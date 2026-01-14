@@ -49,70 +49,68 @@
 :root {
   --radius: 0.625rem;
 
-  /* Base colors - White background, black text */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* CRM Theme - Peach/Forest Green */
+  /* Base colors - Peach background */
+  --background: oklch(0.97 0.02 55);              /* #FFF1E6 peach-bg */
+  --foreground: oklch(0.22 0.02 60);              /* #2D2A26 text-main */
 
-  /* Card - White with black text */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  /* Card/Panel - Lighter peach */
+  --card: oklch(0.98 0.015 55);                   /* #FFF8F2 panel-bg */
+  --card-foreground: oklch(0.22 0.02 60);
 
-  /* Popover - White with black text */
+  /* Popover - White */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.22 0.02 60);
 
-  /* Primary - Subtle Orange (used sparingly for accents) */
-  --primary: oklch(0.70 0.16 45);
+  /* Primary - Forest Green */
+  --primary: oklch(0.38 0.06 160);                /* #2D4B3E forest green */
   --primary-foreground: oklch(0.99 0 0);
 
-  /* Secondary - Neutral gray (main UI) */
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.20 0 0);
+  /* Secondary - Light peach */
+  --secondary: oklch(0.96 0.02 55);
+  --secondary-foreground: oklch(0.22 0.02 60);
 
-  /* Muted - Neutral gray */
-  --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.45 0 0);
+  /* Muted - Warm gray */
+  --muted: oklch(0.95 0.015 55);
+  --muted-foreground: oklch(0.60 0.03 55);        /* #8C7E74 text-muted */
 
-  /* Accent - Very subtle warm tint */
-  --accent: oklch(0.96 0 0);
-  --accent-foreground: oklch(0.20 0 0);
+  /* Accent - Bitcoin Orange (for highlights) */
+  --accent: oklch(0.70 0.16 45);                  /* #F7931A */
+  --accent-foreground: oklch(0.99 0 0);
 
   /* Destructive - Red */
   --destructive: oklch(0.577 0.245 27.325);
 
-  /* Borders and inputs - Neutral gray */
-  --border: oklch(0.92 0 0);
-  --input: oklch(0.93 0 0);
-  --ring: oklch(0.70 0.16 45);
+  /* Borders and inputs */
+  --border: oklch(0.38 0.06 160 / 0.08);          /* Subtle forest green border */
+  --input: oklch(0.99 0 0);
+  --ring: oklch(0.38 0.06 160);
 
-  /* Charts - Orange palette */
-  --chart-1: oklch(0.70 0.16 45);
-  --chart-2: oklch(0.75 0.14 50);
-  --chart-3: oklch(0.65 0.12 40);
-  --chart-4: oklch(0.80 0.10 55);
-  --chart-5: oklch(0.60 0.14 35);
+  /* Charts - Forest green + orange palette */
+  --chart-1: oklch(0.38 0.06 160);
+  --chart-2: oklch(0.70 0.16 45);
+  --chart-3: oklch(0.45 0.05 160);
+  --chart-4: oklch(0.75 0.14 50);
+  --chart-5: oklch(0.55 0.04 160);
 
-  /* Sidebar - Clean white */
-  --sidebar: oklch(0.99 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.70 0.16 45);
+  /* Sidebar - Warm peach */
+  --sidebar: oklch(0.94 0.03 55);                 /* #FCE9D9 sidebar-bg */
+  --sidebar-foreground: oklch(0.22 0.02 60);
+  --sidebar-primary: oklch(0.38 0.06 160);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.96 0 0);
-  --sidebar-accent-foreground: oklch(0.25 0 0);
-  --sidebar-border: oklch(0.92 0 0);
-  --sidebar-ring: oklch(0.70 0.16 45);
+  --sidebar-accent: oklch(0.38 0.06 160);         /* Active state - forest green */
+  --sidebar-accent-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(0 0 0 / 0.05);
+  --sidebar-ring: oklch(0.38 0.06 160);
 
-  /* Platform/Admin Theme - Rich Orange */
-  --platform-gradient-from: oklch(0.72 0.16 48);
-  --platform-gradient-to: oklch(0.65 0.18 42);
-  --platform-accent: oklch(0.96 0.04 50);
-  --platform-primary: oklch(0.70 0.16 45);
-  --platform-badge-bg: oklch(0.70 0.16 45);
-  --platform-badge-text: oklch(0.99 0 0);
-
-  /* Client Theme - Same Orange (unified design) */
-  --client-badge-bg: oklch(0.70 0.16 45);
-  --client-badge-text: oklch(0.99 0 0);
+  /* CRM-specific tokens */
+  --crm-forest: oklch(0.38 0.06 160);             /* #2D4B3E */
+  --crm-orange: oklch(0.70 0.16 45);              /* #F7931A */
+  --crm-peach: oklch(0.97 0.02 55);               /* #FFF1E6 */
+  --crm-panel: oklch(0.98 0.015 55);              /* #FFF8F2 */
+  --crm-sidebar: oklch(0.94 0.03 55);             /* #FCE9D9 */
+  --crm-text: oklch(0.22 0.02 60);                /* #2D2A26 */
+  --crm-text-muted: oklch(0.60 0.03 55);          /* #8C7E74 */
 }
 
 .dark {
@@ -195,6 +193,15 @@
   --color-landing-lavender: var(--landing-lavender);
   --color-landing-blue-card: var(--landing-blue-card);
   --color-landing-mint: var(--landing-mint);
+
+  /* CRM color utilities */
+  --color-crm-forest: var(--crm-forest);
+  --color-crm-orange: var(--crm-orange);
+  --color-crm-peach: var(--crm-peach);
+  --color-crm-panel: var(--crm-panel);
+  --color-crm-sidebar: var(--crm-sidebar);
+  --color-crm-text: var(--crm-text);
+  --color-crm-text-muted: var(--crm-text-muted);
 }
 
 /* Landing page utility classes */
@@ -230,6 +237,30 @@
 
 .text-shadow-pop {
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* CRM Utility Classes */
+.organic-shadow {
+  box-shadow: 0 20px 50px -12px rgba(140, 126, 116, 0.12);
+}
+
+.active-nav {
+  background-color: oklch(0.38 0.06 160);
+  color: white;
+  box-shadow: 0 4px 12px rgba(45, 75, 62, 0.2);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: oklch(0.90 0.03 55);
+  border-radius: 10px;
 }
 
 @layer base {

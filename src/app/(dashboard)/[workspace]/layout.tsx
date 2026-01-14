@@ -1,6 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { WorkspaceSidebar } from '@/components/workspace/sidebar'
 import { MOCK_WORKSPACE, isDevMode } from '@/lib/mock-data'
 import type { Workspace } from '@/types/database'
@@ -20,18 +19,34 @@ export default async function WorkspaceLayout({
   if (isDevMode()) {
     const workspace = { name: MOCK_WORKSPACE.name, slug: MOCK_WORKSPACE.slug }
     return (
-      <SidebarProvider defaultOpen={true}>
+      <div className="flex h-screen overflow-hidden bg-background">
+        {/* Noise Overlay */}
+        <div className="noise-overlay" style={{ opacity: 0.03 }} />
+
+        {/* Sidebar */}
         <WorkspaceSidebar workspace={workspace} />
-        <SidebarInset>
-          <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4">
-            <SidebarTrigger className="-ml-1" />
-            <span className="text-xs bg-yellow-500/20 text-yellow-700 px-2 py-1 rounded">DEV MODE</span>
-          </header>
-          <div className="flex-1 overflow-auto">
+
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {/* Content Area */}
+          <div className="flex-1 overflow-auto custom-scrollbar">
             {children}
           </div>
-        </SidebarInset>
-      </SidebarProvider>
+
+          {/* Footer */}
+          <footer className="h-10 px-8 bg-sidebar/40 border-t border-black/5 flex items-center justify-between shrink-0">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+              © 2024 MY21STAFF INC.
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Network Stable
+              </span>
+            </div>
+          </footer>
+        </main>
+      </div>
     )
   }
 
@@ -56,16 +71,33 @@ export default async function WorkspaceLayout({
   const workspace = data as Pick<Workspace, 'id' | 'name' | 'slug'>
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <div className="flex h-screen overflow-hidden bg-background">
+      {/* Noise Overlay */}
+      <div className="noise-overlay" style={{ opacity: 0.03 }} />
+
+      {/* Sidebar */}
       <WorkspaceSidebar workspace={{ name: workspace.name, slug: workspace.slug }} />
-      <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4">
-          <SidebarTrigger className="-ml-1" />
-        </header>
-        <div className="flex-1 overflow-auto">
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Content Area */}
+        <div className="flex-1 overflow-auto custom-scrollbar">
           {children}
         </div>
-      </SidebarInset>
-    </SidebarProvider>
+
+        {/* Footer */}
+        <footer className="h-10 px-8 bg-sidebar/40 border-t border-black/5 flex items-center justify-between shrink-0">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+            © 2024 MY21STAFF INC.
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Network Stable
+            </span>
+          </div>
+        </footer>
+      </main>
+    </div>
   )
 }
