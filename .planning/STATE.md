@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** Phase 1 — Foundation
+**Current focus:** Phase 2 — Database View
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-01-14 — Completed 01-02-PLAN.md
+Phase: 1 of 5 (Foundation) — COMPLETE
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-01-14 — Completed 01-03-PLAN.md
 
-Progress: ██░░░░░░░░ 20%
+Progress: ███░░░░░░░ 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 7 min
-- Total execution time: 14 min
+- Total plans completed: 3
+- Average duration: 11 min
+- Total execution time: 32 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Foundation | 2/3 | 14 min | 7 min |
+| 1. Foundation | 3/3 | 32 min | 11 min |
 
 **Recent Trend:**
-- Last 5 plans: 7 min, 7 min
-- Trend: Consistent
+- Last 5 plans: 7 min, 7 min, 18 min
+- Trend: Consistent (18 min includes user verification)
 
 ## Accumulated Context
 
@@ -42,9 +42,9 @@ Recent decisions affecting current work:
 
 - 01-01: Shadcn/ui New York style with neutral base
 - 01-01: Multi-env Supabase via SUPABASE_ENV variable
-- 01-01: Sonner for toasts (toast component deprecated)
 - 01-02: Public routes include /forms for public form pages
-- 01-02: Auth pages use bg-muted for theme consistency
+- 01-03: Simplified v2 schema (core tables only)
+- 01-03: Workspace routing via [workspace] slug param
 
 ### Deferred Issues
 
@@ -57,5 +57,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed 01-02-PLAN.md
+Stopped at: Phase 1 complete
 Resume file: None
