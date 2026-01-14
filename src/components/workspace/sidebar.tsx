@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Database, MessageCircle, Settings } from 'lucide-react'
+import { Database, Globe, MessageCircle, Settings } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -32,6 +32,11 @@ const navItems = [
     title: 'Inbox',
     icon: MessageCircle,
     href: '/inbox',
+  },
+  {
+    title: 'Website',
+    icon: Globe,
+    href: '/website',
   },
   {
     title: 'Settings',
