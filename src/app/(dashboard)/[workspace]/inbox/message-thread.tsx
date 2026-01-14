@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, MessageSquare } from 'lucide-react'
+import { Loader2, MessageSquare, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import type { Contact, Message } from '@/types/database'
@@ -27,8 +27,18 @@ function getInitials(name: string | null, phone: string): string {
   return phone.slice(-2)
 }
 
+function isSendingMessage(message: Message): boolean {
+  return (
+    typeof message.metadata === 'object' &&
+    message.metadata !== null &&
+    'status' in message.metadata &&
+    message.metadata.status === 'sending'
+  )
+}
+
 function MessageBubble({ message }: { message: Message }) {
   const isOutbound = message.direction === 'outbound'
+  const isSending = isSendingMessage(message)
 
   return (
     <div
@@ -36,7 +46,8 @@ function MessageBubble({ message }: { message: Message }) {
         'max-w-[70%] rounded-lg px-4 py-2',
         isOutbound
           ? 'ml-auto bg-primary text-primary-foreground'
-          : 'bg-muted'
+          : 'bg-muted',
+        isSending && 'opacity-70'
       )}
     >
       {message.message_type === 'image' && message.media_url && (
@@ -49,10 +60,17 @@ function MessageBubble({ message }: { message: Message }) {
       )}
       {message.content && <p className="whitespace-pre-wrap">{message.content}</p>}
       <span className={cn(
-        'text-xs block mt-1',
+        'text-xs block mt-1 flex items-center gap-1',
         isOutbound ? 'text-primary-foreground/70' : 'text-muted-foreground'
       )}>
-        {format(new Date(message.created_at), 'HH:mm')}
+        {isSending ? (
+          <>
+            <Clock className="h-3 w-3" />
+            Sending...
+          </>
+        ) : (
+          format(new Date(message.created_at), 'HH:mm')
+        )}
       </span>
     </div>
   )

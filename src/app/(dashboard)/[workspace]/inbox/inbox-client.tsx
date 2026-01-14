@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -80,6 +80,30 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
       setMessages([])
     }
   }, [selectedConversation])
+
+  // Handle message sent (optimistic or real)
+  const handleMessageSent = useCallback((message: Message & { _optimisticId?: string }, isOptimistic: boolean) => {
+    if (isOptimistic) {
+      // Add optimistic message
+      setMessages((prev) => [...prev, message])
+    } else {
+      // Replace optimistic message with real one
+      const optimisticId = message._optimisticId
+      if (optimisticId) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === optimisticId ? message : m))
+        )
+      } else {
+        // Just append if no optimistic ID (shouldn't happen normally)
+        setMessages((prev) => [...prev, message])
+      }
+    }
+  }, [])
+
+  // Handle message error (remove optimistic message)
+  const handleMessageError = useCallback((optimisticId: string) => {
+    setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+  }, [])
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
@@ -166,7 +190,13 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
               conversationContact={selectedConversation.contact}
               isLoading={isLoadingMessages}
             />
-            <MessageInput />
+            <MessageInput
+              conversationId={selectedConversation.id}
+              contactPhone={selectedConversation.contact.phone}
+              workspaceId={workspace.id}
+              onMessageSent={handleMessageSent}
+              onMessageError={handleMessageError}
+            />
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
