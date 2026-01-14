@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-14)
 ## Current Position
 
 Phase: 3 of 5 (Inbox Core)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-01-14 — Completed 03-02-PLAN.md
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-01-14 — Completed 03-03-PLAN.md
 
 Progress: ████████░░ 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 8 min
-- Total execution time: 67 min
+- Total execution time: 71 min
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: ████████░░ 80%
 |-------|-------|-------|----------|
 | 1. Foundation | 3/3 | 32 min | 11 min |
 | 2. Database View | 3/3 | 22 min | 7 min |
-| 3. Inbox Core | 2/3 | 13 min | 7 min |
+| 3. Inbox Core | 3/3 | 17 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 4 min, 3 min, 15 min, 10 min, 3 min
+- Last 5 plans: 3 min, 15 min, 10 min, 3 min, 4 min
 - Trend: Consistent
 
 ## Accumulated Context
@@ -56,6 +56,8 @@ Recent decisions affecting current work:
 - 03-01: ConversationWithContact type for joined data
 - 03-02: Message bubbles 70% max-width, outbound right/primary, inbound left/muted
 - 03-02: Lazy load messages on conversation selection
+- 03-03: Status filter pattern reused from Database view for consistency
+- 03-03: Empty states with icons: no conversations, no results, no filter matches
 
 ### Deferred Issues
 
@@ -68,6 +70,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed 03-02-PLAN.md (Message thread display)
+Stopped at: Completed 03-03-PLAN.md (Status filtering) - Phase 3 complete
 Resume file: None
-Next: 03-03-PLAN.md (Status filtering)
+Next: Phase 4 (Inbox Send) - wire Kapso send API

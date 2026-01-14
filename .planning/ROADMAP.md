@@ -56,6 +56,6 @@ None
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-01-14 |
 | 2. Database View | 3/3 | Complete | 2026-01-14 |
-| 3. Inbox Core | 2/3 | In progress | - |
+| 3. Inbox Core | 3/3 | Complete | 2026-01-14 |
 | 4. Inbox Send | 0/TBD | Not started | - |
 | 5. Website Manager | 0/TBD | Not started | - |
