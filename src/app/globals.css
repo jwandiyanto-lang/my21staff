@@ -161,6 +161,48 @@
   --client-badge-text: oklch(0.15 0 0);
 }
 
+/* Landing Page Design Tokens - Notion-inspired */
+:root {
+  /* Landing page colors */
+  --landing-bg: oklch(0.985 0.002 90);           /* #FBFBFA off-white */
+  --landing-hero: oklch(0.81 0.04 150);          /* #B6C9BB sage green */
+  --landing-cta: oklch(0.70 0.16 45);            /* #F7931A orange (same as primary) */
+  --landing-text: oklch(0.25 0.02 80);           /* #37352F near-black */
+  --landing-text-muted: oklch(0.25 0.02 80 / 0.6); /* #37352F99 60% opacity */
+  --landing-dark-bg: oklch(0.15 0 0);            /* #1A1A1A for CTA section */
+  --landing-border: oklch(0.25 0.02 80 / 0.16); /* notion-style border */
+}
+
+/* Landing page color utilities for Tailwind */
+@theme inline {
+  --color-landing-bg: var(--landing-bg);
+  --color-landing-hero: var(--landing-hero);
+  --color-landing-cta: var(--landing-cta);
+  --color-landing-text: var(--landing-text);
+  --color-landing-text-muted: var(--landing-text-muted);
+  --color-landing-dark-bg: var(--landing-dark-bg);
+}
+
+/* Landing page utility classes */
+.rounded-notion {
+  border-radius: 3px;
+}
+
+.border-notion {
+  border: 1px solid rgba(55, 53, 47, 0.16);
+}
+
+.border-notion-thick {
+  border: 2px solid rgba(55, 53, 47, 0.16);
+}
+
+.notion-grid {
+  background-image:
+    linear-gradient(rgba(55, 53, 47, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(55, 53, 47, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
