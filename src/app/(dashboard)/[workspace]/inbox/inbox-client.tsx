@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Filter } from 'lucide-react'
+import { Filter, MessageCircle } from 'lucide-react'
 import { ConversationList } from './conversation-list'
 import { MessageThread } from './message-thread'
 import { MessageInput } from './message-input'
@@ -171,8 +171,9 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
-              <p className="text-lg">Select a conversation</p>
-              <p className="text-sm mt-2">
+              <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium">Select a conversation</p>
+              <p className="text-sm mt-1">
                 Choose a conversation from the sidebar to view messages
               </p>
             </div>

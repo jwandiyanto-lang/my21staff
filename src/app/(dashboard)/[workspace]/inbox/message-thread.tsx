@@ -5,6 +5,7 @@ import { format } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Loader2, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import type { Contact, Message } from '@/types/database'
@@ -68,7 +69,10 @@ export function MessageThread({ messages, conversationContact, isLoading }: Mess
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center text-muted-foreground">
-        <p>Loading messages...</p>
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin" />
+          <p className="text-sm">Loading messages...</p>
+        </div>
       </div>
     )
   }
@@ -114,7 +118,11 @@ export function MessageThread({ messages, conversationContact, isLoading }: Mess
       <ScrollArea className="flex-1 p-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">
-            <p>No messages yet</p>
+            <div className="text-center">
+              <MessageSquare className="h-10 w-10 mx-auto mb-3 opacity-50" />
+              <p className="font-medium">No messages yet</p>
+              <p className="text-sm mt-1">Start the conversation by sending a message</p>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col gap-3">

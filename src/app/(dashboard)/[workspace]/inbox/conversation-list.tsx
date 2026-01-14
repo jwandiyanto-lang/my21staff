@@ -12,6 +12,7 @@ interface ConversationListProps {
   selectedId: string | null
   onSelect: (conversation: ConversationWithContact) => void
   searchQuery: string
+  hasStatusFilter?: boolean
 }
 
 function getInitials(name: string | null, phone: string): string {
@@ -31,6 +32,7 @@ export function ConversationList({
   selectedId,
   onSelect,
   searchQuery,
+  hasStatusFilter = false,
 }: ConversationListProps) {
   const filteredConversations = conversations.filter((conv) =>
     conv.contact.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -41,12 +43,20 @@ export function ConversationList({
     return (
       <div className="flex-1 flex items-center justify-center p-8 text-center text-muted-foreground">
         {searchQuery ? (
-          <p>No conversations found</p>
+          <div>
+            <p className="font-medium mb-1">No results found</p>
+            <p className="text-sm">No conversations match "{searchQuery}"</p>
+          </div>
+        ) : hasStatusFilter ? (
+          <div>
+            <p className="font-medium mb-1">No matching conversations</p>
+            <p className="text-sm">No conversations match the selected filters</p>
+          </div>
         ) : (
           <div>
-            <p className="mb-2">No conversations yet</p>
+            <p className="font-medium mb-1">No conversations yet</p>
             <p className="text-sm">
-              Conversations will appear here when leads message your WhatsApp number
+              Messages will appear when leads contact you via WhatsApp
             </p>
           </div>
         )}
