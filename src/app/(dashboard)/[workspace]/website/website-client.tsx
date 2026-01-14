@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { FileText, Video, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { articleStatuses, webinarStatuses, type ArticleStatus, type WebinarStatus } from '@/lib/content-status'
+import { ArticleFormSheet } from './article-form-sheet'
 import type { Workspace, Article, Webinar } from '@/types/database'
 
 interface WebsiteClientProps {
@@ -28,11 +30,11 @@ function StatusBadge({ status, type }: { status: string; type: 'article' | 'webi
   )
 }
 
-function ArticleCard({ article }: { article: Article }) {
+function ArticleCard({ article, onClick }: { article: Article; onClick: () => void }) {
   const displayDate = article.published_at || article.created_at
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={onClick}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base font-medium line-clamp-2">
@@ -107,7 +109,35 @@ function EmptyState({ type }: { type: 'articles' | 'webinars' }) {
   )
 }
 
-export function WebsiteClient({ articles, webinars }: WebsiteClientProps) {
+export function WebsiteClient({ workspace, articles: initialArticles, webinars }: WebsiteClientProps) {
+  // Article state
+  const [articles, setArticles] = useState<Article[]>(initialArticles)
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
+  const [isArticleSheetOpen, setIsArticleSheetOpen] = useState(false)
+
+  const handleCreateArticle = () => {
+    setSelectedArticle(null)
+    setIsArticleSheetOpen(true)
+  }
+
+  const handleEditArticle = (article: Article) => {
+    setSelectedArticle(article)
+    setIsArticleSheetOpen(true)
+  }
+
+  const handleArticleSaved = (savedArticle: Article) => {
+    setArticles((prev) => {
+      const exists = prev.find((a) => a.id === savedArticle.id)
+      if (exists) {
+        // Update existing
+        return prev.map((a) => (a.id === savedArticle.id ? savedArticle : a))
+      } else {
+        // Add new
+        return [savedArticle, ...prev]
+      }
+    })
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -135,7 +165,7 @@ export function WebsiteClient({ articles, webinars }: WebsiteClientProps) {
         <TabsContent value="articles" className="mt-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium">Articles</h2>
-            <Button size="sm">
+            <Button size="sm" onClick={handleCreateArticle}>
               <Plus className="h-4 w-4 mr-1.5" />
               Create Article
             </Button>
@@ -146,7 +176,11 @@ export function WebsiteClient({ articles, webinars }: WebsiteClientProps) {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {articles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
+                <ArticleCard
+                  key={article.id}
+                  article={article}
+                  onClick={() => handleEditArticle(article)}
+                />
               ))}
             </div>
           )}
@@ -173,6 +207,15 @@ export function WebsiteClient({ articles, webinars }: WebsiteClientProps) {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Article Form Sheet */}
+      <ArticleFormSheet
+        article={selectedArticle}
+        workspaceId={workspace.id}
+        open={isArticleSheetOpen}
+        onOpenChange={setIsArticleSheetOpen}
+        onSaved={handleArticleSaved}
+      />
     </div>
   )
 }
