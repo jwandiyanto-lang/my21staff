@@ -4,16 +4,51 @@ import type { Contact, Workspace, Conversation, Message, ConversationWithContact
 
 export const MOCK_WORKSPACE: Workspace = {
   id: 'dev-workspace-001',
-  name: 'Demo Workspace',
+  name: 'Eagle Overseas Education',
   slug: 'demo',
   owner_id: 'dev-user-001',
-  kapso_phone_id: null,
-  settings: {},
+  kapso_phone_id: '647015955153740',
+  settings: {
+    kapso_api_key: process.env.KAPSO_API_KEY || '',
+    whatsapp_number: '+62 xxx xxxx xxxx',
+    whatsapp_name: 'Jonathan Wandiyanto',
+  },
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
 }
 
 export const MOCK_CONTACTS: Contact[] = [
+  // Real contact from Kapso
+  {
+    id: 'contact-kapso-001',
+    workspace_id: 'dev-workspace-001',
+    phone: '+6285693542822',
+    name: 'dap4_ratu_akhmar',
+    email: null,
+    lead_score: 50,
+    lead_status: 'new',
+    tags: ['Student', 'Immigration'],
+    metadata: {
+      source: 'Facebook CTWA',
+      interest: 'Family Immigration',
+      kapso_conversation_id: '366a22b7-11d6-4b9f-b721-9ec21a7054f8'
+    },
+    created_at: '2026-01-14T05:18:00Z',
+    updated_at: '2026-01-14T08:15:00Z',
+  },
+  {
+    id: 'contact-kapso-002',
+    workspace_id: 'dev-workspace-001',
+    phone: '+62unknown',
+    name: 'A',
+    email: null,
+    lead_score: 30,
+    lead_status: 'new',
+    tags: [],
+    metadata: { source: 'Referral Link' },
+    created_at: '2026-01-14T08:00:00Z',
+    updated_at: '2026-01-14T08:00:00Z',
+  },
   {
     id: 'contact-001',
     workspace_id: 'dev-workspace-001',
@@ -98,6 +133,31 @@ export const isDevMode = () => process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 // Mock conversations linked to existing contacts
 export const MOCK_CONVERSATIONS_RAW: Conversation[] = [
+  // Real conversations from Kapso
+  {
+    id: 'conv-kapso-001',
+    workspace_id: 'dev-workspace-001',
+    contact_id: 'contact-kapso-001', // dap4_ratu_akhmar - student
+    status: 'open',
+    assigned_to: null,
+    unread_count: 4,
+    last_message_at: '2026-01-14T08:15:00Z',
+    last_message_preview: 'saya apa aja bisa insyaallah',
+    created_at: '2026-01-14T05:18:00Z',
+    updated_at: '2026-01-14T08:15:00Z',
+  },
+  {
+    id: 'conv-kapso-002',
+    workspace_id: 'dev-workspace-001',
+    contact_id: 'contact-kapso-002', // A - referral link
+    status: 'open',
+    assigned_to: null,
+    unread_count: 1,
+    last_message_at: '2026-01-14T08:00:00Z',
+    last_message_preview: 'https://lynk.id/iutami',
+    created_at: '2026-01-14T08:00:00Z',
+    updated_at: '2026-01-14T08:00:00Z',
+  },
   {
     id: 'conv-001',
     workspace_id: 'dev-workspace-001',
@@ -168,6 +228,78 @@ export const MOCK_CONVERSATIONS: ConversationWithContact[] = MOCK_CONVERSATIONS_
 
 // Mock messages across conversations
 export const MOCK_MESSAGES: Message[] = [
+  // Real Conversation - dap4_ratu_akhmar (student from Kapso)
+  {
+    id: 'msg-kapso-001',
+    conversation_id: 'conv-kapso-001',
+    workspace_id: 'dev-workspace-001',
+    direction: 'inbound',
+    sender_type: 'contact',
+    sender_id: 'contact-kapso-001',
+    content: 'https://lynk.id/iutami?fbclid=IwY2xjawPTzftleHRuA2FlbQlx...',
+    message_type: 'text',
+    media_url: null,
+    kapso_message_id: 'kapso-real-001',
+    metadata: { source: 'Facebook CTWA' },
+    created_at: '2026-01-14T05:18:00Z',
+  },
+  {
+    id: 'msg-kapso-002',
+    conversation_id: 'conv-kapso-001',
+    workspace_id: 'dev-workspace-001',
+    direction: 'inbound',
+    sender_type: 'contact',
+    sender_id: 'contact-kapso-001',
+    content: 'mohon maaf kalau untuk imigrasi sekeluarga tapi disana bekerja. bisa atau tidak ya',
+    message_type: 'text',
+    media_url: null,
+    kapso_message_id: 'kapso-real-002',
+    metadata: {},
+    created_at: '2026-01-14T08:13:00Z',
+  },
+  {
+    id: 'msg-kapso-003',
+    conversation_id: 'conv-kapso-001',
+    workspace_id: 'dev-workspace-001',
+    direction: 'inbound',
+    sender_type: 'contact',
+    sender_id: 'contact-kapso-001',
+    content: 'suami saya sebagai supir',
+    message_type: 'text',
+    media_url: null,
+    kapso_message_id: 'kapso-real-003',
+    metadata: {},
+    created_at: '2026-01-14T08:14:00Z',
+  },
+  {
+    id: 'msg-kapso-004',
+    conversation_id: 'conv-kapso-001',
+    workspace_id: 'dev-workspace-001',
+    direction: 'inbound',
+    sender_type: 'contact',
+    sender_id: 'contact-kapso-001',
+    content: 'saya apa aja bisa insyaallah',
+    message_type: 'text',
+    media_url: null,
+    kapso_message_id: 'kapso-real-004',
+    metadata: {},
+    created_at: '2026-01-14T08:15:00Z',
+  },
+  // Real Conversation - A (referral link)
+  {
+    id: 'msg-kapso-005',
+    conversation_id: 'conv-kapso-002',
+    workspace_id: 'dev-workspace-001',
+    direction: 'inbound',
+    sender_type: 'contact',
+    sender_id: 'contact-kapso-002',
+    content: 'https://lynk.id/iutami',
+    message_type: 'text',
+    media_url: null,
+    kapso_message_id: 'kapso-real-005',
+    metadata: {},
+    created_at: '2026-01-14T08:00:00Z',
+  },
   // Conversation 1 - Ahmad Rizky (hot lead)
   {
     id: 'msg-001',
