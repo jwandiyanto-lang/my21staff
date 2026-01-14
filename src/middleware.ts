@@ -3,6 +3,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { getSupabaseConfig } from '@/lib/supabase/config'
 
 export async function middleware(request: NextRequest) {
+  // Dev mode: skip all auth checks
+  if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })

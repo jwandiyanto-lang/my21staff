@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { WorkspaceSidebar } from '@/components/workspace/sidebar'
+import { MOCK_WORKSPACE, isDevMode } from '@/lib/mock-data'
 import type { Workspace } from '@/types/database'
 
 interface WorkspaceLayoutProps {
@@ -14,6 +15,27 @@ export default async function WorkspaceLayout({
   params,
 }: WorkspaceLayoutProps) {
   const { workspace: workspaceSlug } = await params
+
+  // Dev mode: skip auth and use mock workspace
+  if (isDevMode()) {
+    const workspace = { name: MOCK_WORKSPACE.name, slug: MOCK_WORKSPACE.slug }
+    return (
+      <SidebarProvider defaultOpen={true}>
+        <WorkspaceSidebar workspace={workspace} />
+        <SidebarInset>
+          <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4">
+            <SidebarTrigger className="-ml-1" />
+            <span className="text-xs bg-yellow-500/20 text-yellow-700 px-2 py-1 rounded">DEV MODE</span>
+          </header>
+          <div className="flex-1 overflow-auto">
+            {children}
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    )
+  }
+
+  // Production mode: use Supabase
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()

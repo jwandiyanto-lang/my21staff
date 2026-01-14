@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DatabaseClient } from './database-client'
+import { MOCK_WORKSPACE, MOCK_CONTACTS, isDevMode } from '@/lib/mock-data'
 import type { Workspace, Contact } from '@/types/database'
 
 interface DatabasePageProps {
@@ -9,6 +10,22 @@ interface DatabasePageProps {
 
 export default async function DatabasePage({ params }: DatabasePageProps) {
   const { workspace: workspaceSlug } = await params
+
+  // Dev mode: use mock data
+  if (isDevMode()) {
+    return (
+      <DatabaseClient
+        workspace={{
+          id: MOCK_WORKSPACE.id,
+          name: MOCK_WORKSPACE.name,
+          slug: MOCK_WORKSPACE.slug,
+        }}
+        contacts={MOCK_CONTACTS}
+      />
+    )
+  }
+
+  // Production mode: use Supabase
   const supabase = await createClient()
 
   // Fetch workspace
