@@ -11,6 +11,43 @@ const jetBrainsMono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
+const pricingTiers = [
+  {
+    name: "Core",
+    price: 2500000,
+    staff: 5,
+    target: "Solo founders",
+    features: ["5 Digital Staff", "Basic automation", "WhatsApp integration", "Email support"],
+    recommended: false,
+  },
+  {
+    name: "Pro",
+    price: 5730000,
+    staff: 10,
+    target: "Growing SMBs",
+    features: ["10 Digital Staff", "Advanced automation", "Priority support", "Custom workflows"],
+    recommended: true,
+    badge: "UMR Price",
+  },
+  {
+    name: "Max",
+    price: 10500000,
+    staff: 21,
+    target: "Established businesses",
+    features: ["21 Digital Staff (Full Team)", "Enterprise automation", "Dedicated support", "White-label options"],
+    recommended: false,
+  },
+];
+
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+};
+
 const departments = [
   {
     name: "THE BRAIN",
@@ -148,6 +185,109 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-24 px-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <h2
+            className="text-4xl md:text-5xl font-bold text-landing-text text-center mb-4"
+            style={{ fontFamily: "var(--font-jakarta)" }}
+          >
+            Simple Pricing
+          </h2>
+          <p
+            className="text-lg text-landing-text-muted text-center mb-16 max-w-2xl mx-auto"
+            style={{ fontFamily: "var(--font-jakarta)" }}
+          >
+            A full digital department for the price of one entry-level employee
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {pricingTiers.map((tier) => (
+              <div
+                key={tier.name}
+                className={`p-8 border-notion-thick relative ${
+                  tier.recommended
+                    ? "scale-105 shadow-lg"
+                    : ""
+                }`}
+                style={{
+                  borderColor: tier.recommended ? "var(--landing-cta)" : undefined,
+                }}
+              >
+                {tier.recommended && (
+                  <div
+                    className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-landing-cta text-white text-xs uppercase tracking-widest rounded-notion"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {tier.badge}
+                  </div>
+                )}
+
+                <h3
+                  className="text-sm font-bold uppercase tracking-widest text-landing-text mb-2"
+                  style={{ fontFamily: "var(--font-jakarta)" }}
+                >
+                  {tier.name}
+                </h3>
+                <p
+                  className="text-xs text-landing-text-muted mb-6"
+                  style={{ fontFamily: "var(--font-jakarta)" }}
+                >
+                  {tier.target}
+                </p>
+
+                <div className="mb-6">
+                  <span
+                    className="text-3xl font-bold text-landing-text"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {formatPrice(tier.price)}
+                  </span>
+                  <span
+                    className="text-sm text-landing-text-muted ml-1"
+                    style={{ fontFamily: "var(--font-jakarta)" }}
+                  >
+                    /month
+                  </span>
+                </div>
+
+                <div
+                  className="text-sm text-landing-cta font-medium mb-6"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  {tier.staff} Digital Staff
+                </div>
+
+                <ul className="space-y-3 mb-8">
+                  {tier.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="text-sm text-landing-text-muted flex items-start"
+                      style={{ fontFamily: "var(--font-jakarta)" }}
+                    >
+                      <span className="text-landing-cta mr-2">✓</span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/signup"
+                  className={`block text-center py-3 rounded-notion uppercase tracking-widest text-sm font-medium transition-opacity hover:opacity-90 ${
+                    tier.recommended
+                      ? "bg-landing-cta text-white"
+                      : "bg-landing-text text-white"
+                  }`}
+                  style={{ fontFamily: "var(--font-jakarta)" }}
+                >
+                  Get Started
+                </Link>
               </div>
             ))}
           </div>
