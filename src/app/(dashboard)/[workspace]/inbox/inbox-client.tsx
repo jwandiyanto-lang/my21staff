@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { ConversationList } from './conversation-list'
-import type { Workspace, ConversationWithContact } from '@/types/database'
+import { MessageThread } from './message-thread'
+import { isDevMode, MOCK_MESSAGES } from '@/lib/mock-data'
+import { createClient } from '@/lib/supabase/client'
+import type { Workspace, ConversationWithContact, Message } from '@/types/database'
 
 interface InboxClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
@@ -15,6 +18,41 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
     conversations[0] || null
   )
   const [searchQuery, setSearchQuery] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+
+  // Load messages when conversation changes
+  useEffect(() => {
+    async function loadMessages(conversationId: string) {
+      setIsLoadingMessages(true)
+
+      if (isDevMode()) {
+        // Dev mode: filter mock messages
+        const filtered = MOCK_MESSAGES.filter((m) => m.conversation_id === conversationId)
+        // Sort by created_at ascending
+        filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        setMessages(filtered)
+      } else {
+        // Production: query Supabase
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: true })
+          .limit(100)
+        setMessages(data || [])
+      }
+
+      setIsLoadingMessages(false)
+    }
+
+    if (selectedConversation) {
+      loadMessages(selectedConversation.id)
+    } else {
+      setMessages([])
+    }
+  }, [selectedConversation])
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
@@ -38,19 +76,14 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
         />
       </div>
 
-      {/* Right area - Message thread placeholder */}
+      {/* Right area - Message thread */}
       <div className="flex-1 flex flex-col bg-muted/30">
         {selectedConversation ? (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <p className="text-lg font-medium">
-                {selectedConversation.contact.name || selectedConversation.contact.phone}
-              </p>
-              <p className="text-sm mt-2">
-                Message thread will appear here (Phase 03-02)
-              </p>
-            </div>
-          </div>
+          <MessageThread
+            messages={messages}
+            conversationContact={selectedConversation.contact}
+            isLoading={isLoadingMessages}
+          />
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
