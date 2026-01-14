@@ -293,6 +293,53 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Dark CTA Section */}
+      <section className="py-24 px-8 bg-landing-dark-bg relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-landing-dark-bg via-landing-dark-bg to-landing-text opacity-50" />
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <h2
+            className="text-4xl md:text-5xl font-bold text-white mb-6"
+            style={{ fontFamily: "var(--font-jakarta)" }}
+          >
+            Ready to hire your digital team?
+          </h2>
+          <p
+            className="text-lg text-white/70 mb-10 max-w-2xl mx-auto"
+            style={{ fontFamily: "var(--font-jakarta)" }}
+          >
+            Start with 5 staff, scale to 21. No hiring, no training, no overhead.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/signup"
+              className="inline-block bg-landing-cta text-white uppercase tracking-widest px-8 py-3 rounded-notion font-medium hover:opacity-90 transition-opacity"
+              style={{ fontFamily: "var(--font-jakarta)" }}
+            >
+              Get Started
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-block border border-white/30 text-white uppercase tracking-widest px-8 py-3 rounded-notion font-medium hover:bg-white/10 transition-colors"
+              style={{ fontFamily: "var(--font-jakarta)" }}
+            >
+              Talk to Us
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 px-8 bg-landing-dark-bg border-t border-white/10">
+        <div className="max-w-6xl mx-auto text-center">
+          <p
+            className="text-sm text-white/50"
+            style={{ fontFamily: "var(--font-jakarta)" }}
+          >
+            © 2026 my21staff. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
