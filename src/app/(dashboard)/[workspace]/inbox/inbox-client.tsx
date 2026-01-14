@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { ConversationList } from './conversation-list'
 import { MessageThread } from './message-thread'
+import { MessageInput } from './message-input'
 import { isDevMode, MOCK_MESSAGES } from '@/lib/mock-data'
 import { createClient } from '@/lib/supabase/client'
 import type { Workspace, ConversationWithContact, Message } from '@/types/database'
@@ -79,11 +80,14 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
       {/* Right area - Message thread */}
       <div className="flex-1 flex flex-col bg-muted/30">
         {selectedConversation ? (
-          <MessageThread
-            messages={messages}
-            conversationContact={selectedConversation.contact}
-            isLoading={isLoadingMessages}
-          />
+          <>
+            <MessageThread
+              messages={messages}
+              conversationContact={selectedConversation.contact}
+              isLoading={isLoadingMessages}
+            />
+            <MessageInput />
+          </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
