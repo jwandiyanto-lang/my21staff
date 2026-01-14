@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/popover'
 import { Filter } from 'lucide-react'
 import { columns } from './columns'
+import { ContactDetailSheet } from './contact-detail-sheet'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import type { Contact, Workspace } from '@/types/database'
 
@@ -22,6 +23,7 @@ interface DatabaseClientProps {
 export function DatabaseClient({ workspace, contacts }: DatabaseClientProps) {
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
 
   const filteredContacts = useMemo(() => {
     if (statusFilter.length === 0) return contacts
@@ -40,7 +42,7 @@ export function DatabaseClient({ workspace, contacts }: DatabaseClientProps) {
 
   const handleRowClick = (contact: Contact) => {
     setSelectedContact(contact)
-    console.log('Selected contact:', contact)
+    setIsDetailOpen(true)
   }
 
   return (
@@ -116,6 +118,14 @@ export function DatabaseClient({ workspace, contacts }: DatabaseClientProps) {
         data={filteredContacts}
         searchPlaceholder="Search contacts..."
         onRowClick={handleRowClick}
+      />
+
+      {/* Contact Detail Sheet */}
+      <ContactDetailSheet
+        contact={selectedContact}
+        workspace={{ slug: workspace.slug }}
+        open={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
       />
     </div>
   )
