@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-14)
 ## Current Position
 
 Phase: 5 of 5 (Website Manager)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-14 — Completed 05-01-PLAN.md
+Last activity: 2026-01-14 — Completed 05-02-PLAN.md
 
-Progress: ███████████░ 92%
+Progress: ███████████░ 94%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 8 min
-- Total execution time: 83 min
+- Total plans completed: 12
+- Average duration: 7 min
+- Total execution time: 85 min
 
 **By Phase:**
 
@@ -31,7 +31,7 @@ Progress: ███████████░ 92%
 | 2. Database View | 3/3 | 22 min | 7 min |
 | 3. Inbox Core | 3/3 | 17 min | 6 min |
 | 4. Inbox Send | 1/1 | 10 min | 10 min |
-| 5. Website Manager | 1/4 | 2 min | 2 min |
+| 5. Website Manager | 2/4 | 4 min | 2 min |
 
 **Recent Trend:**
 - Last 5 plans: 10 min, 3 min, 4 min, 10 min, 2 min
@@ -65,6 +65,8 @@ Recent decisions affecting current work:
 - 05-01: Public SELECT for published articles/webinars (no auth required)
 - 05-01: Public INSERT for webinar registrations (lead generation)
 - 05-01: Workspace-scoped slug uniqueness for articles/webinars
+- 05-02: Website nav item added as 4th sidebar item (Database, Inbox, Website, Settings)
+- 05-02: Card grid layout for articles/webinars with status badges
 
 ### Deferred Issues
 
@@ -77,6 +79,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed 05-01-PLAN.md (Schema + Types) - 1/4 plans done
+Stopped at: Completed 05-02-PLAN.md (Admin UI shell) - 2/4 plans done
 Resume file: None
-Next: 05-02-PLAN.md (Admin UI shell)
+Next: 05-03-PLAN.md (Article CRUD)
