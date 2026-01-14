@@ -31,7 +31,8 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 ## v1.1 — Real Kapso Integration
 
-- [ ] Phase 6: Kapso Live — Connect inbox to real Kapso API
+- [x] Phase 6: Kapso Live — Webhook handler for inbound messages (complete)
+- [ ] Phase 7: Kapso Connection — Connect local DB to live Kapso API
 
 ## Progress
 
@@ -42,4 +43,5 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | 3. Inbox Core | v1.0 | 3/3 | Complete | 2026-01-14 |
 | 4. Inbox Send | v1.0 | 1/1 | Complete | 2026-01-14 |
 | 5. Website Manager | v1.0 | 4/4 | Complete | 2026-01-14 |
-| 6. Kapso Live | v1.1 | 0/? | Not started | — |
+| 6. Kapso Live | v1.1 | 1/1 | Complete | 2026-01-14 |
+| 7. Kapso Connection | v1.1 | 0/? | Not started | — |
