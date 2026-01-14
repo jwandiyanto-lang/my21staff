@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** Phase 5 — Website Manager for lead generation via webinars
+**Current focus:** v1.0 shipped — planning next milestone
 
 ## Current Position
 
-Phase: 5 of 5 (Website Manager)
-Plan: 4 of 4 in current phase
-Status: MILESTONE COMPLETE
-Last activity: 2026-01-14 — Completed 05-04-PLAN.md
+Phase: v1.0 complete (5 phases, 14 plans)
+Plan: All plans completed
+Status: SHIPPED
+Last activity: 2026-01-14 — v1.0 milestone archived
 
-Progress: █████████████ 100%
+Progress: v1.0
 
 ## Performance Metrics
 
@@ -33,56 +33,24 @@ Progress: █████████████ 100%
 | 4. Inbox Send | 1/1 | 10 min | 10 min |
 | 5. Website Manager | 4/4 | 11 min | 3 min |
 
-**Recent Trend:**
-- Last 5 plans: 10 min, 3 min, 4 min, 10 min, 2 min
-- Trend: Fast
-
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
-
-- 01-01: Shadcn/ui New York style with neutral base
-- 01-01: Multi-env Supabase via SUPABASE_ENV variable
-- 01-02: Public routes include /forms for public form pages
-- 01-03: Simplified v2 schema (core tables only)
-- 01-03: Workspace routing via [workspace] slug param
-- 02-01: Simplified sidebar with 3 nav items only (Database, Inbox, Settings)
-- 02-02: Simplified DataTable (no pagination for MVP)
-- 02-02: Status filter only (payment/source/tags filters deferred)
-- 02-03: Dev mode bypass for local testing without Supabase
-- 02-03: Sheet component with 3 tabs for contact details
-- 03-01: Two-panel inbox layout (320px sidebar, flex-1 message area)
-- 03-01: ConversationWithContact type for joined data
-- 03-02: Message bubbles 70% max-width, outbound right/primary, inbound left/muted
-- 03-02: Lazy load messages on conversation selection
-- 03-03: Status filter pattern reused from Database view for consistency
-- 03-03: Empty states with icons: no conversations, no results, no filter matches
-- 04-01: Optimistic UI with status='sending' indicator, replaced on success/error
-- 04-01: Dev mode bypass for Kapso API when SUPABASE_ENV=dev
-- 05-01: Public SELECT for published articles/webinars (no auth required)
-- 05-01: Public INSERT for webinar registrations (lead generation)
-- 05-01: Workspace-scoped slug uniqueness for articles/webinars
-- 05-02: Website nav item added as 4th sidebar item (Database, Inbox, Website, Settings)
-- 05-02: Card grid layout for articles/webinars with status badges
-- 05-03: Sheet pattern for article form (consistent with contact detail sheet)
-- 05-03: Public page pattern at /entity/{workspace}/{slug}
-- 05-04: Lead generation via webinar registration → contact creation
-- 05-04: Contact lookup by phone (workspace-scoped) before creating new
+All decisions logged in PROJECT.md Key Decisions table.
 
 ### Deferred Issues
 
-None yet.
+- Production deployment and Supabase migration
+- Real Kapso API integration (currently dev mode mock)
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: MILESTONE COMPLETE - All 5 phases done
+Stopped at: v1.0 SHIPPED
 Resume file: None
-Next: /gsd:complete-milestone to archive and prepare for next version
+Next: `/gsd:discuss-milestone` to plan v1.1

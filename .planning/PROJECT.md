@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A WhatsApp CRM SaaS for Indonesian small businesses — education consultants and sales teams who use WhatsApp as their primary communication channel. This is a focused rebuild of v1, completing half-built features and adding a Website Manager for content-driven lead generation.
+A WhatsApp CRM SaaS for Indonesian small businesses — education consultants and sales teams who use WhatsApp as their primary communication channel. Features a lead database with status tracking, two-way WhatsApp messaging via Kapso, and a website manager for content-driven lead generation through webinar registrations.
 
 ## Core Value
 
@@ -12,13 +12,15 @@ Two-way WhatsApp messaging from the CRM — users can send and receive messages 
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ **Database View** — Lead table with form submissions, status badges, filters, detail sheet — v1.0
+- ✓ **Kapso Send + Filter** — Send messages via Kapso API, load message history, status filtering, optimistic UI — v1.0
+- ✓ **Website Manager** — CMS for articles/webinars, public pages, registration flows creating contacts — v1.0
 
 ### Active
 
-- [ ] **Database View** — Lead table showing all contacts with form submission answers, status badges (Hot/Warm/Cold/Converted), expandable detail sheet, and filters
-- [ ] **Kapso Send + Filter** — Wire up Send button to Kapso API, load message history, filter conversations by lead status, optimistic UI for sent messages
-- [ ] **Website Manager** — CMS for articles and webinars with public pages, webinar registration flows that create contacts in CRM
+- [ ] Production deployment and testing
+- [ ] Real Kapso API integration (currently dev mode mock)
+- [ ] Supabase migration execution
 
 ### Out of Scope
 
@@ -33,20 +35,13 @@ Two-way WhatsApp messaging from the CRM — users can send and receive messages 
 
 **Target Users:** Indonesian education consultants, small business owners using WhatsApp for sales.
 
-**v1 Reference:** `~/Desktop/21/my21staff/` contains working implementations of:
-- Supabase auth + RLS policies
-- Multi-tenant workspace architecture
-- Kapso webhook for receiving messages
-- Contact/Conversation/Message schema
-- Form builder and submissions
+**Current State (v1.0):**
+- 9,043 lines TypeScript, Next.js 15 + React 19
+- Tech stack: Supabase (PostgreSQL + Auth + RLS), Shadcn/ui, Tailwind CSS
+- Dev mode with mock data for local testing
+- Schema ready for Supabase migration
 
-**Build Approach:** Copy and adapt working code from v1. Don't reinvent — reference and reuse patterns.
-
-**Incomplete in v1:**
-- Inbox Send button is a placeholder
-- Inbox doesn't load actual messages
-- No lead status filtering
-- Form submission responses not displayed in database view
+**v1 Reference:** `~/Desktop/21/my21staff/` was used for patterns (auth, RLS, Kapso integration).
 
 ## Constraints
 
@@ -59,9 +54,14 @@ Two-way WhatsApp messaging from the CRM — users can send and receive messages 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Rebuild in new folder (v2) | Clean slate while preserving v1 reference | — Pending |
-| 3 features only for v2 | Focus over feature creep | — Pending |
-| Kapso over official WhatsApp API | Already integrated in v1, simpler | — Pending |
+| Rebuild in new folder (v2) | Clean slate while preserving v1 reference | ✓ Good — clean codebase |
+| 3 features only for v2 | Focus over feature creep | ✓ Good — all 3 shipped |
+| Kapso over official WhatsApp API | Already integrated in v1, simpler | ✓ Good — working integration |
+| Dev mode bypass for local testing | Test without Supabase/Kapso setup | ✓ Good — fast iteration |
+| Multi-env Supabase via SUPABASE_ENV | Switch dev/prod with one variable | ✓ Good — flexible |
+| Simplified v2 schema (core tables) | Only what's needed for v2 features | ✓ Good — lean schema |
+| Public SELECT for articles/webinars | No auth required for public pages | ✓ Good — lead gen works |
+| Contact lookup before create | Prevent duplicate contacts on registration | ✓ Good — clean data |
 
 ---
-*Last updated: 2026-01-14 after initialization*
+*Last updated: 2026-01-14 after v1.0 milestone*
