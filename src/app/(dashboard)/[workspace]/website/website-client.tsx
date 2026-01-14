@@ -2,18 +2,24 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { FileText, Video, Plus } from 'lucide-react'
+import { FileText, Video, Plus, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { articleStatuses, webinarStatuses, type ArticleStatus, type WebinarStatus } from '@/lib/content-status'
 import { ArticleFormSheet } from './article-form-sheet'
+import { WebinarFormSheet } from './webinar-form-sheet'
 import type { Workspace, Article, Webinar } from '@/types/database'
+
+// Extended webinar type with registration count
+export interface WebinarWithCount extends Webinar {
+  registration_count?: number
+}
 
 interface WebsiteClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
   articles: Article[]
-  webinars: Webinar[]
+  webinars: WebinarWithCount[]
 }
 
 function StatusBadge({ status, type }: { status: string; type: 'article' | 'webinar' }) {
@@ -62,11 +68,12 @@ function ArticleCard({ article, onClick }: { article: Article; onClick: () => vo
   )
 }
 
-function WebinarCard({ webinar }: { webinar: Webinar }) {
+function WebinarCard({ webinar, onClick }: { webinar: WebinarWithCount; onClick: () => void }) {
   const displayDate = webinar.scheduled_at
+  const registrationCount = webinar.registration_count ?? 0
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={onClick}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base font-medium line-clamp-2">
@@ -82,9 +89,15 @@ function WebinarCard({ webinar }: { webinar: Webinar }) {
           </p>
         )}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            {format(new Date(displayDate), 'MMM d, yyyy h:mm a')}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground">
+              {format(new Date(displayDate), 'MMM d, yyyy h:mm a')}
+            </span>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Users className="h-3 w-3" />
+              {registrationCount} {registrationCount === 1 ? 'registration' : 'registrations'}
+            </span>
+          </div>
           <Button variant="ghost" size="sm">
             Edit
           </Button>
@@ -109,11 +122,16 @@ function EmptyState({ type }: { type: 'articles' | 'webinars' }) {
   )
 }
 
-export function WebsiteClient({ workspace, articles: initialArticles, webinars }: WebsiteClientProps) {
+export function WebsiteClient({ workspace, articles: initialArticles, webinars: initialWebinars }: WebsiteClientProps) {
   // Article state
   const [articles, setArticles] = useState<Article[]>(initialArticles)
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const [isArticleSheetOpen, setIsArticleSheetOpen] = useState(false)
+
+  // Webinar state
+  const [webinars, setWebinars] = useState<WebinarWithCount[]>(initialWebinars)
+  const [selectedWebinar, setSelectedWebinar] = useState<WebinarWithCount | null>(null)
+  const [isWebinarSheetOpen, setIsWebinarSheetOpen] = useState(false)
 
   const handleCreateArticle = () => {
     setSelectedArticle(null)
@@ -134,6 +152,29 @@ export function WebsiteClient({ workspace, articles: initialArticles, webinars }
       } else {
         // Add new
         return [savedArticle, ...prev]
+      }
+    })
+  }
+
+  const handleCreateWebinar = () => {
+    setSelectedWebinar(null)
+    setIsWebinarSheetOpen(true)
+  }
+
+  const handleEditWebinar = (webinar: WebinarWithCount) => {
+    setSelectedWebinar(webinar)
+    setIsWebinarSheetOpen(true)
+  }
+
+  const handleWebinarSaved = (savedWebinar: WebinarWithCount) => {
+    setWebinars((prev) => {
+      const exists = prev.find((w) => w.id === savedWebinar.id)
+      if (exists) {
+        // Update existing, preserve registration count
+        return prev.map((w) => (w.id === savedWebinar.id ? { ...savedWebinar, registration_count: w.registration_count } : w))
+      } else {
+        // Add new with 0 registrations
+        return [{ ...savedWebinar, registration_count: 0 }, ...prev]
       }
     })
   }
@@ -190,7 +231,7 @@ export function WebsiteClient({ workspace, articles: initialArticles, webinars }
         <TabsContent value="webinars" className="mt-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium">Webinars</h2>
-            <Button size="sm">
+            <Button size="sm" onClick={handleCreateWebinar}>
               <Plus className="h-4 w-4 mr-1.5" />
               Create Webinar
             </Button>
@@ -201,7 +242,11 @@ export function WebsiteClient({ workspace, articles: initialArticles, webinars }
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {webinars.map((webinar) => (
-                <WebinarCard key={webinar.id} webinar={webinar} />
+                <WebinarCard
+                  key={webinar.id}
+                  webinar={webinar}
+                  onClick={() => handleEditWebinar(webinar)}
+                />
               ))}
             </div>
           )}
@@ -215,6 +260,15 @@ export function WebsiteClient({ workspace, articles: initialArticles, webinars }
         open={isArticleSheetOpen}
         onOpenChange={setIsArticleSheetOpen}
         onSaved={handleArticleSaved}
+      />
+
+      {/* Webinar Form Sheet */}
+      <WebinarFormSheet
+        webinar={selectedWebinar}
+        workspaceId={workspace.id}
+        open={isWebinarSheetOpen}
+        onOpenChange={setIsWebinarSheetOpen}
+        onSaved={handleWebinarSaved}
       />
     </div>
   )
