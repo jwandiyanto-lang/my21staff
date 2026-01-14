@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase/server'
 import { mockWebinars, isDevMode, MOCK_WORKSPACE } from '@/lib/mock-data'
 import type { Webinar, Workspace } from '@/types/database'
-import { WebinarRegistrationForm } from './registration-form'
+import { RegistrationSection } from './registration-section'
 
 interface WebinarPageProps {
   params: Promise<{ workspace: string; slug: string }>
@@ -81,10 +81,8 @@ export default async function WebinarPage({ params }: WebinarPageProps) {
     notFound()
   }
 
-  // Check if webinar is in the future
+  // Calculate scheduled date for display (no comparison - that happens client-side)
   const scheduledDate = new Date(webinar.scheduled_at)
-  const now = new Date()
-  const isPast = scheduledDate < now
 
   // Calculate spots remaining
   const spotsRemaining = webinar.max_registrations
@@ -168,30 +166,14 @@ export default async function WebinarPage({ params }: WebinarPageProps) {
 
         {/* Registration Form or Message */}
         <div className="bg-white rounded-lg p-6 shadow-sm border">
-          {isPast ? (
-            <div className="text-center py-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">This webinar has ended</h3>
-              <p className="text-gray-600">
-                This webinar took place on {formattedDate}. Check back for future events.
-              </p>
-            </div>
-          ) : isFull ? (
-            <div className="text-center py-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Registration Full</h3>
-              <p className="text-gray-600">
-                This webinar has reached maximum capacity. Please check back for future events.
-              </p>
-            </div>
-          ) : (
-            <>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Register Now</h2>
-              <WebinarRegistrationForm
-                webinarId={webinar.id}
-                workspaceId={workspaceId}
-                webinarTitle={webinar.title}
-              />
-            </>
-          )}
+          <RegistrationSection
+            webinarId={webinar.id}
+            workspaceId={workspaceId}
+            webinarTitle={webinar.title}
+            scheduledAt={webinar.scheduled_at}
+            formattedDate={formattedDate}
+            isFull={isFull}
+          />
         </div>
 
         {/* Footer */}
