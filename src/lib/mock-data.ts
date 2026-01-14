@@ -1,6 +1,6 @@
 // Mock data for development - bypasses Supabase when NEXT_PUBLIC_DEV_MODE=true
 
-import type { Contact, Workspace, Conversation, Message, ConversationWithContact } from '@/types/database'
+import type { Contact, Workspace, Conversation, Message, ConversationWithContact, Article, Webinar } from '@/types/database'
 
 export const MOCK_WORKSPACE: Workspace = {
   id: 'dev-workspace-001',
@@ -456,5 +456,70 @@ export const MOCK_MESSAGES: Message[] = [
     kapso_message_id: 'kapso-020',
     metadata: {},
     created_at: '2024-01-08T11:00:00Z',
+  },
+]
+
+// Website Manager mock data
+export const mockArticles: Article[] = [
+  {
+    id: 'article-1',
+    workspace_id: 'dev-workspace-001',
+    title: 'How to Choose the Right University',
+    slug: 'how-to-choose-university',
+    excerpt: 'A comprehensive guide to selecting the perfect university for your education abroad journey.',
+    content: '# How to Choose the Right University\n\nChoosing where to study is one of the most important decisions...',
+    cover_image_url: null,
+    status: 'published',
+    published_at: '2026-01-10T10:00:00Z',
+    created_at: '2026-01-08T10:00:00Z',
+    updated_at: '2026-01-10T10:00:00Z',
+  },
+  {
+    id: 'article-2',
+    workspace_id: 'dev-workspace-001',
+    title: 'Visa Application Tips for Indonesian Students',
+    slug: 'visa-tips-indonesian',
+    excerpt: 'Essential tips to make your student visa application process smooth and successful.',
+    content: null,
+    cover_image_url: null,
+    status: 'draft',
+    published_at: null,
+    created_at: '2026-01-12T10:00:00Z',
+    updated_at: '2026-01-12T10:00:00Z',
+  },
+]
+
+export const mockWebinars: Webinar[] = [
+  {
+    id: 'webinar-1',
+    workspace_id: 'dev-workspace-001',
+    title: 'Study in Australia Info Session',
+    slug: 'study-australia-info',
+    description: 'Learn about studying in Australia, visa requirements, and scholarship opportunities.',
+    cover_image_url: null,
+    scheduled_at: '2026-01-25T14:00:00Z',
+    duration_minutes: 60,
+    meeting_url: 'https://zoom.us/j/example',
+    max_registrations: 100,
+    status: 'published',
+    published_at: '2026-01-14T10:00:00Z',
+    created_at: '2026-01-13T10:00:00Z',
+    updated_at: '2026-01-14T10:00:00Z',
+  },
+  {
+    id: 'webinar-2',
+    workspace_id: 'dev-workspace-001',
+    title: 'UK University Application Workshop',
+    slug: 'uk-application-workshop',
+    description: 'Hands-on workshop for applying to UK universities through UCAS.',
+    cover_image_url: null,
+    scheduled_at: '2026-02-01T15:00:00Z',
+    duration_minutes: 90,
+    meeting_url: null,
+    max_registrations: 50,
+    status: 'draft',
+    published_at: null,
+    created_at: '2026-01-14T10:00:00Z',
+    updated_at: '2026-01-14T10:00:00Z',
   },
 ]
