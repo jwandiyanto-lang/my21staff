@@ -254,3 +254,49 @@ export type ConversationWithContact = Conversation & {
 export type MessageWithSender = Message & {
   sender?: Profile
 }
+
+// Website Manager types
+export interface Article {
+  id: string
+  workspace_id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  content: string | null
+  cover_image_url: string | null
+  status: 'draft' | 'published'
+  published_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Webinar {
+  id: string
+  workspace_id: string
+  title: string
+  slug: string
+  description: string | null
+  cover_image_url: string | null
+  scheduled_at: string
+  duration_minutes: number
+  meeting_url: string | null
+  max_registrations: number | null
+  status: 'draft' | 'published' | 'completed' | 'cancelled'
+  published_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface WebinarRegistration {
+  id: string
+  webinar_id: string
+  contact_id: string
+  workspace_id: string
+  registered_at: string
+  attended: boolean
+}
+
+// Joined type for displaying registrations with contact info
+export interface WebinarRegistrationWithContact extends WebinarRegistration {
+  contact: Contact
+}
