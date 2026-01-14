@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(ls:*)",
+      "Bash(head:*)",
+      "Bash(wc:*)",
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:docs.kapso.ai)"
+    ]
+  }
+}
