@@ -1,12 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Filter } from 'lucide-react'
 import { ConversationList } from './conversation-list'
 import { MessageThread } from './message-thread'
 import { MessageInput } from './message-input'
 import { isDevMode, MOCK_MESSAGES } from '@/lib/mock-data'
 import { createClient } from '@/lib/supabase/client'
+import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import type { Workspace, ConversationWithContact, Message } from '@/types/database'
 
 interface InboxClientProps {
@@ -19,8 +28,25 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
     conversations[0] || null
   )
   const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+
+  // Filter conversations by status
+  const filteredConversations = useMemo(() => {
+    if (statusFilter.length === 0) return conversations
+    return conversations.filter((conv) =>
+      statusFilter.includes(conv.contact.lead_status as LeadStatus)
+    )
+  }, [conversations, statusFilter])
+
+  const handleStatusToggle = (status: LeadStatus) => {
+    setStatusFilter((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
+    )
+  }
 
   // Load messages when conversation changes
   useEffect(() => {
@@ -59,21 +85,75 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
     <div className="flex h-[calc(100vh-4rem)]">
       {/* Left sidebar - Conversation list */}
       <div className="w-80 border-r bg-background flex flex-col">
-        {/* Search header */}
-        <div className="p-4 border-b">
-          <Input
-            placeholder="Search conversations..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        {/* Search and filter header */}
+        <div className="p-4 border-b space-y-3">
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Search conversations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1"
+            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0">
+                  <Filter className="h-4 w-4" />
+                  {statusFilter.length > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
+                      {statusFilter.length}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56" align="end">
+                <div className="space-y-2">
+                  <p className="font-medium text-sm">Filter by status</p>
+                  {LEAD_STATUSES.map((status) => {
+                    const config = LEAD_STATUS_CONFIG[status]
+                    return (
+                      <label
+                        key={status}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={statusFilter.includes(status)}
+                          onCheckedChange={() => handleStatusToggle(status)}
+                        />
+                        <span
+                          className="px-2 py-0.5 rounded text-xs font-medium"
+                          style={{
+                            backgroundColor: config.bgColor,
+                            color: config.color,
+                          }}
+                        >
+                          {config.label}
+                        </span>
+                      </label>
+                    )
+                  })}
+                  {statusFilter.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full mt-2"
+                      onClick={() => setStatusFilter([])}
+                    >
+                      Clear filters
+                    </Button>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         {/* Conversation list */}
         <ConversationList
-          conversations={conversations}
+          conversations={filteredConversations}
           selectedId={selectedConversation?.id || null}
           onSelect={setSelectedConversation}
           searchQuery={searchQuery}
+          hasStatusFilter={statusFilter.length > 0}
         />
       </div>
 
