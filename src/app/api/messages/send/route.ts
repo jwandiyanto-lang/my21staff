@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendMessage } from '@/lib/kapso/client'
 import type { KapsoCredentials } from '@/lib/kapso/client'
+import type { Conversation, Contact, Workspace } from '@/types/database'
 
 interface SendMessageBody {
   conversationId: string
@@ -40,24 +41,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Fetch conversation to get workspace_id and contact info
-    const { data: conversation, error: convError } = await supabase
+    // Fetch conversation to get workspace_id and contact_id
+    const { data: conversationData, error: convError } = await supabase
       .from('conversations')
-      .select(`
-        id,
-        workspace_id,
-        contact_id,
-        contact:contacts!inner(phone)
-      `)
+      .select('id, workspace_id, contact_id')
       .eq('id', conversationId)
       .single()
 
-    if (convError || !conversation) {
+    if (convError || !conversationData) {
       return NextResponse.json(
         { error: 'Conversation not found' },
         { status: 404 }
       )
     }
+
+    const conversation = conversationData as Pick<Conversation, 'id' | 'workspace_id' | 'contact_id'>
 
     // Check user has access to this workspace
     const { data: membership } = await supabase
@@ -74,21 +72,39 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Fetch contact phone
+    const { data: contactData, error: contactError } = await supabase
+      .from('contacts')
+      .select('phone')
+      .eq('id', conversation.contact_id)
+      .single()
+
+    if (contactError || !contactData) {
+      return NextResponse.json(
+        { error: 'Contact not found' },
+        { status: 404 }
+      )
+    }
+
+    const contact = contactData as Pick<Contact, 'phone'>
+
     // Fetch workspace for Kapso credentials
-    const { data: workspace, error: wsError } = await supabase
+    const { data: workspaceData, error: wsError } = await supabase
       .from('workspaces')
       .select('kapso_phone_id, settings')
       .eq('id', conversation.workspace_id)
       .single()
 
-    if (wsError || !workspace) {
+    if (wsError || !workspaceData) {
       return NextResponse.json(
         { error: 'Workspace not found' },
         { status: 404 }
       )
     }
 
-    const contactPhone = (conversation.contact as { phone: string }).phone
+    const workspace = workspaceData as Pick<Workspace, 'kapso_phone_id' | 'settings'>
+
+    const contactPhone = contact.phone
     let kapsoMessageId: string | null = null
 
     // Send via Kapso (unless dev mode)

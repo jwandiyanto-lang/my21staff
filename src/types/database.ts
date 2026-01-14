@@ -40,6 +40,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       workspace_members: {
         Row: {
@@ -63,6 +64,7 @@ export interface Database {
           role?: string
           created_at?: string
         }
+        Relationships: []
       }
       contacts: {
         Row: {
@@ -104,6 +106,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       conversations: {
         Row: {
@@ -142,6 +145,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -186,6 +190,7 @@ export interface Database {
           metadata?: Json
           created_at?: string
         }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -215,6 +220,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
     }
     Views: {

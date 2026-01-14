@@ -55,7 +55,7 @@ export default async function InboxPage({ params }: InboxPageProps) {
     console.error('Error fetching conversations:', conversationsError)
   }
 
-  const conversations = (conversationsData || []) as ConversationWithContact[]
+  const conversations = (conversationsData || []) as unknown as ConversationWithContact[]
 
   return <InboxClient workspace={workspace} conversations={conversations} />
 }
