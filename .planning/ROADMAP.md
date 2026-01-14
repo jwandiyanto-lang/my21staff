@@ -58,4 +58,4 @@ None
 | 2. Database View | 3/3 | Complete | 2026-01-14 |
 | 3. Inbox Core | 3/3 | Complete | 2026-01-14 |
 | 4. Inbox Send | 1/1 | Complete | 2026-01-14 |
-| 5. Website Manager | 0/TBD | Not started | - |
+| 5. Website Manager | 1/4 | In progress | - |

@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** Phase 4 complete — Two-way messaging now works!
+**Current focus:** Phase 5 — Website Manager for lead generation via webinars
 
 ## Current Position
 
-Phase: 4 of 5 (Inbox Send)
-Plan: 1 of 1 in current phase
-Status: Phase complete
-Last activity: 2026-01-14 — Completed 04-01-PLAN.md
+Phase: 5 of 5 (Website Manager)
+Plan: 1 of 4 in current phase
+Status: In progress
+Last activity: 2026-01-14 — Completed 05-01-PLAN.md
 
-Progress: █████████░ 90%
+Progress: ███████████░ 92%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 8 min
-- Total execution time: 81 min
+- Total execution time: 83 min
 
 **By Phase:**
 
@@ -31,10 +31,11 @@ Progress: █████████░ 90%
 | 2. Database View | 3/3 | 22 min | 7 min |
 | 3. Inbox Core | 3/3 | 17 min | 6 min |
 | 4. Inbox Send | 1/1 | 10 min | 10 min |
+| 5. Website Manager | 1/4 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 15 min, 10 min, 3 min, 4 min, 10 min
-- Trend: Consistent
+- Last 5 plans: 10 min, 3 min, 4 min, 10 min, 2 min
+- Trend: Fast
 
 ## Accumulated Context
 
@@ -61,6 +62,9 @@ Recent decisions affecting current work:
 - 03-03: Empty states with icons: no conversations, no results, no filter matches
 - 04-01: Optimistic UI with status='sending' indicator, replaced on success/error
 - 04-01: Dev mode bypass for Kapso API when SUPABASE_ENV=dev
+- 05-01: Public SELECT for published articles/webinars (no auth required)
+- 05-01: Public INSERT for webinar registrations (lead generation)
+- 05-01: Workspace-scoped slug uniqueness for articles/webinars
 
 ### Deferred Issues
 
@@ -73,6 +77,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed 04-01-PLAN.md (Send message integration) - Phase 4 complete
+Stopped at: Completed 05-01-PLAN.md (Schema + Types) - 1/4 plans done
 Resume file: None
-Next: Phase 5 (Website Manager) - CMS for articles/webinars
+Next: 05-02-PLAN.md (Admin UI shell)
