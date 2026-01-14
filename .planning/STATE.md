@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** v1.1 in progress — real Kapso integration
+**Current focus:** v1.2 in progress — AI & Data Integrations
 
 ## Current Position
 
-Phase: 7 of 7 (Landing Page)
-Plan: 3/3 complete
-Status: Phase complete
-Last activity: 2026-01-14 — Completed 07-03-PLAN.md
+Phase: 8 of 9 (Sea Lion + Kapso)
+Plan: 0/1 complete
+Status: Ready to plan
+Last activity: 2026-01-14 — Added Phase 8 & 9 for v1.2
 
-Progress: v1.1 ██████████ 3/3 plans complete
+Progress: v1.2 ░░░░░░░░░░ 0/2 phases complete
 
 ## Performance Metrics
 
@@ -44,7 +44,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 ### Deferred Issues
 
 - Production deployment and Supabase migration
-- Real Kapso API integration (currently dev mode mock)
+- Real Kapso API integration (Phase 8 addresses AI responses)
 
 ### Blockers/Concerns
 
@@ -53,6 +53,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed 07-03-PLAN.md (Phase 7 complete)
+Stopped at: Added Phase 8 & 9 for v1.2 milestone
 Resume file: None
-Next: v1.1 milestone complete - run /gsd:complete-milestone
+Next: Run /gsd:plan-phase 8 to create Sea Lion + Kapso plan
