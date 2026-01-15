@@ -40,9 +40,13 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] Phase 9: Sheets to Database — Google Sheets sync via n8n workflows (complete - 144 records synced)
 - [x] Phase 10: App Verification — Landing→login flow, dev mode disabled, pushed to GitHub (complete)
 
-## v1.3 — Production Deployment
+## v1.3 — Production Deployment (COMPLETE)
 
-- [ ] Phase 11: bolt.new + Telegram — Deploy to bolt.new with real data, Telegram bot notifications
+- [x] Phase 11: Vercel Deployment — Deployed to Vercel with real Supabase, glassmorphism login (complete)
+
+## v1.4 — Multi-Tenant Admin
+
+- [ ] Phase 12: Multi-Tenant Admin — Admin dashboard, client management, dummy credentials, first-login password change
 
 ## Progress
 
@@ -58,4 +62,5 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | 8. Sea Lion + Kapso | v1.2 | 1/1 | Complete | 2026-01-15 |
 | 9. Sheets to Database | v1.2 | 1/1 | Complete | 2026-01-15 |
 | 10. App Verification | v1.2 | 1/1 | Complete | 2026-01-15 |
-| 11. bolt.new + Telegram | v1.3 | 0/1 | In Progress | — |
+| 11. Vercel Deployment | v1.3 | 1/1 | Complete | 2026-01-15 |
+| 12. Multi-Tenant Admin | v1.4 | 0/1 | Planned | — |
