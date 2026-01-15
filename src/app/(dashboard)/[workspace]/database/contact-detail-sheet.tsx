@@ -37,7 +37,9 @@ import {
   Plus,
 } from 'lucide-react'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
-import type { Contact } from '@/types/database'
+import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
+import type { Contact, Message } from '@/types/database'
 
 interface ContactDetailSheetProps {
   contact: Contact | null
@@ -65,12 +67,22 @@ export function ContactDetailSheet({
   const [isUpdatingTags, setIsUpdatingTags] = useState(false)
   const tagInputRef = useRef<HTMLInputElement>(null)
 
+  // Messages state
+  const [activeTab, setActiveTab] = useState('details')
+  const [messages, setMessages] = useState<Message[]>([])
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+  const [messagesLoaded, setMessagesLoaded] = useState(false)
+
   // Sync local state when contact changes
   useEffect(() => {
     if (contact) {
       setLocalStatus(contact.lead_status as LeadStatus)
       setLocalScore(contact.lead_score)
       setLocalTags(contact.tags || [])
+      // Reset messages state for new contact
+      setMessages([])
+      setMessagesLoaded(false)
+      setActiveTab('details')
     }
   }, [contact])
 
@@ -237,6 +249,49 @@ export function ContactDetailSheet({
     }
   }
 
+  // Load messages when Messages tab is selected
+  const loadMessages = useCallback(async () => {
+    if (!contact || messagesLoaded || isLoadingMessages) return
+
+    setIsLoadingMessages(true)
+    try {
+      const supabase = createClient()
+
+      // First, find conversation for this contact
+      const { data: conversation } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('contact_id', contact.id)
+        .single()
+
+      if (conversation) {
+        // Load messages for this conversation
+        const { data: messagesData } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversation.id)
+          .order('created_at', { ascending: true })
+          .limit(100)
+
+        setMessages(messagesData || [])
+      }
+      setMessagesLoaded(true)
+    } catch (error) {
+      console.error('Error loading messages:', error)
+      setMessagesLoaded(true)
+    } finally {
+      setIsLoadingMessages(false)
+    }
+  }, [contact, messagesLoaded, isLoadingMessages])
+
+  // Handle tab change - lazy load messages
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    if (value === 'messages' && !messagesLoaded) {
+      loadMessages()
+    }
+  }
+
   if (!contact) return null
 
   const initials = contact.name
@@ -334,7 +389,7 @@ export function ContactDetailSheet({
         </SheetHeader>
 
         {/* Tabs */}
-        <Tabs defaultValue="details" className="flex-1 flex flex-col overflow-hidden">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="w-full justify-start rounded-none border-b px-6 h-12">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
@@ -497,15 +552,54 @@ export function ContactDetailSheet({
           </TabsContent>
 
           {/* Messages Tab */}
-          <TabsContent value="messages" className="flex-1 m-0 overflow-hidden">
-            <div className="flex items-center justify-center h-full p-6">
-              <div className="text-center">
-                <MessageCircle className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <p className="mt-4 text-muted-foreground">
-                  Message history will appear here after Inbox is connected (Phase 3)
-                </p>
+          <TabsContent value="messages" className="flex-1 m-0 overflow-hidden flex flex-col">
+            {isLoadingMessages ? (
+              <div className="flex items-center justify-center h-full p-6">
+                <div className="text-center">
+                  <Loader2 className="mx-auto h-8 w-8 text-muted-foreground animate-spin" />
+                  <p className="mt-4 text-muted-foreground">Loading messages...</p>
+                </div>
               </div>
-            </div>
+            ) : messages.length > 0 ? (
+              <ScrollArea className="flex-1">
+                <div className="p-4 flex flex-col gap-3">
+                  {messages.map((message) => {
+                    const isOutbound = message.direction === 'outbound'
+                    return (
+                      <div
+                        key={message.id}
+                        className={cn(
+                          'max-w-[85%] rounded-lg px-3 py-2',
+                          isOutbound
+                            ? 'ml-auto bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        )}
+                      >
+                        {message.content && (
+                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        )}
+                        <span className={cn(
+                          'text-xs block mt-1',
+                          isOutbound ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                        )}>
+                          {format(new Date(message.created_at), 'MMM d, HH:mm')}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="flex items-center justify-center h-full p-6">
+                <div className="text-center">
+                  <MessageCircle className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <p className="mt-4 text-muted-foreground font-medium">No messages yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Start a conversation in the Inbox
+                  </p>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* Activity Tab */}
