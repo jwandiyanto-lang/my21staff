@@ -38,7 +38,6 @@ const operationsNav = [
     title: 'Conversations',
     icon: MessageCircle,
     href: '/inbox',
-    badge: 12,
   },
 ]
 

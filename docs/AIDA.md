@@ -4,6 +4,23 @@
 
 ---
 
+## What Makes Us Different
+
+**We're not just CRM. We're your full guide.**
+
+my21staff is built from real industry experience — not by developers guessing what businesses need, but by someone who's been in the trenches. Sales, operations, growth strategy. That's what you get.
+
+> "I help your business grow through AI. That's the difference. Other tools give you software. We give you a system AND the guidance to use it."
+
+**The Difference:**
+| Others | my21staff |
+|--------|-----------|
+| Give you software, figure it out yourself | Give you a system + guidance on how to grow |
+| Features without context | Solutions built from real business experience |
+| Tech-first | Business-first, tech-powered |
+
+---
+
 ## AIDA Summary
 
 | Stage | Message |
@@ -24,7 +41,7 @@
 - "Leads everywhere. System nowhere."
 - "You can't scale chaos."
 - "Still screenshotting chats to save leads?"
-- "Masih kerja manual? Gak bakal bisa scale."
+- "Masih kerja manual? Gak bakal bisa scale up."
 
 ### Opening Lines
 - "No system, no growth. That's the truth most Indonesian SMEs learn too late."
@@ -65,6 +82,62 @@
 | Database CRM | "All leads organized, nothing falls through" |
 | Website Manager | "Capture more leads with landing pages" |
 | Human Support | "When AI can't solve it, humans step in" |
+
+---
+
+## The One Problem
+
+**No system = Can't grow.**
+
+That's it. Everything else is a symptom.
+
+### How It Shows Up
+
+| Symptom | What's Really Happening |
+|---------|------------------------|
+| Leads everywhere | No system to capture them |
+| Forgot to follow up | No system to remind you |
+| Proposals scattered | No system to organize them |
+| Can't see pipeline | No system to track it |
+| Stuck at ceiling | No system to scale |
+
+---
+
+### The System (What You Get)
+
+**Symptom: Leads Everywhere**
+> "Leads from WhatsApp, Instagram, Twitter, ads — scattered everywhere."
+
+**The System:**
+- WhatsApp Messaging — All conversations in one place
+- Lead Reminders — Never forget to follow up (even from Twitter DMs)
+- Unified Inbox — Every lead, every channel, one dashboard
+
+**Skill:** `Lead Management` — AI tracks, reminds, follows up automatically.
+
+---
+
+**Symptom: Proposals Chaos**
+> "Client asks for a quote — you dig through 5 apps to find it."
+
+**The System:**
+- Proposal Library — All your proposals organized in the CRM
+- Bot Access — AI can find and send the right proposal instantly
+- Version Control — Know which version you sent to who
+
+**Skill:** `Proposal Manager` — "Send proposal for Project X" → Bot finds it, sends it, logs it.
+
+---
+
+### Pricing = More System
+
+| Tier | System You Get |
+|------|----------------|
+| **Solo** | Lead system (WhatsApp + Reminders + Follow-up) |
+| **Team** | Solo + Proposal system + Analytics |
+| **Studio** | Team + Marketing system + Ads |
+
+**The more system, the more growth.**
 
 ---
 
@@ -179,9 +252,21 @@
 |---------|------|
 | **Tagline** | No system, no growth. |
 | **Solution** | my21staff is the system. |
-| **Differentiator** | AI handles routine, humans handle complex |
+| **Differentiator** | Not just CRM — your full guide built from real industry experience |
+| **Why Different** | We help your business grow through AI. Others give software, we give guidance. |
 | **Price Anchor** | An AI team for one employee's cost |
 | **CTA** | Get the system. Start growing. |
+
+## Symptom Hooks (Use in Ads)
+
+**Root Problem:** No system = Can't grow
+
+| Symptom | Hook |
+|---------|------|
+| Leads Everywhere | "Leads from 5 apps, organized in 0." |
+| Proposal Chaos | "Client asks for quote. You dig through 5 apps." |
+| Manual Work | "Still screenshotting chats to save leads?" |
+| Forgot Follow-up | "That lead you forgot? Someone else closed it." |
 
 ---
 

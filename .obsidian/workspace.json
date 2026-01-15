@@ -183,8 +183,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "600c2f6ee49ae613",
+  "active": "ccbd897c4fb28da1",
   "lastOpenFiles": [
+    "src/components/workspace/sidebar.tsx.tmp.3699987.1768495334560",
     "src/middleware.ts",
     "src/app/api/auth/password-changed/route.ts",
     "src/app/api/auth/password-changed",
@@ -195,7 +196,6 @@
     "src/app/api/admin/clients",
     "src/app/api/admin",
     "src/app/(dashboard)/admin/clients/new/page.tsx",
-    "src/app/(dashboard)/admin/clients/new",
     "docs/SEA-LION.md",
     "brainstorm/LANDING-PAGE-AIDA-GRADE.md",
     "TODO-FEATURES.md",
