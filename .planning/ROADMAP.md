@@ -44,9 +44,9 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 - [x] Phase 11: Vercel Deployment — Deployed to Vercel with real Supabase, glassmorphism login (complete)
 
-## v1.4 — Multi-Tenant Admin
+## v1.4 — Multi-Tenant Admin (COMPLETE)
 
-- [ ] Phase 12: Multi-Tenant Admin — Admin dashboard, client management, dummy credentials, first-login password change
+- [x] Phase 12: Multi-Tenant Admin — Admin dashboard, client management, dummy credentials, first-login password change (complete)
 
 ## Progress
 
@@ -63,4 +63,4 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | 9. Sheets to Database | v1.2 | 1/1 | Complete | 2026-01-15 |
 | 10. App Verification | v1.2 | 1/1 | Complete | 2026-01-15 |
 | 11. Vercel Deployment | v1.3 | 1/1 | Complete | 2026-01-15 |
-| 12. Multi-Tenant Admin | v1.4 | 0/1 | Planned | — |
+| 12. Multi-Tenant Admin | v1.4 | 1/1 | Complete | 2026-01-15 |
