@@ -48,6 +48,7 @@ export interface Database {
           workspace_id: string
           user_id: string
           role: string
+          must_change_password: boolean
           created_at: string
         }
         Insert: {
@@ -55,6 +56,7 @@ export interface Database {
           workspace_id: string
           user_id: string
           role?: string
+          must_change_password?: boolean
           created_at?: string
         }
         Update: {
@@ -62,6 +64,7 @@ export interface Database {
           workspace_id?: string
           user_id?: string
           role?: string
+          must_change_password?: boolean
           created_at?: string
         }
         Relationships: []
