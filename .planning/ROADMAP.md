@@ -34,11 +34,11 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] Phase 6: Kapso Live — Webhook handler for inbound messages (complete)
 - [x] Phase 7: Landing Page — Public marketing/landing page for the product (complete)
 
-## v1.2 — AI & Data Integrations
+## v1.2 — AI & Data Integrations (COMPLETE)
 
 - [x] Phase 8: Sea Lion + Kapso — AI-powered WhatsApp responses using Sea Lion LLM (complete)
 - [x] Phase 9: Sheets to Database — Google Sheets sync via n8n workflows (complete - 144 records synced)
-- [ ] Phase 10: App Verification — Verify CRM displays synced contacts, fix data flow issues
+- [x] Phase 10: App Verification — Landing→login flow, dev mode disabled, pushed to GitHub (complete)
 
 ## Progress
 
@@ -53,4 +53,4 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | 7. Landing Page | v1.1 | 3/3 | Complete | 2026-01-14 |
 | 8. Sea Lion + Kapso | v1.2 | 1/1 | Complete | 2026-01-15 |
 | 9. Sheets to Database | v1.2 | 1/1 | Complete | 2026-01-15 |
-| 10. App Verification | v1.2 | 0/1 | Planned | — |
+| 10. App Verification | v1.2 | 1/1 | Complete | 2026-01-15 |
