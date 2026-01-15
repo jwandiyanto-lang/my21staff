@@ -123,11 +123,6 @@ export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSideba
             >
               <item.icon className="w-5 h-5" />
               {item.title}
-              {item.badge && (
-                <span className="ml-auto bg-accent text-white text-[10px] px-1.5 py-0.5 rounded-md font-bold">
-                  {item.badge}
-                </span>
-              )}
             </Link>
           )
         })}
