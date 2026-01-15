@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useTransition } from 'react'
+import { useState, useEffect, useCallback, useTransition, useRef } from 'react'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import {
   MessageCircle,
   Phone,
@@ -32,6 +33,8 @@ import {
   Tag,
   ArrowRight,
   Loader2,
+  X,
+  Plus,
 } from 'lucide-react'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import type { Contact } from '@/types/database'
@@ -55,14 +58,19 @@ export function ContactDetailSheet({
   // Local state for optimistic updates
   const [localStatus, setLocalStatus] = useState<LeadStatus>(contact?.lead_status as LeadStatus || 'prospect')
   const [localScore, setLocalScore] = useState(contact?.lead_score || 50)
+  const [localTags, setLocalTags] = useState<string[]>(contact?.tags || [])
+  const [newTagInput, setNewTagInput] = useState('')
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [isUpdatingScore, setIsUpdatingScore] = useState(false)
+  const [isUpdatingTags, setIsUpdatingTags] = useState(false)
+  const tagInputRef = useRef<HTMLInputElement>(null)
 
   // Sync local state when contact changes
   useEffect(() => {
     if (contact) {
       setLocalStatus(contact.lead_status as LeadStatus)
       setLocalScore(contact.lead_score)
+      setLocalTags(contact.tags || [])
     }
   }, [contact])
 
@@ -144,6 +152,89 @@ export function ContactDetailSheet({
     const newScore = value[0]
     setLocalScore(newScore)
     debouncedScoreUpdate(contact.id, newScore)
+  }
+
+  // Tag management handlers
+  const handleAddTag = async () => {
+    if (!contact) return
+    const trimmedTag = newTagInput.trim()
+    if (!trimmedTag) return
+
+    // Prevent duplicates (case-insensitive)
+    if (localTags.some(t => t.toLowerCase() === trimmedTag.toLowerCase())) {
+      setNewTagInput('')
+      return
+    }
+
+    const newTags = [...localTags, trimmedTag]
+
+    // Optimistic update
+    setLocalTags(newTags)
+    setNewTagInput('')
+    setIsUpdatingTags(true)
+
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tags: newTags }),
+      })
+
+      if (!response.ok) {
+        // Revert on error
+        setLocalTags(contact.tags || [])
+        console.error('Failed to add tag')
+      } else {
+        startTransition(() => {
+          router.refresh()
+        })
+      }
+    } catch (error) {
+      setLocalTags(contact.tags || [])
+      console.error('Error adding tag:', error)
+    } finally {
+      setIsUpdatingTags(false)
+    }
+  }
+
+  const handleRemoveTag = async (tagToRemove: string) => {
+    if (!contact) return
+
+    const newTags = localTags.filter(t => t !== tagToRemove)
+    const previousTags = localTags
+
+    // Optimistic update
+    setLocalTags(newTags)
+    setIsUpdatingTags(true)
+
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tags: newTags }),
+      })
+
+      if (!response.ok) {
+        setLocalTags(previousTags)
+        console.error('Failed to remove tag')
+      } else {
+        startTransition(() => {
+          router.refresh()
+        })
+      }
+    } catch (error) {
+      setLocalTags(previousTags)
+      console.error('Error removing tag:', error)
+    } finally {
+      setIsUpdatingTags(false)
+    }
+  }
+
+  const handleTagKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleAddTag()
+    }
   }
 
   if (!contact) return null
@@ -327,21 +418,55 @@ export function ContactDetailSheet({
 
                 {/* Tags */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                    Tags
-                  </h3>
-                  {contact.tags && contact.tags.length > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                      Tags
+                    </h3>
+                    {isUpdatingTags && (
+                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    )}
+                  </div>
+                  {localTags.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
-                      {contact.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary">
+                      {localTags.map((tag) => (
+                        <Badge key={tag} variant="secondary" className="pr-1">
                           <Tag className="mr-1 h-3 w-3" />
                           {tag}
+                          <button
+                            onClick={() => handleRemoveTag(tag)}
+                            className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                            disabled={isUpdatingTags}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
                         </Badge>
                       ))}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">No tags</p>
                   )}
+                  {/* Add tag input */}
+                  <div className="flex gap-2">
+                    <Input
+                      ref={tagInputRef}
+                      type="text"
+                      placeholder="Add a tag..."
+                      value={newTagInput}
+                      onChange={(e) => setNewTagInput(e.target.value)}
+                      onKeyDown={handleTagKeyDown}
+                      className="h-8 text-sm"
+                      disabled={isUpdatingTags}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleAddTag}
+                      disabled={!newTagInput.trim() || isUpdatingTags}
+                      className="h-8 px-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Form Responses (from metadata) */}
