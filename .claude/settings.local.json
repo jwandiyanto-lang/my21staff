@@ -8,7 +8,8 @@
       "Bash(npm run dev:*)",
       "WebFetch(domain:docs.kapso.ai)",
       "WebFetch(domain:sleekflow.io)",
-      "mcp__exa__web_search_exa"
+      "mcp__exa__web_search_exa",
+      "Bash(agent-browser:*)"
     ]
   }
 }
