@@ -59,7 +59,7 @@ export const columns: ColumnDef<Contact>[] = [
     header: 'Status',
     cell: ({ row }) => {
       const status = row.getValue('lead_status') as LeadStatus
-      const config = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.new
+      const config = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.prospect
       return (
         <Badge
           style={{

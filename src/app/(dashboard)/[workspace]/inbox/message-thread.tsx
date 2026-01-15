@@ -78,7 +78,7 @@ function MessageBubble({ message }: { message: Message }) {
 
 export function MessageThread({ messages, conversationContact, isLoading }: MessageThreadProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const statusConfig = LEAD_STATUS_CONFIG[conversationContact.lead_status as LeadStatus]
+  const statusConfig = LEAD_STATUS_CONFIG[conversationContact.lead_status as LeadStatus] || LEAD_STATUS_CONFIG.prospect
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

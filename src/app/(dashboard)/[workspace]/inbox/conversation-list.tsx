@@ -69,7 +69,7 @@ export function ConversationList({
       <div className="divide-y">
         {filteredConversations.map((conversation) => {
           const status = conversation.contact.lead_status as LeadStatus
-          const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.new
+          const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.prospect
 
           return (
             <button

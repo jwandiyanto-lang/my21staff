@@ -109,7 +109,7 @@ export default function Home() {
               >
                 <Sparkles className="w-3.5 h-3.5 text-white" />
                 <span className="text-[11px] font-bold uppercase tracking-widest text-white font-mono">
-                  WhatsApp CRM untuk UMKM
+                  Sistem + Panduan untuk UMKM
                 </span>
               </motion.div>
 
@@ -118,16 +118,16 @@ export default function Home() {
                 className="text-5xl lg:text-7xl font-extrabold tracking-tighter leading-[0.9] mb-8 text-white text-shadow-pop"
                 style={{ fontFamily: "var(--font-jakarta)" }}
               >
-                Kelola Leads <br />
-                dari <span className="italic font-normal">WhatsApp.</span>
+                No System, <br />
+                <span className="italic font-normal">No Growth.</span>
               </motion.h1>
 
               <motion.p
                 variants={fadeInUp}
                 className="text-lg md:text-xl text-white/90 max-w-lg mb-10 leading-relaxed font-medium"
               >
-                CRM yang terhubung langsung ke WhatsApp & Meta Ads.
-                Tangkap leads, kelola percakapan, dan tutup penjualan — semua dari satu dashboard.
+                Saya bantu Anda bangun sistem itu. Bukan cuma software —
+                panduan dari pengalaman bisnis nyata. AI + tim manusia yang benar-benar eksekusi.
               </motion.p>
 
               <motion.div variants={fadeInUp} className="flex flex-wrap gap-4">
@@ -135,7 +135,7 @@ export default function Home() {
                   href="/login"
                   className="px-10 py-4 rounded-notion bg-white text-landing-hero font-black uppercase tracking-widest hover:bg-white/90 transition-all flex items-center gap-2 shadow-xl"
                 >
-                  Mulai Gratis
+                  Dapatkan Sistemnya
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </motion.div>
@@ -170,8 +170,8 @@ export default function Home() {
                 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4"
                 style={{ fontFamily: "var(--font-jakarta)" }}
               >
-                Semua yang Anda butuhkan untuk{" "}
-                <span className="italic">scale</span>
+                Masalahnya sama:{" "}
+                <span className="italic">Tidak ada sistem</span>
               </motion.h2>
             </motion.div>
 
@@ -185,24 +185,24 @@ export default function Home() {
               {[
                 {
                   icon: Users,
-                  title: "Database CRM",
-                  desc: "Kelola kontak & leads dengan status tracking",
+                  title: "Leads Dimana-mana",
+                  desc: "WhatsApp, Instagram, Twitter — semua berantakan. Kami satukan.",
                   image: "bg-gradient-to-br from-amber-100 to-orange-200",
                   emoji: "📊",
                 },
                 {
                   icon: MessageCircle,
-                  title: "WhatsApp Messaging",
-                  desc: "Kirim & terima pesan langsung dari CRM",
+                  title: "Lupa Follow-up",
+                  desc: "Lead yang lupa di-follow up? Orang lain yang closing. AI kami ingatkan.",
                   image: "bg-gradient-to-br from-emerald-100 to-teal-200",
                   emoji: "💬",
                 },
                 {
                   icon: Zap,
-                  title: "Website & Webinar",
-                  desc: "Buat halaman publik untuk tangkap leads",
+                  title: "Proposal Berantakan",
+                  desc: "Client minta quote, Anda cari di 5 aplikasi. Kami kumpulkan semua.",
                   image: "bg-gradient-to-br from-blue-100 to-indigo-200",
-                  emoji: "🌐",
+                  emoji: "📄",
                 },
               ].map((feature, i) => (
                 <motion.div
@@ -372,17 +372,17 @@ export default function Home() {
                   className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6 leading-tight"
                   style={{ fontFamily: "var(--font-jakarta)" }}
                 >
-                  Siap scale bisnis Anda dengan <span className="italic">WhatsApp?</span>
+                  Siap punya <span className="italic">sistem?</span>
                 </h2>
                 <p className="text-lg text-landing-text-muted mb-8">
-                  Mulai gratis hari ini. Setup dalam 5 menit. Tim kami siap bantu 24/7.
+                  Dapatkan sistemnya. Mulai growth. Saya bantu Anda dari awal.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Link
                     href="/login"
                     className="px-8 py-4 rounded-full bg-landing-cta text-white font-bold hover:bg-landing-cta-dark transition-all shadow-lg"
                   >
-                    Mulai Gratis Sekarang
+                    Dapatkan Sistemnya
                   </Link>
                   <a
                     href="https://wa.me/6281234567890"

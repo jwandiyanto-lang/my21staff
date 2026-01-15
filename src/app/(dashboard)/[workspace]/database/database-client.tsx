@@ -2,17 +2,10 @@
 
 import { useMemo, useState } from 'react'
 import { DataTable } from '@/components/ui/data-table'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { Filter } from 'lucide-react'
 import { columns } from './columns'
 import { ContactDetailSheet } from './contact-detail-sheet'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
+import { cn } from '@/lib/utils'
 import type { Contact, Workspace } from '@/types/database'
 
 interface DatabaseClientProps {
@@ -21,24 +14,23 @@ interface DatabaseClientProps {
 }
 
 export function DatabaseClient({ workspace, contacts }: DatabaseClientProps) {
-  const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
+  const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all')
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
 
-  const filteredContacts = useMemo(() => {
-    if (statusFilter.length === 0) return contacts
-    return contacts.filter((contact) =>
-      statusFilter.includes(contact.lead_status as LeadStatus)
-    )
-  }, [contacts, statusFilter])
+  // Count contacts by status
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: contacts.length }
+    LEAD_STATUSES.forEach((status) => {
+      counts[status] = contacts.filter((c) => c.lead_status === status).length
+    })
+    return counts
+  }, [contacts])
 
-  const handleStatusToggle = (status: LeadStatus) => {
-    setStatusFilter((prev) =>
-      prev.includes(status)
-        ? prev.filter((s) => s !== status)
-        : [...prev, status]
-    )
-  }
+  const filteredContacts = useMemo(() => {
+    if (activeStatus === 'all') return contacts
+    return contacts.filter((contact) => contact.lead_status === activeStatus)
+  }, [contacts, activeStatus])
 
   const handleRowClick = (contact: Contact) => {
     setSelectedContact(contact)
@@ -48,68 +40,60 @@ export function DatabaseClient({ workspace, contacts }: DatabaseClientProps) {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Database</h1>
-          <p className="text-muted-foreground">
-            {contacts.length} contact{contacts.length !== 1 ? 's' : ''} total
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-semibold">Lead Management</h1>
+        <p className="text-muted-foreground">
+          {contacts.length} contact{contacts.length !== 1 ? 's' : ''} total
+        </p>
+      </div>
 
-        {/* Filters */}
-        <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Filter className="mr-2 h-4 w-4" />
-                Status
-                {statusFilter.length > 0 && (
-                  <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                    {statusFilter.length}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56" align="end">
-              <div className="space-y-2">
-                <p className="font-medium text-sm">Filter by status</p>
-                {LEAD_STATUSES.map((status) => {
-                  const config = LEAD_STATUS_CONFIG[status]
-                  return (
-                    <label
-                      key={status}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <Checkbox
-                        checked={statusFilter.includes(status)}
-                        onCheckedChange={() => handleStatusToggle(status)}
-                      />
-                      <span
-                        className="px-2 py-0.5 rounded text-xs font-medium"
-                        style={{
-                          backgroundColor: config.bgColor,
-                          color: config.color,
-                        }}
-                      >
-                        {config.label}
-                      </span>
-                    </label>
-                  )
-                })}
-                {statusFilter.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full mt-2"
-                    onClick={() => setStatusFilter([])}
-                  >
-                    Clear filters
-                  </Button>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+      {/* Status Tabs */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* All Tab */}
+        <button
+          onClick={() => setActiveStatus('all')}
+          className={cn(
+            'px-4 py-2 rounded-full text-sm font-medium transition-all',
+            activeStatus === 'all'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+          )}
+        >
+          All
+          <span className="ml-2 text-xs opacity-80">{statusCounts.all}</span>
+        </button>
+
+        {/* Status Tabs */}
+        {LEAD_STATUSES.map((status) => {
+          const config = LEAD_STATUS_CONFIG[status]
+          const count = statusCounts[status]
+          const isActive = activeStatus === status
+
+          return (
+            <button
+              key={status}
+              onClick={() => setActiveStatus(status)}
+              className={cn(
+                'px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2',
+                isActive
+                  ? 'shadow-sm'
+                  : 'hover:opacity-80'
+              )}
+              style={{
+                backgroundColor: isActive ? config.color : config.bgColor,
+                color: isActive ? 'white' : config.color,
+              }}
+            >
+              {config.label}
+              <span className={cn(
+                'text-xs px-1.5 py-0.5 rounded-full',
+                isActive ? 'bg-white/20' : 'bg-black/10'
+              )}>
+                {count}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
       {/* Data Table */}

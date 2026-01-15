@@ -9,13 +9,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Filter, MessageCircle } from 'lucide-react'
+import { Filter, MessageCircle, Mail, MailOpen, ChevronDown } from 'lucide-react'
 import { ConversationList } from './conversation-list'
 import { MessageThread } from './message-thread'
 import { MessageInput } from './message-input'
 import { isDevMode, MOCK_MESSAGES } from '@/lib/mock-data'
 import { createClient } from '@/lib/supabase/client'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
+import { cn } from '@/lib/utils'
 import type { Workspace, ConversationWithContact, Message } from '@/types/database'
 
 interface InboxClientProps {
@@ -29,16 +30,33 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
   )
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
+  const [showUnreadOnly, setShowUnreadOnly] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
 
-  // Filter conversations by status
+  // Count unread conversations
+  const unreadCount = useMemo(() => {
+    return conversations.filter((c) => c.unread_count > 0).length
+  }, [conversations])
+
+  // Filter conversations by status and unread
   const filteredConversations = useMemo(() => {
-    if (statusFilter.length === 0) return conversations
-    return conversations.filter((conv) =>
-      statusFilter.includes(conv.contact.lead_status as LeadStatus)
-    )
-  }, [conversations, statusFilter])
+    let filtered = conversations
+
+    // Filter by unread
+    if (showUnreadOnly) {
+      filtered = filtered.filter((conv) => conv.unread_count > 0)
+    }
+
+    // Filter by status
+    if (statusFilter.length > 0) {
+      filtered = filtered.filter((conv) =>
+        statusFilter.includes(conv.contact.lead_status as LeadStatus)
+      )
+    }
+
+    return filtered
+  }, [conversations, statusFilter, showUnreadOnly])
 
   const handleStatusToggle = (status: LeadStatus) => {
     setStatusFilter((prev) =>
@@ -111,25 +129,63 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
       <div className="w-80 border-r bg-background flex flex-col">
         {/* Search and filter header */}
         <div className="p-4 border-b space-y-3">
-          <div className="flex items-center gap-2">
-            <Input
-              placeholder="Search conversations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1"
-            />
+          <Input
+            placeholder="Search conversations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+
+          {/* Filter buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Unread toggle */}
+            <button
+              onClick={() => setShowUnreadOnly(!showUnreadOnly)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                showUnreadOnly
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+              )}
+            >
+              {showUnreadOnly ? (
+                <Mail className="h-3.5 w-3.5" />
+              ) : (
+                <MailOpen className="h-3.5 w-3.5" />
+              )}
+              Unread
+              {unreadCount > 0 && (
+                <span className={cn(
+                  'px-1.5 py-0.5 rounded-full text-[10px]',
+                  showUnreadOnly ? 'bg-white/20' : 'bg-primary/10 text-primary'
+                )}>
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Status filter dropdown */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="shrink-0">
-                  <Filter className="h-4 w-4" />
-                  {statusFilter.length > 0 && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
-                      {statusFilter.length}
-                    </span>
+                <button
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                    statusFilter.length > 0
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted hover:bg-muted/80 text-muted-foreground'
                   )}
-                </Button>
+                >
+                  <Filter className="h-3.5 w-3.5" />
+                  {statusFilter.length > 0 ? (
+                    <>
+                      {statusFilter.length} status{statusFilter.length > 1 ? 'es' : ''}
+                    </>
+                  ) : (
+                    'All Status'
+                  )}
+                  <ChevronDown className="h-3 w-3" />
+                </button>
               </PopoverTrigger>
-              <PopoverContent className="w-56" align="end">
+              <PopoverContent className="w-56" align="start">
                 <div className="space-y-2">
                   <p className="font-medium text-sm">Filter by status</p>
                   {LEAD_STATUSES.map((status) => {
