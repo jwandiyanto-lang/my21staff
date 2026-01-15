@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useEffect, useCallback, useTransition } from 'react'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Sheet,
   SheetContent,
@@ -9,11 +11,19 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { Badge } from '@/components/ui/badge'
 import {
   MessageCircle,
   Phone,
@@ -21,8 +31,9 @@ import {
   Calendar,
   Tag,
   ArrowRight,
+  Loader2,
 } from 'lucide-react'
-import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
+import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import type { Contact } from '@/types/database'
 
 interface ContactDetailSheetProps {
@@ -38,13 +49,110 @@ export function ContactDetailSheet({
   open,
   onOpenChange,
 }: ContactDetailSheetProps) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  // Local state for optimistic updates
+  const [localStatus, setLocalStatus] = useState<LeadStatus>(contact?.lead_status as LeadStatus || 'prospect')
+  const [localScore, setLocalScore] = useState(contact?.lead_score || 50)
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+  const [isUpdatingScore, setIsUpdatingScore] = useState(false)
+
+  // Sync local state when contact changes
+  useEffect(() => {
+    if (contact) {
+      setLocalStatus(contact.lead_status as LeadStatus)
+      setLocalScore(contact.lead_score)
+    }
+  }, [contact])
+
+  // Debounced score update
+  const debouncedScoreUpdate = useCallback(
+    (() => {
+      let timeoutId: NodeJS.Timeout | null = null
+      return (contactId: string, score: number) => {
+        if (timeoutId) clearTimeout(timeoutId)
+        timeoutId = setTimeout(async () => {
+          setIsUpdatingScore(true)
+          try {
+            const response = await fetch(`/api/contacts/${contactId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ lead_score: score }),
+            })
+            if (!response.ok) {
+              // Revert on error
+              if (contact) setLocalScore(contact.lead_score)
+              console.error('Failed to update score')
+            } else {
+              // Refresh data
+              startTransition(() => {
+                router.refresh()
+              })
+            }
+          } catch (error) {
+            // Revert on error
+            if (contact) setLocalScore(contact.lead_score)
+            console.error('Error updating score:', error)
+          } finally {
+            setIsUpdatingScore(false)
+          }
+        }, 500)
+      }
+    })(),
+    [contact, router]
+  )
+
+  // Status update handler
+  const handleStatusChange = async (newStatus: LeadStatus) => {
+    if (!contact) return
+
+    // Optimistic update
+    const previousStatus = localStatus
+    setLocalStatus(newStatus)
+    setIsUpdatingStatus(true)
+
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_status: newStatus }),
+      })
+
+      if (!response.ok) {
+        // Revert on error
+        setLocalStatus(previousStatus)
+        console.error('Failed to update status')
+      } else {
+        // Refresh data
+        startTransition(() => {
+          router.refresh()
+        })
+      }
+    } catch (error) {
+      // Revert on error
+      setLocalStatus(previousStatus)
+      console.error('Error updating status:', error)
+    } finally {
+      setIsUpdatingStatus(false)
+    }
+  }
+
+  // Score change handler
+  const handleScoreChange = (value: number[]) => {
+    if (!contact) return
+    const newScore = value[0]
+    setLocalScore(newScore)
+    debouncedScoreUpdate(contact.id, newScore)
+  }
+
   if (!contact) return null
 
   const initials = contact.name
     ? contact.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
     : contact.phone.slice(-2)
 
-  const statusConfig = LEAD_STATUS_CONFIG[contact.lead_status as LeadStatus] || LEAD_STATUS_CONFIG.new
+  const statusConfig = LEAD_STATUS_CONFIG[localStatus] || LEAD_STATUS_CONFIG.prospect
 
   const openWhatsApp = () => {
     const phone = contact.phone.replace(/\D/g, '')
@@ -81,14 +189,42 @@ export function ContactDetailSheet({
                 {contact.name || contact.phone}
               </SheetTitle>
               <div className="flex items-center gap-2 mt-1">
-                <Badge
-                  style={{
-                    backgroundColor: statusConfig.bgColor,
-                    color: statusConfig.color,
-                  }}
+                <Select
+                  value={localStatus}
+                  onValueChange={(value) => handleStatusChange(value as LeadStatus)}
+                  disabled={isUpdatingStatus}
                 >
-                  {statusConfig.label}
-                </Badge>
+                  <SelectTrigger
+                    className="w-auto h-7 text-xs border-none shadow-none px-2"
+                    style={{
+                      backgroundColor: statusConfig.bgColor,
+                      color: statusConfig.color,
+                    }}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LEAD_STATUSES.map((status) => {
+                      const config = LEAD_STATUS_CONFIG[status]
+                      return (
+                        <SelectItem
+                          key={status}
+                          value={status}
+                          className="text-xs"
+                        >
+                          <span
+                            className="inline-block w-2 h-2 rounded-full mr-2"
+                            style={{ backgroundColor: config.color }}
+                          />
+                          {config.label}
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
+                {isUpdatingStatus && (
+                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                )}
               </div>
               <div className="flex items-center gap-2 mt-3">
                 <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={openWhatsApp}>
@@ -145,25 +281,45 @@ export function ContactDetailSheet({
 
                 {/* Lead Score */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                    Lead Score
-                  </h3>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                      Lead Score
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      {isUpdatingScore && (
+                        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                      )}
+                      <span
+                        className="text-xl font-semibold tabular-nums"
+                        style={{ color: getScoreColor(localScore) }}
+                      >
+                        {localScore}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
                     <div className="h-3 flex-1 rounded-full bg-muted overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
-                          width: `${Math.min(contact.lead_score, 100)}%`,
-                          backgroundColor: getScoreColor(contact.lead_score),
+                          width: `${Math.min(localScore, 100)}%`,
+                          backgroundColor: getScoreColor(localScore),
                         }}
                       />
                     </div>
-                    <span
-                      className="text-xl font-semibold"
-                      style={{ color: getScoreColor(contact.lead_score) }}
-                    >
-                      {contact.lead_score}
-                    </span>
+                    <Slider
+                      value={[localScore]}
+                      onValueChange={handleScoreChange}
+                      min={0}
+                      max={100}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>0</span>
+                      <span>50</span>
+                      <span>100</span>
+                    </div>
                   </div>
                 </div>
 
