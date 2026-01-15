@@ -5,8 +5,8 @@
 ## Brand Overview
 
 **Name:** my21staff
-**Tagline:** 21 Staff di Ujung Jari Anda
-**Mission:** Memberikan UMKM Indonesia akses ke departemen bisnis profesional melalui AI
+**Tagline:** AI handles the routine. Humans handle the complex.
+**Mission:** Memberikan UMKM Indonesia sistem bisnis yang bekerja melalui AI + tim manusia
 
 ---
 
@@ -189,10 +189,31 @@ box-shadow: 0 4px 12px rgba(45, 75, 62, 0.2);
 
 ### Taglines
 
-- "21 Staff di Ujung Jari Anda"
-- "Departemen Bisnis untuk UMKM"
-- "WhatsApp CRM yang Mengerti Bisnis Anda"
+**Primary:**
+- "AI handles the routine. Humans handle the complex."
+- "No system, no growth."
+
+**Secondary:**
+- "AI yang kerjakan, manusia yang pikirkan."
+- "Sistem yang bekerja — bukan tools yang Anda kerjakan."
+- "Tim digital untuk UMKM Indonesia."
+- "Get the system. Start growing."
+
+**Deprecated (do not use):**
+- ~~"WhatsApp CRM yang Mengerti Bisnis Anda"~~
+- ~~"21 Staff di Ujung Jari Anda"~~
 
 ---
 
-*Last updated: 2026-01-14*
+## Messaging Hierarchy
+
+| Priority | Message |
+|----------|---------|
+| **1. Pain** | No system, no growth |
+| **2. Solution** | my21staff is the system |
+| **3. Differentiator** | AI handles routine, humans handle complex |
+| **4. CTA** | Get the system. Start growing. |
+
+---
+
+*Last updated: 2026-01-15*

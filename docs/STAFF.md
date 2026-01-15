@@ -1,6 +1,8 @@
 # AI Staff - my21staff
 
-8 AI specialists (Telegram Bots) ready to handle business operations 24/7.
+8 AI specialists that execute routine operations 24/7. They handle the follow-ups, reminders, and reports — so humans can focus on complex decisions.
+
+> **AI handles the routine. Humans handle the complex.**
 
 ---
 

@@ -6,7 +6,9 @@
       "Bash(head:*)",
       "Bash(wc:*)",
       "Bash(npm run dev:*)",
-      "WebFetch(domain:docs.kapso.ai)"
+      "WebFetch(domain:docs.kapso.ai)",
+      "WebFetch(domain:sleekflow.io)",
+      "mcp__exa__web_search_exa"
     ]
   }
 }

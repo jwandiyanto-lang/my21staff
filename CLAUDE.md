@@ -11,37 +11,75 @@ WhatsApp CRM SaaS for Indonesian SMEs (UMKM). Connect WhatsApp to Facebook/Meta 
 | Feature | Description |
 |---------|-------------|
 | Database CRM | Manage contacts & leads with status tracking |
-| Kapso Messaging | Send & receive WhatsApp messages from CRM |
+| WhatsApp Messaging | Send & receive WhatsApp messages from CRM |
 | Website Manager | Articles, webinars, public pages for lead gen |
 
 ---
 
-## Free: Human Support (24/7)
+## ⚠️ IMPORTANT: Kapso is Hidden
 
-Real humans available around the clock for product support:
+**Never mention "Kapso" to customers.** It's our backend tech.
 
-| Support | For Feature |
-|---------|-------------|
-| Website Support | Website Manager setup, content help |
-| Kapso/Bot Support | WhatsApp messaging, automation |
-| Lead Management Support | CRM setup, data organization |
+| Don't Say | Say Instead |
+|-----------|-------------|
+| Kapso | WhatsApp integration / Telegram integration |
+| Kapso API | Messaging system |
+| Kapso bridge | WhatsApp connection |
+| Bot | Integration |
+
+Keep all Kapso references internal (code, docs, CLAUDE.md only).
+
+---
+
+## All Tiers: Human Support (24/7)
+
+**You ask, we handle, you're unblocked.**
+
+| Support | We Handle | You Get |
+|---------|-----------|---------|
+| Website Support | Setup, content, fixes | Live website ready |
+| WhatsApp/Telegram Support | Messaging config, troubleshooting | Integration working 24/7 |
+| CRM Support | Pipeline setup, data cleaning | Organized leads |
 
 Contact via WhatsApp or in-app chat. Response within minutes.
 
 ---
 
-## Paid: AI Staff (Telegram Bots)
+## AI Staff by Department
 
-4 AI departments to help run your business. Each handles a core business function.
+**You invest, we execute, you decide.**
 
-| Department | What It Handles |
-|------------|-----------------|
-| **Accounting** | Finance, bookkeeping, invoices, reports |
-| **Marketing** | Content, ads, social media, campaigns |
-| **Customer Success** | FAQ, follow-up, retention, feedback |
-| **Tech Support** | my21staff product help, integrations |
+| Department | They Advise | They Execute | You Get |
+|------------|-------------|--------------|---------|
+| **Sales** | Follow-up timing, offer strategy | Chase leads, send offers, close deals | Pipeline moving, revenue growing |
+| **Finance** | Budget allocation, cash flow tips | Log transactions, track expenses, generate reports | Know where every rupiah goes |
+| **Operations** | Workflow optimization, automation ideas | Handle bookings, reminders, daily tasks | Business running smooth |
+| **Customer** | Response templates, escalation rules | Reply inquiries, resolve complaints, collect feedback | Happy customers, fewer issues |
+| **Analytics** | What metrics matter, what to watch | Track KPIs, analyze trends, spot problems | Weekly insights, clear decisions |
+| **Marketing** | Content angles, posting schedule | Create posts, schedule publishing, track engagement | Content running, leads coming |
+| **Ads** | Targeting, budget split, creative angles | Launch campaigns, A/B test, optimize spend | Ads profitable, CAC dropping |
 
-Each department has multiple specialists (totaling 21 staff) accessible via Telegram.
+---
+
+## Pricing Tiers
+
+| Tier | Price | What You Get |
+|------|-------|--------------|
+| **Solo** | Rp2.5jt/bln | WhatsApp CRM + 4 AI Staff (Sales, Finance, Ops, Customer) |
+| **Team** | Rp5.5jt/bln | Solo + Analytics + Content Planning |
+| **Studio** | Rp10jt/bln | Team + Marketing + Ads Management |
+
+### Setup Fee (One-time)
+
+| Package | Price | What You Get |
+|---------|-------|--------------|
+| **Kickstart** | Rp7.5jt | Website + WhatsApp + Business approach |
+
+### Future Upsells (Internal Only)
+
+- Meta Ads integration
+- Advanced analytics
+- Content Creation (nano banana pro)
 
 ---
 
@@ -121,6 +159,29 @@ WhatsApp-first approach — the dominant messaging platform in Indonesia.
 |---------|---------|
 | `/gsd:help` | GSD workflow commands |
 | `/gsd:progress` | Check project progress |
+
+---
+
+## n8n (Workflow Automation)
+
+**URL:** http://100.113.96.25:5678 (via Tailscale)
+
+**To start n8n:**
+```bash
+# SSH into the server
+ssh 100.113.96.25
+
+# Start n8n (accessible via Tailscale)
+N8N_HOST=0.0.0.0 N8N_SECURE_COOKIE=false npx n8n start
+
+# Or run in background
+N8N_HOST=0.0.0.0 N8N_SECURE_COOKIE=false nohup npx n8n start &
+```
+
+**Google Sheets Service Account:**
+- Email: `n8n-integration@gen-lang-client-0607995229.iam.gserviceaccount.com`
+- Key file: `~/Desktop/gen-lang-client-0607995229-eda8447acf2a.json`
+- Share Google Sheets with the service account email for access
 
 ---
 

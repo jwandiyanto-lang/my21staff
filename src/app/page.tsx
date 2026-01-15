@@ -70,7 +70,7 @@ export default function Home() {
             </div>
           </div>
           <Link
-            href="/auth/login"
+            href="/login"
             className="text-sm text-white px-4 py-1.5 rounded-full border border-white/30 hover:bg-white/10 transition-all"
           >
             Login
@@ -131,10 +131,13 @@ export default function Home() {
               </motion.p>
 
               <motion.div variants={fadeInUp} className="flex flex-wrap gap-4">
-                <button className="px-10 py-4 rounded-notion bg-white text-landing-hero font-black uppercase tracking-widest hover:bg-white/90 transition-all flex items-center gap-2 shadow-xl">
+                <Link
+                  href="/login"
+                  className="px-10 py-4 rounded-notion bg-white text-landing-hero font-black uppercase tracking-widest hover:bg-white/90 transition-all flex items-center gap-2 shadow-xl"
+                >
                   Mulai Gratis
                   <ArrowRight className="w-4 h-4" />
-                </button>
+                </Link>
               </motion.div>
               </div>
             </motion.div>
@@ -340,9 +343,14 @@ export default function Home() {
                 </motion.div>
 
                 <motion.div variants={fadeInUp} className="mt-8">
-                  <button className="px-6 py-3 rounded-full border-2 border-landing-text text-landing-text font-bold text-sm hover:bg-landing-text hover:text-white transition-all">
+                  <a
+                    href="https://wa.me/6281234567890"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-6 py-3 rounded-full border-2 border-landing-text text-landing-text font-bold text-sm hover:bg-landing-text hover:text-white transition-all"
+                  >
                     Chat dengan Tim Kami
-                  </button>
+                  </a>
                 </motion.div>
               </motion.div>
             </div>
@@ -370,12 +378,20 @@ export default function Home() {
                   Mulai gratis hari ini. Setup dalam 5 menit. Tim kami siap bantu 24/7.
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <button className="px-8 py-4 rounded-full bg-landing-cta text-white font-bold hover:bg-landing-cta-dark transition-all shadow-lg">
+                  <Link
+                    href="/login"
+                    className="px-8 py-4 rounded-full bg-landing-cta text-white font-bold hover:bg-landing-cta-dark transition-all shadow-lg"
+                  >
                     Mulai Gratis Sekarang
-                  </button>
-                  <button className="px-8 py-4 rounded-full border-2 border-landing-text text-landing-text font-bold hover:bg-landing-text hover:text-white transition-all">
+                  </Link>
+                  <a
+                    href="https://wa.me/6281234567890"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-8 py-4 rounded-full border-2 border-landing-text text-landing-text font-bold hover:bg-landing-text hover:text-white transition-all"
+                  >
                     Chat via WhatsApp
-                  </button>
+                  </a>
                 </div>
               </motion.div>
 
