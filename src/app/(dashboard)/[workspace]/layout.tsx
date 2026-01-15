@@ -9,6 +9,30 @@ interface WorkspaceLayoutProps {
   params: Promise<{ workspace: string }>
 }
 
+async function checkIsAdmin(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<boolean> {
+  // Check if user has owner or admin role in workspace_members
+  const { data: membership } = await supabase
+    .from('workspace_members')
+    .select('role')
+    .eq('user_id', userId)
+    .in('role', ['owner', 'admin'])
+    .limit(1)
+    .single()
+
+  if (membership) {
+    return true
+  }
+
+  // Also check profiles.is_admin flag
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', userId)
+    .single()
+
+  return profile?.is_admin ?? false
+}
+
 export default async function WorkspaceLayout({
   children,
   params,
@@ -24,7 +48,7 @@ export default async function WorkspaceLayout({
         <div className="noise-overlay" style={{ opacity: 0.03 }} />
 
         {/* Sidebar */}
-        <WorkspaceSidebar workspace={workspace} />
+        <WorkspaceSidebar workspace={workspace} isAdmin={true} />
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col overflow-hidden">
@@ -69,6 +93,7 @@ export default async function WorkspaceLayout({
   }
 
   const workspace = data as Pick<Workspace, 'id' | 'name' | 'slug'>
+  const isAdmin = await checkIsAdmin(supabase, user.id)
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -76,7 +101,7 @@ export default async function WorkspaceLayout({
       <div className="noise-overlay" style={{ opacity: 0.03 }} />
 
       {/* Sidebar */}
-      <WorkspaceSidebar workspace={{ name: workspace.name, slug: workspace.slug }} />
+      <WorkspaceSidebar workspace={{ name: workspace.name, slug: workspace.slug }} isAdmin={isAdmin} />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">

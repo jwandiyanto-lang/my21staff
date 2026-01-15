@@ -10,14 +10,17 @@ import {
   Database,
   Plug,
   User,
+  Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { WorkspaceSwitcher } from './workspace-switcher'
 
 interface WorkspaceSidebarProps {
   workspace: {
     name: string
     slug: string
   }
+  isAdmin?: boolean
 }
 
 const operationsNav = [
@@ -57,7 +60,15 @@ const engineeringNav = [
   },
 ]
 
-export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
+const adminNav = [
+  {
+    title: 'Client Management',
+    icon: Settings,
+    href: '/admin/clients',
+  },
+]
+
+export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSidebarProps) {
   const pathname = usePathname()
 
   const isActive = (href: string) => {
@@ -66,6 +77,10 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
       return pathname === `/${workspace.slug}`
     }
     return pathname === fullHref || pathname.startsWith(`${fullHref}/`)
+  }
+
+  const isAdminRoute = (href: string) => {
+    return pathname === href || pathname.startsWith(`${href}/`)
   }
 
   return (
@@ -79,6 +94,14 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
           my21staff
         </span>
       </div>
+
+      {/* Workspace Switcher (Admin only) */}
+      {isAdmin && (
+        <WorkspaceSwitcher
+          currentWorkspaceSlug={workspace.slug}
+          isAdmin={isAdmin}
+        />
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
@@ -132,6 +155,33 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
             </Link>
           )
         })}
+
+        {/* Admin Section (Admin only) */}
+        {isAdmin && (
+          <>
+            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-3 mt-8 mb-4">
+              Admin
+            </div>
+            {adminNav.map((item) => {
+              const active = isAdminRoute(item.href)
+              return (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors',
+                    active
+                      ? 'active-nav'
+                      : 'text-muted-foreground hover:bg-white/40'
+                  )}
+                >
+                  <item.icon className="w-5 h-5" />
+                  {item.title}
+                </Link>
+              )
+            })}
+          </>
+        )}
       </nav>
 
       {/* User Profile */}
@@ -143,7 +193,7 @@ export function WorkspaceSidebar({ workspace }: WorkspaceSidebarProps) {
           <div className="overflow-hidden">
             <p className="text-sm font-bold truncate">{workspace.name}</p>
             <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-tighter">
-              Admin Access
+              {isAdmin ? 'Admin' : 'Client'} Access
             </p>
           </div>
         </div>
