@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** v1.2 in progress — AI & Data Integrations
+**Current focus:** v1.3 in progress — Production Deployment
 
 ## Current Position
 
-Phase: 10 of 10 (App Verification)
-Plan: 1/1 complete
-Status: v1.2 Complete
-Last activity: 2026-01-15 — Phase 10 complete, pushed to GitHub for bolt.new
+Phase: 11 of 11 (bolt.new + Telegram)
+Plan: 0/1 complete
+Status: In Progress
+Last activity: 2026-01-15 — Starting v1.3 production deployment
 
-Progress: v1.2 ██████████ 3/3 phases complete
+Progress: v1.3 ░░░░░░░░░░ 0/1 phases complete
 
 ## Performance Metrics
 
@@ -53,6 +53,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-15
-Stopped at: v1.2 milestone complete
+Stopped at: Phase 11 started
 Resume file: None
-Next: Deploy via bolt.new, configure Supabase env vars
+Next: Import to bolt.new, configure env vars, create Telegram bot

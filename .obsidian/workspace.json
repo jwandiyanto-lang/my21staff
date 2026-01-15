@@ -185,6 +185,9 @@
   },
   "active": "600c2f6ee49ae613",
   "lastOpenFiles": [
+    "src/proxy.ts",
+    "src/proxy.ts.tmp.3699987.1768481956535",
+    "docs/SEA-LION.md",
     "brainstorm/LANDING-PAGE-AIDA-GRADE.md",
     "TODO-FEATURES.md",
     "docs/BUSINESS-PLAN.md",
@@ -211,7 +214,6 @@
     "src/app/page.tsx.tmp.3179043.1768419016968",
     "CLAUDE.md.tmp.3242844.1768418234484",
     "src/components/ui/staff-deck.tsx",
-    "src/components/ui/staff-cards.tsx",
-    "src/components/ui/wave-animation.tsx"
+    "src/components/ui/staff-cards.tsx"
   ]
 }

@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSupabaseConfig } from '@/lib/supabase/config'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Dev mode: skip all auth checks
   if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
     return NextResponse.next()
