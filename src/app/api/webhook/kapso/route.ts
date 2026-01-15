@@ -54,16 +54,15 @@ export async function POST(request: NextRequest) {
   try {
     const rawPayload = await request.json()
 
-    if (isDevMode()) {
-      console.log('[DEV MODE] Kapso webhook received:', JSON.stringify(rawPayload, null, 2))
-    }
+    // Always log incoming webhook for debugging
+    console.log('[Webhook] Received payload:', JSON.stringify(rawPayload).substring(0, 1000))
 
     // Check if this is Meta/WhatsApp format (has entry array)
     if (rawPayload.entry && Array.isArray(rawPayload.entry)) {
       await handleMetaFormat(rawPayload as MetaWebhookPayload)
     } else {
       // Legacy format or unknown - log for debugging
-      console.log('[Webhook] Unknown payload format:', JSON.stringify(rawPayload).substring(0, 500))
+      console.log('[Webhook] Unknown payload format - not Meta format')
     }
 
   } catch (error) {
@@ -76,12 +75,24 @@ export async function POST(request: NextRequest) {
 async function handleMetaFormat(payload: MetaWebhookPayload) {
   const supabase = createAdminClient()
 
+  console.log('[Webhook] Processing Meta format, entries:', payload.entry.length)
+
   for (const entry of payload.entry) {
+    console.log('[Webhook] Entry ID:', entry.id, 'Changes:', entry.changes.length)
+
     for (const change of entry.changes) {
-      if (change.field !== 'messages') continue
+      console.log('[Webhook] Change field:', change.field)
+
+      if (change.field !== 'messages') {
+        console.log('[Webhook] Skipping non-messages field')
+        continue
+      }
 
       const value = change.value
       const phoneNumberId = value.metadata?.phone_number_id
+
+      console.log('[Webhook] Metadata:', JSON.stringify(value.metadata))
+      console.log('[Webhook] Phone number ID from webhook:', phoneNumberId)
 
       if (!phoneNumberId) {
         console.log('[Webhook] No phone_number_id in metadata')
@@ -91,11 +102,18 @@ async function handleMetaFormat(payload: MetaWebhookPayload) {
       // Find workspace by kapso_phone_id
       const { data: workspaceData, error: workspaceError } = await supabase
         .from('workspaces')
-        .select('id')
+        .select('id, kapso_phone_id')
         .eq('kapso_phone_id', phoneNumberId)
         .single()
 
+      console.log('[Webhook] Workspace lookup result:', { data: workspaceData, error: workspaceError?.message })
+
       if (workspaceError || !workspaceData) {
+        // Also log all workspaces to debug
+        const { data: allWorkspaces } = await supabase
+          .from('workspaces')
+          .select('id, name, kapso_phone_id')
+        console.log('[Webhook] All workspaces:', JSON.stringify(allWorkspaces))
         console.log(`[Webhook] No workspace found for phone_number_id: ${phoneNumberId}`)
         continue
       }
