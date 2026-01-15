@@ -5,16 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** v1.4 complete — Multi-Tenant Admin
+**Current focus:** v1.5 — Lead Management Enhancement
 
 ## Current Position
 
-Phase: 12 of 12 (Multi-Tenant Admin)
-Plan: 1/1 complete
-Status: Complete
-Last activity: 2026-01-15 — Phase 12 complete, multi-tenant admin implemented
+Phase: 13 of 13 (Lead Management Enhancement)
+Plan: 0/2 complete
+Status: Planned
+Last activity: 2026-01-15 — Phase 13 planned (2 plans)
 
-Progress: v1.4 ██████████ 1/1 phases complete
+Progress: v1.5 ░░░░░░░░░░ 0/1 phases complete
+**Next Phase:** Phase 13: Lead Management Enhancement
 
 ## Performance Metrics
 
@@ -37,6 +38,10 @@ Progress: v1.4 ██████████ 1/1 phases complete
 | 8. Sea Lion + Kapso | 1/1 | manual | — |
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 13 added: Lead Management Enhancement (v1.5)
 
 ### Decisions
 

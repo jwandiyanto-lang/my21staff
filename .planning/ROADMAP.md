@@ -48,6 +48,29 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 - [x] Phase 12: Multi-Tenant Admin — Admin dashboard, client management, dummy credentials, first-login password change (complete)
 
+---
+
+## Current Milestone: v1.5 — Lead Management Enhancement
+
+### Phase 13: Lead Management Enhancement
+
+**Goal:** Complete the contact detail sheet with editable fields and real message history
+**Depends on:** Phase 12
+**Plans:** 2 plans
+
+Plans:
+- [ ] 13-01: Contact Update API + Status/Score UI
+- [ ] 13-02: Tag Management + Messages Tab
+
+**Details:**
+- Create PATCH API for contact updates (status, score, tags)
+- Add status dropdown to change lead pipeline stage
+- Add lead score slider for manual adjustment
+- Add tag management (add/remove tags)
+- Integrate Messages tab with actual conversation data
+
+---
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -64,3 +87,4 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | 10. App Verification | v1.2 | 1/1 | Complete | 2026-01-15 |
 | 11. Vercel Deployment | v1.3 | 1/1 | Complete | 2026-01-15 |
 | 12. Multi-Tenant Admin | v1.4 | 1/1 | Complete | 2026-01-15 |
+| 13. Lead Management Enhancement | v1.5 | 0/2 | Planned | — |
