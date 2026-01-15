@@ -60,7 +60,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 Plans:
 - [x] 13-01: Contact Update API + Status/Score UI
-- [ ] 13-02: Tag Management + Messages Tab
+- [x] 13-02: Tag Management + Messages Tab
 - [ ] 13-03: AI Handover Toggle (Kapso integration)
 
 **Details:**
@@ -89,4 +89,4 @@ Plans:
 | 10. App Verification | v1.2 | 1/1 | Complete | 2026-01-15 |
 | 11. Vercel Deployment | v1.3 | 1/1 | Complete | 2026-01-15 |
 | 12. Multi-Tenant Admin | v1.4 | 1/1 | Complete | 2026-01-15 |
-| 13. Lead Management Enhancement | v1.5 | 1/3 | In Progress | — |
+| 13. Lead Management Enhancement | v1.5 | 2/3 | In Progress | — |
