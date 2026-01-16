@@ -54,6 +54,13 @@ function getInitials(name: string | null, phone: string): string {
   return phone.slice(-2)
 }
 
+function getFirstName(name: string | null, phone: string): string {
+  if (name) {
+    return name.split(' ')[0]
+  }
+  return phone
+}
+
 function isSendingMessage(message: Message): boolean {
   return (
     typeof message.metadata === 'object' &&
@@ -366,7 +373,7 @@ export function MessageThread({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="font-medium truncate">
-              {conversationContact.name || conversationContact.phone}
+              {getFirstName(conversationContact.name, conversationContact.phone)}
             </p>
             {statusConfig && (
               <Badge

@@ -27,6 +27,13 @@ function getInitials(name: string | null, phone: string): string {
   return phone.slice(-2)
 }
 
+function getFirstName(name: string | null, phone: string): string {
+  if (name) {
+    return name.split(' ')[0]
+  }
+  return phone
+}
+
 export function ConversationList({
   conversations,
   selectedId,
@@ -88,7 +95,7 @@ export function ConversationList({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="font-medium truncate">
-                      {conversation.contact.name || conversation.contact.phone}
+                      {getFirstName(conversation.contact.name, conversation.contact.phone)}
                     </span>
                     <div className="flex items-center gap-2">
                       <span

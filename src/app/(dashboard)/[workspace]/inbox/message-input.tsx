@@ -68,6 +68,7 @@ export function MessageInput({
   const [filePreview, setFilePreview] = useState<string | null>(null)
   const [templateOpen, setTemplateOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleTemplateSelect = (text: string) => {
     setContent(text)
@@ -176,6 +177,8 @@ export function MessageInput({
       onMessageError(optimisticId)
     } finally {
       setIsSending(false)
+      // Auto-focus input after sending
+      setTimeout(() => inputRef.current?.focus(), 0)
     }
   }
 
@@ -267,11 +270,13 @@ export function MessageInput({
         </Button>
 
         <Input
+          ref={inputRef}
           placeholder={selectedFile ? "Add a caption..." : "Type a message..."}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={isSending}
           className="flex-1"
+          autoFocus
         />
         <Button
           type="submit"
