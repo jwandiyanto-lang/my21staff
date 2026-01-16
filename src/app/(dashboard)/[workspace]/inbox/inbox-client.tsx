@@ -47,47 +47,6 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
     return conversations.filter((c) => c.unread_count > 0).length
   }, [conversations])
 
-  // Mark conversation as read
-  const markAsRead = useCallback(async (conversationId: string) => {
-    // Find current unread count for potential revert
-    const conversation = conversations.find(c => c.id === conversationId)
-    const previousCount = conversation?.unread_count || 0
-
-    // Optimistically update local state
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.id === conversationId ? { ...c, unread_count: 0 } : c
-      )
-    )
-
-    // Also update selected conversation if it matches
-    setSelectedConversation((prev) =>
-      prev && prev.id === conversationId ? { ...prev, unread_count: 0 } : prev
-    )
-
-    // Call API to persist
-    try {
-      const response = await fetch(`/api/conversations/${conversationId}/read`, {
-        method: 'POST',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to mark as read')
-      }
-    } catch (error) {
-      console.error('Failed to mark conversation as read:', error)
-      // Revert on error
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.id === conversationId ? { ...c, unread_count: previousCount } : c
-        )
-      )
-      setSelectedConversation((prev) =>
-        prev && prev.id === conversationId ? { ...prev, unread_count: previousCount } : prev
-      )
-    }
-  }, [conversations])
-
   // Filter conversations by status and unread
   const filteredConversations = useMemo(() => {
     let filtered = conversations
@@ -143,14 +102,10 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
 
     if (selectedConversation) {
       loadMessages(selectedConversation.id)
-      // Mark as read when viewing
-      if (selectedConversation.unread_count > 0) {
-        markAsRead(selectedConversation.id)
-      }
     } else {
       setMessages([])
     }
-  }, [selectedConversation, markAsRead])
+  }, [selectedConversation?.id])
 
   // Real-time subscription for new messages in selected conversation
   useEffect(() => {
@@ -260,6 +215,23 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
   // Handle message error (remove optimistic message)
   const handleMessageError = useCallback((optimisticId: string) => {
     setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+  }, [])
+
+  // Handle conversation selection - mark as read instantly
+  const handleSelectConversation = useCallback((conversation: ConversationWithContact) => {
+    setSelectedConversation(conversation)
+
+    // Instantly mark as read in UI (optimistic)
+    if (conversation.unread_count > 0) {
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversation.id ? { ...c, unread_count: 0 } : c
+        )
+      )
+      // Fire and forget API call
+      fetch(`/api/conversations/${conversation.id}/read`, { method: 'POST' })
+        .catch((err) => console.error('Failed to mark as read:', err))
+    }
   }, [])
 
   // Handle handover status change
@@ -384,7 +356,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
         <ConversationList
           conversations={filteredConversations}
           selectedId={selectedConversation?.id || null}
-          onSelect={setSelectedConversation}
+          onSelect={handleSelectConversation}
           searchQuery={searchQuery}
           hasStatusFilter={statusFilter.length > 0}
         />
