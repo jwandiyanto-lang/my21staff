@@ -24,7 +24,7 @@ export async function GET(
       .from('contact_notes')
       .select(`
         *,
-        author:profiles!contact_notes_author_id_fkey(id, full_name, email)
+        author:profiles(id, full_name, email)
       `)
       .eq('contact_id', contactId)
       .order('created_at', { ascending: false })
@@ -102,7 +102,7 @@ export async function POST(
       })
       .select(`
         *,
-        author:profiles!contact_notes_author_id_fkey(id, full_name, email)
+        author:profiles(id, full_name, email)
       `)
       .single()
 
