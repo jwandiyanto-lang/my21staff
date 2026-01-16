@@ -704,17 +704,6 @@ export function MessageThread({
           )}
           {aiPaused ? 'Manual mode' : 'AI Aktif'}
         </Button>
-
-        {/* Contact Details toggle */}
-        <Button
-          variant={showContactDetails ? 'secondary' : 'ghost'}
-          size="sm"
-          onClick={() => setShowContactDetails(!showContactDetails)}
-          className="gap-1.5 h-8 text-xs"
-        >
-          <User className="h-3.5 w-3.5" />
-          Info
-        </Button>
       </div>
 
       {/* Contact Details Panel (Collapsible) */}
