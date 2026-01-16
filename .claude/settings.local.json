@@ -9,7 +9,23 @@
       "WebFetch(domain:docs.kapso.ai)",
       "WebFetch(domain:sleekflow.io)",
       "mcp__exa__web_search_exa",
-      "Bash(agent-browser:*)"
+      "Bash(agent-browser:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:developers.facebook.com)",
+      "WebFetch(domain:flowcall.co)",
+      "mcp__n8n-mcp__search_nodes",
+      "mcp__n8n-mcp__tools_documentation",
+      "mcp__exa__get_code_context_exa",
+      "mcp__n8n-mcp__get_node",
+      "Bash(grep:*)",
+      "Bash(npm run build:*)",
+      "Bash(file:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: enhance hero section with larger typography and toko silhouette\n\n- Increase headline size \\(text-5xl/7xl\\) for better visual impact\n- Add Indonesian ruko/toko silhouette behind staff cards\n- Toko features: peaked roof, signboard, windows, rolling door\n- Enlarge CTA button and paragraph text for balance\n- Works consistently on both desktop and mobile\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)",
+      "Skill(gsd:plan-phase)",
+      "WebFetch(domain:findyourpeak.onepeakcreative.com)"
     ]
   }
 }

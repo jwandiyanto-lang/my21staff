@@ -597,8 +597,6 @@ export default function Home() {
           <div className="flex items-center justify-center gap-4 text-xs text-landing-text-muted">
             <span className="font-black text-landing-cta">21</span>
             <span>&copy; 2026</span>
-            <span>•</span>
-            <a className="hover:text-landing-cta transition-colors" href="mailto:hello@my21staff.com">Kontak</a>
           </div>
         </div>
       </footer>

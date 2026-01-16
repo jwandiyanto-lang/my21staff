@@ -395,6 +395,55 @@ export function ContactDetailSheet({
         console.error('Error loading notes:', error)
       }
 
+      // 3. WhatsApp messages from conversation
+      try {
+        const supabase = createClient()
+        // First find the conversation for this contact
+        const { data: conversation } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('contact_id', contact.id)
+          .single()
+
+        if (conversation) {
+          // Get messages for this conversation (limit to recent 50 for performance)
+          const { data: messages } = await supabase
+            .from('messages')
+            .select('id, content, direction, message_type, media_url, created_at')
+            .eq('conversation_id', conversation.id)
+            .order('created_at', { ascending: false })
+            .limit(50)
+
+          if (messages) {
+            messages.forEach((msg) => {
+              const direction = msg.direction === 'inbound' ? 'Received' : 'Sent'
+              const msgType = msg.message_type || 'text'
+              let content = msg.content || ''
+
+              // For media messages, show type indicator
+              if (msgType !== 'text' && !content) {
+                content = `[${msgType.charAt(0).toUpperCase() + msgType.slice(1)}]`
+              }
+
+              activityList.push({
+                id: msg.id,
+                type: 'message',
+                content: content,
+                metadata: {
+                  direction: msg.direction,
+                  message_type: msgType,
+                  media_url: msg.media_url,
+                  label: direction
+                },
+                created_at: msg.created_at,
+              })
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error loading messages:', error)
+      }
+
       // Sort by created_at descending (newest first)
       activityList.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
@@ -991,6 +1040,8 @@ export function ContactDetailSheet({
                           return <TrendingUp className="h-4 w-4" />
                         case 'merge':
                           return <GitMerge className="h-4 w-4" />
+                        case 'message':
+                          return <MessageCircle className="h-4 w-4" />
                         default:
                           return <FileText className="h-4 w-4" />
                       }
@@ -1006,6 +1057,10 @@ export function ContactDetailSheet({
                           return 'bg-green-100 text-green-700'
                         case 'merge':
                           return 'bg-purple-100 text-purple-700'
+                        case 'message':
+                          return activity.metadata?.direction === 'inbound'
+                            ? 'bg-teal-100 text-teal-700'
+                            : 'bg-emerald-100 text-emerald-700'
                         default:
                           return 'bg-muted text-muted-foreground'
                       }
@@ -1054,6 +1109,7 @@ export function ContactDetailSheet({
                                    activity.type === 'note' ? 'Note' :
                                    activity.type === 'status_change' ? 'Status Changed' :
                                    activity.type === 'merge' ? 'Contact Merged' :
+                                   activity.type === 'message' ? `WhatsApp ${activity.metadata?.label || 'Message'}` :
                                    'Activity'}
                                 </p>
                               )}
@@ -1071,6 +1127,13 @@ export function ContactDetailSheet({
                           {/* Note content or form answers */}
                           {activity.type === 'note' && (
                             <p className="mt-1 text-sm text-foreground whitespace-pre-wrap">
+                              {activity.content}
+                            </p>
+                          )}
+
+                          {/* Message content */}
+                          {activity.type === 'message' && activity.content && (
+                            <p className="mt-1 text-sm text-foreground whitespace-pre-wrap line-clamp-2">
                               {activity.content}
                             </p>
                           )}

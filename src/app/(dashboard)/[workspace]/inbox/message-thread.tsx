@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check, StickyNote, Send, ChevronDown, ChevronUp, X } from 'lucide-react'
+import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check, StickyNote, Send, ChevronDown, ChevronUp, X, Phone, Mail, MapPin, Calendar, Star } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
@@ -183,6 +183,9 @@ export function MessageThread({
   const [newNoteContent, setNewNoteContent] = useState('')
   const [isAddingNote, setIsAddingNote] = useState(false)
 
+  // Contact details panel state
+  const [showContactDetails, setShowContactDetails] = useState(false)
+
   const aiPaused = conversationStatus === 'handover'
 
   // Search contacts for merge
@@ -315,12 +318,13 @@ export function MessageThread({
     }
   }
 
-  // Reset notes when contact changes
+  // Reset panels when contact changes
   useEffect(() => {
     setNotes([])
     setNotesLoaded(false)
     setShowNotesPanel(false)
     setNewNoteContent('')
+    setShowContactDetails(false)
   }, [conversationContact.id])
 
   // Track if this is initial load or new message
@@ -365,37 +369,42 @@ export function MessageThread({
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b bg-background flex items-center gap-3">
-        <Avatar className="h-10 w-10">
-          <AvatarFallback className="bg-muted">
-            {getInitials(conversationContact.name, conversationContact.phone)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="font-medium truncate">
-              {getFirstName(conversationContact.name, conversationContact.phone)}
+        <button
+          onClick={() => setShowContactDetails(!showContactDetails)}
+          className="flex items-center gap-3 flex-1 min-w-0 text-left hover:opacity-80 transition-opacity"
+        >
+          <Avatar className="h-10 w-10">
+            <AvatarFallback className="bg-muted">
+              {getInitials(conversationContact.name, conversationContact.phone)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-medium truncate">
+                {getFirstName(conversationContact.name, conversationContact.phone)}
+              </p>
+              {statusConfig && (
+                <Badge
+                  variant="outline"
+                  style={{
+                    color: statusConfig.color,
+                    borderColor: statusConfig.color,
+                    backgroundColor: statusConfig.bgColor,
+                  }}
+                  className="text-xs"
+                >
+                  {statusConfig.label}
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground truncate">
+              {conversationContact.name && conversationContact.phone}
+              {conversationContact.lead_score > 0 && (
+                <span className="ml-2">• Score: {conversationContact.lead_score}</span>
+              )}
             </p>
-            {statusConfig && (
-              <Badge
-                variant="outline"
-                style={{
-                  color: statusConfig.color,
-                  borderColor: statusConfig.color,
-                  backgroundColor: statusConfig.bgColor,
-                }}
-                className="text-xs"
-              >
-                {statusConfig.label}
-              </Badge>
-            )}
           </div>
-          <p className="text-sm text-muted-foreground truncate">
-            {conversationContact.name && conversationContact.phone}
-            {conversationContact.lead_score > 0 && (
-              <span className="ml-2">• Score: {conversationContact.lead_score}</span>
-            )}
-          </p>
-        </div>
+        </button>
 
         {/* Notes Toggle */}
         <Button
@@ -450,6 +459,78 @@ export function MessageThread({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Contact Details Panel (Collapsible) */}
+      {showContactDetails && (
+        <div className="border-b bg-muted/30 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-medium">Contact Details</h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setShowContactDetails(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {/* Full Name */}
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Name</p>
+                <p className="font-medium">{conversationContact.name || '-'}</p>
+              </div>
+            </div>
+            {/* Phone */}
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Phone</p>
+                <p className="font-medium">{conversationContact.phone}</p>
+              </div>
+            </div>
+            {/* Email */}
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="font-medium">{conversationContact.email || '-'}</p>
+              </div>
+            </div>
+            {/* Lead Score */}
+            <div className="flex items-center gap-2">
+              <Star className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Lead Score</p>
+                <p className="font-medium">{conversationContact.lead_score}</p>
+              </div>
+            </div>
+            {/* Created */}
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">First Contact</p>
+                <p className="font-medium">{format(new Date(conversationContact.created_at), 'MMM d, yyyy')}</p>
+              </div>
+            </div>
+          </div>
+          {/* Tags */}
+          {conversationContact.tags && conversationContact.tags.length > 0 && (
+            <div className="mt-3 pt-3 border-t">
+              <p className="text-xs text-muted-foreground mb-2">Tags</p>
+              <div className="flex flex-wrap gap-1">
+                {conversationContact.tags.map((tag, i) => (
+                  <Badge key={i} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Notes Panel (Collapsible) */}
       {showNotesPanel && (
