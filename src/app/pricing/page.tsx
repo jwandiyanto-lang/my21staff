@@ -31,9 +31,24 @@ export default function PricingPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("");
 
+  // Form state
+  const [nama, setNama] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [jenisBisnis, setJenisBisnis] = useState("");
+  const [masalah, setMasalah] = useState("");
+  const [teamSize, setTeamSize] = useState("");
+
   const openModal = (plan: string) => {
     setSelectedPlan(plan);
     setModalOpen(true);
+  };
+
+  const resetForm = () => {
+    setNama("");
+    setWhatsapp("");
+    setJenisBisnis("");
+    setMasalah("");
+    setTeamSize("");
   };
 
   return (
@@ -416,7 +431,10 @@ export default function PricingPage() {
             {/* Backdrop */}
             <motion.div
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setModalOpen(false)}
+              onClick={() => {
+                setModalOpen(false);
+                resetForm();
+              }}
             />
 
             {/* Modal Content */}
@@ -428,7 +446,10 @@ export default function PricingPage() {
             >
               {/* Close Button */}
               <button
-                onClick={() => setModalOpen(false)}
+                onClick={() => {
+                  setModalOpen(false);
+                  resetForm();
+                }}
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
@@ -444,6 +465,9 @@ export default function PricingPage() {
 
               {/* Form */}
               <form className="space-y-4">
+                {/* Hidden field for selected plan */}
+                <input type="hidden" name="paket" value={selectedPlan} />
+
                 <div>
                   <label className="block text-sm font-medium text-landing-text mb-1">
                     Nama
@@ -451,6 +475,9 @@ export default function PricingPage() {
                   <input
                     type="text"
                     placeholder="Nama lengkap"
+                    value={nama}
+                    onChange={(e) => setNama(e.target.value)}
+                    required
                     className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
                   />
                 </div>
@@ -462,19 +489,56 @@ export default function PricingPage() {
                   <input
                     type="tel"
                     placeholder="08123456789"
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
+                    required
                     className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-landing-text mb-1">
-                    Bisnis kamu
+                    Jenis Bisnis
                   </label>
                   <input
                     type="text"
-                    placeholder="Nama bisnis / industri"
+                    placeholder="Contoh: Konsultan pendidikan, Toko online"
+                    value={jenisBisnis}
+                    onChange={(e) => setJenisBisnis(e.target.value)}
+                    required
                     className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-landing-text mb-1">
+                    Masalah apa yang ingin diselesaikan?
+                  </label>
+                  <textarea
+                    placeholder="Contoh: Follow-up manual, leads terlewat"
+                    value={masalah}
+                    onChange={(e) => setMasalah(e.target.value)}
+                    rows={2}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-landing-text mb-1">
+                    Berapa orang yang akan pakai sistem ini?
+                  </label>
+                  <select
+                    value={teamSize}
+                    onChange={(e) => setTeamSize(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                  >
+                    <option value="">Pilih...</option>
+                    <option value="Hanya saya">Hanya saya</option>
+                    <option value="2-5 orang">2-5 orang</option>
+                    <option value="6-10 orang">6-10 orang</option>
+                    <option value="Lebih dari 10">Lebih dari 10</option>
+                  </select>
                 </div>
 
                 <button
