@@ -26,7 +26,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil, Tag } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -39,7 +39,11 @@ interface QuickReply {
 interface WorkspaceSettings {
   kapso_api_key?: string
   quick_replies?: QuickReply[]
+  contact_tags?: string[]
 }
+
+// Default contact tags
+const DEFAULT_CONTACT_TAGS = ['Community', '1on1']
 
 interface TeamMember {
   id: string
@@ -91,6 +95,14 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
   const [newReply, setNewReply] = useState({ label: '', text: '' })
   const [isAddingReply, setIsAddingReply] = useState(false)
   const [isSavingReplies, setIsSavingReplies] = useState(false)
+
+  // Contact tags state
+  const [contactTags, setContactTags] = useState<string[]>(
+    workspace.settings?.contact_tags || DEFAULT_CONTACT_TAGS
+  )
+  const [newTag, setNewTag] = useState('')
+  const [isAddingTag, setIsAddingTag] = useState(false)
+  const [isSavingTags, setIsSavingTags] = useState(false)
 
   const isConnected = !!workspace.kapso_phone_id && !!workspace.settings?.kapso_api_key
 
@@ -181,6 +193,46 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
     await saveQuickReplies(updated)
   }
 
+  // Contact tags handlers
+  const saveContactTags = async (tags: string[]) => {
+    setIsSavingTags(true)
+    try {
+      const response = await fetch(`/api/workspaces/${workspace.id}/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: {
+            ...workspace.settings,
+            contact_tags: tags
+          },
+        }),
+      })
+      if (!response.ok) throw new Error('Failed to save')
+      setContactTags(tags)
+    } catch (error) {
+      console.error('Failed to save contact tags:', error)
+    } finally {
+      setIsSavingTags(false)
+    }
+  }
+
+  const handleAddTag = async () => {
+    if (!newTag.trim()) return
+    if (contactTags.includes(newTag.trim())) {
+      setNewTag('')
+      setIsAddingTag(false)
+      return
+    }
+    await saveContactTags([...contactTags, newTag.trim()])
+    setNewTag('')
+    setIsAddingTag(false)
+  }
+
+  const handleDeleteTag = async (tag: string) => {
+    const updated = contactTags.filter(t => t !== tag)
+    await saveContactTags(updated)
+  }
+
   return (
     <div className="p-8">
       <div className="mb-8">
@@ -201,6 +253,13 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
             Quick Replies
             <Badge variant="secondary" className="ml-1 text-xs">
               {quickReplies.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="tags" className="gap-2">
+            <Tag className="h-4 w-4" />
+            Tags
+            <Badge variant="secondary" className="ml-1 text-xs">
+              {contactTags.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="team" className="gap-2">
@@ -409,6 +468,86 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
                   </div>
                 )}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tags Tab */}
+        <TabsContent value="tags" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Contact Tags</CardTitle>
+                  <CardDescription>
+                    Manage tags for categorizing contacts
+                  </CardDescription>
+                </div>
+                <Button onClick={() => setIsAddingTag(true)} disabled={isAddingTag}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Tag
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Add new tag form */}
+              {isAddingTag && (
+                <div className="border rounded-lg p-4 space-y-3 bg-muted/50">
+                  <div className="space-y-2">
+                    <Label>Tag Name</Label>
+                    <Input
+                      placeholder="e.g., VIP, Hot Lead"
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleAddTag()
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={handleAddTag} disabled={isSavingTags}>
+                      {isSavingTags ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      setIsAddingTag(false)
+                      setNewTag('')
+                    }}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* List of tags */}
+              <div className="flex flex-wrap gap-2">
+                {contactTags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="text-sm py-1.5 px-3 gap-2"
+                  >
+                    {tag}
+                    <button
+                      onClick={() => handleDeleteTag(tag)}
+                      disabled={isSavingTags}
+                      className="hover:text-destructive transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+
+              {contactTags.length === 0 && !isAddingTag && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Tag className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No tags yet</p>
+                  <p className="text-sm mt-1">Click "Add Tag" to create your first tag</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

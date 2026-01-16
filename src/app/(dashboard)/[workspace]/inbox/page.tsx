@@ -70,8 +70,9 @@ export default async function InboxPage({ params }: InboxPageProps) {
 
   const teamMembers = (membersData || []) as unknown as TeamMember[]
 
-  // Extract quick replies from settings
+  // Extract quick replies and contact tags from settings
   const quickReplies = (workspace.settings?.quick_replies as Array<{id: string, label: string, text: string}>) || []
+  const contactTags = (workspace.settings?.contact_tags as string[]) || ['Community', '1on1']
 
-  return <InboxClient workspace={workspace} conversations={conversations} quickReplies={quickReplies} teamMembers={teamMembers} />
+  return <InboxClient workspace={workspace} conversations={conversations} quickReplies={quickReplies} teamMembers={teamMembers} contactTags={contactTags} />
 }

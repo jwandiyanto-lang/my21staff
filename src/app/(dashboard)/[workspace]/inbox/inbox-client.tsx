@@ -46,9 +46,10 @@ interface InboxClientProps {
   conversations: ConversationWithContact[]
   quickReplies?: QuickReply[]
   teamMembers?: TeamMember[]
+  contactTags?: string[]
 }
 
-export function InboxClient({ workspace, conversations: initialConversations, quickReplies, teamMembers = [] }: InboxClientProps) {
+export function InboxClient({ workspace, conversations: initialConversations, quickReplies, teamMembers = [], contactTags = ['Community', '1on1'] }: InboxClientProps) {
   const [conversations, setConversations] = useState<ConversationWithContact[]>(initialConversations)
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithContact | null>(
     conversations[0] || null
@@ -66,17 +67,6 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
   // Count unread conversations
   const unreadCount = useMemo(() => {
     return conversations.filter((c) => c.unread_count > 0).length
-  }, [conversations])
-
-  // Get unique tags from all contacts
-  const uniqueTags = useMemo(() => {
-    const tags = new Set<string>()
-    conversations.forEach((conv) => {
-      if (conv.contact.tags) {
-        conv.contact.tags.forEach((tag) => tags.add(tag))
-      }
-    })
-    return Array.from(tags).sort()
   }, [conversations])
 
   // Filter conversations by status, tags, assigned, and unread
@@ -451,7 +441,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
             </Popover>
 
             {/* Tag filter dropdown */}
-            {uniqueTags.length > 0 && (
+            {contactTags.length > 0 && (
               <Popover>
                 <PopoverTrigger asChild>
                   <button
@@ -476,7 +466,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
                 <PopoverContent className="w-56" align="start">
                   <div className="space-y-2">
                     <p className="font-medium text-sm">Filter by tag</p>
-                    {uniqueTags.map((tag) => (
+                    {contactTags.map((tag) => (
                       <label
                         key={tag}
                         className="flex items-center gap-2 cursor-pointer"
