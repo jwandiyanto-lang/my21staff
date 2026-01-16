@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { InboxClient } from './inbox-client'
 import { MOCK_WORKSPACE, MOCK_CONVERSATIONS, isDevMode } from '@/lib/mock-data'
-import type { Workspace, ConversationWithContact } from '@/types/database'
+import type { Workspace, ConversationWithContact, WorkspaceMember, Profile } from '@/types/database'
+
+export type TeamMember = WorkspaceMember & { profile: Profile | null }
 
 interface InboxPageProps {
   params: Promise<{ workspace: string }>
@@ -57,8 +59,19 @@ export default async function InboxPage({ params }: InboxPageProps) {
 
   const conversations = (conversationsData || []) as unknown as ConversationWithContact[]
 
+  // Fetch workspace members with profiles
+  const { data: membersData } = await supabase
+    .from('workspace_members')
+    .select(`
+      *,
+      profile:profiles(*)
+    `)
+    .eq('workspace_id', workspace.id)
+
+  const teamMembers = (membersData || []) as unknown as TeamMember[]
+
   // Extract quick replies from settings
   const quickReplies = (workspace.settings?.quick_replies as Array<{id: string, label: string, text: string}>) || []
 
-  return <InboxClient workspace={workspace} conversations={conversations} quickReplies={quickReplies} />
+  return <InboxClient workspace={workspace} conversations={conversations} quickReplies={quickReplies} teamMembers={teamMembers} />
 }

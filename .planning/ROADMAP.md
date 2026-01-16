@@ -135,7 +135,7 @@ Plans:
 **Plans:** 1/1 complete
 
 Plans:
-- [x] 17-01: Inbox UI/UX Fixes (6/7 fixes, 1 deferred)
+- [x] 17-01: Inbox UI/UX Fixes (7/7 fixes)
 
 **Completed:**
 - WhatsApp-style background pattern in conversation area
@@ -145,9 +145,7 @@ Plans:
 - Status filter working
 - Unread filter working
 - Cascade delete (already in schema with ON DELETE CASCADE)
-
-**Deferred:**
-- Assigned to dropdown (needs workspace_members data fetch)
+- Assigned to dropdown (filters by team member)
 
 ---
 

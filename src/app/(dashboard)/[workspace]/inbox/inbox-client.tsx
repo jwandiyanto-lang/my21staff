@@ -31,7 +31,7 @@ import { isDevMode, MOCK_MESSAGES } from '@/lib/mock-data'
 import { createClient } from '@/lib/supabase/client'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
-import type { Workspace, ConversationWithContact, Message } from '@/types/database'
+import type { Workspace, ConversationWithContact, Message, WorkspaceMember, Profile } from '@/types/database'
 
 interface QuickReply {
   id: string
@@ -39,13 +39,16 @@ interface QuickReply {
   text: string
 }
 
+type TeamMember = WorkspaceMember & { profile: Profile | null }
+
 interface InboxClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
   conversations: ConversationWithContact[]
   quickReplies?: QuickReply[]
+  teamMembers?: TeamMember[]
 }
 
-export function InboxClient({ workspace, conversations: initialConversations, quickReplies }: InboxClientProps) {
+export function InboxClient({ workspace, conversations: initialConversations, quickReplies, teamMembers = [] }: InboxClientProps) {
   const [conversations, setConversations] = useState<ConversationWithContact[]>(initialConversations)
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithContact | null>(
     conversations[0] || null
@@ -53,6 +56,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
   const [tagFilter, setTagFilter] = useState<string[]>([])
+  const [assignedFilter, setAssignedFilter] = useState<string>('all') // 'all' | 'unassigned' | user_id
   const [showUnreadOnly, setShowUnreadOnly] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
@@ -75,7 +79,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
     return Array.from(tags).sort()
   }, [conversations])
 
-  // Filter conversations by status, tags, and unread
+  // Filter conversations by status, tags, assigned, and unread
   const filteredConversations = useMemo(() => {
     let filtered = conversations
 
@@ -98,8 +102,17 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
       )
     }
 
+    // Filter by assigned
+    if (assignedFilter !== 'all') {
+      if (assignedFilter === 'unassigned') {
+        filtered = filtered.filter((conv) => !conv.assigned_to)
+      } else {
+        filtered = filtered.filter((conv) => conv.assigned_to === assignedFilter)
+      }
+    }
+
     return filtered
-  }, [conversations, statusFilter, tagFilter, showUnreadOnly])
+  }, [conversations, statusFilter, tagFilter, assignedFilter, showUnreadOnly])
 
   const handleStatusToggle = (status: LeadStatus) => {
     setStatusFilter((prev) =>
@@ -478,6 +491,32 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
                   </div>
                 </PopoverContent>
               </Popover>
+            )}
+
+            {/* Assigned to filter */}
+            {teamMembers.length > 0 && (
+              <Select value={assignedFilter} onValueChange={setAssignedFilter}>
+                <SelectTrigger
+                  className={cn(
+                    'h-8 w-auto gap-1.5 px-3 rounded-full text-xs font-medium border-0',
+                    assignedFilter !== 'all'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                  )}
+                >
+                  <User className="h-3.5 w-3.5" />
+                  <SelectValue placeholder="Assigned to" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All members</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {teamMembers.map((member) => (
+                    <SelectItem key={member.user_id} value={member.user_id}>
+                      {member.profile?.full_name || member.profile?.email || 'Unknown'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
         </div>
