@@ -313,6 +313,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
               conversationContact={selectedConversation.contact}
               conversationId={selectedConversation.id}
               conversationStatus={selectedConversation.status}
+              workspaceId={workspace.id}
               isLoading={isLoadingMessages}
               onHandoverChange={handleHandoverChange}
             />

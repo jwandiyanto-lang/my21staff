@@ -1,0 +1,162 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+
+export async function POST(request: NextRequest) {
+  try {
+    const { keepContactId, mergeContactId } = await request.json()
+
+    if (!keepContactId || !mergeContactId) {
+      return NextResponse.json(
+        { error: 'Both keepContactId and mergeContactId are required' },
+        { status: 400 }
+      )
+    }
+
+    if (keepContactId === mergeContactId) {
+      return NextResponse.json(
+        { error: 'Cannot merge a contact into itself' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = await createClient()
+
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Fetch both contacts
+    const { data: keepContact, error: keepError } = await supabase
+      .from('contacts')
+      .select('*')
+      .eq('id', keepContactId)
+      .single()
+
+    const { data: mergeContact, error: mergeError } = await supabase
+      .from('contacts')
+      .select('*')
+      .eq('id', mergeContactId)
+      .single()
+
+    if (keepError || !keepContact) {
+      return NextResponse.json(
+        { error: 'Keep contact not found' },
+        { status: 404 }
+      )
+    }
+
+    if (mergeError || !mergeContact) {
+      return NextResponse.json(
+        { error: 'Merge contact not found' },
+        { status: 404 }
+      )
+    }
+
+    // Verify user has access to the workspace
+    const { data: membership } = await supabase
+      .from('workspace_members')
+      .select('id')
+      .eq('workspace_id', keepContact.workspace_id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership) {
+      return NextResponse.json(
+        { error: 'Not authorized to access this workspace' },
+        { status: 403 }
+      )
+    }
+
+    // Merge metadata
+    const keepMetadata = (keepContact.metadata as Record<string, unknown>) || {}
+    const mergeMetadata = (mergeContact.metadata as Record<string, unknown>) || {}
+    const combinedMetadata = {
+      ...mergeMetadata,
+      ...keepMetadata,
+      merged_from: [
+        ...(keepMetadata.merged_from as string[] || []),
+        mergeContactId,
+      ],
+      merged_phone: [
+        ...(keepMetadata.merged_phone as string[] || []),
+        mergeContact.phone,
+      ],
+      merged_at: new Date().toISOString(),
+    }
+
+    // Merge tags
+    const keepTags = keepContact.tags || []
+    const mergeTags = mergeContact.tags || []
+    const combinedTags = [...new Set([...keepTags, ...mergeTags])]
+
+    // Update the keep contact with merged data
+    const updatedKeepContact = {
+      // Prefer keep contact's data, but fill in missing fields from merge contact
+      name: keepContact.name || mergeContact.name,
+      email: keepContact.email || mergeContact.email,
+      // Take the higher lead score
+      lead_score: Math.max(keepContact.lead_score || 0, mergeContact.lead_score || 0),
+      // Keep the more recent status if different
+      lead_status: keepContact.lead_status !== 'prospect'
+        ? keepContact.lead_status
+        : mergeContact.lead_status,
+      tags: combinedTags,
+      metadata: combinedMetadata,
+      updated_at: new Date().toISOString(),
+    }
+
+    const { error: updateError } = await supabase
+      .from('contacts')
+      .update(updatedKeepContact)
+      .eq('id', keepContactId)
+
+    if (updateError) {
+      console.error('Error updating keep contact:', updateError)
+      return NextResponse.json(
+        { error: 'Failed to update contact' },
+        { status: 500 }
+      )
+    }
+
+    // Update all conversations from merge contact to point to keep contact
+    const { error: convError } = await supabase
+      .from('conversations')
+      .update({ contact_id: keepContactId })
+      .eq('contact_id', mergeContactId)
+
+    if (convError) {
+      console.error('Error updating conversations:', convError)
+      // Continue anyway - the merge is partially complete
+    }
+
+    // Update all messages from merge contact's conversations
+    // Messages are linked via conversation, so updating conversations is enough
+
+    // Delete the merged contact
+    const { error: deleteError } = await supabase
+      .from('contacts')
+      .delete()
+      .eq('id', mergeContactId)
+
+    if (deleteError) {
+      console.error('Error deleting merged contact:', deleteError)
+      // Contact is already merged, deletion failure is non-critical
+    }
+
+    return NextResponse.json({
+      success: true,
+      contact: { ...keepContact, ...updatedKeepContact }
+    })
+  } catch (error) {
+    console.error('Error merging contacts:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

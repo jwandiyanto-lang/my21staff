@@ -1,14 +1,30 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { format } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
+import { createClient } from '@/lib/supabase/client'
 import type { Contact, Message } from '@/types/database'
 
 interface MessageThreadProps {
@@ -16,8 +32,10 @@ interface MessageThreadProps {
   conversationContact: Contact
   conversationId: string
   conversationStatus: string
+  workspaceId: string
   isLoading: boolean
   onHandoverChange?: (aiPaused: boolean) => void
+  onContactMerged?: () => void
 }
 
 function getInitials(name: string | null, phone: string): string {
@@ -128,14 +146,77 @@ export function MessageThread({
   conversationContact,
   conversationId,
   conversationStatus,
+  workspaceId,
   isLoading,
-  onHandoverChange
+  onHandoverChange,
+  onContactMerged
 }: MessageThreadProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const statusConfig = LEAD_STATUS_CONFIG[conversationContact.lead_status as LeadStatus] || LEAD_STATUS_CONFIG.prospect
   const [isTogglingHandover, setIsTogglingHandover] = useState(false)
 
+  // Merge dialog state
+  const [mergeDialogOpen, setMergeDialogOpen] = useState(false)
+  const [mergeSearch, setMergeSearch] = useState('')
+  const [mergeContacts, setMergeContacts] = useState<Contact[]>([])
+  const [isSearchingContacts, setIsSearchingContacts] = useState(false)
+  const [selectedMergeContact, setSelectedMergeContact] = useState<Contact | null>(null)
+  const [isMerging, setIsMerging] = useState(false)
+
   const aiPaused = conversationStatus === 'handover'
+
+  // Search contacts for merge
+  const searchContacts = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setMergeContacts([])
+      return
+    }
+    setIsSearchingContacts(true)
+    try {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('contacts')
+        .select('*')
+        .eq('workspace_id', workspaceId)
+        .neq('id', conversationContact.id) // Exclude current contact
+        .or(`name.ilike.%${query}%,phone.ilike.%${query}%,email.ilike.%${query}%`)
+        .limit(10)
+      setMergeContacts(data || [])
+    } catch (error) {
+      console.error('Error searching contacts:', error)
+    } finally {
+      setIsSearchingContacts(false)
+    }
+  }, [workspaceId, conversationContact.id])
+
+  // Handle merge
+  const handleMerge = async () => {
+    if (!selectedMergeContact) return
+    setIsMerging(true)
+    try {
+      const response = await fetch('/api/contacts/merge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          keepContactId: conversationContact.id,
+          mergeContactId: selectedMergeContact.id,
+        }),
+      })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to merge contacts')
+      }
+      toast.success(`Merged ${selectedMergeContact.name || selectedMergeContact.phone} into ${conversationContact.name || conversationContact.phone}`)
+      setMergeDialogOpen(false)
+      setSelectedMergeContact(null)
+      setMergeSearch('')
+      onContactMerged?.()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to merge contacts')
+    } finally {
+      setIsMerging(false)
+    }
+  }
 
   const handleHandoverToggle = async () => {
     setIsTogglingHandover(true)
@@ -224,6 +305,21 @@ export function MessageThread({
           )}
           {aiPaused ? 'Anda merespons' : 'AI Aktif'}
         </Button>
+
+        {/* More actions dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setMergeDialogOpen(true)}>
+              <Merge className="h-4 w-4 mr-2" />
+              Merge Contact
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Messages */}
@@ -245,6 +341,113 @@ export function MessageThread({
           </div>
         )}
       </ScrollArea>
+
+      {/* Merge Contact Dialog */}
+      <Dialog open={mergeDialogOpen} onOpenChange={setMergeDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Merge Contact</DialogTitle>
+            <DialogDescription>
+              Merge another contact into {conversationContact.name || conversationContact.phone}. Messages and data from the merged contact will be combined.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Search input */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, phone, or email..."
+                value={mergeSearch}
+                onChange={(e) => {
+                  setMergeSearch(e.target.value)
+                  searchContacts(e.target.value)
+                }}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Selected contact */}
+            {selectedMergeContact && (
+              <div className="border rounded-lg p-3 bg-primary/5 border-primary">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {getInitials(selectedMergeContact.name, selectedMergeContact.phone)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-medium">{selectedMergeContact.name || selectedMergeContact.phone}</p>
+                    <p className="text-sm text-muted-foreground">{selectedMergeContact.phone}</p>
+                  </div>
+                  <Check className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+            )}
+
+            {/* Search results */}
+            {isSearchingContacts ? (
+              <div className="text-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+              </div>
+            ) : mergeContacts.length > 0 ? (
+              <div className="space-y-2 max-h-60 overflow-auto">
+                {mergeContacts.map((contact) => (
+                  <button
+                    key={contact.id}
+                    onClick={() => setSelectedMergeContact(contact)}
+                    className={cn(
+                      'w-full text-left border rounded-lg p-3 transition-colors',
+                      selectedMergeContact?.id === contact.id
+                        ? 'border-primary bg-primary/5'
+                        : 'hover:bg-muted'
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-muted">
+                          {getInitials(contact.name, contact.phone)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{contact.name || contact.phone}</p>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {contact.phone}
+                          {contact.email && ` • ${contact.email}`}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : mergeSearch.trim() ? (
+              <p className="text-center py-4 text-muted-foreground">No contacts found</p>
+            ) : null}
+
+            {/* Merge button */}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setMergeDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleMerge}
+                disabled={!selectedMergeContact || isMerging}
+              >
+                {isMerging ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Merging...
+                  </>
+                ) : (
+                  <>
+                    <Merge className="h-4 w-4 mr-2" />
+                    Merge
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
