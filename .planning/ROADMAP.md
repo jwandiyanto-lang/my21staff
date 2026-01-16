@@ -153,19 +153,19 @@ Plans:
 
 ### Phase 18: Kapso Bot Setup & Verification
 
-**Goal:** Systematically verify Kapso integration works end-to-end in production
+**Goal:** Configure Kia persona for Eagle Overseas with CRM context integration and verify full Kapso flow
 **Depends on:** Phase 17
-**Plans:** 1 plan
+**Plans:** 2 plans
 
 Plans:
-- [ ] 18-01-PLAN.md — End-to-end verification (webhook, AI, outbound, handover)
+- [ ] 18-01-PLAN.md — Contact lookup API by phone (for Kapso function context)
+- [ ] 18-02-PLAN.md — Deploy Kia persona + end-to-end verification
 
 **Scope:**
-- Verify Kapso webhook receiving messages
-- Test AI auto-reply functionality
-- Test outbound messages from CRM
-- Verify AI handover toggle works
-- Document any issues for future phases
+- Build contact lookup API (`/api/contacts/by-phone/[phone]`)
+- Update Kapso sea-lion-reply function with Kia persona (Saya/Kak, no emoji)
+- Integrate CRM context (name, metadata, notes, messages) into AI responses
+- Verify full flow: inbound, AI response, outbound, handover toggle
 
 ---
 
@@ -209,4 +209,4 @@ Plans:
 | 15. Pricing Page | v1.6 | 2/2 | Complete | 2026-01-16 |
 | 16. Pricing Form Enhancement | v1.9 | 0/1 | Not started | — |
 | 17. Inbox UI/UX Fixes | v1.7 | 1/1 | Complete | 2026-01-16 |
-| 18. Kapso Bot Setup | v1.8 | 0/1 | Planned | — |
+| 18. Kapso Bot Setup | v1.8 | 0/2 | Planned | — |
