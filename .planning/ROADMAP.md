@@ -50,30 +50,30 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 ---
 
-## Current Milestone: v1.5 — Lead Management Enhancement
+## v1.5 — Lead Management Enhancement (COMPLETE)
 
 ### Phase 13: Lead Management Enhancement
 
 **Goal:** Complete lead management with editable fields, message history, and AI handover control
 **Depends on:** Phase 12
-**Plans:** 3 plans
+**Plans:** 3/3 complete
 
 Plans:
 - [x] 13-01: Contact Update API + Status/Score UI
 - [x] 13-02: Tag Management + Messages Tab
-- [ ] 13-03: AI Handover Toggle (Kapso integration)
+- [x] 13-03: AI Handover Toggle (Kapso integration)
 
-**Details:**
-- Create PATCH API for contact updates (status, score, tags)
-- Add status dropdown to change lead pipeline stage
-- Add lead score slider for manual adjustment
-- Add tag management (add/remove tags)
-- Integrate Messages tab with actual conversation data
-- Add AI handover toggle in inbox (pause/resume automation per conversation)
+**Completed:**
+- PATCH API for contact updates (status, score, tags)
+- Status dropdown to change lead pipeline stage
+- Lead score slider for manual adjustment
+- Tag management (add/remove tags)
+- Messages tab with conversation data
+- AI handover toggle in inbox (pause/resume Kapso workflows per conversation)
 
 ---
 
-## v1.6 — Landing Page Refresh (IN PROGRESS)
+## v1.6 — Landing Page Refresh (COMPLETE)
 
 ### Phase 14: Landing Page Refresh
 
@@ -105,19 +105,24 @@ Plans:
 
 **Goal:** Dedicated pricing page at `/pricing` accessible from landing page CTAs
 **Depends on:** Phase 14 (landing page refresh)
-**Plans:** 1 plan
+**Plans:** 2 plans
 
 Plans:
 - [x] 15-01: Pricing Page Refresh (story-driven content, filter section, 3-tier pricing)
+- [x] 15-02: Modal Form + Animations (interactive session)
 
 **Completed:**
-- Story section with 3 problem scenarios (too many leads, no leads, nothing at all)
+- Story section with 5 problem scenarios ("Masalah yang sering kami temui")
 - Rhetorical question: "Pernah bulan ini ramai... uangnya kemana?"
 - Urgency section: "No system = No growth"
-- Exclusivity filter: "Kami tidak menerima semua orang"
-- 3-tier pricing: Solo Rp2.5jt, Team Rp5.5jt, Studio Rp10jt
-- Setup fee: Kickstart Rp7.5jt (Website + WhatsApp + Business approach + Guidance)
-- Header with centered "21" logo
+- 3-tier pricing: Solo Rp3.9jt, Team Rp7.9jt, Studio Custom
+- Features from PRICING.md (WhatsApp numbers, message quotas, AI chats)
+- Setup fee box: Rp7.5jt (Website/Web App + Business Consultation)
+- Header with centered "21" logo + "Mulai" nav button
+- Modal form for lead capture (Nama, WhatsApp, Bisnis)
+- Stagger entrance + hover lift animations on pricing cards
+- Smooth scroll for "Mulai" nav button
+- Footer matching landing page style
 
 ---
 
@@ -137,6 +142,6 @@ Plans:
 | 10. App Verification | v1.2 | 1/1 | Complete | 2026-01-15 |
 | 11. Vercel Deployment | v1.3 | 1/1 | Complete | 2026-01-15 |
 | 12. Multi-Tenant Admin | v1.4 | 1/1 | Complete | 2026-01-15 |
-| 13. Lead Management Enhancement | v1.5 | 2/3 | In Progress | — |
+| 13. Lead Management Enhancement | v1.5 | 3/3 | Complete | 2026-01-16 |
 | 14. Landing Page Refresh | v1.6 | 1/1 | Complete | 2026-01-16 |
-| 15. Pricing Page | v1.6 | 1/1 | Complete | 2026-01-16 |
+| 15. Pricing Page | v1.6 | 2/2 | Complete | 2026-01-16 |

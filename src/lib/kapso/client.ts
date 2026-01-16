@@ -132,22 +132,109 @@ export async function sendMediaMessage(
 }
 
 /**
- * Set handover status for a conversation (pause/resume AI)
- * Uses Kapso API: PATCH /whatsapp/conversations/{conversation_id}
+ * Get Kapso conversation by contact phone number
+ * Returns the Kapso conversation ID for a phone number
  */
-export async function setHandover(
+export async function getKapsoConversation(
   credentials: KapsoCredentials,
-  conversationId: string,
-  paused: boolean
-): Promise<{ success: boolean }> {
+  contactPhone: string
+): Promise<{ id: string; status: string } | null> {
+  const { apiKey, phoneId } = credentials;
+
+  if (!apiKey || !phoneId) {
+    console.error('Missing Kapso credentials');
+    return null;
+  }
+
+  const cleanPhone = cleanPhoneNumber(contactPhone);
+  const apiUrl = `https://api.kapso.ai/meta/whatsapp/v24.0/${phoneId}/conversations?phone_number=${cleanPhone}&status=active&limit=1`;
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'X-API-Key': apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      const result = await response.text();
+      console.error(`Kapso get conversation error: ${response.status} - ${result}`);
+      return null;
+    }
+
+    const data = await response.json();
+    if (data.data && data.data.length > 0) {
+      return { id: data.data[0].id, status: data.data[0].status };
+    }
+    return null;
+  } catch (error) {
+    console.error('Kapso get conversation failed:', error);
+    return null;
+  }
+}
+
+/**
+ * Get active workflow executions for a Kapso conversation
+ */
+export async function getWorkflowExecutions(
+  credentials: KapsoCredentials,
+  kapsoConversationId: string
+): Promise<Array<{ id: string; status: string }>> {
   const { apiKey } = credentials;
 
   if (!apiKey) {
-    throw new Error('Missing Kapso API key');
+    console.error('Missing Kapso API key');
+    return [];
   }
 
-  // Kapso conversation endpoint
-  const apiUrl = `https://api.kapso.ai/whatsapp/conversations/${conversationId}`;
+  const apiUrl = `https://api.kapso.ai/platform/v1/functions/whatsapp-conversations/${kapsoConversationId}/workflow-executions`;
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'X-API-Key': apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      const result = await response.text();
+      console.error(`Kapso get workflow executions error: ${response.status} - ${result}`);
+      return [];
+    }
+
+    const data = await response.json();
+    // Filter for active/waiting executions that can be handed off
+    const activeExecutions = (data.data || []).filter(
+      (exec: { status: string }) => exec.status === 'running' || exec.status === 'waiting'
+    );
+    return activeExecutions.map((exec: { id: string; status: string }) => ({
+      id: exec.id,
+      status: exec.status,
+    }));
+  } catch (error) {
+    console.error('Kapso get workflow executions failed:', error);
+    return [];
+  }
+}
+
+/**
+ * Update workflow execution status (handoff/waiting/ended)
+ */
+export async function updateWorkflowExecutionStatus(
+  credentials: KapsoCredentials,
+  executionId: string,
+  status: 'handoff' | 'waiting' | 'ended'
+): Promise<boolean> {
+  const { apiKey } = credentials;
+
+  if (!apiKey) {
+    console.error('Missing Kapso API key');
+    return false;
+  }
+
+  const apiUrl = `https://api.kapso.ai/platform/v1/workflow_executions/${executionId}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -157,22 +244,76 @@ export async function setHandover(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        status: paused ? 'handoff' : 'open',
+        workflow_execution: { status },
       }),
     });
 
     if (!response.ok) {
       const result = await response.text();
-      console.error(`Kapso handover API error: ${response.status} - ${result}`);
-      // Don't throw - we still want to track locally even if Kapso call fails
-      return { success: false };
+      console.error(`Kapso update workflow execution error: ${response.status} - ${result}`);
+      return false;
     }
 
-    console.log(`Handover ${paused ? 'enabled' : 'disabled'} for conversation ${conversationId}`);
-    return { success: true };
+    console.log(`Workflow execution ${executionId} status updated to ${status}`);
+    return true;
+  } catch (error) {
+    console.error('Kapso update workflow execution failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Set handover status for a conversation (pause/resume AI)
+ * This is a high-level function that:
+ * 1. Finds the Kapso conversation by phone number
+ * 2. Gets active workflow executions
+ * 3. Updates their status to handoff (to pause) or ends the handoff state
+ */
+export async function setHandover(
+  credentials: KapsoCredentials,
+  contactPhone: string,
+  paused: boolean
+): Promise<{ success: boolean; message?: string }> {
+  const { apiKey } = credentials;
+
+  if (!apiKey) {
+    return { success: false, message: 'Missing Kapso API key' };
+  }
+
+  try {
+    // Step 1: Get Kapso conversation by phone number
+    const conversation = await getKapsoConversation(credentials, contactPhone);
+    if (!conversation) {
+      console.log(`No active Kapso conversation found for ${contactPhone}`);
+      // This is OK - may not have an active conversation on Kapso side
+      return { success: true, message: 'No active Kapso conversation' };
+    }
+
+    // Step 2: Get active workflow executions
+    const executions = await getWorkflowExecutions(credentials, conversation.id);
+    if (executions.length === 0) {
+      console.log(`No active workflow executions for conversation ${conversation.id}`);
+      // This is OK - may not have any workflows running
+      return { success: true, message: 'No active workflow executions' };
+    }
+
+    // Step 3: Update all active workflow executions
+    const newStatus = paused ? 'handoff' : 'waiting'; // 'waiting' to resume, Kapso will continue
+    let successCount = 0;
+
+    for (const exec of executions) {
+      const updated = await updateWorkflowExecutionStatus(credentials, exec.id, newStatus);
+      if (updated) successCount++;
+    }
+
+    console.log(`Handover: Updated ${successCount}/${executions.length} workflow executions to ${newStatus}`);
+    return {
+      success: successCount > 0,
+      message: `Updated ${successCount}/${executions.length} workflow executions`,
+    };
   } catch (error) {
     console.error('Kapso handover API call failed:', error);
-    return { success: false };
+    return { success: false, message: 'Kapso API call failed' };
   }
 }
 
@@ -189,7 +330,9 @@ export function createKapsoClient(credentials: KapsoCredentials) {
       caption?: string,
       filename?: string
     ) => sendMediaMessage(credentials, to, mediaUrl, mediaType, caption, filename),
-    setHandover: (conversationId: string, paused: boolean) => setHandover(credentials, conversationId, paused),
+    setHandover: (contactPhone: string, paused: boolean) => setHandover(credentials, contactPhone, paused),
+    getKapsoConversation: (contactPhone: string) => getKapsoConversation(credentials, contactPhone),
+    getWorkflowExecutions: (kapsoConversationId: string) => getWorkflowExecutions(credentials, kapsoConversationId),
   };
 }
 

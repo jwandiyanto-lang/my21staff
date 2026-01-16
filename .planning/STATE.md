@@ -5,16 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** v1.6 — Landing Page Refresh
+**Current focus:** v1.5 & v1.6 Complete
 
 ## Current Position
 
-Phase: 15 of 15 (Pricing Page)
-Plan: 1/? complete
-Status: In Progress
-Last activity: 2026-01-16 — Completed 15-01-PLAN.md (Pricing Page Refresh)
+Phase: All phases complete (13-03 was last)
+Status: Complete
+Last activity: 2026-01-16 — Completed 13-03-PLAN.md (AI Handover Toggle)
 
-Progress: v1.6 ██████████ Phase 15 Plan 01 complete
+Progress: v1.5 ██████████ Phase 13 Complete | v1.6 ██████████ Phases 14-15 Complete
 
 ## Performance Metrics
 
@@ -35,7 +34,8 @@ Progress: v1.6 ██████████ Phase 15 Plan 01 complete
 | 6. Kapso Live | 1/1 | 12 min | 12 min |
 | 7. Landing Page | 3/3 | 20 min | 7 min |
 | 8. Sea Lion + Kapso | 1/1 | manual | — |
-| 15. Pricing Page | 1/? | 8 min | 8 min |
+| 13. Lead Management | 3/3 | 15 min | 5 min |
+| 15. Pricing Page | 1/1 | 8 min | 8 min |
 
 ## Accumulated Context
 
@@ -56,7 +56,6 @@ Recent (Phase 15):
 ### Deferred Issues
 
 - Production deployment and Supabase migration
-- Phase 13-03: AI Handover Toggle (Kapso integration) pending
 
 ### Blockers/Concerns
 
@@ -65,6 +64,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed 15-01-PLAN.md
+Stopped at: Completed 13-03-PLAN.md (AI Handover Toggle)
 Resume file: None
-Next: Check if more Phase 15 plans needed, or continue with Phase 13-03
+Next: All current phases complete. Consider v1.7 milestone or production deployment.

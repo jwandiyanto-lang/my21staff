@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { setHandover } from '@/lib/kapso/client'
 
 export async function POST(
   request: Request,
@@ -19,34 +20,80 @@ export async function POST(
 
     const supabase = await createClient()
 
-    // Update conversation status
+    // Get conversation
+    const { data: conversation, error: convError } = await supabase
+      .from('conversations')
+      .select('id, workspace_id, contact_id')
+      .eq('id', conversationId)
+      .single()
+
+    if (convError || !conversation) {
+      console.error('Error fetching conversation:', convError)
+      return NextResponse.json(
+        { error: 'Conversation not found' },
+        { status: 404 }
+      )
+    }
+
+    // Get contact phone
+    const { data: contact, error: contactError } = await supabase
+      .from('contacts')
+      .select('phone')
+      .eq('id', conversation.contact_id)
+      .single()
+
+    if (contactError) {
+      console.error('Error fetching contact:', contactError)
+    }
+
+    // Get workspace Kapso credentials
+    const { data: workspace, error: wsError } = await supabase
+      .from('workspaces')
+      .select('kapso_phone_id, settings')
+      .eq('id', conversation.workspace_id)
+      .single()
+
+    if (wsError) {
+      console.error('Error fetching workspace:', wsError)
+    }
+
+    // Update conversation status locally
     // Using 'handover' when AI is paused, 'open' when AI is active
     const newStatus = ai_paused ? 'handover' : 'open'
 
-    const { data, error } = await supabase
+    const { error: updateError } = await supabase
       .from('conversations')
       .update({ status: newStatus })
       .eq('id', conversationId)
-      .select()
-      .single()
 
-    if (error) {
-      console.error('Error updating handover status:', error)
+    if (updateError) {
+      console.error('Error updating handover status:', updateError)
       return NextResponse.json(
         { error: 'Failed to update handover status' },
         { status: 500 }
       )
     }
 
-    // TODO: Call Kapso API to pause/resume AI workflow
-    // This would use: PATCH /workflow_executions/{execution_id}
-    // with status: "handoff" | "waiting"
-    // For now, we track state locally in our database
+    // Call Kapso API to pause/resume AI workflow
+    let kapsoResult: { success: boolean; message?: string } = { success: true, message: 'No Kapso credentials' }
+    const settings = workspace?.settings as { kapso_api_key?: string } | null
+    const apiKey = settings?.kapso_api_key
+    const phoneId = workspace?.kapso_phone_id
+
+    if (apiKey && phoneId && contact?.phone) {
+      kapsoResult = await setHandover(
+        { apiKey, phoneId },
+        contact.phone,
+        ai_paused
+      )
+      console.log(`Kapso handover result for ${contact.phone}:`, kapsoResult)
+    }
 
     return NextResponse.json({
       success: true,
       status: newStatus,
-      ai_paused
+      ai_paused,
+      kapso: kapsoResult,
     })
   } catch (error) {
     console.error('Error in handover API:', error)
