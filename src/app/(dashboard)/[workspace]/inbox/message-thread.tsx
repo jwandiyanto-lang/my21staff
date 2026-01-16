@@ -636,20 +636,16 @@ export function MessageThread({
           {aiPaused ? 'Manual mode' : 'AI Aktif'}
         </Button>
 
-        {/* More actions dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setShowContactDetails(!showContactDetails)}>
-              <User className="h-4 w-4 mr-2" />
-              Contact Details
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Contact Details toggle */}
+        <Button
+          variant={showContactDetails ? 'secondary' : 'ghost'}
+          size="sm"
+          onClick={() => setShowContactDetails(!showContactDetails)}
+          className="gap-1.5 h-8 text-xs"
+        >
+          <User className="h-3.5 w-3.5" />
+          Info
+        </Button>
       </div>
 
       {/* Contact Details Panel (Collapsible) */}
