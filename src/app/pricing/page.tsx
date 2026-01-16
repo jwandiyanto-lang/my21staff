@@ -42,14 +42,9 @@ export default function PricingPage() {
             Kembali
           </Link>
           <Link href="/" className="flex items-center">
-            <span className="text-xl font-black">my<span className="text-landing-cta">21</span>staff</span>
+            <span className="text-2xl font-black text-landing-cta">21</span>
           </Link>
-          <Link
-            href="/login"
-            className="text-sm text-landing-cta font-semibold hover:underline"
-          >
-            Login
-          </Link>
+          <div className="w-16" /> {/* Spacer to balance the layout */}
         </div>
       </nav>
 
@@ -145,8 +140,69 @@ export default function PricingPage() {
           </div>
         </section>
 
+        {/* Filter Section - We Don't Accept Everyone */}
+        <section className="py-16 bg-white border-b border-gray-100">
+          <div className="mx-auto max-w-3xl px-6">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={staggerContainer}
+              className="text-center"
+            >
+              <motion.div variants={fadeInUp} className="mb-8">
+                <p className="text-landing-cta font-bold text-sm uppercase tracking-widest mb-4">
+                  Sebelum Lanjut
+                </p>
+                <h2
+                  className="text-3xl md:text-4xl font-extrabold mb-4"
+                  style={{ fontFamily: "var(--font-jakarta)" }}
+                >
+                  Kami tidak menerima semua orang.
+                </h2>
+              </motion.div>
+
+              <motion.div variants={fadeInUp} className="space-y-4 text-left max-w-xl mx-auto">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-landing-cta/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-landing-cta font-bold text-sm">×</span>
+                  </div>
+                  <p className="text-landing-text-muted">
+                    Ini <span className="font-semibold text-landing-text">bukan CRM plug-and-play</span>.
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-landing-cta/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-landing-cta" />
+                  </div>
+                  <p className="text-landing-text-muted">
+                    Kami bantu Anda berkembang jadi <span className="font-semibold text-landing-text">bisnis resmi yang siap main di liga besar</span>.
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-landing-cta/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-landing-cta" />
+                  </div>
+                  <p className="text-landing-text-muted">
+                    Ini untuk bisnis yang <span className="font-semibold text-landing-text">sudah merasakan sakitnya</span> — yang tau ada sesuatu yang <span className="italic">broken</span>.
+                  </p>
+                </div>
+              </motion.div>
+
+              <motion.p
+                variants={fadeInUp}
+                className="mt-8 text-lg font-semibold text-landing-text"
+              >
+                Kalau itu Anda — <span className="text-landing-cta">mari bicara</span>.
+              </motion.p>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Pricing Section */}
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-[#FDF8F3]">
           <div className="mx-auto max-w-7xl px-6">
             <motion.div
               initial="hidden"
