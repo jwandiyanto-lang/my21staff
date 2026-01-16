@@ -45,7 +45,19 @@ import {
   Pencil,
   Check,
   User,
+  Trash2,
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { createClient } from '@/lib/supabase/client'
@@ -112,6 +124,9 @@ export function ContactDetailSheet({
   const [newNoteContent, setNewNoteContent] = useState('')
   const [isAddingNote, setIsAddingNote] = useState(false)
   const [expandedForms, setExpandedForms] = useState<Set<string>>(new Set())
+
+  // Delete state
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Sync local state when contact changes
   useEffect(() => {
@@ -565,6 +580,33 @@ export function ContactDetailSheet({
     }
     if (value === 'activity' && !activitiesLoaded) {
       loadActivities()
+    }
+  }
+
+  // Delete contact handler
+  const handleDeleteContact = async () => {
+    if (!contact) return
+
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete contact')
+      }
+
+      toast.success('Contact deleted successfully')
+      onOpenChange(false)
+      startTransition(() => {
+        router.refresh()
+      })
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete contact')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -1327,13 +1369,49 @@ export function ContactDetailSheet({
         </Tabs>
 
         {/* Footer */}
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-2">
           <Button asChild className="w-full">
             <Link href={`/${workspace.slug}/inbox?contact=${contact.id}`}>
               Open in Inbox
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
+
+          {/* Delete Contact */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Contact
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Contact</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete <strong>{contact.name || contact.phone}</strong>?
+                  This will also delete all associated conversations and messages. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteContact}
+                  disabled={isDeleting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete'
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </SheetContent>
     </Sheet>

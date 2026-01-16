@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createApiAdminClient } from '@/lib/supabase/server'
 import { LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import type { Contact } from '@/types/database'
 
@@ -224,6 +224,104 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json(contact)
   } catch (error) {
     console.error('GET /api/contacts/[id] error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE /api/contacts/[id] - Delete a contact
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  try {
+    const { id } = await context.params
+
+    if (isDevMode()) {
+      // Dev mode: simulate deletion
+      return NextResponse.json({ success: true })
+    }
+
+    const supabase = await createClient()
+    const adminClient = createApiAdminClient()
+
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Fetch contact to verify it exists and get workspace_id
+    const { data: contact, error: fetchError } = await adminClient
+      .from('contacts')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !contact) {
+      return NextResponse.json(
+        { error: 'Contact not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check user has access to workspace
+    const { data: membership } = await adminClient
+      .from('workspace_members')
+      .select('id')
+      .eq('workspace_id', contact.workspace_id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership) {
+      return NextResponse.json(
+        { error: 'Not authorized to delete this contact' },
+        { status: 403 }
+      )
+    }
+
+    // Delete associated conversations first (this will cascade to messages due to FK)
+    const { error: convDeleteError } = await adminClient
+      .from('conversations')
+      .delete()
+      .eq('contact_id', id)
+
+    if (convDeleteError) {
+      console.error('Error deleting conversations:', convDeleteError)
+      // Continue anyway - we'll try to delete the contact
+    }
+
+    // Delete contact notes
+    const { error: notesDeleteError } = await adminClient
+      .from('contact_notes')
+      .delete()
+      .eq('contact_id', id)
+
+    if (notesDeleteError) {
+      console.error('Error deleting contact notes:', notesDeleteError)
+      // Continue anyway
+    }
+
+    // Delete the contact
+    const { error: deleteError } = await adminClient
+      .from('contacts')
+      .delete()
+      .eq('id', id)
+
+    if (deleteError) {
+      console.error('Error deleting contact:', deleteError)
+      return NextResponse.json(
+        { error: 'Failed to delete contact' },
+        { status: 500 }
+      )
+    }
+
+    console.log(`[Delete] Successfully deleted contact ${id}`)
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('DELETE /api/contacts/[id] error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
