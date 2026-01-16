@@ -56,6 +56,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [showInfoPanel, setShowInfoPanel] = useState(false)
+  const [replyToMessage, setReplyToMessage] = useState<Message | null>(null)
 
   // Count unread conversations
   const unreadCount = useMemo(() => {
@@ -284,6 +285,16 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
     window.location.reload()
   }, [])
 
+  // Handle reply to message
+  const handleReply = useCallback((message: Message) => {
+    setReplyToMessage(message)
+  }, [])
+
+  // Clear reply when conversation changes
+  useEffect(() => {
+    setReplyToMessage(null)
+  }, [selectedConversation?.id])
+
   return (
     <div className="flex h-full">
       {/* Left sidebar - Conversation list */}
@@ -414,6 +425,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
               onContactMerged={handleContactMerged}
               showInfoPanel={showInfoPanel}
               onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
+              onReply={handleReply}
             />
             <MessageInput
               conversationId={selectedConversation.id}
@@ -423,6 +435,8 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
               onMessageSent={handleMessageSent}
               onMessageError={handleMessageError}
               conversationStatus={selectedConversation.status}
+              replyToMessage={replyToMessage}
+              onClearReply={() => setReplyToMessage(null)}
             />
           </>
         ) : (

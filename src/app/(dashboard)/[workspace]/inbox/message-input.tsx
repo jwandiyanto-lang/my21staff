@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { SendHorizonal, Loader2, Paperclip, X, Image, FileText, Film, Zap } from 'lucide-react'
+import { SendHorizonal, Loader2, Paperclip, X, Image, FileText, Film, Zap, Reply } from 'lucide-react'
 import {
   Popover,
   PopoverContent,
@@ -26,6 +26,8 @@ interface MessageInputProps {
   onMessageSent: (message: Message, isOptimistic: boolean) => void
   onMessageError: (optimisticId: string) => void
   conversationStatus?: string
+  replyToMessage?: Message | null
+  onClearReply?: () => void
 }
 
 type MediaType = 'image' | 'video' | 'document'
@@ -61,6 +63,8 @@ export function MessageInput({
   onMessageSent,
   onMessageError,
   conversationStatus,
+  replyToMessage,
+  onClearReply,
 }: MessageInputProps) {
   const isManualMode = conversationStatus === 'handover'
   // Use provided templates or fall back to defaults
@@ -117,6 +121,15 @@ export function MessageInput({
     // Determine message type
     const messageType = selectedFile ? getMediaType(selectedFile) : 'text'
 
+    // Build content with reply context if replying
+    let messageContent = trimmedContent
+    if (replyToMessage && trimmedContent) {
+      // Truncate long replies
+      const replyText = replyToMessage.content?.slice(0, 100) || '[media]'
+      const replyPreview = replyText.length > 100 ? replyText + '...' : replyText
+      messageContent = `> _${replyPreview}_\n\n${trimmedContent}`
+    }
+
     // Create optimistic message
     const optimisticId = crypto.randomUUID()
     const optimisticMessage: Message = {
@@ -126,18 +139,20 @@ export function MessageInput({
       direction: 'outbound',
       sender_type: 'user',
       sender_id: null,
-      content: trimmedContent || (selectedFile ? `[${messageType}]` : ''),
+      content: messageContent || (selectedFile ? `[${messageType}]` : ''),
       message_type: messageType,
       media_url: filePreview,
       kapso_message_id: null,
-      metadata: { status: 'sending', filename: selectedFile?.name },
+      metadata: { status: 'sending', filename: selectedFile?.name, replyToId: replyToMessage?.id },
       created_at: new Date().toISOString(),
     }
 
     // Clear input immediately and show optimistic message
     setContent('')
     const fileToSend = selectedFile
+    const replyContext = replyToMessage
     clearFile()
+    onClearReply?.()
     onMessageSent(optimisticMessage, true)
     setIsSending(true)
 
@@ -156,11 +171,11 @@ export function MessageInput({
           body: formData,
         })
       } else {
-        // Send text message
+        // Send text message (with reply context if replying)
         response = await fetch('/api/messages/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conversationId, content: trimmedContent }),
+          body: JSON.stringify({ conversationId, content: messageContent }),
         })
       }
 
@@ -197,6 +212,32 @@ export function MessageInput({
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <div className="w-2 h-2 rounded-full bg-amber-500" />
             <span>Manual mode</span>
+          </div>
+        </div>
+      )}
+
+      {/* Reply Preview */}
+      {replyToMessage && (
+        <div className="px-4 pt-3">
+          <div className="flex items-center gap-3 p-2 bg-muted/50 rounded-lg border-l-2 border-primary">
+            <Reply className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">
+                Replying to {replyToMessage.direction === 'inbound' ? 'their message' : 'your message'}
+              </p>
+              <p className="text-sm truncate">
+                {replyToMessage.content || `[${replyToMessage.message_type}]`}
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={onClearReply}
+            >
+              <X className="h-3 w-3" />
+            </Button>
           </div>
         </div>
       )}

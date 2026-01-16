@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check, StickyNote, Send, ChevronDown, ChevronUp, X, Phone, Mail, MapPin, Calendar, Star, Info, XCircle } from 'lucide-react'
+import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check, StickyNote, Send, ChevronDown, ChevronUp, X, Phone, Mail, MapPin, Calendar, Star, Info, XCircle, Reply } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
@@ -44,6 +44,7 @@ interface MessageThreadProps {
   onClose?: () => void
   showInfoPanel?: boolean
   onToggleInfoPanel?: () => void
+  onReply?: (message: Message) => void
 }
 
 function getDayLabel(date: Date): string {
@@ -92,7 +93,7 @@ function isSendingMessage(message: Message): boolean {
   )
 }
 
-function MessageBubble({ message, contactName, contactPhone }: { message: Message; contactName?: string | null; contactPhone?: string }) {
+function MessageBubble({ message, contactName, contactPhone, onReply }: { message: Message; contactName?: string | null; contactPhone?: string; onReply?: (message: Message) => void }) {
   const isOutbound = message.direction === 'outbound'
   const isSending = isSendingMessage(message)
   const metadata = message.metadata as Record<string, unknown> | null
@@ -146,10 +147,21 @@ function MessageBubble({ message, contactName, contactPhone }: { message: Messag
     }
   }
 
+  const ReplyButton = () => (
+    <button
+      onClick={() => onReply?.(message)}
+      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-muted"
+      title="Reply"
+    >
+      <Reply className="h-4 w-4 text-muted-foreground" />
+    </button>
+  )
+
   // Outbound messages with avatar (like Kapso)
   if (isOutbound) {
     return (
-      <div className="flex items-end gap-2 justify-end">
+      <div className="flex items-end gap-2 justify-end group">
+        {onReply && <ReplyButton />}
         <div
           className={cn(
             'max-w-[70%] rounded-2xl rounded-br-sm px-4 py-2 bg-[#2D4B3E] text-white',
@@ -175,7 +187,7 @@ function MessageBubble({ message, contactName, contactPhone }: { message: Messag
 
   // Inbound messages with avatar
   return (
-    <div className="flex items-end gap-2">
+    <div className="flex items-end gap-2 group">
       <Avatar className={cn('h-8 w-8 flex-shrink-0', getAvatarColor(contactName || null, contactPhone || ''))}>
         <AvatarFallback className="text-xs text-white font-medium bg-transparent">
           {getInitials(contactName || null, contactPhone || '')}
@@ -192,6 +204,7 @@ function MessageBubble({ message, contactName, contactPhone }: { message: Messag
           {format(new Date(message.created_at), 'hh:mm a')}
         </span>
       </div>
+      {onReply && <ReplyButton />}
     </div>
   )
 }
@@ -208,6 +221,7 @@ export function MessageThread({
   onClose,
   showInfoPanel = false,
   onToggleInfoPanel,
+  onReply,
 }: MessageThreadProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const statusConfig = LEAD_STATUS_CONFIG[conversationContact.lead_status as LeadStatus] || LEAD_STATUS_CONFIG.prospect
@@ -754,6 +768,7 @@ export function MessageThread({
                     message={message}
                     contactName={conversationContact.name}
                     contactPhone={conversationContact.phone}
+                    onReply={onReply}
                   />
                 </div>
               )
