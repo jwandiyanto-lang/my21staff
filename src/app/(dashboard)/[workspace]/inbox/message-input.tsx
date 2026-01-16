@@ -25,6 +25,7 @@ interface MessageInputProps {
   quickReplies?: QuickReply[]
   onMessageSent: (message: Message, isOptimistic: boolean) => void
   onMessageError: (optimisticId: string) => void
+  conversationStatus?: string
 }
 
 type MediaType = 'image' | 'video' | 'document'
@@ -59,7 +60,9 @@ export function MessageInput({
   quickReplies,
   onMessageSent,
   onMessageError,
+  conversationStatus,
 }: MessageInputProps) {
+  const isManualMode = conversationStatus === 'handover'
   // Use provided templates or fall back to defaults
   const templates = quickReplies && quickReplies.length > 0 ? quickReplies : DEFAULT_QUICK_TEMPLATES
   const [content, setContent] = useState('')
@@ -186,6 +189,16 @@ export function MessageInput({
 
   return (
     <div className="border-t bg-background">
+      {/* Manual mode indicator */}
+      {isManualMode && (
+        <div className="px-4 pt-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="w-2 h-2 rounded-full bg-amber-500" />
+            <span>Manual mode</span>
+          </div>
+        </div>
+      )}
+
       {/* File Preview */}
       {selectedFile && (
         <div className="px-4 pt-3">

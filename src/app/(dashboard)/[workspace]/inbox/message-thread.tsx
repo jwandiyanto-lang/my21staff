@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow, isToday, isYesterday, isSameDay } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check, StickyNote, Send, ChevronDown, ChevronUp, X, Phone, Mail, MapPin, Calendar, Star } from 'lucide-react'
+import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check, StickyNote, Send, ChevronDown, ChevronUp, X, Phone, Mail, MapPin, Calendar, Star, Info, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
@@ -41,6 +41,28 @@ interface MessageThreadProps {
   isLoading: boolean
   onHandoverChange?: (aiPaused: boolean) => void
   onContactMerged?: () => void
+  onClose?: () => void
+  showInfoPanel?: boolean
+  onToggleInfoPanel?: () => void
+}
+
+function getDayLabel(date: Date): string {
+  if (isToday(date)) return 'Today'
+  if (isYesterday(date)) return 'Yesterday'
+  return format(date, 'MMMM d, yyyy')
+}
+
+function getAvatarColor(name: string | null, phone: string): string {
+  const str = name || phone
+  const colors = [
+    'bg-orange-500', 'bg-emerald-500', 'bg-blue-500', 'bg-purple-500',
+    'bg-pink-500', 'bg-yellow-500', 'bg-cyan-500', 'bg-rose-500'
+  ]
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return colors[Math.abs(hash) % colors.length]
 }
 
 function getInitials(name: string | null, phone: string): string {
@@ -70,7 +92,7 @@ function isSendingMessage(message: Message): boolean {
   )
 }
 
-function MessageBubble({ message }: { message: Message }) {
+function MessageBubble({ message, contactName, contactPhone }: { message: Message; contactName?: string | null; contactPhone?: string }) {
   const isOutbound = message.direction === 'outbound'
   const isSending = isSendingMessage(message)
   const metadata = message.metadata as Record<string, unknown> | null
@@ -124,31 +146,52 @@ function MessageBubble({ message }: { message: Message }) {
     }
   }
 
+  // Outbound messages with avatar (like Kapso)
+  if (isOutbound) {
+    return (
+      <div className="flex items-end gap-2 justify-end">
+        <div
+          className={cn(
+            'max-w-[70%] rounded-2xl rounded-br-sm px-4 py-2 bg-[#2D4B3E] text-white',
+            isSending && 'opacity-70'
+          )}
+        >
+          {renderMedia()}
+          {message.content && <p className="whitespace-pre-wrap text-sm">{message.content}</p>}
+          <span className="text-xs block mt-1 text-white/60">
+            {isSending ? (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Sending...
+              </span>
+            ) : (
+              format(new Date(message.created_at), 'hh:mm a')
+            )}
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  // Inbound messages with avatar
   return (
-    <div
-      className={cn(
-        'max-w-[70%] rounded-lg px-4 py-2',
-        isOutbound
-          ? 'ml-auto bg-primary text-primary-foreground'
-          : 'bg-muted',
-        isSending && 'opacity-70'
-      )}
-    >
-      {renderMedia()}
-      {message.content && <p className="whitespace-pre-wrap">{message.content}</p>}
-      <span className={cn(
-        'text-xs block mt-1 flex items-center gap-1',
-        isOutbound ? 'text-primary-foreground/70' : 'text-muted-foreground'
-      )}>
-        {isSending ? (
-          <>
-            <Clock className="h-3 w-3" />
-            Sending...
-          </>
-        ) : (
-          format(new Date(message.created_at), 'HH:mm')
+    <div className="flex items-end gap-2">
+      <Avatar className={cn('h-8 w-8 flex-shrink-0', getAvatarColor(contactName || null, contactPhone || ''))}>
+        <AvatarFallback className="text-xs text-white font-medium bg-transparent">
+          {getInitials(contactName || null, contactPhone || '')}
+        </AvatarFallback>
+      </Avatar>
+      <div
+        className={cn(
+          'max-w-[70%] rounded-2xl rounded-bl-sm px-4 py-2 bg-muted'
         )}
-      </span>
+      >
+        {renderMedia()}
+        {message.content && <p className="whitespace-pre-wrap text-sm">{message.content}</p>}
+        <span className="text-xs block mt-1 text-muted-foreground">
+          {format(new Date(message.created_at), 'hh:mm a')}
+        </span>
+      </div>
     </div>
   )
 }
@@ -161,7 +204,10 @@ export function MessageThread({
   workspaceId,
   isLoading,
   onHandoverChange,
-  onContactMerged
+  onContactMerged,
+  onClose,
+  showInfoPanel = false,
+  onToggleInfoPanel,
 }: MessageThreadProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const statusConfig = LEAD_STATUS_CONFIG[conversationContact.lead_status as LeadStatus] || LEAD_STATUS_CONFIG.prospect
@@ -365,93 +411,115 @@ export function MessageThread({
     )
   }
 
+  // Calculate last activity time
+  const lastActivityTime = messages.length > 0
+    ? formatDistanceToNow(new Date(messages[messages.length - 1].created_at), { addSuffix: false })
+    : null
+
+  const isActive = conversationStatus === 'open' || conversationStatus === 'handover'
+
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-      {/* Header */}
-      <div className="p-4 border-b bg-background flex items-center gap-3">
-        <button
-          onClick={() => setShowContactDetails(!showContactDetails)}
-          className="flex items-center gap-3 flex-1 min-w-0 text-left hover:opacity-80 transition-opacity"
-        >
-          <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-muted">
-              {getInitials(conversationContact.name, conversationContact.phone)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <p className="font-medium truncate">
-                {getFirstName(conversationContact.name, conversationContact.phone)}
-              </p>
-              {statusConfig && (
-                <Badge
-                  variant="outline"
-                  style={{
-                    color: statusConfig.color,
-                    borderColor: statusConfig.color,
-                    backgroundColor: statusConfig.bgColor,
-                  }}
-                  className="text-xs"
-                >
-                  {statusConfig.label}
-                </Badge>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground truncate">
-              {conversationContact.name && conversationContact.phone}
-              {conversationContact.lead_score > 0 && (
-                <span className="ml-2">• Score: {conversationContact.lead_score}</span>
-              )}
-            </p>
-          </div>
-        </button>
+      {/* Header - Kapso style */}
+      <div className="px-4 py-3 border-b bg-background flex items-center gap-3">
+        {/* Avatar and contact info */}
+        <Avatar className={cn('h-10 w-10', getAvatarColor(conversationContact.name, conversationContact.phone))}>
+          <AvatarFallback className="text-sm text-white font-medium bg-transparent">
+            {getInitials(conversationContact.name, conversationContact.phone)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold truncate">
+            {conversationContact.name || conversationContact.phone}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            <span className={isActive ? 'text-emerald-600' : ''}>
+              {isActive ? 'Active' : 'Closed'}
+            </span>
+            {lastActivityTime && (
+              <> • {lastActivityTime} ago</>
+            )}
+            <> • {conversationContact.phone}</>
+          </p>
+        </div>
 
+        {/* Close button */}
+        {onClose && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <XCircle className="h-4 w-4" />
+            Close
+          </Button>
+        )}
+
+        {/* Info toggle */}
+        {onToggleInfoPanel && (
+          <Button
+            variant={showInfoPanel ? 'default' : 'ghost'}
+            size="sm"
+            onClick={onToggleInfoPanel}
+            className="gap-1.5"
+          >
+            <Info className="h-4 w-4" />
+            Info
+          </Button>
+        )}
+      </div>
+
+      {/* Secondary header with actions */}
+      <div className="px-4 py-2 border-b bg-muted/30 flex items-center gap-2">
         {/* Notes Toggle */}
         <Button
-          variant={showNotesPanel ? 'default' : 'outline'}
+          variant={showNotesPanel ? 'secondary' : 'ghost'}
           size="sm"
           onClick={toggleNotesPanel}
-          className="gap-2"
+          className="gap-1.5 h-8 text-xs"
         >
-          <StickyNote className="h-4 w-4" />
+          <StickyNote className="h-3.5 w-3.5" />
           Notes
           {notes.length > 0 && (
-            <span className={cn(
-              'px-1.5 py-0.5 rounded-full text-[10px]',
-              showNotesPanel ? 'bg-white/20' : 'bg-primary/10 text-primary'
-            )}>
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary">
               {notes.length}
             </span>
           )}
-          {showNotesPanel ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </Button>
 
         {/* Handover Toggle */}
         <Button
-          variant={aiPaused ? 'default' : 'outline'}
+          variant={aiPaused ? 'secondary' : 'ghost'}
           size="sm"
           onClick={handleHandoverToggle}
           disabled={isTogglingHandover}
-          className="gap-2"
+          className="gap-1.5 h-8 text-xs"
         >
           {isTogglingHandover ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : aiPaused ? (
-            <User className="h-4 w-4" />
+            <User className="h-3.5 w-3.5" />
           ) : (
-            <Bot className="h-4 w-4" />
+            <Bot className="h-3.5 w-3.5" />
           )}
-          {aiPaused ? 'Anda merespons' : 'AI Aktif'}
+          {aiPaused ? 'Manual mode' : 'AI Aktif'}
         </Button>
+
+        <div className="flex-1" />
 
         {/* More actions dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="h-8 w-8">
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setShowContactDetails(!showContactDetails)}>
+              <User className="h-4 w-4 mr-2" />
+              Contact Details
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setMergeDialogOpen(true)}>
               <Merge className="h-4 w-4 mr-2" />
               Merge Contact
@@ -609,9 +677,29 @@ export function MessageThread({
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
-            ))}
+            {messages.map((message, index) => {
+              const messageDate = new Date(message.created_at)
+              const prevMessage = index > 0 ? messages[index - 1] : null
+              const showDaySeparator = !prevMessage || !isSameDay(messageDate, new Date(prevMessage.created_at))
+
+              return (
+                <div key={message.id}>
+                  {/* Day separator */}
+                  {showDaySeparator && (
+                    <div className="flex items-center justify-center my-4">
+                      <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
+                        {getDayLabel(messageDate)}
+                      </span>
+                    </div>
+                  )}
+                  <MessageBubble
+                    message={message}
+                    contactName={conversationContact.name}
+                    contactPhone={conversationContact.phone}
+                  />
+                </div>
+              )
+            })}
             <div ref={messagesEndRef} />
           </div>
         )}

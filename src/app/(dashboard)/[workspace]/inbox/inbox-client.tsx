@@ -9,7 +9,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Filter, MessageCircle, Mail, MailOpen, ChevronDown } from 'lucide-react'
+import { Filter, MessageCircle, Mail, MailOpen, ChevronDown, Phone, Calendar, Star, User, MessageSquare } from 'lucide-react'
+import { format, formatDistanceToNow } from 'date-fns'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { ConversationList } from './conversation-list'
 import { MessageThread } from './message-thread'
 import { MessageInput } from './message-input'
@@ -41,6 +44,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
   const [showUnreadOnly, setShowUnreadOnly] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+  const [showInfoPanel, setShowInfoPanel] = useState(false)
 
   // Count unread conversations
   const unreadCount = useMemo(() => {
@@ -359,6 +363,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
           onSelect={handleSelectConversation}
           searchQuery={searchQuery}
           hasStatusFilter={statusFilter.length > 0}
+          workspaceName={workspace.name}
         />
       </div>
 
@@ -374,6 +379,8 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
               workspaceId={workspace.id}
               isLoading={isLoadingMessages}
               onHandoverChange={handleHandoverChange}
+              showInfoPanel={showInfoPanel}
+              onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
             />
             <MessageInput
               conversationId={selectedConversation.id}
@@ -382,6 +389,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
               quickReplies={quickReplies}
               onMessageSent={handleMessageSent}
               onMessageError={handleMessageError}
+              conversationStatus={selectedConversation.status}
             />
           </>
         ) : (
@@ -396,6 +404,169 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
           </div>
         )}
       </div>
+
+      {/* Right Info sidebar - Kapso style */}
+      {showInfoPanel && selectedConversation && (
+        <InfoSidebar
+          contact={selectedConversation.contact}
+          messagesCount={messages.length}
+          lastActivity={messages.length > 0 ? messages[messages.length - 1].created_at : null}
+          conversationStatus={selectedConversation.status}
+        />
+      )}
+    </div>
+  )
+}
+
+// Helper function for avatar color
+function getAvatarColor(name: string | null, phone: string): string {
+  const str = name || phone
+  const colors = [
+    'bg-orange-500', 'bg-emerald-500', 'bg-blue-500', 'bg-purple-500',
+    'bg-pink-500', 'bg-yellow-500', 'bg-cyan-500', 'bg-rose-500'
+  ]
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return colors[Math.abs(hash) % colors.length]
+}
+
+function getInitials(name: string | null, phone: string): string {
+  if (name) {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
+  return phone.slice(-2)
+}
+
+// Info Sidebar Component (Kapso style)
+function InfoSidebar({
+  contact,
+  messagesCount,
+  lastActivity,
+  conversationStatus,
+}: {
+  contact: ConversationWithContact['contact']
+  messagesCount: number
+  lastActivity: string | null
+  conversationStatus: string
+}) {
+  const isActive = conversationStatus === 'open' || conversationStatus === 'handover'
+  const statusConfig = LEAD_STATUS_CONFIG[contact.lead_status as LeadStatus] || LEAD_STATUS_CONFIG.prospect
+
+  return (
+    <div className="w-72 border-l bg-background flex flex-col">
+      {/* Contact header */}
+      <div className="p-4 border-b">
+        <div className="flex items-center gap-3">
+          <Avatar className={cn('h-12 w-12', getAvatarColor(contact.name, contact.phone))}>
+            <AvatarFallback className="text-white font-medium bg-transparent">
+              {getInitials(contact.name, contact.phone)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold truncate">{contact.name || contact.phone}</p>
+            <p className="text-sm text-muted-foreground">{contact.phone}</p>
+          </div>
+        </div>
+
+        {/* Quick actions */}
+        <div className="flex gap-2 mt-4">
+          <Button variant="outline" size="sm" className="flex-1 text-xs">
+            View conversations
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1 text-xs">
+            + Add note
+          </Button>
+        </div>
+      </div>
+
+      {/* Assignment */}
+      <div className="p-4 border-b">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+          <User className="h-4 w-4" />
+          <span>Assignment</span>
+        </div>
+        <p className="text-sm">Not assigned</p>
+      </div>
+
+      {/* Status */}
+      <div className="p-4 border-b">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+          <MessageSquare className="h-4 w-4" />
+          <span>Status</span>
+        </div>
+        <Badge
+          variant="outline"
+          className={cn(
+            'text-xs',
+            isActive ? 'bg-emerald-500/20 text-emerald-600 border-emerald-500/30' : ''
+          )}
+        >
+          {isActive ? 'Active' : 'Closed'}
+        </Badge>
+      </div>
+
+      {/* Lead Status */}
+      <div className="p-4 border-b">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+          <Star className="h-4 w-4" />
+          <span>Lead Status</span>
+        </div>
+        <Badge
+          variant="outline"
+          style={{
+            color: statusConfig.color,
+            borderColor: statusConfig.color,
+            backgroundColor: statusConfig.bgColor,
+          }}
+          className="text-xs"
+        >
+          {statusConfig.label}
+        </Badge>
+        {contact.lead_score > 0 && (
+          <p className="text-xs text-muted-foreground mt-1">Score: {contact.lead_score}</p>
+        )}
+      </div>
+
+      {/* Activity */}
+      <div className="p-4">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+          <Calendar className="h-4 w-4" />
+          <span>Activity</span>
+        </div>
+        <div className="space-y-1 text-sm">
+          <p>
+            <span className="text-muted-foreground">Last active: </span>
+            {lastActivity
+              ? formatDistanceToNow(new Date(lastActivity), { addSuffix: false }) + ' ago'
+              : 'Never'}
+          </p>
+          <p>
+            <span className="text-muted-foreground">Total messages: </span>
+            {messagesCount}
+          </p>
+        </div>
+      </div>
+
+      {/* Tags */}
+      {contact.tags && contact.tags.length > 0 && (
+        <div className="p-4 border-t">
+          <p className="text-sm text-muted-foreground mb-2">Tags</p>
+          <div className="flex flex-wrap gap-1">
+            {contact.tags.map((tag, i) => (
+              <Badge key={i} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -2,9 +2,8 @@
 
 import { formatDistanceToNow } from 'date-fns'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
+import { cn } from '@/lib/utils'
 import type { ConversationWithContact } from '@/types/database'
 
 interface ConversationListProps {
@@ -13,6 +12,7 @@ interface ConversationListProps {
   onSelect: (conversation: ConversationWithContact) => void
   searchQuery: string
   hasStatusFilter?: boolean
+  workspaceName?: string
 }
 
 function getInitials(name: string | null, phone: string): string {
@@ -27,11 +27,18 @@ function getInitials(name: string | null, phone: string): string {
   return phone.slice(-2)
 }
 
-function getFirstName(name: string | null, phone: string): string {
-  if (name) {
-    return name.split(' ')[0]
+function getAvatarColor(name: string | null, phone: string): string {
+  // Generate consistent color based on name/phone
+  const str = name || phone
+  const colors = [
+    'bg-orange-500', 'bg-emerald-500', 'bg-blue-500', 'bg-purple-500',
+    'bg-pink-500', 'bg-yellow-500', 'bg-cyan-500', 'bg-rose-500'
+  ]
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
   }
-  return phone
+  return colors[Math.abs(hash) % colors.length]
 }
 
 export function ConversationList({
@@ -40,6 +47,7 @@ export function ConversationList({
   onSelect,
   searchQuery,
   hasStatusFilter = false,
+  workspaceName = 'Workspace',
 }: ConversationListProps) {
   const filteredConversations = conversations.filter((conv) =>
     conv.contact.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -73,53 +81,68 @@ export function ConversationList({
 
   return (
     <ScrollArea className="flex-1 min-h-0">
-      <div className="divide-y">
+      <div>
         {filteredConversations.map((conversation) => {
-          const status = conversation.contact.lead_status as LeadStatus
-          const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.prospect
+          const isSelected = selectedId === conversation.id
+          const isActive = conversation.status === 'open' || conversation.status === 'handover'
 
           return (
             <button
               key={conversation.id}
               onClick={() => onSelect(conversation)}
-              className={`w-full p-4 text-left hover:bg-muted/50 transition-colors ${
-                selectedId === conversation.id ? 'bg-muted' : ''
-              }`}
+              className={cn(
+                'w-full p-3 text-left transition-colors border-l-2',
+                isSelected
+                  ? 'bg-primary/10 border-l-primary'
+                  : 'hover:bg-muted/50 border-l-transparent'
+              )}
             >
               <div className="flex items-start gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="text-sm">
+                <Avatar className={cn('h-10 w-10', getAvatarColor(conversation.contact.name, conversation.contact.phone))}>
+                  <AvatarFallback className="text-sm text-white font-medium bg-transparent">
                     {getInitials(conversation.contact.name, conversation.contact.phone)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium truncate">
-                      {getFirstName(conversation.contact.name, conversation.contact.phone)}
+                  {/* Row 1: Name + Timestamp */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium truncate text-sm">
+                      {conversation.contact.name || conversation.contact.phone}
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-2 h-2 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: statusConfig.color }}
-                        title={statusConfig.label}
-                      />
-                      {conversation.unread_count > 0 && (
-                        <Badge variant="default" className="h-5 px-1.5 text-xs">
-                          {conversation.unread_count}
-                        </Badge>
-                      )}
-                    </div>
+                    <span className="text-xs text-muted-foreground flex-shrink-0">
+                      {conversation.last_message_at
+                        ? formatDistanceToNow(new Date(conversation.last_message_at), {
+                            addSuffix: false,
+                          }).replace('about ', '').replace('less than a minute', '1m')
+                        : ''}
+                    </span>
                   </div>
+
+                  {/* Row 2: Preview text */}
                   <p className="text-sm text-muted-foreground truncate mt-0.5">
                     {conversation.last_message_preview || 'No messages yet'}
                   </p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">
-                    {conversation.last_message_at
-                      ? formatDistanceToNow(new Date(conversation.last_message_at), {
-                          addSuffix: true,
-                        })
-                      : 'Never'}
-                  </p>
+
+                  {/* Row 3: Status + Source */}
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={cn(
+                      'text-[10px] px-1.5 py-0.5 rounded font-medium',
+                      isActive
+                        ? 'bg-emerald-500/20 text-emerald-600'
+                        : 'bg-muted text-muted-foreground'
+                    )}>
+                      {isActive ? 'Active' : 'Closed'}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">•</span>
+                    <span className="text-[10px] text-muted-foreground truncate">
+                      {workspaceName}
+                    </span>
+                    {conversation.unread_count > 0 && (
+                      <span className="ml-auto bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                        {conversation.unread_count}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </button>
