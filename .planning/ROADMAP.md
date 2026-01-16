@@ -126,7 +126,25 @@ Plans:
 
 ---
 
-## v1.7 — Form & Lead Capture (In Progress)
+## v1.7 — Inbox Polish (IN PROGRESS)
+
+### Phase 17: Inbox UI/UX Fixes
+
+**Goal:** Polish inbox with working filters, better layout, and WhatsApp-style feel
+**Depends on:** Phase 13 (Lead Management)
+**Plans:** TBD
+
+**Fixes:**
+1. WhatsApp-style background pattern in conversation area
+2. Info panel responsive (no cutoff on narrow screens)
+3. Header layout: `[Notes] [Merge] ──── [AI Aktif]`
+4. Status/tag filters actually filter conversation list
+5. Unread filter works
+6. Assigned to dropdown shows team members (or owner if none)
+
+---
+
+## v1.8 — Form & Lead Capture (Future)
 
 ### Phase 16: Pricing Form Enhancement
 
@@ -164,4 +182,5 @@ Plans:
 | 13. Lead Management Enhancement | v1.5 | 3/3 | Complete | 2026-01-16 |
 | 14. Landing Page Refresh | v1.6 | 1/1 | Complete | 2026-01-16 |
 | 15. Pricing Page | v1.6 | 2/2 | Complete | 2026-01-16 |
-| 16. Pricing Form Enhancement | v1.7 | 0/1 | Not started | — |
+| 16. Pricing Form Enhancement | v1.8 | 0/1 | Not started | — |
+| 17. Inbox UI/UX Fixes | v1.7 | 0/? | In Progress | — |

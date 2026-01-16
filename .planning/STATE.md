@@ -5,15 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** v1.5 & v1.6 Complete
+**Current focus:** v1.7 — Inbox Polish
 
 ## Current Position
 
-Phase: All phases complete (13-03 was last)
-Status: Complete
-Last activity: 2026-01-16 — Completed 15-02 (Pricing Modal Form + Animations)
+Phase: 17 (Inbox UI/UX Fixes)
+Plan: Context gathered, ready for planning
+Status: In Progress
+Last activity: 2026-01-16 — Created Phase 17 context for inbox fixes
 
-Progress: v1.5 ██████████ Phase 13 Complete | v1.6 ██████████ Phases 14-15 Complete
+Progress: v1.7 ░░░░░░░░░░ Phase 17 starting
 
 ## Performance Metrics
 
@@ -44,6 +45,7 @@ Progress: v1.5 ██████████ Phase 13 Complete | v1.6 ███
 - Phase 13 added: Lead Management Enhancement (v1.5)
 - Phase 14 added: Landing Page Refresh (v1.6)
 - Phase 15 added: Pricing Page (v1.6)
+- Phase 17 added: Inbox UI/UX Fixes (v1.7)
 
 ### Decisions
 
@@ -66,6 +68,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed 15-02 (Pricing Modal Form + Animations)
+Stopped at: Created Phase 17 context
 Resume file: None
-Next: All current phases complete. Consider v1.7 milestone, production deployment, or form submission backend.
+Next: Plan and execute Phase 17 (Inbox UI/UX Fixes)
