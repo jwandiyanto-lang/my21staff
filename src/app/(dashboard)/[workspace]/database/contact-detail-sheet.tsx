@@ -333,7 +333,8 @@ export function ContactDetailSheet({
         const formAnswers = (innerMeta.form_answers as Record<string, unknown>) || {}
         const hasFormAnswers = Object.keys(formAnswers).length > 0
 
-        if (hasFormAnswers || meta.source === 'google_form') {
+        const source = innerMeta.source || meta.source
+        if (hasFormAnswers || source === 'google_form' || source === 'google_sheets') {
           activityList.push({
             id: `form-${contact.id}`,
             type: 'form_submission',
@@ -438,9 +439,12 @@ export function ContactDetailSheet({
   }
 
   // Extract form responses from metadata if present
+  // Data structure: metadata.metadata.form_answers (from n8n Google Sheets sync)
   const metadata = contact.metadata as Record<string, unknown> | null
-  const formResponses = metadata && typeof metadata === 'object'
-    ? Object.entries(metadata).filter(([key]) => !key.startsWith('_'))
+  const innerMetadata = metadata?.metadata as Record<string, unknown> | undefined
+  const formAnswersData = (innerMetadata?.form_answers as Record<string, unknown>) || {}
+  const formResponses = Object.keys(formAnswersData).length > 0
+    ? Object.entries(formAnswersData).filter(([key]) => !key.startsWith('_'))
     : []
 
   // Lead score color
@@ -556,6 +560,10 @@ export function ContactDetailSheet({
   }
 
   const scoreBreakdown = metadata ? calculateScoreBreakdown(metadata) : []
+
+  // Calculate score from form answers if stored score is 0
+  const calculatedScore = scoreBreakdown.reduce((sum, item) => sum + item.points, 0)
+  const displayScore = localScore === 0 && calculatedScore > 0 ? calculatedScore : localScore
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -675,9 +683,9 @@ export function ContactDetailSheet({
                       )}
                       <span
                         className="text-xl font-semibold tabular-nums"
-                        style={{ color: getScoreColor(localScore) }}
+                        style={{ color: getScoreColor(displayScore) }}
                       >
-                        {localScore}
+                        {displayScore}
                       </span>
                     </div>
                   </div>
@@ -686,13 +694,13 @@ export function ContactDetailSheet({
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
-                          width: `${Math.min(localScore, 100)}%`,
-                          backgroundColor: getScoreColor(localScore),
+                          width: `${Math.min(displayScore, 100)}%`,
+                          backgroundColor: getScoreColor(displayScore),
                         }}
                       />
                     </div>
                     <Slider
-                      value={[localScore]}
+                      value={[displayScore]}
                       onValueChange={handleScoreChange}
                       min={0}
                       max={100}
@@ -733,8 +741,8 @@ export function ContactDetailSheet({
                         ))}
                         <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
                           <span>Total</span>
-                          <span style={{ color: getScoreColor(localScore) }}>
-                            {scoreBreakdown.reduce((sum, item) => sum + item.points, 0)} pts
+                          <span style={{ color: getScoreColor(displayScore) }}>
+                            {calculatedScore} pts
                           </span>
                         </div>
                       </div>
