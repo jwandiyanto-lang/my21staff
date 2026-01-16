@@ -5,6 +5,8 @@ import { DataTable } from '@/components/ui/data-table'
 import { createColumns } from './columns'
 import { ContactDetailSheet } from './contact-detail-sheet'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
+import { Badge } from '@/components/ui/badge'
+import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Contact, Workspace } from '@/types/database'
 
@@ -16,6 +18,7 @@ interface DatabaseClientProps {
 export function DatabaseClient({ workspace, contacts: initialContacts }: DatabaseClientProps) {
   const [contacts, setContacts] = useState<Contact[]>(initialContacts)
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
 
@@ -61,10 +64,41 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
     return counts
   }, [contacts])
 
+  // Extract all unique tags
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>()
+    contacts.forEach((contact) => {
+      contact.tags?.forEach((tag) => tagSet.add(tag))
+    })
+    return Array.from(tagSet).sort()
+  }, [contacts])
+
+  // Toggle tag selection
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag]
+    )
+  }
+
   const filteredContacts = useMemo(() => {
-    if (activeStatus === 'all') return contacts
-    return contacts.filter((contact) => contact.lead_status === activeStatus)
-  }, [contacts, activeStatus])
+    let filtered = contacts
+
+    // Filter by status
+    if (activeStatus !== 'all') {
+      filtered = filtered.filter((contact) => contact.lead_status === activeStatus)
+    }
+
+    // Filter by tags (contact must have ALL selected tags)
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter((contact) =>
+        selectedTags.every((tag) => contact.tags?.includes(tag))
+      )
+    }
+
+    return filtered
+  }, [contacts, activeStatus, selectedTags])
 
   const handleRowClick = (contact: Contact) => {
     setSelectedContact(contact)
@@ -129,6 +163,46 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
           )
         })}
       </div>
+
+      {/* Tag Filters */}
+      {allTags.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm text-muted-foreground mr-2">Tags:</span>
+          {allTags.map((tag) => {
+            const isSelected = selectedTags.includes(tag)
+            return (
+              <button
+                key={tag}
+                onClick={() => toggleTag(tag)}
+                className={cn(
+                  'px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1',
+                  isSelected
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                )}
+              >
+                {tag}
+                {isSelected && <X className="h-3 w-3" />}
+              </button>
+            )
+          })}
+          {selectedTags.length > 0 && (
+            <button
+              onClick={() => setSelectedTags([])}
+              className="text-xs text-muted-foreground hover:text-foreground underline ml-2"
+            >
+              Clear tags
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Results count */}
+      {(activeStatus !== 'all' || selectedTags.length > 0) && (
+        <p className="text-sm text-muted-foreground">
+          Showing {filteredContacts.length} of {contacts.length} contacts
+        </p>
+      )}
 
       {/* Data Table */}
       <DataTable

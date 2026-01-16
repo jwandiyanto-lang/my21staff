@@ -13,14 +13,22 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
+import { cn } from '@/lib/utils'
 import type { Contact } from '@/types/database'
 import { formatDistanceToNow } from 'date-fns'
 
-interface ColumnsConfig {
-  onStatusChange?: (contactId: string, newStatus: LeadStatus) => void
+interface TeamMember {
+  id: string
+  name: string | null
 }
 
-export function createColumns({ onStatusChange }: ColumnsConfig = {}): ColumnDef<Contact>[] {
+interface ColumnsConfig {
+  onStatusChange?: (contactId: string, newStatus: LeadStatus) => void
+  onAssigneeChange?: (contactId: string, assigneeId: string | null) => void
+  teamMembers?: TeamMember[]
+}
+
+export function createColumns({ onStatusChange, onAssigneeChange, teamMembers = [] }: ColumnsConfig = {}): ColumnDef<Contact>[] {
   return [
   {
     accessorKey: 'name',
@@ -141,6 +149,65 @@ export function createColumns({ onStatusChange }: ColumnsConfig = {}): ColumnDef
             </Badge>
           )}
         </div>
+      )
+    },
+  },
+  {
+    accessorKey: 'assigned_to',
+    header: 'Assigned to',
+    cell: ({ row }) => {
+      const contact = row.original
+      const assignedTo = row.getValue('assigned_to') as string | null
+      const assignedMember = teamMembers.find((m) => m.id === assignedTo)
+
+      if (!onAssigneeChange || teamMembers.length === 0) {
+        return assignedMember ? (
+          <Badge variant="outline" className="text-xs">
+            {assignedMember.name || 'Unnamed'}
+          </Badge>
+        ) : (
+          <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700">
+            New Lead
+          </Badge>
+        )
+      }
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <button
+              className={cn(
+                'flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium hover:opacity-80 transition-opacity',
+                assignedTo
+                  ? 'bg-muted text-foreground'
+                  : 'bg-amber-100 text-amber-700'
+              )}
+            >
+              {assignedMember?.name || 'New Lead'}
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem
+              onClick={() => onAssigneeChange(contact.id, null)}
+              className={!assignedTo ? 'bg-muted' : ''}
+            >
+              <span className="w-2 h-2 rounded-full mr-2 bg-amber-500" />
+              Unassigned (New Lead)
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {teamMembers.map((member) => (
+              <DropdownMenuItem
+                key={member.id}
+                onClick={() => onAssigneeChange(contact.id, member.id)}
+                className={assignedTo === member.id ? 'bg-muted' : ''}
+              >
+                <span className="w-2 h-2 rounded-full mr-2 bg-primary" />
+                {member.name || 'Unnamed'}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )
     },
   },

@@ -28,6 +28,7 @@ export const MOCK_CONTACTS: Contact[] = [
     lead_score: 50,
     lead_status: 'new',
     tags: ['Student', 'Immigration'],
+    assigned_to: null,
     metadata: {
       source: 'Facebook CTWA',
       interest: 'Family Immigration',
@@ -45,6 +46,7 @@ export const MOCK_CONTACTS: Contact[] = [
     lead_score: 30,
     lead_status: 'new',
     tags: [],
+    assigned_to: null,
     metadata: { source: 'Referral Link' },
     created_at: '2026-01-14T08:00:00Z',
     updated_at: '2026-01-14T08:00:00Z',

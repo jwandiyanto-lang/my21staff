@@ -79,6 +79,7 @@ export interface Database {
           lead_score: number
           lead_status: string
           tags: string[]
+          assigned_to: string | null
           metadata: Json
           created_at: string
           updated_at: string
@@ -92,6 +93,7 @@ export interface Database {
           lead_score?: number
           lead_status?: string
           tags?: string[]
+          assigned_to?: string | null
           metadata?: Json
           created_at?: string
           updated_at?: string
@@ -105,6 +107,7 @@ export interface Database {
           lead_score?: number
           lead_status?: string
           tags?: string[]
+          assigned_to?: string | null
           metadata?: Json
           created_at?: string
           updated_at?: string
