@@ -21,16 +21,25 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check, StickyNote, Send, ChevronDown, ChevronUp, X, Phone, Mail, MapPin, Calendar, Star, Info, XCircle, Reply } from 'lucide-react'
+import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check, StickyNote, Send, ChevronDown, ChevronUp, X, Phone, Mail, MapPin, Calendar, Star, Info, XCircle, Reply, UserPlus } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import { createClient } from '@/lib/supabase/client'
-import type { Contact, Message, Profile, ContactNote } from '@/types/database'
+import type { Contact, Message, Profile, ContactNote, WorkspaceMember } from '@/types/database'
 
 type ContactNoteWithAuthor = ContactNote & {
   author?: Profile
 }
+
+type TeamMember = WorkspaceMember & { profile: Profile | null }
 
 interface MessageThreadProps {
   messages: Message[]
@@ -39,7 +48,10 @@ interface MessageThreadProps {
   conversationStatus: string
   workspaceId: string
   isLoading: boolean
+  assignedTo?: string | null
+  teamMembers?: TeamMember[]
   onHandoverChange?: (aiPaused: boolean) => void
+  onAssignmentChange?: (userId: string | null) => void
   onContactMerged?: () => void
   onClose?: () => void
   showInfoPanel?: boolean
@@ -261,7 +273,10 @@ export function MessageThread({
   conversationStatus,
   workspaceId,
   isLoading,
+  assignedTo,
+  teamMembers = [],
   onHandoverChange,
+  onAssignmentChange,
   onContactMerged,
   onClose,
   showInfoPanel = false,
@@ -271,6 +286,7 @@ export function MessageThread({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const statusConfig = LEAD_STATUS_CONFIG[conversationContact.lead_status as LeadStatus] || LEAD_STATUS_CONFIG.prospect
   const [isTogglingHandover, setIsTogglingHandover] = useState(false)
+  const [isAssigning, setIsAssigning] = useState(false)
 
   // Merge dialog state
   const [mergeDialogOpen, setMergeDialogOpen] = useState(false)
@@ -420,6 +436,29 @@ export function MessageThread({
       console.error('Failed to toggle handover:', error)
     } finally {
       setIsTogglingHandover(false)
+    }
+  }
+
+  const handleAssignment = async (userId: string) => {
+    setIsAssigning(true)
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/assign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assigned_to: userId === 'unassigned' ? null : userId }),
+      })
+
+      if (response.ok) {
+        onAssignmentChange?.(userId === 'unassigned' ? null : userId)
+        toast.success('Conversation assigned')
+      } else {
+        toast.error('Failed to assign conversation')
+      }
+    } catch (error) {
+      console.error('Failed to assign conversation:', error)
+      toast.error('Failed to assign conversation')
+    } finally {
+      setIsAssigning(false)
     }
   }
 
@@ -615,6 +654,36 @@ export function MessageThread({
           <Merge className="h-3.5 w-3.5" />
           Merge
         </Button>
+
+        {/* Assign to dropdown */}
+        {teamMembers.length > 0 && (
+          <Select
+            value={assignedTo || 'unassigned'}
+            onValueChange={handleAssignment}
+            disabled={isAssigning}
+          >
+            <SelectTrigger className="h-8 w-auto gap-1.5 px-3 text-xs border-0 bg-transparent hover:bg-muted/50">
+              <UserPlus className="h-3.5 w-3.5" />
+              <SelectValue>
+                {isAssigning ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : assignedTo ? (
+                  teamMembers.find(m => m.user_id === assignedTo)?.profile?.full_name || 'Assigned'
+                ) : (
+                  'Assign'
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="unassigned">Unassigned</SelectItem>
+              {teamMembers.map((member) => (
+                <SelectItem key={member.user_id} value={member.user_id}>
+                  {member.profile?.full_name || member.profile?.email || 'Unknown'}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <div className="flex-1" />
 

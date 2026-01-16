@@ -319,6 +319,19 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
     )
   }, [selectedConversation])
 
+  // Handle assignment change
+  const handleAssignmentChange = useCallback((userId: string | null) => {
+    if (!selectedConversation) return
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === selectedConversation.id ? { ...c, assigned_to: userId } : c
+      )
+    )
+    setSelectedConversation((prev) =>
+      prev ? { ...prev, assigned_to: userId } : null
+    )
+  }, [selectedConversation])
+
   // Handle contact merged - refresh to get updated data
   const handleContactMerged = useCallback(() => {
     // Refresh the page to get updated conversations and contacts
@@ -543,7 +556,10 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
               conversationStatus={selectedConversation.status}
               workspaceId={workspace.id}
               isLoading={isLoadingMessages}
+              assignedTo={selectedConversation.assigned_to}
+              teamMembers={teamMembers}
               onHandoverChange={handleHandoverChange}
+              onAssignmentChange={handleAssignmentChange}
               onContactMerged={handleContactMerged}
               showInfoPanel={showInfoPanel}
               onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
