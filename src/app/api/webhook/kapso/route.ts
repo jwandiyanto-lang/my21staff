@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
+import type { Json } from '@/types/database'
 
 // Meta/WhatsApp Business API webhook payload types
 interface MetaWebhookMessage {
@@ -182,7 +183,7 @@ async function handleMetaFormat(payload: MetaWebhookPayload) {
         }
 
         // Build metadata with reply context if present
-        const messageMetadata: Record<string, unknown> = {}
+        const messageMetadata: { [key: string]: Json } = {}
         if (message.context) {
           messageMetadata.reply_to_kapso_id = message.context.id
           messageMetadata.reply_to_from = message.context.from
@@ -200,7 +201,7 @@ async function handleMetaFormat(payload: MetaWebhookPayload) {
             content: messageContent,
             message_type: messageType,
             kapso_message_id: message.id,
-            metadata: Object.keys(messageMetadata).length > 0 ? messageMetadata : undefined,
+            ...(Object.keys(messageMetadata).length > 0 ? { metadata: messageMetadata } : {}),
           })
 
         if (messageError) {

@@ -287,7 +287,7 @@ export default function PricingPage() {
         <section id="pricing" className="bg-landing-hero text-white py-16">
           <div className="mx-auto max-w-5xl px-6">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              Pilih sistemnya.
+              Siap untuk buat <span className="text-landing-cta">Sistem Kamu</span>?
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -325,7 +325,7 @@ export default function PricingPage() {
                 <h3 className="text-xl font-bold mt-1">Team</h3>
                 <p className="text-xs text-white/80 mb-4">Tim kecil & UMKM</p>
                 <div className="mb-4">
-                  <span className="text-3xl font-extrabold">Rp5.5jt</span>
+                  <span className="text-3xl font-extrabold">Rp7.9jt</span>
                   <span className="text-sm text-white/80">/bln</span>
                 </div>
                 <ul className="space-y-2 mb-6 text-sm">
@@ -349,13 +349,12 @@ export default function PricingPage() {
               {/* Studio */}
               <div className="bg-white text-landing-text rounded-2xl p-6">
                 <h3 className="text-xl font-bold">Studio</h3>
-                <p className="text-xs text-landing-text-muted mb-4">Bisnis bertumbuh</p>
+                <p className="text-xs text-landing-text-muted mb-4">Enterprise & custom</p>
                 <div className="mb-4">
-                  <span className="text-3xl font-extrabold">Rp10jt</span>
-                  <span className="text-sm text-landing-text-muted">/bln</span>
+                  <span className="text-3xl font-extrabold">Custom</span>
                 </div>
                 <ul className="space-y-2 mb-6 text-sm">
-                  {["Semua Team", "5 WhatsApp", "Marketing automation", "Ads management", "Dedicated support"].map((item) => (
+                  {["Semua Team", "5+ WhatsApp", "Marketing automation", "Ads management", "Dedicated support"].map((item) => (
                     <li key={item} className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-landing-hero" />
                       {item}
@@ -368,14 +367,15 @@ export default function PricingPage() {
                   rel="noopener noreferrer"
                   className="block w-full text-center py-3 rounded-full border-2 border-landing-hero text-landing-hero font-bold text-sm hover:bg-landing-hero hover:text-white transition-all"
                 >
-                  Pilih Studio
+                  Hubungi Kami
                 </a>
               </div>
             </div>
 
-            <p className="text-center mt-10 text-sm text-white/70">
-              Setup fee: <span className="font-bold text-white">Rp7.5jt</span> (Website + WhatsApp + Guidance)
-            </p>
+            {/* Setup Fee Box */}
+            <div className="mt-8 max-w-xl mx-auto bg-gray-100 rounded-lg py-3 px-6 text-center">
+              <p className="text-sm text-gray-500">One-time setup fee: <span className="font-bold text-gray-800">Rp7.5jt</span> — Website + WhatsApp + Business consultation</p>
+            </div>
           </div>
         </section>
 
