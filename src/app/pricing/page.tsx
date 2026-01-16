@@ -33,17 +33,17 @@ export default function PricingPage() {
       style={{ fontFamily: "var(--font-jakarta)" }}
     >
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FDFBF7]/80 backdrop-blur-sm">
+      <nav className="fixed top-0 left-0 right-0 z-50">
         <div className="mx-auto max-w-7xl px-6 h-14 flex items-center">
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-extrabold text-landing-cta">21</span>
+            <span className="text-2xl font-extrabold text-white">21</span>
           </Link>
         </div>
       </nav>
 
       <main>
         {/* The Letter */}
-        <section className="bg-[#FDFBF7] text-landing-text pt-24 pb-12">
+        <section className="bg-landing-hero text-white pt-24 pb-12">
           <div className="mx-auto max-w-2xl px-6">
             <motion.article
               initial="hidden"
@@ -97,7 +97,7 @@ export default function PricingPage() {
         </section>
 
         {/* The Problem */}
-        <section className="bg-[#FDFBF7] text-landing-text py-12">
+        <section className="bg-landing-hero text-white py-12">
           <div className="mx-auto max-w-2xl px-6">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
               Banyak yang punya masalah tapi ditutup-tutupin. Sampai suatu saat jadi terlalu besar.
@@ -106,22 +106,22 @@ export default function PricingPage() {
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="bg-[#FDFBF7] text-landing-text py-12">
+        <section id="pricing" className="bg-landing-hero text-white py-12">
           <div className="mx-auto max-w-7xl px-6">
             <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-extrabold">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-landing-cta">
                 Pilih sistemnya.
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
               {/* Solo */}
-              <div className="bg-white rounded-2xl p-6 border border-gray-200">
+              <div className="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20">
                 <h3 className="text-xl font-bold">Solo</h3>
-                <p className="text-xs text-landing-text-muted mb-4">Founder & freelancer</p>
+                <p className="text-xs text-white/60 mb-4">Founder & freelancer</p>
                 <div className="mb-4">
                   <span className="text-3xl font-extrabold">Rp2.5jt</span>
-                  <span className="text-sm text-landing-text-muted">/bln</span>
+                  <span className="text-sm text-white/60">/bln</span>
                 </div>
                 <ul className="space-y-2 mb-6 text-sm">
                   {["1 WhatsApp", "CRM integration", "Lead reminders", "Auto follow-up", "24/7 support"].map((item) => (
@@ -135,7 +135,7 @@ export default function PricingPage() {
                   href="https://wa.me/6281234567890?text=Halo%2C%20saya%20tertarik%20paket%20Solo"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full text-center py-3 rounded-full border-2 border-landing-text text-landing-text font-bold text-sm hover:bg-landing-text hover:text-white transition-all"
+                  className="block w-full text-center py-3 rounded-full border-2 border-white text-white font-bold text-sm hover:bg-white hover:text-landing-hero transition-all"
                 >
                   Pilih Solo
                 </a>
@@ -143,7 +143,7 @@ export default function PricingPage() {
 
               {/* Team */}
               <div className="bg-landing-cta rounded-2xl p-6 text-white relative md:-translate-y-2">
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-landing-hero text-xs font-bold px-3 py-1 rounded-full">
                   POPULAR
                 </span>
                 <h3 className="text-xl font-bold mt-1">Team</h3>
@@ -171,17 +171,17 @@ export default function PricingPage() {
               </div>
 
               {/* Studio */}
-              <div className="bg-landing-hero rounded-2xl p-6 text-white">
+              <div className="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20">
                 <h3 className="text-xl font-bold">Studio</h3>
-                <p className="text-xs text-white/80 mb-4">Bisnis bertumbuh</p>
+                <p className="text-xs text-white/60 mb-4">Bisnis bertumbuh</p>
                 <div className="mb-4">
                   <span className="text-3xl font-extrabold">Rp10jt</span>
-                  <span className="text-sm text-white/80">/bln</span>
+                  <span className="text-sm text-white/60">/bln</span>
                 </div>
                 <ul className="space-y-2 mb-6 text-sm">
                   {["Semua Team", "5 WhatsApp", "Marketing automation", "Ads management", "Dedicated support"].map((item) => (
                     <li key={item} className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-white" />
+                      <Check className="w-4 h-4 text-landing-cta" />
                       {item}
                     </li>
                   ))}
@@ -190,7 +190,7 @@ export default function PricingPage() {
                   href="https://wa.me/6281234567890?text=Halo%2C%20saya%20tertarik%20paket%20Studio"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full text-center py-3 rounded-full bg-white text-landing-hero font-bold text-sm hover:bg-white/90 transition-all"
+                  className="block w-full text-center py-3 rounded-full border-2 border-white text-white font-bold text-sm hover:bg-white hover:text-landing-hero transition-all"
                 >
                   Pilih Studio
                 </a>
@@ -199,17 +199,17 @@ export default function PricingPage() {
 
             {/* Setup Fee */}
             <div className="text-center mt-10">
-              <p className="text-sm text-landing-text-muted">
-                Setup fee: <span className="font-bold text-landing-text">Rp7.5jt</span> (Website + WhatsApp + Guidance)
+              <p className="text-sm text-white/60">
+                Setup fee: <span className="font-bold text-white">Rp7.5jt</span> (Website + WhatsApp + Guidance)
               </p>
             </div>
           </div>
         </section>
 
         {/* Final CTA */}
-        <section className="bg-[#FDFBF7] text-landing-text py-12">
+        <section className="bg-landing-hero text-white py-12">
           <div className="mx-auto max-w-2xl px-6 text-center">
-            <p className="text-landing-text-muted mb-4">
+            <p className="text-white/60 mb-4">
               Masih ragu? Chat dulu.
             </p>
             <a
@@ -225,8 +225,8 @@ export default function PricingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#FDFBF7] border-t border-landing-text/10 py-4">
-        <div className="mx-auto max-w-7xl px-6 text-center text-xs text-landing-text-muted">
+      <footer className="bg-landing-hero border-t border-white/10 py-4">
+        <div className="mx-auto max-w-7xl px-6 text-center text-xs text-white/50">
           <span className="font-bold text-landing-cta">21</span> &copy; 2026
         </div>
       </footer>
