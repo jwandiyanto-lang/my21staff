@@ -1,7 +1,7 @@
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUpDown, MoreHorizontal, MessageCircle, ChevronDown } from 'lucide-react'
+import { ArrowUpDown, MoreHorizontal, MessageCircle, ChevronDown, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -25,10 +25,11 @@ interface TeamMember {
 interface ColumnsConfig {
   onStatusChange?: (contactId: string, newStatus: LeadStatus) => void
   onAssigneeChange?: (contactId: string, assigneeId: string | null) => void
+  onDelete?: (contact: Contact) => void
   teamMembers?: TeamMember[]
 }
 
-export function createColumns({ onStatusChange, onAssigneeChange, teamMembers = [] }: ColumnsConfig = {}): ColumnDef<Contact>[] {
+export function createColumns({ onStatusChange, onAssigneeChange, onDelete, teamMembers = [] }: ColumnsConfig = {}): ColumnDef<Contact>[] {
   return [
   {
     accessorKey: 'name',
@@ -74,8 +75,13 @@ export function createColumns({ onStatusChange, onAssigneeChange, teamMembers = 
       const contact = row.original
       const status = row.getValue('lead_status') as LeadStatus
       const config = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.prospect
+      const isDefaultStatus = status === 'prospect'
 
       if (!onStatusChange) {
+        // Show "---" for prospect (default/unassigned status)
+        if (isDefaultStatus) {
+          return <span className="text-muted-foreground">---</span>
+        }
         return (
           <Badge
             style={{
@@ -91,16 +97,25 @@ export function createColumns({ onStatusChange, onAssigneeChange, teamMembers = 
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <button
-              className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium hover:opacity-80 transition-opacity"
-              style={{
-                backgroundColor: config.bgColor,
-                color: config.color,
-              }}
-            >
-              {config.label}
-              <ChevronDown className="h-3 w-3" />
-            </button>
+            {isDefaultStatus ? (
+              <button
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground hover:bg-muted transition-colors"
+              >
+                ---
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            ) : (
+              <button
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium hover:opacity-80 transition-opacity"
+                style={{
+                  backgroundColor: config.bgColor,
+                  color: config.color,
+                }}
+              >
+                {config.label}
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
             {LEAD_STATUSES.map((s) => {
@@ -166,34 +181,36 @@ export function createColumns({ onStatusChange, onAssigneeChange, teamMembers = 
             {assignedMember.name || 'Unnamed'}
           </Badge>
         ) : (
-          <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700">
-            New Lead
-          </Badge>
+          <span className="text-muted-foreground">---</span>
         )
       }
 
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <button
-              className={cn(
-                'flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium hover:opacity-80 transition-opacity',
-                assignedTo
-                  ? 'bg-muted text-foreground'
-                  : 'bg-amber-100 text-amber-700'
-              )}
-            >
-              {assignedMember?.name || 'New Lead'}
-              <ChevronDown className="h-3 w-3" />
-            </button>
+            {assignedTo ? (
+              <button
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-muted text-foreground hover:opacity-80 transition-opacity"
+              >
+                {assignedMember?.name || 'Unnamed'}
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            ) : (
+              <button
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground hover:bg-muted transition-colors"
+              >
+                ---
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem
               onClick={() => onAssigneeChange(contact.id, null)}
               className={!assignedTo ? 'bg-muted' : ''}
             >
-              <span className="w-2 h-2 rounded-full mr-2 bg-amber-500" />
-              Unassigned (New Lead)
+              <span className="w-2 h-2 rounded-full mr-2 bg-muted-foreground" />
+              Unassigned
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             {teamMembers.map((member) => (
@@ -320,6 +337,21 @@ export function createColumns({ onStatusChange, onAssigneeChange, teamMembers = 
                 <MessageCircle className="mr-2 h-4 w-4" />
                 Open WhatsApp
               </DropdownMenuItem>
+              {onDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDelete(contact)
+                    }}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete contact
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

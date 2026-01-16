@@ -20,7 +20,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { ChevronDown, Filter, Tag, SlidersHorizontal, X } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { ChevronDown, Filter, Tag, SlidersHorizontal, X, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { Contact, Workspace } from '@/types/database'
 
@@ -75,6 +86,8 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => loadFiltersFromStorage().visibleColumns)
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
+  const [contactToDelete, setContactToDelete] = useState<Contact | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Persist filters to localStorage
   useEffect(() => {
@@ -109,9 +122,38 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
     }
   }, [initialContacts])
 
+  // Handle delete contact
+  const handleDeleteContact = useCallback(async () => {
+    if (!contactToDelete) return
+
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/contacts/${contactToDelete.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete contact')
+      }
+
+      // Remove from local state
+      setContacts((prev) => prev.filter((c) => c.id !== contactToDelete.id))
+      toast.success('Contact deleted successfully')
+      setContactToDelete(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete contact')
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [contactToDelete])
+
   // Create columns with status change handler, filtered by visibility
   const allColumns = useMemo(
-    () => createColumns({ onStatusChange: handleStatusChange }),
+    () => createColumns({
+      onStatusChange: handleStatusChange,
+      onDelete: setContactToDelete,
+    }),
     [handleStatusChange]
   )
 
@@ -363,6 +405,36 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
         open={isDetailOpen}
         onOpenChange={setIsDetailOpen}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!contactToDelete} onOpenChange={(open) => !open && setContactToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contact</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{contactToDelete?.name || contactToDelete?.phone}</strong>?
+              This will also delete all associated conversations and messages. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteContact}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
