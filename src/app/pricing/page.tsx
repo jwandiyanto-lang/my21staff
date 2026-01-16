@@ -33,10 +33,10 @@ export default function PricingPage() {
       style={{ fontFamily: "var(--font-jakarta)" }}
     >
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FDFBF7]">
-        <div className="mx-auto max-w-2xl px-6 h-14 flex items-center">
+      <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
+        <div className="mx-auto max-w-7xl px-6 h-14 flex items-center">
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-extrabold text-landing-hero">21</span>
+            <span className="text-2xl font-black text-white">21</span>
           </Link>
         </div>
       </nav>
