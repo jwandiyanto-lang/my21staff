@@ -43,7 +43,7 @@ export default function PricingPage() {
 
       <main>
         {/* Hero */}
-        <section className="bg-landing-hero text-white pt-24 pb-16">
+        <section className="bg-landing-hero text-white pt-16 pb-12">
           <div className="mx-auto max-w-4xl px-6">
             <motion.div
               initial="hidden"
