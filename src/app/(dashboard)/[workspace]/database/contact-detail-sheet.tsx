@@ -25,6 +25,7 @@ import {
 import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   MessageCircle,
   Phone,
@@ -35,11 +36,32 @@ import {
   Loader2,
   X,
   Plus,
+  FileText,
+  Send,
+  StickyNote,
+  TrendingUp,
+  GitMerge,
+  ClipboardList,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-import type { Contact, Message } from '@/types/database'
+import type { Contact, Message, ContactNote, Profile } from '@/types/database'
+
+// Activity item type for timeline
+interface ActivityItem {
+  id: string
+  type: 'form_submission' | 'note' | 'status_change' | 'score_change' | 'merge' | 'message'
+  content: string
+  metadata?: Record<string, unknown>
+  author?: { full_name: string | null; email: string | null }
+  created_at: string
+}
+
+type ContactNoteWithAuthor = ContactNote & {
+  author?: Profile
+}
 
 interface ContactDetailSheetProps {
   contact: Contact | null
@@ -73,6 +95,13 @@ export function ContactDetailSheet({
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [messagesLoaded, setMessagesLoaded] = useState(false)
 
+  // Activity & Notes state
+  const [activities, setActivities] = useState<ActivityItem[]>([])
+  const [isLoadingActivities, setIsLoadingActivities] = useState(false)
+  const [activitiesLoaded, setActivitiesLoaded] = useState(false)
+  const [newNoteContent, setNewNoteContent] = useState('')
+  const [isAddingNote, setIsAddingNote] = useState(false)
+
   // Sync local state when contact changes
   useEffect(() => {
     if (contact) {
@@ -82,6 +111,10 @@ export function ContactDetailSheet({
       // Reset messages state for new contact
       setMessages([])
       setMessagesLoaded(false)
+      // Reset activity state for new contact
+      setActivities([])
+      setActivitiesLoaded(false)
+      setNewNoteContent('')
       setActiveTab('details')
     }
   }, [contact])
@@ -284,11 +317,110 @@ export function ContactDetailSheet({
     }
   }, [contact, messagesLoaded, isLoadingMessages])
 
-  // Handle tab change - lazy load messages
+  // Load activities for Activity tab
+  const loadActivities = useCallback(async () => {
+    if (!contact || activitiesLoaded || isLoadingActivities) return
+
+    setIsLoadingActivities(true)
+    try {
+      // Build activity timeline from multiple sources
+      const activityList: ActivityItem[] = []
+
+      // 1. Form submission (from contact creation + questionnaire)
+      const meta = contact.metadata as Record<string, unknown> | null
+      if (meta) {
+        const innerMeta = (meta.metadata as Record<string, unknown>) || meta
+        const formAnswers = (innerMeta.form_answers as Record<string, unknown>) || {}
+        const hasFormAnswers = Object.keys(formAnswers).length > 0
+
+        if (hasFormAnswers || meta.source === 'google_form') {
+          activityList.push({
+            id: `form-${contact.id}`,
+            type: 'form_submission',
+            content: 'Submitted questionnaire',
+            metadata: formAnswers,
+            created_at: contact.created_at,
+          })
+        }
+      }
+
+      // 2. Notes from API
+      try {
+        const response = await fetch(`/api/contacts/${contact.id}/notes`)
+        if (response.ok) {
+          const { notes } = await response.json() as { notes: ContactNoteWithAuthor[] }
+          notes.forEach((note: ContactNoteWithAuthor) => {
+            activityList.push({
+              id: note.id,
+              type: note.note_type as ActivityItem['type'],
+              content: note.content,
+              metadata: note.metadata as Record<string, unknown>,
+              author: note.author ? { full_name: note.author.full_name, email: note.author.email } : undefined,
+              created_at: note.created_at,
+            })
+          })
+        }
+      } catch (error) {
+        console.error('Error loading notes:', error)
+      }
+
+      // Sort by created_at descending (newest first)
+      activityList.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+      setActivities(activityList)
+      setActivitiesLoaded(true)
+    } catch (error) {
+      console.error('Error loading activities:', error)
+      setActivitiesLoaded(true)
+    } finally {
+      setIsLoadingActivities(false)
+    }
+  }, [contact, activitiesLoaded, isLoadingActivities])
+
+  // Add a new note
+  const handleAddNote = async () => {
+    if (!contact || !newNoteContent.trim()) return
+
+    setIsAddingNote(true)
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newNoteContent.trim() }),
+      })
+
+      if (response.ok) {
+        const { note } = await response.json() as { note: ContactNoteWithAuthor }
+        // Add to activities list
+        setActivities((prev) => [{
+          id: note.id,
+          type: 'note',
+          content: note.content,
+          author: note.author ? { full_name: note.author.full_name, email: note.author.email } : undefined,
+          created_at: note.created_at,
+        }, ...prev])
+        setNewNoteContent('')
+        toast.success('Note added')
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Failed to add note')
+      }
+    } catch (error) {
+      console.error('Error adding note:', error)
+      toast.error('Failed to add note')
+    } finally {
+      setIsAddingNote(false)
+    }
+  }
+
+  // Handle tab change - lazy load data
   const handleTabChange = (value: string) => {
     setActiveTab(value)
     if (value === 'messages' && !messagesLoaded) {
       loadMessages()
+    }
+    if (value === 'activity' && !activitiesLoaded) {
+      loadActivities()
     }
   }
 
@@ -744,15 +876,143 @@ export function ContactDetailSheet({
           </TabsContent>
 
           {/* Activity Tab */}
-          <TabsContent value="activity" className="flex-1 m-0 overflow-hidden">
-            <div className="flex items-center justify-center h-full p-6">
-              <div className="text-center">
-                <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <p className="mt-4 text-muted-foreground">
-                  Activity timeline coming soon
-                </p>
+          <TabsContent value="activity" className="flex-1 m-0 overflow-hidden flex flex-col">
+            {/* Add Note Input */}
+            <div className="p-4 border-b bg-background">
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="Add a note..."
+                  value={newNoteContent}
+                  onChange={(e) => setNewNoteContent(e.target.value)}
+                  className="min-h-[60px] text-sm resize-none"
+                  disabled={isAddingNote}
+                />
+                <Button
+                  size="icon"
+                  onClick={handleAddNote}
+                  disabled={!newNoteContent.trim() || isAddingNote}
+                  className="h-[60px] w-[60px]"
+                >
+                  {isAddingNote ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             </div>
+
+            {/* Activity Timeline */}
+            {isLoadingActivities ? (
+              <div className="flex items-center justify-center flex-1 p-6">
+                <div className="text-center">
+                  <Loader2 className="mx-auto h-8 w-8 text-muted-foreground animate-spin" />
+                  <p className="mt-4 text-muted-foreground">Loading activity...</p>
+                </div>
+              </div>
+            ) : activities.length > 0 ? (
+              <ScrollArea className="flex-1">
+                <div className="p-4 space-y-4">
+                  {activities.map((activity) => {
+                    // Get icon and colors based on activity type
+                    const getActivityIcon = () => {
+                      switch (activity.type) {
+                        case 'form_submission':
+                          return <ClipboardList className="h-4 w-4" />
+                        case 'note':
+                          return <StickyNote className="h-4 w-4" />
+                        case 'status_change':
+                          return <TrendingUp className="h-4 w-4" />
+                        case 'score_change':
+                          return <TrendingUp className="h-4 w-4" />
+                        case 'merge':
+                          return <GitMerge className="h-4 w-4" />
+                        default:
+                          return <FileText className="h-4 w-4" />
+                      }
+                    }
+
+                    const getActivityColor = () => {
+                      switch (activity.type) {
+                        case 'form_submission':
+                          return 'bg-blue-100 text-blue-700'
+                        case 'note':
+                          return 'bg-yellow-100 text-yellow-700'
+                        case 'status_change':
+                          return 'bg-green-100 text-green-700'
+                        case 'merge':
+                          return 'bg-purple-100 text-purple-700'
+                        default:
+                          return 'bg-muted text-muted-foreground'
+                      }
+                    }
+
+                    return (
+                      <div key={activity.id} className="flex gap-3">
+                        {/* Icon */}
+                        <div className={cn(
+                          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
+                          getActivityColor()
+                        )}>
+                          {getActivityIcon()}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium">
+                                {activity.type === 'form_submission' ? 'Form Submitted' :
+                                 activity.type === 'note' ? 'Note' :
+                                 activity.type === 'status_change' ? 'Status Changed' :
+                                 activity.type === 'merge' ? 'Contact Merged' :
+                                 'Activity'}
+                              </p>
+                              {activity.author && (
+                                <p className="text-xs text-muted-foreground">
+                                  by {activity.author.full_name || activity.author.email}
+                                </p>
+                              )}
+                            </div>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {format(new Date(activity.created_at), 'MMM d, HH:mm')}
+                            </span>
+                          </div>
+
+                          {/* Note content or form answers */}
+                          {activity.type === 'note' && (
+                            <p className="mt-1 text-sm text-foreground whitespace-pre-wrap">
+                              {activity.content}
+                            </p>
+                          )}
+
+                          {activity.type === 'form_submission' && activity.metadata && Object.keys(activity.metadata).length > 0 && (
+                            <div className="mt-2 p-2 bg-muted rounded-lg text-xs space-y-1">
+                              {Object.entries(activity.metadata).map(([key, value]) => (
+                                <div key={key} className="flex justify-between gap-2">
+                                  <span className="text-muted-foreground truncate">{key}</span>
+                                  <span className="font-medium text-right">{String(value)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="flex items-center justify-center flex-1 p-6">
+                <div className="text-center">
+                  <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <p className="mt-4 text-muted-foreground font-medium">No activity yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Add a note to start tracking activity
+                  </p>
+                </div>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 

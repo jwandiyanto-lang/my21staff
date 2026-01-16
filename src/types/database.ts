@@ -228,6 +228,42 @@ export interface Database {
         }
         Relationships: []
       }
+      contact_notes: {
+        Row: {
+          id: string
+          contact_id: string
+          workspace_id: string
+          author_id: string
+          content: string
+          note_type: string
+          metadata: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          contact_id: string
+          workspace_id: string
+          author_id: string
+          content: string
+          note_type?: string
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          contact_id?: string
+          workspace_id?: string
+          author_id?: string
+          content?: string
+          note_type?: string
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -251,6 +287,12 @@ export type Contact = Database['public']['Tables']['contacts']['Row']
 export type Conversation = Database['public']['Tables']['conversations']['Row']
 export type Message = Database['public']['Tables']['messages']['Row']
 export type Profile = Database['public']['Tables']['profiles']['Row']
+export type ContactNote = Database['public']['Tables']['contact_notes']['Row']
+
+// With author
+export type ContactNoteWithAuthor = ContactNote & {
+  author?: Profile
+}
 
 // With relations
 export type ConversationWithContact = Conversation & {
