@@ -1,6 +1,63 @@
 // Mock data for development - bypasses Supabase when NEXT_PUBLIC_DEV_MODE=true
 
-import type { Contact, Workspace, Conversation, Message, ConversationWithContact, Article, Webinar } from '@/types/database'
+import type { Contact, Workspace, Conversation, Message, ConversationWithContact, Article, Webinar, WorkspaceMember, Profile } from '@/types/database'
+
+export type MockTeamMember = WorkspaceMember & { profile: Profile | null }
+
+// Mock team members for dev mode
+export const MOCK_TEAM_MEMBERS: MockTeamMember[] = [
+  {
+    id: 'member-001',
+    workspace_id: 'dev-workspace-001',
+    user_id: 'dev-user-001',
+    role: 'owner',
+    must_change_password: false,
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+    profile: {
+      id: 'dev-user-001',
+      email: 'jonathan@eagle.edu',
+      full_name: 'Jonathan Wandiyanto',
+      avatar_url: null,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    },
+  },
+  {
+    id: 'member-002',
+    workspace_id: 'dev-workspace-001',
+    user_id: 'dev-user-002',
+    role: 'admin',
+    must_change_password: false,
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+    profile: {
+      id: 'dev-user-002',
+      email: 'sarah@eagle.edu',
+      full_name: 'Sarah Chen',
+      avatar_url: null,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    },
+  },
+  {
+    id: 'member-003',
+    workspace_id: 'dev-workspace-001',
+    user_id: 'dev-user-003',
+    role: 'member',
+    must_change_password: false,
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+    profile: {
+      id: 'dev-user-003',
+      email: 'budi@eagle.edu',
+      full_name: 'Budi Santoso',
+      avatar_url: null,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    },
+  },
+]
 
 export const MOCK_WORKSPACE: Workspace = {
   id: 'dev-workspace-001',
@@ -27,8 +84,8 @@ export const MOCK_CONTACTS: Contact[] = [
     email: null,
     lead_score: 50,
     lead_status: 'new',
-    tags: ['Student', 'Immigration'],
-    assigned_to: null,
+    tags: ['Community', '1on1'],
+    assigned_to: 'dev-user-002', // Assigned to Sarah Chen
     metadata: {
       source: 'Facebook CTWA',
       interest: 'Family Immigration',

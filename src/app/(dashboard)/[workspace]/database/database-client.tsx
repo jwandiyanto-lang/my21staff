@@ -129,6 +129,35 @@ export function DatabaseClient({ workspace, contacts: initialContacts, contactTa
     }
   }, [initialContacts])
 
+  // Handle inline assignee change
+  const handleAssigneeChange = useCallback(async (contactId: string, assigneeId: string | null) => {
+    // Optimistic update
+    setContacts((prev) =>
+      prev.map((c) =>
+        c.id === contactId ? { ...c, assigned_to: assigneeId } : c
+      )
+    )
+
+    // Call API
+    try {
+      const response = await fetch(`/api/contacts/${contactId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assigned_to: assigneeId }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update assignee')
+      }
+      toast.success(assigneeId ? 'Contact assigned' : 'Contact unassigned')
+    } catch (error) {
+      console.error('Failed to update contact assignee:', error)
+      // Revert on error
+      setContacts(initialContacts)
+      toast.error('Failed to update assignee')
+    }
+  }, [initialContacts])
+
   // Handle delete contact
   const handleDeleteContact = useCallback(async () => {
     if (!contactToDelete) return
@@ -155,13 +184,24 @@ export function DatabaseClient({ workspace, contacts: initialContacts, contactTa
     }
   }, [contactToDelete])
 
+  // Convert team members to column format
+  const columnTeamMembers = useMemo(
+    () => teamMembers.map((m) => ({
+      id: m.user_id,
+      name: m.profile?.full_name || m.profile?.email || null,
+    })),
+    [teamMembers]
+  )
+
   // Create columns with status change handler, filtered by visibility
   const allColumns = useMemo(
     () => createColumns({
       onStatusChange: handleStatusChange,
+      onAssigneeChange: handleAssigneeChange,
       onDelete: setContactToDelete,
+      teamMembers: columnTeamMembers,
     }),
-    [handleStatusChange]
+    [handleStatusChange, handleAssigneeChange, columnTeamMembers]
   )
 
   const columns = useMemo(

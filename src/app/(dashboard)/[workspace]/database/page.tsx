@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DatabaseClient } from './database-client'
-import { MOCK_WORKSPACE, MOCK_CONTACTS, isDevMode } from '@/lib/mock-data'
+import { MOCK_WORKSPACE, MOCK_CONTACTS, MOCK_TEAM_MEMBERS, isDevMode } from '@/lib/mock-data'
 import type { Workspace, Contact, WorkspaceMember, Profile } from '@/types/database'
 
 export type TeamMember = WorkspaceMember & { profile: Profile | null }
@@ -24,7 +24,7 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
         }}
         contacts={MOCK_CONTACTS}
         contactTags={['Community', '1on1']}
-        teamMembers={[]}
+        teamMembers={MOCK_TEAM_MEMBERS}
       />
     )
   }
