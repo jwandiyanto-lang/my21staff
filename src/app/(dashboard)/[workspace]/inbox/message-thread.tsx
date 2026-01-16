@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { format } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, MessageSquare, Clock } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Loader2, MessageSquare, Clock, Bot, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import type { Contact, Message } from '@/types/database'
@@ -13,7 +14,10 @@ import type { Contact, Message } from '@/types/database'
 interface MessageThreadProps {
   messages: Message[]
   conversationContact: Contact
+  conversationId: string
+  conversationStatus: string
   isLoading: boolean
+  onHandoverChange?: (aiPaused: boolean) => void
 }
 
 function getInitials(name: string | null, phone: string): string {
@@ -76,9 +80,38 @@ function MessageBubble({ message }: { message: Message }) {
   )
 }
 
-export function MessageThread({ messages, conversationContact, isLoading }: MessageThreadProps) {
+export function MessageThread({
+  messages,
+  conversationContact,
+  conversationId,
+  conversationStatus,
+  isLoading,
+  onHandoverChange
+}: MessageThreadProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const statusConfig = LEAD_STATUS_CONFIG[conversationContact.lead_status as LeadStatus] || LEAD_STATUS_CONFIG.prospect
+  const [isTogglingHandover, setIsTogglingHandover] = useState(false)
+
+  const aiPaused = conversationStatus === 'handover'
+
+  const handleHandoverToggle = async () => {
+    setIsTogglingHandover(true)
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/handover`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ai_paused: !aiPaused }),
+      })
+
+      if (response.ok) {
+        onHandoverChange?.(!aiPaused)
+      }
+    } catch (error) {
+      console.error('Failed to toggle handover:', error)
+    } finally {
+      setIsTogglingHandover(false)
+    }
+  }
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -130,6 +163,24 @@ export function MessageThread({ messages, conversationContact, isLoading }: Mess
             )}
           </p>
         </div>
+
+        {/* Handover Toggle */}
+        <Button
+          variant={aiPaused ? 'default' : 'outline'}
+          size="sm"
+          onClick={handleHandoverToggle}
+          disabled={isTogglingHandover}
+          className="gap-2"
+        >
+          {isTogglingHandover ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : aiPaused ? (
+            <User className="h-4 w-4" />
+          ) : (
+            <Bot className="h-4 w-4" />
+          )}
+          {aiPaused ? 'Anda merespons' : 'AI Aktif'}
+        </Button>
       </div>
 
       {/* Messages */}

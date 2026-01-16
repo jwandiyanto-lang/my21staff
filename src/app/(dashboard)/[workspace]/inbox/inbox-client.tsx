@@ -147,6 +147,20 @@ export function InboxClient({ workspace, conversations: initialConversations }: 
     setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
   }, [])
 
+  // Handle handover status change
+  const handleHandoverChange = useCallback((aiPaused: boolean) => {
+    if (!selectedConversation) return
+    const newStatus = aiPaused ? 'handover' : 'open'
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === selectedConversation.id ? { ...c, status: newStatus } : c
+      )
+    )
+    setSelectedConversation((prev) =>
+      prev ? { ...prev, status: newStatus } : null
+    )
+  }, [selectedConversation])
+
   return (
     <div className="flex h-[calc(100vh-4rem)]">
       {/* Left sidebar - Conversation list */}
@@ -268,7 +282,10 @@ export function InboxClient({ workspace, conversations: initialConversations }: 
             <MessageThread
               messages={messages}
               conversationContact={selectedConversation.contact}
+              conversationId={selectedConversation.id}
+              conversationStatus={selectedConversation.status}
               isLoading={isLoadingMessages}
+              onHandoverChange={handleHandoverChange}
             />
             <MessageInput
               conversationId={selectedConversation.id}

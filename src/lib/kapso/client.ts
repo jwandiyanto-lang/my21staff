@@ -73,11 +73,57 @@ export async function sendMessage(
 }
 
 /**
+ * Set handover status for a conversation (pause/resume AI)
+ * Uses Kapso API: PATCH /whatsapp/conversations/{conversation_id}
+ */
+export async function setHandover(
+  credentials: KapsoCredentials,
+  conversationId: string,
+  paused: boolean
+): Promise<{ success: boolean }> {
+  const { apiKey } = credentials;
+
+  if (!apiKey) {
+    throw new Error('Missing Kapso API key');
+  }
+
+  // Kapso conversation endpoint
+  const apiUrl = `https://api.kapso.ai/whatsapp/conversations/${conversationId}`;
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'PATCH',
+      headers: {
+        'X-API-Key': apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: paused ? 'handoff' : 'open',
+      }),
+    });
+
+    if (!response.ok) {
+      const result = await response.text();
+      console.error(`Kapso handover API error: ${response.status} - ${result}`);
+      // Don't throw - we still want to track locally even if Kapso call fails
+      return { success: false };
+    }
+
+    console.log(`Handover ${paused ? 'enabled' : 'disabled'} for conversation ${conversationId}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Kapso handover API call failed:', error);
+    return { success: false };
+  }
+}
+
+/**
  * Create a Kapso client instance with bound credentials
  */
 export function createKapsoClient(credentials: KapsoCredentials) {
   return {
     sendMessage: (to: string, text: string) => sendMessage(credentials, to, text),
+    setHandover: (conversationId: string, paused: boolean) => setHandover(credentials, conversationId, paused),
   };
 }
 

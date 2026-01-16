@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, useEffect } from 'react'
 import { DataTable } from '@/components/ui/data-table'
 import { createColumns } from './columns'
 import { ContactDetailSheet } from './contact-detail-sheet'
@@ -34,6 +34,35 @@ const COLUMN_OPTIONS = [
   { id: 'created_at', label: 'Created' },
 ] as const
 
+const STORAGE_KEY = 'my21staff-database-filters'
+const DEFAULT_COLUMNS = COLUMN_OPTIONS.map((col) => col.id)
+
+interface DatabaseFilters {
+  activeStatus: LeadStatus | 'all'
+  selectedTags: string[]
+  visibleColumns: string[]
+}
+
+function loadFiltersFromStorage(): DatabaseFilters {
+  if (typeof window === 'undefined') {
+    return { activeStatus: 'all', selectedTags: [], visibleColumns: DEFAULT_COLUMNS }
+  }
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      return {
+        activeStatus: parsed.activeStatus || 'all',
+        selectedTags: parsed.selectedTags || [],
+        visibleColumns: parsed.visibleColumns || DEFAULT_COLUMNS,
+      }
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return { activeStatus: 'all', selectedTags: [], visibleColumns: DEFAULT_COLUMNS }
+}
+
 interface DatabaseClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
   contacts: Contact[]
@@ -41,13 +70,17 @@ interface DatabaseClientProps {
 
 export function DatabaseClient({ workspace, contacts: initialContacts }: DatabaseClientProps) {
   const [contacts, setContacts] = useState<Contact[]>(initialContacts)
-  const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all')
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(
-    COLUMN_OPTIONS.map((col) => col.id)
-  )
+  const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>(() => loadFiltersFromStorage().activeStatus)
+  const [selectedTags, setSelectedTags] = useState<string[]>(() => loadFiltersFromStorage().selectedTags)
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() => loadFiltersFromStorage().visibleColumns)
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
+
+  // Persist filters to localStorage
+  useEffect(() => {
+    const filters: DatabaseFilters = { activeStatus, selectedTags, visibleColumns }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters))
+  }, [activeStatus, selectedTags, visibleColumns])
 
   // Handle inline status change
   const handleStatusChange = useCallback(async (contactId: string, newStatus: LeadStatus) => {
