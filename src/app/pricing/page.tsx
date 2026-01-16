@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check } from "lucide-react";
+import { Check } from "lucide-react";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -36,105 +36,104 @@ export default function PricingPage() {
     >
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-            Kembali
-          </Link>
+        <div className="mx-auto max-w-7xl px-6 h-14 flex items-center">
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-black text-landing-cta">21</span>
           </Link>
-          <div className="w-16" /> {/* Spacer to balance the layout */}
         </div>
       </nav>
 
       <main className="pt-14">
         {/* Story Section */}
         <section className="py-20 bg-[#FDF8F3]">
-          <div className="mx-auto max-w-4xl px-6">
+          <div className="mx-auto max-w-3xl px-6">
             <motion.div
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
+              className="space-y-16"
             >
-              {/* The Problem - 3 Scenarios */}
-              <motion.div variants={fadeInUp} className="mb-16">
-                <p className="text-landing-cta font-bold text-sm uppercase tracking-widest mb-6 text-center">
-                  Situasi Anda Sekarang
-                </p>
-
-                <div className="space-y-8">
-                  <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                    <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-jakarta)" }}>
-                      Leads <span className="text-landing-cta">kebanyakan</span>?
-                    </h3>
-                    <p className="text-landing-text-muted">
-                      Sia-sia — Anda balas semua orang, tapi bukan yang tepat. Waktu habis, closing minim.
-                    </p>
-                  </div>
-
-                  <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                    <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-jakarta)" }}>
-                      Leads <span className="text-landing-cta">gak ada</span>?
-                    </h3>
-                    <p className="text-landing-text-muted">
-                      Belum paham konten dan iklan online. Kompetitor sudah jalan, Anda masih diam.
-                    </p>
-                  </div>
-
-                  <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                    <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-jakarta)" }}>
-                      <span className="text-landing-cta">Gak ada sama sekali</span>?
-                    </h3>
-                    <p className="text-landing-text-muted">
-                      Mungkin saatnya evaluasi — apakah bisnis ini memang layak dilanjutkan?
-                    </p>
-                  </div>
-                </div>
-
-                <motion.p
-                  variants={fadeInUp}
-                  className="text-center text-lg mt-8 font-semibold text-landing-text"
-                >
-                  Bisnis besar sukses karena punya <span className="italic">sistem yang jalan untuk mereka</span>.
-                </motion.p>
-              </motion.div>
-
-              {/* The Pain Point - Rhetorical Question */}
-              <motion.div variants={fadeInUp} className="mb-16 text-center">
-                <h2
-                  className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight"
+              {/* Opening */}
+              <motion.div variants={fadeInUp} className="text-center">
+                <h1
+                  className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight"
                   style={{ fontFamily: "var(--font-jakarta)" }}
                 >
-                  Pernah bulan ini <span className="italic">ramai</span>...
-                </h2>
-                <p className="text-xl text-landing-text-muted mb-4">
-                  Tapi pas gajian atau pajak...
+                  Leads kebanyakan?
+                </h1>
+                <p className="text-xl text-landing-text-muted leading-relaxed">
+                  Sia-sia — Anda balas semua orang, tapi bukan yang tepat.<br />
+                  Waktu habis, closing minim.
                 </p>
-                <p className="text-3xl md:text-4xl font-extrabold text-landing-cta" style={{ fontFamily: "var(--font-jakarta)" }}>
+              </motion.div>
+
+              {/* Second scenario */}
+              <motion.div variants={fadeInUp} className="text-center">
+                <h2
+                  className="text-3xl md:text-4xl font-extrabold mb-4"
+                  style={{ fontFamily: "var(--font-jakarta)" }}
+                >
+                  Atau malah <span className="text-landing-cta">gak ada leads</span>?
+                </h2>
+                <p className="text-lg text-landing-text-muted leading-relaxed">
+                  Belum paham konten dan iklan online.<br />
+                  Kompetitor sudah jalan, Anda masih diam.
+                </p>
+              </motion.div>
+
+              {/* Third scenario */}
+              <motion.div variants={fadeInUp} className="text-center">
+                <h2
+                  className="text-2xl md:text-3xl font-bold mb-4 text-landing-text-muted"
+                  style={{ fontFamily: "var(--font-jakarta)" }}
+                >
+                  Atau bahkan... gak ada sama sekali?
+                </h2>
+                <p className="text-lg text-landing-text-muted">
+                  Mungkin saatnya evaluasi.
+                </p>
+              </motion.div>
+
+              {/* The insight */}
+              <motion.div variants={fadeInUp} className="text-center py-8">
+                <p className="text-xl md:text-2xl font-semibold text-landing-text leading-relaxed">
+                  Bisnis besar sukses karena satu hal:<br />
+                  <span className="text-landing-cta italic">Mereka punya sistem yang jalan.</span>
+                </p>
+              </motion.div>
+
+              {/* The Pain Point */}
+              <motion.div variants={fadeInUp} className="text-center">
+                <h2
+                  className="text-3xl md:text-4xl font-extrabold mb-6 leading-tight"
+                  style={{ fontFamily: "var(--font-jakarta)" }}
+                >
+                  Pernah bulan ini <span className="italic">ramai</span>...<br />
+                  <span className="text-landing-text-muted font-normal text-2xl md:text-3xl">tapi pas gajian atau pajak...</span>
+                </h2>
+                <p className="text-4xl md:text-5xl font-extrabold text-landing-cta" style={{ fontFamily: "var(--font-jakarta)" }}>
                   Uangnya kemana?
                 </p>
-                <p className="text-landing-text-muted mt-4 max-w-xl mx-auto">
-                  Banyak bisnis terlihat oke di permukaan. Tapi pas waktunya bayar — uangnya hilang entah kemana.
+                <p className="text-landing-text-muted mt-6 text-lg">
+                  Banyak bisnis terlihat oke di permukaan.<br />
+                  Tapi pas waktunya bayar — uangnya hilang entah kemana.
                 </p>
               </motion.div>
 
               {/* The Urgency */}
-              <motion.div variants={fadeInUp} className="text-center">
-                <div className="bg-landing-hero text-white rounded-2xl p-8 md:p-12">
-                  <h2
-                    className="text-2xl md:text-3xl font-extrabold mb-4"
-                    style={{ fontFamily: "var(--font-jakarta)" }}
-                  >
-                    No system = No growth.
-                  </h2>
-                  <p className="text-white/80 text-lg mb-6">
-                    Anda bukan bertumbuh — Anda <span className="font-bold text-white">tenggelam</span> dalam masalah.
-                  </p>
-                  <p className="text-xl font-semibold">
-                    Kita gak punya waktu untuk itu, kan?
-                  </p>
-                </div>
+              <motion.div variants={fadeInUp} className="text-center py-8">
+                <h2
+                  className="text-3xl md:text-4xl font-extrabold mb-4"
+                  style={{ fontFamily: "var(--font-jakarta)" }}
+                >
+                  No system = <span className="text-landing-cta">No growth.</span>
+                </h2>
+                <p className="text-xl text-landing-text-muted mb-6">
+                  Anda bukan bertumbuh — Anda <span className="font-bold text-landing-text">tenggelam</span> dalam masalah.
+                </p>
+                <p className="text-2xl font-semibold text-landing-text">
+                  Kita gak punya waktu untuk itu, kan?
+                </p>
               </motion.div>
             </motion.div>
           </div>
