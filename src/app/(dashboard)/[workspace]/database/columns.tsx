@@ -1,7 +1,7 @@
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUpDown, MoreHorizontal, MessageCircle } from 'lucide-react'
+import { ArrowUpDown, MoreHorizontal, MessageCircle, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -12,11 +12,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
+import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import type { Contact } from '@/types/database'
 import { formatDistanceToNow } from 'date-fns'
 
-export const columns: ColumnDef<Contact>[] = [
+interface ColumnsConfig {
+  onStatusChange?: (contactId: string, newStatus: LeadStatus) => void
+}
+
+export function createColumns({ onStatusChange }: ColumnsConfig = {}): ColumnDef<Contact>[] {
+  return [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -58,17 +63,57 @@ export const columns: ColumnDef<Contact>[] = [
     accessorKey: 'lead_status',
     header: 'Status',
     cell: ({ row }) => {
+      const contact = row.original
       const status = row.getValue('lead_status') as LeadStatus
       const config = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.prospect
+
+      if (!onStatusChange) {
+        return (
+          <Badge
+            style={{
+              backgroundColor: config.bgColor,
+              color: config.color,
+            }}
+          >
+            {config.label}
+          </Badge>
+        )
+      }
+
       return (
-        <Badge
-          style={{
-            backgroundColor: config.bgColor,
-            color: config.color,
-          }}
-        >
-          {config.label}
-        </Badge>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <button
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium hover:opacity-80 transition-opacity"
+              style={{
+                backgroundColor: config.bgColor,
+                color: config.color,
+              }}
+            >
+              {config.label}
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
+            {LEAD_STATUSES.map((s) => {
+              const sConfig = LEAD_STATUS_CONFIG[s]
+              const isSelected = s === status
+              return (
+                <DropdownMenuItem
+                  key={s}
+                  onClick={() => onStatusChange(contact.id, s)}
+                  className={isSelected ? 'bg-muted' : ''}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full mr-2"
+                    style={{ backgroundColor: sConfig.color }}
+                  />
+                  {sConfig.label}
+                </DropdownMenuItem>
+              )
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )
     },
     filterFn: (row, id, value) => {
@@ -214,4 +259,8 @@ export const columns: ColumnDef<Contact>[] = [
       )
     },
   },
-]
+  ]
+}
+
+// Backward compatible export
+export const columns = createColumns()

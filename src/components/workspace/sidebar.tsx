@@ -6,11 +6,9 @@ import {
   LayoutDashboard,
   Users,
   MessageCircle,
-  GitBranch,
-  Database,
-  Plug,
-  User,
+  UsersRound,
   Settings,
+  User,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WorkspaceSwitcher } from './workspace-switcher'
@@ -41,29 +39,16 @@ const operationsNav = [
   },
 ]
 
-const engineeringNav = [
-  {
-    title: 'Workflows',
-    icon: GitBranch,
-    href: '/workflows',
-  },
-  {
-    title: 'Data Logs',
-    icon: Database,
-    href: '/logs',
-  },
-  {
-    title: 'Integrations',
-    icon: Plug,
-    href: '/integrations',
-  },
-]
-
 const adminNav = [
   {
-    title: 'Client Management',
+    title: 'Team Management',
+    icon: UsersRound,
+    href: '/team',
+  },
+  {
+    title: 'Settings',
     icon: Settings,
-    href: '/admin/clients',
+    href: '/settings',
   },
 ]
 
@@ -76,10 +61,6 @@ export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSideba
       return pathname === `/${workspace.slug}`
     }
     return pathname === fullHref || pathname.startsWith(`${fullHref}/`)
-  }
-
-  const isAdminRoute = (href: string) => {
-    return pathname === href || pathname.startsWith(`${href}/`)
   }
 
   return (
@@ -127,11 +108,11 @@ export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSideba
           )
         })}
 
-        {/* Engineering Section */}
+        {/* Admin Section */}
         <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-3 mt-8 mb-4">
-          Engineering
+          Admin
         </div>
-        {engineeringNav.map((item) => {
+        {adminNav.map((item) => {
           const active = isActive(item.href)
           return (
             <Link
@@ -149,33 +130,6 @@ export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSideba
             </Link>
           )
         })}
-
-        {/* Admin Section (Admin only) */}
-        {isAdmin && (
-          <>
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-3 mt-8 mb-4">
-              Admin
-            </div>
-            {adminNav.map((item) => {
-              const active = isAdminRoute(item.href)
-              return (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors',
-                    active
-                      ? 'active-nav'
-                      : 'text-muted-foreground hover:bg-white/40'
-                  )}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {item.title}
-                </Link>
-              )
-            })}
-          </>
-        )}
       </nav>
 
       {/* User Profile */}

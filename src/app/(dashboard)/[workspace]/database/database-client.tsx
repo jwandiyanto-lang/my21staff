@@ -1,8 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { DataTable } from '@/components/ui/data-table'
-import { columns } from './columns'
+import { createColumns } from './columns'
 import { ContactDetailSheet } from './contact-detail-sheet'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
@@ -13,10 +13,44 @@ interface DatabaseClientProps {
   contacts: Contact[]
 }
 
-export function DatabaseClient({ workspace, contacts }: DatabaseClientProps) {
+export function DatabaseClient({ workspace, contacts: initialContacts }: DatabaseClientProps) {
+  const [contacts, setContacts] = useState<Contact[]>(initialContacts)
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all')
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
+
+  // Handle inline status change
+  const handleStatusChange = useCallback(async (contactId: string, newStatus: LeadStatus) => {
+    // Optimistic update
+    setContacts((prev) =>
+      prev.map((c) =>
+        c.id === contactId ? { ...c, lead_status: newStatus } : c
+      )
+    )
+
+    // Call API
+    try {
+      const response = await fetch(`/api/contacts/${contactId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_status: newStatus }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update status')
+      }
+    } catch (error) {
+      console.error('Failed to update contact status:', error)
+      // Revert on error
+      setContacts(initialContacts)
+    }
+  }, [initialContacts])
+
+  // Create columns with status change handler
+  const columns = useMemo(
+    () => createColumns({ onStatusChange: handleStatusChange }),
+    [handleStatusChange]
+  )
 
   // Count contacts by status
   const statusCounts = useMemo(() => {
