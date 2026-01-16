@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DatabaseClient } from './database-client'
 import { MOCK_WORKSPACE, MOCK_CONTACTS, isDevMode } from '@/lib/mock-data'
-import type { Workspace, Contact } from '@/types/database'
+import type { Workspace, Contact, WorkspaceMember, Profile } from '@/types/database'
+
+export type TeamMember = WorkspaceMember & { profile: Profile | null }
 
 interface DatabasePageProps {
   params: Promise<{ workspace: string }>
@@ -21,6 +23,8 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
           slug: MOCK_WORKSPACE.slug,
         }}
         contacts={MOCK_CONTACTS}
+        contactTags={['Community', '1on1']}
+        teamMembers={[]}
       />
     )
   }
@@ -28,10 +32,10 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
   // Production mode: use Supabase
   const supabase = await createClient()
 
-  // Fetch workspace
+  // Fetch workspace with settings
   const { data: workspaceData, error: workspaceError } = await supabase
     .from('workspaces')
-    .select('id, name, slug')
+    .select('id, name, slug, settings')
     .eq('slug', workspaceSlug)
     .single()
 
@@ -39,7 +43,7 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
     notFound()
   }
 
-  const workspace = workspaceData as Pick<Workspace, 'id' | 'name' | 'slug'>
+  const workspace = workspaceData as Pick<Workspace, 'id' | 'name' | 'slug'> & { settings: Record<string, unknown> | null }
 
   // Fetch contacts for this workspace
   const { data: contactsData, error: contactsError } = await supabase
@@ -54,5 +58,26 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
 
   const contacts = (contactsData || []) as Contact[]
 
-  return <DatabaseClient workspace={workspace} contacts={contacts} />
+  // Fetch workspace members with profiles
+  const { data: membersData } = await supabase
+    .from('workspace_members')
+    .select(`
+      *,
+      profile:profiles(*)
+    `)
+    .eq('workspace_id', workspace.id)
+
+  const teamMembers = (membersData || []) as unknown as TeamMember[]
+
+  // Extract contact tags from settings
+  const contactTags = (workspace.settings?.contact_tags as string[]) || ['Community', '1on1']
+
+  return (
+    <DatabaseClient
+      workspace={workspace}
+      contacts={contacts}
+      contactTags={contactTags}
+      teamMembers={teamMembers}
+    />
+  )
 }

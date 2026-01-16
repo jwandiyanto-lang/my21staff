@@ -62,7 +62,10 @@ import { toast } from 'sonner'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-import type { Contact, Message, ContactNote, Profile } from '@/types/database'
+import { Checkbox } from '@/components/ui/checkbox'
+import type { Contact, Message, ContactNote, Profile, WorkspaceMember } from '@/types/database'
+
+type TeamMember = WorkspaceMember & { profile: Profile | null }
 
 // Activity item type for timeline
 interface ActivityItem {
@@ -83,6 +86,8 @@ interface ContactDetailSheetProps {
   workspace: { slug: string }
   open: boolean
   onOpenChange: (open: boolean) => void
+  contactTags?: string[]
+  teamMembers?: TeamMember[]
 }
 
 export function ContactDetailSheet({
@@ -90,6 +95,8 @@ export function ContactDetailSheet({
   workspace,
   open,
   onOpenChange,
+  contactTags = ['Community', '1on1'],
+  teamMembers = [],
 }: ContactDetailSheetProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -98,11 +105,11 @@ export function ContactDetailSheet({
   const [localStatus, setLocalStatus] = useState<LeadStatus>(contact?.lead_status as LeadStatus || 'prospect')
   const [localScore, setLocalScore] = useState(contact?.lead_score ?? 0)
   const [localTags, setLocalTags] = useState<string[]>(contact?.tags || [])
-  const [newTagInput, setNewTagInput] = useState('')
+  const [localAssignedTo, setLocalAssignedTo] = useState<string | null>(contact?.assigned_to || null)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [isUpdatingScore, setIsUpdatingScore] = useState(false)
   const [isUpdatingTags, setIsUpdatingTags] = useState(false)
-  const tagInputRef = useRef<HTMLInputElement>(null)
+  const [isUpdatingAssignment, setIsUpdatingAssignment] = useState(false)
 
   // Editable contact info
   const [localName, setLocalName] = useState(contact?.name || '')
@@ -134,6 +141,7 @@ export function ContactDetailSheet({
       setLocalStatus(contact.lead_status as LeadStatus)
       setLocalScore(contact.lead_score)
       setLocalTags(contact.tags || [])
+      setLocalAssignedTo(contact.assigned_to || null)
       setLocalName(contact.name || '')
       setLocalPhone(contact.phone || '')
       setLocalEmail(contact.email || '')
@@ -230,53 +238,14 @@ export function ContactDetailSheet({
     debouncedScoreUpdate(contact.id, newScore)
   }
 
-  // Tag management handlers
-  const handleAddTag = async () => {
-    if (!contact) return
-    const trimmedTag = newTagInput.trim()
-    if (!trimmedTag) return
-
-    // Prevent duplicates (case-insensitive)
-    if (localTags.some(t => t.toLowerCase() === trimmedTag.toLowerCase())) {
-      setNewTagInput('')
-      return
-    }
-
-    const newTags = [...localTags, trimmedTag]
-
-    // Optimistic update
-    setLocalTags(newTags)
-    setNewTagInput('')
-    setIsUpdatingTags(true)
-
-    try {
-      const response = await fetch(`/api/contacts/${contact.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tags: newTags }),
-      })
-
-      if (!response.ok) {
-        // Revert on error
-        setLocalTags(contact.tags || [])
-        console.error('Failed to add tag')
-      } else {
-        startTransition(() => {
-          router.refresh()
-        })
-      }
-    } catch (error) {
-      setLocalTags(contact.tags || [])
-      console.error('Error adding tag:', error)
-    } finally {
-      setIsUpdatingTags(false)
-    }
-  }
-
-  const handleRemoveTag = async (tagToRemove: string) => {
+  // Tag toggle handler (for predefined tags)
+  const handleToggleTag = async (tag: string) => {
     if (!contact) return
 
-    const newTags = localTags.filter(t => t !== tagToRemove)
+    const hasTag = localTags.includes(tag)
+    const newTags = hasTag
+      ? localTags.filter(t => t !== tag)
+      : [...localTags, tag]
     const previousTags = localTags
 
     // Optimistic update
@@ -292,7 +261,7 @@ export function ContactDetailSheet({
 
       if (!response.ok) {
         setLocalTags(previousTags)
-        console.error('Failed to remove tag')
+        console.error('Failed to update tags')
       } else {
         startTransition(() => {
           router.refresh()
@@ -300,16 +269,44 @@ export function ContactDetailSheet({
       }
     } catch (error) {
       setLocalTags(previousTags)
-      console.error('Error removing tag:', error)
+      console.error('Error updating tags:', error)
     } finally {
       setIsUpdatingTags(false)
     }
   }
 
-  const handleTagKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleAddTag()
+  // Assignment handler
+  const handleAssignmentChange = async (userId: string) => {
+    if (!contact) return
+
+    const newAssignedTo = userId === 'unassigned' ? null : userId
+    const previousAssigned = localAssignedTo
+
+    setLocalAssignedTo(newAssignedTo)
+    setIsUpdatingAssignment(true)
+
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assigned_to: newAssignedTo }),
+      })
+
+      if (!response.ok) {
+        setLocalAssignedTo(previousAssigned)
+        toast.error('Failed to update assignment')
+      } else {
+        toast.success('Assignment updated')
+        startTransition(() => {
+          router.refresh()
+        })
+      }
+    } catch (error) {
+      setLocalAssignedTo(previousAssigned)
+      console.error('Error updating assignment:', error)
+      toast.error('Failed to update assignment')
+    } finally {
+      setIsUpdatingAssignment(false)
     }
   }
 
@@ -1057,6 +1054,39 @@ export function ContactDetailSheet({
 
                 <Separator />
 
+                {/* Assigned To */}
+                {teamMembers.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                        Assigned To
+                      </h3>
+                      {isUpdatingAssignment && (
+                        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                      )}
+                    </div>
+                    <Select
+                      value={localAssignedTo || 'unassigned'}
+                      onValueChange={handleAssignmentChange}
+                      disabled={isUpdatingAssignment}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select team member" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {teamMembers.map((member) => (
+                          <SelectItem key={member.user_id} value={member.user_id}>
+                            {member.profile?.full_name || member.profile?.email || 'Unknown'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {teamMembers.length > 0 && <Separator />}
+
                 {/* Tags */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -1067,47 +1097,30 @@ export function ContactDetailSheet({
                       <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                     )}
                   </div>
-                  {localTags.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {localTags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="pr-1">
-                          <Tag className="mr-1 h-3 w-3" />
-                          {tag}
-                          <button
-                            onClick={() => handleRemoveTag(tag)}
-                            className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                  {contactTags.length > 0 ? (
+                    <div className="space-y-2">
+                      {contactTags.map((tag) => (
+                        <label
+                          key={tag}
+                          className="flex items-center gap-3 cursor-pointer"
+                        >
+                          <Checkbox
+                            checked={localTags.includes(tag)}
+                            onCheckedChange={() => handleToggleTag(tag)}
                             disabled={isUpdatingTags}
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
+                          />
+                          <Badge variant={localTags.includes(tag) ? 'default' : 'secondary'}>
+                            <Tag className="mr-1 h-3 w-3" />
+                            {tag}
+                          </Badge>
+                        </label>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No tags</p>
+                    <p className="text-sm text-muted-foreground">
+                      No tags configured. Add tags in Settings.
+                    </p>
                   )}
-                  {/* Add tag input */}
-                  <div className="flex gap-2">
-                    <Input
-                      ref={tagInputRef}
-                      type="text"
-                      placeholder="Add a tag..."
-                      value={newTagInput}
-                      onChange={(e) => setNewTagInput(e.target.value)}
-                      onKeyDown={handleTagKeyDown}
-                      className="h-8 text-sm"
-                      disabled={isUpdatingTags}
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleAddTag}
-                      disabled={!newTagInput.trim() || isUpdatingTags}
-                      className="h-8 px-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
                 </div>
 
                 {/* Form Responses (from metadata) */}

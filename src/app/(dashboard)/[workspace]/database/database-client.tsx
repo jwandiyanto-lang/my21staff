@@ -30,10 +30,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ChevronDown, Filter, Tag, SlidersHorizontal, X, Loader2 } from 'lucide-react'
+import { ChevronDown, Filter, Tag, SlidersHorizontal, X, Loader2, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import type { Contact, Workspace } from '@/types/database'
+import type { Contact, Workspace, WorkspaceMember, Profile } from '@/types/database'
+
+type TeamMember = WorkspaceMember & { profile: Profile | null }
 
 const COLUMN_OPTIONS = [
   { id: 'name', label: 'Name' },
@@ -51,12 +53,13 @@ const DEFAULT_COLUMNS = COLUMN_OPTIONS.map((col) => col.id)
 interface DatabaseFilters {
   activeStatus: LeadStatus | 'all'
   selectedTags: string[]
+  assignedTo: string // 'all' | 'unassigned' | user_id
   visibleColumns: string[]
 }
 
 function loadFiltersFromStorage(): DatabaseFilters {
   if (typeof window === 'undefined') {
-    return { activeStatus: 'all', selectedTags: [], visibleColumns: DEFAULT_COLUMNS }
+    return { activeStatus: 'all', selectedTags: [], assignedTo: 'all', visibleColumns: DEFAULT_COLUMNS }
   }
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
@@ -65,24 +68,28 @@ function loadFiltersFromStorage(): DatabaseFilters {
       return {
         activeStatus: parsed.activeStatus || 'all',
         selectedTags: parsed.selectedTags || [],
+        assignedTo: parsed.assignedTo || 'all',
         visibleColumns: parsed.visibleColumns || DEFAULT_COLUMNS,
       }
     }
   } catch {
     // Ignore parse errors
   }
-  return { activeStatus: 'all', selectedTags: [], visibleColumns: DEFAULT_COLUMNS }
+  return { activeStatus: 'all', selectedTags: [], assignedTo: 'all', visibleColumns: DEFAULT_COLUMNS }
 }
 
 interface DatabaseClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
   contacts: Contact[]
+  contactTags?: string[]
+  teamMembers?: TeamMember[]
 }
 
-export function DatabaseClient({ workspace, contacts: initialContacts }: DatabaseClientProps) {
+export function DatabaseClient({ workspace, contacts: initialContacts, contactTags = ['Community', '1on1'], teamMembers = [] }: DatabaseClientProps) {
   const [contacts, setContacts] = useState<Contact[]>(initialContacts)
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>(() => loadFiltersFromStorage().activeStatus)
   const [selectedTags, setSelectedTags] = useState<string[]>(() => loadFiltersFromStorage().selectedTags)
+  const [assignedTo, setAssignedTo] = useState<string>(() => loadFiltersFromStorage().assignedTo)
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => loadFiltersFromStorage().visibleColumns)
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
@@ -91,9 +98,9 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
 
   // Persist filters to localStorage
   useEffect(() => {
-    const filters: DatabaseFilters = { activeStatus, selectedTags, visibleColumns }
+    const filters: DatabaseFilters = { activeStatus, selectedTags, assignedTo, visibleColumns }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filters))
-  }, [activeStatus, selectedTags, visibleColumns])
+  }, [activeStatus, selectedTags, assignedTo, visibleColumns])
 
   // Handle inline status change
   const handleStatusChange = useCallback(async (contactId: string, newStatus: LeadStatus) => {
@@ -184,15 +191,6 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
     return counts
   }, [contacts])
 
-  // Extract all unique tags
-  const allTags = useMemo(() => {
-    const tagSet = new Set<string>()
-    contacts.forEach((contact) => {
-      contact.tags?.forEach((tag) => tagSet.add(tag))
-    })
-    return Array.from(tagSet).sort()
-  }, [contacts])
-
   // Toggle tag selection
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
@@ -200,6 +198,12 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
         ? prev.filter((t) => t !== tag)
         : [...prev, tag]
     )
+  }
+
+  // Get assigned member name helper
+  const getAssignedMemberName = (userId: string) => {
+    const member = teamMembers.find(m => m.user_id === userId)
+    return member?.profile?.full_name || member?.profile?.email || 'Unknown'
   }
 
   const filteredContacts = useMemo(() => {
@@ -217,8 +221,17 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
       )
     }
 
+    // Filter by assigned to
+    if (assignedTo !== 'all') {
+      if (assignedTo === 'unassigned') {
+        filtered = filtered.filter((contact) => !contact.assigned_to)
+      } else {
+        filtered = filtered.filter((contact) => contact.assigned_to === assignedTo)
+      }
+    }
+
     return filtered
-  }, [contacts, activeStatus, selectedTags])
+  }, [contacts, activeStatus, selectedTags, assignedTo])
 
   const handleRowClick = (contact: Contact) => {
     setSelectedContact(contact)
@@ -283,7 +296,7 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
         </DropdownMenu>
 
         {/* Tags Filter Dropdown */}
-        {allTags.length > 0 && (
+        {contactTags.length > 0 && (
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="h-9">
@@ -299,7 +312,7 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
             </PopoverTrigger>
             <PopoverContent align="start" className="w-56 p-2">
               <div className="space-y-1">
-                {allTags.map((tag) => {
+                {contactTags.map((tag) => {
                   const isSelected = selectedTags.includes(tag)
                   return (
                     <div
@@ -323,6 +336,51 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
                     </button>
                   </>
                 )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {/* Assigned To Filter Dropdown */}
+        {teamMembers.length > 0 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9">
+                <User className="h-4 w-4 mr-2" />
+                {assignedTo === 'all' ? 'All Staff' : assignedTo === 'unassigned' ? 'Unassigned' : getAssignedMemberName(assignedTo)}
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-56 p-2">
+              <div className="space-y-1">
+                <div
+                  className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
+                  onClick={() => setAssignedTo('all')}
+                >
+                  <Checkbox checked={assignedTo === 'all'} />
+                  <span className="text-sm">All Staff</span>
+                </div>
+                <div
+                  className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
+                  onClick={() => setAssignedTo('unassigned')}
+                >
+                  <Checkbox checked={assignedTo === 'unassigned'} />
+                  <span className="text-sm">Unassigned</span>
+                </div>
+                <DropdownMenuSeparator />
+                {teamMembers.map((member) => {
+                  const isSelected = assignedTo === member.user_id
+                  return (
+                    <div
+                      key={member.user_id}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
+                      onClick={() => setAssignedTo(member.user_id)}
+                    >
+                      <Checkbox checked={isSelected} />
+                      <span className="text-sm">{member.profile?.full_name || member.profile?.email || 'Unknown'}</span>
+                    </div>
+                  )
+                })}
               </div>
             </PopoverContent>
           </Popover>
@@ -357,7 +415,7 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
         </Popover>
 
         {/* Active filter badges */}
-        {(activeStatus !== 'all' || selectedTags.length > 0) && (
+        {(activeStatus !== 'all' || selectedTags.length > 0 || assignedTo !== 'all') && (
           <div className="flex items-center gap-2 ml-2">
             {activeStatus !== 'all' && (
               <span
@@ -386,6 +444,16 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
                 />
               </span>
             ))}
+            {assignedTo !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                <User className="h-3 w-3" />
+                {assignedTo === 'unassigned' ? 'Unassigned' : getAssignedMemberName(assignedTo)}
+                <X
+                  className="h-3 w-3 cursor-pointer hover:opacity-70"
+                  onClick={() => setAssignedTo('all')}
+                />
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -404,6 +472,8 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
         workspace={{ slug: workspace.slug }}
         open={isDetailOpen}
         onOpenChange={setIsDetailOpen}
+        contactTags={contactTags}
+        teamMembers={teamMembers}
       />
 
       {/* Delete Confirmation Dialog */}
