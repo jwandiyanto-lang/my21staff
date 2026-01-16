@@ -87,6 +87,56 @@ export default function PricingPage() {
           </div>
         </section>
 
+        {/* Onboarding Timeline */}
+        <section className="bg-landing-hero text-white py-16">
+          <div className="mx-auto max-w-3xl px-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+              Dari hari ini ke sistem jalan dalam <span className="text-landing-cta">7 hari</span>
+            </h2>
+
+            <div className="relative">
+              {/* Timeline line */}
+              <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-0.5 bg-white/20 md:-translate-x-1/2" />
+
+              {/* Day 1 */}
+              <div className="relative flex items-start gap-6 mb-10">
+                <div className="w-12 h-12 rounded-full bg-landing-cta flex items-center justify-center font-bold text-lg shrink-0 z-10">
+                  1
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-white/60 mb-1">Hari Pertama</p>
+                  <h3 className="text-xl font-bold">Kickstart Call</h3>
+                  <p className="text-white/80 mt-2">Ngobrol bisnis Anda. Kami pahamin masalahnya, tentuin bareng-bareng sistem yang cocok.</p>
+                </div>
+              </div>
+
+              {/* Day 3 */}
+              <div className="relative flex items-start gap-6 mb-10">
+                <div className="w-12 h-12 rounded-full bg-white text-landing-hero flex items-center justify-center font-bold text-lg shrink-0 z-10">
+                  3
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-white/60 mb-1">Hari Ketiga</p>
+                  <h3 className="text-xl font-bold">WhatsApp Connect</h3>
+                  <p className="text-white/80 mt-2">WhatsApp bisnis sudah connect. Leads mulai masuk otomatis. Tinggal balas.</p>
+                </div>
+              </div>
+
+              {/* Day 7 */}
+              <div className="relative flex items-start gap-6">
+                <div className="w-12 h-12 rounded-full bg-landing-cta flex items-center justify-center font-bold text-lg shrink-0 z-10">
+                  7
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-white/60 mb-1">Hari Ketujuh</p>
+                  <h3 className="text-xl font-bold">Full System Running</h3>
+                  <p className="text-white/80 mt-2">Sistem jalan. Auto follow-up aktif. Reporting terkirim. Anda tinggal fokus closing.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Pricing Section */}
         <section id="pricing" className="bg-landing-hero text-white py-16">
           <div className="mx-auto max-w-5xl px-6">
