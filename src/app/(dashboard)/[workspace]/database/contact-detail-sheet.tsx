@@ -101,6 +101,7 @@ export function ContactDetailSheet({
   const [activitiesLoaded, setActivitiesLoaded] = useState(false)
   const [newNoteContent, setNewNoteContent] = useState('')
   const [isAddingNote, setIsAddingNote] = useState(false)
+  const [expandedForms, setExpandedForms] = useState<Set<string>>(new Set())
 
   // Sync local state when contact changes
   useEffect(() => {
@@ -115,6 +116,7 @@ export function ContactDetailSheet({
       setActivities([])
       setActivitiesLoaded(false)
       setNewNoteContent('')
+      setExpandedForms(new Set())
       setActiveTab('details')
     }
   }, [contact])
@@ -327,13 +329,41 @@ export function ContactDetailSheet({
       const activityList: ActivityItem[] = []
 
       // 1. Form submission (from contact creation + questionnaire)
+      // Handle multiple metadata structures:
+      // - New n8n: { metadata: { notes, source, form_answers: {...} } }
+      // - Old flat: { notes, source, imported_at }
+      // - Direct fields: { Pendidikan, Aktivitas, Budget, ... }
       const meta = contact.metadata as Record<string, unknown> | null
       if (meta) {
         const innerMeta = (meta.metadata as Record<string, unknown>) || meta
-        const formAnswers = (innerMeta.form_answers as Record<string, unknown>) || {}
-        const hasFormAnswers = Object.keys(formAnswers).length > 0
 
+        // Try to find form_answers in various locations
+        let formAnswers: Record<string, unknown> = {}
+
+        // Check nested form_answers first
+        if (innerMeta.form_answers && typeof innerMeta.form_answers === 'object') {
+          formAnswers = innerMeta.form_answers as Record<string, unknown>
+        }
+        // Check direct form_answers in metadata
+        else if (meta.form_answers && typeof meta.form_answers === 'object') {
+          formAnswers = meta.form_answers as Record<string, unknown>
+        }
+        // Check for Indonesian field names directly in metadata (old imports)
+        else {
+          const formFieldKeys = ['Pendidikan', 'Jurusan', 'Aktivitas', 'Negara Tujuan', 'Budget',
+            'Target Berangkat', 'Level Bahasa Inggris', 'Goals', 'Catatan', 'Education',
+            'Activity', 'TargetCountry', 'TargetDeparture', 'EnglishLevel']
+          const directFields: Record<string, unknown> = {}
+          for (const key of formFieldKeys) {
+            if (meta[key] !== undefined && meta[key] !== null) directFields[key] = meta[key]
+            if (innerMeta[key] !== undefined && innerMeta[key] !== null) directFields[key] = innerMeta[key]
+          }
+          if (Object.keys(directFields).length > 0) formAnswers = directFields
+        }
+
+        const hasFormAnswers = Object.keys(formAnswers).length > 0
         const source = innerMeta.source || meta.source
+
         if (hasFormAnswers || source === 'google_form' || source === 'google_sheets') {
           activityList.push({
             id: `form-${contact.id}`,
@@ -439,10 +469,29 @@ export function ContactDetailSheet({
   }
 
   // Extract form responses from metadata if present
-  // Data structure: metadata.metadata.form_answers (from n8n Google Sheets sync)
+  // Handle multiple metadata structures from different import sources
   const metadata = contact.metadata as Record<string, unknown> | null
-  const innerMetadata = metadata?.metadata as Record<string, unknown> | undefined
-  const formAnswersData = (innerMetadata?.form_answers as Record<string, unknown>) || {}
+  const innerMetadata = (metadata?.metadata as Record<string, unknown>) || metadata
+
+  // Try to find form_answers in various locations
+  let formAnswersData: Record<string, unknown> = {}
+  if (innerMetadata?.form_answers && typeof innerMetadata.form_answers === 'object') {
+    formAnswersData = innerMetadata.form_answers as Record<string, unknown>
+  } else if (metadata?.form_answers && typeof metadata.form_answers === 'object') {
+    formAnswersData = metadata.form_answers as Record<string, unknown>
+  } else if (metadata) {
+    // Check for Indonesian field names directly in metadata
+    const formFieldKeys = ['Pendidikan', 'Jurusan', 'Aktivitas', 'Negara Tujuan', 'Budget',
+      'Target Berangkat', 'Level Bahasa Inggris', 'Goals', 'Catatan', 'Education',
+      'Activity', 'TargetCountry', 'TargetDeparture', 'EnglishLevel']
+    for (const key of formFieldKeys) {
+      if (metadata[key] !== undefined && metadata[key] !== null) formAnswersData[key] = metadata[key]
+      if (innerMetadata && innerMetadata[key] !== undefined && innerMetadata[key] !== null) {
+        formAnswersData[key] = innerMetadata[key]
+      }
+    }
+  }
+
   const formResponses = Object.keys(formAnswersData).length > 0
     ? Object.entries(formAnswersData).filter(([key]) => !key.startsWith('_'))
     : []
@@ -456,13 +505,20 @@ export function ContactDetailSheet({
   }
 
   // Score breakdown calculation from questionnaire responses
-  // Handles both direct fields and nested n8n structure (metadata.metadata.form_answers)
+  // Handles multiple metadata structures from different import sources
   const calculateScoreBreakdown = (meta: Record<string, unknown>) => {
     const breakdown: { label: string; value: string; points: number; maxPoints: number }[] = []
 
     // Navigate to form_answers if nested (from n8n)
     const innerMeta = (meta.metadata as Record<string, unknown>) || meta
-    const formAnswers = (innerMeta.form_answers as Record<string, unknown>) || {}
+
+    // Try to find form_answers in various locations
+    let formAnswers: Record<string, unknown> = {}
+    if (innerMeta.form_answers && typeof innerMeta.form_answers === 'object') {
+      formAnswers = innerMeta.form_answers as Record<string, unknown>
+    } else if (meta.form_answers && typeof meta.form_answers === 'object') {
+      formAnswers = meta.form_answers as Record<string, unknown>
+    }
 
     // Helper to get field value from multiple possible locations and names
     const getField = (
@@ -969,13 +1025,38 @@ export function ContactDetailSheet({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium">
-                                {activity.type === 'form_submission' ? 'Form Submitted' :
-                                 activity.type === 'note' ? 'Note' :
-                                 activity.type === 'status_change' ? 'Status Changed' :
-                                 activity.type === 'merge' ? 'Contact Merged' :
-                                 'Activity'}
-                              </p>
+                              {activity.type === 'form_submission' && activity.metadata && Object.keys(activity.metadata).length > 0 ? (
+                                <button
+                                  onClick={() => {
+                                    setExpandedForms(prev => {
+                                      const newSet = new Set(prev)
+                                      if (newSet.has(activity.id)) {
+                                        newSet.delete(activity.id)
+                                      } else {
+                                        newSet.add(activity.id)
+                                      }
+                                      return newSet
+                                    })
+                                  }}
+                                  className="text-sm font-medium text-left hover:text-primary transition-colors flex items-center gap-1"
+                                >
+                                  Form Submitted
+                                  <span className={cn(
+                                    "text-muted-foreground transition-transform",
+                                    expandedForms.has(activity.id) && "rotate-180"
+                                  )}>
+                                    ▼
+                                  </span>
+                                </button>
+                              ) : (
+                                <p className="text-sm font-medium">
+                                  {activity.type === 'form_submission' ? 'Form Submitted' :
+                                   activity.type === 'note' ? 'Note' :
+                                   activity.type === 'status_change' ? 'Status Changed' :
+                                   activity.type === 'merge' ? 'Contact Merged' :
+                                   'Activity'}
+                                </p>
+                              )}
                               {activity.author && (
                                 <p className="text-xs text-muted-foreground">
                                   by {activity.author.full_name || activity.author.email}
@@ -994,7 +1075,7 @@ export function ContactDetailSheet({
                             </p>
                           )}
 
-                          {activity.type === 'form_submission' && activity.metadata && Object.keys(activity.metadata).length > 0 && (
+                          {activity.type === 'form_submission' && activity.metadata && Object.keys(activity.metadata).length > 0 && expandedForms.has(activity.id) && (
                             <div className="mt-2 p-2 bg-muted rounded-lg text-xs space-y-1">
                               {Object.entries(activity.metadata).map(([key, value]) => (
                                 <div key={key} className="flex justify-between gap-2">
