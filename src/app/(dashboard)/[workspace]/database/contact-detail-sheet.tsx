@@ -320,11 +320,36 @@ export function ContactDetailSheet({
   }
 
   // Score breakdown calculation from questionnaire responses
+  // Handles both direct fields and nested n8n structure (metadata.metadata.form_answers)
   const calculateScoreBreakdown = (meta: Record<string, unknown>) => {
     const breakdown: { label: string; value: string; points: number; maxPoints: number }[] = []
 
+    // Navigate to form_answers if nested (from n8n)
+    const innerMeta = (meta.metadata as Record<string, unknown>) || meta
+    const formAnswers = (innerMeta.form_answers as Record<string, unknown>) || {}
+
+    // Helper to get field value from multiple possible locations and names
+    const getField = (
+      directKeys: string[],
+      formAnswerKeys: string[]
+    ): unknown => {
+      // First check direct metadata fields
+      for (const key of directKeys) {
+        if (meta[key] !== undefined && meta[key] !== null) return meta[key]
+        if (innerMeta[key] !== undefined && innerMeta[key] !== null) return innerMeta[key]
+      }
+      // Then check form_answers with Indonesian names
+      for (const key of formAnswerKeys) {
+        if (formAnswers[key] !== undefined && formAnswers[key] !== null) return formAnswers[key]
+      }
+      return null
+    }
+
     // English Level (30 pts max)
-    const englishLevel = meta.EnglishLevel || meta.english_level
+    const englishLevel = getField(
+      ['EnglishLevel', 'english_level'],
+      ['Level Bahasa Inggris', 'EnglishLevel']
+    )
     if (englishLevel) {
       const englishMap: Record<string, number> = {
         'native': 30, 'has_score': 30, 'advanced': 25, 'intermediate': 15, 'beginner': 5
@@ -334,7 +359,10 @@ export function ContactDetailSheet({
     }
 
     // Budget (25 pts max)
-    const budget = meta.Budget || meta.budget
+    const budget = getField(
+      ['Budget', 'budget'],
+      ['Budget']
+    )
     if (budget) {
       const budgetMap: Record<string, number> = {
         '500jt-1m': 25, '300-500jt': 20, '100-300jt': 15, '<100jt': 5, 'scholarship': 5
@@ -344,7 +372,10 @@ export function ContactDetailSheet({
     }
 
     // Timeline (20 pts max)
-    const timeline = meta.TargetDeparture || meta.target_departure
+    const timeline = getField(
+      ['TargetDeparture', 'target_departure'],
+      ['Target Berangkat', 'TargetDeparture']
+    )
     if (timeline) {
       const timelineMap: Record<string, number> = {
         '3months': 20, '6months': 15, '1year': 10, '2years': 5, 'flexible': 5
@@ -354,7 +385,10 @@ export function ContactDetailSheet({
     }
 
     // Activity (15 pts max)
-    const activity = meta.Activity || meta.activity
+    const activity = getField(
+      ['Activity', 'activity'],
+      ['Aktivitas', 'Activity']
+    )
     if (activity) {
       const activityMap: Record<string, number> = {
         'working': 15, 'fresh_grad': 12, 'other': 10, 'student': 5
@@ -364,15 +398,21 @@ export function ContactDetailSheet({
     }
 
     // Target Country (10 pts max)
-    const targetCountry = meta.TargetCountry || meta.target_country
+    const targetCountry = getField(
+      ['TargetCountry', 'target_country'],
+      ['Negara Tujuan', 'TargetCountry']
+    )
     if (targetCountry) {
       const points = String(targetCountry) === 'undecided' ? 3 : 10
       breakdown.push({ label: 'Target Country', value: String(targetCountry), points, maxPoints: 10 })
     }
 
     // Remardk Penalty (-20 pts)
-    const remardk = meta.Remardk || meta.remardk
-    if (remardk) {
+    const remardk = getField(
+      ['Remardk', 'remardk'],
+      ['Catatan', 'Remardk']
+    )
+    if (remardk && String(remardk) !== 'No Response') {
       const badRemarks = ['Wrong Number', 'Ga mau Bayar']
       const isPenalty = badRemarks.includes(String(remardk))
       if (isPenalty) {
