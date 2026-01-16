@@ -52,6 +52,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
   )
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
+  const [tagFilter, setTagFilter] = useState<string[]>([])
   const [showUnreadOnly, setShowUnreadOnly] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
@@ -63,7 +64,18 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
     return conversations.filter((c) => c.unread_count > 0).length
   }, [conversations])
 
-  // Filter conversations by status and unread
+  // Get unique tags from all contacts
+  const uniqueTags = useMemo(() => {
+    const tags = new Set<string>()
+    conversations.forEach((conv) => {
+      if (conv.contact.tags) {
+        conv.contact.tags.forEach((tag) => tags.add(tag))
+      }
+    })
+    return Array.from(tags).sort()
+  }, [conversations])
+
+  // Filter conversations by status, tags, and unread
   const filteredConversations = useMemo(() => {
     let filtered = conversations
 
@@ -79,14 +91,29 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
       )
     }
 
+    // Filter by tags
+    if (tagFilter.length > 0) {
+      filtered = filtered.filter((conv) =>
+        conv.contact.tags?.some((tag) => tagFilter.includes(tag))
+      )
+    }
+
     return filtered
-  }, [conversations, statusFilter, showUnreadOnly])
+  }, [conversations, statusFilter, tagFilter, showUnreadOnly])
 
   const handleStatusToggle = (status: LeadStatus) => {
     setStatusFilter((prev) =>
       prev.includes(status)
         ? prev.filter((s) => s !== status)
         : [...prev, status]
+    )
+  }
+
+  const handleTagToggle = (tag: string) => {
+    setTagFilter((prev) =>
+      prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag]
     )
   }
 
@@ -396,6 +423,62 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
                 </div>
               </PopoverContent>
             </Popover>
+
+            {/* Tag filter dropdown */}
+            {uniqueTags.length > 0 && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                      tagFilter.length > 0
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                    )}
+                  >
+                    <Tag className="h-3.5 w-3.5" />
+                    {tagFilter.length > 0 ? (
+                      <>
+                        {tagFilter.length} tag{tagFilter.length > 1 ? 's' : ''}
+                      </>
+                    ) : (
+                      'All Tags'
+                    )}
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56" align="start">
+                  <div className="space-y-2">
+                    <p className="font-medium text-sm">Filter by tag</p>
+                    {uniqueTags.map((tag) => (
+                      <label
+                        key={tag}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={tagFilter.includes(tag)}
+                          onCheckedChange={() => handleTagToggle(tag)}
+                        />
+                        <Badge variant="secondary" className="text-xs">
+                          <Tag className="mr-1 h-3 w-3" />
+                          {tag}
+                        </Badge>
+                      </label>
+                    ))}
+                    {tagFilter.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full mt-2"
+                        onClick={() => setTagFilter([])}
+                      >
+                        Clear tags
+                      </Button>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         </div>
 
@@ -741,7 +824,7 @@ function InfoSidebar({
   }
 
   return (
-    <div className="w-80 border-l bg-background flex flex-col">
+    <div className="w-80 shrink-0 border-l bg-background flex flex-col overflow-hidden">
       {/* Contact header */}
       <div className="p-4 border-b">
         <div className="flex items-center gap-3">

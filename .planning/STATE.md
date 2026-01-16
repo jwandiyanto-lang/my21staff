@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-14)
 
 ## Current Position
 
-Phase: 17 (Inbox UI/UX Fixes)
-Plan: Context gathered, ready for planning
-Status: In Progress
-Last activity: 2026-01-16 — Created Phase 17 context for inbox fixes
+Phase: 17 (Inbox UI/UX Fixes) - COMPLETE
+Plan: 17-01 complete (6/7 fixes, 1 deferred)
+Status: Complete
+Last activity: 2026-01-16 — Completed Phase 17 inbox fixes
 
-Progress: v1.7 ░░░░░░░░░░ Phase 17 starting
+Progress: v1.7 ██████████ Phase 17 complete
 
 ## Performance Metrics
 
@@ -68,6 +68,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Created Phase 17 context
+Stopped at: Completed Phase 17 inbox fixes
 Resume file: None
-Next: Plan and execute Phase 17 (Inbox UI/UX Fixes)
+Next: Push changes and test, or start next phase

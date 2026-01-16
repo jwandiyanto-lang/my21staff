@@ -605,7 +605,20 @@ export function MessageThread({
           )}
         </Button>
 
-        {/* Handover Toggle */}
+        {/* Merge Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setMergeDialogOpen(true)}
+          className="gap-1.5 h-8 text-xs"
+        >
+          <Merge className="h-3.5 w-3.5" />
+          Merge
+        </Button>
+
+        <div className="flex-1" />
+
+        {/* Handover Toggle - right side */}
         <Button
           variant={aiPaused ? 'secondary' : 'ghost'}
           size="sm"
@@ -623,8 +636,6 @@ export function MessageThread({
           {aiPaused ? 'Manual mode' : 'AI Aktif'}
         </Button>
 
-        <div className="flex-1" />
-
         {/* More actions dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -636,10 +647,6 @@ export function MessageThread({
             <DropdownMenuItem onClick={() => setShowContactDetails(!showContactDetails)}>
               <User className="h-4 w-4 mr-2" />
               Contact Details
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setMergeDialogOpen(true)}>
-              <Merge className="h-4 w-4 mr-2" />
-              Merge Contact
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -783,7 +790,7 @@ export function MessageThread({
       )}
 
       {/* Messages */}
-      <ScrollArea className="flex-1 min-h-0 p-4">
+      <ScrollArea className="flex-1 min-h-0 p-4 whatsapp-bg">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             <div className="text-center">

@@ -1,4 +1,4 @@
-# Phase 16: Inbox UI/UX Fixes - Context
+# Phase 17: Inbox UI/UX Fixes - Context
 
 **Gathered:** 2026-01-16
 **Status:** Ready for planning
@@ -41,6 +41,7 @@ The header buttons should be logically arranged: Notes and Merge together on the
    - Tags → filter by tags array
    - Unread button → filter where unread_count > 0
 5. **Assigned to dropdown** - Query workspace_members, show names, default to owner if empty
+6. **Cascade delete** - When a contact is deleted, automatically delete their conversation
 
 </specifics>
 

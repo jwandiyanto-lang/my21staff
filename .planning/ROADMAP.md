@@ -126,21 +126,28 @@ Plans:
 
 ---
 
-## v1.7 — Inbox Polish (IN PROGRESS)
+## v1.7 — Inbox Polish (COMPLETE)
 
 ### Phase 17: Inbox UI/UX Fixes
 
 **Goal:** Polish inbox with working filters, better layout, and WhatsApp-style feel
 **Depends on:** Phase 13 (Lead Management)
-**Plans:** TBD
+**Plans:** 1/1 complete
 
-**Fixes:**
-1. WhatsApp-style background pattern in conversation area
-2. Info panel responsive (no cutoff on narrow screens)
-3. Header layout: `[Notes] [Merge] ──── [AI Aktif]`
-4. Status/tag filters actually filter conversation list
-5. Unread filter works
-6. Assigned to dropdown shows team members (or owner if none)
+Plans:
+- [x] 17-01: Inbox UI/UX Fixes (6/7 fixes, 1 deferred)
+
+**Completed:**
+- WhatsApp-style background pattern in conversation area
+- Info panel responsive (no cutoff on narrow screens)
+- Header layout: `[Notes] [Merge] ──── [AI Aktif]`
+- Tag filter added (filters by contact tags)
+- Status filter working
+- Unread filter working
+- Cascade delete (already in schema with ON DELETE CASCADE)
+
+**Deferred:**
+- Assigned to dropdown (needs workspace_members data fetch)
 
 ---
 
@@ -183,4 +190,4 @@ Plans:
 | 14. Landing Page Refresh | v1.6 | 1/1 | Complete | 2026-01-16 |
 | 15. Pricing Page | v1.6 | 2/2 | Complete | 2026-01-16 |
 | 16. Pricing Form Enhancement | v1.8 | 0/1 | Not started | — |
-| 17. Inbox UI/UX Fixes | v1.7 | 0/? | In Progress | — |
+| 17. Inbox UI/UX Fixes | v1.7 | 1/1 | Complete | 2026-01-16 |
