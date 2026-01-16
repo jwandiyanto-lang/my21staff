@@ -81,7 +81,7 @@ export function ContactDetailSheet({
 
   // Local state for optimistic updates
   const [localStatus, setLocalStatus] = useState<LeadStatus>(contact?.lead_status as LeadStatus || 'prospect')
-  const [localScore, setLocalScore] = useState(contact?.lead_score || 50)
+  const [localScore, setLocalScore] = useState(contact?.lead_score ?? 0)
   const [localTags, setLocalTags] = useState<string[]>(contact?.tags || [])
   const [newTagInput, setNewTagInput] = useState('')
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
