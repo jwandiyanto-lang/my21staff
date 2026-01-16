@@ -316,8 +316,31 @@ export function MessageThread({
     setNewNoteContent('')
   }, [conversationContact.id])
 
+  // Track if this is initial load or new message
+  const prevMessagesLengthRef = useRef<number>(0)
+  const isInitialLoadRef = useRef<boolean>(true)
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Reset initial load flag when conversation changes
+    isInitialLoadRef.current = true
+    prevMessagesLengthRef.current = 0
+  }, [conversationId])
+
+  useEffect(() => {
+    if (messages.length === 0) return
+
+    // Determine scroll behavior
+    const isInitialLoad = isInitialLoadRef.current
+    const isNewMessage = messages.length > prevMessagesLengthRef.current && prevMessagesLengthRef.current > 0
+
+    // Update refs
+    prevMessagesLengthRef.current = messages.length
+    isInitialLoadRef.current = false
+
+    // Instant scroll on initial load, smooth for new messages
+    messagesEndRef.current?.scrollIntoView({
+      behavior: isInitialLoad ? 'instant' : 'smooth'
+    })
   }, [messages])
 
   if (isLoading) {
