@@ -319,6 +319,72 @@ export function ContactDetailSheet({
     return '#6B7280' // gray
   }
 
+  // Score breakdown calculation from questionnaire responses
+  const calculateScoreBreakdown = (meta: Record<string, unknown>) => {
+    const breakdown: { label: string; value: string; points: number; maxPoints: number }[] = []
+
+    // English Level (30 pts max)
+    const englishLevel = meta.EnglishLevel || meta.english_level
+    if (englishLevel) {
+      const englishMap: Record<string, number> = {
+        'native': 30, 'has_score': 30, 'advanced': 25, 'intermediate': 15, 'beginner': 5
+      }
+      const points = englishMap[String(englishLevel)] || 0
+      breakdown.push({ label: 'English Level', value: String(englishLevel), points, maxPoints: 30 })
+    }
+
+    // Budget (25 pts max)
+    const budget = meta.Budget || meta.budget
+    if (budget) {
+      const budgetMap: Record<string, number> = {
+        '500jt-1m': 25, '300-500jt': 20, '100-300jt': 15, '<100jt': 5, 'scholarship': 5
+      }
+      const points = budgetMap[String(budget)] || 0
+      breakdown.push({ label: 'Budget', value: String(budget), points, maxPoints: 25 })
+    }
+
+    // Timeline (20 pts max)
+    const timeline = meta.TargetDeparture || meta.target_departure
+    if (timeline) {
+      const timelineMap: Record<string, number> = {
+        '3months': 20, '6months': 15, '1year': 10, '2years': 5, 'flexible': 5
+      }
+      const points = timelineMap[String(timeline)] || 0
+      breakdown.push({ label: 'Timeline', value: String(timeline), points, maxPoints: 20 })
+    }
+
+    // Activity (15 pts max)
+    const activity = meta.Activity || meta.activity
+    if (activity) {
+      const activityMap: Record<string, number> = {
+        'working': 15, 'fresh_grad': 12, 'other': 10, 'student': 5
+      }
+      const points = activityMap[String(activity)] || 0
+      breakdown.push({ label: 'Activity', value: String(activity), points, maxPoints: 15 })
+    }
+
+    // Target Country (10 pts max)
+    const targetCountry = meta.TargetCountry || meta.target_country
+    if (targetCountry) {
+      const points = String(targetCountry) === 'undecided' ? 3 : 10
+      breakdown.push({ label: 'Target Country', value: String(targetCountry), points, maxPoints: 10 })
+    }
+
+    // Remardk Penalty (-20 pts)
+    const remardk = meta.Remardk || meta.remardk
+    if (remardk) {
+      const badRemarks = ['Wrong Number', 'Ga mau Bayar']
+      const isPenalty = badRemarks.includes(String(remardk))
+      if (isPenalty) {
+        breakdown.push({ label: 'Remark Penalty', value: String(remardk), points: -20, maxPoints: 0 })
+      }
+    }
+
+    return breakdown
+  }
+
+  const scoreBreakdown = metadata ? calculateScoreBreakdown(metadata) : []
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md p-0 flex flex-col">
@@ -467,6 +533,41 @@ export function ContactDetailSheet({
                       <span>100</span>
                     </div>
                   </div>
+
+                  {/* Score Breakdown - only show if we have breakdown data */}
+                  {scoreBreakdown.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <h4 className="text-xs font-medium text-muted-foreground">Score Breakdown</h4>
+                      <div className="space-y-1.5">
+                        {scoreBreakdown.map((item) => (
+                          <div key={item.label} className="flex items-center justify-between text-sm">
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground">{item.label}</span>
+                              <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                                {item.value}
+                              </span>
+                            </div>
+                            <span className={cn(
+                              "font-medium tabular-nums",
+                              item.points < 0 ? "text-red-500" :
+                              item.points >= item.maxPoints ? "text-green-600" : "text-foreground"
+                            )}>
+                              {item.points > 0 ? '+' : ''}{item.points}
+                              {item.maxPoints > 0 && (
+                                <span className="text-muted-foreground text-xs">/{item.maxPoints}</span>
+                              )}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
+                          <span>Total</span>
+                          <span style={{ color: getScoreColor(localScore) }}>
+                            {scoreBreakdown.reduce((sum, item) => sum + item.points, 0)} pts
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Separator />
