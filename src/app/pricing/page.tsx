@@ -134,7 +134,7 @@ export default function PricingPage() {
   return (
     <div
       className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}
-      style={{ fontFamily: "var(--font-jakarta)" }}
+      style={{ fontFamily: "var(--font-inter)" }}
     >
       {/* Navigation - Matches home page */}
       <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
