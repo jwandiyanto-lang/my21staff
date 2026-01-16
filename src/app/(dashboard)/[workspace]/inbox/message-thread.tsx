@@ -221,6 +221,8 @@ export function MessageThread({
   const [isSearchingContacts, setIsSearchingContacts] = useState(false)
   const [selectedMergeContact, setSelectedMergeContact] = useState<Contact | null>(null)
   const [keepContactId, setKeepContactId] = useState<string | null>(null) // Which contact to keep
+  const [selectedPhone, setSelectedPhone] = useState<string>('') // Which phone to keep
+  const [selectedEmail, setSelectedEmail] = useState<string>('') // Which email to keep
   const [isMerging, setIsMerging] = useState(false)
 
   // Notes panel state
@@ -285,12 +287,16 @@ export function MessageThread({
     const currentScore = getCompletenessScore(conversationContact)
     const selectedScore = getCompletenessScore(selectedMergeContact)
     setKeepContactId(selectedScore > currentScore ? selectedMergeContact.id : conversationContact.id)
+    // Default phone to current conversation (for WhatsApp continuity)
+    setSelectedPhone(conversationContact.phone)
+    // Default email to whichever contact has one
+    setSelectedEmail(conversationContact.email || selectedMergeContact.email || '')
     setMergeStep('confirm')
   }
 
   // Handle merge with chosen direction
   const handleMerge = async () => {
-    if (!selectedMergeContact || !keepContactId) return
+    if (!selectedMergeContact || !keepContactId || !selectedPhone) return
     setIsMerging(true)
 
     const keepContact = keepContactId === conversationContact.id ? conversationContact : selectedMergeContact
@@ -303,8 +309,9 @@ export function MessageThread({
         body: JSON.stringify({
           keepContactId: keepContact.id,
           mergeContactId: mergeContact.id,
-          // Always use the current conversation's phone number for WhatsApp continuity
-          activePhone: conversationContact.phone,
+          // User-selected phone and email
+          activePhone: selectedPhone,
+          activeEmail: selectedEmail || null,
         }),
       })
       if (!response.ok) {
@@ -317,6 +324,8 @@ export function MessageThread({
       setMergeSearch('')
       setMergeStep('search')
       setKeepContactId(null)
+      setSelectedPhone('')
+      setSelectedEmail('')
       onContactMerged?.()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to merge contacts')
@@ -332,6 +341,8 @@ export function MessageThread({
     setSelectedMergeContact(null)
     setMergeSearch('')
     setKeepContactId(null)
+    setSelectedPhone('')
+    setSelectedEmail('')
   }
 
   const handleHandoverToggle = async () => {
@@ -961,6 +972,86 @@ export function MessageThread({
                 )}
               </div>
 
+              {/* Phone & Email Selection */}
+              {selectedMergeContact && (
+                <div className="border rounded-lg p-4 space-y-4">
+                  <h4 className="text-sm font-medium">Choose which to keep:</h4>
+
+                  {/* Phone Selection */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground uppercase">Phone Number (for WhatsApp)</label>
+                    <div className="space-y-1">
+                      <label className="flex items-center gap-2 p-2 rounded hover:bg-muted cursor-pointer">
+                        <input
+                          type="radio"
+                          name="phone"
+                          checked={selectedPhone === conversationContact.phone}
+                          onChange={() => setSelectedPhone(conversationContact.phone)}
+                          className="h-4 w-4"
+                        />
+                        <span className="text-sm">{conversationContact.phone}</span>
+                        <span className="text-xs text-muted-foreground ml-auto">(Current chat)</span>
+                      </label>
+                      {selectedMergeContact.phone !== conversationContact.phone && (
+                        <label className="flex items-center gap-2 p-2 rounded hover:bg-muted cursor-pointer">
+                          <input
+                            type="radio"
+                            name="phone"
+                            checked={selectedPhone === selectedMergeContact.phone}
+                            onChange={() => setSelectedPhone(selectedMergeContact.phone)}
+                            className="h-4 w-4"
+                          />
+                          <span className="text-sm">{selectedMergeContact.phone}</span>
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Email Selection */}
+                  {(conversationContact.email || selectedMergeContact.email) && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-muted-foreground uppercase">Email</label>
+                      <div className="space-y-1">
+                        {conversationContact.email && (
+                          <label className="flex items-center gap-2 p-2 rounded hover:bg-muted cursor-pointer">
+                            <input
+                              type="radio"
+                              name="email"
+                              checked={selectedEmail === conversationContact.email}
+                              onChange={() => setSelectedEmail(conversationContact.email || '')}
+                              className="h-4 w-4"
+                            />
+                            <span className="text-sm truncate">{conversationContact.email}</span>
+                          </label>
+                        )}
+                        {selectedMergeContact.email && selectedMergeContact.email !== conversationContact.email && (
+                          <label className="flex items-center gap-2 p-2 rounded hover:bg-muted cursor-pointer">
+                            <input
+                              type="radio"
+                              name="email"
+                              checked={selectedEmail === selectedMergeContact.email}
+                              onChange={() => setSelectedEmail(selectedMergeContact.email || '')}
+                              className="h-4 w-4"
+                            />
+                            <span className="text-sm truncate">{selectedMergeContact.email}</span>
+                          </label>
+                        )}
+                        <label className="flex items-center gap-2 p-2 rounded hover:bg-muted cursor-pointer">
+                          <input
+                            type="radio"
+                            name="email"
+                            checked={selectedEmail === ''}
+                            onChange={() => setSelectedEmail('')}
+                            className="h-4 w-4"
+                          />
+                          <span className="text-sm text-muted-foreground">No email</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Summary */}
               {keepContactId && selectedMergeContact && (
                 <div className="bg-muted/50 rounded-lg p-3 text-sm">
@@ -994,7 +1085,7 @@ export function MessageThread({
                   </Button>
                   <Button
                     onClick={handleMerge}
-                    disabled={!keepContactId || isMerging}
+                    disabled={!keepContactId || !selectedPhone || isMerging}
                   >
                     {isMerging ? (
                       <>

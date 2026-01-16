@@ -50,8 +50,8 @@ function calculateCompletenessScore(contact: {
 
 export async function POST(request: NextRequest) {
   try {
-    // activePhone is the phone number from the current conversation - must be preserved for WhatsApp
-    const { keepContactId, mergeContactId, activePhone } = await request.json()
+    // activePhone and activeEmail are user-selected values from the merge dialog
+    const { keepContactId, mergeContactId, activePhone, activeEmail } = await request.json()
 
     if (!keepContactId || !mergeContactId) {
       return NextResponse.json(
@@ -150,9 +150,9 @@ export async function POST(request: NextRequest) {
     const updatedKeepContact = {
       // Prefer keep contact's data, but fill in missing fields from merge contact
       name: keepContact.name || mergeContact.name,
-      email: keepContact.email || mergeContact.email,
-      // Use activePhone if provided (from current conversation), otherwise keep existing phone
-      // This ensures WhatsApp messages can still be sent to the conversation's number
+      // Use user-selected email if provided, otherwise prefer keep contact's email
+      email: activeEmail !== undefined ? activeEmail : (keepContact.email || mergeContact.email),
+      // Use user-selected phone - required for WhatsApp to work correctly
       phone: activePhone || keepContact.phone,
       // Take the higher lead score
       lead_score: Math.max(keepContact.lead_score || 0, mergeContact.lead_score || 0),
