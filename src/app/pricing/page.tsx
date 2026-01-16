@@ -42,156 +42,157 @@ export default function PricingPage() {
       </nav>
 
       <main>
-        {/* Hero */}
-        <section className="bg-landing-hero text-white pt-16 pb-12">
-          <div className="mx-auto max-w-4xl px-6">
+        {/* Story 1: The Lost Lead */}
+        <section className="bg-landing-hero text-white pt-24 pb-20">
+          <div className="mx-auto max-w-3xl px-6">
             <motion.div
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
-              className="text-center"
             >
-              <motion.h1
+              <motion.p
                 variants={fadeInUp}
-                className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight"
+                className="text-lg md:text-xl text-white/60 mb-6"
               >
-                Leads <span className="text-landing-cta">kebanyakan</span>?<br />
-                Closing <span className="text-white/50">minim</span>.
-              </motion.h1>
+                Kemarin ada yang chat.
+              </motion.p>
 
               <motion.p
                 variants={fadeInUp}
-                className="text-lg md:text-xl text-white/70 mt-6"
+                className="text-2xl md:text-3xl text-white/80 mb-6"
               >
-                Balas semua orang. Tapi bukan yang tepat. Waktu habis. Revenue stagnan.
+                Tanya harga. Serius mau beli.
+              </motion.p>
+
+              <motion.p
+                variants={fadeInUp}
+                className="text-xl md:text-2xl text-white/60 mb-10"
+              >
+                Tapi Anda lagi sibuk. Belum sempat balas.
+              </motion.p>
+
+              <motion.h1
+                variants={fadeInUp}
+                className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
+              >
+                Hari ini dia sudah <span className="text-landing-cta">closing</span><br />
+                sama kompetitor.
+              </motion.h1>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Story 2: The 11PM Grind */}
+        <section className="bg-black text-white py-20">
+          <div className="mx-auto max-w-3xl px-6">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={staggerContainer}
+            >
+              <motion.p
+                variants={fadeInUp}
+                className="text-lg text-white/50 mb-6"
+              >
+                Jam 11 malam.
+              </motion.p>
+
+              <motion.p
+                variants={fadeInUp}
+                className="text-2xl md:text-3xl text-white/80 mb-6"
+              >
+                Masih balas WhatsApp. Keluarga sudah tidur.
+              </motion.p>
+
+              <motion.p
+                variants={fadeInUp}
+                className="text-xl text-white/60 mb-10"
+              >
+                Besok pagi bangun, cek HP —
+              </motion.p>
+
+              <motion.p
+                variants={fadeInUp}
+                className="text-3xl md:text-4xl font-bold"
+              >
+                Tetap ada yang <span className="text-landing-cta">kelewat</span>.
               </motion.p>
             </motion.div>
           </div>
         </section>
 
-        {/* No leads */}
-        <section className="bg-landing-cta text-white py-12">
-          <div className="mx-auto max-w-4xl px-6 text-center">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+        {/* Story 3: Where's the money? */}
+        <section className="bg-white text-landing-text py-20">
+          <div className="mx-auto max-w-3xl px-6">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true }}
-              className="text-2xl md:text-3xl lg:text-4xl font-extrabold"
+              variants={staggerContainer}
             >
-              Atau gak ada leads sama sekali?
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-lg text-white/90 mt-3"
-            >
-              Kompetitor jalan. Anda diam.
-            </motion.p>
+              <motion.p
+                variants={fadeInUp}
+                className="text-lg text-landing-text-muted mb-6"
+              >
+                Bulan lalu ramai. Chat masuk terus.
+              </motion.p>
+
+              <motion.p
+                variants={fadeInUp}
+                className="text-2xl md:text-3xl text-landing-text/80 mb-6"
+              >
+                Sibuk dari pagi sampai malam.
+              </motion.p>
+
+              <motion.p
+                variants={fadeInUp}
+                className="text-xl text-landing-text-muted mb-10"
+              >
+                Tapi pas akhir bulan, cek rekening...
+              </motion.p>
+
+              <motion.h2
+                variants={fadeInUp}
+                className="text-4xl md:text-5xl lg:text-6xl font-bold text-landing-cta"
+              >
+                Uangnya kemana?
+              </motion.h2>
+            </motion.div>
           </div>
         </section>
 
-        {/* The difference */}
-        <section className="bg-black text-white py-16">
-          <div className="mx-auto max-w-4xl px-6 text-center">
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-white/50 text-sm uppercase tracking-widest mb-4"
-            >
-              Yang membedakan
-            </motion.p>
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-2xl md:text-3xl font-bold mb-4"
-            >
-              Bisnis besar punya satu hal yang Anda belum punya:
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-landing-cta"
-            >
-              Sistem yang jalan.
-            </motion.p>
-          </div>
-        </section>
-
-        {/* The pain */}
-        <section className="bg-white text-landing-text py-16">
-          <div className="mx-auto max-w-4xl px-6 text-center">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-2xl md:text-3xl font-bold"
-            >
-              Bulan ini ramai. Tapi pas gajian...
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-extrabold text-landing-cta mt-4"
-            >
-              Uangnya kemana?
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-landing-text-muted mt-4"
-            >
-              Ramai di permukaan. Pas bayar — hilang.
-            </motion.p>
-          </div>
-        </section>
-
-        {/* Urgency */}
+        {/* The Answer */}
         <section className="bg-landing-hero text-white py-16">
-          <div className="mx-auto max-w-4xl px-6 text-center">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-4xl md:text-5xl lg:text-6xl font-extrabold"
-            >
-              No system. <span className="text-landing-cta">No growth.</span>
-            </motion.h2>
+          <div className="mx-auto max-w-3xl px-6 text-center">
             <motion.p
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              className="text-lg text-white/70 mt-4"
+              className="text-white/60 text-lg mb-4"
             >
-              Gak ada waktu tenggelam dalam masalah.
+              Yang membedakan bisnis yang scale dan yang stuck:
             </motion.p>
+            <motion.h2
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl lg:text-5xl font-bold"
+            >
+              <span className="text-landing-cta">Sistem</span> yang jalan.
+            </motion.h2>
           </div>
         </section>
 
         {/* Filter */}
         <section className="bg-landing-cta text-white py-12">
           <div className="mx-auto max-w-3xl px-6 text-center">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-4"
-            >
+            <h3 className="text-2xl md:text-3xl font-bold mb-3">
               Kami tidak terima semua orang.
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-lg text-white/90"
-            >
-              Bukan CRM plug-and-play. Ini untuk yang sudah tau ada yang <span className="italic">broken</span>.
-            </motion.p>
+            </h3>
+            <p className="text-white/90">
+              Ini untuk yang sudah tau ada yang <span className="italic">broken</span>.
+            </p>
           </div>
         </section>
 
