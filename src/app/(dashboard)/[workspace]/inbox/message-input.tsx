@@ -180,8 +180,10 @@ export function MessageInput({
       onMessageError(optimisticId)
     } finally {
       setIsSending(false)
-      // Auto-focus input after sending
-      setTimeout(() => inputRef.current?.focus(), 0)
+      // Auto-focus input after sending - wait for React to re-enable the input
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 50)
     }
   }
 
