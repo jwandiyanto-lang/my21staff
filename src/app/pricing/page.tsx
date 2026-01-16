@@ -32,172 +32,92 @@ export default function PricingPage() {
       className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}
       style={{ fontFamily: "var(--font-jakarta)" }}
     >
-      {/* Navigation - Transparent */}
-      <nav className="fixed top-0 left-0 right-0 z-50">
-        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FDFBF7]/80 backdrop-blur-sm">
+        <div className="mx-auto max-w-7xl px-6 h-14 flex items-center">
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-extrabold text-white">21</span>
+            <span className="text-2xl font-extrabold text-landing-cta">21</span>
           </Link>
         </div>
       </nav>
 
       <main>
-        {/* Story 1: The Lost Lead */}
-        <section className="bg-landing-hero text-white pt-24 pb-20">
-          <div className="mx-auto max-w-3xl px-6">
-            <motion.div
+        {/* The Letter */}
+        <section className="bg-[#FDFBF7] text-landing-text pt-24 pb-16">
+          <div className="mx-auto max-w-2xl px-6">
+            <motion.article
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
+              className="space-y-6 text-lg md:text-xl leading-relaxed"
             >
-              <motion.p
-                variants={fadeInUp}
-                className="text-lg md:text-xl text-white/60 mb-6"
-              >
-                Kemarin ada yang chat.
+              <motion.p variants={fadeInUp} className="text-landing-text-muted italic">
+                Sebelum pakai 21...
               </motion.p>
 
-              <motion.p
-                variants={fadeInUp}
-                className="text-2xl md:text-3xl text-white/80 mb-6"
-              >
-                Tanya harga. Serius mau beli.
+              <motion.p variants={fadeInUp}>
+                Kemarin ada yang chat. Tanya harga. Serius mau beli.
               </motion.p>
 
-              <motion.p
-                variants={fadeInUp}
-                className="text-xl md:text-2xl text-white/60 mb-10"
-              >
-                Tapi Anda lagi sibuk. Belum sempat balas.
+              <motion.p variants={fadeInUp}>
+                Tapi saya lagi sibuk. Belum sempat balas.
               </motion.p>
 
-              <motion.h1
-                variants={fadeInUp}
-                className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
-              >
-                Hari ini dia sudah <span className="text-landing-cta">closing</span><br />
-                sama kompetitor.
-              </motion.h1>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Story 2: The 11PM Grind */}
-        <section className="bg-black text-white py-20">
-          <div className="mx-auto max-w-3xl px-6">
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={staggerContainer}
-            >
-              <motion.p
-                variants={fadeInUp}
-                className="text-lg text-white/50 mb-6"
-              >
-                Jam 11 malam.
+              <motion.p variants={fadeInUp} className="font-semibold">
+                Hari ini dia sudah closing sama kompetitor.
               </motion.p>
 
-              <motion.p
-                variants={fadeInUp}
-                className="text-2xl md:text-3xl text-white/80 mb-6"
-              >
-                Masih balas WhatsApp. Keluarga sudah tidur.
+              <motion.p variants={fadeInUp} className="pt-4">
+                Jam 11 malam masih balas WhatsApp. Keluarga sudah tidur. Besok pagi bangun, cek HP — tetap ada yang kelewat.
               </motion.p>
 
-              <motion.p
-                variants={fadeInUp}
-                className="text-xl text-white/60 mb-10"
-              >
-                Besok pagi bangun, cek HP —
+              <motion.p variants={fadeInUp}>
+                Bulan lalu ramai. Chat masuk terus. Sibuk dari pagi sampai malam.
               </motion.p>
 
-              <motion.p
-                variants={fadeInUp}
-                className="text-3xl md:text-4xl font-bold"
-              >
-                Tetap ada yang <span className="text-landing-cta">kelewat</span>.
-              </motion.p>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Story 3: Where's the money? */}
-        <section className="bg-white text-landing-text py-20">
-          <div className="mx-auto max-w-3xl px-6">
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={staggerContainer}
-            >
-              <motion.p
-                variants={fadeInUp}
-                className="text-lg text-landing-text-muted mb-6"
-              >
-                Bulan lalu ramai. Chat masuk terus.
-              </motion.p>
-
-              <motion.p
-                variants={fadeInUp}
-                className="text-2xl md:text-3xl text-landing-text/80 mb-6"
-              >
-                Sibuk dari pagi sampai malam.
-              </motion.p>
-
-              <motion.p
-                variants={fadeInUp}
-                className="text-xl text-landing-text-muted mb-10"
-              >
+              <motion.p variants={fadeInUp}>
                 Tapi pas akhir bulan, cek rekening...
               </motion.p>
 
-              <motion.h2
-                variants={fadeInUp}
-                className="text-4xl md:text-5xl lg:text-6xl font-bold text-landing-cta"
-              >
+              <motion.p variants={fadeInUp} className="text-2xl md:text-3xl font-bold text-landing-cta">
                 Uangnya kemana?
-              </motion.h2>
-            </motion.div>
+              </motion.p>
+
+              <motion.div variants={fadeInUp} className="pt-8 border-t border-landing-text/10">
+                <p className="text-landing-text-muted mb-4">
+                  Sekarang setelah pakai 21:
+                </p>
+                <p>
+                  Leads masuk, langsung ada yang follow up. Gak ada yang kelewat. Gak perlu begadang.
+                </p>
+                <p className="mt-4">
+                  Akhir bulan? Tau persis mana yang closing, mana yang pending, mana yang butuh di-push.
+                </p>
+                <p className="mt-4 font-semibold">
+                  Bukan kerja lebih keras. Tapi kerja dengan sistem.
+                </p>
+              </motion.div>
+
+              <motion.div variants={fadeInUp} className="pt-8">
+                <p className="text-landing-text-muted text-base">
+                  — Klien 21
+                </p>
+              </motion.div>
+            </motion.article>
           </div>
         </section>
 
-        {/* The Answer */}
-        <section className="bg-landing-hero text-white py-16">
-          <div className="mx-auto max-w-3xl px-6 text-center">
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-white/60 text-lg mb-4"
-            >
-              Yang membedakan bisnis yang scale dan yang stuck:
-            </motion.p>
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-3xl md:text-4xl lg:text-5xl font-bold"
-            >
-              <span className="text-landing-cta">Sistem</span> yang jalan.
-            </motion.h2>
-          </div>
-        </section>
-
-        {/* Filter */}
-        <section className="bg-landing-cta text-white py-12">
-          <div className="mx-auto max-w-3xl px-6 text-center">
-            <h3 className="text-2xl md:text-3xl font-bold mb-3">
-              Kami tidak terima semua orang.
-            </h3>
-            <p className="text-white/90">
-              Ini untuk yang sudah tau ada yang <span className="italic">broken</span>.
+        {/* Not for everyone */}
+        <section className="bg-[#FDFBF7] text-landing-text pb-16">
+          <div className="mx-auto max-w-2xl px-6">
+            <p className="text-center text-landing-text-muted">
+              Ini bukan untuk semua orang. Ini untuk yang sudah tau ada yang <span className="italic">broken</span>.
             </p>
           </div>
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="bg-[#FDF8F3] text-landing-text py-16">
+        <section id="pricing" className="bg-[#FDFBF7] text-landing-text py-12">
           <div className="mx-auto max-w-7xl px-6">
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-extrabold">
@@ -298,19 +218,16 @@ export default function PricingPage() {
         </section>
 
         {/* Final CTA */}
-        <section className="bg-black text-white py-12">
-          <div className="mx-auto max-w-3xl px-6 text-center">
-            <h3 className="text-2xl md:text-3xl font-extrabold mb-3">
-              Masih ragu?
-            </h3>
-            <p className="text-white/70 mb-6">
-              Chat dulu. Ceritakan masalahnya.
+        <section className="bg-[#FDFBF7] text-landing-text py-12">
+          <div className="mx-auto max-w-2xl px-6 text-center">
+            <p className="text-landing-text-muted mb-4">
+              Masih ragu? Chat dulu.
             </p>
             <a
               href="https://wa.me/6281234567890"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block px-10 py-4 rounded-full bg-landing-cta text-white font-bold hover:bg-landing-cta/90 transition-all"
+              className="inline-block px-8 py-3 rounded-full bg-landing-cta text-white font-bold hover:bg-landing-cta/90 transition-all"
             >
               Chat via WhatsApp
             </a>
@@ -319,8 +236,8 @@ export default function PricingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-black border-t border-white/10 py-4">
-        <div className="mx-auto max-w-7xl px-6 text-center text-xs text-white/50">
+      <footer className="bg-[#FDFBF7] border-t border-landing-text/10 py-4">
+        <div className="mx-auto max-w-7xl px-6 text-center text-xs text-landing-text-muted">
           <span className="font-bold text-landing-cta">21</span> &copy; 2026
         </div>
       </footer>
