@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,7 +10,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Filter, MessageCircle, Mail, MailOpen, ChevronDown, Phone, Calendar, Star, User, MessageSquare } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
+import { Filter, MessageCircle, Mail, MailOpen, ChevronDown, Phone, Calendar, Star, User, MessageSquare, Loader2, X, Plus, Tag } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -131,7 +142,22 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
           const newMessage = payload.new as Message
           // Avoid duplicates (optimistic updates)
           setMessages((prev) => {
+            // Check for exact ID match first
             if (prev.some((m) => m.id === newMessage.id)) return prev
+
+            // Check for optimistic message match (outbound + same content + sending status)
+            if (newMessage.direction === 'outbound') {
+              const optimisticMatch = prev.find((m) =>
+                m.direction === 'outbound' &&
+                m.content === newMessage.content &&
+                (m.metadata as Record<string, unknown>)?.status === 'sending'
+              )
+              if (optimisticMatch) {
+                // Replace optimistic with real message
+                return prev.map((m) => m.id === optimisticMatch.id ? newMessage : m)
+              }
+            }
+
             return [...prev, newMessage]
           })
         }
@@ -203,16 +229,15 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
       // Add optimistic message
       setMessages((prev) => [...prev, message])
     } else {
-      // Replace optimistic message with real one
+      // Replace optimistic message with real one, ensuring no duplicates
       const optimisticId = message._optimisticId
-      if (optimisticId) {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === optimisticId ? message : m))
+      setMessages((prev) => {
+        // Remove both the optimistic message AND any duplicate that came via real-time
+        const filtered = prev.filter((m) =>
+          m.id !== optimisticId && m.id !== message.id
         )
-      } else {
-        // Just append if no optimistic ID (shouldn't happen normally)
-        setMessages((prev) => [...prev, message])
-      }
+        return [...filtered, message]
+      })
     }
   }, [])
 
@@ -444,23 +469,200 @@ function getInitials(name: string | null, phone: string): string {
   return phone.slice(-2)
 }
 
-// Info Sidebar Component (Kapso style)
+// Info Sidebar Component (Full profile like Lead Management)
 function InfoSidebar({
   contact,
   messagesCount,
   lastActivity,
   conversationStatus,
+  onContactUpdate,
 }: {
   contact: ConversationWithContact['contact']
   messagesCount: number
   lastActivity: string | null
   conversationStatus: string
+  onContactUpdate?: (updated: Partial<ConversationWithContact['contact']>) => void
 }) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const isActive = conversationStatus === 'open' || conversationStatus === 'handover'
-  const statusConfig = LEAD_STATUS_CONFIG[contact.lead_status as LeadStatus] || LEAD_STATUS_CONFIG.prospect
+
+  // Local state for optimistic updates
+  const [localStatus, setLocalStatus] = useState<LeadStatus>(contact.lead_status as LeadStatus || 'prospect')
+  const [localScore, setLocalScore] = useState(contact.lead_score ?? 0)
+  const [localTags, setLocalTags] = useState<string[]>(contact.tags || [])
+  const [newTagInput, setNewTagInput] = useState('')
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+  const [isUpdatingScore, setIsUpdatingScore] = useState(false)
+  const [isUpdatingTags, setIsUpdatingTags] = useState(false)
+  const tagInputRef = useRef<HTMLInputElement>(null)
+
+  // Sync local state when contact changes
+  useEffect(() => {
+    setLocalStatus(contact.lead_status as LeadStatus || 'prospect')
+    setLocalScore(contact.lead_score ?? 0)
+    setLocalTags(contact.tags || [])
+  }, [contact.id, contact.lead_status, contact.lead_score, contact.tags])
+
+  const statusConfig = LEAD_STATUS_CONFIG[localStatus] || LEAD_STATUS_CONFIG.prospect
+
+  // Debounced score update
+  const debouncedScoreUpdate = useCallback(
+    (() => {
+      let timeoutId: NodeJS.Timeout | null = null
+      return (contactId: string, score: number) => {
+        if (timeoutId) clearTimeout(timeoutId)
+        timeoutId = setTimeout(async () => {
+          setIsUpdatingScore(true)
+          try {
+            const response = await fetch(`/api/contacts/${contactId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ lead_score: score }),
+            })
+            if (!response.ok) {
+              setLocalScore(contact.lead_score ?? 0)
+            } else {
+              onContactUpdate?.({ lead_score: score })
+              startTransition(() => router.refresh())
+            }
+          } catch {
+            setLocalScore(contact.lead_score ?? 0)
+          } finally {
+            setIsUpdatingScore(false)
+          }
+        }, 500)
+      }
+    })(),
+    [contact.lead_score, router, onContactUpdate]
+  )
+
+  // Status update handler
+  const handleStatusChange = async (newStatus: LeadStatus) => {
+    const previousStatus = localStatus
+    setLocalStatus(newStatus)
+    setIsUpdatingStatus(true)
+
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_status: newStatus }),
+      })
+
+      if (!response.ok) {
+        setLocalStatus(previousStatus)
+      } else {
+        onContactUpdate?.({ lead_status: newStatus })
+        startTransition(() => router.refresh())
+      }
+    } catch {
+      setLocalStatus(previousStatus)
+    } finally {
+      setIsUpdatingStatus(false)
+    }
+  }
+
+  // Score change handler
+  const handleScoreChange = (value: number[]) => {
+    const newScore = value[0]
+    setLocalScore(newScore)
+    debouncedScoreUpdate(contact.id, newScore)
+  }
+
+  // Tag management
+  const handleAddTag = async () => {
+    const trimmedTag = newTagInput.trim()
+    if (!trimmedTag) return
+    if (localTags.some(t => t.toLowerCase() === trimmedTag.toLowerCase())) {
+      setNewTagInput('')
+      return
+    }
+
+    const newTags = [...localTags, trimmedTag]
+    setLocalTags(newTags)
+    setNewTagInput('')
+    setIsUpdatingTags(true)
+
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tags: newTags }),
+      })
+
+      if (!response.ok) {
+        setLocalTags(contact.tags || [])
+      } else {
+        onContactUpdate?.({ tags: newTags })
+        startTransition(() => router.refresh())
+      }
+    } catch {
+      setLocalTags(contact.tags || [])
+    } finally {
+      setIsUpdatingTags(false)
+    }
+  }
+
+  const handleRemoveTag = async (tagToRemove: string) => {
+    const newTags = localTags.filter(t => t !== tagToRemove)
+    const previousTags = localTags
+    setLocalTags(newTags)
+    setIsUpdatingTags(true)
+
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tags: newTags }),
+      })
+
+      if (!response.ok) {
+        setLocalTags(previousTags)
+      } else {
+        onContactUpdate?.({ tags: newTags })
+        startTransition(() => router.refresh())
+      }
+    } catch {
+      setLocalTags(previousTags)
+    } finally {
+      setIsUpdatingTags(false)
+    }
+  }
+
+  // Extract form responses from metadata
+  const metadata = contact.metadata as Record<string, unknown> | null
+  const innerMetadata = (metadata?.metadata as Record<string, unknown>) || metadata
+  let formAnswersData: Record<string, unknown> = {}
+  if (innerMetadata?.form_answers && typeof innerMetadata.form_answers === 'object') {
+    formAnswersData = innerMetadata.form_answers as Record<string, unknown>
+  } else if (metadata?.form_answers && typeof metadata.form_answers === 'object') {
+    formAnswersData = metadata.form_answers as Record<string, unknown>
+  } else if (metadata) {
+    const formFieldKeys = ['Pendidikan', 'Jurusan', 'Aktivitas', 'Negara Tujuan', 'Budget',
+      'Target Berangkat', 'Level Bahasa Inggris', 'Goals', 'Catatan', 'Education',
+      'Activity', 'TargetCountry', 'TargetDeparture', 'EnglishLevel']
+    for (const key of formFieldKeys) {
+      if (metadata[key] !== undefined && metadata[key] !== null) formAnswersData[key] = metadata[key]
+      if (innerMetadata && innerMetadata[key] !== undefined && innerMetadata[key] !== null) {
+        formAnswersData[key] = innerMetadata[key]
+      }
+    }
+  }
+  const formResponses = Object.keys(formAnswersData).length > 0
+    ? Object.entries(formAnswersData).filter(([key]) => !key.startsWith('_'))
+    : []
+
+  // Score color
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return '#10B981'
+    if (score >= 60) return '#F59E0B'
+    if (score >= 40) return '#3B82F6'
+    return '#6B7280'
+  }
 
   return (
-    <div className="w-72 border-l bg-background flex flex-col">
+    <div className="w-80 border-l bg-background flex flex-col">
       {/* Contact header */}
       <div className="p-4 border-b">
         <div className="flex items-center gap-3">
@@ -486,87 +688,209 @@ function InfoSidebar({
         </div>
       </div>
 
-      {/* Assignment */}
-      <div className="p-4 border-b">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <User className="h-4 w-4" />
-          <span>Assignment</span>
-        </div>
-        <p className="text-sm">Not assigned</p>
-      </div>
-
-      {/* Status */}
-      <div className="p-4 border-b">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <MessageSquare className="h-4 w-4" />
-          <span>Status</span>
-        </div>
-        <Badge
-          variant="outline"
-          className={cn(
-            'text-xs',
-            isActive ? 'bg-emerald-500/20 text-emerald-600 border-emerald-500/30' : ''
-          )}
-        >
-          {isActive ? 'Active' : 'Closed'}
-        </Badge>
-      </div>
-
-      {/* Lead Status */}
-      <div className="p-4 border-b">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Star className="h-4 w-4" />
-          <span>Lead Status</span>
-        </div>
-        <Badge
-          variant="outline"
-          style={{
-            color: statusConfig.color,
-            borderColor: statusConfig.color,
-            backgroundColor: statusConfig.bgColor,
-          }}
-          className="text-xs"
-        >
-          {statusConfig.label}
-        </Badge>
-        {contact.lead_score > 0 && (
-          <p className="text-xs text-muted-foreground mt-1">Score: {contact.lead_score}</p>
-        )}
-      </div>
-
-      {/* Activity */}
-      <div className="p-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Calendar className="h-4 w-4" />
-          <span>Activity</span>
-        </div>
-        <div className="space-y-1 text-sm">
-          <p>
-            <span className="text-muted-foreground">Last active: </span>
-            {lastActivity
-              ? formatDistanceToNow(new Date(lastActivity), { addSuffix: false }) + ' ago'
-              : 'Never'}
-          </p>
-          <p>
-            <span className="text-muted-foreground">Total messages: </span>
-            {messagesCount}
-          </p>
-        </div>
-      </div>
-
-      {/* Tags */}
-      {contact.tags && contact.tags.length > 0 && (
-        <div className="p-4 border-t">
-          <p className="text-sm text-muted-foreground mb-2">Tags</p>
-          <div className="flex flex-wrap gap-1">
-            {contact.tags.map((tag, i) => (
-              <Badge key={i} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-4">
+          {/* Contact Info */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Contact Info
+            </h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                <span>{contact.phone}</span>
+              </div>
+              {contact.email && (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="truncate">{contact.email}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <span>Added {format(new Date(contact.created_at), 'MMM d, yyyy')}</span>
+              </div>
+            </div>
           </div>
+
+          <Separator />
+
+          {/* Conversation Status */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Conversation
+            </h3>
+            <Badge
+              variant="outline"
+              className={cn(
+                'text-xs',
+                isActive ? 'bg-emerald-500/20 text-emerald-600 border-emerald-500/30' : ''
+              )}
+            >
+              {isActive ? 'Active' : 'Closed'}
+            </Badge>
+            <div className="text-xs text-muted-foreground mt-1">
+              {lastActivity
+                ? `Last active: ${formatDistanceToNow(new Date(lastActivity), { addSuffix: false })} ago`
+                : 'No activity'}
+              {' • '}{messagesCount} messages
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Lead Status */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Lead Status
+              </h3>
+              {isUpdatingStatus && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+            </div>
+            <Select
+              value={localStatus}
+              onValueChange={(value) => handleStatusChange(value as LeadStatus)}
+              disabled={isUpdatingStatus}
+            >
+              <SelectTrigger
+                className="w-full h-8 text-xs"
+                style={{
+                  backgroundColor: statusConfig.bgColor,
+                  color: statusConfig.color,
+                  borderColor: statusConfig.color,
+                }}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LEAD_STATUSES.map((status) => {
+                  const config = LEAD_STATUS_CONFIG[status]
+                  return (
+                    <SelectItem key={status} value={status} className="text-xs">
+                      <span
+                        className="inline-block w-2 h-2 rounded-full mr-2"
+                        style={{ backgroundColor: config.color }}
+                      />
+                      {config.label}
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Separator />
+
+          {/* Lead Score */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Lead Score
+              </h3>
+              <div className="flex items-center gap-2">
+                {isUpdatingScore && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                <span
+                  className="text-lg font-semibold tabular-nums"
+                  style={{ color: getScoreColor(localScore) }}
+                >
+                  {localScore}
+                </span>
+              </div>
+            </div>
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${Math.min(localScore, 100)}%`,
+                  backgroundColor: getScoreColor(localScore),
+                }}
+              />
+            </div>
+            <Slider
+              value={[localScore]}
+              onValueChange={handleScoreChange}
+              min={0}
+              max={100}
+              step={1}
+              className="w-full"
+            />
+          </div>
+
+          <Separator />
+
+          {/* Tags */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Tags
+              </h3>
+              {isUpdatingTags && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+            </div>
+            {localTags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {localTags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs pr-1">
+                    <Tag className="mr-1 h-3 w-3" />
+                    {tag}
+                    <button
+                      onClick={() => handleRemoveTag(tag)}
+                      className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                      disabled={isUpdatingTags}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-1">
+              <Input
+                ref={tagInputRef}
+                type="text"
+                placeholder="Add tag..."
+                value={newTagInput}
+                onChange={(e) => setNewTagInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                className="h-7 text-xs"
+                disabled={isUpdatingTags}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleAddTag}
+                disabled={!newTagInput.trim() || isUpdatingTags}
+                className="h-7 px-2"
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Form Responses */}
+          {formResponses.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Form Responses
+                </h3>
+                <div className="space-y-2">
+                  {formResponses.map(([key, value]) => (
+                    <div key={key} className="flex justify-between gap-2 text-xs">
+                      <span className="text-muted-foreground capitalize truncate">
+                        {key.replace(/_/g, ' ')}
+                      </span>
+                      <span className="font-medium text-right truncate max-w-[120px]">
+                        {String(value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
-      )}
+      </ScrollArea>
     </div>
   )
 }

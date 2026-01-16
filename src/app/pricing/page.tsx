@@ -45,46 +45,54 @@ export default function PricingPage() {
         {/* The Letter */}
         <section className="bg-[#FDFBF7] text-landing-text pt-20 pb-16">
           <div className="mx-auto max-w-2xl px-6">
-            <article className="prose prose-lg max-w-none">
-              <h2 className="text-2xl font-bold text-landing-hero mb-8">Sebelum</h2>
-
-              <p>
-                Kemarin ada yang chat. Tanya harga. Sudah mau DP.
+            {/* Quote block - letter from future self */}
+            <blockquote className="border-l-4 border-landing-cta/30 pl-6 md:pl-8">
+              <p className="text-landing-text/60 text-sm mb-6 italic">
+                Surat dari dirimu, 6 bulan dari sekarang
               </p>
 
-              <p>
-                Tapi karena saya lagi sibuk urusin customer langganan, jadi kelupaan bales. Saya chat lagi — dia sudah <strong>ghosting</strong>.
+              <div className="space-y-6 text-lg leading-relaxed">
+                <div>
+                  <p className="font-semibold text-landing-hero mb-3">Dulu...</p>
+                  <p>
+                    Kemarin ada yang chat. Tanya harga. Sudah mau DP.
+                  </p>
+                  <p className="mt-3">
+                    Tapi karena saya lagi sibuk urusin customer langganan, jadi kelupaan bales. Saya chat lagi — dia sudah <strong>ghosting</strong>.
+                  </p>
+                  <p className="mt-3">
+                    Lalu kadang saya bisa urusin client baru, tapi gak beli-beli. Sampai keluarga teriak kalau saya tidak ada waktu untuk mereka.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-landing-hero mb-3">Sekarang...</p>
+                  <p>
+                    Setelah pakai sistem, setiap leads masuk sudah otomatis dinilai dan ada yang follow up.
+                  </p>
+                  <p className="mt-3">
+                    Ketika ada leads bagus, saya terima notif dan bisa ambil alih chatnya.
+                  </p>
+                  <p className="mt-3">
+                    Hasilnya jauh lebih bagus — dan saya bisa gunakan energi saya untuk susun planning bisnis dan bangun relasi.
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-landing-cta font-semibold mt-10 text-right">
+                — Kamu, 6 bulan dari sekarang
               </p>
-
-              <p>
-                Lalu kadang saya bisa urusin client baru, tapi gak beli-beli. Sampai keluarga teriak kalau saya tidak ada waktu untuk mereka.
-              </p>
-
-              <h2 className="text-2xl font-bold text-landing-hero mt-12 mb-8">Sesudah</h2>
-
-              <p>
-                Setelah pakai sistem, setiap leads masuk sudah otomatis dinilai dan ada yang follow up.
-              </p>
-
-              <p>
-                Ketika ada leads bagus, saya terima notif dan bisa ambil alih chatnya.
-              </p>
-
-              <p>
-                Hasilnya jauh lebih bagus — dan saya bisa gunakan energi saya untuk susun planning bisnis dan bangun relasi.
-              </p>
-
-              <p className="text-landing-cta font-semibold mt-12">
-                Ini kamu nantinya.
-              </p>
-
-              <hr className="my-12 border-landing-text/10" />
-
-              <p className="text-xl md:text-2xl font-bold text-landing-text leading-snug">
-                Banyak yang punya masalah tapi ditutup-tutupin. Sampai suatu saat jadi terlalu besar.
-              </p>
-            </article>
+            </blockquote>
           </div>
+        </section>
+
+        {/* Full-page interstitial */}
+        <section className="bg-[#FDFBF7] flex items-center justify-center px-6 pt-8 pb-20 md:pt-12 md:pb-24">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-landing-text text-center max-w-4xl leading-tight">
+            Banyak yang punya masalah tapi ditutup-tutupin.
+            <br className="hidden md:block" />
+            <span className="text-landing-cta">Sampai suatu saat jadi terlalu besar.</span>
+          </h2>
         </section>
 
         {/* Onboarding Timeline */}

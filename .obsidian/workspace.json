@@ -185,6 +185,8 @@
   },
   "active": "ccbd897c4fb28da1",
   "lastOpenFiles": [
+    "src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx.tmp.3557761.1768573315136",
+    "src/app/(dashboard)/[workspace]/inbox/message-thread.tsx.tmp.3557761.1768573110388",
     "src/app/pricing/page.tsx.tmp.1178326.1768564893979",
     "src/app/(dashboard)/[workspace]/inbox/message-thread.tsx.tmp.3699987.1768564733885",
     "supabase/migrations/15_enable_realtime.sql",
@@ -194,8 +196,6 @@
     "src/app/page.tsx.tmp.1178326.1768558543903",
     "src/app/page.tsx.tmp.1178326.1768558231587",
     "src/app/(dashboard)/[workspace]/database/contact-detail-sheet.tsx.tmp.3699987.1768556624093",
-    "src/app/pricing/page.tsx",
-    "src/app/pricing",
     "brainstorm/LANDING-PAGE-REVIEW-2026-01-16.md",
     "client/eagle overseas/USER-FLOW.md",
     "client/eagle overseas/N8N-INTEGRATION.md",

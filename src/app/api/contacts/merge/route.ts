@@ -1,9 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+// Calculate completeness score for a contact
+function calculateCompletenessScore(contact: {
+  name: string | null
+  email: string | null
+  lead_score: number
+  tags: string[] | null
+  metadata: unknown
+}): number {
+  let score = 0
+
+  // Has name (2 points)
+  if (contact.name && contact.name.trim()) score += 2
+
+  // Has email (2 points)
+  if (contact.email && contact.email.trim()) score += 2
+
+  // Lead score contributes directly
+  score += contact.lead_score || 0
+
+  // Has tags (1 point per tag, max 5)
+  if (contact.tags && contact.tags.length > 0) {
+    score += Math.min(contact.tags.length, 5)
+  }
+
+  // Has metadata/form_answers (5 points if has form data)
+  const metadata = contact.metadata as Record<string, unknown> | null
+  if (metadata) {
+    const innerMeta = (metadata.metadata as Record<string, unknown>) || metadata
+    const formAnswers = innerMeta?.form_answers || metadata?.form_answers
+    if (formAnswers && typeof formAnswers === 'object' && Object.keys(formAnswers).length > 0) {
+      score += 5
+    }
+    // Check for direct form fields
+    const formFieldKeys = ['Pendidikan', 'Jurusan', 'Aktivitas', 'Negara Tujuan', 'Budget',
+      'Target Berangkat', 'Level Bahasa Inggris', 'Goals', 'Education', 'Activity',
+      'TargetCountry', 'TargetDeparture', 'EnglishLevel']
+    for (const key of formFieldKeys) {
+      if (metadata[key] !== undefined || innerMeta?.[key] !== undefined) {
+        score += 5
+        break
+      }
+    }
+  }
+
+  return score
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { keepContactId, mergeContactId } = await request.json()
+    let { keepContactId, mergeContactId } = await request.json()
 
     if (!keepContactId || !mergeContactId) {
       return NextResponse.json(
@@ -31,13 +78,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch both contacts
-    const { data: keepContact, error: keepError } = await supabase
+    let { data: keepContact, error: keepError } = await supabase
       .from('contacts')
       .select('*')
       .eq('id', keepContactId)
       .single()
 
-    const { data: mergeContact, error: mergeError } = await supabase
+    let { data: mergeContact, error: mergeError } = await supabase
       .from('contacts')
       .select('*')
       .eq('id', mergeContactId)
@@ -70,6 +117,21 @@ export async function POST(request: NextRequest) {
         { error: 'Not authorized to access this workspace' },
         { status: 403 }
       )
+    }
+
+    // Auto-select the more complete profile as the one to keep
+    const keepScore = calculateCompletenessScore(keepContact)
+    const mergeScore = calculateCompletenessScore(mergeContact)
+
+    // If mergeContact is more complete, swap them
+    if (mergeScore > keepScore) {
+      const temp = keepContact
+      keepContact = mergeContact
+      mergeContact = temp
+
+      const tempId = keepContactId
+      keepContactId = mergeContactId
+      mergeContactId = tempId
     }
 
     // Merge metadata
