@@ -32,6 +32,7 @@ export async function createClient() {
 }
 
 // Admin client for server-side operations (bypasses RLS)
+// Note: This uses createServerClient which still works but with empty cookies
 export function createAdminClient() {
   const config = getSupabaseConfig()
   return createServerClient<Database>(
@@ -43,5 +44,20 @@ export function createAdminClient() {
         setAll: () => {},
       },
     }
+  )
+}
+
+// Admin client for API routes/webhooks (no cookies needed)
+// Uses the standard Supabase client directly
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+
+export function createApiAdminClient() {
+  const config = getSupabaseConfig()
+  if (!config.serviceRoleKey) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured')
+  }
+  return createSupabaseClient<Database>(
+    config.url,
+    config.serviceRoleKey
   )
 }

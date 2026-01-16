@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createApiAdminClient } from '@/lib/supabase/server'
 
 // Meta/WhatsApp Business API webhook payload types
 interface MetaWebhookMessage {
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleMetaFormat(payload: MetaWebhookPayload) {
-  const supabase = createAdminClient()
+  const supabase = createApiAdminClient()
 
   console.log('[Webhook] Processing Meta format, entries:', payload.entry.length)
 
@@ -229,7 +229,7 @@ export async function GET(request: NextRequest) {
 
 // Helper: Get or create contact
 async function getOrCreateContact(
-  supabase: ReturnType<typeof createAdminClient>,
+  supabase: ReturnType<typeof createApiAdminClient>,
   workspaceId: string,
   phone: string,
   name: string | null
@@ -275,7 +275,7 @@ async function getOrCreateContact(
 
 // Helper: Get or create conversation
 async function getOrCreateConversation(
-  supabase: ReturnType<typeof createAdminClient>,
+  supabase: ReturnType<typeof createApiAdminClient>,
   workspaceId: string,
   contactId: string
 ) {
