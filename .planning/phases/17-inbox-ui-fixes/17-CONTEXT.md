@@ -54,6 +54,10 @@ All fixes are in the inbox (`src/app/(dashboard)/[workspace]/inbox/`):
 
 Priority: Filters working > Header layout > Background > Info panel responsive
 
+**Also from Phase 16:**
+- Ensure header/footer consistency between all public pages (home, pricing, etc.)
+- Check "21" logo styling matches across pages
+
 </notes>
 
 ---
