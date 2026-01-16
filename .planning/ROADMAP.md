@@ -73,6 +73,54 @@ Plans:
 
 ---
 
+## v1.6 — Landing Page Refresh (IN PROGRESS)
+
+### Phase 14: Landing Page Refresh
+
+**Goal:** Modernize landing page with new hero copy, employee badge cards, pricing section
+**Depends on:** Phase 7 (original landing page)
+**Plans:** 1 plan (interactive session)
+
+Plans:
+- [x] 14-01: Landing Page Refresh (interactive)
+
+**Completed:**
+- Hero headline: "No System, No Growth" with better spacing
+- Subtext: "Dari berantakan menjadi satu sistem. Software yang bertumbuh bareng bisnis Anda!"
+- CTA button: Solid orange "Dapatkan Sistemnya"
+- Staff cards: Employee ID badge style with my21staff branding
+- AI-generated Notion-style avatars for 8 staff members
+- Pricing section: Solo (Rp3.9jt) & Team (Rp7.9jt) plans
+- Removed nav links (Harga, Layanan, Kenapa Harus) for cleaner look
+- Login button: More prominent with backdrop blur
+- Footer: Updated to 2026, simplified links
+- Compressed hero section (less green space)
+
+**Pending (future):**
+- Real photos to replace placeholder gradients
+- Social proof / testimonials
+- Before/after transformation section
+
+### Phase 15: Pricing Page
+
+**Goal:** Dedicated pricing page at `/pricing` accessible from landing page CTAs
+**Depends on:** Phase 14 (landing page refresh)
+**Plans:** 1 plan
+
+Plans:
+- [x] 15-01: Pricing Page Refresh (story-driven content, filter section, 3-tier pricing)
+
+**Completed:**
+- Story section with 3 problem scenarios (too many leads, no leads, nothing at all)
+- Rhetorical question: "Pernah bulan ini ramai... uangnya kemana?"
+- Urgency section: "No system = No growth"
+- Exclusivity filter: "Kami tidak menerima semua orang"
+- 3-tier pricing: Solo Rp2.5jt, Team Rp5.5jt, Studio Rp10jt
+- Setup fee: Kickstart Rp7.5jt (Website + WhatsApp + Business approach + Guidance)
+- Header with centered "21" logo
+
+---
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -90,3 +138,5 @@ Plans:
 | 11. Vercel Deployment | v1.3 | 1/1 | Complete | 2026-01-15 |
 | 12. Multi-Tenant Admin | v1.4 | 1/1 | Complete | 2026-01-15 |
 | 13. Lead Management Enhancement | v1.5 | 2/3 | In Progress | — |
+| 14. Landing Page Refresh | v1.6 | 1/1 | Complete | 2026-01-16 |
+| 15. Pricing Page | v1.6 | 1/1 | Complete | 2026-01-16 |
