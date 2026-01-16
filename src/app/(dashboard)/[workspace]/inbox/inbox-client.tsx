@@ -20,7 +20,7 @@ import {
 import { Slider } from '@/components/ui/slider'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { Filter, MessageCircle, Mail, MailOpen, ChevronDown, Phone, Calendar, Star, User, MessageSquare, Loader2, X, Plus, Tag } from 'lucide-react'
+import { Filter, MessageCircle, Mail, MailOpen, ChevronDown, Phone, Calendar, Star, User, MessageSquare, Loader2, X, Plus, Tag, Pencil, Check } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -277,6 +277,12 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
     )
   }, [selectedConversation])
 
+  // Handle contact merged - refresh to get updated data
+  const handleContactMerged = useCallback(() => {
+    // Refresh the page to get updated conversations and contacts
+    window.location.reload()
+  }, [])
+
   return (
     <div className="flex h-full">
       {/* Left sidebar - Conversation list */}
@@ -404,6 +410,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
               workspaceId={workspace.id}
               isLoading={isLoadingMessages}
               onHandoverChange={handleHandoverChange}
+              onContactMerged={handleContactMerged}
               showInfoPanel={showInfoPanel}
               onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
             />
@@ -497,12 +504,23 @@ function InfoSidebar({
   const [isUpdatingTags, setIsUpdatingTags] = useState(false)
   const tagInputRef = useRef<HTMLInputElement>(null)
 
+  // Editable contact info
+  const [localName, setLocalName] = useState(contact.name || '')
+  const [localPhone, setLocalPhone] = useState(contact.phone || '')
+  const [localEmail, setLocalEmail] = useState(contact.email || '')
+  const [editingField, setEditingField] = useState<'name' | 'phone' | 'email' | null>(null)
+  const [isUpdatingInfo, setIsUpdatingInfo] = useState(false)
+
   // Sync local state when contact changes
   useEffect(() => {
     setLocalStatus(contact.lead_status as LeadStatus || 'prospect')
     setLocalScore(contact.lead_score ?? 0)
     setLocalTags(contact.tags || [])
-  }, [contact.id, contact.lead_status, contact.lead_score, contact.tags])
+    setLocalName(contact.name || '')
+    setLocalPhone(contact.phone || '')
+    setLocalEmail(contact.email || '')
+    setEditingField(null)
+  }, [contact.id, contact.lead_status, contact.lead_score, contact.tags, contact.name, contact.phone, contact.email])
 
   const statusConfig = LEAD_STATUS_CONFIG[localStatus] || LEAD_STATUS_CONFIG.prospect
 
@@ -630,6 +648,52 @@ function InfoSidebar({
     }
   }
 
+  // Contact info update handler
+  const handleSaveField = async (field: 'name' | 'phone' | 'email') => {
+    const value = field === 'name' ? localName : field === 'phone' ? localPhone : localEmail
+    const originalValue = field === 'name' ? (contact.name || '') : field === 'phone' ? contact.phone : (contact.email || '')
+
+    // Skip if unchanged
+    if (value === originalValue) {
+      setEditingField(null)
+      return
+    }
+
+    setIsUpdatingInfo(true)
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value || null }),
+      })
+
+      if (!response.ok) {
+        // Revert on error
+        if (field === 'name') setLocalName(contact.name || '')
+        if (field === 'phone') setLocalPhone(contact.phone || '')
+        if (field === 'email') setLocalEmail(contact.email || '')
+      } else {
+        onContactUpdate?.({ [field]: value || null })
+        startTransition(() => router.refresh())
+      }
+    } catch {
+      // Revert on error
+      if (field === 'name') setLocalName(contact.name || '')
+      if (field === 'phone') setLocalPhone(contact.phone || '')
+      if (field === 'email') setLocalEmail(contact.email || '')
+    } finally {
+      setIsUpdatingInfo(false)
+      setEditingField(null)
+    }
+  }
+
+  const handleCancelEdit = (field: 'name' | 'phone' | 'email') => {
+    if (field === 'name') setLocalName(contact.name || '')
+    if (field === 'phone') setLocalPhone(contact.phone || '')
+    if (field === 'email') setLocalEmail(contact.email || '')
+    setEditingField(null)
+  }
+
   // Extract form responses from metadata
   const metadata = contact.metadata as Record<string, unknown> | null
   const innerMetadata = (metadata?.metadata as Record<string, unknown>) || metadata
@@ -690,22 +754,158 @@ function InfoSidebar({
 
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-4">
-          {/* Contact Info */}
+          {/* Contact Info - Editable */}
           <div className="space-y-2">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Contact Info
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Contact Info
+              </h3>
+              {isUpdatingInfo && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+            </div>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>{contact.phone}</span>
+              {/* Name field */}
+              <div className="flex items-center gap-2 group">
+                <User className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                {editingField === 'name' ? (
+                  <div className="flex-1 flex items-center gap-1">
+                    <Input
+                      value={localName}
+                      onChange={(e) => setLocalName(e.target.value)}
+                      className="h-7 text-sm"
+                      placeholder="Name"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveField('name')
+                        if (e.key === 'Escape') handleCancelEdit('name')
+                      }}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => handleSaveField('name')}
+                      disabled={isUpdatingInfo}
+                    >
+                      <Check className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => handleCancelEdit('name')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-between">
+                    <span className="truncate">{localName || 'No name'}</span>
+                    <button
+                      onClick={() => setEditingField('name')}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded"
+                    >
+                      <Pencil className="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
               </div>
-              {contact.email && (
-                <div className="flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="truncate">{contact.email}</span>
-                </div>
-              )}
+
+              {/* Phone field */}
+              <div className="flex items-center gap-2 group">
+                <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                {editingField === 'phone' ? (
+                  <div className="flex-1 flex items-center gap-1">
+                    <Input
+                      value={localPhone}
+                      onChange={(e) => setLocalPhone(e.target.value)}
+                      className="h-7 text-sm"
+                      placeholder="Phone"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveField('phone')
+                        if (e.key === 'Escape') handleCancelEdit('phone')
+                      }}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => handleSaveField('phone')}
+                      disabled={isUpdatingInfo}
+                    >
+                      <Check className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => handleCancelEdit('phone')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-between">
+                    <span>{localPhone}</span>
+                    <button
+                      onClick={() => setEditingField('phone')}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded"
+                    >
+                      <Pencil className="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Email field */}
+              <div className="flex items-center gap-2 group">
+                <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                {editingField === 'email' ? (
+                  <div className="flex-1 flex items-center gap-1">
+                    <Input
+                      value={localEmail}
+                      onChange={(e) => setLocalEmail(e.target.value)}
+                      className="h-7 text-sm"
+                      placeholder="Email"
+                      type="email"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveField('email')
+                        if (e.key === 'Escape') handleCancelEdit('email')
+                      }}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => handleSaveField('email')}
+                      disabled={isUpdatingInfo}
+                    >
+                      <Check className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => handleCancelEdit('email')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-between">
+                    <span className="truncate">{localEmail || 'No email'}</span>
+                    <button
+                      onClick={() => setEditingField('email')}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded"
+                    >
+                      <Pencil className="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Created date - not editable */}
               <div className="flex items-center gap-2">
                 <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                 <span>Added {format(new Date(contact.created_at), 'MMM d, yyyy')}</span>

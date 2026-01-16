@@ -50,7 +50,8 @@ function calculateCompletenessScore(contact: {
 
 export async function POST(request: NextRequest) {
   try {
-    let { keepContactId, mergeContactId } = await request.json()
+    // activePhone is the phone number from the current conversation - must be preserved for WhatsApp
+    const { keepContactId, mergeContactId, activePhone } = await request.json()
 
     if (!keepContactId || !mergeContactId) {
       return NextResponse.json(
@@ -119,20 +120,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Auto-select the more complete profile as the one to keep
-    const keepScore = calculateCompletenessScore(keepContact)
-    const mergeScore = calculateCompletenessScore(mergeContact)
-
-    // If mergeContact is more complete, swap them
-    if (mergeScore > keepScore) {
-      const temp = keepContact
-      keepContact = mergeContact
-      mergeContact = temp
-
-      const tempId = keepContactId
-      keepContactId = mergeContactId
-      mergeContactId = tempId
-    }
+    // Note: We no longer auto-swap - the user explicitly chose the direction in the UI
+    // The activePhone parameter ensures we keep the WhatsApp number from the current conversation
 
     // Merge metadata
     const keepMetadata = (keepContact.metadata as Record<string, unknown>) || {}
@@ -161,6 +150,9 @@ export async function POST(request: NextRequest) {
       // Prefer keep contact's data, but fill in missing fields from merge contact
       name: keepContact.name || mergeContact.name,
       email: keepContact.email || mergeContact.email,
+      // Use activePhone if provided (from current conversation), otherwise keep existing phone
+      // This ensures WhatsApp messages can still be sent to the conversation's number
+      phone: activePhone || keepContact.phone,
       // Take the higher lead score
       lead_score: Math.max(keepContact.lead_score || 0, mergeContact.lead_score || 0),
       // Keep the more recent status if different

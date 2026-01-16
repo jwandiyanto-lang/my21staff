@@ -303,6 +303,8 @@ export function MessageThread({
         body: JSON.stringify({
           keepContactId: keepContact.id,
           mergeContactId: mergeContact.id,
+          // Always use the current conversation's phone number for WhatsApp continuity
+          activePhone: conversationContact.phone,
         }),
       })
       if (!response.ok) {

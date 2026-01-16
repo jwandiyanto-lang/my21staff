@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params
     const body = await request.json()
-    const { lead_status, lead_score, tags, name, email } = body
+    const { lead_status, lead_score, tags, name, email, phone } = body
 
     // Validate lead_status if provided
     if (lead_status !== undefined && !LEAD_STATUSES.includes(lead_status as LeadStatus)) {
@@ -126,6 +126,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
     if (email !== undefined) {
       updateData.email = email?.trim() || null
+    }
+    if (phone !== undefined) {
+      updateData.phone = phone?.trim() || null
     }
 
     const { data: contact, error } = await supabase
