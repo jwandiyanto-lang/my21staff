@@ -587,6 +587,11 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
           messagesCount={messages.length}
           lastActivity={messages.length > 0 ? messages[messages.length - 1].created_at : null}
           conversationStatus={selectedConversation.status}
+          contactTags={contactTags}
+          teamMembers={teamMembers}
+          assignedTo={selectedConversation.assigned_to}
+          conversationId={selectedConversation.id}
+          onAssignmentChange={handleAssignmentChange}
         />
       )}
     </div>
@@ -626,12 +631,22 @@ function InfoSidebar({
   lastActivity,
   conversationStatus,
   onContactUpdate,
+  contactTags = [],
+  teamMembers = [],
+  assignedTo,
+  conversationId,
+  onAssignmentChange,
 }: {
   contact: ConversationWithContact['contact']
   messagesCount: number
   lastActivity: string | null
   conversationStatus: string
   onContactUpdate?: (updated: Partial<ConversationWithContact['contact']>) => void
+  contactTags?: string[]
+  teamMembers?: TeamMember[]
+  assignedTo?: string | null
+  conversationId?: string
+  onAssignmentChange?: (userId: string | null) => void
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -641,11 +656,11 @@ function InfoSidebar({
   const [localStatus, setLocalStatus] = useState<LeadStatus>(contact.lead_status as LeadStatus || 'prospect')
   const [localScore, setLocalScore] = useState(contact.lead_score ?? 0)
   const [localTags, setLocalTags] = useState<string[]>(contact.tags || [])
-  const [newTagInput, setNewTagInput] = useState('')
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [isUpdatingScore, setIsUpdatingScore] = useState(false)
   const [isUpdatingTags, setIsUpdatingTags] = useState(false)
-  const tagInputRef = useRef<HTMLInputElement>(null)
+  const [localAssignedTo, setLocalAssignedTo] = useState<string | null>(assignedTo || null)
+  const [isUpdatingAssignment, setIsUpdatingAssignment] = useState(false)
 
   // Editable contact info
   const [localName, setLocalName] = useState(contact.name || '')
@@ -664,6 +679,11 @@ function InfoSidebar({
     setLocalEmail(contact.email || '')
     setEditingField(null)
   }, [contact.id, contact.lead_status, contact.lead_score, contact.tags, contact.name, contact.phone, contact.email])
+
+  // Sync assigned to when it changes from parent
+  useEffect(() => {
+    setLocalAssignedTo(assignedTo || null)
+  }, [assignedTo])
 
   const statusConfig = LEAD_STATUS_CONFIG[localStatus] || LEAD_STATUS_CONFIG.prospect
 
@@ -732,41 +752,12 @@ function InfoSidebar({
   }
 
   // Tag management
-  const handleAddTag = async () => {
-    const trimmedTag = newTagInput.trim()
-    if (!trimmedTag) return
-    if (localTags.some(t => t.toLowerCase() === trimmedTag.toLowerCase())) {
-      setNewTagInput('')
-      return
-    }
-
-    const newTags = [...localTags, trimmedTag]
-    setLocalTags(newTags)
-    setNewTagInput('')
-    setIsUpdatingTags(true)
-
-    try {
-      const response = await fetch(`/api/contacts/${contact.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tags: newTags }),
-      })
-
-      if (!response.ok) {
-        setLocalTags(contact.tags || [])
-      } else {
-        onContactUpdate?.({ tags: newTags })
-        startTransition(() => router.refresh())
-      }
-    } catch {
-      setLocalTags(contact.tags || [])
-    } finally {
-      setIsUpdatingTags(false)
-    }
-  }
-
-  const handleRemoveTag = async (tagToRemove: string) => {
-    const newTags = localTags.filter(t => t !== tagToRemove)
+  // Toggle tag (add if not present, remove if present)
+  const handleToggleTag = async (tag: string) => {
+    const hasTag = localTags.includes(tag)
+    const newTags = hasTag
+      ? localTags.filter(t => t !== tag)
+      : [...localTags, tag]
     const previousTags = localTags
     setLocalTags(newTags)
     setIsUpdatingTags(true)
@@ -788,6 +779,33 @@ function InfoSidebar({
       setLocalTags(previousTags)
     } finally {
       setIsUpdatingTags(false)
+    }
+  }
+
+  // Handle assignment change in info panel
+  const handleAssignmentInPanel = async (userId: string) => {
+    if (!conversationId) return
+    const newAssignedTo = userId === 'unassigned' ? null : userId
+    const previousAssigned = localAssignedTo
+    setLocalAssignedTo(newAssignedTo)
+    setIsUpdatingAssignment(true)
+
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/assign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assigned_to: newAssignedTo }),
+      })
+
+      if (!response.ok) {
+        setLocalAssignedTo(previousAssigned)
+      } else {
+        onAssignmentChange?.(newAssignedTo)
+      }
+    } catch {
+      setLocalAssignedTo(previousAssigned)
+    } finally {
+      setIsUpdatingAssignment(false)
     }
   }
 
@@ -1161,6 +1179,37 @@ function InfoSidebar({
 
           <Separator />
 
+          {/* Assigned To */}
+          {teamMembers.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Assigned To
+                </h3>
+                {isUpdatingAssignment && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </div>
+              <Select
+                value={localAssignedTo || 'unassigned'}
+                onValueChange={handleAssignmentInPanel}
+                disabled={isUpdatingAssignment}
+              >
+                <SelectTrigger className="w-full h-8 text-xs">
+                  <SelectValue placeholder="Select team member" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {teamMembers.map((member) => (
+                    <SelectItem key={member.user_id} value={member.user_id}>
+                      {member.profile?.full_name || member.profile?.email || 'Unknown'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {teamMembers.length > 0 && <Separator />}
+
           {/* Tags */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -1169,44 +1218,30 @@ function InfoSidebar({
               </h3>
               {isUpdatingTags && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
             </div>
-            {localTags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {localTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs pr-1">
-                    <Tag className="mr-1 h-3 w-3" />
-                    {tag}
-                    <button
-                      onClick={() => handleRemoveTag(tag)}
-                      className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+            {contactTags.length > 0 ? (
+              <div className="space-y-2">
+                {contactTags.map((tag) => (
+                  <label
+                    key={tag}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={localTags.includes(tag)}
+                      onCheckedChange={() => handleToggleTag(tag)}
                       disabled={isUpdatingTags}
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
+                    />
+                    <Badge variant={localTags.includes(tag) ? 'default' : 'secondary'} className="text-xs">
+                      <Tag className="mr-1 h-3 w-3" />
+                      {tag}
+                    </Badge>
+                  </label>
                 ))}
               </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                No tags configured. Add tags in Settings.
+              </p>
             )}
-            <div className="flex gap-1">
-              <Input
-                ref={tagInputRef}
-                type="text"
-                placeholder="Add tag..."
-                value={newTagInput}
-                onChange={(e) => setNewTagInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                className="h-7 text-xs"
-                disabled={isUpdatingTags}
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleAddTag}
-                disabled={!newTagInput.trim() || isUpdatingTags}
-                className="h-7 px-2"
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
-            </div>
           </div>
 
           {/* Form Responses */}
