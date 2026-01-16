@@ -363,7 +363,7 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
       </div>
 
       {/* Right area - Message thread */}
-      <div className="flex-1 flex flex-col bg-muted/30">
+      <div className="flex-1 flex flex-col min-h-0 bg-muted/30">
         {selectedConversation ? (
           <>
             <MessageThread

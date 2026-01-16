@@ -355,7 +355,7 @@ export function MessageThread({
   }
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b bg-background flex items-center gap-3">
         <Avatar className="h-10 w-10">
@@ -510,7 +510,7 @@ export function MessageThread({
       )}
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 min-h-0 p-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             <div className="text-center">
