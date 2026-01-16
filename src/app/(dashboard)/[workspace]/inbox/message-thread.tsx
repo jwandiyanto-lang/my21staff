@@ -215,10 +215,12 @@ export function MessageThread({
 
   // Merge dialog state
   const [mergeDialogOpen, setMergeDialogOpen] = useState(false)
+  const [mergeStep, setMergeStep] = useState<'search' | 'confirm'>('search')
   const [mergeSearch, setMergeSearch] = useState('')
   const [mergeContacts, setMergeContacts] = useState<Contact[]>([])
   const [isSearchingContacts, setIsSearchingContacts] = useState(false)
   const [selectedMergeContact, setSelectedMergeContact] = useState<Contact | null>(null)
+  const [keepContactId, setKeepContactId] = useState<string | null>(null) // Which contact to keep
   const [isMerging, setIsMerging] = useState(false)
 
   // Notes panel state
@@ -258,33 +260,76 @@ export function MessageThread({
     }
   }, [workspaceId, conversationContact.id])
 
-  // Handle merge
-  const handleMerge = async () => {
+  // Calculate completeness score for a contact
+  const getCompletenessScore = (contact: Contact): number => {
+    let score = 0
+    if (contact.name?.trim()) score += 2
+    if (contact.email?.trim()) score += 2
+    score += contact.lead_score || 0
+    if (contact.tags && contact.tags.length > 0) score += Math.min(contact.tags.length, 5)
+    const metadata = contact.metadata as Record<string, unknown> | null
+    if (metadata) {
+      const innerMeta = (metadata.metadata as Record<string, unknown>) || metadata
+      const formAnswers = innerMeta?.form_answers || metadata?.form_answers
+      if (formAnswers && typeof formAnswers === 'object' && Object.keys(formAnswers).length > 0) {
+        score += 5
+      }
+    }
+    return score
+  }
+
+  // Proceed to confirmation step
+  const handleProceedToConfirm = () => {
     if (!selectedMergeContact) return
+    // Auto-select the more complete profile
+    const currentScore = getCompletenessScore(conversationContact)
+    const selectedScore = getCompletenessScore(selectedMergeContact)
+    setKeepContactId(selectedScore > currentScore ? selectedMergeContact.id : conversationContact.id)
+    setMergeStep('confirm')
+  }
+
+  // Handle merge with chosen direction
+  const handleMerge = async () => {
+    if (!selectedMergeContact || !keepContactId) return
     setIsMerging(true)
+
+    const keepContact = keepContactId === conversationContact.id ? conversationContact : selectedMergeContact
+    const mergeContact = keepContactId === conversationContact.id ? selectedMergeContact : conversationContact
+
     try {
       const response = await fetch('/api/contacts/merge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          keepContactId: conversationContact.id,
-          mergeContactId: selectedMergeContact.id,
+          keepContactId: keepContact.id,
+          mergeContactId: mergeContact.id,
         }),
       })
       if (!response.ok) {
         const error = await response.json()
         throw new Error(error.error || 'Failed to merge contacts')
       }
-      toast.success(`Merged ${selectedMergeContact.name || selectedMergeContact.phone} into ${conversationContact.name || conversationContact.phone}`)
+      toast.success(`Merged ${mergeContact.name || mergeContact.phone} into ${keepContact.name || keepContact.phone}`)
       setMergeDialogOpen(false)
       setSelectedMergeContact(null)
       setMergeSearch('')
+      setMergeStep('search')
+      setKeepContactId(null)
       onContactMerged?.()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to merge contacts')
     } finally {
       setIsMerging(false)
     }
+  }
+
+  // Reset merge dialog
+  const resetMergeDialog = () => {
+    setMergeDialogOpen(false)
+    setMergeStep('search')
+    setSelectedMergeContact(null)
+    setMergeSearch('')
+    setKeepContactId(null)
   }
 
   const handleHandoverToggle = async () => {
@@ -706,109 +751,265 @@ export function MessageThread({
       </ScrollArea>
 
       {/* Merge Contact Dialog */}
-      <Dialog open={mergeDialogOpen} onOpenChange={setMergeDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={mergeDialogOpen} onOpenChange={resetMergeDialog}>
+        <DialogContent className={cn("sm:max-w-md", mergeStep === 'confirm' && "sm:max-w-2xl")}>
           <DialogHeader>
-            <DialogTitle>Merge Contact</DialogTitle>
+            <DialogTitle>
+              {mergeStep === 'search' ? 'Merge Contact' : 'Confirm Merge Direction'}
+            </DialogTitle>
             <DialogDescription>
-              Merge another contact into {conversationContact.name || conversationContact.phone}. Messages and data from the merged contact will be combined.
+              {mergeStep === 'search'
+                ? 'Search for a contact to merge with this one.'
+                : 'Choose which profile to keep. The other will be merged into it.'}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            {/* Search input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by name, phone, or email..."
-                value={mergeSearch}
-                onChange={(e) => {
-                  setMergeSearch(e.target.value)
-                  searchContacts(e.target.value)
-                }}
-                className="pl-10"
-              />
-            </div>
 
-            {/* Selected contact */}
-            {selectedMergeContact && (
-              <div className="border rounded-lg p-3 bg-primary/5 border-primary">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {getInitials(selectedMergeContact.name, selectedMergeContact.phone)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium">{selectedMergeContact.name || selectedMergeContact.phone}</p>
-                    <p className="text-sm text-muted-foreground">{selectedMergeContact.phone}</p>
+          {mergeStep === 'search' ? (
+            <div className="space-y-4 py-4">
+              {/* Search input */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, phone, or email..."
+                  value={mergeSearch}
+                  onChange={(e) => {
+                    setMergeSearch(e.target.value)
+                    searchContacts(e.target.value)
+                  }}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Selected contact */}
+              {selectedMergeContact && (
+                <div className="border rounded-lg p-3 bg-primary/5 border-primary">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {getInitials(selectedMergeContact.name, selectedMergeContact.phone)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">{selectedMergeContact.name || selectedMergeContact.phone}</p>
+                      <p className="text-sm text-muted-foreground">{selectedMergeContact.phone}</p>
+                    </div>
+                    <Check className="h-5 w-5 text-primary" />
                   </div>
-                  <Check className="h-5 w-5 text-primary" />
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Search results */}
-            {isSearchingContacts ? (
-              <div className="text-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+              {/* Search results */}
+              {isSearchingContacts ? (
+                <div className="text-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+                </div>
+              ) : mergeContacts.length > 0 ? (
+                <div className="space-y-2 max-h-60 overflow-auto">
+                  {mergeContacts.map((contact) => (
+                    <button
+                      key={contact.id}
+                      onClick={() => setSelectedMergeContact(contact)}
+                      className={cn(
+                        'w-full text-left border rounded-lg p-3 transition-colors',
+                        selectedMergeContact?.id === contact.id
+                          ? 'border-primary bg-primary/5'
+                          : 'hover:bg-muted'
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-muted">
+                            {getInitials(contact.name, contact.phone)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{contact.name || contact.phone}</p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {contact.phone}
+                            {contact.email && ` • ${contact.email}`}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : mergeSearch.trim() ? (
+                <p className="text-center py-4 text-muted-foreground">No contacts found</p>
+              ) : null}
+
+              {/* Next button */}
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={resetMergeDialog}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleProceedToConfirm}
+                  disabled={!selectedMergeContact}
+                >
+                  Next
+                </Button>
               </div>
-            ) : mergeContacts.length > 0 ? (
-              <div className="space-y-2 max-h-60 overflow-auto">
-                {mergeContacts.map((contact) => (
+            </div>
+          ) : (
+            /* Confirmation step - show both profiles side by side */
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Current contact */}
+                <button
+                  onClick={() => setKeepContactId(conversationContact.id)}
+                  className={cn(
+                    'border rounded-lg p-4 text-left transition-all',
+                    keepContactId === conversationContact.id
+                      ? 'border-primary bg-primary/5 ring-2 ring-primary'
+                      : 'hover:bg-muted'
+                  )}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {getInitials(conversationContact.name, conversationContact.phone)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold truncate">{conversationContact.name || conversationContact.phone}</p>
+                      <p className="text-xs text-muted-foreground">{conversationContact.phone}</p>
+                    </div>
+                    {keepContactId === conversationContact.id && (
+                      <Check className="h-5 w-5 text-primary flex-shrink-0" />
+                    )}
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Email</span>
+                      <span className={conversationContact.email ? 'font-medium' : 'text-muted-foreground'}>
+                        {conversationContact.email || '—'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Lead Score</span>
+                      <span className="font-medium">{conversationContact.lead_score || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tags</span>
+                      <span className="font-medium">{conversationContact.tags?.length || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Status</span>
+                      <span className="font-medium capitalize">{conversationContact.lead_status || 'prospect'}</span>
+                    </div>
+                  </div>
+                  {keepContactId === conversationContact.id && (
+                    <div className="mt-3 pt-3 border-t">
+                      <span className="text-xs font-medium text-primary">✓ Keep this profile</span>
+                    </div>
+                  )}
+                </button>
+
+                {/* Selected merge contact */}
+                {selectedMergeContact && (
                   <button
-                    key={contact.id}
-                    onClick={() => setSelectedMergeContact(contact)}
+                    onClick={() => setKeepContactId(selectedMergeContact.id)}
                     className={cn(
-                      'w-full text-left border rounded-lg p-3 transition-colors',
-                      selectedMergeContact?.id === contact.id
-                        ? 'border-primary bg-primary/5'
+                      'border rounded-lg p-4 text-left transition-all',
+                      keepContactId === selectedMergeContact.id
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary'
                         : 'hover:bg-muted'
                     )}
                   >
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Avatar className="h-12 w-12">
                         <AvatarFallback className="bg-muted">
-                          {getInitials(contact.name, contact.phone)}
+                          {getInitials(selectedMergeContact.name, selectedMergeContact.phone)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{contact.name || contact.phone}</p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {contact.phone}
-                          {contact.email && ` • ${contact.email}`}
-                        </p>
+                        <p className="font-semibold truncate">{selectedMergeContact.name || selectedMergeContact.phone}</p>
+                        <p className="text-xs text-muted-foreground">{selectedMergeContact.phone}</p>
+                      </div>
+                      {keepContactId === selectedMergeContact.id && (
+                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
+                      )}
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Email</span>
+                        <span className={selectedMergeContact.email ? 'font-medium' : 'text-muted-foreground'}>
+                          {selectedMergeContact.email || '—'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Lead Score</span>
+                        <span className="font-medium">{selectedMergeContact.lead_score || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Tags</span>
+                        <span className="font-medium">{selectedMergeContact.tags?.length || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Status</span>
+                        <span className="font-medium capitalize">{selectedMergeContact.lead_status || 'prospect'}</span>
                       </div>
                     </div>
+                    {keepContactId === selectedMergeContact.id && (
+                      <div className="mt-3 pt-3 border-t">
+                        <span className="text-xs font-medium text-primary">✓ Keep this profile</span>
+                      </div>
+                    )}
                   </button>
-                ))}
-              </div>
-            ) : mergeSearch.trim() ? (
-              <p className="text-center py-4 text-muted-foreground">No contacts found</p>
-            ) : null}
-
-            {/* Merge button */}
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setMergeDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleMerge}
-                disabled={!selectedMergeContact || isMerging}
-              >
-                {isMerging ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Merging...
-                  </>
-                ) : (
-                  <>
-                    <Merge className="h-4 w-4 mr-2" />
-                    Merge
-                  </>
                 )}
-              </Button>
+              </div>
+
+              {/* Summary */}
+              {keepContactId && selectedMergeContact && (
+                <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                  <p>
+                    <span className="font-medium">
+                      {keepContactId === conversationContact.id
+                        ? (selectedMergeContact.name || selectedMergeContact.phone)
+                        : (conversationContact.name || conversationContact.phone)}
+                    </span>
+                    {' will be merged into '}
+                    <span className="font-medium">
+                      {keepContactId === conversationContact.id
+                        ? (conversationContact.name || conversationContact.phone)
+                        : (selectedMergeContact.name || selectedMergeContact.phone)}
+                    </span>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    All messages and data will be combined. The merged contact will be deleted.
+                  </p>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex justify-between gap-2 pt-2">
+                <Button variant="outline" onClick={() => setMergeStep('search')}>
+                  Back
+                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={resetMergeDialog}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleMerge}
+                    disabled={!keepContactId || isMerging}
+                  >
+                    {isMerging ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Merging...
+                      </>
+                    ) : (
+                      <>
+                        <Merge className="h-4 w-4 mr-2" />
+                        Confirm Merge
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
