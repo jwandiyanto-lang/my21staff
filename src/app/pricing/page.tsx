@@ -283,56 +283,6 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Horizontal Timeline */}
-        <section className="bg-landing-hero text-white py-16">
-          <div className="mx-auto max-w-5xl px-6">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-16">
-              Siap untuk buat <span className="text-landing-cta">Sistem Kamu</span>?
-            </h2>
-
-            {/* Horizontal Timeline */}
-            <div className="relative">
-              {/* Timeline line - horizontal on desktop */}
-              <div className="hidden md:block absolute top-6 left-0 right-0 h-0.5 bg-white/20" />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
-                {/* Step 1 */}
-                <div className="relative text-center">
-                  <div className="w-12 h-12 rounded-full bg-landing-cta flex items-center justify-center font-bold text-xl mx-auto mb-4 relative z-10">
-                    1
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Kickstart Call</h3>
-                  <p className="text-white/70 text-sm">
-                    Setelah isi form, kita ngobrol dan pahami bisnis kamu.
-                  </p>
-                </div>
-
-                {/* Step 2 */}
-                <div className="relative text-center">
-                  <div className="w-12 h-12 rounded-full bg-white text-landing-hero flex items-center justify-center font-bold text-xl mx-auto mb-4 relative z-10">
-                    2
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Atur Sistem</h3>
-                  <p className="text-white/70 text-sm">
-                    Kita butuh 1 bulan kurang lebih untuk atur apa yang kamu butuh.
-                  </p>
-                </div>
-
-                {/* Step 3 */}
-                <div className="relative text-center">
-                  <div className="w-12 h-12 rounded-full bg-landing-cta flex items-center justify-center font-bold text-xl mx-auto mb-4 relative z-10">
-                    3
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Full System Running</h3>
-                  <p className="text-white/70 text-sm">
-                    Dan kamu punya 24/7 support.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Pricing Section */}
         <section id="pricing" className="bg-landing-hero text-white py-16">
           <div className="mx-auto max-w-5xl px-6">
@@ -346,7 +296,7 @@ export default function PricingPage() {
                 <h3 className="text-xl font-bold">Solo</h3>
                 <p className="text-xs text-landing-text-muted mb-4">Founder & freelancer</p>
                 <div className="mb-4">
-                  <span className="text-3xl font-extrabold">Rp2.5jt</span>
+                  <span className="text-3xl font-extrabold">Rp3.9jt</span>
                   <span className="text-sm text-landing-text-muted">/bln</span>
                 </div>
                 <ul className="space-y-2 mb-6 text-sm">

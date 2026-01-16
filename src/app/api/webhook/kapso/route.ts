@@ -200,7 +200,7 @@ async function handleMetaFormat(payload: MetaWebhookPayload) {
             content: messageContent,
             message_type: messageType,
             kapso_message_id: message.id,
-            metadata: Object.keys(messageMetadata).length > 0 ? messageMetadata : null,
+            metadata: Object.keys(messageMetadata).length > 0 ? messageMetadata : undefined,
           })
 
         if (messageError) {

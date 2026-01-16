@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "brainstorm/LANDING-PAGE-AIDA-GRADE.md",
+                "file": "docs/PRICING.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "LANDING-PAGE-AIDA-GRADE"
+              "title": "PRICING"
             }
           }
         ]
@@ -183,8 +183,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "ccbd897c4fb28da1",
+  "active": "600c2f6ee49ae613",
   "lastOpenFiles": [
+    "brainstorm/LANDING-PAGE-AIDA-GRADE.md",
     "src/components/ui/alert-dialog.tsx",
     "node_modules/@radix-ui/react-alert-dialog/LICENSE",
     "node_modules/@radix-ui/react-alert-dialog/src/index.ts",
@@ -195,7 +196,6 @@
     "node_modules/@radix-ui/react-alert-dialog/dist/index.d.ts",
     "node_modules/@radix-ui/react-alert-dialog/node_modules/@radix-ui/react-primitive/LICENSE",
     "node_modules/@radix-ui/react-alert-dialog/node_modules/@radix-ui/react-context/package.json",
-    "node_modules/@radix-ui/react-alert-dialog/dist/index.d.mts",
     "node_modules/@radix-ui/react-alert-dialog/README.md",
     "node_modules/@radix-ui/react-alert-dialog/node_modules/@radix-ui/react-primitive/README.md",
     "node_modules/@radix-ui/react-alert-dialog/node_modules/@radix-ui/react-slot/README.md",
@@ -215,7 +215,6 @@
     "public/assets/avatars/avatar-maya.jpg",
     "public/assets/avatars/avatar-rian.jpg",
     "public/assets/avatars/avatar-sari.jpg",
-    "brainstorm/LANDING-PAGE-AIDA-GRADE.md",
     "docs/BRAND.md",
     "docs/AIDA.md",
     "docs/BUSINESS-PLAN.md",
