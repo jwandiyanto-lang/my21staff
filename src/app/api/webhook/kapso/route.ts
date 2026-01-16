@@ -12,6 +12,11 @@ interface MetaWebhookMessage {
   video?: { id: string; caption?: string }
   document?: { id: string; filename?: string; caption?: string }
   timestamp: string
+  // Reply context - when user replies to a specific message
+  context?: {
+    from: string
+    id: string  // The message ID being replied to
+  }
 }
 
 interface MetaWebhookContact {
@@ -176,6 +181,14 @@ async function handleMetaFormat(payload: MetaWebhookPayload) {
           continue
         }
 
+        // Build metadata with reply context if present
+        const messageMetadata: Record<string, unknown> = {}
+        if (message.context) {
+          messageMetadata.reply_to_kapso_id = message.context.id
+          messageMetadata.reply_to_from = message.context.from
+          console.log(`[Webhook] Message is a reply to: ${message.context.id}`)
+        }
+
         // Insert message
         const { error: messageError } = await supabase
           .from('messages')
@@ -187,6 +200,7 @@ async function handleMetaFormat(payload: MetaWebhookPayload) {
             content: messageContent,
             message_type: messageType,
             kapso_message_id: message.id,
+            metadata: Object.keys(messageMetadata).length > 0 ? messageMetadata : null,
           })
 
         if (messageError) {

@@ -93,10 +93,53 @@ function isSendingMessage(message: Message): boolean {
   )
 }
 
-function MessageBubble({ message, contactName, contactPhone, onReply }: { message: Message; contactName?: string | null; contactPhone?: string; onReply?: (message: Message) => void }) {
+function MessageBubble({ message, contactName, contactPhone, onReply, allMessages }: { message: Message; contactName?: string | null; contactPhone?: string; onReply?: (message: Message) => void; allMessages?: Message[] }) {
   const isOutbound = message.direction === 'outbound'
   const isSending = isSendingMessage(message)
   const metadata = message.metadata as Record<string, unknown> | null
+
+  // Check if this message is a reply to another message
+  const replyToKapsoId = metadata?.reply_to_kapso_id as string | undefined
+  const replyToId = metadata?.replyToId as string | undefined // For messages we sent with reply
+
+  // Find the original message being replied to
+  const quotedMessage = allMessages?.find(m =>
+    (replyToKapsoId && m.kapso_message_id === replyToKapsoId) ||
+    (replyToId && m.id === replyToId)
+  )
+
+  // Render quoted message preview
+  const renderQuotedMessage = () => {
+    if (!quotedMessage) return null
+
+    const isQuotedOutbound = quotedMessage.direction === 'outbound'
+    const quotedContent = quotedMessage.content?.slice(0, 100) || `[${quotedMessage.message_type}]`
+    const displayContent = quotedContent.length > 100 ? quotedContent + '...' : quotedContent
+
+    return (
+      <div
+        className={cn(
+          'mb-2 p-2 rounded-lg border-l-2 text-xs',
+          isOutbound
+            ? 'bg-white/10 border-white/40'
+            : 'bg-muted-foreground/10 border-muted-foreground/40'
+        )}
+      >
+        <p className={cn(
+          'font-medium mb-0.5',
+          isOutbound ? 'text-white/70' : 'text-muted-foreground'
+        )}>
+          {isQuotedOutbound ? 'You' : (contactName || contactPhone || 'Contact')}
+        </p>
+        <p className={cn(
+          'line-clamp-2',
+          isOutbound ? 'text-white/60' : 'text-muted-foreground'
+        )}>
+          {displayContent}
+        </p>
+      </div>
+    )
+  }
 
   const renderMedia = () => {
     if (!message.media_url) return null
@@ -168,6 +211,7 @@ function MessageBubble({ message, contactName, contactPhone, onReply }: { messag
             isSending && 'opacity-70'
           )}
         >
+          {renderQuotedMessage()}
           {renderMedia()}
           {message.content && <p className="whitespace-pre-wrap text-sm">{message.content}</p>}
           <span className="text-xs block mt-1 text-white/60">
@@ -198,6 +242,7 @@ function MessageBubble({ message, contactName, contactPhone, onReply }: { messag
           'max-w-[70%] rounded-2xl rounded-bl-sm px-4 py-2 bg-muted'
         )}
       >
+        {renderQuotedMessage()}
         {renderMedia()}
         {message.content && <p className="whitespace-pre-wrap text-sm">{message.content}</p>}
         <span className="text-xs block mt-1 text-muted-foreground">
@@ -769,6 +814,7 @@ export function MessageThread({
                     contactName={conversationContact.name}
                     contactPhone={conversationContact.phone}
                     onReply={onReply}
+                    allMessages={messages}
                   />
                 </div>
               )
