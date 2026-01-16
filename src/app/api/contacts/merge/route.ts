@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createApiAdminClient } from '@/lib/supabase/server'
 
 // Calculate completeness score for a contact
 function calculateCompletenessScore(contact: {
@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    const adminClient = createApiAdminClient()
 
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -78,14 +79,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Fetch both contacts
-    let { data: keepContact, error: keepError } = await supabase
+    // Fetch both contacts using admin client to ensure we can read them
+    let { data: keepContact, error: keepError } = await adminClient
       .from('contacts')
       .select('*')
       .eq('id', keepContactId)
       .single()
 
-    let { data: mergeContact, error: mergeError } = await supabase
+    let { data: mergeContact, error: mergeError } = await adminClient
       .from('contacts')
       .select('*')
       .eq('id', mergeContactId)
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify user has access to the workspace
-    const { data: membership } = await supabase
+    const { data: membership } = await adminClient
       .from('workspace_members')
       .select('id')
       .eq('workspace_id', keepContact.workspace_id)
@@ -164,7 +165,8 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     }
 
-    const { error: updateError } = await supabase
+    // Use admin client for all database operations to bypass RLS
+    const { error: updateError } = await adminClient
       .from('contacts')
       .update(updatedKeepContact)
       .eq('id', keepContactId)
@@ -178,7 +180,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update all conversations from merge contact to point to keep contact
-    const { error: convError } = await supabase
+    const { error: convError } = await adminClient
       .from('conversations')
       .update({ contact_id: keepContactId })
       .eq('contact_id', mergeContactId)
@@ -188,23 +190,41 @@ export async function POST(request: NextRequest) {
       // Continue anyway - the merge is partially complete
     }
 
-    // Update all messages from merge contact's conversations
-    // Messages are linked via conversation, so updating conversations is enough
-
-    // Delete the merged contact
-    const { error: deleteError } = await supabase
+    // Delete the merged contact - CRITICAL: this must succeed to prevent duplicate contacts
+    const { error: deleteError } = await adminClient
       .from('contacts')
       .delete()
       .eq('id', mergeContactId)
 
     if (deleteError) {
       console.error('Error deleting merged contact:', deleteError)
-      // Contact is already merged, deletion failure is non-critical
+      return NextResponse.json(
+        { error: 'Failed to delete merged contact. Please try again or delete manually.' },
+        { status: 500 }
+      )
     }
+
+    // Verify the contact was actually deleted
+    const { data: deletedCheck } = await adminClient
+      .from('contacts')
+      .select('id')
+      .eq('id', mergeContactId)
+      .single()
+
+    if (deletedCheck) {
+      console.error('Contact still exists after deletion attempt:', mergeContactId)
+      return NextResponse.json(
+        { error: 'Contact deletion failed. Please delete manually from lead management.' },
+        { status: 500 }
+      )
+    }
+
+    console.log(`[Merge] Successfully merged contact ${mergeContactId} into ${keepContactId}. Phone: ${updatedKeepContact.phone}`)
 
     return NextResponse.json({
       success: true,
-      contact: { ...keepContact, ...updatedKeepContact }
+      contact: { ...keepContact, ...updatedKeepContact },
+      deletedContactId: mergeContactId
     })
   } catch (error) {
     console.error('Error merging contacts:', error)
