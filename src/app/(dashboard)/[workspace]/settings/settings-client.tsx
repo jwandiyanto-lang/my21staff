@@ -26,11 +26,19 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
 import { formatDistanceToNow } from 'date-fns'
+
+interface QuickReply {
+  id: string
+  label: string
+  text: string
+}
 
 interface WorkspaceSettings {
   kapso_api_key?: string
+  quick_replies?: QuickReply[]
 }
 
 interface TeamMember {
@@ -55,6 +63,15 @@ interface SettingsClientProps {
   members: TeamMember[]
 }
 
+// Default quick replies
+const DEFAULT_QUICK_REPLIES: QuickReply[] = [
+  { id: '1', label: 'Greeting', text: 'Halo! Terima kasih sudah menghubungi kami. Ada yang bisa kami bantu?' },
+  { id: '2', label: 'Follow Up', text: 'Halo, kami ingin follow up mengenai percakapan kita sebelumnya. Apakah ada pertanyaan yang bisa kami bantu?' },
+  { id: '3', label: 'Thank You', text: 'Terima kasih banyak! Jika ada pertanyaan lain, jangan ragu untuk menghubungi kami kembali.' },
+  { id: '4', label: 'Busy', text: 'Terima kasih sudah menghubungi. Saat ini kami sedang sibuk, akan kami balas secepatnya.' },
+  { id: '5', label: 'Schedule', text: 'Apakah Anda bersedia untuk jadwalkan panggilan? Mohon informasikan waktu yang tersedia.' },
+]
+
 export function SettingsClient({ workspace, members }: SettingsClientProps) {
   // WhatsApp settings state
   const [phoneId, setPhoneId] = useState(workspace.kapso_phone_id || '')
@@ -65,6 +82,15 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
   // Team invite state
   const [email, setEmail] = useState('')
   const [isInviting, setIsInviting] = useState(false)
+
+  // Quick replies state
+  const [quickReplies, setQuickReplies] = useState<QuickReply[]>(
+    workspace.settings?.quick_replies || DEFAULT_QUICK_REPLIES
+  )
+  const [editingReply, setEditingReply] = useState<QuickReply | null>(null)
+  const [newReply, setNewReply] = useState({ label: '', text: '' })
+  const [isAddingReply, setIsAddingReply] = useState(false)
+  const [isSavingReplies, setIsSavingReplies] = useState(false)
 
   const isConnected = !!workspace.kapso_phone_id && !!workspace.settings?.kapso_api_key
 
@@ -108,6 +134,53 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
     }
   }
 
+  // Quick replies handlers
+  const saveQuickReplies = async (replies: QuickReply[]) => {
+    setIsSavingReplies(true)
+    try {
+      const response = await fetch(`/api/workspaces/${workspace.id}/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: {
+            ...workspace.settings,
+            quick_replies: replies
+          },
+        }),
+      })
+      if (!response.ok) throw new Error('Failed to save')
+      setQuickReplies(replies)
+    } catch (error) {
+      console.error('Failed to save quick replies:', error)
+    } finally {
+      setIsSavingReplies(false)
+    }
+  }
+
+  const handleAddReply = async () => {
+    if (!newReply.label.trim() || !newReply.text.trim()) return
+    const reply: QuickReply = {
+      id: Date.now().toString(),
+      label: newReply.label.trim(),
+      text: newReply.text.trim(),
+    }
+    await saveQuickReplies([...quickReplies, reply])
+    setNewReply({ label: '', text: '' })
+    setIsAddingReply(false)
+  }
+
+  const handleUpdateReply = async () => {
+    if (!editingReply || !editingReply.label.trim() || !editingReply.text.trim()) return
+    const updated = quickReplies.map(r => r.id === editingReply.id ? editingReply : r)
+    await saveQuickReplies(updated)
+    setEditingReply(null)
+  }
+
+  const handleDeleteReply = async (id: string) => {
+    const updated = quickReplies.filter(r => r.id !== id)
+    await saveQuickReplies(updated)
+  }
+
   return (
     <div className="p-8">
       <div className="mb-8">
@@ -122,6 +195,13 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
           <TabsTrigger value="integrations" className="gap-2">
             <Settings className="h-4 w-4" />
             Integrations
+          </TabsTrigger>
+          <TabsTrigger value="quick-replies" className="gap-2">
+            <Zap className="h-4 w-4" />
+            Quick Replies
+            <Badge variant="secondary" className="ml-1 text-xs">
+              {quickReplies.length}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="team" className="gap-2">
             <Users className="h-4 w-4" />
@@ -201,6 +281,132 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
                     <Check className="w-4 h-4" />
                     Settings saved
                   </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Quick Replies Tab */}
+        <TabsContent value="quick-replies" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Quick Replies</CardTitle>
+                  <CardDescription>
+                    Manage message templates for fast responses
+                  </CardDescription>
+                </div>
+                <Button onClick={() => setIsAddingReply(true)} disabled={isAddingReply}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Reply
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Add new reply form */}
+              {isAddingReply && (
+                <div className="border rounded-lg p-4 space-y-3 bg-muted/50">
+                  <div className="space-y-2">
+                    <Label>Label</Label>
+                    <Input
+                      placeholder="e.g., Greeting, Follow Up"
+                      value={newReply.label}
+                      onChange={(e) => setNewReply({ ...newReply, label: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Message</Label>
+                    <Textarea
+                      placeholder="Enter your message template..."
+                      value={newReply.text}
+                      onChange={(e) => setNewReply({ ...newReply, text: e.target.value })}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={handleAddReply} disabled={isSavingReplies}>
+                      {isSavingReplies ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      setIsAddingReply(false)
+                      setNewReply({ label: '', text: '' })
+                    }}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* List of quick replies */}
+              <div className="space-y-3">
+                {quickReplies.map((reply) => (
+                  <div key={reply.id} className="border rounded-lg p-4">
+                    {editingReply?.id === reply.id ? (
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          <Label>Label</Label>
+                          <Input
+                            value={editingReply.label}
+                            onChange={(e) => setEditingReply({ ...editingReply, label: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Message</Label>
+                          <Textarea
+                            value={editingReply.text}
+                            onChange={(e) => setEditingReply({ ...editingReply, text: e.target.value })}
+                            rows={3}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button onClick={handleUpdateReply} disabled={isSavingReplies}>
+                            {isSavingReplies ? 'Saving...' : 'Save'}
+                          </Button>
+                          <Button variant="outline" onClick={() => setEditingReply(null)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium">{reply.label}</p>
+                          <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
+                            {reply.text}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setEditingReply(reply)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                            onClick={() => handleDeleteReply(reply.id)}
+                            disabled={isSavingReplies}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {quickReplies.length === 0 && !isAddingReply && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Zap className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No quick replies yet</p>
+                    <p className="text-sm mt-1">Click "Add Reply" to create your first template</p>
+                  </div>
                 )}
               </div>
             </CardContent>

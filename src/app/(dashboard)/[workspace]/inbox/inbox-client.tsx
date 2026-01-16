@@ -19,12 +19,19 @@ import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-s
 import { cn } from '@/lib/utils'
 import type { Workspace, ConversationWithContact, Message } from '@/types/database'
 
+interface QuickReply {
+  id: string
+  label: string
+  text: string
+}
+
 interface InboxClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
   conversations: ConversationWithContact[]
+  quickReplies?: QuickReply[]
 }
 
-export function InboxClient({ workspace, conversations: initialConversations }: InboxClientProps) {
+export function InboxClient({ workspace, conversations: initialConversations, quickReplies }: InboxClientProps) {
   const [conversations, setConversations] = useState<ConversationWithContact[]>(initialConversations)
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithContact | null>(
     conversations[0] || null
@@ -313,6 +320,7 @@ export function InboxClient({ workspace, conversations: initialConversations }: 
               conversationId={selectedConversation.id}
               contactPhone={selectedConversation.contact.phone}
               workspaceId={workspace.id}
+              quickReplies={quickReplies}
               onMessageSent={handleMessageSent}
               onMessageError={handleMessageError}
             />

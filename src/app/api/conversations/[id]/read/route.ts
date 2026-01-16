@@ -9,11 +9,22 @@ export async function POST(
     const { id: conversationId } = await params
     const supabase = await createClient()
 
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     // Mark conversation as read by setting unread_count to 0
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('conversations')
-      .update({ unread_count: 0 })
+      .update({ unread_count: 0, updated_at: new Date().toISOString() })
       .eq('id', conversationId)
+      .select()
+      .single()
 
     if (error) {
       console.error('Error marking conversation as read:', error)
@@ -23,7 +34,7 @@ export async function POST(
       )
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, conversation: data })
   } catch (error) {
     console.error('Error in mark-as-read API:', error)
     return NextResponse.json(

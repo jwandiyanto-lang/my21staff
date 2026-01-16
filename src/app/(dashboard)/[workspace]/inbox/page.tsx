@@ -28,10 +28,10 @@ export default async function InboxPage({ params }: InboxPageProps) {
   // Production mode: use Supabase
   const supabase = await createClient()
 
-  // Fetch workspace
+  // Fetch workspace with settings
   const { data: workspaceData, error: workspaceError } = await supabase
     .from('workspaces')
-    .select('id, name, slug')
+    .select('id, name, slug, settings')
     .eq('slug', workspaceSlug)
     .single()
 
@@ -39,7 +39,7 @@ export default async function InboxPage({ params }: InboxPageProps) {
     notFound()
   }
 
-  const workspace = workspaceData as Pick<Workspace, 'id' | 'name' | 'slug'>
+  const workspace = workspaceData as Pick<Workspace, 'id' | 'name' | 'slug'> & { settings: Record<string, unknown> | null }
 
   // Fetch conversations with contacts, ordered by last message
   const { data: conversationsData, error: conversationsError } = await supabase
@@ -57,5 +57,8 @@ export default async function InboxPage({ params }: InboxPageProps) {
 
   const conversations = (conversationsData || []) as unknown as ConversationWithContact[]
 
-  return <InboxClient workspace={workspace} conversations={conversations} />
+  // Extract quick replies from settings
+  const quickReplies = (workspace.settings?.quick_replies as Array<{id: string, label: string, text: string}>) || []
+
+  return <InboxClient workspace={workspace} conversations={conversations} quickReplies={quickReplies} />
 }
