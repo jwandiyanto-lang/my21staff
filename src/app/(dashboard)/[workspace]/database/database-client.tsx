@@ -5,10 +5,34 @@ import { DataTable } from '@/components/ui/data-table'
 import { createColumns } from './columns'
 import { ContactDetailSheet } from './contact-detail-sheet'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
-import { Badge } from '@/components/ui/badge'
-import { X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+} from '@/components/ui/dropdown-menu'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { ChevronDown, Filter, Tag, SlidersHorizontal, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Contact, Workspace } from '@/types/database'
+
+const COLUMN_OPTIONS = [
+  { id: 'name', label: 'Name' },
+  { id: 'email', label: 'Email' },
+  { id: 'lead_status', label: 'Status' },
+  { id: 'tags', label: 'Tags' },
+  { id: 'assigned_to', label: 'Assigned to' },
+  { id: 'lead_score', label: 'Score' },
+  { id: 'created_at', label: 'Created' },
+] as const
 
 interface DatabaseClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
@@ -19,6 +43,9 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
   const [contacts, setContacts] = useState<Contact[]>(initialContacts)
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(
+    COLUMN_OPTIONS.map((col) => col.id)
+  )
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
 
@@ -49,11 +76,29 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
     }
   }, [initialContacts])
 
-  // Create columns with status change handler
-  const columns = useMemo(
+  // Create columns with status change handler, filtered by visibility
+  const allColumns = useMemo(
     () => createColumns({ onStatusChange: handleStatusChange }),
     [handleStatusChange]
   )
+
+  const columns = useMemo(
+    () => allColumns.filter((col) => {
+      const colId = 'accessorKey' in col ? col.accessorKey : col.id
+      if (colId === 'actions') return true // Always show actions
+      return visibleColumns.includes(colId as string)
+    }),
+    [allColumns, visibleColumns]
+  )
+
+  // Toggle column visibility
+  const toggleColumn = (columnId: string) => {
+    setVisibleColumns((prev) =>
+      prev.includes(columnId)
+        ? prev.filter((id) => id !== columnId)
+        : [...prev, columnId]
+    )
+  }
 
   // Count contacts by status
   const statusCounts = useMemo(() => {
@@ -108,101 +153,167 @@ export function DatabaseClient({ workspace, contacts: initialContacts }: Databas
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold">Lead Management</h1>
-        <p className="text-muted-foreground">
-          {contacts.length} contact{contacts.length !== 1 ? 's' : ''} total
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Lead Management</h1>
+          <p className="text-muted-foreground">
+            {filteredContacts.length} of {contacts.length} contact{contacts.length !== 1 ? 's' : ''}
+          </p>
+        </div>
       </div>
 
-      {/* Status Tabs */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* All Tab */}
-        <button
-          onClick={() => setActiveStatus('all')}
-          className={cn(
-            'px-4 py-2 rounded-full text-sm font-medium transition-all',
-            activeStatus === 'all'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'bg-muted hover:bg-muted/80 text-muted-foreground'
-          )}
-        >
-          All
-          <span className="ml-2 text-xs opacity-80">{statusCounts.all}</span>
-        </button>
-
-        {/* Status Tabs */}
-        {LEAD_STATUSES.map((status) => {
-          const config = LEAD_STATUS_CONFIG[status]
-          const count = statusCounts[status]
-          const isActive = activeStatus === status
-
-          return (
-            <button
-              key={status}
-              onClick={() => setActiveStatus(status)}
-              className={cn(
-                'px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2',
-                isActive
-                  ? 'shadow-sm'
-                  : 'hover:opacity-80'
-              )}
-              style={{
-                backgroundColor: isActive ? config.color : config.bgColor,
-                color: isActive ? 'white' : config.color,
-              }}
-            >
-              {config.label}
-              <span className={cn(
-                'text-xs px-1.5 py-0.5 rounded-full',
-                isActive ? 'bg-white/20' : 'bg-black/10'
-              )}>
-                {count}
+      {/* Compact Filter Row */}
+      <div className="flex items-center gap-3 flex-wrap">
+        {/* Status Filter Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="h-9">
+              <Filter className="h-4 w-4 mr-2" />
+              {activeStatus === 'all' ? 'All Status' : LEAD_STATUS_CONFIG[activeStatus].label}
+              <span className="ml-2 text-xs bg-muted px-1.5 py-0.5 rounded">
+                {activeStatus === 'all' ? statusCounts.all : statusCounts[activeStatus]}
               </span>
-            </button>
-          )
-        })}
-      </div>
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuCheckboxItem
+              checked={activeStatus === 'all'}
+              onCheckedChange={() => setActiveStatus('all')}
+            >
+              All Status
+              <span className="ml-auto text-xs text-muted-foreground">{statusCounts.all}</span>
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator />
+            {LEAD_STATUSES.map((status) => {
+              const config = LEAD_STATUS_CONFIG[status]
+              return (
+                <DropdownMenuCheckboxItem
+                  key={status}
+                  checked={activeStatus === status}
+                  onCheckedChange={() => setActiveStatus(status)}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full mr-2"
+                    style={{ backgroundColor: config.color }}
+                  />
+                  {config.label}
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    {statusCounts[status]}
+                  </span>
+                </DropdownMenuCheckboxItem>
+              )
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-      {/* Tag Filters */}
-      {allTags.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm text-muted-foreground mr-2">Tags:</span>
-          {allTags.map((tag) => {
-            const isSelected = selectedTags.includes(tag)
-            return (
-              <button
-                key={tag}
-                onClick={() => toggleTag(tag)}
-                className={cn(
-                  'px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1',
-                  isSelected
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+        {/* Tags Filter Dropdown */}
+        {allTags.length > 0 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9">
+                <Tag className="h-4 w-4 mr-2" />
+                Tags
+                {selectedTags.length > 0 && (
+                  <span className="ml-2 text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                    {selectedTags.length}
+                  </span>
                 )}
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-56 p-2">
+              <div className="space-y-1">
+                {allTags.map((tag) => {
+                  const isSelected = selectedTags.includes(tag)
+                  return (
+                    <div
+                      key={tag}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
+                      onClick={() => toggleTag(tag)}
+                    >
+                      <Checkbox checked={isSelected} />
+                      <span className="text-sm">{tag}</span>
+                    </div>
+                  )
+                })}
+                {selectedTags.length > 0 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <button
+                      onClick={() => setSelectedTags([])}
+                      className="w-full text-xs text-muted-foreground hover:text-foreground text-left px-2 py-1"
+                    >
+                      Clear all
+                    </button>
+                  </>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {/* Column Visibility Dropdown */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-9">
+              <SlidersHorizontal className="h-4 w-4 mr-2" />
+              Columns
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-48 p-2">
+            <div className="space-y-1">
+              {COLUMN_OPTIONS.map((col) => {
+                const isVisible = visibleColumns.includes(col.id)
+                return (
+                  <div
+                    key={col.id}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
+                    onClick={() => toggleColumn(col.id)}
+                  >
+                    <Checkbox checked={isVisible} />
+                    <span className="text-sm">{col.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Active filter badges */}
+        {(activeStatus !== 'all' || selectedTags.length > 0) && (
+          <div className="flex items-center gap-2 ml-2">
+            {activeStatus !== 'all' && (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor: LEAD_STATUS_CONFIG[activeStatus].bgColor,
+                  color: LEAD_STATUS_CONFIG[activeStatus].color,
+                }}
+              >
+                {LEAD_STATUS_CONFIG[activeStatus].label}
+                <X
+                  className="h-3 w-3 cursor-pointer hover:opacity-70"
+                  onClick={() => setActiveStatus('all')}
+                />
+              </span>
+            )}
+            {selectedTags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-muted"
               >
                 {tag}
-                {isSelected && <X className="h-3 w-3" />}
-              </button>
-            )
-          })}
-          {selectedTags.length > 0 && (
-            <button
-              onClick={() => setSelectedTags([])}
-              className="text-xs text-muted-foreground hover:text-foreground underline ml-2"
-            >
-              Clear tags
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Results count */}
-      {(activeStatus !== 'all' || selectedTags.length > 0) && (
-        <p className="text-sm text-muted-foreground">
-          Showing {filteredContacts.length} of {contacts.length} contacts
-        </p>
-      )}
+                <X
+                  className="h-3 w-3 cursor-pointer hover:opacity-70"
+                  onClick={() => toggleTag(tag)}
+                />
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Data Table */}
       <DataTable

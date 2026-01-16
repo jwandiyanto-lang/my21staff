@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   Users,
   MessageCircle,
-  UsersRound,
   Settings,
   User,
 } from 'lucide-react'
@@ -40,11 +39,6 @@ const operationsNav = [
 ]
 
 const adminNav = [
-  {
-    title: 'Team Management',
-    icon: UsersRound,
-    href: '/team',
-  },
   {
     title: 'Settings',
     icon: Settings,
