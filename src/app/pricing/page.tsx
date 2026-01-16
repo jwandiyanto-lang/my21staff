@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
-import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, X } from "lucide-react";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -27,6 +28,14 @@ const staggerContainer = {
 };
 
 export default function PricingPage() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("");
+
+  const openModal = (plan: string) => {
+    setSelectedPlan(plan);
+    setModalOpen(true);
+  };
+
   return (
     <div
       className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}
@@ -290,9 +299,18 @@ export default function PricingPage() {
               Siap untuk buat <span className="text-landing-cta">Sistem Kamu</span>?
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={staggerContainer}
+            >
               {/* Solo */}
-              <div className="bg-white text-landing-text rounded-2xl p-6">
+              <motion.div
+                className="bg-white text-landing-text rounded-2xl p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                variants={fadeInUp}
+              >
                 <h3 className="text-xl font-bold">Solo</h3>
                 <p className="text-xs text-landing-text-muted mb-4">Founder & freelancer</p>
                 <div className="mb-4">
@@ -300,25 +318,26 @@ export default function PricingPage() {
                   <span className="text-sm text-landing-text-muted">/bln</span>
                 </div>
                 <ul className="space-y-2 mb-6 text-sm">
-                  {["1 WhatsApp", "CRM integration", "Lead reminders", "Auto follow-up", "24/7 support"].map((item) => (
+                  {["1 WhatsApp Number", "200 Marketing Messages/mo", "100 Utility Messages/mo", "30,000 AI Chats/mo"].map((item) => (
                     <li key={item} className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-landing-hero" />
                       {item}
                     </li>
                   ))}
                 </ul>
-                <a
-                  href="https://wa.me/6281234567890?text=Halo%2C%20saya%20tertarik%20paket%20Solo"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center py-3 rounded-full border-2 border-landing-hero text-landing-hero font-bold text-sm hover:bg-landing-hero hover:text-white transition-all"
+                <button
+                  onClick={() => openModal("Solo")}
+                  className="block w-full text-center py-3 rounded-full border-2 border-landing-hero text-landing-hero font-bold text-sm hover:bg-landing-hero hover:text-white transition-all cursor-pointer"
                 >
                   Pilih Solo
-                </a>
-              </div>
+                </button>
+              </motion.div>
 
               {/* Team */}
-              <div className="bg-landing-cta text-white rounded-2xl p-6 relative md:-translate-y-2">
+              <motion.div
+                className="bg-landing-cta text-white rounded-2xl p-6 relative md:-translate-y-2 hover:shadow-xl hover:-translate-y-3 transition-all duration-300"
+                variants={fadeInUp}
+              >
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-landing-hero text-white text-xs font-bold px-3 py-1 rounded-full">
                   POPULAR
                 </span>
@@ -329,80 +348,150 @@ export default function PricingPage() {
                   <span className="text-sm text-white/80">/bln</span>
                 </div>
                 <ul className="space-y-2 mb-6 text-sm">
-                  {["Semua Solo", "3 WhatsApp", "Proposal library", "Analytics", "Laporan mingguan"].map((item) => (
+                  {["3 WhatsApp Numbers", "500 Marketing Messages/mo", "300 Utility Messages/mo", "60,000 AI Chats/mo"].map((item) => (
                     <li key={item} className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-white" />
                       {item}
                     </li>
                   ))}
                 </ul>
-                <a
-                  href="https://wa.me/6281234567890?text=Halo%2C%20saya%20tertarik%20paket%20Team"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center py-3 rounded-full bg-white text-landing-cta font-bold text-sm hover:bg-white/90 transition-all"
+                <button
+                  onClick={() => openModal("Team")}
+                  className="block w-full text-center py-3 rounded-full bg-white text-landing-cta font-bold text-sm hover:bg-white/90 transition-all cursor-pointer"
                 >
                   Pilih Team
-                </a>
-              </div>
+                </button>
+              </motion.div>
 
               {/* Studio */}
-              <div className="bg-white text-landing-text rounded-2xl p-6">
+              <motion.div
+                className="bg-white text-landing-text rounded-2xl p-6 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                variants={fadeInUp}
+              >
                 <h3 className="text-xl font-bold">Studio</h3>
                 <p className="text-xs text-landing-text-muted mb-4">Enterprise & custom</p>
                 <div className="mb-4">
                   <span className="text-3xl font-extrabold">Custom</span>
                 </div>
-                <ul className="space-y-2 mb-6 text-sm">
-                  {["Semua Team", "5+ WhatsApp", "Marketing automation", "Ads management", "Dedicated support"].map((item) => (
-                    <li key={item} className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-landing-hero" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="https://wa.me/6281234567890?text=Halo%2C%20saya%20tertarik%20paket%20Studio"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center py-3 rounded-full border-2 border-landing-hero text-landing-hero font-bold text-sm hover:bg-landing-hero hover:text-white transition-all"
+                <p className="text-sm text-landing-text/70 mb-6 flex-1">
+                  Butuh lebih dari Solo atau Team? Yuk ngobrol dulu, kita sesuaikan dengan kebutuhan bisnis kamu.
+                </p>
+                <button
+                  onClick={() => openModal("Studio")}
+                  className="block w-full text-center py-3 rounded-full border-2 border-landing-hero text-landing-hero font-bold text-sm hover:bg-landing-hero hover:text-white transition-all cursor-pointer"
                 >
                   Hubungi Kami
-                </a>
-              </div>
-            </div>
+                </button>
+              </motion.div>
+            </motion.div>
 
             {/* Setup Fee Box */}
             <div className="mt-8 max-w-xl mx-auto bg-gray-100 rounded-lg py-3 px-6 text-center">
-              <p className="text-sm text-gray-500">One-time setup fee: <span className="font-bold text-gray-800">Rp7.5jt</span> — Website + WhatsApp + Business consultation</p>
+              <p className="text-sm text-gray-500">One-time setup fee: <span className="font-bold text-gray-800">Rp7.5jt</span> — Website / Web App + Business Consultation</p>
             </div>
           </div>
         </section>
 
-        {/* Final CTA */}
-        <section className="bg-landing-hero text-white py-10">
-          <div className="mx-auto max-w-2xl px-6 text-center">
-            <p className="text-white/70 mb-4">
-              Masih ragu? Chat dulu.
-            </p>
-            <a
-              href="https://wa.me/6281234567890"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-8 py-3 rounded-full bg-landing-cta text-white font-bold hover:bg-landing-cta/90 transition-all"
-            >
-              Chat via WhatsApp
-            </a>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-landing-hero border-t border-white/10 py-4">
-        <div className="mx-auto max-w-7xl px-6 text-center text-xs text-white/50">
-          <span className="font-bold text-landing-cta">21</span> &copy; 2026
+      <footer className="bg-white border-t border-notion py-4">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex items-center justify-center gap-4 text-xs text-landing-text-muted">
+            <span className="font-black text-landing-cta">21</span>
+            <span>&copy; 2026</span>
+          </div>
         </div>
       </footer>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {modalOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {/* Backdrop */}
+            <motion.div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setModalOpen(false)}
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              className="relative bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setModalOpen(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              {/* Form Header */}
+              <h3 className="text-2xl font-bold text-landing-text mb-2">
+                Tertarik paket {selectedPlan}?
+              </h3>
+              <p className="text-sm text-landing-text/60 mb-6">
+                Isi form ini, kami akan hubungi kamu segera.
+              </p>
+
+              {/* Form */}
+              <form className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-landing-text mb-1">
+                    Nama
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nama lengkap"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-landing-text mb-1">
+                    WhatsApp
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="08123456789"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-landing-text mb-1">
+                    Bisnis kamu
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nama bisnis / industri"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-full bg-landing-cta text-white font-bold text-sm hover:bg-landing-cta/90 transition-all mt-2"
+                >
+                  Kirim
+                </button>
+              </form>
+
+              <p className="text-xs text-center text-gray-400 mt-4">
+                Kami akan menghubungi via WhatsApp dalam 24 jam.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
