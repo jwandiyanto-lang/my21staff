@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
 
       if (!apiKey || !phoneId) {
         return NextResponse.json(
-          { error: 'Workspace missing Kapso credentials' },
+          { error: 'WhatsApp credentials not configured' },
           { status: 500 }
         )
       }
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
       } catch (kapsoError) {
         console.error('Kapso send error:', kapsoError)
         return NextResponse.json(
-          { error: 'Failed to send message via Kapso' },
+          { error: 'Failed to send WhatsApp message' },
           { status: 500 }
         )
       }
