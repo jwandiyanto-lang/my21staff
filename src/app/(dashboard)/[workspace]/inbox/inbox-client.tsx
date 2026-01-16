@@ -42,6 +42,10 @@ export function InboxClient({ workspace, conversations: initialConversations }: 
 
   // Mark conversation as read
   const markAsRead = useCallback(async (conversationId: string) => {
+    // Find current unread count for potential revert
+    const conversation = conversations.find(c => c.id === conversationId)
+    const previousCount = conversation?.unread_count || 0
+
     // Optimistically update local state
     setConversations((prev) =>
       prev.map((c) =>
@@ -49,15 +53,33 @@ export function InboxClient({ workspace, conversations: initialConversations }: 
       )
     )
 
+    // Also update selected conversation if it matches
+    setSelectedConversation((prev) =>
+      prev && prev.id === conversationId ? { ...prev, unread_count: 0 } : prev
+    )
+
     // Call API to persist
     try {
-      await fetch(`/api/conversations/${conversationId}/read`, {
+      const response = await fetch(`/api/conversations/${conversationId}/read`, {
         method: 'POST',
       })
+
+      if (!response.ok) {
+        throw new Error('Failed to mark as read')
+      }
     } catch (error) {
       console.error('Failed to mark conversation as read:', error)
+      // Revert on error
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversationId ? { ...c, unread_count: previousCount } : c
+        )
+      )
+      setSelectedConversation((prev) =>
+        prev && prev.id === conversationId ? { ...prev, unread_count: previousCount } : prev
+      )
     }
-  }, [])
+  }, [conversations])
 
   // Filter conversations by status and unread
   const filteredConversations = useMemo(() => {

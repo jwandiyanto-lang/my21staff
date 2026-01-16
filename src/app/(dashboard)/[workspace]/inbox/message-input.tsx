@@ -3,7 +3,12 @@
 import { useState, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { SendHorizonal, Loader2, Paperclip, X, Image, FileText, Film } from 'lucide-react'
+import { SendHorizonal, Loader2, Paperclip, X, Image, FileText, Film, Zap } from 'lucide-react'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { toast } from 'sonner'
 import type { Message } from '@/types/database'
 
@@ -31,6 +36,15 @@ function getMediaIcon(type: MediaType) {
   }
 }
 
+// Quick reply templates
+const QUICK_TEMPLATES = [
+  { label: 'Greeting', text: 'Halo! Terima kasih sudah menghubungi kami. Ada yang bisa kami bantu?' },
+  { label: 'Follow Up', text: 'Halo, kami ingin follow up mengenai percakapan kita sebelumnya. Apakah ada pertanyaan yang bisa kami bantu?' },
+  { label: 'Thank You', text: 'Terima kasih banyak! Jika ada pertanyaan lain, jangan ragu untuk menghubungi kami kembali.' },
+  { label: 'Busy', text: 'Terima kasih sudah menghubungi. Saat ini kami sedang sibuk, akan kami balas secepatnya.' },
+  { label: 'Schedule', text: 'Apakah Anda bersedia untuk jadwalkan panggilan? Mohon informasikan waktu yang tersedia.' },
+]
+
 export function MessageInput({
   conversationId,
   contactPhone,
@@ -42,7 +56,13 @@ export function MessageInput({
   const [isSending, setIsSending] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [filePreview, setFilePreview] = useState<string | null>(null)
+  const [templateOpen, setTemplateOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleTemplateSelect = (text: string) => {
+    setContent(text)
+    setTemplateOpen(false)
+  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -194,6 +214,36 @@ export function MessageInput({
           className="hidden"
         />
 
+        {/* Quick Templates */}
+        <Popover open={templateOpen} onOpenChange={setTemplateOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              disabled={isSending}
+              title="Quick replies"
+            >
+              <Zap className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-72 p-2">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground px-2 py-1">Quick Replies</p>
+              {QUICK_TEMPLATES.map((template) => (
+                <button
+                  key={template.label}
+                  onClick={() => handleTemplateSelect(template.text)}
+                  className="w-full text-left px-2 py-2 rounded-md hover:bg-muted text-sm transition-colors"
+                >
+                  <span className="font-medium">{template.label}</span>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{template.text}</p>
+                </button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
         {/* Attach Button */}
         <Button
           type="button"
@@ -201,6 +251,7 @@ export function MessageInput({
           size="icon"
           onClick={() => fileInputRef.current?.click()}
           disabled={isSending}
+          title="Attach file"
         >
           <Paperclip className="h-4 w-4" />
         </Button>
