@@ -91,6 +91,9 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
 
   // Load messages when conversation changes
   useEffect(() => {
+    // Clear messages immediately when conversation changes to prevent stale data showing
+    setMessages([])
+
     async function loadMessages(conversationId: string) {
       setIsLoadingMessages(true)
 
@@ -117,8 +120,6 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
 
     if (selectedConversation) {
       loadMessages(selectedConversation.id)
-    } else {
-      setMessages([])
     }
   }, [selectedConversation?.id])
 
