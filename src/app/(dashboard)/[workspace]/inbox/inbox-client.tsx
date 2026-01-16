@@ -249,9 +249,9 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
   }, [selectedConversation])
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    <div className="flex h-full">
       {/* Left sidebar - Conversation list */}
-      <div className="w-80 border-r bg-background flex flex-col">
+      <div className="w-80 border-r bg-background flex flex-col min-h-0">
         {/* Search and filter header */}
         <div className="p-4 border-b space-y-3">
           <Input

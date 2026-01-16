@@ -65,7 +65,7 @@ export function ConversationList({
   }
 
   return (
-    <ScrollArea className="flex-1">
+    <ScrollArea className="flex-1 min-h-0">
       <div className="divide-y">
         {filteredConversations.map((conversation) => {
           const status = conversation.contact.lead_status as LeadStatus
