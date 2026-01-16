@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-01-14)
 
 Phase: All phases complete (13-03 was last)
 Status: Complete
-Last activity: 2026-01-16 — Completed 13-03-PLAN.md (AI Handover Toggle)
+Last activity: 2026-01-16 — Completed 15-02 (Pricing Modal Form + Animations)
 
 Progress: v1.5 ██████████ Phase 13 Complete | v1.6 ██████████ Phases 14-15 Complete
 
@@ -35,7 +35,7 @@ Progress: v1.5 ██████████ Phase 13 Complete | v1.6 ███
 | 7. Landing Page | 3/3 | 20 min | 7 min |
 | 8. Sea Lion + Kapso | 1/1 | manual | — |
 | 13. Lead Management | 3/3 | 15 min | 5 min |
-| 15. Pricing Page | 1/1 | 8 min | 8 min |
+| 15. Pricing Page | 2/2 | interactive | — |
 
 ## Accumulated Context
 
@@ -50,8 +50,10 @@ Progress: v1.5 ██████████ Phase 13 Complete | v1.6 ███
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent (Phase 15):
-- Story flow: Problem scenarios → Rhetorical question → Urgency → Filter → Pricing
-- 3-tier pricing matching ROADMAP: Solo Rp2.5jt, Team Rp5.5jt, Studio Rp10jt
+- Story flow: Problem scenarios → Rhetorical question → Urgency → Pricing
+- 3-tier pricing: Solo Rp3.9jt, Team Rp7.9jt, Studio Custom
+- Modal form for lead capture instead of direct WhatsApp links
+- Stagger entrance + hover lift animations on pricing cards
 
 ### Deferred Issues
 
@@ -64,6 +66,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed 13-03-PLAN.md (AI Handover Toggle)
+Stopped at: Completed 15-02 (Pricing Modal Form + Animations)
 Resume file: None
-Next: All current phases complete. Consider v1.7 milestone or production deployment.
+Next: All current phases complete. Consider v1.7 milestone, production deployment, or form submission backend.
