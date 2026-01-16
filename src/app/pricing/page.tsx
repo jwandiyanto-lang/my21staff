@@ -33,10 +33,33 @@ export default function PricingPage() {
 
   // Form state
   const [nama, setNama] = useState("");
+  const [countryCode, setCountryCode] = useState("+62");
   const [whatsapp, setWhatsapp] = useState("");
   const [jenisBisnis, setJenisBisnis] = useState("");
-  const [masalah, setMasalah] = useState("");
+  const [dariManaTahu, setDariManaTahu] = useState("");
+  const [leadSources, setLeadSources] = useState<string[]>([]);
+  const [currentTracking, setCurrentTracking] = useState("");
+  const [leadsPerMonth, setLeadsPerMonth] = useState("");
+  const [masalahBisnis, setMasalahBisnis] = useState("");
   const [teamSize, setTeamSize] = useState("");
+
+  // Country codes for WhatsApp
+  const countryCodes = [
+    { code: "+62", flag: "🇮🇩", country: "Indonesia" },
+    { code: "+971", flag: "🇦🇪", country: "UAE" },
+    { code: "+65", flag: "🇸🇬", country: "Singapore" },
+    { code: "+60", flag: "🇲🇾", country: "Malaysia" },
+    { code: "+1", flag: "🇺🇸", country: "USA" },
+  ];
+
+  // Toggle lead source checkbox
+  const toggleLeadSource = (source: string) => {
+    setLeadSources(prev =>
+      prev.includes(source)
+        ? prev.filter(s => s !== source)
+        : [...prev, source]
+    );
+  };
 
   const openModal = (plan: string) => {
     setSelectedPlan(plan);
@@ -45,9 +68,14 @@ export default function PricingPage() {
 
   const resetForm = () => {
     setNama("");
+    setCountryCode("+62");
     setWhatsapp("");
     setJenisBisnis("");
-    setMasalah("");
+    setDariManaTahu("");
+    setLeadSources([]);
+    setCurrentTracking("");
+    setLeadsPerMonth("");
+    setMasalahBisnis("");
     setTeamSize("");
   };
 
@@ -69,9 +97,13 @@ export default function PricingPage() {
         },
         body: JSON.stringify({
           nama,
-          whatsapp,
+          whatsapp: `${countryCode}${whatsapp}`,
           jenisBisnis,
-          masalah,
+          dariManaTahu,
+          leadSources: leadSources.join(", "),
+          currentTracking,
+          leadsPerMonth,
+          masalahBisnis,
           teamSize,
           paket: selectedPlan,
           timestamp: new Date().toISOString(),
@@ -104,12 +136,14 @@ export default function PricingPage() {
       className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}
       style={{ fontFamily: "var(--font-jakarta)" }}
     >
-      {/* Navigation */}
+      {/* Navigation - Matches home page */}
       <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
         <div className="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <span className="text-2xl font-black text-white">21</span>
-          </Link>
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center">
+              <span className="text-2xl font-black text-white">21</span>
+            </Link>
+          </div>
           <a
             href="#pricing"
             className="text-sm text-white px-5 py-2 rounded-full bg-white/20 backdrop-blur-sm font-semibold hover:bg-white/30 transition-all"
@@ -512,10 +546,11 @@ export default function PricingPage() {
               </p>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
                 {/* Hidden field for selected plan */}
                 <input type="hidden" name="paket" value={selectedPlan} />
 
+                {/* 1. Nama */}
                 <div>
                   <label className="block text-sm font-medium text-landing-text mb-1">
                     Nama
@@ -530,20 +565,35 @@ export default function PricingPage() {
                   />
                 </div>
 
+                {/* 2. WhatsApp with country code */}
                 <div>
                   <label className="block text-sm font-medium text-landing-text mb-1">
                     WhatsApp
                   </label>
-                  <input
-                    type="tel"
-                    placeholder="08123456789"
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
-                  />
+                  <div className="flex gap-2">
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="px-3 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                    >
+                      {countryCodes.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.flag} {c.code}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="tel"
+                      placeholder="812345678"
+                      value={whatsapp}
+                      onChange={(e) => setWhatsapp(e.target.value)}
+                      required
+                      className="flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
+                    />
+                  </div>
                 </div>
 
+                {/* 3. Jenis Bisnis */}
                 <div>
                   <label className="block text-sm font-medium text-landing-text mb-1">
                     Jenis Bisnis
@@ -558,19 +608,133 @@ export default function PricingPage() {
                   />
                 </div>
 
+                {/* 4. Dari mana tahu my21staff */}
                 <div>
                   <label className="block text-sm font-medium text-landing-text mb-1">
-                    Masalah apa yang ingin diselesaikan?
+                    Dari mana tahu my21staff?
                   </label>
-                  <textarea
-                    placeholder="Contoh: Follow-up manual, leads terlewat"
-                    value={masalah}
-                    onChange={(e) => setMasalah(e.target.value)}
-                    rows={2}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm resize-none"
-                  />
+                  <select
+                    value={dariManaTahu}
+                    onChange={(e) => setDariManaTahu(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                  >
+                    <option value="">Pilih...</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="Google Search">Google Search</option>
+                    <option value="Rekomendasi teman/kolega">Rekomendasi teman/kolega</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Iklan">Iklan</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </select>
                 </div>
 
+                {/* 5. Dari mana leads masuk (checkboxes) */}
+                <div>
+                  <label className="block text-sm font-medium text-landing-text mb-2">
+                    Dari mana leads kamu biasa masuk?
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      "WhatsApp langsung",
+                      "Instagram DM",
+                      "Website/Form",
+                      "Referral",
+                      "Iklan (Meta/Google)",
+                      "Lainnya",
+                    ].map((source) => (
+                      <label
+                        key={source}
+                        className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all text-sm ${
+                          leadSources.includes(source)
+                            ? "border-landing-cta bg-landing-cta/10"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={leadSources.includes(source)}
+                          onChange={() => toggleLeadSource(source)}
+                          className="sr-only"
+                        />
+                        <div
+                          className={`w-4 h-4 rounded border flex items-center justify-center ${
+                            leadSources.includes(source)
+                              ? "bg-landing-cta border-landing-cta"
+                              : "border-gray-300"
+                          }`}
+                        >
+                          {leadSources.includes(source) && (
+                            <Check className="w-3 h-3 text-white" />
+                          )}
+                        </div>
+                        <span className="text-landing-text">{source}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 6. Cara track leads sekarang */}
+                <div>
+                  <label className="block text-sm font-medium text-landing-text mb-1">
+                    Bagaimana cara track leads sekarang?
+                  </label>
+                  <select
+                    value={currentTracking}
+                    onChange={(e) => setCurrentTracking(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                  >
+                    <option value="">Pilih...</option>
+                    <option value="Belum ada sistem">Belum ada sistem (ingatan saja)</option>
+                    <option value="Catatan/Notes HP">Catatan/Notes HP</option>
+                    <option value="Excel/Google Sheet">Excel/Google Sheet</option>
+                    <option value="CRM lain">CRM lain</option>
+                  </select>
+                </div>
+
+                {/* 7. Leads per bulan */}
+                <div>
+                  <label className="block text-sm font-medium text-landing-text mb-1">
+                    Berapa leads masuk per bulan?
+                  </label>
+                  <select
+                    value={leadsPerMonth}
+                    onChange={(e) => setLeadsPerMonth(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                  >
+                    <option value="">Pilih...</option>
+                    <option value="< 10 leads">&lt; 10 leads</option>
+                    <option value="10-30 leads">10-30 leads</option>
+                    <option value="30-100 leads">30-100 leads</option>
+                    <option value="> 100 leads">&gt; 100 leads</option>
+                  </select>
+                </div>
+
+                {/* 8. Masalah terbesar di bisnis */}
+                <div>
+                  <label className="block text-sm font-medium text-landing-text mb-1">
+                    Masalah terbesar di bisnis?
+                  </label>
+                  <select
+                    value={masalahBisnis}
+                    onChange={(e) => setMasalahBisnis(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                  >
+                    <option value="">Pilih...</option>
+                    <option value="Lupa follow-up leads">Lupa follow-up leads</option>
+                    <option value="Tidak sempat balas chat">Tidak sempat balas chat</option>
+                    <option value="Pembukuan berantakan">Pembukuan berantakan</option>
+                    <option value="Tidak bisa lepas dari operasional">Tidak bisa lepas dari operasional</option>
+                    <option value="Tidak tahu mana leads yang serius">Tidak tahu mana leads yang serius</option>
+                    <option value="Semua di atas">Semua di atas</option>
+                  </select>
+                </div>
+
+                {/* 9. Team size */}
                 <div>
                   <label className="block text-sm font-medium text-landing-text mb-1">
                     Berapa orang yang akan pakai sistem ini?
