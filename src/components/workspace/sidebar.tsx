@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -11,9 +12,11 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WorkspaceSwitcher } from './workspace-switcher'
+import { createClient } from '@/lib/supabase/client'
 
 interface WorkspaceSidebarProps {
   workspace: {
+    id?: string
     name: string
     slug: string
   }
@@ -48,6 +51,32 @@ const adminNav = [
 
 export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSidebarProps) {
   const pathname = usePathname()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  // Fetch unread conversation count
+  useEffect(() => {
+    async function fetchUnreadCount() {
+      if (!workspace.id) return
+
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('unread_count')
+        .eq('workspace_id', workspace.id)
+        .gt('unread_count', 0)
+
+      if (!error && data) {
+        const total = data.reduce((sum, conv) => sum + (conv.unread_count || 0), 0)
+        setUnreadCount(total)
+      }
+    }
+
+    fetchUnreadCount()
+
+    // Poll every 30 seconds for new messages
+    const interval = setInterval(fetchUnreadCount, 30000)
+    return () => clearInterval(interval)
+  }, [workspace.id])
 
   const isActive = (href: string) => {
     const fullHref = `/${workspace.slug}${href}`
@@ -85,6 +114,7 @@ export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSideba
         </div>
         {operationsNav.map((item) => {
           const active = isActive(item.href)
+          const showBadge = item.href === '/inbox' && unreadCount > 0
           return (
             <Link
               key={item.title}
@@ -97,7 +127,12 @@ export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSideba
               )}
             >
               <item.icon className="w-5 h-5" />
-              {item.title}
+              <span className="flex-1">{item.title}</span>
+              {showBadge && (
+                <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white min-w-[20px] text-center">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
             </Link>
           )
         })}

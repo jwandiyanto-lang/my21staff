@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { SendHorizonal, Loader2 } from 'lucide-react'
+import { SendHorizonal, Loader2, Paperclip, X, Image, FileText, Film } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Message } from '@/types/database'
 
@@ -15,6 +15,22 @@ interface MessageInputProps {
   onMessageError: (optimisticId: string) => void
 }
 
+type MediaType = 'image' | 'video' | 'document'
+
+function getMediaType(file: File): MediaType {
+  if (file.type.startsWith('image/')) return 'image'
+  if (file.type.startsWith('video/')) return 'video'
+  return 'document'
+}
+
+function getMediaIcon(type: MediaType) {
+  switch (type) {
+    case 'image': return Image
+    case 'video': return Film
+    default: return FileText
+  }
+}
+
 export function MessageInput({
   conversationId,
   contactPhone,
@@ -24,12 +40,48 @@ export function MessageInput({
 }: MessageInputProps) {
   const [content, setContent] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [filePreview, setFilePreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Check file size (max 16MB for WhatsApp)
+    if (file.size > 16 * 1024 * 1024) {
+      toast.error('File size must be less than 16MB')
+      return
+    }
+
+    setSelectedFile(file)
+
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onload = (e) => setFilePreview(e.target?.result as string)
+      reader.readAsDataURL(file)
+    } else {
+      setFilePreview(null)
+    }
+  }
+
+  const clearFile = () => {
+    setSelectedFile(null)
+    setFilePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     const trimmedContent = content.trim()
-    if (!trimmedContent || isSending) return
+    if ((!trimmedContent && !selectedFile) || isSending) return
+
+    // Determine message type
+    const messageType = selectedFile ? getMediaType(selectedFile) : 'text'
 
     // Create optimistic message
     const optimisticId = crypto.randomUUID()
@@ -40,25 +92,43 @@ export function MessageInput({
       direction: 'outbound',
       sender_type: 'user',
       sender_id: null,
-      content: trimmedContent,
-      message_type: 'text',
-      media_url: null,
+      content: trimmedContent || (selectedFile ? `[${messageType}]` : ''),
+      message_type: messageType,
+      media_url: filePreview,
       kapso_message_id: null,
-      metadata: { status: 'sending' },
+      metadata: { status: 'sending', filename: selectedFile?.name },
       created_at: new Date().toISOString(),
     }
 
     // Clear input immediately and show optimistic message
     setContent('')
+    const fileToSend = selectedFile
+    clearFile()
     onMessageSent(optimisticMessage, true)
     setIsSending(true)
 
     try {
-      const response = await fetch('/api/messages/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId, content: trimmedContent }),
-      })
+      let response
+
+      if (fileToSend) {
+        // Upload file first, then send media message
+        const formData = new FormData()
+        formData.append('file', fileToSend)
+        formData.append('conversationId', conversationId)
+        formData.append('caption', trimmedContent)
+
+        response = await fetch('/api/messages/send-media', {
+          method: 'POST',
+          body: formData,
+        })
+      } else {
+        // Send text message
+        response = await fetch('/api/messages/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId, content: trimmedContent }),
+        })
+      }
 
       if (!response.ok) {
         const error = await response.json()
@@ -79,11 +149,64 @@ export function MessageInput({
     }
   }
 
+  const MediaIcon = selectedFile ? getMediaIcon(getMediaType(selectedFile)) : null
+
   return (
-    <div className="border-t p-4 bg-background">
-      <form onSubmit={handleSubmit} className="flex gap-2">
+    <div className="border-t bg-background">
+      {/* File Preview */}
+      {selectedFile && (
+        <div className="px-4 pt-3">
+          <div className="flex items-center gap-3 p-2 bg-muted rounded-lg">
+            {filePreview ? (
+              <img src={filePreview} alt="Preview" className="h-12 w-12 object-cover rounded" />
+            ) : (
+              <div className="h-12 w-12 bg-muted-foreground/10 rounded flex items-center justify-center">
+                {MediaIcon && <MediaIcon className="h-6 w-6 text-muted-foreground" />}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{selectedFile.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {(selectedFile.size / 1024).toFixed(1)} KB
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={clearFile}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Input Row */}
+      <form onSubmit={handleSubmit} className="flex gap-2 p-4">
+        {/* File Input (hidden) */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+
+        {/* Attach Button */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isSending}
+        >
+          <Paperclip className="h-4 w-4" />
+        </Button>
+
         <Input
-          placeholder="Type a message..."
+          placeholder={selectedFile ? "Add a caption..." : "Type a message..."}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={isSending}
@@ -92,7 +215,7 @@ export function MessageInput({
         <Button
           type="submit"
           size="icon"
-          disabled={isSending || !content.trim()}
+          disabled={isSending || (!content.trim() && !selectedFile)}
         >
           {isSending ? (
             <Loader2 className="h-4 w-4 animate-spin" />

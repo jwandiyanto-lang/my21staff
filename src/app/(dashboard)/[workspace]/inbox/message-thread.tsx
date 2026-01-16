@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Loader2, MessageSquare, Clock, Bot, User } from 'lucide-react'
+import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import type { Contact, Message } from '@/types/database'
@@ -43,6 +43,56 @@ function isSendingMessage(message: Message): boolean {
 function MessageBubble({ message }: { message: Message }) {
   const isOutbound = message.direction === 'outbound'
   const isSending = isSendingMessage(message)
+  const metadata = message.metadata as Record<string, unknown> | null
+
+  const renderMedia = () => {
+    if (!message.media_url) return null
+
+    switch (message.message_type) {
+      case 'image':
+        return (
+          <a href={message.media_url} target="_blank" rel="noopener noreferrer" className="block mb-2">
+            <img
+              src={message.media_url}
+              alt="Image"
+              className="max-w-full rounded-lg max-h-64 object-cover"
+            />
+          </a>
+        )
+      case 'video':
+        return (
+          <div className="mb-2">
+            <video
+              src={message.media_url}
+              controls
+              className="max-w-full rounded-lg max-h-64"
+            />
+          </div>
+        )
+      case 'document':
+        const filename = metadata?.filename as string | undefined
+        return (
+          <a
+            href={message.media_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              'flex items-center gap-2 mb-2 p-2 rounded-lg',
+              isOutbound ? 'bg-white/10' : 'bg-muted-foreground/10'
+            )}
+          >
+            <FileText className="h-8 w-8 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{filename || 'Document'}</p>
+              <p className="text-xs opacity-70">Click to download</p>
+            </div>
+            <Download className="h-4 w-4" />
+          </a>
+        )
+      default:
+        return null
+    }
+  }
 
   return (
     <div
@@ -54,14 +104,7 @@ function MessageBubble({ message }: { message: Message }) {
         isSending && 'opacity-70'
       )}
     >
-      {message.message_type === 'image' && message.media_url && (
-        <div className="mb-2">
-          <div className="text-xs opacity-70 mb-1">[Image]</div>
-          {message.metadata && typeof message.metadata === 'object' && 'caption' in message.metadata && (
-            <p className="text-sm">{String(message.metadata.caption)}</p>
-          )}
-        </div>
-      )}
+      {renderMedia()}
       {message.content && <p className="whitespace-pre-wrap">{message.content}</p>}
       <span className={cn(
         'text-xs block mt-1 flex items-center gap-1',

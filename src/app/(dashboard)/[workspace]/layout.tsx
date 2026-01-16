@@ -41,7 +41,7 @@ export default async function WorkspaceLayout({
 
   // Dev mode: skip auth and use mock workspace
   if (isDevMode()) {
-    const workspace = { name: MOCK_WORKSPACE.name, slug: MOCK_WORKSPACE.slug }
+    const workspace = { id: MOCK_WORKSPACE.id, name: MOCK_WORKSPACE.name, slug: MOCK_WORKSPACE.slug }
     return (
       <div className="flex h-screen overflow-hidden bg-background">
         {/* Noise Overlay */}
@@ -101,7 +101,7 @@ export default async function WorkspaceLayout({
       <div className="noise-overlay" style={{ opacity: 0.03 }} />
 
       {/* Sidebar */}
-      <WorkspaceSidebar workspace={{ name: workspace.name, slug: workspace.slug }} isAdmin={isAdmin} />
+      <WorkspaceSidebar workspace={{ id: workspace.id, name: workspace.name, slug: workspace.slug }} isAdmin={isAdmin} />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
