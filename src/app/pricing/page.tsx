@@ -43,7 +43,7 @@ export default function PricingPage() {
 
       <main>
         {/* The Letter */}
-        <section className="bg-[#FDFBF7] text-landing-text pt-24 pb-16">
+        <section className="bg-[#FDFBF7] text-landing-text pt-24 pb-12">
           <div className="mx-auto max-w-2xl px-6">
             <motion.article
               initial="hidden"
@@ -51,68 +51,57 @@ export default function PricingPage() {
               variants={staggerContainer}
               className="space-y-6 text-lg md:text-xl leading-relaxed"
             >
-              <motion.p variants={fadeInUp} className="text-landing-text-muted italic">
-                Sebelum pakai 21...
+              <motion.h2 variants={fadeInUp} className="text-2xl md:text-3xl font-bold">
+                Sebelum
+              </motion.h2>
+
+              <motion.p variants={fadeInUp}>
+                Kemarin ada yang chat. Tanya harga. Sudah mau DP.
               </motion.p>
 
               <motion.p variants={fadeInUp}>
-                Kemarin ada yang chat. Tanya harga. Serius mau beli.
+                Tapi karena saya lagi sibuk urusin customer langganan, jadi kelupaan bales.
               </motion.p>
 
               <motion.p variants={fadeInUp}>
-                Tapi saya lagi sibuk. Belum sempat balas.
-              </motion.p>
-
-              <motion.p variants={fadeInUp} className="font-semibold">
-                Hari ini dia sudah closing sama kompetitor.
+                Saya chat lagi — dia sudah <span className="font-semibold">ghosting</span>.
               </motion.p>
 
               <motion.p variants={fadeInUp} className="pt-4">
-                Jam 11 malam masih balas WhatsApp. Keluarga sudah tidur. Besok pagi bangun, cek HP — tetap ada yang kelewat.
+                Lalu kadang saya bisa urusin client baru, tapi gak beli-beli. Sampai keluarga teriak kalau saya tidak ada waktu untuk mereka.
               </motion.p>
 
-              <motion.p variants={fadeInUp}>
-                Bulan lalu ramai. Chat masuk terus. Sibuk dari pagi sampai malam.
-              </motion.p>
+              <motion.div variants={fadeInUp} className="pt-10">
+                <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                  Sesudah
+                </h2>
 
-              <motion.p variants={fadeInUp}>
-                Tapi pas akhir bulan, cek rekening...
-              </motion.p>
-
-              <motion.p variants={fadeInUp} className="text-2xl md:text-3xl font-bold text-landing-cta">
-                Uangnya kemana?
-              </motion.p>
-
-              <motion.div variants={fadeInUp} className="pt-8 border-t border-landing-text/10">
-                <p className="text-landing-text-muted mb-4">
-                  Sekarang setelah pakai 21:
-                </p>
                 <p>
-                  Leads masuk, langsung ada yang follow up. Gak ada yang kelewat. Gak perlu begadang.
+                  Setelah pakai sistem, setiap leads masuk sudah otomatis dinilai dan ada yang follow up.
                 </p>
+
                 <p className="mt-4">
-                  Akhir bulan? Tau persis mana yang closing, mana yang pending, mana yang butuh di-push.
+                  Ketika ada leads bagus, saya terima notif dan bisa ambil alih chatnya.
                 </p>
-                <p className="mt-4 font-semibold">
-                  Bukan kerja lebih keras. Tapi kerja dengan sistem.
+
+                <p className="mt-4">
+                  Hasilnya jauh lebih bagus — dan saya bisa gunakan energi saya untuk susun planning bisnis dan bangun relasi.
                 </p>
               </motion.div>
 
-              <motion.div variants={fadeInUp} className="pt-8">
-                <p className="text-landing-text-muted text-base">
-                  — Klien 21
-                </p>
-              </motion.div>
+              <motion.p variants={fadeInUp} className="pt-8 text-landing-cta font-semibold">
+                Ini kamu nantinya.
+              </motion.p>
             </motion.article>
           </div>
         </section>
 
-        {/* Not for everyone */}
-        <section className="bg-[#FDFBF7] text-landing-text pb-16">
+        {/* The Problem */}
+        <section className="bg-[#FDFBF7] text-landing-text py-12">
           <div className="mx-auto max-w-2xl px-6">
-            <p className="text-center text-landing-text-muted">
-              Ini bukan untuk semua orang. Ini untuk yang sudah tau ada yang <span className="italic">broken</span>.
-            </p>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
+              Banyak yang punya masalah tapi ditutup-tutupin. Sampai suatu saat jadi terlalu besar.
+            </h2>
           </div>
         </section>
 
