@@ -19,13 +19,10 @@ export async function GET(
       )
     }
 
-    // Get notes with author info
+    // Get notes
     const { data: notes, error } = await supabase
       .from('contact_notes')
-      .select(`
-        *,
-        author:profiles(id, full_name, email)
-      `)
+      .select('*')
       .eq('contact_id', contactId)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -100,10 +97,7 @@ export async function POST(
         note_type,
         metadata,
       })
-      .select(`
-        *,
-        author:profiles(id, full_name, email)
-      `)
+      .select('*')
       .single()
 
     if (insertError) {
