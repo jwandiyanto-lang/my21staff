@@ -152,6 +152,92 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
     }
   }, [selectedConversation, markAsRead])
 
+  // Real-time subscription for new messages in selected conversation
+  useEffect(() => {
+    if (isDevMode() || !selectedConversation) return
+
+    const supabase = createClient()
+
+    const channel = supabase
+      .channel(`messages:${selectedConversation.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${selectedConversation.id}`,
+        },
+        (payload) => {
+          const newMessage = payload.new as Message
+          // Avoid duplicates (optimistic updates)
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === newMessage.id)) return prev
+            return [...prev, newMessage]
+          })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [selectedConversation?.id])
+
+  // Real-time subscription for conversation updates (new messages, unread counts)
+  useEffect(() => {
+    if (isDevMode()) return
+
+    const supabase = createClient()
+
+    const channel = supabase
+      .channel(`conversations:${workspace.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'conversations',
+          filter: `workspace_id=eq.${workspace.id}`,
+        },
+        async (payload) => {
+          if (payload.eventType === 'INSERT') {
+            // New conversation - fetch with contact info
+            const { data: newConv } = await supabase
+              .from('conversations')
+              .select('*, contact:contacts!inner(*)')
+              .eq('id', payload.new.id)
+              .single()
+
+            if (newConv && newConv.contact) {
+              setConversations((prev) => [newConv as unknown as ConversationWithContact, ...prev])
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            // Update existing conversation
+            const updated = payload.new
+            setConversations((prev) =>
+              prev.map((c) =>
+                c.id === updated.id
+                  ? { ...c, ...updated, contact: c.contact }
+                  : c
+              )
+            )
+            // Also update selected if matches
+            setSelectedConversation((prev) =>
+              prev && prev.id === updated.id
+                ? { ...prev, ...updated, contact: prev.contact }
+                : prev
+            )
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [workspace.id])
+
   // Handle message sent (optimistic or real)
   const handleMessageSent = useCallback((message: Message & { _optimisticId?: string }, isOptimistic: boolean) => {
     if (isOptimistic) {
