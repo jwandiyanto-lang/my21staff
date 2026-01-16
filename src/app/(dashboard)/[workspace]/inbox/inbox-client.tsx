@@ -24,7 +24,8 @@ interface InboxClientProps {
   conversations: ConversationWithContact[]
 }
 
-export function InboxClient({ workspace, conversations }: InboxClientProps) {
+export function InboxClient({ workspace, conversations: initialConversations }: InboxClientProps) {
+  const [conversations, setConversations] = useState<ConversationWithContact[]>(initialConversations)
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithContact | null>(
     conversations[0] || null
   )
@@ -38,6 +39,25 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
   const unreadCount = useMemo(() => {
     return conversations.filter((c) => c.unread_count > 0).length
   }, [conversations])
+
+  // Mark conversation as read
+  const markAsRead = useCallback(async (conversationId: string) => {
+    // Optimistically update local state
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === conversationId ? { ...c, unread_count: 0 } : c
+      )
+    )
+
+    // Call API to persist
+    try {
+      await fetch(`/api/conversations/${conversationId}/read`, {
+        method: 'POST',
+      })
+    } catch (error) {
+      console.error('Failed to mark conversation as read:', error)
+    }
+  }, [])
 
   // Filter conversations by status and unread
   const filteredConversations = useMemo(() => {
@@ -94,10 +114,14 @@ export function InboxClient({ workspace, conversations }: InboxClientProps) {
 
     if (selectedConversation) {
       loadMessages(selectedConversation.id)
+      // Mark as read when viewing
+      if (selectedConversation.unread_count > 0) {
+        markAsRead(selectedConversation.id)
+      }
     } else {
       setMessages([])
     }
-  }, [selectedConversation])
+  }, [selectedConversation, markAsRead])
 
   // Handle message sent (optimistic or real)
   const handleMessageSent = useCallback((message: Message & { _optimisticId?: string }, isOptimistic: boolean) => {
