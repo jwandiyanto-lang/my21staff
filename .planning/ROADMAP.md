@@ -149,7 +149,27 @@ Plans:
 
 ---
 
-## v1.8 — Form & Lead Capture (Future)
+## v1.8 — Kapso Verification
+
+### Phase 18: Kapso Bot Setup & Verification
+
+**Goal:** Systematically verify Kapso integration works end-to-end in production
+**Depends on:** Phase 17
+**Plans:** 1 plan
+
+Plans:
+- [ ] 18-01-PLAN.md — End-to-end verification (webhook, AI, outbound, handover)
+
+**Scope:**
+- Verify Kapso webhook receiving messages
+- Test AI auto-reply functionality
+- Test outbound messages from CRM
+- Verify AI handover toggle works
+- Document any issues for future phases
+
+---
+
+## v1.9 — Form & Lead Capture (Future)
 
 ### Phase 16: Pricing Form Enhancement
 
@@ -187,5 +207,6 @@ Plans:
 | 13. Lead Management Enhancement | v1.5 | 3/3 | Complete | 2026-01-16 |
 | 14. Landing Page Refresh | v1.6 | 1/1 | Complete | 2026-01-16 |
 | 15. Pricing Page | v1.6 | 2/2 | Complete | 2026-01-16 |
-| 16. Pricing Form Enhancement | v1.8 | 0/1 | Not started | — |
+| 16. Pricing Form Enhancement | v1.9 | 0/1 | Not started | — |
 | 17. Inbox UI/UX Fixes | v1.7 | 1/1 | Complete | 2026-01-16 |
+| 18. Kapso Bot Setup | v1.8 | 0/1 | Planned | — |
