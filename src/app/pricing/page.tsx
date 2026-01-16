@@ -51,6 +51,54 @@ export default function PricingPage() {
     setTeamSize("");
   };
 
+  // Submission state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || "https://n8n.example.com/webhook/pricing-form";
+
+    try {
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nama,
+          whatsapp,
+          jenisBisnis,
+          masalah,
+          teamSize,
+          paket: selectedPlan,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit form");
+      }
+
+      // Success
+      setSubmitSuccess(true);
+      resetForm();
+
+      // Close modal after brief success state
+      setTimeout(() => {
+        setModalOpen(false);
+        setSubmitSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Form submission error:", error);
+      alert("Gagal mengirim form. Silakan coba lagi.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div
       className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}
@@ -464,7 +512,7 @@ export default function PricingPage() {
               </p>
 
               {/* Form */}
-              <form className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Hidden field for selected plan */}
                 <input type="hidden" name="paket" value={selectedPlan} />
 
@@ -543,9 +591,10 @@ export default function PricingPage() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-full bg-landing-cta text-white font-bold text-sm hover:bg-landing-cta/90 transition-all mt-2"
+                  disabled={isSubmitting || submitSuccess}
+                  className="w-full py-3 rounded-full bg-landing-cta text-white font-bold text-sm hover:bg-landing-cta/90 transition-all mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  Kirim
+                  {submitSuccess ? "✓ Terkirim!" : isSubmitting ? "Mengirim..." : "Kirim"}
                 </button>
               </form>
 
