@@ -6,195 +6,200 @@
 
 ## Subscription Plans
 
-| Plan | Monthly | USD Equiv. | Best For |
-|------|---------|------------|----------|
-| **Solo** | Rp2,500,000 | ~$155 | Solo founders, freelancers |
-| **Team** | Rp5,500,000 | ~$340 | Growing SMBs, small teams |
-| **Studio** | Rp10,000,000 | ~$620 | Established businesses |
+| | Solo | Team |
+|---|------|------|
+| **Price** | Rp3,900,000/mo | Rp7,900,000/mo |
+| **WhatsApp Numbers** | 1 | 3 |
+| **Marketing Messages** | 200/mo | 500/mo |
+| **Utility Messages** | 100/mo | 300/mo |
+| **AI Chats** | 30,000/mo | 60,000/mo |
+| **Best For** | Solo founders, freelancers | Small teams, growing SMBs |
+
+**Pricing Logic:** Big jump Solo → Team (+Rp4jt). Apple-style psychology.
 
 ---
 
-## What's Included
-
-### Solo (Rp2.5jt/month)
-
-| Feature | Included |
-|---------|----------|
-| Database CRM | Unlimited contacts |
-| AI Staff | 4 specialists (Sales, Finance, Ops, Customer) |
-| Human Support | When AI can't solve it |
-| Website Manager | Landing pages, articles |
-
-### Team (Rp5.5jt/month)
-
-Everything in Solo, plus:
-
-| Feature | Included |
-|---------|----------|
-| Analytics Dashboard | Lead tracking, conversion rates |
-| Content Planning | Social calendar, scheduling |
-| AI Staff | 6 total |
-
-### Studio (Rp10jt/month)
-
-Everything in Team, plus:
-
-| Feature | Included |
-|---------|----------|
-| Marketing Management | Campaign execution |
-| Ads Management | Paid ads optimization |
-| AI Staff | 8 total (all departments) |
-
----
-
-## One-Time Setup Fees
+## One-Time Setup Fee
 
 | Package | Price | What's Included |
 |---------|-------|-----------------|
-| **Kickstart** | Rp7,500,000 (~$465) | Website setup, config, business consultation |
-
-*Setup fee is optional but recommended for fastest time-to-value.*
+| **Kickstart** | Rp7,500,000 | Website setup, config, business consultation |
 
 ---
 
-## The Hybrid Model
+## Overage Rates
 
-| Component | What It Does |
+When you exceed your quota:
+
+| Item | Price |
+|------|-------|
+| Extra WhatsApp number | Rp250,000/mo |
+| Marketing message | Rp700/msg |
+| Utility message | Rp450/msg |
+| AI chat | Rp50/chat |
+
+---
+
+## Enterprise / Studio
+
+Custom pricing based on client needs. Contact us to discuss volume and requirements.
+
+---
+
+# Cost Breakdown (Internal)
+
+*This section is for internal reference only. Do not share with customers.*
+
+---
+
+## Profit Summary
+
+| Tier | Price | Cost | Profit | Margin |
+|------|-------|------|--------|--------|
+| Solo | Rp3.9jt | Rp498k | **Rp3.40jt** | 87% |
+| Team | Rp7.9jt | Rp1.29jt | **Rp6.61jt** | 84% |
+
+---
+
+## Per-Tier Cost Breakdown (High Usage)
+
+### Solo (Rp3,900,000/mo)
+
+| Cost Item | Monthly Cost |
 |-----------|--------------|
-| **AI Staff** | Execute routine tasks 24/7 — follow-ups, reminders, reports |
-| **Human Team** | Handle complex decisions, strategy, troubleshooting |
+| Kapso (1 number) | Rp160,000 |
+| AI API (30K chats × Rp4.00) | Rp120,000 |
+| Meta Marketing (200 × Rp586) | Rp117,200 |
+| Meta Utility (100 × Rp357) | Rp35,700 |
+| Buffer (15%) | Rp64,935 |
+| **Total Cost** | **Rp497,835** |
+| **Profit** | **Rp3,402,165 (87%)** |
 
-> **AI handles the routine. Humans handle the complex.**
->
-> That's why it works.
+### Team (Rp7,900,000/mo)
 
----
-
-## AI Staff by Department
-
-| Department | What AI Handles | What Humans Handle |
-|------------|-----------------|-------------------|
-| **Sales** | Follow-ups, reminders, qualification | Strategy, negotiation, closing |
-| **Finance** | Invoice logging, payment reminders | Budget decisions, forecasting |
-| **Operations** | Scheduling, task routing, status updates | Complex problem-solving |
-| **Customer** | FAQ responses, ticket logging | Complaints, escalations |
-| **Analytics** | Report generation, tracking | Insights, recommendations |
-| **Marketing** | Content scheduling, broadcasting | Strategy, creative decisions |
-| **Ads** | Campaign monitoring | Optimization, budget decisions |
-| **Executive** | Coordination, routing | Strategic decisions |
-
-*Staff availability depends on plan tier.*
+| Cost Item | Monthly Cost |
+|-----------|--------------|
+| Kapso (3 numbers) | Rp480,000 |
+| AI API (60K chats × Rp4.00) | Rp240,000 |
+| Meta Marketing (500 × Rp586) | Rp293,000 |
+| Meta Utility (300 × Rp357) | Rp107,100 |
+| Buffer (15%) | Rp168,015 |
+| **Total Cost** | **Rp1,288,115** |
+| **Profit** | **Rp6,611,885 (84%)** |
 
 ---
 
-## Pricing Philosophy
+## Overage Margins
 
-### UMR Anchor
-
-Our Team tier (Rp5.5jt) is intentionally priced around Indonesia's Upah Minimum Regional (minimum wage). This creates a clear comparison:
-
-> "An AI team for the price of one entry-level employee."
-
-### No Per-Contact Pricing
-
-Unlike competitors who charge per contact or message volume, we offer flat monthly pricing. Grow without worrying about usage limits.
-
-### AI + Human Included
-
-The hybrid model is included in every plan — not an upsell. AI executes routine tasks. Humans step in for complex decisions. This is our core differentiator.
+| Item | Our Cost | Our Price | Margin |
+|------|----------|-----------|--------|
+| Extra number | Rp160,000 | Rp250,000 | 36% |
+| Marketing msg | Rp586 | Rp700 | 19% |
+| Utility msg | Rp357 | Rp450 | 26% |
+| AI chat | Rp4.00 | Rp50 | 92% |
 
 ---
 
-## Price Comparison
+## Infrastructure Costs
 
-| Plan | my21staff | SleekFlow | Difference |
-|------|-----------|-----------|------------|
-| Entry | Rp2.5jt (~$155) | $0 (Free tier) | We execute, they give you tools |
-| Mid | Rp5.5jt (~$340) | $149-199/mo | AI team vs DIY automation |
-| High | Rp10jt (~$620) | $349-399/mo | Full execution vs self-service |
+### Kapso (WhatsApp BSP)
 
----
+**Pro Plan: $25/month**
+- 100,000 messages/month included (then $0.002/msg)
+- 3 phone numbers included (then $10/additional)
+- 100 GB WhatsApp media storage
+- 1M serverless function calls
 
-## Future Upsells (Internal Only)
+### Vercel (Hosting)
 
-| Feature | Est. Price | Status |
-|---------|------------|--------|
-| Advanced Analytics | TBD | Roadmap |
-| Content Creation | TBD | Future |
-| Custom AI Training | TBD | Future |
+**Pro Plan: $20/month** — shared across all customers
 
 ---
 
-## WhatsApp Messaging Quota
+## Meta WhatsApp API (Indonesia Rates)
 
-Each subscription includes a monthly WhatsApp marketing message quota. Service messages (customer-initiated) are always FREE.
+| Message Type | Meta Cost | Description |
+|--------------|-----------|-------------|
+| **Marketing** | Rp586/msg | Broadcasts, promos, cold outreach |
+| **Utility** | Rp357/msg | Order updates, receipts, notifications |
+| **Authentication** | Rp357/msg | OTPs, login verification |
+| **Service** | **FREE** | Customer-initiated (within 24hr window) |
 
-### Included Quota
+### Key Insight
+- Service messages = FREE (customer messages first, you reply)
+- Only pay Meta when YOU initiate (marketing/utility)
+- Inbound-first strategy = maximum profit
 
-| Plan | Monthly Marketing Messages | Overage Rate |
-|------|---------------------------|--------------|
-| **Solo** | 500 | Rp500/msg |
-| **Team** | 1,500 | Rp400/msg |
-| **Studio** | 5,000 | Rp300/msg |
+---
 
-### Message Types
+## Kapso Processing Fees
 
-| Type | Description | Cost |
-|------|-------------|------|
-| **Service** | Customer messages you first (within 24hr window) | FREE |
-| **Utility** | Order updates, receipts, shipping notifications | FREE |
-| **Marketing** | Broadcasts, promos, announcements, cold outreach | Counted toward quota |
+| Volume | Cost |
+|--------|------|
+| Under 100K messages/month | **FREE** |
+| Over 100K messages/month | $0.002/msg (~Rp32) |
 
-### How It Works
+### Message Count Per Tier
 
-1. **Within quota**: No extra charge
-2. **Over quota**: Charged per message at overage rate
-3. **Reset**: Quota resets monthly on billing date
-4. **Tracking**: View usage in dashboard (coming soon)
+| Tier | Marketing | Utility | AI Chats | Total |
+|------|-----------|---------|----------|-------|
+| Solo | 200 | 100 | 30,000 | 30,300 |
+| Team | 500 | 300 | 60,000 | 60,800 |
 
-### Example
+Both tiers stay under 100K = no Kapso overage.
 
-| Scenario | Messages Sent | Quota | Overage | Extra Cost |
-|----------|---------------|-------|---------|------------|
-| Solo user sends 400 marketing | 400 | 500 | 0 | Rp0 |
-| Solo user sends 800 marketing | 800 | 500 | 300 | Rp150,000 |
-| Team user sends 2,000 marketing | 2,000 | 1,500 | 500 | Rp200,000 |
+---
 
-**Tip:** Optimize for inbound! Customer-initiated conversations are FREE and don't count toward quota.
+## AI API Costs (Gemini Flash-Lite)
+
+### Per Million Tokens
+
+| | Rate (USD) | Rate (IDR) |
+|---|------------|------------|
+| Input | $0.10/1M | Rp1,600/1M |
+| Output | $0.40/1M | Rp6,400/1M |
+
+### Per Token
+
+| | Cost |
+|---|------|
+| Input | Rp0.0016/token |
+| Output | Rp0.0064/token |
+
+### Per Chat (High Usage: 500 tokens in + 500 tokens out)
+
+| | Tokens | Cost |
+|---|--------|------|
+| Input | 500 | Rp0.80 |
+| Output | 500 | Rp3.20 |
+| **Total** | 1,000 | **Rp4.00** |
+
+### Alternative AI Providers
+
+| Provider | Model | Input/1M | Output/1M | Cost/Chat |
+|----------|-------|----------|-----------|-----------|
+| Google | Flash-Lite | $0.10 | $0.40 | **Rp4.00** |
+| Google | Flash | $0.30 | $2.50 | Rp11.20 |
+| xAI | Grok 4.1 Fast | $0.20 | $0.50 | Rp5.60 |
+| Anthropic | Haiku | $1.00 | $5.00 | Rp48.00 |
+| Anthropic | Sonnet | $3.00 | $15.00 | Rp144.00 |
 
 ---
 
 ## FAQ
 
-**Q: Are there any hidden fees?**
-A: No. The monthly subscription includes everything listed. Messaging API costs may apply for high-volume outbound marketing.
+**Q: Why are margins so high?**
+A: Fixed costs (salaries, ops) not included. Human support is labor cost. Buffer for API changes.
 
-**Q: Can I change plans?**
-A: Yes. Upgrade or downgrade anytime. Changes take effect next billing cycle.
+**Q: What if API prices change?**
+A: 84-87% margins provide buffer. Even 2x increase is sustainable.
 
-**Q: What if I exceed limits?**
-A: We don't have per-contact limits. Use as much as you need.
+**Q: Why only two tiers?**
+A: Solo & Team cover most SMBs. Enterprise/Studio is custom to avoid losses on high-volume accounts.
 
-**Q: Is there a free trial?**
-A: We offer a "Start Free" option to explore the dashboard. Contact us for details.
-
-**Q: Do I need the setup fee?**
-A: Not required, but recommended. The Kickstart package includes hands-on setup that gets you operational faster.
-
-**Q: What do AI Staff actually do?**
-A: AI Staff execute routine operations — they send follow-ups, log data, generate reports, send reminders. They're your back-office team working 24/7.
-
-**Q: When do humans help?**
-A: Humans step in for complex decisions, strategy, troubleshooting, and anything AI can't handle. You're never alone.
+**Q: What about Kapso overage?**
+A: Both tiers stay under 100K messages. If customer exceeds, they pay Rp50/chat overage (we pay Rp32 + Rp4 = Rp36, profit Rp14).
 
 ---
 
-## Payment Methods
-
-- Bank transfer (BCA, Mandiri, BNI)
-- Virtual account
-- Credit card (coming soon)
-
----
-
-*Contact us via WhatsApp for custom pricing on enterprise needs.*
+*Internal document. Do not share with customers.*

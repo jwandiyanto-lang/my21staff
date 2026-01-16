@@ -2,11 +2,13 @@
 
 ## What This Is
 
-A WhatsApp CRM SaaS for Indonesian small businesses — education consultants and sales teams who use WhatsApp as their primary communication channel. Features a lead database with status tracking, two-way WhatsApp messaging via Kapso, and a website manager for content-driven lead generation through webinar registrations.
+**No system = Can't grow. I help you build that system.**
+
+WhatsApp CRM + AI team for Indonesian SMEs. Not just software — guidance from real business experience.
 
 ## Core Value
 
-Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
+The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
 ## Requirements
 
@@ -33,7 +35,9 @@ Two-way WhatsApp messaging from the CRM — users can send and receive messages 
 
 ## Context
 
-**Target Users:** Indonesian education consultants, small business owners using WhatsApp for sales.
+**The Message:** No system = Can't grow. I help you build that system.
+
+**Target Users:** Indonesian SMEs who have leads everywhere but no system to manage them.
 
 **Current State (v1.0):**
 - 9,043 lines TypeScript, Next.js 15 + React 19

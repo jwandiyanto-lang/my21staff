@@ -1,18 +1,32 @@
 # my21staff
 
-WhatsApp CRM SaaS for Indonesian SMEs (UMKM). Connect WhatsApp to Facebook/Meta Ads for lead generation.
+**No system = Can't grow. I help you build that system.**
+
+WhatsApp CRM + AI team for Indonesian SMEs. Not just software — guidance from real business experience.
 
 **Target Market:** Indonesia (primary), UAE (expansion)
 
 ---
 
-## Core Features
+## The Message
 
-| Feature | Description |
-|---------|-------------|
-| Database CRM | Manage contacts & leads with status tracking |
-| WhatsApp Messaging | Send & receive WhatsApp messages from CRM |
-| Website Manager | Articles, webinars, public pages for lead gen |
+| Element | Copy |
+|---------|------|
+| **Problem** | No system = Can't grow |
+| **Solution** | I help you build that system |
+| **Tool** | my21staff (AI + human team) |
+| **Why Me** | Real business experience, not just software |
+
+---
+
+## The System (What They Get)
+
+| Symptom | System |
+|---------|--------|
+| Leads everywhere | WhatsApp CRM + Lead Reminders |
+| Forgot follow-ups | AI Follow-up + Social Reminders |
+| Proposals scattered | Proposal Library + Bot Access |
+| No visibility | Analytics + Weekly Reports |
 
 ---
 
@@ -61,19 +75,21 @@ Contact via WhatsApp or in-app chat. Response within minutes.
 
 ---
 
-## Pricing Tiers
+## Pricing = More System
 
-| Tier | Price | What You Get |
-|------|-------|--------------|
-| **Solo** | Rp2.5jt/bln | WhatsApp CRM + 4 AI Staff (Sales, Finance, Ops, Customer) |
-| **Team** | Rp5.5jt/bln | Solo + Analytics + Content Planning |
-| **Studio** | Rp10jt/bln | Team + Marketing + Ads Management |
+| Tier | Price | System You Get |
+|------|-------|----------------|
+| **Solo** | Rp2.5jt/bln | Lead system (WhatsApp + Reminders + Follow-up) |
+| **Team** | Rp5.5jt/bln | Solo + Proposal system + Analytics |
+| **Studio** | Rp10jt/bln | Team + Marketing system + Ads |
+
+**The more system, the more growth.**
 
 ### Setup Fee (One-time)
 
 | Package | Price | What You Get |
 |---------|-------|--------------|
-| **Kickstart** | Rp7.5jt | Website + WhatsApp + Business approach |
+| **Kickstart** | Rp7.5jt | Website + WhatsApp + Business approach + Guidance |
 
 ### Future Upsells (Internal Only)
 
