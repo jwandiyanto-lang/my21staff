@@ -126,6 +126,25 @@ Plans:
 
 ---
 
+## v1.7 — Form & Lead Capture (In Progress)
+
+### Phase 16: Pricing Form Enhancement
+
+**Goal:** Enhance pricing page form with qualifying questions + Google Sheet capture via n8n
+**Depends on:** Phase 15 (pricing page with modal form)
+**Plans:** TBD
+
+Plans:
+- [ ] 16-01: Form fields + n8n webhook + Google Sheet
+
+**Scope:**
+- Update form fields (business type, current pain, team size)
+- n8n webhook to capture submissions
+- Google Sheet for lead storage
+- Bahasa Indonesia copy
+
+---
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -145,3 +164,4 @@ Plans:
 | 13. Lead Management Enhancement | v1.5 | 3/3 | Complete | 2026-01-16 |
 | 14. Landing Page Refresh | v1.6 | 1/1 | Complete | 2026-01-16 |
 | 15. Pricing Page | v1.6 | 2/2 | Complete | 2026-01-16 |
+| 16. Pricing Form Enhancement | v1.7 | 0/1 | Not started | — |
