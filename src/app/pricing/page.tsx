@@ -34,10 +34,16 @@ export default function PricingPage() {
     >
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
-        <div className="mx-auto max-w-7xl px-6 h-14 flex items-center">
+        <div className="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-black text-white">21</span>
           </Link>
+          <a
+            href="#pricing"
+            className="text-sm text-white px-5 py-2 rounded-full bg-white/20 backdrop-blur-sm font-semibold hover:bg-white/30 transition-all"
+          >
+            Mulai
+          </a>
         </div>
       </nav>
 
@@ -86,59 +92,241 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Full-page interstitial */}
-        <section className="bg-[#FDFBF7] flex items-center justify-center px-6 pt-8 pb-20 md:pt-12 md:pb-24">
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-landing-text text-center max-w-4xl leading-tight">
-            Banyak yang punya masalah tapi ditutup-tutupin.
-            <br className="hidden md:block" />
-            <span className="text-landing-cta">Sampai suatu saat jadi terlalu besar.</span>
-          </h2>
+        {/* Header - Dark green */}
+        <section className="bg-landing-hero text-white px-6 py-12 md:py-16">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center">
+              No system = <span className="text-landing-cta">No growth.</span>
+            </h2>
+          </div>
         </section>
 
-        {/* Onboarding Timeline */}
+        {/* Story - Cream background */}
+        <section className="bg-[#FDFBF7] px-6 py-12 md:py-16">
+          <div className="mx-auto max-w-3xl">
+            {/* Problem */}
+            <div className="space-y-6 text-lg md:text-xl text-landing-text leading-relaxed">
+              <p>
+                Bisnis mau maju, tapi <strong className="text-landing-text">kepala sudah penuh</strong>.
+              </p>
+
+              <p>
+                Setiap lead yang masuk harus <strong className="text-landing-text">diurus manual</strong>.
+                Setiap follow-up harus <strong className="text-landing-text">diingat sendiri</strong>.
+                Setiap peluang yang datang — <strong className="text-landing-text">lewat</strong>, karena tidak sempat.
+              </p>
+
+              <p>
+                Mau hire orang? <strong className="text-landing-text">Ribet</strong>. Harus training, harus awasi, harus bayar tiap bulan.
+                Dan kalau resign? <strong className="text-landing-text">Mulai dari nol lagi</strong>.
+              </p>
+
+              <p>
+                Mau kasih ke orang lain? <strong className="text-landing-text">Takut salah</strong>. Takut tidak sesuai standar.
+              </p>
+
+              <p>
+                Ujung-ujungnya <strong className="text-landing-text">harus kerja sendiri</strong>.
+                Belum lagi <strong className="text-landing-text">tukang pajak</strong> yang tiba-tiba datang.
+              </p>
+
+              <p className="text-landing-text font-medium">
+                Rasanya tidak adil. Susah berbisnis.<br />
+                Tapi mau kerja sama siapa?
+              </p>
+            </div>
+
+            {/* Divider */}
+            <hr className="my-12 border-landing-text/10" />
+
+            {/* Solution */}
+            <div className="space-y-6 text-lg md:text-xl text-landing-text leading-relaxed">
+              <p className="text-2xl md:text-3xl font-bold text-landing-hero">
+                Solusinya bukan tambah tenaga.<br />
+                Solusinya adalah <span className="text-landing-cta">sistem</span> — dengan <span className="text-landing-cta">staff digital</span>.
+              </p>
+
+              <p>
+                Staff digital <strong className="text-landing-text">tidak sakit</strong>. <strong className="text-landing-text">Tidak resign</strong>. <strong className="text-landing-text">Tidak perlu diawasi</strong>.
+              </p>
+
+              <p>
+                Mereka ikut instruksi <strong className="text-landing-text">persis seperti yang kamu mau</strong>.
+                Dan semua aktivitas bisa <strong className="text-landing-text">di-track kapan saja</strong>.
+              </p>
+
+              <p className="text-landing-text font-medium">
+                Kamu tetap pegang kontrol. Tapi tidak perlu pegang semuanya sendiri.
+              </p>
+            </div>
+
+            {/* Why we exist */}
+            <div className="mt-12 p-8 md:p-10 bg-landing-cta/90 rounded-2xl shadow-lg max-w-4xl mx-auto">
+              <p className="text-2xl md:text-3xl font-bold text-white mb-4">
+                Ini alasan kami ada.
+              </p>
+              <p className="text-lg md:text-xl text-white leading-relaxed">
+                Kami <strong className="text-black">tidak jual software dan kamu ikut aturan kita</strong>.
+              </p>
+              <p className="text-lg md:text-xl text-white leading-relaxed mt-3">
+                Kami <strong className="text-black">diskusi dan bangun sistem dari awal</strong> seiring bisnis kamu bertumbuh.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 5 Problems Section */}
+        <section className="bg-[#FDFBF7] py-16">
+          <div className="mx-auto max-w-5xl px-6">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-landing-text mb-4">
+              Masalah yang sering kami temui
+            </h2>
+            <p className="text-center text-landing-text/60 mb-12">
+              Dan bagaimana <span className="text-landing-cta font-semibold">my21staff</span> membantu
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Problem 1 */}
+              <div className="border-2 border-landing-text/20 rounded-2xl p-6 bg-white">
+                <div className="text-3xl mb-3">💬</div>
+                <h3 className="text-lg font-bold text-landing-text mb-2">WhatsApp Overwhelm</h3>
+                <p className="text-landing-text/60 text-sm mb-4">
+                  Terlalu banyak chat masuk, tidak bisa fokus ke hal lain. Balas satu, masuk lima.
+                </p>
+                <div className="border-t border-landing-text/10 pt-4">
+                  <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
+                  <ul className="text-sm text-landing-text space-y-1">
+                    <li>→ WhatsApp Bot balas otomatis 24/7</li>
+                    <li>→ Grading score setiap lead di CRM</li>
+                    <li>→ Kamu di-info mana yang serius</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Problem 2 */}
+              <div className="border-2 border-landing-text/20 rounded-2xl p-6 bg-white">
+                <div className="text-3xl mb-3">🔄</div>
+                <h3 className="text-lg font-bold text-landing-text mb-2">Stuck di Day-to-Day</h3>
+                <p className="text-landing-text/60 text-sm mb-4">
+                  Sibuk operasional terus, tidak sempat pikirkan produk baru atau kembangkan relasi.
+                </p>
+                <div className="border-t border-landing-text/10 pt-4">
+                  <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
+                  <ul className="text-sm text-landing-text space-y-1">
+                    <li>→ Task otomatis dari AI</li>
+                    <li>→ Reminder follow-up partner</li>
+                    <li>→ Waktu untuk kamu atur strategi</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Problem 3 */}
+              <div className="border-2 border-landing-text/20 rounded-2xl p-6 bg-white">
+                <div className="text-3xl mb-3">📊</div>
+                <h3 className="text-lg font-bold text-landing-text mb-2">Pembukuan Berantakan</h3>
+                <p className="text-landing-text/60 text-sm mb-4">
+                  Tidak ada catatan rapi. Waktu pajak datang, panik cari data.
+                </p>
+                <div className="border-t border-landing-text/10 pt-4">
+                  <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
+                  <ul className="text-sm text-landing-text space-y-1">
+                    <li>→ Transaksi tercatat otomatis</li>
+                    <li>→ Laporan mingguan ke chat kamu</li>
+                    <li>→ Pembukuan rapi untuk kamu</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Problem 4 */}
+              <div className="border-2 border-landing-text/20 rounded-2xl p-6 bg-white">
+                <div className="text-3xl mb-3">❄️</div>
+                <h3 className="text-lg font-bold text-landing-text mb-2">Leads Jadi Dingin</h3>
+                <p className="text-landing-text/60 text-sm mb-4">
+                  Sudah balas sekali, lalu lupa follow up. Customer beli di tempat lain.
+                </p>
+                <div className="border-t border-landing-text/10 pt-4">
+                  <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
+                  <ul className="text-sm text-landing-text space-y-1">
+                    <li>→ Auto follow-up di waktu tepat</li>
+                    <li>→ Task muncul di CRM</li>
+                    <li>→ Tidak ada yang terlewat</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Problem 5 */}
+              <div className="border-2 border-landing-text/20 rounded-2xl p-6 bg-white">
+                <div className="text-3xl mb-3">🔒</div>
+                <h3 className="text-lg font-bold text-landing-text mb-2">Tidak Bisa Lepas</h3>
+                <p className="text-landing-text/60 text-sm mb-4">
+                  Mau libur? Tidak bisa. Bisnis berhenti kalau kamu berhenti.
+                </p>
+                <div className="border-t border-landing-text/10 pt-4">
+                  <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
+                  <ul className="text-sm text-landing-text space-y-1">
+                    <li>→ AI jalan terus 24/7</li>
+                    <li>→ Semua aktivitas di-track</li>
+                    <li>→ Kamu di notif yang penting-penting aja</li>
+                    <li>→ Kamu bisa ambil alih kapan saja</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* CTA Card */}
+              <div className="border-2 border-landing-cta bg-landing-cta/10 rounded-2xl p-6 flex flex-col justify-center">
+                <p className="text-xl font-bold text-landing-text mb-2">Punya masalah serupa?</p>
+                <p className="text-landing-text/70 text-sm">
+                  Apa masalah kamu? Kita atur sistemnya.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Horizontal Timeline */}
         <section className="bg-landing-hero text-white py-16">
-          <div className="mx-auto max-w-3xl px-6">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-              Dari hari ini ke sistem jalan dalam <span className="text-landing-cta">7 hari</span>
+          <div className="mx-auto max-w-5xl px-6">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-16">
+              Siap untuk buat <span className="text-landing-cta">Sistem Kamu</span>?
             </h2>
 
+            {/* Horizontal Timeline */}
             <div className="relative">
-              {/* Timeline line */}
-              <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-0.5 bg-white/20 md:-translate-x-1/2" />
+              {/* Timeline line - horizontal on desktop */}
+              <div className="hidden md:block absolute top-6 left-0 right-0 h-0.5 bg-white/20" />
 
-              {/* Day 1 */}
-              <div className="relative flex items-start gap-6 mb-10">
-                <div className="w-12 h-12 rounded-full bg-landing-cta flex items-center justify-center font-bold text-lg shrink-0 z-10">
-                  1
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
+                {/* Step 1 */}
+                <div className="relative text-center">
+                  <div className="w-12 h-12 rounded-full bg-landing-cta flex items-center justify-center font-bold text-xl mx-auto mb-4 relative z-10">
+                    1
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Kickstart Call</h3>
+                  <p className="text-white/70 text-sm">
+                    Setelah isi form, kita ngobrol dan pahami bisnis kamu.
+                  </p>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm text-white/60 mb-1">Hari Pertama</p>
-                  <h3 className="text-xl font-bold">Kickstart Call</h3>
-                  <p className="text-white/80 mt-2">Ngobrol bisnis Anda. Kami pahamin masalahnya, tentuin bareng-bareng sistem yang cocok.</p>
-                </div>
-              </div>
 
-              {/* Day 3 */}
-              <div className="relative flex items-start gap-6 mb-10">
-                <div className="w-12 h-12 rounded-full bg-white text-landing-hero flex items-center justify-center font-bold text-lg shrink-0 z-10">
-                  3
+                {/* Step 2 */}
+                <div className="relative text-center">
+                  <div className="w-12 h-12 rounded-full bg-white text-landing-hero flex items-center justify-center font-bold text-xl mx-auto mb-4 relative z-10">
+                    2
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Atur Sistem</h3>
+                  <p className="text-white/70 text-sm">
+                    Kita butuh 1 bulan kurang lebih untuk atur apa yang kamu butuh.
+                  </p>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm text-white/60 mb-1">Hari Ketiga</p>
-                  <h3 className="text-xl font-bold">WhatsApp Connect</h3>
-                  <p className="text-white/80 mt-2">WhatsApp bisnis sudah connect. Leads mulai masuk otomatis. Tinggal balas.</p>
-                </div>
-              </div>
 
-              {/* Day 7 */}
-              <div className="relative flex items-start gap-6">
-                <div className="w-12 h-12 rounded-full bg-landing-cta flex items-center justify-center font-bold text-lg shrink-0 z-10">
-                  7
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-white/60 mb-1">Hari Ketujuh</p>
-                  <h3 className="text-xl font-bold">Full System Running</h3>
-                  <p className="text-white/80 mt-2">Sistem jalan. Auto follow-up aktif. Reporting terkirim. Anda tinggal fokus closing.</p>
+                {/* Step 3 */}
+                <div className="relative text-center">
+                  <div className="w-12 h-12 rounded-full bg-landing-cta flex items-center justify-center font-bold text-xl mx-auto mb-4 relative z-10">
+                    3
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Full System Running</h3>
+                  <p className="text-white/70 text-sm">
+                    Dan kamu punya 24/7 support.
+                  </p>
                 </div>
               </div>
             </div>
