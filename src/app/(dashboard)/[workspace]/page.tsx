@@ -65,12 +65,13 @@ export default async function WorkspaceDashboard({
       .from('contacts')
       .select('id, tags, created_at')
       .eq('workspace_id', workspace.id),
-    // Upcoming tasks (notes with due dates)
+    // Upcoming tasks (notes with due dates, not completed)
     supabase
       .from('contact_notes')
       .select('id, content, due_date, contact_id')
       .eq('workspace_id', workspace.id)
       .not('due_date', 'is', null)
+      .is('completed_at', null)
       .gte('due_date', todayStart)
       .order('due_date', { ascending: true })
       .limit(10),
