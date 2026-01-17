@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -36,7 +35,6 @@ interface UpcomingTasksProps {
 }
 
 export function UpcomingTasks({ tasks: initialTasks, contactMap, workspaceSlug }: UpcomingTasksProps) {
-  const router = useRouter()
   const [tasks, setTasks] = useState(initialTasks)
   const [loading, setLoading] = useState<string | null>(null)
   const [completingTask, setCompletingTask] = useState<Task | null>(null)
@@ -61,10 +59,6 @@ export function UpcomingTasks({ tasks: initialTasks, contactMap, workspaceSlug }
     } finally {
       setLoading(null)
     }
-  }
-
-  const handleNavigateToContact = (contactId: string) => {
-    router.push(`/${workspaceSlug}/database?contact=${contactId}`)
   }
 
   return (
@@ -93,11 +87,8 @@ export function UpcomingTasks({ tasks: initialTasks, contactMap, workspaceSlug }
                         <Check className="h-3 w-3 opacity-0 group-hover:opacity-100" />
                       )}
                     </Button>
-                    <div
-                      className="flex-1 min-w-0 cursor-pointer"
-                      onClick={() => handleNavigateToContact(task.contact_id)}
-                    >
-                      <p className="text-sm font-medium truncate hover:underline">{task.content}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{task.content}</p>
                       <p className="text-xs text-muted-foreground">
                         {contact?.name || contact?.phone || 'Unknown contact'}
                       </p>
