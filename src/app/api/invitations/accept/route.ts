@@ -65,10 +65,10 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      // User not logged in - redirect to login with redirect back
-      const loginUrl = new URL('/login', request.url)
-      loginUrl.searchParams.set('redirect', `/api/invitations/accept?token=${token}`)
-      return NextResponse.redirect(loginUrl)
+      // User not logged in - redirect to signup with redirect back
+      const signupUrl = new URL('/signup', request.url)
+      signupUrl.searchParams.set('redirect', `/api/invitations/accept?token=${token}`)
+      return NextResponse.redirect(signupUrl)
     }
 
     // Check if user email matches invitation
