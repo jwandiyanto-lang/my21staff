@@ -51,11 +51,17 @@ skipped: 3
 
 - truth: "Notes can be created successfully in lead management and conversation profile"
   status: failed
-  reason: "User reported: Failed to create note in the lead management, also in the conversation under each profile"
+  reason: "User reported: Failed to create note - could not find the due date column"
   severity: blocker
   test: 1
-  artifacts: []
-  missing: []
+  root_cause: "Migration 16 (due_date column) and Migration 17 (completed_at column) not applied to production Supabase"
+  artifacts:
+    - path: "supabase/migrations/16_notes_due_date.sql"
+      issue: "Not applied to production"
+    - path: "supabase/migrations/17_notes_completed_at.sql"
+      issue: "Not applied to production"
+  missing:
+    - "Run migrations on production Supabase database"
 
 - truth: "Notes in conversation profile should have due date feature"
   status: failed

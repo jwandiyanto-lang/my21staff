@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Textarea } from '@/components/ui/textarea'
+import { Calendar } from '@/components/ui/calendar'
 import {
   Select,
   SelectContent,
@@ -12,15 +14,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { Slider } from '@/components/ui/slider'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Phone, Mail, Calendar, User, Loader2, Tag, Pencil, Check, X } from 'lucide-react'
+import { Phone, Mail, Calendar as CalendarIcon, User, Loader2, Tag, Pencil, Check, X, Clock } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
+import { formatWIB, DATE_FORMATS } from '@/lib/utils/timezone'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 import type { Contact, WorkspaceMember, Profile } from '@/types/database'
 
 type TeamMember = WorkspaceMember & { profile: Profile | null }
@@ -96,6 +113,12 @@ export function InfoSidebar({
   const [localEmail, setLocalEmail] = useState(contact.email || '')
   const [editingField, setEditingField] = useState<'name' | 'phone' | 'email' | null>(null)
   const [isUpdatingInfo, setIsUpdatingInfo] = useState(false)
+
+  // Note dialog state
+  const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false)
+  const [newNoteContent, setNewNoteContent] = useState('')
+  const [newNoteDueDate, setNewNoteDueDate] = useState<Date | undefined>(undefined)
+  const [isAddingNote, setIsAddingNote] = useState(false)
 
   // Sync local state when contact changes
   useEffect(() => {
@@ -283,6 +306,39 @@ export function InfoSidebar({
     setEditingField(null)
   }
 
+  // Add note handler
+  const handleAddNote = async () => {
+    if (!newNoteContent.trim()) return
+
+    setIsAddingNote(true)
+    try {
+      const response = await fetch(`/api/contacts/${contact.id}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: newNoteContent.trim(),
+          due_date: newNoteDueDate ? newNoteDueDate.toISOString() : null,
+        }),
+      })
+
+      if (response.ok) {
+        toast.success('Catatan ditambahkan')
+        setNewNoteContent('')
+        setNewNoteDueDate(undefined)
+        setIsNoteDialogOpen(false)
+        startTransition(() => router.refresh())
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Gagal menambah catatan')
+      }
+    } catch (error) {
+      console.error('Error adding note:', error)
+      toast.error('Gagal menambah catatan')
+    } finally {
+      setIsAddingNote(false)
+    }
+  }
+
   // Extract form responses from metadata
   const metadata = contact.metadata as Record<string, unknown> | null
   const innerMetadata = (metadata?.metadata as Record<string, unknown>) || metadata
@@ -335,7 +391,12 @@ export function InfoSidebar({
           <Button variant="outline" size="sm" className="flex-1 text-xs">
             View conversations
           </Button>
-          <Button variant="outline" size="sm" className="flex-1 text-xs">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-xs"
+            onClick={() => setIsNoteDialogOpen(true)}
+          >
             + Add note
           </Button>
         </div>
@@ -697,6 +758,77 @@ export function InfoSidebar({
           )}
         </div>
       </ScrollArea>
+
+      {/* Add Note Dialog */}
+      <Dialog open={isNoteDialogOpen} onOpenChange={setIsNoteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tambah Catatan</DialogTitle>
+            <DialogDescription>
+              Tambah catatan untuk {contact.name || contact.phone}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Textarea
+              placeholder="Tulis catatan..."
+              value={newNoteContent}
+              onChange={(e) => setNewNoteContent(e.target.value)}
+              rows={3}
+            />
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "h-8 text-xs gap-1.5",
+                      newNoteDueDate && "text-orange-600 border-orange-200 bg-orange-50"
+                    )}
+                  >
+                    <Clock className="h-3.5 w-3.5" />
+                    {newNoteDueDate ? formatWIB(newNoteDueDate, DATE_FORMATS.DATETIME) : 'Set due date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={newNoteDueDate}
+                    onSelect={setNewNoteDueDate}
+                    initialFocus
+                  />
+                  {newNoteDueDate && (
+                    <div className="p-2 border-t">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-xs text-muted-foreground"
+                        onClick={() => setNewNoteDueDate(undefined)}
+                      >
+                        Hapus due date
+                      </Button>
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsNoteDialogOpen(false)}>
+              Batal
+            </Button>
+            <Button
+              onClick={handleAddNote}
+              disabled={!newNoteContent.trim() || isAddingNote}
+            >
+              {isAddingNote ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              Simpan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
