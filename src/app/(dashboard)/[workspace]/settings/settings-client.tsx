@@ -26,7 +26,8 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X } from 'lucide-react'
+import { useRef } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -44,6 +45,27 @@ interface WorkspaceSettings {
 
 // Default contact tags
 const DEFAULT_CONTACT_TAGS = ['Community', '1on1']
+
+// Import types
+interface ValidatedRow {
+  row: number
+  data: Record<string, unknown>
+  valid: boolean
+  errors: { path: string; message: string }[]
+  normalized?: {
+    phone: string
+    tags: string[]
+  }
+}
+
+interface ImportPreview {
+  totalRows: number
+  validRows: number
+  invalidRows: number
+  duplicatesInFile: number
+  preview: ValidatedRow[]
+  allValidated: ValidatedRow[]
+}
 
 interface TeamMember {
   id: string
@@ -103,6 +125,16 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
   const [newTag, setNewTag] = useState('')
   const [isAddingTag, setIsAddingTag] = useState(false)
   const [isSavingTags, setIsSavingTags] = useState(false)
+
+  // Import state
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [importPreview, setImportPreview] = useState<ImportPreview | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
+  const [importResult, setImportResult] = useState<{
+    created: number
+    updated: number
+  } | null>(null)
 
   const isConnected = !!workspace.kapso_phone_id && !!workspace.settings?.kapso_api_key
 
@@ -231,6 +263,83 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
   const handleDeleteTag = async (tag: string) => {
     const updated = contactTags.filter(t => t !== tag)
     await saveContactTags(updated)
+  }
+
+  // Import handlers
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    setImportPreview(null)
+    setImportResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('workspace', workspace.id)
+
+      const res = await fetch('/api/contacts/import/preview', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to process CSV')
+      }
+
+      const data = await res.json()
+      setImportPreview(data)
+    } catch (error) {
+      console.error('Failed to preview CSV:', error)
+    } finally {
+      setIsUploading(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleConfirmImport = async () => {
+    if (!importPreview) return
+
+    setIsImporting(true)
+
+    try {
+      const validRows = importPreview.allValidated.filter(r => r.valid)
+
+      const res = await fetch('/api/contacts/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace: workspace.id,
+          rows: validRows,
+        }),
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to import contacts')
+      }
+
+      const result = await res.json()
+      setImportResult(result)
+
+      // Reset after 5 seconds
+      setTimeout(() => {
+        setImportPreview(null)
+        setImportResult(null)
+      }, 5000)
+    } catch (error) {
+      console.error('Failed to import contacts:', error)
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  const handleCancelImport = () => {
+    setImportPreview(null)
+    setImportResult(null)
   }
 
   return (
@@ -586,25 +695,188 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
             </CardContent>
           </Card>
 
-          {/* Import Template Card */}
+          {/* Import Contacts Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Import Template</CardTitle>
+              <CardTitle className="text-lg">Import Contacts</CardTitle>
               <CardDescription>
-                Download a CSV template to prepare your data for import
+                Upload a CSV file to import contacts in bulk
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button
-                variant="outline"
-                onClick={() => window.open('/api/contacts/template', '_blank')}
-              >
-                <FileSpreadsheet className="h-4 w-4 mr-2" />
-                Download Template
-              </Button>
-              <p className="text-sm text-muted-foreground">
-                Upload functionality coming soon
-              </p>
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
+              {/* Initial state - no preview */}
+              {!importPreview && !importResult && (
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4 mr-2" />
+                          Select CSV File
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open('/api/contacts/template', '_blank')}
+                    >
+                      <FileSpreadsheet className="h-4 w-4 mr-2" />
+                      Download Template
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    CSV should have columns: name, phone, email, tags, lead_status, lead_score
+                  </p>
+                </div>
+              )}
+
+              {/* Preview state */}
+              {importPreview && !importResult && (
+                <div className="space-y-4">
+                  {/* Summary */}
+                  <div className="flex flex-wrap gap-3">
+                    <Badge variant="secondary">
+                      {importPreview.totalRows} total rows
+                    </Badge>
+                    <Badge variant="default" className="bg-green-600">
+                      {importPreview.validRows} valid
+                    </Badge>
+                    {importPreview.invalidRows > 0 && (
+                      <Badge variant="destructive">
+                        {importPreview.invalidRows} invalid
+                      </Badge>
+                    )}
+                    {importPreview.duplicatesInFile > 0 && (
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                        {importPreview.duplicatesInFile} duplicates in file
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Preview table */}
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">#</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Error</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {importPreview.preview.slice(0, 5).map((row) => (
+                          <TableRow
+                            key={row.row}
+                            className={!row.valid ? 'bg-red-50' : ''}
+                          >
+                            <TableCell className="font-mono text-sm">
+                              {row.row}
+                            </TableCell>
+                            <TableCell>
+                              {(row.data.name as string) || '-'}
+                            </TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {row.valid && row.normalized
+                                ? row.normalized.phone
+                                : (row.data.phone as string) || '-'}
+                            </TableCell>
+                            <TableCell>
+                              {(row.data.email as string) || '-'}
+                            </TableCell>
+                            <TableCell>
+                              {row.valid ? (
+                                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Valid
+                                </Badge>
+                              ) : (
+                                <Badge variant="destructive">
+                                  <X className="h-3 w-3 mr-1" />
+                                  Invalid
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-red-600 text-sm">
+                              {row.errors.map(e => e.message).join(', ')}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {importPreview.totalRows > 5 && (
+                    <p className="text-sm text-muted-foreground">
+                      Showing first 5 of {importPreview.totalRows} rows
+                    </p>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={handleConfirmImport}
+                      disabled={isImporting || importPreview.validRows === 0}
+                    >
+                      {isImporting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Importing...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4 mr-2" />
+                          Import {importPreview.validRows} Contacts
+                        </>
+                      )}
+                    </Button>
+                    <Button variant="outline" onClick={handleCancelImport}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Result state */}
+              {importResult && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-green-600">
+                    <Check className="h-5 w-5" />
+                    <span className="font-medium">Import complete!</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <Badge variant="default" className="bg-green-600">
+                      {importResult.created} created
+                    </Badge>
+                    <Badge variant="secondary">
+                      {importResult.updated} updated
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    This message will disappear in a few seconds...
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
