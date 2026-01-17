@@ -23,6 +23,7 @@ export default async function InboxPage({ params }: InboxPageProps) {
           slug: MOCK_WORKSPACE.slug,
         }}
         conversations={MOCK_CONVERSATIONS}
+        totalCount={MOCK_CONVERSATIONS.length}
       />
     )
   }
