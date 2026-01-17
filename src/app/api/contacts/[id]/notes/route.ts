@@ -130,6 +130,14 @@ export async function POST(
       )
     }
 
+    // Validate due_date format if provided
+    if (due_date && isNaN(new Date(due_date).getTime())) {
+      return NextResponse.json(
+        { error: 'Invalid due date format' },
+        { status: 400 }
+      )
+    }
+
     // Insert note
     const { data: note, error: insertError } = await supabase
       .from('contact_notes')
