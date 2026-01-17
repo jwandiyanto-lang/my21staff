@@ -169,7 +169,34 @@ Plans:
 
 ---
 
-## v1.9 — Form & Lead Capture (Future)
+## v1.9 — Performance & Security
+
+### Phase 19: Performance & Security Audit
+
+**Goal:** Harden the application with authorization fixes, rate limiting, input validation, and performance optimizations
+**Depends on:** Phase 18
+**Plans:** 5 plans
+
+Plans:
+- [ ] 19-01-PLAN.md — Authorization fixes (workspace auth helper, API route fixes, DEV_MODE safeguard)
+- [ ] 19-02-PLAN.md — Rate limiting (auth, messaging, public forms)
+- [ ] 19-03-PLAN.md — Input validation (Zod schemas for API endpoints)
+- [ ] 19-04-PLAN.md — Logging cleanup (mask PII in logs)
+- [ ] 19-05-PLAN.md — Performance (fix build error, caching headers, dependency updates)
+
+**Scope:**
+- Fix 2 API routes missing workspace authorization
+- Add production safeguard for DEV_MODE bypass
+- Implement rate limiting on auth/messaging/public endpoints
+- Add Zod validation schemas for API inputs
+- Remove/mask PII from production logs
+- Fix TypeScript build error
+- Add caching headers for public content
+- Update outdated dependencies
+
+---
+
+## v2.0 — Form & Lead Capture (Future)
 
 ### Phase 16: Pricing Form Enhancement
 
@@ -207,6 +234,7 @@ Plans:
 | 13. Lead Management Enhancement | v1.5 | 3/3 | Complete | 2026-01-16 |
 | 14. Landing Page Refresh | v1.6 | 1/1 | Complete | 2026-01-16 |
 | 15. Pricing Page | v1.6 | 2/2 | Complete | 2026-01-16 |
-| 16. Pricing Form Enhancement | v1.9 | 0/1 | Not started | — |
+| 16. Pricing Form Enhancement | v2.0 | 0/1 | Not started | — |
 | 17. Inbox UI/UX Fixes | v1.7 | 1/1 | Complete | 2026-01-16 |
 | 18. Kapso Bot Setup | v1.8 | 0/2 | Planned | — |
+| 19. Performance & Security | v1.9 | 0/5 | Planned | — |
