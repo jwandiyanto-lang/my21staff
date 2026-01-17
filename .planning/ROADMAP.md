@@ -202,7 +202,7 @@ Plans:
 
 **Goal:** Add dashboard with client stats and enhance notes with due dates for task management
 **Depends on:** Phase 19 (security)
-**Plans:** 1/1 complete (interactive session)
+**Plans:** 3/3 complete
 
 **Scope:**
 - Dashboard showing total clients, new daily clients
@@ -210,12 +210,21 @@ Plans:
 - Notes enhancement: add due_date field
 - Dashboard task view: show notes with upcoming due dates
 
+**Plans:**
+- [x] 20-01: Dashboard page (interactive session)
+- [x] 20-08: Fix Notes Creation Error Handling
+- [x] 20-09: Dashboard Task Sorting & Complete Action
+
 **Completed:**
 - [x] Dashboard page with client stats (total, today, week, month)
 - [x] Tag-based analytics (1on1 consultation with orange styling)
 - [x] Notes schema update (due_date column via migration 16)
 - [x] Due dates UI in notes (calendar picker with popover)
 - [x] Task-like view on dashboard (upcoming tasks section)
+- [x] Notes API error handling with detailed messages
+- [x] Due date format validation with 400 error response
+- [x] Task completion action (completed_at column + server action)
+- [x] UpcomingTasks client component with optimistic UI
 
 ---
 
@@ -288,6 +297,6 @@ Plans:
 | 17. Inbox UI/UX Fixes | v1.7 | 1/1 | Complete | 2026-01-16 |
 | 18. Kapso Bot Setup | v1.8 | 0/2 | Planned | — |
 | 19. Performance & Security | v1.9 | 8/8 | Complete | 2026-01-17 |
-| 20. Dashboard & Notes | v1.10 | 1/1 | Complete | 2026-01-17 |
+| 20. Dashboard & Notes | v1.10 | 3/3 | Complete | 2026-01-17 |
 | 21. Lead Polish + Performance | v1.11 | 7/7 | Complete | 2026-01-17 |
 | 22. Direct Form + Telegram | v1.12 | 0/2 | Deferred | — |
