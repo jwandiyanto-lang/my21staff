@@ -219,29 +219,47 @@ Plans:
 
 ---
 
-## v1.11 — Direct Lead Capture
+## v1.11 — Lead Management Polish + Performance
 
-### Phase 21: Direct Form to CRM + Telegram Notifications
+### Phase 21: Lead Management Polish + Performance
+
+**Goal:** Polish lead management features and improve app performance
+**Depends on:** Phase 20
+**Plans:** TBD (planning)
+
+**Scope:**
+- Notes/Activity: Show dates, auto-update midnight WIB
+- Assign dropdown: Per-row dropdown for staff assignment (auto-include new team members)
+- Tags dropdown: Per-row inline tag editing
+- Info box: Fix display issues
+- Performance: Faster inbox/chat, faster webhooks
+
+**Deliverables:**
+- [ ] Notes dates display with midnight WIB refresh
+- [ ] Assign dropdown per lead row (default to owner)
+- [ ] Tags dropdown per lead row
+- [ ] Info panel display fix
+- [ ] Performance optimizations (chat, webhooks)
+
+---
+
+## v1.12 — Direct Lead Capture (Deferred)
+
+### Phase 22: Direct Form to CRM + Telegram Notifications
 
 **Goal:** Connect website forms directly to CRM database with instant Telegram notifications
-**Depends on:** Phase 20
+**Depends on:** Phase 21
 **Plans:** 2 plans
 
 Plans:
-- [ ] 21-01: Leads API + Telegram Notifications
-- [ ] 21-02: Connect Pricing Form to API
+- [ ] 22-01: Leads API + Telegram Notifications
+- [ ] 22-02: Connect Pricing Form to API
 
 **Scope:**
 - API endpoint for direct lead submission (`/api/leads`)
 - Pricing page form → Supabase contacts table (real-time)
 - Telegram notification service (`src/lib/telegram/client.ts`)
 - Notification on new lead with contact details
-
-**Deliverables:**
-- [ ] POST /api/leads endpoint with rate limiting
-- [ ] Pricing form connected to API (replace n8n webhook)
-- [ ] Telegram bot notifications on new leads
-- [ ] Contact creation with metadata storage
 
 ---
 
@@ -269,4 +287,5 @@ Plans:
 | 18. Kapso Bot Setup | v1.8 | 0/2 | Planned | — |
 | 19. Performance & Security | v1.9 | 8/8 | Complete | 2026-01-17 |
 | 20. Dashboard & Notes | v1.10 | 1/1 | Complete | 2026-01-17 |
-| 21. Direct Form + Telegram | v1.11 | 0/2 | Planned | — |
+| 21. Lead Polish + Performance | v1.11 | 0/? | Planned | — |
+| 22. Direct Form + Telegram | v1.12 | 0/2 | Deferred | — |

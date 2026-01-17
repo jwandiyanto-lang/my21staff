@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** v1.11 — Direct Lead Capture
+**Current focus:** v1.11 — Lead Management Polish + Performance
 
 ## Current Position
 
-Phase: 21 (Direct Form to CRM + Telegram) - PLANNED
-Plan: 2 plans ready (21-01, 21-02)
-Status: Ready to execute
-Last activity: 2026-01-17 — v1.10 deployed to Vercel, all features verified
+Phase: 21 (Lead Management Polish + Performance) - CONTEXT GATHERED
+Plan: Pending planning
+Status: Ready for /gsd:plan-phase 21
+Last activity: 2026-01-17 — Phase 21 scope changed to lead polish + performance
 
-Progress: v1.10 ██████████ Complete & Deployed | v1.11 ░░░░░░░░░░ Planned
+Progress: v1.10 ██████████ Complete & Deployed | v1.11 ░░░░░░░░░░ Context Ready
 
 ## Performance Metrics
 
@@ -50,7 +50,8 @@ Progress: v1.10 ██████████ Complete & Deployed | v1.11 ░�
 - Phase 18 added: Kapso Bot Setup & Verification (v1.8)
 - Phase 19 added: Performance & Security (v1.9)
 - Phase 20 added: Dashboard Stats & Notes Due Dates (v1.10)
-- Phase 21 planned: Direct Form to CRM + Telegram (v1.11)
+- Phase 21 replanned: Lead Management Polish + Performance (v1.11)
+- Phase 22 deferred: Direct Form to CRM + Telegram (v1.12)
 
 ### Decisions
 
@@ -78,7 +79,7 @@ None.
 Last session: 2026-01-17
 Stopped at: v1.10 deployed and verified
 Resume file: None
-Next: `/gsd:execute-phase 21` to add direct lead capture + Telegram notifications
+Next: `/gsd:plan-phase 21` to plan lead polish + performance fixes
 
 ## Deployment Info
 
