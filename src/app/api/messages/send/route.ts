@@ -6,6 +6,7 @@ import type { Conversation, Contact, Workspace } from '@/types/database'
 import { validateBody } from '@/lib/validations'
 import { sendMessageSchema } from '@/lib/validations/message'
 import { rateLimitByUser } from '@/lib/rate-limit'
+import { safeDecrypt } from '@/lib/crypto'
 
 interface WorkspaceSettings {
   kapso_api_key?: string
@@ -112,16 +113,18 @@ export async function POST(request: NextRequest) {
     } else {
       // Production: call Kapso API
       const settings = workspace.settings as WorkspaceSettings | null
-      const apiKey = settings?.kapso_api_key
+      const encryptedKey = settings?.kapso_api_key
       const phoneId = workspace.kapso_phone_id
 
-      if (!apiKey || !phoneId) {
+      if (!encryptedKey || !phoneId) {
         return NextResponse.json(
           { error: 'WhatsApp credentials not configured' },
           { status: 500 }
         )
       }
 
+      // Decrypt API key (handles both encrypted and legacy plain-text keys)
+      const apiKey = safeDecrypt(encryptedKey)
       const credentials: KapsoCredentials = { apiKey, phoneId }
 
       try {

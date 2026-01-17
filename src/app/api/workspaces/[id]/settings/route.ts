@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
+import { safeEncrypt } from '@/lib/crypto'
 
 export async function PATCH(
   request: Request,
@@ -31,9 +32,16 @@ export async function PATCH(
         .single()
 
       const existingSettings = (existing?.settings as Record<string, unknown>) || {}
+      const newSettings = { ...body.settings }
+
+      // Encrypt API key if provided
+      if (newSettings.kapso_api_key && typeof newSettings.kapso_api_key === 'string') {
+        newSettings.kapso_api_key = safeEncrypt(newSettings.kapso_api_key)
+      }
+
       updates.settings = {
         ...existingSettings,
-        ...body.settings,
+        ...newSettings,
       }
     }
 

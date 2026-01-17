@@ -4,6 +4,7 @@ import { sendMediaMessage } from '@/lib/kapso/client'
 import type { KapsoCredentials } from '@/lib/kapso/client'
 import type { Conversation, Contact, Workspace } from '@/types/database'
 import { rateLimitByUser } from '@/lib/rate-limit'
+import { safeDecrypt } from '@/lib/crypto'
 
 interface WorkspaceSettings {
   kapso_api_key?: string
@@ -160,16 +161,18 @@ export async function POST(request: NextRequest) {
       console.log(`[DEV MODE] Skipping Kapso media send. Mock ID: ${kapsoMessageId}`)
     } else {
       const settings = workspace.settings as WorkspaceSettings | null
-      const apiKey = settings?.kapso_api_key
+      const encryptedKey = settings?.kapso_api_key
       const phoneId = workspace.kapso_phone_id
 
-      if (!apiKey || !phoneId) {
+      if (!encryptedKey || !phoneId) {
         return NextResponse.json(
           { error: 'WhatsApp credentials not configured' },
           { status: 500 }
         )
       }
 
+      // Decrypt API key (handles both encrypted and legacy plain-text keys)
+      const apiKey = safeDecrypt(encryptedKey)
       const credentials: KapsoCredentials = { apiKey, phoneId }
 
       try {
