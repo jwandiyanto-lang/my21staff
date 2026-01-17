@@ -663,6 +663,19 @@ export function ContactDetailSheet({
     ? contact.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
     : contact.phone.slice(-2)
 
+  // Avatar color based on phone for stability (doesn't change when name is edited)
+  const getAvatarColor = (phone: string): string => {
+    const colors = [
+      'bg-orange-500', 'bg-emerald-500', 'bg-blue-500', 'bg-purple-500',
+      'bg-pink-500', 'bg-yellow-500', 'bg-cyan-500', 'bg-rose-500'
+    ]
+    let hash = 0
+    for (let i = 0; i < phone.length; i++) {
+      hash = phone.charCodeAt(i) + ((hash << 5) - hash)
+    }
+    return colors[Math.abs(hash) % colors.length]
+  }
+
   const statusConfig = LEAD_STATUS_CONFIG[localStatus] || LEAD_STATUS_CONFIG.prospect
 
   const openWhatsApp = () => {
@@ -829,8 +842,8 @@ export function ContactDetailSheet({
         {/* Header */}
         <SheetHeader className="p-6 pb-4 border-b">
           <div className="flex items-start gap-4">
-            <Avatar className="h-14 w-14">
-              <AvatarFallback className="text-lg bg-primary/10 text-primary">
+            <Avatar className={cn('h-14 w-14', getAvatarColor(contact.phone))}>
+              <AvatarFallback className="text-lg text-white font-medium bg-transparent">
                 {initials}
               </AvatarFallback>
             </Avatar>
