@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { LoginModal } from "@/components/auth/login-modal";
 import { Plus_Jakarta_Sans, JetBrains_Mono, Inter } from "next/font/google";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -36,6 +38,8 @@ const staggerContainer = {
 };
 
 export default function Home() {
+  const [loginOpen, setLoginOpen] = useState(false);
+
   return (
     <div
       className={`${plusJakartaSans.variable} ${jetBrainsMono.variable} ${inter.variable} bg-landing-bg text-landing-text antialiased`}
@@ -43,6 +47,9 @@ export default function Home() {
     >
       {/* Noise Overlay */}
       <div className="noise-overlay" />
+
+      {/* Login Modal */}
+      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
 
       {/* Navigation - Blends with sections */}
       <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
@@ -52,12 +59,12 @@ export default function Home() {
               <span className="text-2xl font-black text-white">21</span>
             </Link>
           </div>
-          <Link
-            href="/login"
+          <button
+            onClick={() => setLoginOpen(true)}
             className="text-sm text-white px-5 py-2 rounded-full bg-white/20 backdrop-blur-sm font-semibold hover:bg-white/30 transition-all"
           >
             Login
-          </Link>
+          </button>
         </div>
       </nav>
 
