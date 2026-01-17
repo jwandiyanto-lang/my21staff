@@ -43,15 +43,16 @@ export default async function InboxPage({ params }: InboxPageProps) {
 
   const workspace = workspaceData as Pick<Workspace, 'id' | 'name' | 'slug'> & { settings: Record<string, unknown> | null }
 
-  // Fetch conversations with contacts, ordered by last message
-  const { data: conversationsData, error: conversationsError } = await supabase
+  // Fetch conversations with contacts, ordered by last message (paginated)
+  const { data: conversationsData, count: totalCount, error: conversationsError } = await supabase
     .from('conversations')
     .select(`
       *,
       contact:contacts(*)
-    `)
+    `, { count: 'exact' })
     .eq('workspace_id', workspace.id)
     .order('last_message_at', { ascending: false, nullsFirst: false })
+    .range(0, 49) // First 50 conversations
 
   if (conversationsError) {
     console.error('Error fetching conversations:', conversationsError)
@@ -74,5 +75,5 @@ export default async function InboxPage({ params }: InboxPageProps) {
   const quickReplies = (workspace.settings?.quick_replies as Array<{id: string, label: string, text: string}>) || []
   const contactTags = (workspace.settings?.contact_tags as string[]) || ['Community', '1on1']
 
-  return <InboxClient workspace={workspace} conversations={conversations} quickReplies={quickReplies} teamMembers={teamMembers} contactTags={contactTags} />
+  return <InboxClient workspace={workspace} conversations={conversations} totalCount={totalCount ?? 0} quickReplies={quickReplies} teamMembers={teamMembers} contactTags={contactTags} />
 }
