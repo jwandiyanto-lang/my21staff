@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { sendMediaMessage } from '@/lib/kapso/client'
 import type { KapsoCredentials } from '@/lib/kapso/client'
 import type { Conversation, Contact, Workspace } from '@/types/database'
+import { rateLimitByUser } from '@/lib/rate-limit'
 
 interface WorkspaceSettings {
   kapso_api_key?: string
@@ -54,6 +55,10 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
+
+    // Rate limit: 10 media messages per minute per user
+    const rateLimitResponse = rateLimitByUser(user.id, 'messages/send-media', { limit: 10, windowMs: 60 * 1000 })
+    if (rateLimitResponse) return rateLimitResponse
 
     // Fetch conversation to get workspace_id and contact_id
     const { data: conversationData, error: convError } = await supabase

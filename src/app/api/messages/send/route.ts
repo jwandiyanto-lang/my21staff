@@ -3,11 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { sendMessage } from '@/lib/kapso/client'
 import type { KapsoCredentials } from '@/lib/kapso/client'
 import type { Conversation, Contact, Workspace } from '@/types/database'
-
-interface SendMessageBody {
-  conversationId: string
-  content: string
-}
+import { validateBody } from '@/lib/validations'
+import { sendMessageSchema } from '@/lib/validations/message'
+import { rateLimitByUser } from '@/lib/rate-limit'
 
 interface WorkspaceSettings {
   kapso_api_key?: string
@@ -19,16 +17,11 @@ function isDevMode(): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: SendMessageBody = await request.json()
-    const { conversationId, content } = body
+    // Validate input with Zod
+    const validationResult = await validateBody(request, sendMessageSchema)
+    if (validationResult instanceof NextResponse) return validationResult
 
-    // Validate input
-    if (!conversationId || !content?.trim()) {
-      return NextResponse.json(
-        { error: 'Missing required fields: conversationId and content' },
-        { status: 400 }
-      )
-    }
+    const { conversationId, content } = validationResult
 
     const supabase = await createClient()
 
@@ -40,6 +33,10 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
+
+    // Rate limit: 30 messages per minute per user
+    const rateLimitResponse = rateLimitByUser(user.id, 'messages/send', { limit: 30, windowMs: 60 * 1000 })
+    if (rateLimitResponse) return rateLimitResponse
 
     // Fetch conversation to get workspace_id and contact_id
     const { data: conversationData, error: convError } = await supabase
