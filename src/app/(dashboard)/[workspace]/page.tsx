@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Users, UserPlus, Calendar, Tag, ClipboardList } from 'lucide-react'
+import { UpcomingTasks } from '@/components/dashboard/upcoming-tasks'
 
 export default async function WorkspaceDashboard({
   params,
@@ -201,42 +202,11 @@ export default async function WorkspaceDashboard({
           <ClipboardList className="h-5 w-5" />
           Upcoming Tasks
         </h2>
-        <Card>
-          <CardContent className="pt-6">
-            {upcomingTasks && upcomingTasks.length > 0 ? (
-              <div className="space-y-3">
-                {upcomingTasks.map((task) => {
-                  const contact = contactMap.get(task.contact_id)
-                  return (
-                    <div
-                      key={task.id}
-                      className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{task.content}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {contact?.name || contact?.phone || 'Unknown contact'}
-                        </p>
-                      </div>
-                      <div className="text-xs text-muted-foreground whitespace-nowrap">
-                        {task.due_date && new Date(task.due_date).toLocaleDateString('id-ID', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No upcoming tasks. Add due dates to notes to see them here.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        <UpcomingTasks
+          tasks={upcomingTasks || []}
+          contactMap={contactMap}
+          workspaceSlug={workspaceSlug}
+        />
       </div>
     </div>
   )
