@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { format, formatDistanceToNow, isToday, isYesterday, isSameDay } from 'date-fns'
+import { formatWIB, formatDistanceWIB, DATE_FORMATS, toWIB } from '@/lib/utils/timezone'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -60,9 +61,18 @@ interface MessageThreadProps {
 }
 
 function getDayLabel(date: Date): string {
-  if (isToday(date)) return 'Today'
-  if (isYesterday(date)) return 'Yesterday'
-  return format(date, 'MMMM d, yyyy')
+  const wibDate = toWIB(date)
+  const nowWIB = toWIB(new Date())
+
+  // Check if dates are on the same day in WIB
+  if (wibDate.toDateString() === nowWIB.toDateString()) return 'Today'
+
+  // Check if yesterday in WIB
+  const yesterdayWIB = new Date(nowWIB)
+  yesterdayWIB.setDate(yesterdayWIB.getDate() - 1)
+  if (wibDate.toDateString() === yesterdayWIB.toDateString()) return 'Yesterday'
+
+  return formatWIB(date, DATE_FORMATS.DATE_LONG)
 }
 
 function getAvatarColor(name: string | null, phone: string): string {
@@ -233,7 +243,7 @@ function MessageBubble({ message, contactName, contactPhone, onReply, allMessage
                 Sending...
               </span>
             ) : (
-              format(new Date(message.created_at), 'hh:mm a')
+              formatWIB(message.created_at, DATE_FORMATS.TIME_12H)
             )}
           </span>
         </div>
@@ -258,7 +268,7 @@ function MessageBubble({ message, contactName, contactPhone, onReply, allMessage
         {renderMedia()}
         {message.content && <p className="whitespace-pre-wrap text-sm">{message.content}</p>}
         <span className="text-xs block mt-1 text-muted-foreground">
-          {format(new Date(message.created_at), 'hh:mm a')}
+          {formatWIB(message.created_at, DATE_FORMATS.TIME_12H)}
         </span>
       </div>
       {onReply && <ReplyButton />}
@@ -569,7 +579,7 @@ export function MessageThread({
 
   // Calculate last activity time
   const lastActivityTime = messages.length > 0
-    ? formatDistanceToNow(new Date(messages[messages.length - 1].created_at), { addSuffix: false })
+    ? formatDistanceWIB(messages[messages.length - 1].created_at, { addSuffix: false })
     : null
 
   const isActive = conversationStatus === 'open' || conversationStatus === 'handover'
@@ -758,7 +768,7 @@ export function MessageThread({
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">First Contact</p>
-                <p className="font-medium">{format(new Date(conversationContact.created_at), 'MMM d, yyyy')}</p>
+                <p className="font-medium">{formatWIB(conversationContact.created_at, DATE_FORMATS.DATE_LONG)}</p>
               </div>
             </div>
           </div>
@@ -829,7 +839,7 @@ export function MessageThread({
                     <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                       <span>{note.author?.full_name || note.author?.email || 'Unknown'}</span>
                       <span>•</span>
-                      <span>{format(new Date(note.created_at), 'MMM d, HH:mm')}</span>
+                      <span>{formatWIB(note.created_at, DATE_FORMATS.DATETIME)}</span>
                     </div>
                   </div>
                 ))}
