@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 
 export async function PATCH(
   request: Request,
@@ -10,14 +11,9 @@ export async function PATCH(
     const body = await request.json()
     const supabase = await createClient()
 
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Verify workspace access
+    const authResult = await requireWorkspaceMembership(workspaceId)
+    if (authResult instanceof NextResponse) return authResult
 
     // Build update object
     const updates: Record<string, unknown> = {}

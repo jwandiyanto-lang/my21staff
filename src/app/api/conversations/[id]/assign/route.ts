@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 
 export async function POST(
   request: NextRequest,
@@ -11,14 +12,20 @@ export async function POST(
 
     const supabase = await createClient()
 
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    // Fetch conversation to get workspace_id
+    const { data: conversation } = await supabase
+      .from('conversations')
+      .select('workspace_id')
+      .eq('id', conversationId)
+      .single()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!conversation) {
+      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
     }
+
+    // Verify workspace access
+    const authResult = await requireWorkspaceMembership(conversation.workspace_id)
+    if (authResult instanceof NextResponse) return authResult
 
     // Update the conversation's assigned_to field
     const { error } = await supabase
