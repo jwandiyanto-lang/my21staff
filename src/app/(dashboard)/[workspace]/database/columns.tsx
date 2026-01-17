@@ -25,11 +25,13 @@ interface TeamMember {
 interface ColumnsConfig {
   onStatusChange?: (contactId: string, newStatus: LeadStatus) => void
   onAssigneeChange?: (contactId: string, assigneeId: string | null) => void
+  onTagsChange?: (contactId: string, tags: string[]) => void
   onDelete?: (contact: Contact) => void
   teamMembers?: TeamMember[]
+  contactTags?: string[]
 }
 
-export function createColumns({ onStatusChange, onAssigneeChange, onDelete, teamMembers = [] }: ColumnsConfig = {}): ColumnDef<Contact>[] {
+export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, onDelete, teamMembers = [], contactTags = [] }: ColumnsConfig = {}): ColumnDef<Contact>[] {
   return [
   {
     accessorKey: 'name',
