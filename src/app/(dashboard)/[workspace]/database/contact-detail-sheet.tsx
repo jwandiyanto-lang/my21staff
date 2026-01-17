@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useTransition, useRef } from 'react'
 import { format } from 'date-fns'
+import { formatWIB, formatDistanceWIB, DATE_FORMATS } from '@/lib/utils/timezone'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -1015,7 +1016,7 @@ export function ContactDetailSheet({
                     {/* Created date - not editable */}
                     <div className="flex items-center gap-3">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>Added {format(new Date(contact.created_at), 'MMM d, yyyy')}</span>
+                      <span>Added {formatWIB(contact.created_at, DATE_FORMATS.DATE_LONG)}</span>
                     </div>
                   </div>
                 </div>
@@ -1230,7 +1231,7 @@ export function ContactDetailSheet({
                           'text-xs block mt-1',
                           isOutbound ? 'text-primary-foreground/70' : 'text-muted-foreground'
                         )}>
-                          {format(new Date(message.created_at), 'MMM d, HH:mm')}
+                          {formatWIB(message.created_at, DATE_FORMATS.DATETIME)}
                         </span>
                       </div>
                     )
@@ -1275,7 +1276,7 @@ export function ContactDetailSheet({
                           )}
                         >
                           <Clock className="h-3.5 w-3.5" />
-                          {newNoteDueDate ? format(newNoteDueDate, 'MMM d, HH:mm') : 'Set due date'}
+                          {newNoteDueDate ? formatWIB(newNoteDueDate, DATE_FORMATS.DATETIME) : 'Set due date'}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -1448,8 +1449,8 @@ export function ContactDetailSheet({
                             </div>
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
                               {activity.type === 'message_summary'
-                                ? format(new Date(activity.created_at), 'MMM d')
-                                : format(new Date(activity.created_at), 'MMM d, HH:mm')}
+                                ? formatWIB(activity.created_at, DATE_FORMATS.DATE_SHORT)
+                                : formatWIB(activity.created_at, DATE_FORMATS.DATETIME)}
                             </span>
                           </div>
 
@@ -1462,7 +1463,7 @@ export function ContactDetailSheet({
                               {typeof activity.metadata?.due_date === 'string' && (
                                 <div className="mt-2 flex items-center gap-1.5 text-xs text-orange-600">
                                   <Clock className="h-3 w-3" />
-                                  <span>Due: {format(new Date(activity.metadata.due_date), 'MMM d, HH:mm')}</span>
+                                  <span>Due: {formatWIB(activity.metadata.due_date, DATE_FORMATS.DATETIME_LONG)}</span>
                                 </div>
                               )}
                             </div>
@@ -1503,7 +1504,7 @@ export function ContactDetailSheet({
                                     {msg.content || (msg.message_type !== 'text' ? `[${msg.message_type}]` : '')}
                                   </p>
                                   <span className="text-muted-foreground text-[10px] mt-1 block">
-                                    {format(new Date(msg.created_at), 'HH:mm')}
+                                    {formatWIB(msg.created_at, DATE_FORMATS.TIME)}
                                   </span>
                                 </div>
                               ))}
