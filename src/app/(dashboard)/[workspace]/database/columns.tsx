@@ -235,7 +235,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
       const assignedTo = row.getValue('assigned_to') as string | null
       const assignedMember = teamMembers.find((m) => m.id === assignedTo)
 
-      if (!onAssigneeChange || teamMembers.length === 0) {
+      if (!onAssigneeChange) {
         return assignedMember ? (
           <Badge variant="outline" className="text-xs">
             {assignedMember.name || 'Unnamed'}
@@ -248,11 +248,11 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            {assignedTo ? (
+            {assignedTo && assignedMember ? (
               <button
                 className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-muted text-foreground hover:opacity-80 transition-opacity"
               >
-                {assignedMember?.name || 'Unnamed'}
+                {assignedMember.name || 'Unnamed'}
                 <ChevronDown className="h-3 w-3" />
               </button>
             ) : (
@@ -272,17 +272,28 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
               <span className="w-2 h-2 rounded-full mr-2 bg-muted-foreground" />
               Unassigned
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            {teamMembers.map((member) => (
-              <DropdownMenuItem
-                key={member.id}
-                onClick={() => onAssigneeChange(contact.id, member.id)}
-                className={assignedTo === member.id ? 'bg-muted' : ''}
-              >
-                <span className="w-2 h-2 rounded-full mr-2 bg-primary" />
-                {member.name || 'Unnamed'}
-              </DropdownMenuItem>
-            ))}
+            {teamMembers.length > 0 ? (
+              <>
+                <DropdownMenuSeparator />
+                {teamMembers.map((member) => (
+                  <DropdownMenuItem
+                    key={member.id}
+                    onClick={() => onAssigneeChange(contact.id, member.id)}
+                    className={assignedTo === member.id ? 'bg-muted' : ''}
+                  >
+                    <span className="w-2 h-2 rounded-full mr-2 bg-primary" />
+                    {member.name || 'Unnamed'}
+                  </DropdownMenuItem>
+                ))}
+              </>
+            ) : (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled className="text-muted-foreground text-xs">
+                  No team members. Add in Settings.
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )

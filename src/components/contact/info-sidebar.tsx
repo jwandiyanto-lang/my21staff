@@ -55,16 +55,15 @@ interface InfoSidebarProps {
   onAssignmentChange?: (userId: string | null) => void
 }
 
-// Helper function for avatar color
-function getAvatarColor(name: string | null, phone: string): string {
-  const str = name || phone
+// Helper function for avatar color - uses phone for stability (doesn't change when name is edited)
+function getAvatarColor(phone: string): string {
   const colors = [
     'bg-orange-500', 'bg-emerald-500', 'bg-blue-500', 'bg-purple-500',
     'bg-pink-500', 'bg-yellow-500', 'bg-cyan-500', 'bg-rose-500'
   ]
   let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  for (let i = 0; i < phone.length; i++) {
+    hash = phone.charCodeAt(i) + ((hash << 5) - hash)
   }
   return colors[Math.abs(hash) % colors.length]
 }
@@ -375,7 +374,7 @@ export function InfoSidebar({
       {/* Contact header */}
       <div className="p-4 border-b">
         <div className="flex items-center gap-3">
-          <Avatar className={cn('h-12 w-12', getAvatarColor(contact.name, contact.phone))}>
+          <Avatar className={cn('h-12 w-12', getAvatarColor(contact.phone))}>
             <AvatarFallback className="text-white font-medium bg-transparent">
               {getInitials(contact.name, contact.phone)}
             </AvatarFallback>
@@ -557,7 +556,7 @@ export function InfoSidebar({
 
               {/* Created date - not editable */}
               <div className="flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
                 <span>Added {format(new Date(contact.created_at), 'MMM d, yyyy')}</span>
               </div>
             </div>
