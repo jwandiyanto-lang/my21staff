@@ -18,6 +18,35 @@ export async function POST(
       )
     }
 
+    // Get conversation to verify workspace access
+    const { data: conversation, error: convError } = await supabase
+      .from('conversations')
+      .select('id, workspace_id')
+      .eq('id', conversationId)
+      .single()
+
+    if (convError || !conversation) {
+      return NextResponse.json(
+        { error: 'Conversation not found' },
+        { status: 404 }
+      )
+    }
+
+    // Verify user has access to this workspace
+    const { data: membership } = await supabase
+      .from('workspace_members')
+      .select('id')
+      .eq('workspace_id', conversation.workspace_id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership) {
+      return NextResponse.json(
+        { error: 'Not authorized to access this conversation' },
+        { status: 403 }
+      )
+    }
+
     // Mark conversation as read by setting unread_count to 0
     const { data, error } = await supabase
       .from('conversations')

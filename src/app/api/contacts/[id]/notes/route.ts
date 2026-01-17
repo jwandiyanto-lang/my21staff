@@ -19,10 +19,39 @@ export async function GET(
       )
     }
 
+    // Get contact to verify workspace access
+    const { data: contact, error: contactError } = await supabase
+      .from('contacts')
+      .select('workspace_id')
+      .eq('id', contactId)
+      .single()
+
+    if (contactError || !contact) {
+      return NextResponse.json(
+        { error: 'Contact not found' },
+        { status: 404 }
+      )
+    }
+
+    // Verify user has access to this workspace
+    const { data: membership } = await supabase
+      .from('workspace_members')
+      .select('id')
+      .eq('workspace_id', contact.workspace_id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership) {
+      return NextResponse.json(
+        { error: 'Not authorized to access this contact' },
+        { status: 403 }
+      )
+    }
+
     // Get notes
     const { data: notes, error } = await supabase
       .from('contact_notes')
-      .select('*')
+      .select('id, content, note_type, metadata, author_id, created_at, updated_at')
       .eq('contact_id', contactId)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -86,6 +115,21 @@ export async function POST(
       )
     }
 
+    // Verify user has access to this workspace
+    const { data: membership } = await supabase
+      .from('workspace_members')
+      .select('id')
+      .eq('workspace_id', contact.workspace_id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership) {
+      return NextResponse.json(
+        { error: 'Not authorized to access this contact' },
+        { status: 403 }
+      )
+    }
+
     // Insert note
     const { data: note, error: insertError } = await supabase
       .from('contact_notes')
@@ -97,7 +141,7 @@ export async function POST(
         note_type,
         metadata,
       })
-      .select('*')
+      .select('id, content, note_type, metadata, author_id, created_at, updated_at')
       .single()
 
     if (insertError) {

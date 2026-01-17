@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { setHandover } from '@/lib/kapso/client'
+import { safeDecrypt } from '@/lib/crypto'
 
 export async function POST(
   request: Request,
@@ -20,6 +21,15 @@ export async function POST(
 
     const supabase = await createClient()
 
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     // Get conversation
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
@@ -32,6 +42,21 @@ export async function POST(
       return NextResponse.json(
         { error: 'Conversation not found' },
         { status: 404 }
+      )
+    }
+
+    // Verify user has access to this workspace
+    const { data: membership } = await supabase
+      .from('workspace_members')
+      .select('id')
+      .eq('workspace_id', conversation.workspace_id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership) {
+      return NextResponse.json(
+        { error: 'Not authorized to access this conversation' },
+        { status: 403 }
       )
     }
 
@@ -77,10 +102,11 @@ export async function POST(
     // Call Kapso API to pause/resume AI workflow
     let kapsoResult: { success: boolean; message?: string } = { success: true, message: 'No Kapso credentials' }
     const settings = workspace?.settings as { kapso_api_key?: string } | null
-    const apiKey = settings?.kapso_api_key
+    const encryptedKey = settings?.kapso_api_key
     const phoneId = workspace?.kapso_phone_id
 
-    if (apiKey && phoneId && contact?.phone) {
+    if (encryptedKey && phoneId && contact?.phone) {
+      const apiKey = safeDecrypt(encryptedKey)
       kapsoResult = await setHandover(
         { apiKey, phoneId },
         contact.phone,
@@ -112,17 +138,41 @@ export async function GET(
     const { id: conversationId } = await params
     const supabase = await createClient()
 
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { data, error } = await supabase
       .from('conversations')
-      .select('status')
+      .select('status, workspace_id')
       .eq('id', conversationId)
       .single()
 
-    if (error) {
+    if (error || !data) {
       console.error('Error fetching handover status:', error)
       return NextResponse.json(
-        { error: 'Failed to fetch handover status' },
-        { status: 500 }
+        { error: 'Conversation not found' },
+        { status: 404 }
+      )
+    }
+
+    // Verify user has access to this workspace
+    const { data: membership } = await supabase
+      .from('workspace_members')
+      .select('id')
+      .eq('workspace_id', data.workspace_id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership) {
+      return NextResponse.json(
+        { error: 'Not authorized to access this conversation' },
+        { status: 403 }
       )
     }
 
