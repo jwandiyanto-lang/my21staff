@@ -154,21 +154,22 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
       const tags = row.getValue('tags') as string[] || []
 
       if (!onTagsChange || contactTags.length === 0) {
-        // Read-only display - compact: 1 tag + count
+        // Read-only display - compact
         if (tags.length === 0) {
           return <span className="text-muted-foreground">-</span>
         }
-        return (
-          <div className="flex items-center gap-1">
-            <Badge variant="secondary" className="text-xs truncate max-w-[80px]">
+        if (tags.length === 1) {
+          return (
+            <Badge variant="secondary" className="text-xs">
               {tags[0]}
             </Badge>
-            {tags.length > 1 && (
-              <Badge variant="outline" className="text-xs shrink-0">
-                +{tags.length - 1}
-              </Badge>
-            )}
-          </div>
+          )
+        }
+        // 2+ tags: just show count
+        return (
+          <Badge variant="outline" className="text-xs">
+            +{tags.length}
+          </Badge>
         )
       }
 
@@ -190,16 +191,15 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
               </button>
             ) : (
               <button className="flex items-center gap-1 px-2 py-1 rounded-md text-xs hover:bg-muted transition-colors">
-                <div className="flex items-center gap-1">
-                  <Badge variant="secondary" className="text-xs truncate max-w-[80px]">
+                {tags.length === 1 ? (
+                  <Badge variant="secondary" className="text-xs">
                     {tags[0]}
                   </Badge>
-                  {tags.length > 1 && (
-                    <Badge variant="outline" className="text-xs shrink-0">
-                      +{tags.length - 1}
-                    </Badge>
-                  )}
-                </div>
+                ) : (
+                  <Badge variant="outline" className="text-xs">
+                    +{tags.length}
+                  </Badge>
+                )}
                 <ChevronDown className="h-3 w-3 ml-1" />
               </button>
             )}
