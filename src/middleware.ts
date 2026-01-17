@@ -2,8 +2,12 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Dev mode bypass - skip auth checks entirely
-  if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
+  // Dev mode bypass - ONLY in development environment
+  // Never trust NEXT_PUBLIC_DEV_MODE alone as it could be set incorrectly
+  if (
+    process.env.NEXT_PUBLIC_DEV_MODE === 'true' &&
+    process.env.NODE_ENV !== 'production'
+  ) {
     return NextResponse.next({ request })
   }
 
