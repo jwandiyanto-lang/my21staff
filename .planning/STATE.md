@@ -11,12 +11,10 @@ See: .planning/PROJECT.md (updated 2026-01-14)
 
 Phase: 21 (Direct Form to CRM + Telegram) - PLANNED
 Plan: 2 plans ready (21-01, 21-02)
-Status: Awaiting execution
-Last activity: 2026-01-17 — Phase 21 planned, Vercel rate-limited (retry in 1 hour)
+Status: Ready to execute
+Last activity: 2026-01-17 — v1.10 deployed to Vercel, all features verified
 
-Paused: Phase 18 (Kapso Bot Setup) — waiting for Vercel reset
-
-Progress: v1.10 ██████████ Complete | v1.11 ░░░░░░░░░░ Planned
+Progress: v1.10 ██████████ Complete & Deployed | v1.11 ░░░░░░░░░░ Planned
 
 ## Performance Metrics
 
@@ -69,7 +67,7 @@ Recent (Phase 19):
 
 ### Deferred Issues
 
-- Production deployment and Supabase migration
+None — production deployment complete.
 
 ### Blockers/Concerns
 
@@ -78,8 +76,23 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Phase 21 planned - 2 plans ready for execution
+Stopped at: v1.10 deployed and verified
 Resume file: None
-Next: `/gsd:execute-phase 21` when Vercel rate limit resets (~1 hour)
+Next: `/gsd:execute-phase 21` to add direct lead capture + Telegram notifications
 
-Deployment: Phase 20 commit pushed (fb1b5b1), Vercel rate-limited
+## Deployment Info
+
+**Production URL:** https://my21staff.vercel.app
+**Vercel CLI:** Installed and linked
+**Supabase Project:** my21staff (tcpqqublnkphuwhhwizx)
+
+**Environment Variables (Vercel):**
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- NEXT_PUBLIC_PRICING_WORKSPACE_ID (my21staff workspace)
+- ENCRYPTION_KEY
+
+**Workspaces:**
+- My21Staff: `0318fda5-22c4-419b-bdd8-04471b818d17` (for pricing form leads)
+- Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
