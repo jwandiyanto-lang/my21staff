@@ -117,6 +117,8 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
   // Team invite state
   const [email, setEmail] = useState('')
   const [isInviting, setIsInviting] = useState(false)
+  const [inviteSent, setInviteSent] = useState(false)
+  const [localInvitations, setLocalInvitations] = useState<Invitation[]>(invitations)
 
   // Quick replies state
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>(
@@ -176,6 +178,7 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
     if (!email.trim()) return
 
     setIsInviting(true)
+    setInviteSent(false)
     try {
       const res = await fetch('/api/invitations', {
         method: 'POST',
@@ -191,9 +194,20 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
         throw new Error(err.error || 'Failed to send invitation')
       }
 
+      const data = await res.json()
+
+      // Add to local state
+      setLocalInvitations(prev => [{
+        id: data.invitation.id,
+        email: data.invitation.email,
+        status: data.invitation.status,
+        created_at: new Date().toISOString(),
+        expires_at: data.invitation.expires_at,
+      }, ...prev])
+
       setEmail('')
-      // Refresh page to show new invitation
-      window.location.reload()
+      setInviteSent(true)
+      setTimeout(() => setInviteSent(false), 3000)
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to invite')
     } finally {
@@ -915,7 +929,7 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4">
+              <div className="flex gap-4 items-center">
                 <div className="flex-1">
                   <Label htmlFor="inviteEmail" className="sr-only">
                     Email
@@ -936,6 +950,12 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
                   <UserPlus className="h-4 w-4 mr-2" />
                   {isInviting ? 'Inviting...' : 'Invite'}
                 </Button>
+                {inviteSent && (
+                  <span className="text-sm text-green-600 flex items-center gap-1">
+                    <Check className="w-4 h-4" />
+                    Invitation sent!
+                  </span>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -997,12 +1017,12 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
           </Card>
 
           {/* Pending Invitations */}
-          {invitations.length > 0 && (
+          {localInvitations.length > 0 && (
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle className="text-lg">Pending Invitations</CardTitle>
                 <CardDescription>
-                  {invitations.length} pending invitation{invitations.length !== 1 ? 's' : ''}
+                  {localInvitations.length} pending invitation{localInvitations.length !== 1 ? 's' : ''}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1015,7 +1035,7 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {invitations.map((inv) => (
+                    {localInvitations.map((inv) => (
                       <TableRow key={inv.id}>
                         <TableCell className="font-medium">{inv.email}</TableCell>
                         <TableCell className="text-muted-foreground">

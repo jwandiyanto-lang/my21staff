@@ -254,23 +254,43 @@ Plans:
 
 ---
 
-## v1.12 — Direct Lead Capture (Deferred)
+## v1.12 — Settings & Data Management (Final Milestone)
 
-### Phase 22: Direct Form to CRM + Telegram Notifications
+### Phase 22: Settings Page (CSV, Team Invites, Pricing Form)
 
-**Goal:** Connect website forms directly to CRM database with instant Telegram notifications
+**Goal:** Complete settings page with data management, team invitations, and direct lead capture from pricing form
 **Depends on:** Phase 21
-**Plans:** 2 plans
-
-Plans:
-- [ ] 22-01: Leads API + Telegram Notifications
-- [ ] 22-02: Connect Pricing Form to API
+**Plans:** 4 plans
 
 **Scope:**
-- API endpoint for direct lead submission (`/api/leads`)
-- Pricing page form → Supabase contacts table (real-time)
-- Telegram notification service (`src/lib/telegram/client.ts`)
-- Notification on new lead with contact details
+
+**1. CSV Import/Export (Settings → Data)**
+- Export contacts to CSV (all fields: name, phone, email, tags, status, score, assigned_to)
+- Export notes to CSV (with due dates, content, author)
+- Download template CSV for imports
+- Upload validation (required fields, phone format, duplicate handling)
+- Preview before import with error highlighting
+- Batch upsert with progress indicator
+
+**2. Team Member Invitation (Settings → Team)**
+- Invite by email using custom SMTP (Hostinger)
+- Email contains magic link for password setup
+- User added to workspace as member
+- SMTP configuration via env vars (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM)
+- Invitation tracking (pending, accepted, expired)
+
+**3. Pricing Form → my21staff CRM**
+- API endpoint `/api/leads` for direct form submission
+- Form data mapped to contacts table in my21staff workspace
+- Tags: `pricing-form`, selected plan name
+- Metadata: business type, lead sources, current tracking, etc.
+- Telegram notification on new lead (optional)
+
+Plans:
+- [ ] 22-01: Settings Page Structure + CSV Export
+- [ ] 22-02: CSV Import with Validation
+- [ ] 22-03: Team Invitation System (SMTP + Magic Links)
+- [ ] 22-04: Pricing Form → my21staff Leads API
 
 ---
 
@@ -299,4 +319,4 @@ Plans:
 | 19. Performance & Security | v1.9 | 8/8 | Complete | 2026-01-17 |
 | 20. Dashboard & Notes | v1.10 | 3/3 | Complete | 2026-01-17 |
 | 21. Lead Polish + Performance | v1.11 | 7/7 | Complete | 2026-01-17 |
-| 22. Direct Form + Telegram | v1.12 | 0/2 | Deferred | — |
+| 22. Settings & Data Management | v1.12 | 0/4 | Planning | — |
