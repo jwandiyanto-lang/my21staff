@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { rateLimit } from '@/lib/rate-limit'
 
 function isDevMode(): boolean {
   return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
@@ -23,6 +24,10 @@ type DatabaseClient = any
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 10 requests per minute per IP
+    const rateLimitResponse = rateLimit(request, { limit: 10, windowMs: 60 * 1000 })
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = await request.json()
     const { webinar_id, workspace_id, name, phone, email } = body
 
