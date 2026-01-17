@@ -87,10 +87,8 @@ export default function PricingPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || "https://n8n.example.com/webhook/pricing-form";
-
     try {
-      const response = await fetch(webhookUrl, {
+      const response = await fetch("/api/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -106,12 +104,12 @@ export default function PricingPage() {
           masalahBisnis,
           teamSize,
           paket: selectedPlan,
-          timestamp: new Date().toISOString(),
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to submit form");
+        const data = await response.json();
+        throw new Error(data.error || "Failed to submit form");
       }
 
       // Success
