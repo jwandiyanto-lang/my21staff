@@ -1027,9 +1027,8 @@ export function ContactDetailSheet({
                     </div>
 
                     {/* Created date - not editable */}
-                    <div className="flex items-center gap-3">
-                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                      <span>Added {formatWIB(contact.created_at, DATE_FORMATS.DATE_LONG)}</span>
+                    <div className="text-sm text-muted-foreground">
+                      Added {formatWIB(contact.created_at, DATE_FORMATS.DATE_LONG)}
                     </div>
                   </div>
                 </div>
@@ -1538,7 +1537,7 @@ export function ContactDetailSheet({
             ) : (
               <div className="flex items-center justify-center flex-1 p-6">
                 <div className="text-center">
-                  <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <CalendarIcon className="mx-auto h-12 w-12 text-muted-foreground/50" />
                   <p className="mt-4 text-muted-foreground font-medium">No activity yet</p>
                   <p className="text-sm text-muted-foreground mt-1">
                     Add a note to start tracking activity

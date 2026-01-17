@@ -555,9 +555,8 @@ export function InfoSidebar({
               </div>
 
               {/* Created date - not editable */}
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>Added {format(new Date(contact.created_at), 'MMM d, yyyy')}</span>
+              <div className="text-sm text-muted-foreground">
+                Added {format(new Date(contact.created_at), 'MMM d, yyyy')}
               </div>
             </div>
           </div>
