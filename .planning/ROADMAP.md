@@ -219,13 +219,13 @@ Plans:
 
 ---
 
-## v1.11 — Lead Management Polish + Performance
+## v1.11 — Lead Management Polish + Performance (COMPLETE)
 
 ### Phase 21: Lead Management Polish + Performance
 
 **Goal:** Polish lead management features and improve app performance
 **Depends on:** Phase 20
-**Plans:** TBD (planning)
+**Plans:** 7/7 complete
 
 **Scope:**
 - Notes/Activity: Show dates, auto-update midnight WIB
@@ -234,12 +234,14 @@ Plans:
 - Info box: Fix display issues
 - Performance: Faster inbox/chat, faster webhooks
 
-**Deliverables:**
-- [ ] Notes dates display with midnight WIB refresh
-- [ ] Assign dropdown per lead row (default to owner)
-- [ ] Tags dropdown per lead row
-- [ ] Info panel display fix
-- [ ] Performance optimizations (chat, webhooks)
+**Plans:**
+- [x] 21-01: WIB Timezone Utilities (Wave 1)
+- [x] 21-02: Contacts Pagination (Wave 1)
+- [x] 21-03: Notes Dates Display with WIB (Wave 2)
+- [x] 21-04: Inline Tags Dropdown (Wave 2)
+- [x] 21-05: Conversations Pagination (Wave 2)
+- [x] 21-06: Info Panel Extraction (Wave 3)
+- [x] 21-07: Webhook Batching (Wave 3)
 
 ---
 
@@ -287,5 +289,5 @@ Plans:
 | 18. Kapso Bot Setup | v1.8 | 0/2 | Planned | — |
 | 19. Performance & Security | v1.9 | 8/8 | Complete | 2026-01-17 |
 | 20. Dashboard & Notes | v1.10 | 1/1 | Complete | 2026-01-17 |
-| 21. Lead Polish + Performance | v1.11 | 0/? | Planned | — |
+| 21. Lead Polish + Performance | v1.11 | 7/7 | Complete | 2026-01-17 |
 | 22. Direct Form + Telegram | v1.12 | 0/2 | Deferred | — |
