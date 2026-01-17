@@ -73,6 +73,7 @@ Recent (Phase 21):
 - Client-side filtering: Filters apply to loaded contacts only (simpler implementation)
 - Inline tags dropdown: Checkbox-style tag toggle with optimistic updates in database table
 - Conversations pagination: Same load more pattern applied to inbox (50 per page)
+- Combined time display: Activity items show relative + absolute time ("2 hours ago · Jan 17, 14:30")
 
 ### Deferred Issues
 
