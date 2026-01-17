@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** v1.11 — Lead Management Polish + Performance
+**Current focus:** v1.12 — Settings & Data Management
 
 ## Current Position
 
-Phase: 20 (Dashboard Stats & Notes Due Dates) - COMPLETE
-Plan: 20-09 complete, 0 remaining
-Status: All UAT gaps addressed - Phase 20 complete
-Last activity: 2026-01-17 — Plan 20-09 complete (task completion)
+Phase: 22 (Settings & Data Management)
+Plan: 22-01 complete, more remaining
+Status: In progress - CSV export complete
+Last activity: 2026-01-17 — Plan 22-01 complete (CSV export)
 
-Progress: v1.10 ██████████ Complete & Deployed | v1.11 ██████████ Phase 21 COMPLETE | Phase 20 UAT ██████████ COMPLETE
+Progress: v1.10 ██████████ Complete | v1.11 ██████████ Complete | Phase 22 █░░░░░░░░░ In Progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 30
+- Total plans completed: 31
 - Average duration: 6 min
-- Total execution time: 170 min (excludes manual config)
+- Total execution time: 174 min (excludes manual config)
 
 **By Phase:**
 
@@ -39,6 +39,7 @@ Progress: v1.10 ██████████ Complete & Deployed | v1.11 █�
 | 15. Pricing Page | 2/2 | interactive | — |
 | 19. Performance & Security | 8/8 | 33 min | 4 min |
 | 20. Dashboard & Notes | 3/3 | 5 min | 2 min |
+| 22. Settings & Data | 1/? | 4 min | 4 min |
 
 ## Accumulated Context
 
@@ -52,7 +53,7 @@ Progress: v1.10 ██████████ Complete & Deployed | v1.11 █�
 - Phase 19 added: Performance & Security (v1.9)
 - Phase 20 added: Dashboard Stats & Notes Due Dates (v1.10)
 - Phase 21 replanned: Lead Management Polish + Performance (v1.11)
-- Phase 22 deferred: Direct Form to CRM + Telegram (v1.12)
+- Phase 22 started: Settings & Data Management (v1.12)
 
 ### Decisions
 
@@ -80,6 +81,11 @@ Recent (Phase 21):
 - Webhook async processing: Return 200 immediately, process payload in background
 - Webhook batch operations: IN queries for contacts/conversations, batch inserts for messages
 
+Recent (Phase 22):
+- PapaParse for CSV: Fast parsing/generation, handles edge cases gracefully
+- Tags as comma-separated: Array converted to string for CSV readability
+- Template no auth: Public endpoint for CSV template download
+
 ### Deferred Issues
 
 None — production deployment complete.
@@ -91,9 +97,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Plan 20-09 complete (task completion)
+Stopped at: Plan 22-01 complete (CSV export)
 Resume file: None
-Next: Deploy v1.10/v1.11 updates or start Phase 22
+Next: Plan 22-02 (CSV import) or other Phase 22 plans
 
 ## Deployment Info
 
