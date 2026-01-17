@@ -8,6 +8,7 @@ export const updateContactSchema = z.object({
   lead_score: z.number().int().min(0).max(100).optional(),
   tags: z.array(z.string().max(50)).max(20).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
+  assigned_to: z.string().uuid('Invalid user ID').optional().nullable(),
 }).strict()
 
 export const mergeContactSchema = z.object({

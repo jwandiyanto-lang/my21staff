@@ -21,7 +21,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const validationResult = await validateBody(request, updateContactSchema)
     if (validationResult instanceof NextResponse) return validationResult
 
-    const { lead_status, lead_score, tags, name, email, phone } = validationResult
+    const { lead_status, lead_score, tags, name, email, phone, assigned_to } = validationResult
 
     if (isDevMode()) {
       // Dev mode: return mock updated contact
@@ -107,6 +107,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
     if (phone !== undefined) {
       updateData.phone = phone?.trim() || null
+    }
+    if (assigned_to !== undefined) {
+      updateData.assigned_to = assigned_to || null
     }
 
     const { data: contact, error } = await supabase
