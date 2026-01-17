@@ -26,7 +26,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil, Tag } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -261,6 +261,10 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
             <Badge variant="secondary" className="ml-1 text-xs">
               {contactTags.length}
             </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="data" className="gap-2">
+            <FileSpreadsheet className="h-4 w-4" />
+            Data
           </TabsTrigger>
           <TabsTrigger value="team" className="gap-2">
             <Users className="h-4 w-4" />
@@ -548,6 +552,59 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
                   <p className="text-sm mt-1">Click "Add Tag" to create your first tag</p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Data Tab */}
+        <TabsContent value="data" className="space-y-6">
+          {/* Export Data Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Export Data</CardTitle>
+              <CardDescription>
+                Download your contacts and notes as CSV files
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-4">
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(`/api/contacts/export?workspace=${workspace.id}`, '_blank')}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Contacts
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(`/api/notes/export?workspace=${workspace.id}`, '_blank')}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Notes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Import Template Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Import Template</CardTitle>
+              <CardDescription>
+                Download a CSV template to prepare your data for import
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button
+                variant="outline"
+                onClick={() => window.open('/api/contacts/template', '_blank')}
+              >
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Download Template
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                Upload functionality coming soon
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
