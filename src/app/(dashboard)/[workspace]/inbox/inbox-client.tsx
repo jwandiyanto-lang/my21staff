@@ -559,6 +559,27 @@ export function InboxClient({ workspace, conversations: initialConversations, to
           hasStatusFilter={statusFilter.length > 0}
           workspaceName={workspace.name}
         />
+
+        {/* Load More Button */}
+        {conversations.length < totalCount && (
+          <div className="p-4 border-t">
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={loadMoreConversations}
+              disabled={isLoadingMore}
+            >
+              {isLoadingMore ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>Load More ({totalCount - conversations.length} remaining)</>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Right area - Message thread */}
