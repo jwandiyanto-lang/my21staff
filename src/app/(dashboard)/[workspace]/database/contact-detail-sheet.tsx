@@ -1447,11 +1447,17 @@ export function ContactDetailSheet({
                                 </p>
                               )}
                             </div>
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {activity.type === 'message_summary'
-                                ? formatWIB(activity.created_at, DATE_FORMATS.DATE_SHORT)
-                                : formatWIB(activity.created_at, DATE_FORMATS.DATETIME)}
-                            </span>
+                            <div className="text-xs text-muted-foreground whitespace-nowrap text-right">
+                              {activity.type === 'message_summary' ? (
+                                formatWIB(activity.created_at, DATE_FORMATS.DATE_SHORT)
+                              ) : (
+                                <>
+                                  {formatDistanceWIB(activity.created_at, { addSuffix: true })}
+                                  <span className="mx-1">·</span>
+                                  {formatWIB(activity.created_at, DATE_FORMATS.DATETIME)}
+                                </>
+                              )}
+                            </div>
                           </div>
 
                           {/* Note content or form answers */}
