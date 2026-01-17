@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** v1.7 — Inbox Polish
+**Current focus:** v1.9 — Performance & Security
 
 ## Current Position
 
-Phase: 17 (Inbox UI/UX Fixes) - COMPLETE
-Plan: 17-01 complete (6/7 fixes, 1 deferred)
-Status: Complete
-Last activity: 2026-01-16 — Completed Phase 17 inbox fixes
+Phase: 19 (Performance & Security)
+Plan: 01 of 2 (Authorization Fixes)
+Status: Plan 01 complete
+Last activity: 2026-01-17 — Completed 19-01-PLAN.md (Authorization Fixes)
 
-Progress: v1.7 ██████████ Phase 17 complete
+Progress: v1.9 [=====-----] 1/2 plans complete
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
+- Total plans completed: 21
 - Average duration: 7 min
-- Total execution time: 132 min (excludes manual config)
+- Total execution time: 135 min (excludes manual config)
 
 **By Phase:**
 
@@ -37,6 +37,7 @@ Progress: v1.7 ██████████ Phase 17 complete
 | 8. Sea Lion + Kapso | 1/1 | manual | — |
 | 13. Lead Management | 3/3 | 15 min | 5 min |
 | 15. Pricing Page | 2/2 | interactive | — |
+| 19. Performance & Security | 1/2 | 3 min | 3 min |
 
 ## Accumulated Context
 
@@ -46,16 +47,16 @@ Progress: v1.7 ██████████ Phase 17 complete
 - Phase 14 added: Landing Page Refresh (v1.6)
 - Phase 15 added: Pricing Page (v1.6)
 - Phase 17 added: Inbox UI/UX Fixes (v1.7)
+- Phase 18 added: Kapso Bot Setup & Verification (v1.8)
+- Phase 19 added: Performance & Security (v1.9)
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
 
-Recent (Phase 15):
-- Story flow: Problem scenarios → Rhetorical question → Urgency → Pricing
-- 3-tier pricing: Solo Rp3.9jt, Team Rp7.9jt, Studio Custom
-- Modal form for lead capture instead of direct WhatsApp links
-- Stagger entrance + hover lift animations on pricing cards
+Recent (Phase 19):
+- Centralized workspace auth: Single requireWorkspaceMembership function for all routes
+- Production safeguard: DEV_MODE bypass requires NODE_ENV !== 'production'
 
 ### Deferred Issues
 
@@ -67,7 +68,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-16
-Stopped at: Completed Phase 17 inbox fixes
+Last session: 2026-01-17
+Stopped at: Completed 19-01-PLAN.md (Authorization Fixes)
 Resume file: None
-Next: Push changes and test, or start next phase
+Next: Execute 19-02-PLAN.md (Performance Optimizations)
