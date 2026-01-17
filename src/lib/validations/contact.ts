@@ -7,7 +7,7 @@ export const updateContactSchema = z.object({
   lead_status: z.enum(['prospect', 'cold_lead', 'hot_lead', 'client', 'student', 'alumni', 'lost']).optional(),
   lead_score: z.number().int().min(0).max(100).optional(),
   tags: z.array(z.string().max(50)).max(20).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 }).strict()
 
 export const mergeContactSchema = z.object({

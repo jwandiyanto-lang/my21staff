@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createApiAdminClient } from '@/lib/supabase/server'
-import { LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
+import { validateBody } from '@/lib/validations'
+import { updateContactSchema } from '@/lib/validations/contact'
 import type { Contact } from '@/types/database'
 
 function isDevMode(): boolean {
@@ -15,35 +16,12 @@ type RouteContext = {
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params
-    const body = await request.json()
-    const { lead_status, lead_score, tags, name, email, phone } = body
 
-    // Validate lead_status if provided
-    if (lead_status !== undefined && !LEAD_STATUSES.includes(lead_status as LeadStatus)) {
-      return NextResponse.json(
-        { error: `Invalid lead_status. Must be one of: ${LEAD_STATUSES.join(', ')}` },
-        { status: 400 }
-      )
-    }
+    // Validate input with Zod
+    const validationResult = await validateBody(request, updateContactSchema)
+    if (validationResult instanceof NextResponse) return validationResult
 
-    // Validate lead_score if provided
-    if (lead_score !== undefined) {
-      const score = Number(lead_score)
-      if (isNaN(score) || score < 0 || score > 100) {
-        return NextResponse.json(
-          { error: 'lead_score must be a number between 0 and 100' },
-          { status: 400 }
-        )
-      }
-    }
-
-    // Validate tags if provided
-    if (tags !== undefined && !Array.isArray(tags)) {
-      return NextResponse.json(
-        { error: 'tags must be an array of strings' },
-        { status: 400 }
-      )
-    }
+    const { lead_status, lead_score, tags, name, email, phone } = validationResult
 
     if (isDevMode()) {
       // Dev mode: return mock updated contact

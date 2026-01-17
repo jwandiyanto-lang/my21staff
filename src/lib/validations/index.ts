@@ -16,7 +16,7 @@ export async function validateBody<T extends ZodSchema>(
     return schema.parse(body)
   } catch (error) {
     if (error instanceof ZodError) {
-      const errors = error.errors.map(e => ({
+      const errors = error.issues.map(e => ({
         field: e.path.join('.'),
         message: e.message
       }))
