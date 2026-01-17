@@ -26,7 +26,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, RefreshCw } from 'lucide-react'
 import { useRef } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDistanceToNow } from 'date-fns'
@@ -119,6 +119,10 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
   const [isInviting, setIsInviting] = useState(false)
   const [inviteSent, setInviteSent] = useState(false)
   const [localInvitations, setLocalInvitations] = useState<Invitation[]>(invitations)
+  const [localMembers, setLocalMembers] = useState<TeamMember[]>(members)
+  const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null)
+  const [deletingInvitationId, setDeletingInvitationId] = useState<string | null>(null)
+  const [resendingInvitationId, setResendingInvitationId] = useState<string | null>(null)
 
   // Quick replies state
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>(
@@ -212,6 +216,70 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
       alert(error instanceof Error ? error.message : 'Failed to invite')
     } finally {
       setIsInviting(false)
+    }
+  }
+
+  const handleDeleteMember = async (memberId: string) => {
+    if (!confirm('Are you sure you want to remove this team member?')) return
+
+    setDeletingMemberId(memberId)
+    try {
+      const res = await fetch(`/api/workspace-members/${memberId}`, {
+        method: 'DELETE',
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to remove member')
+      }
+
+      setLocalMembers(prev => prev.filter(m => m.id !== memberId))
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to remove member')
+    } finally {
+      setDeletingMemberId(null)
+    }
+  }
+
+  const handleDeleteInvitation = async (invitationId: string) => {
+    if (!confirm('Are you sure you want to cancel this invitation?')) return
+
+    setDeletingInvitationId(invitationId)
+    try {
+      const res = await fetch(`/api/invitations/${invitationId}`, {
+        method: 'DELETE',
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to cancel invitation')
+      }
+
+      setLocalInvitations(prev => prev.filter(i => i.id !== invitationId))
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to cancel invitation')
+    } finally {
+      setDeletingInvitationId(null)
+    }
+  }
+
+  const handleResendInvitation = async (invitationId: string) => {
+    setResendingInvitationId(invitationId)
+    try {
+      const res = await fetch(`/api/invitations/${invitationId}`, {
+        method: 'POST',
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to resend invitation')
+      }
+
+      alert('Invitation resent successfully!')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to resend invitation')
+    } finally {
+      setResendingInvitationId(null)
     }
   }
 
@@ -416,7 +484,7 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
             <Users className="h-4 w-4" />
             Team
             <Badge variant="secondary" className="ml-1 text-xs">
-              {members.length}
+              {localMembers.length}
             </Badge>
           </TabsTrigger>
         </TabsList>
@@ -965,7 +1033,7 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
             <CardHeader>
               <CardTitle className="text-lg">Team Members</CardTitle>
               <CardDescription>
-                {members.length} member{members.length !== 1 ? 's' : ''} in this workspace
+                {localMembers.length} member{localMembers.length !== 1 ? 's' : ''} in this workspace
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -980,14 +1048,14 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {members.length === 0 ? (
+                  {localMembers.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                         No team members yet. Invite someone to get started.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    members.map((member) => (
+                    localMembers.map((member) => (
                       <TableRow key={member.id}>
                         <TableCell className="font-medium">
                           {member.profiles?.full_name || 'Unnamed'}
@@ -1003,8 +1071,18 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
                         </TableCell>
                         <TableCell>
                           {member.role !== 'owner' && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Trash2 className="h-4 w-4 text-muted-foreground" />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleDeleteMember(member.id)}
+                              disabled={deletingMemberId === member.id}
+                            >
+                              {deletingMemberId === member.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                              )}
                             </Button>
                           )}
                         </TableCell>
@@ -1032,6 +1110,7 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
                       <TableHead>Email</TableHead>
                       <TableHead>Sent</TableHead>
                       <TableHead>Expires</TableHead>
+                      <TableHead className="w-[100px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1043,6 +1122,38 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {formatDistanceToNow(new Date(inv.expires_at), { addSuffix: true })}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleResendInvitation(inv.id)}
+                              disabled={resendingInvitationId === inv.id}
+                              title="Resend invitation"
+                            >
+                              {resendingInvitationId === inv.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <RefreshCw className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleDeleteInvitation(inv.id)}
+                              disabled={deletingInvitationId === inv.id}
+                              title="Cancel invitation"
+                            >
+                              {deletingInvitationId === inv.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                              )}
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
