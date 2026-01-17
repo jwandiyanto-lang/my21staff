@@ -163,6 +163,35 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
     }
   }, [initialContacts])
 
+  // Handle inline tags change
+  const handleTagsChange = useCallback(async (contactId: string, newTags: string[]) => {
+    // Optimistic update
+    setContacts((prev) =>
+      prev.map((c) =>
+        c.id === contactId ? { ...c, tags: newTags } : c
+      )
+    )
+
+    // Call API
+    try {
+      const response = await fetch(`/api/contacts/${contactId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tags: newTags }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update tags')
+      }
+      toast.success('Tags updated')
+    } catch (error) {
+      console.error('Failed to update contact tags:', error)
+      // Revert on error
+      setContacts(initialContacts)
+      toast.error('Failed to update tags')
+    }
+  }, [initialContacts])
+
   // Handle delete contact
   const handleDeleteContact = useCallback(async () => {
     if (!contactToDelete) return
@@ -224,10 +253,12 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
     () => createColumns({
       onStatusChange: handleStatusChange,
       onAssigneeChange: handleAssigneeChange,
+      onTagsChange: handleTagsChange,
       onDelete: setContactToDelete,
       teamMembers: columnTeamMembers,
+      contactTags,
     }),
-    [handleStatusChange, handleAssigneeChange, columnTeamMembers]
+    [handleStatusChange, handleAssigneeChange, handleTagsChange, columnTeamMembers, contactTags]
   )
 
   const columns = useMemo(
