@@ -90,11 +90,27 @@ my21staff
 
 ### Font Family
 
-| Font | Usage | Google Fonts |
-|------|-------|--------------|
-| Plus Jakarta Sans | Headlines, headings | `Plus_Jakarta_Sans` |
-| Inter | Body text | `Inter` |
-| JetBrains Mono | Labels, badges, code | `JetBrains_Mono` |
+| Font | Usage | Google Fonts | Import |
+|------|-------|--------------|--------|
+| Plus Jakarta Sans | Headlines, headings | `Plus_Jakarta_Sans` | `next/font/google` |
+| Inter | Body text | `Inter` | `next/font/google` |
+| JetBrains Mono | Labels, badges, code | `JetBrains_Mono` | `next/font/google` |
+
+### ⚠️ DO NOT USE
+
+| Font | Reason |
+|------|--------|
+| Geist | Not part of brand — remove from layout |
+| Geist Mono | Not part of brand — use JetBrains Mono |
+
+### Font Usage by Context
+
+| Context | Headlines | Body | Labels/Badges |
+|---------|-----------|------|---------------|
+| Landing Page | Plus Jakarta Sans (extrabold) | Inter (medium) | JetBrains Mono (bold, uppercase) |
+| Pricing Page | Plus Jakarta Sans (bold) | Inter (regular) | — |
+| CRM App | Plus Jakarta Sans (semibold) | Inter (regular) | JetBrains Mono (bold, uppercase) |
+| Login | Plus Jakarta Sans (bold) | Inter (regular) | — |
 
 ### Hero Headlines
 
@@ -162,7 +178,7 @@ box-shadow: 0 4px 12px rgba(45, 75, 62, 0.2);
 - Background: Peach (#FFF1E6)
 - Primary actions: Forest Green (#2D4B3E)
 - Highlights: Orange (#F7931A)
-- Font: Plus Jakarta Sans
+- Font: Plus Jakarta Sans + Inter
 
 ### Landing Page
 
@@ -175,10 +191,24 @@ box-shadow: 0 4px 12px rgba(45, 75, 62, 0.2);
 
 ## Voice & Tone
 
-### Language
+### Language Rules
 
-- **UI Text:** Bahasa Indonesia
-- **Code/Docs:** English
+| Context | Language | Pronoun |
+|---------|----------|---------|
+| Marketing copy (landing, pricing) | Indonesian | Anda (formal) |
+| CRM UI labels | Indonesian | — |
+| Code & documentation | English | — |
+| Error messages | Indonesian | — |
+| Success messages | Indonesian | — |
+
+### Headline Strategy
+
+| Element | Language | Example |
+|---------|----------|---------|
+| Main headlines | English | "No System, No Growth" |
+| Section titles | English or Indonesian | "Ready to Grow?" |
+| Body copy | Indonesian | Professional, clear |
+| CTAs | Indonesian | "Dapatkan Sistemnya" |
 
 ### Personality
 
@@ -205,6 +235,66 @@ box-shadow: 0 4px 12px rgba(45, 75, 62, 0.2);
 
 ---
 
+## Copy Guidelines
+
+### Indonesian Writing Style
+
+**Do:**
+- Use "Anda" (formal) consistently
+- Write clear, concise sentences
+- Use active voice
+- Keep professional but warm tone
+
+**Don't:**
+- Mix "Anda" and "kamu" in the same context
+- Use casual abbreviations (gak, gimana, dll)
+- Overuse English when Indonesian works
+- Use corporate jargon
+
+### Word Replacements
+
+| Casual (Don't Use) | Professional (Use) |
+|--------------------|-------------------|
+| gak, ga | tidak |
+| gimana | bagaimana |
+| bareng | bersama |
+| buat | untuk |
+| kamu | Anda |
+| aja | saja |
+| udah | sudah |
+| beli-beli | membeli |
+| kelupaan | lupa |
+| urusin | mengurus |
+
+### CRM Label Translations
+
+| English | Indonesian |
+|---------|------------|
+| Dashboard | Dasbor |
+| Lead Management | Kelola Leads |
+| Conversations | Percakapan |
+| Settings | Pengaturan |
+| All Status | Semua Status |
+| Unassigned | Belum ditugaskan |
+| Search contacts... | Cari kontak... |
+| Search conversations... | Cari percakapan... |
+| Delete | Hapus |
+| Cancel | Batal |
+| Save | Simpan |
+| Clear all | Hapus semua |
+| Contact Info | Info Kontak |
+| Lead Status | Status Lead |
+| Lead Score | Skor Lead |
+| Assigned To | Ditugaskan ke |
+| Select a conversation | Pilih percakapan |
+| Unread | Belum dibaca |
+| Active | Aktif |
+| Closed | Selesai |
+| Add note | Tambah catatan |
+| View conversations | Lihat percakapan |
+
+---
+
 ## Messaging Hierarchy
 
 | Priority | Message |
@@ -216,4 +306,22 @@ box-shadow: 0 4px 12px rgba(45, 75, 62, 0.2);
 
 ---
 
-*Last updated: 2026-01-15*
+## Implementation Checklist
+
+### Fonts (Fix Required)
+
+- [ ] Update `src/app/layout.tsx` to use Plus Jakarta Sans + Inter (not Geist)
+- [ ] Remove Geist and Geist_Mono imports
+- [ ] Ensure CRM inherits correct fonts
+
+### CRM Labels (Fix Required)
+
+- [ ] Translate sidebar navigation to Indonesian
+- [ ] Translate database page labels
+- [ ] Translate inbox page labels
+- [ ] Translate settings page labels
+- [ ] Translate dialog/modal text
+
+---
+
+*Last updated: 2026-01-17*
