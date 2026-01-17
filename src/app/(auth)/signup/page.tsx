@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 
-export default function SignupPage() {
+function SignupForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -17,12 +17,17 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get('redirect')
   const supabase = createClient()
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    // Use redirect param or default to dashboard
+    const nextUrl = redirect || '/dashboard'
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -31,7 +36,7 @@ export default function SignupPage() {
         data: {
           full_name: fullName,
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`,
       },
     })
 
@@ -62,7 +67,7 @@ export default function SignupPage() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => router.push('/login')}
+              onClick={() => router.push(redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login')}
             >
               Back to login
             </Button>
@@ -129,7 +134,10 @@ export default function SignupPage() {
             </Button>
             <p className="text-sm text-center text-muted-foreground">
               Already have an account?{' '}
-              <Link href="/login" className="text-primary hover:underline">
+              <Link
+                href={redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login'}
+                className="text-primary hover:underline"
+              >
                 Sign in
               </Link>
             </p>
@@ -137,5 +145,13 @@ export default function SignupPage() {
         </form>
       </Card>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-muted" />}>
+      <SignupForm />
+    </Suspense>
   )
 }

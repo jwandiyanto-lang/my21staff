@@ -185,6 +185,8 @@
   },
   "active": "600c2f6ee49ae613",
   "lastOpenFiles": [
+    "src/components/auth/login-modal.tsx",
+    "src/components/auth",
     "src/app/api/invitations/accept/route.ts",
     "src/app/api/invitations/route.ts",
     "src/app/api/invitations/accept",
@@ -194,8 +196,6 @@
     "supabase/migrations/19_workspace_invitations.sql",
     "node_modules/@aws-sdk/client-sesv2/dist-types/ts3.4/schemas/schemas_0.d.ts",
     "node_modules/@aws-sdk/client-sesv2/dist-types/ts3.4/pagination/index.d.ts",
-    "node_modules/@aws-sdk/client-sesv2/dist-types/ts3.4/pagination/ListTenantsPaginator.d.ts",
-    "node_modules/@aws-sdk/client-sesv2/dist-types/ts3.4/pagination/ListTenantResourcesPaginator.d.ts",
     "node_modules/@aws-sdk/client-sesv2/README.md",
     "node_modules/@aws-sdk/util-arn-parser/README.md",
     "node_modules/@types/nodemailer/README.md",

@@ -1,17 +1,19 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { X } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get('redirect')
   const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -30,7 +32,7 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/dashboard')
+    router.push(redirect || '/dashboard')
     router.refresh()
   }
 
@@ -159,7 +161,10 @@ export default function LoginPage() {
               <div className="mt-8 text-center">
                 <p className="text-sm text-gray-600">
                   Don&apos;t have an account?{' '}
-                  <Link href="/signup" className="font-semibold text-[#2D4B3E] hover:underline">
+                  <Link
+                    href={redirect ? `/signup?redirect=${encodeURIComponent(redirect)}` : '/signup'}
+                    className="font-semibold text-[#2D4B3E] hover:underline"
+                  >
                     Sign up
                   </Link>
                 </p>
@@ -175,5 +180,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-[#9CB99C] via-[#A8C5A8] to-[#B5D1B5]" />}>
+      <LoginForm />
+    </Suspense>
   )
 }
