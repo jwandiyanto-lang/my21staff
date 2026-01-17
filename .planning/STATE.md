@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-14)
 ## Current Position
 
 Phase: 22 (Settings & Data Management)
-Plan: 22-01 complete, more remaining
-Status: In progress - CSV export complete
-Last activity: 2026-01-17 — Plan 22-01 complete (CSV export)
+Plan: 22-02 complete, more remaining
+Status: In progress - CSV import complete
+Last activity: 2026-01-17 — Plan 22-02 complete (CSV import)
 
-Progress: v1.10 ██████████ Complete | v1.11 ██████████ Complete | Phase 22 █░░░░░░░░░ In Progress
+Progress: v1.10 ██████████ Complete | v1.11 ██████████ Complete | Phase 22 ██░░░░░░░░ In Progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31
+- Total plans completed: 32
 - Average duration: 6 min
-- Total execution time: 174 min (excludes manual config)
+- Total execution time: 179 min (excludes manual config)
 
 **By Phase:**
 
@@ -39,7 +39,7 @@ Progress: v1.10 ██████████ Complete | v1.11 █████�
 | 15. Pricing Page | 2/2 | interactive | — |
 | 19. Performance & Security | 8/8 | 33 min | 4 min |
 | 20. Dashboard & Notes | 3/3 | 5 min | 2 min |
-| 22. Settings & Data | 1/? | 4 min | 4 min |
+| 22. Settings & Data | 2/? | 9 min | 5 min |
 
 ## Accumulated Context
 
@@ -85,6 +85,9 @@ Recent (Phase 22):
 - PapaParse for CSV: Fast parsing/generation, handles edge cases gracefully
 - Tags as comma-separated: Array converted to string for CSV readability
 - Template no auth: Public endpoint for CSV template download
+- Phone E.164 normalization: Indonesian 0812 -> +6281, assumes Indonesia if no code
+- CSV import flow: Preview -> validate -> confirm -> batch upsert
+- Duplicate detection: Flag duplicates within CSV file before import
 
 ### Deferred Issues
 
@@ -97,9 +100,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Plan 22-01 complete (CSV export)
+Stopped at: Plan 22-02 complete (CSV import)
 Resume file: None
-Next: Plan 22-02 (CSV import) or other Phase 22 plans
+Next: Plan 22-03 or other Phase 22 plans
 
 ## Deployment Info
 
