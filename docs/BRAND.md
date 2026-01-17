@@ -196,10 +196,10 @@ box-shadow: 0 4px 12px rgba(45, 75, 62, 0.2);
 | Context | Language | Pronoun |
 |---------|----------|---------|
 | Marketing copy (landing, pricing) | Indonesian | Anda (formal) |
-| CRM UI labels | Indonesian | — |
+| CRM UI labels | English | — |
 | Code & documentation | English | — |
-| Error messages | Indonesian | — |
-| Success messages | Indonesian | — |
+| Error messages | English | — |
+| Success messages | English | — |
 
 ### Headline Strategy
 
@@ -266,33 +266,6 @@ box-shadow: 0 4px 12px rgba(45, 75, 62, 0.2);
 | kelupaan | lupa |
 | urusin | mengurus |
 
-### CRM Label Translations
-
-| English | Indonesian |
-|---------|------------|
-| Dashboard | Dasbor |
-| Lead Management | Kelola Leads |
-| Conversations | Percakapan |
-| Settings | Pengaturan |
-| All Status | Semua Status |
-| Unassigned | Belum ditugaskan |
-| Search contacts... | Cari kontak... |
-| Search conversations... | Cari percakapan... |
-| Delete | Hapus |
-| Cancel | Batal |
-| Save | Simpan |
-| Clear all | Hapus semua |
-| Contact Info | Info Kontak |
-| Lead Status | Status Lead |
-| Lead Score | Skor Lead |
-| Assigned To | Ditugaskan ke |
-| Select a conversation | Pilih percakapan |
-| Unread | Belum dibaca |
-| Active | Aktif |
-| Closed | Selesai |
-| Add note | Tambah catatan |
-| View conversations | Lihat percakapan |
-
 ---
 
 ## Messaging Hierarchy
@@ -308,19 +281,17 @@ box-shadow: 0 4px 12px rgba(45, 75, 62, 0.2);
 
 ## Implementation Checklist
 
-### Fonts (Fix Required)
+### Fonts
 
-- [ ] Update `src/app/layout.tsx` to use Plus Jakarta Sans + Inter (not Geist)
-- [ ] Remove Geist and Geist_Mono imports
-- [ ] Ensure CRM inherits correct fonts
+- [x] Update `src/app/layout.tsx` to use Plus Jakarta Sans + Inter (not Geist)
+- [x] Remove Geist and Geist_Mono imports
+- [x] Update `globals.css` font variables
+- [x] Ensure CRM inherits correct fonts
 
-### CRM Labels (Fix Required)
+### Language
 
-- [ ] Translate sidebar navigation to Indonesian
-- [ ] Translate database page labels
-- [ ] Translate inbox page labels
-- [ ] Translate settings page labels
-- [ ] Translate dialog/modal text
+- [x] Marketing pages (landing, pricing): Indonesian with "Anda" pronoun
+- [x] CRM UI: English (keep as-is)
 
 ---
 
