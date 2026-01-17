@@ -270,6 +270,48 @@ export interface Database {
         }
         Relationships: []
       }
+      workspace_invitations: {
+        Row: {
+          id: string
+          workspace_id: string
+          email: string
+          role: string
+          token: string
+          status: string
+          invited_by: string | null
+          expires_at: string
+          accepted_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          workspace_id: string
+          email: string
+          role?: string
+          token: string
+          status?: string
+          invited_by?: string | null
+          expires_at: string
+          accepted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          workspace_id?: string
+          email?: string
+          role?: string
+          token?: string
+          status?: string
+          invited_by?: string | null
+          expires_at?: string
+          accepted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -294,21 +336,7 @@ export type Conversation = Database['public']['Tables']['conversations']['Row']
 export type Message = Database['public']['Tables']['messages']['Row']
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type ContactNote = Database['public']['Tables']['contact_notes']['Row']
-
-// Invitation type (not yet in generated types)
-export interface WorkspaceInvitation {
-  id: string
-  workspace_id: string
-  email: string
-  role: string
-  token: string
-  status: 'pending' | 'accepted' | 'expired' | 'cancelled'
-  invited_by: string | null
-  expires_at: string
-  accepted_at: string | null
-  created_at: string
-  updated_at: string
-}
+export type WorkspaceInvitation = Database['public']['Tables']['workspace_invitations']['Row']
 
 // With author
 export type ContactNoteWithAuthor = ContactNote & {
