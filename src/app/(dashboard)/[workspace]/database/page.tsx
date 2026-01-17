@@ -60,6 +60,9 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
 
   const contacts = (contactsData || []) as Contact[]
 
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser()
+
   // Fetch workspace members with profiles
   const { data: membersData } = await supabase
     .from('workspace_members')
@@ -69,7 +72,32 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
     `)
     .eq('workspace_id', workspace.id)
 
-  const teamMembers = (membersData || []) as unknown as TeamMember[]
+  let teamMembers = (membersData || []) as unknown as TeamMember[]
+
+  // Always include current user in team members list
+  if (user) {
+    const currentUserInList = teamMembers.some(m => m.user_id === user.id)
+    if (!currentUserInList) {
+      // Fetch current user's profile
+      const { data: currentUserProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (currentUserProfile) {
+        // Add current user as a team member
+        teamMembers = [{
+          id: `current-${user.id}`,
+          workspace_id: workspace.id,
+          user_id: user.id,
+          role: 'owner',
+          created_at: new Date().toISOString(),
+          profile: currentUserProfile,
+        } as TeamMember, ...teamMembers]
+      }
+    }
+  }
 
   // Extract contact tags from settings
   const contactTags = (workspace.settings?.contact_tags as string[]) || ['Community', '1on1']

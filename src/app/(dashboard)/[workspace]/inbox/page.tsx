@@ -61,6 +61,9 @@ export default async function InboxPage({ params }: InboxPageProps) {
 
   const conversations = (conversationsData || []) as unknown as ConversationWithContact[]
 
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser()
+
   // Fetch workspace members with profiles
   const { data: membersData } = await supabase
     .from('workspace_members')
@@ -70,7 +73,32 @@ export default async function InboxPage({ params }: InboxPageProps) {
     `)
     .eq('workspace_id', workspace.id)
 
-  const teamMembers = (membersData || []) as unknown as TeamMember[]
+  let teamMembers = (membersData || []) as unknown as TeamMember[]
+
+  // Always include current user in team members list
+  if (user) {
+    const currentUserInList = teamMembers.some(m => m.user_id === user.id)
+    if (!currentUserInList) {
+      // Fetch current user's profile
+      const { data: currentUserProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (currentUserProfile) {
+        // Add current user as a team member
+        teamMembers = [{
+          id: `current-${user.id}`,
+          workspace_id: workspace.id,
+          user_id: user.id,
+          role: 'owner',
+          created_at: new Date().toISOString(),
+          profile: currentUserProfile,
+        } as TeamMember, ...teamMembers]
+      }
+    }
+  }
 
   // Extract quick replies and contact tags from settings
   const quickReplies = (workspace.settings?.quick_replies as Array<{id: string, label: string, text: string}>) || []

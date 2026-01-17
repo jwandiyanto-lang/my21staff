@@ -25,8 +25,9 @@ export function getSupabaseConfig(): SupabaseConfig {
     case 'production':
     default:
       return {
-        url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        // Fallback values for build time (client will re-fetch at runtime)
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+        anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key',
         serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
       }
   }
