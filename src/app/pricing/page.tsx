@@ -170,10 +170,10 @@ export default function PricingPage() {
                     Kemarin ada yang chat. Tanya harga. Sudah mau DP.
                   </p>
                   <p className="mt-3">
-                    Tapi karena saya lagi sibuk urusin customer langganan, jadi kelupaan bales. Saya chat lagi — dia sudah <strong>ghosting</strong>.
+                    Tapi karena saya sedang sibuk mengurus customer langganan, jadi lupa membalas. Saya chat lagi — dia sudah <strong>ghosting</strong>.
                   </p>
                   <p className="mt-3">
-                    Lalu kadang saya bisa urusin client baru, tapi gak beli-beli. Sampai keluarga teriak kalau saya tidak ada waktu untuk mereka.
+                    Lalu kadang saya bisa mengurus client baru, tapi tidak juga membeli. Sampai keluarga mengeluh karena saya tidak ada waktu untuk mereka.
                   </p>
                 </div>
 
@@ -257,12 +257,12 @@ export default function PricingPage() {
               </p>
 
               <p>
-                Mereka ikut instruksi <strong className="text-landing-text">persis seperti yang kamu mau</strong>.
+                Mereka mengikuti instruksi <strong className="text-landing-text">persis seperti yang Anda inginkan</strong>.
                 Dan semua aktivitas bisa <strong className="text-landing-text">di-track kapan saja</strong>.
               </p>
 
               <p className="text-landing-text font-medium">
-                Kamu tetap pegang kontrol. Tapi tidak perlu pegang semuanya sendiri.
+                Anda tetap memegang kontrol. Tapi tidak perlu mengerjakan semuanya sendiri.
               </p>
             </div>
 
@@ -272,10 +272,10 @@ export default function PricingPage() {
                 Ini alasan kami ada.
               </p>
               <p className="text-lg md:text-xl text-white leading-relaxed">
-                Kami <strong className="text-black">tidak jual software dan kamu ikut aturan kita</strong>.
+                Kami <strong className="text-black">tidak jual software lalu Anda ikut aturan kami</strong>.
               </p>
               <p className="text-lg md:text-xl text-white leading-relaxed mt-3">
-                Kami <strong className="text-black">diskusi dan bangun sistem dari awal</strong> seiring bisnis kamu bertumbuh.
+                Kami <strong className="text-black">diskusi dan bangun sistem dari awal</strong> seiring bisnis Anda bertumbuh.
               </p>
             </div>
           </div>
@@ -304,7 +304,7 @@ export default function PricingPage() {
                   <ul className="text-sm text-landing-text space-y-1">
                     <li>→ WhatsApp Bot balas otomatis 24/7</li>
                     <li>→ Grading score setiap lead di CRM</li>
-                    <li>→ Kamu di-info mana yang serius</li>
+                    <li>→ Anda diinformasikan mana yang serius</li>
                   </ul>
                 </div>
               </div>
@@ -321,7 +321,7 @@ export default function PricingPage() {
                   <ul className="text-sm text-landing-text space-y-1">
                     <li>→ Task otomatis dari AI</li>
                     <li>→ Reminder follow-up partner</li>
-                    <li>→ Waktu untuk kamu atur strategi</li>
+                    <li>→ Waktu untuk Anda mengatur strategi</li>
                   </ul>
                 </div>
               </div>
@@ -337,8 +337,8 @@ export default function PricingPage() {
                   <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
                   <ul className="text-sm text-landing-text space-y-1">
                     <li>→ Transaksi tercatat otomatis</li>
-                    <li>→ Laporan mingguan ke chat kamu</li>
-                    <li>→ Pembukuan rapi untuk kamu</li>
+                    <li>→ Laporan mingguan ke WhatsApp Anda</li>
+                    <li>→ Pembukuan rapi untuk Anda</li>
                   </ul>
                 </div>
               </div>
@@ -372,8 +372,8 @@ export default function PricingPage() {
                   <ul className="text-sm text-landing-text space-y-1">
                     <li>→ AI jalan terus 24/7</li>
                     <li>→ Semua aktivitas di-track</li>
-                    <li>→ Kamu di notif yang penting-penting aja</li>
-                    <li>→ Kamu bisa ambil alih kapan saja</li>
+                    <li>→ Anda dinotifikasi untuk hal penting saja</li>
+                    <li>→ Anda bisa ambil alih kapan saja</li>
                   </ul>
                 </div>
               </div>
@@ -382,7 +382,7 @@ export default function PricingPage() {
               <div className="border-2 border-landing-cta bg-landing-cta/10 rounded-2xl p-6 flex flex-col justify-center">
                 <p className="text-xl font-bold text-landing-text mb-2">Punya masalah serupa?</p>
                 <p className="text-landing-text/70 text-sm">
-                  Apa masalah kamu? Kita atur sistemnya.
+                  Apa masalah Anda? Mari kita atur sistemnya.
                 </p>
               </div>
             </div>
@@ -393,7 +393,7 @@ export default function PricingPage() {
         <section id="pricing" className="bg-landing-hero text-white py-16">
           <div className="mx-auto max-w-5xl px-6">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              Siap untuk buat <span className="text-landing-cta">Sistem Kamu</span>?
+              Siap untuk membangun <span className="text-landing-cta">Sistem Anda</span>?
             </h2>
 
             <motion.div
@@ -471,7 +471,7 @@ export default function PricingPage() {
                   <span className="text-3xl font-extrabold">Custom</span>
                 </div>
                 <p className="text-sm text-landing-text/70 mb-6 flex-1">
-                  Butuh lebih dari Solo atau Team? Yuk ngobrol dulu, kita sesuaikan dengan kebutuhan bisnis kamu.
+                  Butuh lebih dari Solo atau Team? Mari diskusi, kami sesuaikan dengan kebutuhan bisnis Anda.
                 </p>
                 <button
                   onClick={() => openModal("Studio")}
@@ -542,7 +542,7 @@ export default function PricingPage() {
                 Tertarik paket {selectedPlan}?
               </h3>
               <p className="text-sm text-landing-text/60 mb-6">
-                Isi form ini, kami akan hubungi kamu segera.
+                Isi form ini, kami akan menghubungi Anda segera.
               </p>
 
               {/* Form */}
@@ -633,7 +633,7 @@ export default function PricingPage() {
                 {/* 5. Dari mana leads masuk (checkboxes) */}
                 <div>
                   <label className="block text-sm font-medium text-landing-text mb-2">
-                    Dari mana leads kamu biasa masuk?
+                    Dari mana leads Anda biasanya masuk?
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {[

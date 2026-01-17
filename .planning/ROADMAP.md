@@ -196,6 +196,28 @@ Plans:
 
 ---
 
+## v1.10 — Brand Polish
+
+### Phase 20: Brand Consistency & Professional Copy
+
+**Goal:** Ensure consistent brand application and professional Indonesian copy across all customer-facing pages
+**Depends on:** Phase 15 (pricing page), Phase 14 (landing page)
+**Plans:** TBD (interactive session)
+
+**Scope:**
+- Audit and update copy across landing page, pricing page, CRM
+- Professional Indonesian with English headlines
+- Consistent voice and tone throughout
+- Update BRAND.md with copy guidelines
+
+**Deliverables:**
+- [ ] Updated BRAND.md with copy guidelines section
+- [ ] Landing page copy polish
+- [ ] Pricing page copy consistency
+- [ ] CRM labels and messages review
+
+---
+
 ## v2.0 — Form & Lead Capture (Future)
 
 ### Phase 16: Pricing Form Enhancement
@@ -238,3 +260,4 @@ Plans:
 | 17. Inbox UI/UX Fixes | v1.7 | 1/1 | Complete | 2026-01-16 |
 | 18. Kapso Bot Setup | v1.8 | 0/2 | Planned | — |
 | 19. Performance & Security | v1.9 | 0/5 | Planned | — |
+| 20. Brand Consistency | v1.10 | 0/? | Not started | — |

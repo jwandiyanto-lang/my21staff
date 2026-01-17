@@ -5,16 +5,18 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** v1.9 — Performance & Security
+**Current focus:** v1.10 — Brand Polish
 
 ## Current Position
 
-Phase: 19 (Performance & Security)
-Plan: 08 of 8 + hotfixes
-Status: Phase 19 COMPLETE
-Last activity: 2026-01-17 — Fixed 3 critical auth vulnerabilities
+Phase: 20 (Brand Consistency & Professional Copy) - CONTEXT GATHERING
+Plan: None yet
+Status: Discussing requirements
+Last activity: 2026-01-17 — Created Phase 20 for brand consistency
 
-Progress: v1.9 [==========] 8/8 plans + 3 hotfixes complete
+Paused: Phase 18 (Kapso Bot Setup) — waiting for Vercel reset
+
+Progress: v1.10 ░░░░░░░░░░ Phase 20 context gathering
 
 ## Performance Metrics
 
@@ -49,6 +51,7 @@ Progress: v1.9 [==========] 8/8 plans + 3 hotfixes complete
 - Phase 17 added: Inbox UI/UX Fixes (v1.7)
 - Phase 18 added: Kapso Bot Setup & Verification (v1.8)
 - Phase 19 added: Performance & Security (v1.9)
+- Phase 20 added: Brand Consistency & Professional Copy (v1.10)
 
 ### Decisions
 

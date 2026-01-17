@@ -84,7 +84,7 @@ export default function Home() {
                 variants={fadeInUp}
                 className="text-lg md:text-xl text-white/90 max-w-lg mb-10 leading-relaxed"
               >
-                Dari berantakan menjadi satu sistem. Software yang bertumbuh bareng bisnis Anda!
+                Dari berantakan menjadi satu sistem. Software yang bertumbuh bersama bisnis Anda.
               </motion.p>
 
               <motion.div variants={fadeInUp}>
@@ -205,17 +205,17 @@ export default function Home() {
               {[
                 {
                   title: "Mau Kualitas, Harga Murah",
-                  desc: "Diadu sama kompetitor yang banting harga.",
+                  desc: "Dibandingkan dengan kompetitor yang banting harga.",
                   image: "/assets/problems/problem-harga-murah.jpg",
                 },
                 {
                   title: "Kerja Sampai Begadang",
-                  desc: "Gak ada waktu buat keluarga.",
+                  desc: "Tidak ada waktu untuk keluarga.",
                   image: "/assets/problems/problem-begadang.jpg",
                 },
                 {
                   title: "Susah Cari Orang",
-                  desc: "Banyak mau, kualitas ga sesuai ekspektasi.",
+                  desc: "Banyak tuntutan, kualitas tidak sesuai ekspektasi.",
                   image: "/assets/problems/problem-cari-orang.jpg",
                 },
               ].map((problem, i) => (
@@ -271,7 +271,7 @@ export default function Home() {
               className="text-center mt-12"
             >
               <p className="text-lg text-landing-text-muted italic">
-                &ldquo;Apa memang saya gak cocok jadi pengusaha?&rdquo;
+                &ldquo;Apa memang saya tidak cocok jadi pengusaha?&rdquo;
               </p>
             </motion.div>
           </div>
@@ -474,8 +474,8 @@ export default function Home() {
 
                 <motion.div variants={fadeInUp} className="space-y-4 mb-8">
                   {[
-                    { title: "CRM yang Bertumbuh Bareng Bisnis Anda", desc: "Lead Management • Website • Staff Infrastructure" },
-                    { title: "Staff Digital 24/7", desc: "Balas chat otomatis • Follow-up tanpa lupa" },
+                    { title: "CRM yang Bertumbuh Bersama Bisnis Anda", desc: "Lead Management • Website • Staff Infrastructure" },
+                    { title: "Staff Digital 24/7", desc: "Respons otomatis • Follow-up tanpa terlewat" },
                     { title: "Keputusan Berbasis Data", desc: "Lihat mana yang hot • Track conversion • Laporan mingguan" },
                   ].map((item) => (
                     <div key={item.title} className="flex gap-4 items-start">
