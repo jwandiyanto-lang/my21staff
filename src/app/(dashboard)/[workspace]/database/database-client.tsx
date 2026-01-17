@@ -30,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ChevronDown, Filter, Tag, SlidersHorizontal, X, Loader2, User } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Filter, Tag, SlidersHorizontal, X, Loader2, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { Contact, Workspace, WorkspaceMember, Profile } from '@/types/database'
@@ -86,7 +86,7 @@ interface DatabaseClientProps {
   teamMembers?: TeamMember[]
 }
 
-const PAGE_SIZE = 50
+const PAGE_SIZE = 25
 
 export function DatabaseClient({ workspace, contacts: initialContacts, totalCount, contactTags = ['Community', '1on1'], teamMembers = [] }: DatabaseClientProps) {
   const [contacts, setContacts] = useState<Contact[]>(initialContacts)
@@ -98,8 +98,8 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [page, setPage] = useState(0)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isLoadingPage, setIsLoadingPage] = useState(false)
 
   // Persist filters to localStorage
   useEffect(() => {
@@ -218,26 +218,29 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
     }
   }, [contactToDelete])
 
-  // Handle load more contacts
-  const loadMoreContacts = useCallback(async () => {
-    setIsLoadingMore(true)
+  // Handle page navigation
+  const goToPage = useCallback(async (page: number) => {
+    if (page === currentPage) return
+    setIsLoadingPage(true)
     try {
-      const nextPage = page + 1
-      const response = await fetch(`/api/contacts?workspace=${workspace.id}&page=${nextPage}&limit=${PAGE_SIZE}`)
+      const response = await fetch(`/api/contacts?workspace=${workspace.id}&page=${page}&limit=${PAGE_SIZE}`)
       if (response.ok) {
         const data = await response.json()
-        setContacts(prev => [...prev, ...data.contacts])
-        setPage(nextPage)
+        setContacts(data.contacts)
+        setCurrentPage(page)
       } else {
-        toast.error('Failed to load more contacts')
+        toast.error('Failed to load contacts')
       }
     } catch (error) {
-      console.error('Failed to load more contacts:', error)
-      toast.error('Failed to load more contacts')
+      console.error('Failed to load contacts:', error)
+      toast.error('Failed to load contacts')
     } finally {
-      setIsLoadingMore(false)
+      setIsLoadingPage(false)
     }
-  }, [page, workspace.id])
+  }, [currentPage, workspace.id])
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
   // Convert team members to column format
   const columnTeamMembers = useMemo(
@@ -342,8 +345,8 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
         <div>
           <h1 className="text-2xl font-semibold">Lead Management</h1>
           <p className="text-muted-foreground">
-            Showing {contacts.length} of {totalCount} contact{totalCount !== 1 ? 's' : ''}
-            {filteredContacts.length !== contacts.length && ` (${filteredContacts.length} filtered)`}
+            {totalCount} contact{totalCount !== 1 ? 's' : ''}
+            {filteredContacts.length !== contacts.length && ` (${filteredContacts.length} shown after filter)`}
           </p>
         </div>
       </div>
@@ -564,23 +567,67 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
         onRowClick={handleRowClick}
       />
 
-      {/* Load More Button */}
-      {contacts.length < totalCount && (
-        <div className="flex justify-center">
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
           <Button
             variant="outline"
-            onClick={loadMoreContacts}
-            disabled={isLoadingMore}
+            size="sm"
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1 || isLoadingPage}
           >
-            {isLoadingMore ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
-              </>
-            ) : (
-              `Load More (${totalCount - contacts.length} remaining)`
-            )}
+            <ChevronLeft className="h-4 w-4" />
           </Button>
+
+          {/* Page numbers */}
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+              // Show first, last, current, and adjacent pages
+              const showPage = page === 1 ||
+                page === totalPages ||
+                Math.abs(page - currentPage) <= 1
+
+              // Show ellipsis
+              const showEllipsisBefore = page === currentPage - 2 && currentPage > 3
+              const showEllipsisAfter = page === currentPage + 2 && currentPage < totalPages - 2
+
+              if (showEllipsisBefore || showEllipsisAfter) {
+                return <span key={page} className="px-2 text-muted-foreground">...</span>
+              }
+
+              if (!showPage) return null
+
+              return (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? "default" : "outline"}
+                  size="sm"
+                  className="w-9"
+                  onClick={() => goToPage(page)}
+                  disabled={isLoadingPage}
+                >
+                  {isLoadingPage && page === currentPage ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    page
+                  )}
+                </Button>
+              )
+            })}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages || isLoadingPage}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+
+          <span className="text-sm text-muted-foreground ml-2">
+            Page {currentPage} of {totalPages}
+          </span>
         </div>
       )}
 

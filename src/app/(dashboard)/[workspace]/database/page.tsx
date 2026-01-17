@@ -52,7 +52,7 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
     .select('*', { count: 'exact' })
     .eq('workspace_id', workspace.id)
     .order('created_at', { ascending: false })
-    .range(0, 49) // First 50 contacts
+    .range(0, 24) // First 25 contacts
 
   if (contactsError) {
     console.error('Error fetching contacts:', contactsError)
