@@ -3,7 +3,7 @@ status: complete
 phase: 21-lead-polish-performance
 source: 21-01-SUMMARY.md, 21-02-SUMMARY.md, 21-03-SUMMARY.md, 21-04-SUMMARY.md, 21-05-SUMMARY.md, 21-06-SUMMARY.md, 21-07-SUMMARY.md, fixes
 started: 2026-01-17T12:00:00Z
-updated: 2026-01-17T16:00:00Z
+updated: 2026-01-17T17:30:00Z
 ---
 
 ## Current Test
@@ -17,12 +17,13 @@ expected: Edit a contact's name - the avatar color should NOT change (stays same
 result: pass
 
 ### 2. Info Panel Calendar Icon
-expected: In contact detail sheet, the "Added" date row shows a small calendar icon, NOT a full calendar widget
+expected: In contact detail sheet, the "Added" date row shows plain text date, NOT a calendar widget
 result: pass
 
 ### 3. Assigned To Dropdown in Database
-expected: In Database table, clicking the Assigned To cell ("---") opens a dropdown. Shows "Unassigned" option and any team members.
+expected: In Database table, clicking the Assigned To cell opens a dropdown. Shows current user and any team members.
 result: pass
+note: Required migration 18 to add assigned_to column to contacts table
 
 ### 4. Contacts Pagination Load More
 expected: In Database view, header shows "Showing X of Y contacts". If more than 50 contacts exist, "Load More (N remaining)" button appears below the table.
@@ -40,8 +41,8 @@ result: pass
 expected: In Database table, clicking the Tags cell opens a dropdown with checkboxes. Toggling a tag updates immediately without page refresh.
 result: pass
 
-### 8. Tags Display with Overflow
-expected: In Database table, if a contact has many tags, shows first 2 tags with "+N" badge for overflow.
+### 8. Tags Display Compact
+expected: In Database table: 1 tag shows tag name, 2+ tags shows "+N" badge only
 result: pass
 
 ### 9. Inbox Conversations Pagination
@@ -67,3 +68,10 @@ skipped: 0
 ## Gaps
 
 [none]
+
+## Post-UAT Fixes Applied
+
+1. **assigned_to column** - Migration 18 created to add column to contacts table
+2. **Tags compact display** - 1 tag = name, 2+ tags = "+N" only
+3. **Auth fix** - Admin client bypass for workspace access check
+4. **Calendar widget** - Removed inline calendar from Added date rows
