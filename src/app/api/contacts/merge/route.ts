@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`[Merge] Successfully merged contact ${mergeContactId} into ${keepContactId}. Phone: ${updatedKeepContact.phone}`)
+    console.log(`[Merge] Successfully merged contact ${mergeContactId} into ${keepContactId}`)
 
     return NextResponse.json({
       success: true,
