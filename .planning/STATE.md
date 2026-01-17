@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-14)
 
 ## Current Position
 
-Phase: 21 (Lead Management Polish + Performance) - IN PROGRESS
-Plan: 21-05 complete, 2 remaining (21-06 to 21-07)
-Status: Plan 21-05 executed - Conversations pagination added
-Last activity: 2026-01-17 — Plan 21-05 complete
+Phase: 21 (Lead Management Polish + Performance) - COMPLETE
+Plan: 21-07 complete, 0 remaining
+Status: All plans executed - Phase 21 complete
+Last activity: 2026-01-17 — Plan 21-07 complete (webhook batching)
 
-Progress: v1.10 ██████████ Complete & Deployed | v1.11 █████░░░░░ 21-05 done
+Progress: v1.10 ██████████ Complete & Deployed | v1.11 ██████████ Phase 21 COMPLETE
 
 ## Performance Metrics
 
@@ -74,6 +74,10 @@ Recent (Phase 21):
 - Inline tags dropdown: Checkbox-style tag toggle with optimistic updates in database table
 - Conversations pagination: Same load more pattern applied to inbox (50 per page)
 - Combined time display: Activity items show relative + absolute time ("2 hours ago · Jan 17, 14:30")
+- InfoSidebar extraction: Reusable component at src/components/contact/info-sidebar.tsx
+- Bidirectional state sync: onContactUpdate callback syncs sidebar changes to conversation list
+- Webhook async processing: Return 200 immediately, process payload in background
+- Webhook batch operations: IN queries for contacts/conversations, batch inserts for messages
 
 ### Deferred Issues
 
@@ -86,9 +90,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Plan 21-05 complete (Conversations pagination)
+Stopped at: Phase 21 complete (all 7 plans executed)
 Resume file: None
-Next: Execute plan 21-06
+Next: Deploy v1.11 or start Phase 22
 
 ## Deployment Info
 
