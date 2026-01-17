@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
+import { verifyKapsoSignature } from '@/lib/kapso/verify-signature'
 import type { Json } from '@/types/database'
 
 // PII masking helpers for safe logging
@@ -72,7 +73,24 @@ export async function POST(request: NextRequest) {
   const successResponse = NextResponse.json({ received: true })
 
   try {
-    const rawPayload = await request.json()
+    // Get raw body for signature verification
+    const rawBody = await request.text()
+    const signature = request.headers.get('x-kapso-signature')
+    const webhookSecret = process.env.KAPSO_WEBHOOK_SECRET
+
+    // Verify signature if webhook secret is configured
+    if (webhookSecret) {
+      if (!verifyKapsoSignature(rawBody, signature, webhookSecret)) {
+        console.error('[Webhook] Invalid signature - rejecting request')
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+      }
+      console.log('[Webhook] Signature verified')
+    } else {
+      console.log('[Webhook] Warning: KAPSO_WEBHOOK_SECRET not set - skipping signature verification')
+    }
+
+    // Parse body after verification
+    const rawPayload = JSON.parse(rawBody)
 
     // Always log incoming webhook for debugging (masked for privacy)
     console.log('[Webhook] Received payload (masked):', maskPayload(rawPayload).substring(0, 500))
