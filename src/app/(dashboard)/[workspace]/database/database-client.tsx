@@ -81,11 +81,14 @@ function loadFiltersFromStorage(): DatabaseFilters {
 interface DatabaseClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
   contacts: Contact[]
+  totalCount: number
   contactTags?: string[]
   teamMembers?: TeamMember[]
 }
 
-export function DatabaseClient({ workspace, contacts: initialContacts, contactTags = ['Community', '1on1'], teamMembers = [] }: DatabaseClientProps) {
+const PAGE_SIZE = 50
+
+export function DatabaseClient({ workspace, contacts: initialContacts, totalCount, contactTags = ['Community', '1on1'], teamMembers = [] }: DatabaseClientProps) {
   const [contacts, setContacts] = useState<Contact[]>(initialContacts)
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>(() => loadFiltersFromStorage().activeStatus)
   const [selectedTags, setSelectedTags] = useState<string[]>(() => loadFiltersFromStorage().selectedTags)
@@ -95,6 +98,8 @@ export function DatabaseClient({ workspace, contacts: initialContacts, contactTa
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [page, setPage] = useState(0)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
 
   // Persist filters to localStorage
   useEffect(() => {
@@ -183,6 +188,27 @@ export function DatabaseClient({ workspace, contacts: initialContacts, contactTa
       setIsDeleting(false)
     }
   }, [contactToDelete])
+
+  // Handle load more contacts
+  const loadMoreContacts = useCallback(async () => {
+    setIsLoadingMore(true)
+    try {
+      const nextPage = page + 1
+      const response = await fetch(`/api/contacts?workspace=${workspace.id}&page=${nextPage}&limit=${PAGE_SIZE}`)
+      if (response.ok) {
+        const data = await response.json()
+        setContacts(prev => [...prev, ...data.contacts])
+        setPage(nextPage)
+      } else {
+        toast.error('Failed to load more contacts')
+      }
+    } catch (error) {
+      console.error('Failed to load more contacts:', error)
+      toast.error('Failed to load more contacts')
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }, [page, workspace.id])
 
   // Convert team members to column format
   const columnTeamMembers = useMemo(
@@ -285,7 +311,8 @@ export function DatabaseClient({ workspace, contacts: initialContacts, contactTa
         <div>
           <h1 className="text-2xl font-semibold">Lead Management</h1>
           <p className="text-muted-foreground">
-            {filteredContacts.length} of {contacts.length} contact{contacts.length !== 1 ? 's' : ''}
+            Showing {contacts.length} of {totalCount} contact{totalCount !== 1 ? 's' : ''}
+            {filteredContacts.length !== contacts.length && ` (${filteredContacts.length} filtered)`}
           </p>
         </div>
       </div>
@@ -505,6 +532,26 @@ export function DatabaseClient({ workspace, contacts: initialContacts, contactTa
         searchPlaceholder="Search contacts..."
         onRowClick={handleRowClick}
       />
+
+      {/* Load More Button */}
+      {contacts.length < totalCount && (
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            onClick={loadMoreContacts}
+            disabled={isLoadingMore}
+          >
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              `Load More (${totalCount - contacts.length} remaining)`
+            )}
+          </Button>
+        </div>
+      )}
 
       {/* Contact Detail Sheet */}
       <ContactDetailSheet
