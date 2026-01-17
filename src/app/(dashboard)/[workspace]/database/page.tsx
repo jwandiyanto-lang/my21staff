@@ -23,6 +23,7 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
           slug: MOCK_WORKSPACE.slug,
         }}
         contacts={MOCK_CONTACTS}
+        totalCount={MOCK_CONTACTS.length}
         contactTags={['Community', '1on1']}
         teamMembers={MOCK_TEAM_MEMBERS}
       />
@@ -45,12 +46,13 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
 
   const workspace = workspaceData as Pick<Workspace, 'id' | 'name' | 'slug'> & { settings: Record<string, unknown> | null }
 
-  // Fetch contacts for this workspace
-  const { data: contactsData, error: contactsError } = await supabase
+  // Fetch contacts for this workspace with pagination
+  const { data: contactsData, count: totalCount, error: contactsError } = await supabase
     .from('contacts')
-    .select('*')
+    .select('*', { count: 'exact' })
     .eq('workspace_id', workspace.id)
     .order('created_at', { ascending: false })
+    .range(0, 49) // First 50 contacts
 
   if (contactsError) {
     console.error('Error fetching contacts:', contactsError)
@@ -76,6 +78,7 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
     <DatabaseClient
       workspace={workspace}
       contacts={contacts}
+      totalCount={totalCount ?? 0}
       contactTags={contactTags}
       teamMembers={teamMembers}
     />
