@@ -164,8 +164,9 @@ export async function POST(
     return NextResponse.json({ note })
   } catch (error) {
     console.error('Error in notes API:', error)
+    const message = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Internal server error: ${message}` },
       { status: 500 }
     )
   }
