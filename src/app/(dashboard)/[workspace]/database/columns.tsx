@@ -154,20 +154,18 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
       const tags = row.getValue('tags') as string[] || []
 
       if (!onTagsChange || contactTags.length === 0) {
-        // Read-only display
+        // Read-only display - compact: 1 tag + count
         if (tags.length === 0) {
           return <span className="text-muted-foreground">-</span>
         }
         return (
-          <div className="flex flex-wrap gap-1 max-w-[200px]">
-            {tags.slice(0, 2).map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            {tags.length > 2 && (
-              <Badge variant="outline" className="text-xs">
-                +{tags.length - 2}
+          <div className="flex items-center gap-1">
+            <Badge variant="secondary" className="text-xs truncate max-w-[80px]">
+              {tags[0]}
+            </Badge>
+            {tags.length > 1 && (
+              <Badge variant="outline" className="text-xs shrink-0">
+                +{tags.length - 1}
               </Badge>
             )}
           </div>
@@ -192,15 +190,13 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
               </button>
             ) : (
               <button className="flex items-center gap-1 px-2 py-1 rounded-md text-xs hover:bg-muted transition-colors">
-                <div className="flex gap-1 max-w-[150px]">
-                  {tags.slice(0, 2).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                  {tags.length > 2 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{tags.length - 2}
+                <div className="flex items-center gap-1">
+                  <Badge variant="secondary" className="text-xs truncate max-w-[80px]">
+                    {tags[0]}
+                  </Badge>
+                  {tags.length > 1 && (
+                    <Badge variant="outline" className="text-xs shrink-0">
+                      +{tags.length - 1}
                     </Badge>
                   )}
                 </div>
