@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check, StickyNote, Send, ChevronDown, ChevronUp, X, Phone, Mail, MapPin, Calendar, Star, Info, XCircle, Reply, UserPlus } from 'lucide-react'
+import { Loader2, MessageSquare, Clock, Bot, User, FileText, Film, Download, MoreVertical, Merge, Search, Check, Send, ChevronDown, ChevronUp, X, Phone, Mail, MapPin, Calendar, Star, Info, XCircle, Reply, UserPlus } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -34,11 +34,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import { createClient } from '@/lib/supabase/client'
-import type { Contact, Message, Profile, ContactNote, WorkspaceMember } from '@/types/database'
-
-type ContactNoteWithAuthor = ContactNote & {
-  author?: Profile
-}
+import type { Contact, Message, Profile, WorkspaceMember } from '@/types/database'
 
 type TeamMember = WorkspaceMember & { profile: Profile | null }
 
@@ -310,14 +306,6 @@ export function MessageThread({
   const [selectedEmail, setSelectedEmail] = useState<string>('') // Which email to keep
   const [isMerging, setIsMerging] = useState(false)
 
-  // Notes panel state
-  const [showNotesPanel, setShowNotesPanel] = useState(false)
-  const [notes, setNotes] = useState<ContactNoteWithAuthor[]>([])
-  const [isLoadingNotes, setIsLoadingNotes] = useState(false)
-  const [notesLoaded, setNotesLoaded] = useState(false)
-  const [newNoteContent, setNewNoteContent] = useState('')
-  const [isAddingNote, setIsAddingNote] = useState(false)
-
   // Contact details panel state
   const [showContactDetails, setShowContactDetails] = useState(false)
 
@@ -472,70 +460,8 @@ export function MessageThread({
     }
   }
 
-  // Load notes when panel is opened
-  const loadNotes = useCallback(async () => {
-    if (notesLoaded || isLoadingNotes) return
-
-    setIsLoadingNotes(true)
-    try {
-      const response = await fetch(`/api/contacts/${conversationContact.id}/notes`)
-      if (response.ok) {
-        const { notes: notesData } = await response.json()
-        setNotes(notesData || [])
-      }
-      setNotesLoaded(true)
-    } catch (error) {
-      console.error('Error loading notes:', error)
-      setNotesLoaded(true)
-    } finally {
-      setIsLoadingNotes(false)
-    }
-  }, [conversationContact.id, notesLoaded, isLoadingNotes])
-
-  // Toggle notes panel
-  const toggleNotesPanel = () => {
-    const newState = !showNotesPanel
-    setShowNotesPanel(newState)
-    if (newState && !notesLoaded) {
-      loadNotes()
-    }
-  }
-
-  // Add a new note
-  const handleAddNote = async () => {
-    if (!newNoteContent.trim()) return
-
-    setIsAddingNote(true)
-    try {
-      const response = await fetch(`/api/contacts/${conversationContact.id}/notes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: newNoteContent.trim() }),
-      })
-
-      if (response.ok) {
-        const { note } = await response.json()
-        setNotes((prev) => [note, ...prev])
-        setNewNoteContent('')
-        toast.success('Note added')
-      } else {
-        const error = await response.json()
-        toast.error(error.error || 'Failed to add note')
-      }
-    } catch (error) {
-      console.error('Error adding note:', error)
-      toast.error('Failed to add note')
-    } finally {
-      setIsAddingNote(false)
-    }
-  }
-
   // Reset panels when contact changes
   useEffect(() => {
-    setNotes([])
-    setNotesLoaded(false)
-    setShowNotesPanel(false)
-    setNewNoteContent('')
     setShowContactDetails(false)
   }, [conversationContact.id])
 
@@ -638,22 +564,6 @@ export function MessageThread({
 
       {/* Secondary header with actions */}
       <div className="px-4 py-2 border-b bg-muted/30 flex items-center gap-2">
-        {/* Notes Toggle */}
-        <Button
-          variant={showNotesPanel ? 'secondary' : 'ghost'}
-          size="sm"
-          onClick={toggleNotesPanel}
-          className="gap-1.5 h-8 text-xs"
-        >
-          <StickyNote className="h-3.5 w-3.5" />
-          Notes
-          {notes.length > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary">
-              {notes.length}
-            </span>
-          )}
-        </Button>
-
         {/* Merge Button */}
         <Button
           variant="ghost"
@@ -785,71 +695,6 @@ export function MessageThread({
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Notes Panel (Collapsible) */}
-      {showNotesPanel && (
-        <div className="border-b bg-muted/30">
-          {/* Add Note Input */}
-          <div className="p-3 border-b">
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Add a note about this lead..."
-                value={newNoteContent}
-                onChange={(e) => setNewNoteContent(e.target.value)}
-                className="min-h-[50px] text-sm resize-none bg-background"
-                disabled={isAddingNote}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && e.metaKey) {
-                    e.preventDefault()
-                    handleAddNote()
-                  }
-                }}
-              />
-              <Button
-                size="icon"
-                onClick={handleAddNote}
-                disabled={!newNoteContent.trim() || isAddingNote}
-                className="h-[50px] w-[50px]"
-              >
-                {isAddingNote ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">⌘+Enter to save</p>
-          </div>
-
-          {/* Notes List */}
-          <div className="max-h-48 overflow-auto">
-            {isLoadingNotes ? (
-              <div className="flex items-center justify-center p-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : notes.length > 0 ? (
-              <div className="divide-y">
-                {notes.map((note) => (
-                  <div key={note.id} className="p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm whitespace-pre-wrap flex-1">{note.content}</p>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                      <span>{note.author?.full_name || note.author?.email || 'Unknown'}</span>
-                      <span>•</span>
-                      <span>{formatWIB(note.created_at, DATE_FORMATS.DATETIME)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                No notes yet. Add the first note above.
-              </div>
-            )}
-          </div>
         </div>
       )}
 
