@@ -61,9 +61,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Footer */}
         <footer className="h-10 px-8 bg-sidebar/40 border-t border-black/5 flex items-center justify-between shrink-0">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-            © 2024 MY21STAFF INC.
-          </p>
+<div />
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-accent" />
             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">

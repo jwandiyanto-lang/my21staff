@@ -225,19 +225,23 @@ Plans:
 
 **Goal:** Connect website forms directly to CRM database with instant Telegram notifications
 **Depends on:** Phase 20
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 21-01: Leads API + Telegram Notifications
+- [ ] 21-02: Connect Pricing Form to API
 
 **Scope:**
-- API endpoint for direct lead submission
+- API endpoint for direct lead submission (`/api/leads`)
 - Pricing page form → Supabase contacts table (real-time)
-- Telegram bot setup for lead notifications
+- Telegram notification service (`src/lib/telegram/client.ts`)
 - Notification on new lead with contact details
 
 **Deliverables:**
-- [ ] POST /api/leads endpoint
-- [ ] Pricing form connected to API
-- [ ] Telegram bot configured
-- [ ] Instant notification on new leads
+- [ ] POST /api/leads endpoint with rate limiting
+- [ ] Pricing form connected to API (replace n8n webhook)
+- [ ] Telegram bot notifications on new leads
+- [ ] Contact creation with metadata storage
 
 ---
 
@@ -265,4 +269,4 @@ Plans:
 | 18. Kapso Bot Setup | v1.8 | 0/2 | Planned | — |
 | 19. Performance & Security | v1.9 | 8/8 | Complete | 2026-01-17 |
 | 20. Dashboard & Notes | v1.10 | 1/1 | Complete | 2026-01-17 |
-| 21. Direct Form + Telegram | v1.11 | 0/? | Not started | — |
+| 21. Direct Form + Telegram | v1.11 | 0/2 | Planned | — |

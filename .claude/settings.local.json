@@ -26,7 +26,13 @@
       "Bash(git commit:*)",
       "Skill(gsd:plan-phase)",
       "WebFetch(domain:findyourpeak.onepeakcreative.com)",
-      "Bash(pgrep:*)"
+      "Bash(pgrep:*)",
+      "Bash(git push:*)",
+      "WebSearch",
+      "Bash(npm install:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm outdated:*)",
+      "Bash(git diff:*)"
     ]
   }
 }
