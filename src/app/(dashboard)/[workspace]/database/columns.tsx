@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Checkbox } from '@/components/ui/checkbox'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
 import type { Contact } from '@/types/database'
@@ -149,23 +150,80 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
     accessorKey: 'tags',
     header: 'Tags',
     cell: ({ row }) => {
-      const tags = row.getValue('tags') as string[]
-      if (!tags || tags.length === 0) {
-        return <span className="text-muted-foreground">-</span>
+      const contact = row.original
+      const tags = row.getValue('tags') as string[] || []
+
+      if (!onTagsChange || contactTags.length === 0) {
+        // Read-only display
+        if (tags.length === 0) {
+          return <span className="text-muted-foreground">-</span>
+        }
+        return (
+          <div className="flex flex-wrap gap-1 max-w-[200px]">
+            {tags.slice(0, 2).map((tag) => (
+              <Badge key={tag} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+            {tags.length > 2 && (
+              <Badge variant="outline" className="text-xs">
+                +{tags.length - 2}
+              </Badge>
+            )}
+          </div>
+        )
       }
+
+      // Editable dropdown
+      const toggleTag = (tag: string) => {
+        const newTags = tags.includes(tag)
+          ? tags.filter(t => t !== tag)
+          : [...tags, tag]
+        onTagsChange(contact.id, newTags)
+      }
+
       return (
-        <div className="flex flex-wrap gap-1 max-w-[200px]">
-          {tags.slice(0, 2).map((tag) => (
-            <Badge key={tag} variant="secondary" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-          {tags.length > 2 && (
-            <Badge variant="outline" className="text-xs">
-              +{tags.length - 2}
-            </Badge>
-          )}
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            {tags.length === 0 ? (
+              <button className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground hover:bg-muted transition-colors">
+                ---
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            ) : (
+              <button className="flex items-center gap-1 px-2 py-1 rounded-md text-xs hover:bg-muted transition-colors">
+                <div className="flex gap-1 max-w-[150px]">
+                  {tags.slice(0, 2).map((tag) => (
+                    <Badge key={tag} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                  {tags.length > 2 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{tags.length - 2}
+                    </Badge>
+                  )}
+                </div>
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </button>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
+            {contactTags.map((tag) => {
+              const isSelected = tags.includes(tag)
+              return (
+                <DropdownMenuItem
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className="flex items-center gap-2"
+                >
+                  <Checkbox checked={isSelected} className="h-4 w-4" />
+                  <span>{tag}</span>
+                </DropdownMenuItem>
+              )
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )
     },
   },
