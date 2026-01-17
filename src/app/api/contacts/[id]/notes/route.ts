@@ -148,7 +148,7 @@ export async function POST(
     if (insertError) {
       console.error('Error creating note:', insertError)
       return NextResponse.json(
-        { error: 'Failed to create note' },
+        { error: `Failed to create note: ${insertError.message}` },
         { status: 500 }
       )
     }
