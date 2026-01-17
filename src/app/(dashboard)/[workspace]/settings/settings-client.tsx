@@ -78,6 +78,14 @@ interface TeamMember {
   } | null
 }
 
+interface Invitation {
+  id: string
+  email: string
+  status: string
+  created_at: string
+  expires_at: string
+}
+
 interface SettingsClientProps {
   workspace: {
     id: string
@@ -87,6 +95,7 @@ interface SettingsClientProps {
     settings: WorkspaceSettings | null
   }
   members: TeamMember[]
+  invitations: Invitation[]
 }
 
 // Default quick replies
@@ -98,7 +107,7 @@ const DEFAULT_QUICK_REPLIES: QuickReply[] = [
   { id: '5', label: 'Schedule', text: 'Apakah Anda bersedia untuk jadwalkan panggilan? Mohon informasikan waktu yang tersedia.' },
 ]
 
-export function SettingsClient({ workspace, members }: SettingsClientProps) {
+export function SettingsClient({ workspace, members, invitations }: SettingsClientProps) {
   // WhatsApp settings state
   const [phoneId, setPhoneId] = useState(workspace.kapso_phone_id || '')
   const [apiKey, setApiKey] = useState(workspace.settings?.kapso_api_key || '')
@@ -168,11 +177,25 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
 
     setIsInviting(true)
     try {
-      // TODO: Implement invite API
-      alert(`Invite functionality coming soon for: ${email}`)
+      const res = await fetch('/api/invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          workspaceId: workspace.id,
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to send invitation')
+      }
+
       setEmail('')
+      // Refresh page to show new invitation
+      window.location.reload()
     } catch (error) {
-      console.error('Failed to invite:', error)
+      alert(error instanceof Error ? error.message : 'Failed to invite')
     } finally {
       setIsInviting(false)
     }
@@ -972,6 +995,42 @@ export function SettingsClient({ workspace, members }: SettingsClientProps) {
               </Table>
             </CardContent>
           </Card>
+
+          {/* Pending Invitations */}
+          {invitations.length > 0 && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="text-lg">Pending Invitations</CardTitle>
+                <CardDescription>
+                  {invitations.length} pending invitation{invitations.length !== 1 ? 's' : ''}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Sent</TableHead>
+                      <TableHead>Expires</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {invitations.map((inv) => (
+                      <TableRow key={inv.id}>
+                        <TableCell className="font-medium">{inv.email}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDistanceToNow(new Date(inv.created_at), { addSuffix: true })}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDistanceToNow(new Date(inv.expires_at), { addSuffix: true })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>

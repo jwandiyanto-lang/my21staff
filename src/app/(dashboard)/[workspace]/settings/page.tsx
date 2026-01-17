@@ -52,11 +52,25 @@ export default async function SettingsPage({ params }: Props) {
     profiles: profiles?.find((p) => p.id === member.user_id) || null,
   }))
 
+  // Get pending invitations
+  const { data: invitations } = await supabase
+    .from('workspace_invitations')
+    .select('*')
+    .eq('workspace_id', workspace.id)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+
   // Cast settings to expected type
   const workspaceWithSettings = {
     ...workspace,
     settings: workspace.settings as { kapso_api_key?: string } | null,
   }
 
-  return <SettingsClient workspace={workspaceWithSettings} members={membersWithProfiles} />
+  return (
+    <SettingsClient
+      workspace={workspaceWithSettings}
+      members={membersWithProfiles}
+      invitations={invitations || []}
+    />
+  )
 }
