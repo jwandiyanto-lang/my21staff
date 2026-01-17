@@ -185,6 +185,7 @@
   },
   "active": "600c2f6ee49ae613",
   "lastOpenFiles": [
+    "src/app/(dashboard)/[workspace]/inbox/conversation-list.tsx.tmp.3557761.1768647497715",
     "src/components/dashboard/upcoming-tasks.tsx.tmp.3557761.1768645025342",
     "src/components/dashboard/upcoming-tasks.tsx",
     "src/components/dashboard",
@@ -195,7 +196,6 @@
     "venv/bin/activate.csh",
     "venv/bin/activate.fish",
     "venv/bin/activate",
-    "venv/bin/Activate.ps1",
     "brainstorm/eagle-overseas-bot-persona.md",
     "brainstorm/deployment-checklist-v1.10.md",
     "node_modules/date-fns-jalali/SECURITY.md",

@@ -27,16 +27,15 @@ function getInitials(name: string | null, phone: string): string {
   return phone.slice(-2)
 }
 
-function getAvatarColor(name: string | null, phone: string): string {
-  // Generate consistent color based on name/phone
-  const str = name || phone
+// Uses phone for color stability - doesn't change when name is edited
+function getAvatarColor(phone: string): string {
   const colors = [
     'bg-orange-500', 'bg-emerald-500', 'bg-blue-500', 'bg-purple-500',
     'bg-pink-500', 'bg-yellow-500', 'bg-cyan-500', 'bg-rose-500'
   ]
   let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  for (let i = 0; i < phone.length; i++) {
+    hash = phone.charCodeAt(i) + ((hash << 5) - hash)
   }
   return colors[Math.abs(hash) % colors.length]
 }
@@ -98,7 +97,7 @@ export function ConversationList({
               )}
             >
               <div className="flex items-start gap-3">
-                <Avatar className={cn('h-10 w-10', getAvatarColor(conversation.contact.name, conversation.contact.phone))}>
+                <Avatar className={cn('h-10 w-10', getAvatarColor(conversation.contact.phone))}>
                   <AvatarFallback className="text-sm text-white font-medium bg-transparent">
                     {getInitials(conversation.contact.name, conversation.contact.phone)}
                   </AvatarFallback>

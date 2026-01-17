@@ -71,15 +71,15 @@ function getDayLabel(date: Date): string {
   return formatWIB(date, DATE_FORMATS.DATE_LONG)
 }
 
-function getAvatarColor(name: string | null, phone: string): string {
-  const str = name || phone
+// Uses phone for color stability - doesn't change when name is edited
+function getAvatarColor(phone: string): string {
   const colors = [
     'bg-orange-500', 'bg-emerald-500', 'bg-blue-500', 'bg-purple-500',
     'bg-pink-500', 'bg-yellow-500', 'bg-cyan-500', 'bg-rose-500'
   ]
   let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  for (let i = 0; i < phone.length; i++) {
+    hash = phone.charCodeAt(i) + ((hash << 5) - hash)
   }
   return colors[Math.abs(hash) % colors.length]
 }
@@ -250,7 +250,7 @@ function MessageBubble({ message, contactName, contactPhone, onReply, allMessage
   // Inbound messages with avatar
   return (
     <div className="flex items-end gap-2 group">
-      <Avatar className={cn('h-8 w-8 flex-shrink-0', getAvatarColor(contactName || null, contactPhone || ''))}>
+      <Avatar className={cn('h-8 w-8 flex-shrink-0', getAvatarColor(contactPhone || ''))}>
         <AvatarFallback className="text-xs text-white font-medium bg-transparent">
           {getInitials(contactName || null, contactPhone || '')}
         </AvatarFallback>
@@ -515,7 +515,7 @@ export function MessageThread({
       {/* Header - Kapso style */}
       <div className="px-4 py-3 border-b bg-background flex items-center gap-3">
         {/* Avatar and contact info */}
-        <Avatar className={cn('h-10 w-10', getAvatarColor(conversationContact.name, conversationContact.phone))}>
+        <Avatar className={cn('h-10 w-10', getAvatarColor(conversationContact.phone))}>
           <AvatarFallback className="text-sm text-white font-medium bg-transparent">
             {getInitials(conversationContact.name, conversationContact.phone)}
           </AvatarFallback>
