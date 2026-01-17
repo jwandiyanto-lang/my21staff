@@ -1,0 +1,50 @@
+import { format, formatDistanceToNow } from 'date-fns'
+
+// WIB is UTC+7 (Indonesia Western Time)
+const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
+
+/**
+ * Convert a UTC date to WIB timezone
+ */
+export function toWIB(date: Date | string): Date {
+  const d = typeof date === 'string' ? new Date(date) : date
+  return new Date(d.getTime() + WIB_OFFSET_MS)
+}
+
+/**
+ * Format a date in WIB timezone
+ * @param date - Date to format (assumed UTC)
+ * @param formatStr - date-fns format string (default: 'MMM d, HH:mm')
+ */
+export function formatWIB(date: Date | string, formatStr: string = 'MMM d, HH:mm'): string {
+  return format(toWIB(date), formatStr)
+}
+
+/**
+ * Format relative time in WIB
+ * @param date - Date to format (assumed UTC)
+ */
+export function formatDistanceWIB(date: Date | string, options?: { addSuffix?: boolean }): string {
+  return formatDistanceToNow(toWIB(date), options)
+}
+
+/**
+ * Check if date is today in WIB timezone
+ */
+export function isTodayWIB(date: Date | string): boolean {
+  const wibDate = toWIB(date)
+  const now = toWIB(new Date())
+  return wibDate.toDateString() === now.toDateString()
+}
+
+/**
+ * Standard date formats for consistency
+ */
+export const DATE_FORMATS = {
+  DATE_SHORT: 'MMM d',           // Jan 15
+  DATE_LONG: 'MMM d, yyyy',      // Jan 15, 2026
+  TIME: 'HH:mm',                 // 14:30
+  TIME_12H: 'hh:mm a',           // 02:30 PM
+  DATETIME: 'MMM d, HH:mm',      // Jan 15, 14:30
+  DATETIME_LONG: 'MMM d, yyyy HH:mm', // Jan 15, 2026 14:30
+} as const
