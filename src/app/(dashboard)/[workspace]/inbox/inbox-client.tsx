@@ -44,12 +44,13 @@ type TeamMember = WorkspaceMember & { profile: Profile | null }
 interface InboxClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
   conversations: ConversationWithContact[]
+  totalCount: number
   quickReplies?: QuickReply[]
   teamMembers?: TeamMember[]
   contactTags?: string[]
 }
 
-export function InboxClient({ workspace, conversations: initialConversations, quickReplies, teamMembers = [], contactTags = ['Community', '1on1'] }: InboxClientProps) {
+export function InboxClient({ workspace, conversations: initialConversations, totalCount, quickReplies, teamMembers = [], contactTags = ['Community', '1on1'] }: InboxClientProps) {
   const [conversations, setConversations] = useState<ConversationWithContact[]>(initialConversations)
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithContact | null>(
     conversations[0] || null
@@ -63,6 +64,11 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [showInfoPanel, setShowInfoPanel] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<Message | null>(null)
+
+  // Pagination state
+  const [page, setPage] = useState(0)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const PAGE_SIZE = 50
 
   // Count unread conversations
   const unreadCount = useMemo(() => {
@@ -332,6 +338,26 @@ export function InboxClient({ workspace, conversations: initialConversations, qu
   const handleReply = useCallback((message: Message) => {
     setReplyToMessage(message)
   }, [])
+
+  // Load more conversations for pagination
+  const loadMoreConversations = async () => {
+    setIsLoadingMore(true)
+    try {
+      const nextPage = page + 1
+      const response = await fetch(
+        `/api/conversations?workspace=${workspace.id}&page=${nextPage}&limit=${PAGE_SIZE}`
+      )
+      if (response.ok) {
+        const data = await response.json()
+        setConversations(prev => [...prev, ...data.conversations])
+        setPage(nextPage)
+      }
+    } catch (error) {
+      console.error('Failed to load more conversations:', error)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
 
   // Clear reply when conversation changes
   useEffect(() => {
