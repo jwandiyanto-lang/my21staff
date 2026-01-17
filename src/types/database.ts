@@ -295,6 +295,21 @@ export type Message = Database['public']['Tables']['messages']['Row']
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type ContactNote = Database['public']['Tables']['contact_notes']['Row']
 
+// Invitation type (not yet in generated types)
+export interface WorkspaceInvitation {
+  id: string
+  workspace_id: string
+  email: string
+  role: string
+  token: string
+  status: 'pending' | 'accepted' | 'expired' | 'cancelled'
+  invited_by: string | null
+  expires_at: string
+  accepted_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 // With author
 export type ContactNoteWithAuthor = ContactNote & {
   author?: Profile
