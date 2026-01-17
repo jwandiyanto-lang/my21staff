@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
 import type { Json } from '@/types/database'
 
+// PII masking helpers for safe logging
+function maskPhone(phone: string): string {
+  if (!phone || phone.length < 6) return '***'
+  return phone.slice(0, 3) + '***' + phone.slice(-4)
+}
+
+function maskPayload(payload: unknown): string {
+  const str = JSON.stringify(payload)
+  // Mask phone numbers in the log (10-15 digit numbers)
+  return str.replace(/"\d{10,15}"/g, '"***MASKED***"')
+    .replace(/"from":\s*"\d+"/g, '"from":"***"')
+    .replace(/"wa_id":\s*"\d+"/g, '"wa_id":"***"')
+}
+
 // Meta/WhatsApp Business API webhook payload types
 interface MetaWebhookMessage {
   id: string
@@ -60,8 +74,8 @@ export async function POST(request: NextRequest) {
   try {
     const rawPayload = await request.json()
 
-    // Always log incoming webhook for debugging
-    console.log('[Webhook] Received payload:', JSON.stringify(rawPayload).substring(0, 1000))
+    // Always log incoming webhook for debugging (masked for privacy)
+    console.log('[Webhook] Received payload (masked):', maskPayload(rawPayload).substring(0, 500))
 
     // Check if this is Meta/WhatsApp format (has entry array)
     if (rawPayload.entry && Array.isArray(rawPayload.entry)) {
@@ -97,7 +111,7 @@ async function handleMetaFormat(payload: MetaWebhookPayload) {
       const value = change.value
       const phoneNumberId = value.metadata?.phone_number_id
 
-      console.log('[Webhook] Metadata:', JSON.stringify(value.metadata))
+      // Log metadata without exposing display phone (phone_number_id is internal, safe to log)
       console.log('[Webhook] Phone number ID from webhook:', phoneNumberId)
 
       if (!phoneNumberId) {
@@ -115,11 +129,11 @@ async function handleMetaFormat(payload: MetaWebhookPayload) {
       console.log('[Webhook] Workspace lookup result:', { data: workspaceData, error: workspaceError?.message })
 
       if (workspaceError || !workspaceData) {
-        // Also log all workspaces to debug
+        // Log workspace count for debugging (no PII)
         const { data: allWorkspaces } = await supabase
           .from('workspaces')
-          .select('id, name, kapso_phone_id')
-        console.log('[Webhook] All workspaces:', JSON.stringify(allWorkspaces))
+          .select('id, kapso_phone_id')
+        console.log('[Webhook] Workspace count:', allWorkspaces?.length || 0)
         console.log(`[Webhook] No workspace found for phone_number_id: ${phoneNumberId}`)
         continue
       }
