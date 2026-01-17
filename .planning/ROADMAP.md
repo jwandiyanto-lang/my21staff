@@ -196,44 +196,48 @@ Plans:
 
 ---
 
-## v1.10 — Brand Polish
+## v1.10 — Dashboard & Notes (COMPLETE)
 
-### Phase 20: Brand Consistency & Professional Copy
+### Phase 20: Dashboard Stats & Notes Due Dates
 
-**Goal:** Ensure consistent brand application and professional Indonesian copy across all customer-facing pages
-**Depends on:** Phase 15 (pricing page), Phase 14 (landing page)
-**Plans:** TBD (interactive session)
+**Goal:** Add dashboard with client stats and enhance notes with due dates for task management
+**Depends on:** Phase 19 (security)
+**Plans:** 1/1 complete (interactive session)
 
 **Scope:**
-- Audit and update copy across landing page, pricing page, CRM
-- Professional Indonesian with English headlines
-- Consistent voice and tone throughout
-- Update BRAND.md with copy guidelines
+- Dashboard showing total clients, new daily clients
+- Tag analytics: "1on1 consultation" count (all time, today, this week, this month)
+- Notes enhancement: add due_date field
+- Dashboard task view: show notes with upcoming due dates
 
-**Deliverables:**
-- [ ] Updated BRAND.md with copy guidelines section
-- [ ] Landing page copy polish
-- [ ] Pricing page copy consistency
-- [ ] CRM labels and messages review
+**Completed:**
+- [x] Dashboard page with client stats (total, today, week, month)
+- [x] Tag-based analytics (1on1 consultation with orange styling)
+- [x] Notes schema update (due_date column via migration 16)
+- [x] Due dates UI in notes (calendar picker with popover)
+- [x] Task-like view on dashboard (upcoming tasks section)
 
 ---
 
-## v2.0 — Form & Lead Capture (Future)
+## v1.11 — Direct Lead Capture
 
-### Phase 16: Pricing Form Enhancement
+### Phase 21: Direct Form to CRM + Telegram Notifications
 
-**Goal:** Enhance pricing page form with qualifying questions + Google Sheet capture via n8n
-**Depends on:** Phase 15 (pricing page with modal form)
+**Goal:** Connect website forms directly to CRM database with instant Telegram notifications
+**Depends on:** Phase 20
 **Plans:** TBD
 
-Plans:
-- [ ] 16-01: Form fields + n8n webhook + Google Sheet
-
 **Scope:**
-- Update form fields (business type, current pain, team size)
-- n8n webhook to capture submissions
-- Google Sheet for lead storage
-- Bahasa Indonesia copy
+- API endpoint for direct lead submission
+- Pricing page form → Supabase contacts table (real-time)
+- Telegram bot setup for lead notifications
+- Notification on new lead with contact details
+
+**Deliverables:**
+- [ ] POST /api/leads endpoint
+- [ ] Pricing form connected to API
+- [ ] Telegram bot configured
+- [ ] Instant notification on new leads
 
 ---
 
@@ -259,5 +263,6 @@ Plans:
 | 16. Pricing Form Enhancement | v2.0 | 0/1 | Not started | — |
 | 17. Inbox UI/UX Fixes | v1.7 | 1/1 | Complete | 2026-01-16 |
 | 18. Kapso Bot Setup | v1.8 | 0/2 | Planned | — |
-| 19. Performance & Security | v1.9 | 0/5 | Planned | — |
-| 20. Brand Consistency | v1.10 | 0/? | Not started | — |
+| 19. Performance & Security | v1.9 | 8/8 | Complete | 2026-01-17 |
+| 20. Dashboard & Notes | v1.10 | 1/1 | Complete | 2026-01-17 |
+| 21. Direct Form + Telegram | v1.11 | 0/? | Not started | — |

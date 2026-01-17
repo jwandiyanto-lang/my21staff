@@ -237,6 +237,7 @@ export interface Database {
           content: string
           note_type: string
           metadata: Json
+          due_date: string | null
           created_at: string
           updated_at: string
         }
@@ -248,6 +249,7 @@ export interface Database {
           content: string
           note_type?: string
           metadata?: Json
+          due_date?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -259,6 +261,7 @@ export interface Database {
           content?: string
           note_type?: string
           metadata?: Json
+          due_date?: string | null
           created_at?: string
           updated_at?: string
         }

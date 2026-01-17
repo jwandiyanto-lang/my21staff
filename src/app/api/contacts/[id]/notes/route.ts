@@ -51,7 +51,7 @@ export async function GET(
     // Get notes
     const { data: notes, error } = await supabase
       .from('contact_notes')
-      .select('id, content, note_type, metadata, author_id, created_at, updated_at')
+      .select('id, content, note_type, metadata, due_date, author_id, created_at, updated_at')
       .eq('contact_id', contactId)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -81,7 +81,7 @@ export async function POST(
 ) {
   try {
     const { id: contactId } = await params
-    const { content, note_type = 'note', metadata = {} } = await request.json()
+    const { content, note_type = 'note', metadata = {}, due_date = null } = await request.json()
 
     if (!content?.trim()) {
       return NextResponse.json(
@@ -140,8 +140,9 @@ export async function POST(
         content: content.trim(),
         note_type,
         metadata,
+        due_date,
       })
-      .select('id, content, note_type, metadata, author_id, created_at, updated_at')
+      .select('id, content, note_type, metadata, due_date, author_id, created_at, updated_at')
       .single()
 
     if (insertError) {

@@ -30,7 +30,7 @@ import {
   MessageCircle,
   Phone,
   Mail,
-  Calendar,
+  Calendar as CalendarIcon,
   Tag,
   ArrowRight,
   Loader2,
@@ -46,7 +46,14 @@ import {
   Check,
   User,
   Trash2,
+  Clock,
 } from 'lucide-react'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,10 +77,20 @@ type TeamMember = WorkspaceMember & { profile: Profile | null }
 // Activity item type for timeline
 interface ActivityItem {
   id: string
-  type: 'form_submission' | 'note' | 'status_change' | 'score_change' | 'merge' | 'message'
+  type: 'form_submission' | 'note' | 'status_change' | 'score_change' | 'merge' | 'message' | 'message_summary'
   content: string
   metadata?: Record<string, unknown>
   author?: { full_name: string | null; email: string | null }
+  created_at: string
+}
+
+// Message type for grouping
+interface MessageItem {
+  id: string
+  content: string
+  direction: string
+  message_type: string
+  media_url: string | null
   created_at: string
 }
 
@@ -129,8 +146,10 @@ export function ContactDetailSheet({
   const [isLoadingActivities, setIsLoadingActivities] = useState(false)
   const [activitiesLoaded, setActivitiesLoaded] = useState(false)
   const [newNoteContent, setNewNoteContent] = useState('')
+  const [newNoteDueDate, setNewNoteDueDate] = useState<Date | undefined>(undefined)
   const [isAddingNote, setIsAddingNote] = useState(false)
   const [expandedForms, setExpandedForms] = useState<Set<string>>(new Set())
+  const [expandedMessageDays, setExpandedMessageDays] = useState<Set<string>>(new Set())
 
   // Delete state
   const [isDeleting, setIsDeleting] = useState(false)
@@ -154,6 +173,7 @@ export function ContactDetailSheet({
       setActivitiesLoaded(false)
       setNewNoteContent('')
       setExpandedForms(new Set())
+      setExpandedMessageDays(new Set())
       setActiveTab('details')
     }
   }, [contact])
@@ -455,13 +475,16 @@ export function ContactDetailSheet({
       try {
         const response = await fetch(`/api/contacts/${contact.id}/notes`)
         if (response.ok) {
-          const { notes } = await response.json() as { notes: ContactNoteWithAuthor[] }
-          notes.forEach((note: ContactNoteWithAuthor) => {
+          const { notes } = await response.json() as { notes: (ContactNoteWithAuthor & { due_date: string | null })[] }
+          notes.forEach((note) => {
             activityList.push({
               id: note.id,
               type: note.note_type as ActivityItem['type'],
               content: note.content,
-              metadata: note.metadata as Record<string, unknown>,
+              metadata: {
+                ...(note.metadata as Record<string, unknown>),
+                ...(note.due_date ? { due_date: note.due_date } : {}),
+              },
               author: note.author ? { full_name: note.author.full_name, email: note.author.email } : undefined,
               created_at: note.created_at,
             })
@@ -471,7 +494,7 @@ export function ContactDetailSheet({
         console.error('Error loading notes:', error)
       }
 
-      // 3. WhatsApp messages from conversation
+      // 3. WhatsApp messages from conversation - grouped by day
       try {
         const supabase = createClient()
         // First find the conversation for this contact
@@ -482,36 +505,57 @@ export function ContactDetailSheet({
           .single()
 
         if (conversation) {
-          // Get messages for this conversation (limit to recent 50 for performance)
+          // Get messages for this conversation (limit to recent 100 for better grouping)
           const { data: messages } = await supabase
             .from('messages')
             .select('id, content, direction, message_type, media_url, created_at')
             .eq('conversation_id', conversation.id)
             .order('created_at', { ascending: false })
-            .limit(50)
+            .limit(100)
 
-          if (messages) {
+          if (messages && messages.length > 0) {
+            // Group messages by day
+            const messagesByDay = new Map<string, MessageItem[]>()
+
             messages.forEach((msg) => {
-              const direction = msg.direction === 'inbound' ? 'Received' : 'Sent'
-              const msgType = msg.message_type || 'text'
-              let content = msg.content || ''
-
-              // For media messages, show type indicator
-              if (msgType !== 'text' && !content) {
-                content = `[${msgType.charAt(0).toUpperCase() + msgType.slice(1)}]`
+              const dateKey = format(new Date(msg.created_at), 'yyyy-MM-dd')
+              if (!messagesByDay.has(dateKey)) {
+                messagesByDay.set(dateKey, [])
               }
+              messagesByDay.get(dateKey)!.push({
+                id: msg.id,
+                content: msg.content || '',
+                direction: msg.direction,
+                message_type: msg.message_type || 'text',
+                media_url: msg.media_url,
+                created_at: msg.created_at,
+              })
+            })
+
+            // Create summary activity for each day
+            messagesByDay.forEach((dayMessages, dateKey) => {
+              const inboundCount = dayMessages.filter(m => m.direction === 'inbound').length
+              const outboundCount = dayMessages.filter(m => m.direction === 'outbound').length
+
+              // Sort messages chronologically for display (oldest first within day)
+              const sortedMessages = [...dayMessages].sort(
+                (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+              )
+
+              // Get first message time for the day's timestamp
+              const firstMessageTime = sortedMessages[0].created_at
 
               activityList.push({
-                id: msg.id,
-                type: 'message',
-                content: content,
+                id: `msg-summary-${dateKey}`,
+                type: 'message_summary',
+                content: `${dayMessages.length} messages`,
                 metadata: {
-                  direction: msg.direction,
-                  message_type: msgType,
-                  media_url: msg.media_url,
-                  label: direction
+                  date: dateKey,
+                  inbound_count: inboundCount,
+                  outbound_count: outboundCount,
+                  messages: sortedMessages,
                 },
-                created_at: msg.created_at,
+                created_at: firstMessageTime,
               })
             })
           }
@@ -542,20 +586,25 @@ export function ContactDetailSheet({
       const response = await fetch(`/api/contacts/${contact.id}/notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: newNoteContent.trim() }),
+        body: JSON.stringify({
+          content: newNoteContent.trim(),
+          due_date: newNoteDueDate ? newNoteDueDate.toISOString() : null,
+        }),
       })
 
       if (response.ok) {
-        const { note } = await response.json() as { note: ContactNoteWithAuthor }
+        const { note } = await response.json() as { note: ContactNoteWithAuthor & { due_date: string | null } }
         // Add to activities list
         setActivities((prev) => [{
           id: note.id,
           type: 'note',
           content: note.content,
+          metadata: note.due_date ? { due_date: note.due_date } : undefined,
           author: note.author ? { full_name: note.author.full_name, email: note.author.email } : undefined,
           created_at: note.created_at,
         }, ...prev])
         setNewNoteContent('')
+        setNewNoteDueDate(undefined)
         toast.success('Note added')
       } else {
         const error = await response.json()
@@ -1206,18 +1255,57 @@ export function ContactDetailSheet({
             {/* Add Note Input */}
             <div className="p-4 border-b bg-background">
               <div className="flex gap-2">
-                <Textarea
-                  placeholder="Add a note..."
-                  value={newNoteContent}
-                  onChange={(e) => setNewNoteContent(e.target.value)}
-                  className="min-h-[60px] text-sm resize-none"
-                  disabled={isAddingNote}
-                />
+                <div className="flex-1 space-y-2">
+                  <Textarea
+                    placeholder="Add a note..."
+                    value={newNoteContent}
+                    onChange={(e) => setNewNoteContent(e.target.value)}
+                    className="min-h-[60px] text-sm resize-none"
+                    disabled={isAddingNote}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={cn(
+                            "h-8 text-xs gap-1.5",
+                            newNoteDueDate && "text-orange-600 border-orange-200 bg-orange-50"
+                          )}
+                        >
+                          <Clock className="h-3.5 w-3.5" />
+                          {newNoteDueDate ? format(newNoteDueDate, 'MMM d, HH:mm') : 'Set due date'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={newNoteDueDate}
+                          onSelect={setNewNoteDueDate}
+                          initialFocus
+                        />
+                        {newNoteDueDate && (
+                          <div className="p-2 border-t">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-full text-xs text-muted-foreground"
+                              onClick={() => setNewNoteDueDate(undefined)}
+                            >
+                              Clear due date
+                            </Button>
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
                 <Button
                   size="icon"
                   onClick={handleAddNote}
                   disabled={!newNoteContent.trim() || isAddingNote}
-                  className="h-[60px] w-[60px]"
+                  className="h-[88px] w-[60px]"
                 >
                   {isAddingNote ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -1254,6 +1342,7 @@ export function ContactDetailSheet({
                         case 'merge':
                           return <GitMerge className="h-4 w-4" />
                         case 'message':
+                        case 'message_summary':
                           return <MessageCircle className="h-4 w-4" />
                         default:
                           return <FileText className="h-4 w-4" />
@@ -1274,6 +1363,8 @@ export function ContactDetailSheet({
                           return activity.metadata?.direction === 'inbound'
                             ? 'bg-teal-100 text-teal-700'
                             : 'bg-emerald-100 text-emerald-700'
+                        case 'message_summary':
+                          return 'bg-teal-100 text-teal-700'
                         default:
                           return 'bg-muted text-muted-foreground'
                       }
@@ -1316,6 +1407,29 @@ export function ContactDetailSheet({
                                     ▼
                                   </span>
                                 </button>
+                              ) : activity.type === 'message_summary' ? (
+                                <button
+                                  onClick={() => {
+                                    setExpandedMessageDays(prev => {
+                                      const newSet = new Set(prev)
+                                      if (newSet.has(activity.id)) {
+                                        newSet.delete(activity.id)
+                                      } else {
+                                        newSet.add(activity.id)
+                                      }
+                                      return newSet
+                                    })
+                                  }}
+                                  className="text-sm font-medium text-left hover:text-primary transition-colors flex items-center gap-1"
+                                >
+                                  WhatsApp ({activity.metadata?.inbound_count as number || 0} received, {activity.metadata?.outbound_count as number || 0} sent)
+                                  <span className={cn(
+                                    "text-muted-foreground transition-transform text-xs",
+                                    expandedMessageDays.has(activity.id) && "rotate-180"
+                                  )}>
+                                    ▼
+                                  </span>
+                                </button>
                               ) : (
                                 <p className="text-sm font-medium">
                                   {activity.type === 'form_submission' ? 'Form Submitted' :
@@ -1333,15 +1447,25 @@ export function ContactDetailSheet({
                               )}
                             </div>
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {format(new Date(activity.created_at), 'MMM d, HH:mm')}
+                              {activity.type === 'message_summary'
+                                ? format(new Date(activity.created_at), 'MMM d')
+                                : format(new Date(activity.created_at), 'MMM d, HH:mm')}
                             </span>
                           </div>
 
                           {/* Note content or form answers */}
                           {activity.type === 'note' && (
-                            <p className="mt-1 text-sm text-foreground whitespace-pre-wrap">
-                              {activity.content}
-                            </p>
+                            <div className="mt-1">
+                              <p className="text-sm text-foreground whitespace-pre-wrap">
+                                {activity.content}
+                              </p>
+                              {typeof activity.metadata?.due_date === 'string' && (
+                                <div className="mt-2 flex items-center gap-1.5 text-xs text-orange-600">
+                                  <Clock className="h-3 w-3" />
+                                  <span>Due: {format(new Date(activity.metadata.due_date), 'MMM d, HH:mm')}</span>
+                                </div>
+                              )}
+                            </div>
                           )}
 
                           {/* Message content */}
@@ -1357,6 +1481,30 @@ export function ContactDetailSheet({
                                 <div key={key} className="flex justify-between gap-2">
                                   <span className="text-muted-foreground truncate">{key}</span>
                                   <span className="font-medium text-right">{String(value)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Message summary expanded view */}
+                          {activity.type === 'message_summary' && expandedMessageDays.has(activity.id) && Array.isArray(activity.metadata?.messages) && (
+                            <div className="mt-2 space-y-2">
+                              {(activity.metadata.messages as MessageItem[]).map((msg) => (
+                                <div
+                                  key={msg.id}
+                                  className={cn(
+                                    "p-2 rounded-lg text-xs max-w-[85%]",
+                                    msg.direction === 'inbound'
+                                      ? "bg-muted mr-auto"
+                                      : "bg-primary/10 ml-auto text-right"
+                                  )}
+                                >
+                                  <p className="whitespace-pre-wrap break-words">
+                                    {msg.content || (msg.message_type !== 'text' ? `[${msg.message_type}]` : '')}
+                                  </p>
+                                  <span className="text-muted-foreground text-[10px] mt-1 block">
+                                    {format(new Date(msg.created_at), 'HH:mm')}
+                                  </span>
                                 </div>
                               ))}
                             </div>
