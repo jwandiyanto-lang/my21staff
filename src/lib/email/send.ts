@@ -16,18 +16,24 @@ export async function sendInvitationEmail({
   inviterName: string
 }) {
   const resend = getResend()
+
+  console.log('Sending invitation email to:', to)
+  console.log('From:', FROM_EMAIL)
+  console.log('Workspace:', workspaceName)
+
   const { data, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
-    subject: `Anda diundang ke ${workspaceName}`,
+    subject: `You're invited to join ${workspaceName}`,
     react: InvitationEmail({ inviteLink, workspaceName, inviterName }),
   })
 
   if (error) {
-    console.error('Failed to send invitation email:', error)
+    console.error('Resend API error:', JSON.stringify(error, null, 2))
     throw new Error(`Email failed: ${error.message}`)
   }
 
+  console.log('Email sent successfully:', data?.id)
   return data
 }
 

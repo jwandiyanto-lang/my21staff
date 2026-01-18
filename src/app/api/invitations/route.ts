@@ -79,20 +79,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check for pending invitation
-    const { data: existingInvitation } = await supabase
+    // Check for and clean up any existing pending invitations for this email
+    const { data: existingInvitations } = await adminClient
       .from('workspace_invitations')
       .select('id, status')
       .eq('workspace_id', workspaceId)
       .eq('email', normalizedEmail)
-      .eq('status', 'pending')
-      .single()
 
-    if (existingInvitation) {
-      return NextResponse.json(
-        { error: 'An invitation is already pending for this email' },
-        { status: 400 }
-      )
+    // Delete any existing pending invitations to allow fresh invite
+    if (existingInvitations && existingInvitations.length > 0) {
+      await adminClient
+        .from('workspace_invitations')
+        .delete()
+        .eq('workspace_id', workspaceId)
+        .eq('email', normalizedEmail)
+        .in('status', ['pending', 'expired'])
     }
 
     // Generate unique invitation token

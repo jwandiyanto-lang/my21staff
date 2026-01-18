@@ -13,5 +13,5 @@ export function getResend(): Resend {
   return _resend
 }
 
-// Default sender for all emails - "Kia dari my21staff" matches bot persona
-export const FROM_EMAIL = 'Kia dari my21staff <kia@my21staff.com>'
+// Default sender for all emails
+export const FROM_EMAIL = 'Kia from my21staff <kia@my21staff.com>'
