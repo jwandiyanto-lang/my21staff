@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 
 ## Current Position
 
-Phase: 3 of 9 — Workspace Roles Enhancement (COMPLETE)
-Plan: 04 of 04 complete (including gap closure)
-Status: Phase complete
-Last activity: 2026-01-18 — Completed 03-04-PLAN.md (Gap Closure)
+Phase: 4 of 9 — Support Ticketing Core
+Plan: 01 of 05 complete
+Status: In progress
+Last activity: 2026-01-18 — Completed 04-01-PLAN.md (Database Schema)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ██████░░░░ Phase 1-3 Complete
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ██████░░░░ Phase 4 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 62 (14 in v1.0 + 38 in v2.0 + 10 in v2.1)
+- Total plans completed: 63 (14 in v1.0 + 38 in v2.0 + 11 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 29 in v2.1
+- Commits: 325 in v2.0, 32 in v2.1
 
 **Codebase:**
 - Lines: ~24,000 TypeScript
@@ -57,6 +57,8 @@ Key v2.1 decisions:
 - API permission guard pattern: requirePermission(role, 'perm'); if (err) return err
 - PermissionButton with disabled:pointer-events-auto for tooltip accessibility
 - Owner role protected from change (contact support for ownership transfer)
+- CHECK constraints over ENUM types for ticket category/priority/stage (flexibility)
+- Subquery RLS pattern for joined tables (comments/history via tickets)
 
 ### Deferred Issues
 
@@ -75,9 +77,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 03-04-PLAN.md (Gap Closure) - Phase 03 fully complete
+Stopped at: Completed 04-01-PLAN.md (Database Schema)
 Resume file: None
-Next: Phase 04 (see ROADMAP.md)
+Next: 04-02-PLAN.md (API Endpoints)
 
 ## Deployment Info
 
@@ -97,4 +99,4 @@ Next: Phase 04 (see ROADMAP.md)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 — Phase 03 fully complete including gap closure (Workspace Roles Enhancement)*
+*Last updated: 2026-01-18 — Phase 04 in progress, 04-01 complete (Database Schema)*
