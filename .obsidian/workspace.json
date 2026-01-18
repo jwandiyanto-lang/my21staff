@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "CLAUDE.md",
+                "file": "business/brand/BRAND.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "CLAUDE"
+              "title": "BRAND"
             }
           }
         ]
@@ -185,6 +185,20 @@
   },
   "active": "600c2f6ee49ae613",
   "lastOpenFiles": [
+    "business/brainstorm/TODO-FEATURES.md",
+    "business/clients/eagle-user-flow.md",
+    "business/clients/eagle-n8n-integration.md",
+    "business/brainstorm/problem-card-prompts.md",
+    "business/brainstorm/LANDING-PAGE-REVIEW-2026-01-16.md",
+    "business/brainstorm/LANDING-PAGE-AIDA-GRADE.md",
+    "business/brainstorm/eagle-overseas-bot-persona.md",
+    "business/brainstorm/deployment-checklist-v1.10.md",
+    "business/brainstorm/avatar-prompts.md",
+    "business/bots/sealion-telegram-bot.py",
+    "business/bots/eagle-studenthub-bot.md",
+    "CLAUDE.md",
+    "business/bots/README.md",
+    "business/clients/eagle-overseas.md",
     "business/brand/docs/STAFF.md",
     "business/brand/docs/PRICING.md",
     "business/brand/docs/ONE-PAGER.md",
@@ -210,26 +224,12 @@
     "scripts",
     "business/brand/logos/icon-only.svg",
     "business/brand/logos/wordmark-full.svg",
-    "business/brand/logos",
     "node_modules/svix/README.md",
     "node_modules/resend/readme.md",
     "node_modules/fast-sha256/README.md",
     "node_modules/uuid/README.md",
     "node_modules/uuid/LICENSE.md",
     "node_modules/uuid/CONTRIBUTING.md",
-    "node_modules/uuid/CHANGELOG.md",
-    "node_modules/standardwebhooks/README.md",
-    "node_modules/@aws-sdk/client-sesv2/README.md",
-    "node_modules/@aws-sdk/util-arn-parser/README.md",
-    "node_modules/@types/nodemailer/README.md",
-    "node_modules/@aws-sdk/nested-clients/README.md",
-    "node_modules/@smithy/core/README.md",
-    "node_modules/@aws-sdk/core/README.md",
-    "node_modules/@smithy/types/README.md",
-    "node_modules/fast-xml-parser/README.md",
-    "node_modules/fast-xml-parser/CHANGELOG.md",
-    "node_modules/@smithy/util-endpoints/README.md",
-    "node_modules/@aws-sdk/signature-v4-multi-region/README.md",
-    "node_modules/@aws-sdk/client-sso/README.md"
+    "node_modules/uuid/CHANGELOG.md"
   ]
 }
