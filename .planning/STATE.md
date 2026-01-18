@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 4 of 9 — Support Ticketing Core
-Plan: 01 of 05 complete
+Plan: 02 of 05 complete
 Status: In progress
-Last activity: 2026-01-18 — Completed 04-01-PLAN.md (Database Schema)
+Last activity: 2026-01-18 — Completed 04-02-PLAN.md (TypeScript Utilities)
 
 Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ██████░░░░ Phase 4 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 63 (14 in v1.0 + 38 in v2.0 + 11 in v2.1)
+- Total plans completed: 64 (14 in v1.0 + 38 in v2.0 + 12 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 32 in v2.1
+- Commits: 325 in v2.0, 35 in v2.1
 
 **Codebase:**
 - Lines: ~24,000 TypeScript
@@ -59,6 +59,9 @@ Key v2.1 decisions:
 - Owner role protected from change (contact support for ownership transfer)
 - CHECK constraints over ENUM types for ticket category/priority/stage (flexibility)
 - Subquery RLS pattern for joined tables (comments/history via tickets)
+- Ticket state machine in src/lib/tickets/ (types, transitions, tokens)
+- HMAC tokens reuse ENCRYPTION_KEY (TICKET_TOKEN_SECRET fallback)
+- Ticket permissions: tickets:assign, tickets:transition, tickets:skip_stage
 
 ### Deferred Issues
 
@@ -77,9 +80,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 04-01-PLAN.md (Database Schema)
+Stopped at: Completed 04-02-PLAN.md (TypeScript Utilities)
 Resume file: None
-Next: 04-02-PLAN.md (API Endpoints)
+Next: 04-03-PLAN.md (API Routes)
 
 ## Deployment Info
 
@@ -99,4 +102,4 @@ Next: 04-02-PLAN.md (API Endpoints)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 — Phase 04 in progress, 04-01 complete (Database Schema)*
+*Last updated: 2026-01-18 — Phase 04 in progress, 04-02 complete (TypeScript Utilities)*
