@@ -254,7 +254,7 @@ Plans:
 
 ---
 
-## v1.12 — Settings & Data Management (Final Milestone)
+## v1.12 — Settings & Data Management (COMPLETE)
 
 ### Phase 22: Settings Page (CSV, Team Invites, Pricing Form)
 
@@ -287,10 +287,26 @@ Plans:
 - Telegram notification on new lead (optional)
 
 Plans:
-- [ ] 22-01: Settings Page Structure + CSV Export
-- [ ] 22-02: CSV Import with Validation
-- [ ] 22-03: Team Invitation System (SMTP + Magic Links)
-- [ ] 22-04: Pricing Form → my21staff Leads API
+- [x] 22-01: Settings Page Structure + CSV Export
+- [x] 22-02: CSV Import with Validation
+- [x] 22-03: Team Invitation System (direct user creation + recovery links) — SMTP deferred
+- [x] 22-04: Pricing Form → my21staff Leads API
+
+**Completed:**
+- Settings page with Profile, Workspace, Team, and Data tabs
+- CSV export (contacts, notes) with proper formatting
+- CSV template download for imports
+- CSV import with preview, validation, duplicate detection, batch upsert
+- Phone normalization to E.164 format (Indonesian +62)
+- Team invitation system with direct user creation via Supabase admin API
+- Recovery link generation for password setup (no Supabase confirmation email)
+- Set-password page for new team members
+- Delete and resend invitation functionality
+- Pricing form → my21staff CRM leads with automatic tags
+- Duplicate contact detection by phone with tag merging
+
+**Deferred to next milestone:**
+- SMTP email delivery from Vercel (DNS resolution issues)
 
 ---
 
@@ -319,4 +335,4 @@ Plans:
 | 19. Performance & Security | v1.9 | 8/8 | Complete | 2026-01-17 |
 | 20. Dashboard & Notes | v1.10 | 3/3 | Complete | 2026-01-17 |
 | 21. Lead Polish + Performance | v1.11 | 7/7 | Complete | 2026-01-17 |
-| 22. Settings & Data Management | v1.12 | 0/4 | Planning | — |
+| 22. Settings & Data Management | v1.12 | 4/4 | Complete | 2026-01-18 |

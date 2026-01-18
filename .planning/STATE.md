@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-14)
 
 **Core value:** Two-way WhatsApp messaging from the CRM — users can send and receive messages without switching apps.
-**Current focus:** v1.12 — Settings & Data Management
+**Current focus:** v1.12 Complete — Planning next milestone
 
 ## Current Position
 
 Phase: 22 (Settings & Data Management)
-Plan: 22-02 complete, more remaining
-Status: In progress - CSV import complete
-Last activity: 2026-01-17 — Plan 22-02 complete (CSV import)
+Plan: 22-04 complete (all 4 plans done)
+Status: Complete — v1.12 milestone finished
+Last activity: 2026-01-18 — Phase 22 complete
 
-Progress: v1.10 ██████████ Complete | v1.11 ██████████ Complete | Phase 22 ██░░░░░░░░ In Progress
+Progress: v1.10 ██████████ Complete | v1.11 ██████████ Complete | v1.12 ██████████ Complete
 
 ## Performance Metrics
 
@@ -39,7 +39,7 @@ Progress: v1.10 ██████████ Complete | v1.11 █████�
 | 15. Pricing Page | 2/2 | interactive | — |
 | 19. Performance & Security | 8/8 | 33 min | 4 min |
 | 20. Dashboard & Notes | 3/3 | 5 min | 2 min |
-| 22. Settings & Data | 2/? | 9 min | 5 min |
+| 22. Settings & Data | 4/4 | 13+ min | interactive |
 
 ## Accumulated Context
 
@@ -88,10 +88,19 @@ Recent (Phase 22):
 - Phone E.164 normalization: Indonesian 0812 -> +6281, assumes Indonesia if no code
 - CSV import flow: Preview -> validate -> confirm -> batch upsert
 - Duplicate detection: Flag duplicates within CSV file before import
+- Direct user creation: Use auth.admin.createUser() with email_confirm: true (skip Supabase email)
+- Recovery link: Generate via auth.admin.generateLink() for password setup
+- Lazy transporter: Create nodemailer transport at runtime, not module load
+- SMTP deferred: DNS resolution issues from Vercel to be resolved in next milestone
+- Lead capture API: Public /api/leads endpoint, admin client for DB operations
+- Workspace targeting: NEXT_PUBLIC_PRICING_WORKSPACE_ID for my21staff leads
 
 ### Deferred Issues
 
-None — production deployment complete.
+- SMTP email delivery from Vercel: DNS resolution fails for smtp.hostinger.com (EBADNAME)
+  - Affects: Team invitation emails
+  - Workaround: Recovery links work, just need to manually share the link
+  - Next milestone: Investigate alternative SMTP providers or Supabase email
 
 ### Blockers/Concerns
 
@@ -99,10 +108,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-17
-Stopped at: Plan 22-02 complete (CSV import)
+Last session: 2026-01-18
+Stopped at: v1.12 milestone complete
 Resume file: None
-Next: Plan 22-03 or other Phase 22 plans
+Next: Define next milestone (v1.13 or v2.0)
 
 ## Deployment Info
 
