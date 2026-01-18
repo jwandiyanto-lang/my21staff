@@ -6,6 +6,8 @@ import {
   canTransition,
   isSkipTransition,
   generateReopenToken,
+  sendTicketUpdatedEmail,
+  STAGE_CONFIG,
   type TicketStage
 } from '@/lib/tickets'
 
@@ -134,9 +136,58 @@ export async function POST(
       })
     }
 
-    // Note: notifyParticipants flag is stored for email handling in Plan 05
-    // For now we just acknowledge it was received
-    const response: { success: boolean; pendingApproval?: boolean; notifyParticipants?: boolean } = {
+    // Send email notifications if requested and not a skip transition
+    if (notifyParticipants && !isSkip) {
+      try {
+        // Get workspace info
+        const { data: workspace } = await supabase
+          .from('workspaces')
+          .select('name, slug')
+          .eq('id', ticket.workspace_id)
+          .single()
+
+        // Get all participants (requester + commenters)
+        const { data: comments } = await supabase
+          .from('ticket_comments')
+          .select('author_id')
+          .eq('ticket_id', ticketId)
+
+        const participantIds = new Set<string>([
+          ticket.requester_id,
+          ...comments?.map(c => c.author_id) || []
+        ])
+
+        // Get email addresses from users table
+        const { data: profiles } = await supabase
+          .from('users')
+          .select('id, email, full_name')
+          .in('id', Array.from(participantIds))
+
+        const recipients = profiles?.map(p => ({
+          email: p.email,
+          name: p.full_name || p.email
+        })) || []
+
+        if (recipients.length > 0 && workspace) {
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
+          await sendTicketUpdatedEmail(recipients, {
+            ticketTitle: ticket.title,
+            ticketId,
+            workspaceName: workspace.name,
+            changedByName: authResult.user.email || 'Unknown',
+            fromStage: STAGE_CONFIG[currentStage].labelId,
+            toStage: STAGE_CONFIG[toStage as TicketStage].labelId,
+            comment: comment || undefined,
+            ticketLink: `${appUrl}/${workspace.slug}/support/${ticketId}`
+          })
+        }
+      } catch (emailError) {
+        // Log but don't fail the request if email sending fails
+        console.error('Failed to send transition notification emails:', emailError)
+      }
+    }
+
+    const response: { success: boolean; pendingApproval?: boolean; emailSent?: boolean } = {
       success: true
     }
 
@@ -144,8 +195,8 @@ export async function POST(
       response.pendingApproval = true
     }
 
-    if (notifyParticipants) {
-      response.notifyParticipants = true
+    if (notifyParticipants && !isSkip) {
+      response.emailSent = true
     }
 
     return NextResponse.json(response)

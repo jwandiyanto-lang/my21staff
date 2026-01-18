@@ -9,3 +9,6 @@ export { canTransition, getNextStage, isSkipTransition, getValidTargetStages } f
 
 // Tokens
 export { generateReopenToken, verifyReopenToken } from './tokens'
+
+// Email
+export { sendTicketCreatedEmail, sendTicketUpdatedEmail, sendTicketClosedEmail } from './email'
