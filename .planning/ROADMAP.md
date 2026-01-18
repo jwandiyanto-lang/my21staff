@@ -109,14 +109,14 @@ Plans:
 
 ### Phase 3: Workspace Roles Enhancement
 **Goal:** Permission infrastructure — owner/admin/member enforcement
-**Status:** Gap closure in progress
-**Plans:** 4 plans (3 complete + 1 gap closure)
+**Status:** Complete
+**Plans:** 4/4 plans — completed 2026-01-18
 
 Plans:
 - [x] 03-01-PLAN.md — Permission types, utilities, and RLS policy
 - [x] 03-02-PLAN.md — API route permission enforcement
 - [x] 03-03-PLAN.md — Role management UI in team page
-- [ ] 03-04-PLAN.md — Gap closure: Wire invite/remove UI and update API permission
+- [x] 03-04-PLAN.md — Gap closure: Wire invite/remove UI and update API permission
 
 **Scope:**
 - Create `hasPermission()` utility
@@ -227,10 +227,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 9/? | Phase 1-2 complete, Phase 3 gap closure | — |
+| 1-9 | v2.1 | 10/? | Phase 1-3 complete | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-18 — Phase 3 gap closure plan added (03-04)*
+*Last updated: 2026-01-18 — Phase 3 complete (4/4 plans)*
