@@ -4,7 +4,7 @@ const path = require('path');
 
 const sizes = [32, 64, 128, 256];
 const logos = ['wordmark-full', 'icon-only'];
-const inputDir = path.join(__dirname, '..', 'business', 'brand', 'logos');
+const inputDir = path.join(__dirname, '..', 'logos');
 const outputDir = inputDir;
 
 async function generateLogos() {
