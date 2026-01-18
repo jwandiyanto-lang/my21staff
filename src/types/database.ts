@@ -312,6 +312,147 @@ export interface Database {
         }
         Relationships: []
       }
+      tickets: {
+        Row: {
+          id: string
+          workspace_id: string
+          requester_id: string
+          assigned_to: string | null
+          title: string
+          description: string
+          category: string
+          priority: string
+          stage: string
+          pending_approval: boolean
+          pending_stage: string | null
+          approval_requested_at: string | null
+          reopen_token: string | null
+          closed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          workspace_id: string
+          requester_id: string
+          assigned_to?: string | null
+          title: string
+          description: string
+          category: string
+          priority: string
+          stage?: string
+          pending_approval?: boolean
+          pending_stage?: string | null
+          approval_requested_at?: string | null
+          reopen_token?: string | null
+          closed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          workspace_id?: string
+          requester_id?: string
+          assigned_to?: string | null
+          title?: string
+          description?: string
+          category?: string
+          priority?: string
+          stage?: string
+          pending_approval?: boolean
+          pending_stage?: string | null
+          approval_requested_at?: string | null
+          reopen_token?: string | null
+          closed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ticket_comments: {
+        Row: {
+          id: string
+          ticket_id: string
+          author_id: string
+          content: string
+          is_stage_change: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          ticket_id: string
+          author_id: string
+          content: string
+          is_stage_change?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          ticket_id?: string
+          author_id?: string
+          content?: string
+          is_stage_change?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      ticket_status_history: {
+        Row: {
+          id: string
+          ticket_id: string
+          changed_by: string
+          from_stage: string | null
+          to_stage: string
+          reason: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          ticket_id: string
+          changed_by: string
+          from_stage?: string | null
+          to_stage: string
+          reason?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          ticket_id?: string
+          changed_by?: string
+          from_stage?: string | null
+          to_stage?: string
+          reason?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          id: string
+          email: string
+          full_name: string | null
+          avatar_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          email: string
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
