@@ -21,7 +21,7 @@ Progress: v1.0 ██████████ Shipped | v2.0 ██████�
 **Velocity:**
 - Total plans completed: 55 (14 in v1.0 + 38 in v2.0 + 3 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 11 in v2.1
+- Commits: 325 in v2.0, 14 in v2.1
 
 **Codebase:**
 - Lines: 23,856 TypeScript
