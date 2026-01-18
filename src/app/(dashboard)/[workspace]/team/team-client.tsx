@@ -70,9 +70,20 @@ export function TeamClient({
 
     setIsInviting(true)
     try {
-      // TODO: Implement invite API
-      toast.info(`Fitur undangan akan segera hadir untuk: ${email}`)
-      setEmail('')
+      const response = await fetch('/api/invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), workspaceId: workspace.id }),
+      })
+
+      if (response.ok) {
+        toast.success(`Undangan berhasil dikirim ke ${email.trim()}`)
+        setEmail('')
+        router.refresh()
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Gagal mengirim undangan')
+      }
     } catch (error) {
       console.error('Failed to invite:', error)
       toast.error('Gagal mengirim undangan')
@@ -108,8 +119,24 @@ export function TeamClient({
   }
 
   const handleRemove = async (memberId: string) => {
-    // TODO: Implement remove member
-    toast.info('Fitur hapus anggota akan segera hadir')
+    if (!confirm('Hapus anggota ini dari workspace?')) return
+
+    try {
+      const response = await fetch(`/api/workspace-members/${memberId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        toast.success('Anggota berhasil dihapus')
+        router.refresh()
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Gagal menghapus anggota')
+      }
+    } catch (error) {
+      console.error('Failed to remove member:', error)
+      toast.error('Gagal menghapus anggota')
+    }
   }
 
   const canChangeRole = hasPermission(currentUserRole, 'team:change_role')
