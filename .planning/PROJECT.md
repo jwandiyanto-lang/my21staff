@@ -10,6 +10,22 @@ WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-t
 
 The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
+## Current Milestone: v2.1 Client Launch Ready
+
+**Goal:** Complete package to onboard Eagle as first paying client — brand foundation, functional CRM features, working integrations.
+
+**Target features:**
+- Brand Guidelines Document (logo, colors, typography, voice)
+- Folder Restructure (my21staff/ vs my21staff-business/)
+- Email System via Hostinger (invitation, welcome, support templates)
+- Landing Page Redesign (mobile-friendly, "WhatsApp Automation" hook)
+- Workspace Ownership & Roles (owner permissions, member management)
+- WhatsApp Bot via Kapso (Eagle's number, SeaLion AI)
+- Support Page with Full Ticketing (Report → Discuss → Outcome → Implementation)
+- Security Info Page
+- Performance Optimization (edge caching, DB query caching, bundle reduction)
+- Deferred: Kapso Persona Config, SMTP Email Delivery fix
+
 ## Current State (v2.0)
 
 **Production URL:** https://my21staff.vercel.app
@@ -52,8 +68,17 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 ### Active
 
-- [ ] Kapso persona configuration (Kia for Eagle Overseas)
-- [ ] SMTP email delivery for team invitations
+- [ ] Brand Guidelines Document — logo rules, colors, typography, voice & tone
+- [ ] Folder Restructure — my21staff/ (web app) vs my21staff-business/ (private)
+- [ ] Email System — templates via admin@my21staff.com (Hostinger)
+- [ ] Landing Page Redesign — mobile-friendly, "WhatsApp Automation" hook
+- [ ] Workspace Ownership & Roles — owner permissions, member management
+- [ ] WhatsApp Bot Setup — Eagle's number via Kapso, SeaLion AI
+- [ ] Support Page — full ticketing system (Report → Discuss → Outcome → Implementation)
+- [ ] Security Info Page — data storage, protection methods
+- [ ] Performance Optimization — edge caching, DB query caching, bundle reduction
+- [ ] Kapso persona configuration (Kia for Eagle Overseas) — deferred from v2.0
+- [ ] SMTP email delivery fix — deferred from v2.0
 
 ### Out of Scope
 
@@ -62,6 +87,11 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - Self-service onboarding — manual for now
 - Billing/subscriptions — not needed yet
 - Multi-user chat assignment — single user per workspace for v2
+- Ads campaign launch — v2.2
+- Advanced analytics dashboard — v2.2
+- Meta Ads integration — v2.2
+- Content creation tools — v2.2
+- Telegram bot connection — v2.2 (persona only in v2.1)
 
 ## Context
 
@@ -100,4 +130,4 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | Phone E.164 normalization | Indonesian 0812 → +6281 | ✓ Good — consistent data |
 
 ---
-*Last updated: 2026-01-18 after v2.0 milestone*
+*Last updated: 2026-01-18 after v2.1 milestone started*

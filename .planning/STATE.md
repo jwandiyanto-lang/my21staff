@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** The system that lets you grow — lead management, follow-up automation, guided by real business experience.
-**Current focus:** v2.0 shipped — Planning next milestone (v2.1)
+**Current focus:** v2.1 Client Launch Ready — First paying client onboarding
 
 ## Current Position
 
-Phase: 22 complete (v2.0 shipped)
-Plan: All plans complete
-Status: Milestone archived
-Last activity: 2026-01-18 — v2.0 milestone complete
+Phase: Not started (run /gsd:create-roadmap)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-01-18 — Milestone v2.1 started
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ░░░░░░░░░░ Starting
 
 ## Performance Metrics
 
@@ -59,9 +59,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: v2.0 milestone archived
+Stopped at: v2.1 milestone initialized
 Resume file: None
-Next: `/gsd:discuss-milestone` for v2.1 planning
+Next: `/gsd:create-roadmap` to plan phases
 
 ## Deployment Info
 
@@ -81,4 +81,4 @@ Next: `/gsd:discuss-milestone` for v2.1 planning
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 after v2.0 milestone*
+*Last updated: 2026-01-18 after v2.1 milestone started*
