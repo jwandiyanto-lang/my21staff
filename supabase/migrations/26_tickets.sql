@@ -137,3 +137,39 @@ CREATE POLICY "Members can view status history" ON ticket_status_history
       WHERE (SELECT private.get_user_role_in_workspace(workspace_id)) IS NOT NULL
     )
   );
+
+-- ============================================================================
+-- INDEXES
+-- ============================================================================
+
+-- Tickets indexes
+CREATE INDEX idx_tickets_workspace ON tickets(workspace_id);
+CREATE INDEX idx_tickets_requester ON tickets(requester_id);
+CREATE INDEX idx_tickets_assigned ON tickets(assigned_to);
+CREATE INDEX idx_tickets_stage ON tickets(stage);
+CREATE INDEX idx_tickets_workspace_stage ON tickets(workspace_id, stage);
+
+-- Comments indexes
+CREATE INDEX idx_ticket_comments_ticket ON ticket_comments(ticket_id);
+CREATE INDEX idx_ticket_comments_ticket_created ON ticket_comments(ticket_id, created_at);
+
+-- Status history indexes
+CREATE INDEX idx_ticket_status_history_ticket ON ticket_status_history(ticket_id);
+
+-- ============================================================================
+-- TRIGGER: Update updated_at timestamp
+-- ============================================================================
+
+-- Create function if not exists (may already exist from other migrations)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_tickets_updated_at
+  BEFORE UPDATE ON tickets
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
