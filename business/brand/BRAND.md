@@ -114,13 +114,22 @@ The landing page uses a Notion-inspired off-white with sage green hero sections.
 | Error | Red | #EF4444 | Errors, destructive actions |
 | Info | Blue | #3B82F6 | Information, links |
 
+### Orange Philosophy
+
+The orange (#F7931A) is Bitcoin's exact orange — a subtle nod to financial independence and modern business. Use it as a **small hint**, never dominant:
+
+- The "21" in our logo (21 = Bitcoin's 21 million supply cap)
+- Accent highlights, not backgrounds
+- CTAs that matter, not every button
+- A whisper of ambition, not a shout
+
 ### Color Application Guidelines
 
 1. **Primary Actions:** Use forest green (#2D4B3E) for buttons, CTAs in CRM
-2. **Landing CTAs:** Use orange (#F7931A) for conversion buttons
+2. **Landing CTAs:** Use orange (#F7931A) sparingly for high-impact conversion buttons
 3. **Backgrounds:** Never use orange as a background color
 4. **Text:** Use dark text (#2D2A26 or #37352F) for body content
-5. **Accents:** Orange for highlights, notifications, emphasis only
+5. **Accents:** Orange for highlights, notifications, emphasis only — keep it subtle
 
 ---
 
