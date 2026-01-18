@@ -66,3 +66,74 @@ CREATE TABLE ticket_status_history (
   reason TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- ============================================================================
+-- ROW LEVEL SECURITY
+-- Uses private.get_user_role_in_workspace() from migration 25
+-- ============================================================================
+
+-- Enable RLS on all tables
+ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ticket_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ticket_status_history ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================================
+-- TICKETS POLICIES
+-- ============================================================================
+
+-- SELECT: Any workspace member can view tickets
+CREATE POLICY "Members can view tickets" ON tickets
+  FOR SELECT USING (
+    (SELECT private.get_user_role_in_workspace(workspace_id)) IS NOT NULL
+  );
+
+-- INSERT: Any member can create tickets (requester_id must match auth.uid())
+CREATE POLICY "Members can create tickets" ON tickets
+  FOR INSERT WITH CHECK (
+    (SELECT private.get_user_role_in_workspace(workspace_id)) IS NOT NULL
+    AND requester_id = auth.uid()
+  );
+
+-- UPDATE: Owner/admin, assigned_to, or requester can update
+CREATE POLICY "Authorized users can update tickets" ON tickets
+  FOR UPDATE USING (
+    (SELECT private.get_user_role_in_workspace(workspace_id)) IN ('owner', 'admin')
+    OR assigned_to = auth.uid()
+    OR requester_id = auth.uid()
+  );
+
+-- ============================================================================
+-- TICKET_COMMENTS POLICIES
+-- ============================================================================
+
+-- SELECT: Members can view comments if ticket is in their workspace
+CREATE POLICY "Members can view comments" ON ticket_comments
+  FOR SELECT USING (
+    ticket_id IN (
+      SELECT id FROM tickets
+      WHERE (SELECT private.get_user_role_in_workspace(workspace_id)) IS NOT NULL
+    )
+  );
+
+-- INSERT: Members can add comments (author_id must match auth.uid())
+CREATE POLICY "Members can add comments" ON ticket_comments
+  FOR INSERT WITH CHECK (
+    ticket_id IN (
+      SELECT id FROM tickets
+      WHERE (SELECT private.get_user_role_in_workspace(workspace_id)) IS NOT NULL
+    )
+    AND author_id = auth.uid()
+  );
+
+-- ============================================================================
+-- TICKET_STATUS_HISTORY POLICIES
+-- ============================================================================
+
+-- SELECT: Members can view status history if ticket is in their workspace
+CREATE POLICY "Members can view status history" ON ticket_status_history
+  FOR SELECT USING (
+    ticket_id IN (
+      SELECT id FROM tickets
+      WHERE (SELECT private.get_user_role_in_workspace(workspace_id)) IS NOT NULL
+    )
+  );
