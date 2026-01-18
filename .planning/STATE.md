@@ -10,22 +10,22 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 4 of 9 — Support Ticketing Core
-Plan: 02 of 05 complete
+Plan: 03 of 05 complete
 Status: In progress
-Last activity: 2026-01-18 — Completed 04-02-PLAN.md (TypeScript Utilities)
+Last activity: 2026-01-18 — Completed 04-03-PLAN.md (API Routes)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ██████░░░░ Phase 4 in progress
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ███████░░░ Phase 4 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 64 (14 in v1.0 + 38 in v2.0 + 12 in v2.1)
+- Total plans completed: 65 (14 in v1.0 + 38 in v2.0 + 13 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 35 in v2.1
+- Commits: 325 in v2.0, 38 in v2.1
 
 **Codebase:**
-- Lines: ~24,000 TypeScript
-- Files: ~130 TypeScript files
+- Lines: ~24,500 TypeScript
+- Files: ~136 TypeScript files
 - Phases: 23 complete (Phase 18 skipped)
 
 ## Accumulated Context
@@ -62,6 +62,9 @@ Key v2.1 decisions:
 - Ticket state machine in src/lib/tickets/ (types, transitions, tokens)
 - HMAC tokens reuse ENCRYPTION_KEY (TICKET_TOKEN_SECRET fallback)
 - Ticket permissions: tickets:assign, tickets:transition, tickets:skip_stage
+- Ticket API routes follow contacts pattern (fetch ticket, then verify workspace membership)
+- Dual-mode reopen (HMAC token for email links, authenticated for logged-in users)
+- One-time reopen tokens (cleared after successful reopen)
 
 ### Deferred Issues
 
@@ -80,9 +83,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 04-02-PLAN.md (TypeScript Utilities)
+Stopped at: Completed 04-03-PLAN.md (API Routes)
 Resume file: None
-Next: 04-03-PLAN.md (API Routes)
+Next: 04-04-PLAN.md (UI Components)
 
 ## Deployment Info
 
@@ -102,4 +105,4 @@ Next: 04-03-PLAN.md (API Routes)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 — Phase 04 in progress, 04-02 complete (TypeScript Utilities)*
+*Last updated: 2026-01-18 — Phase 04 in progress, 04-03 complete (API Routes)*
