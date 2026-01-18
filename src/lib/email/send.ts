@@ -1,6 +1,8 @@
 import { getResend, FROM_EMAIL } from './resend'
 import { InvitationEmail } from '@/emails/invitation'
 import { PasswordResetEmail } from '@/emails/password-reset'
+import { RoleChangeEmail } from '@/emails/role-change'
+import { type WorkspaceRole } from '@/lib/permissions/types'
 
 export async function sendInvitationEmail({
   to,
@@ -46,6 +48,35 @@ export async function sendPasswordResetEmail({
 
   if (error) {
     console.error('Failed to send password reset email:', error)
+    throw new Error(`Email failed: ${error.message}`)
+  }
+
+  return data
+}
+
+export async function sendRoleChangeEmail({
+  to,
+  userName,
+  workspaceName,
+  oldRole,
+  newRole,
+}: {
+  to: string
+  userName: string
+  workspaceName: string
+  oldRole: WorkspaceRole
+  newRole: WorkspaceRole
+}) {
+  const resend = getResend()
+  const { data, error } = await resend.emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject: `Role Anda di ${workspaceName} telah diubah`,
+    react: RoleChangeEmail({ userName, workspaceName, oldRole, newRole }),
+  })
+
+  if (error) {
+    console.error('Failed to send role change email:', error)
     throw new Error(`Email failed: ${error.message}`)
   }
 
