@@ -6,14 +6,14 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 
 ## Milestones
 
-- ✅ **v1.0 MVP** — Phases 1-5 (shipped 2026-01-14)
-- ✅ **v2.0 Production Ready** — Phases 6-22 (shipped 2026-01-18)
-- 📋 **v2.1 Kapso Persona** — Phase 18 + SMTP (planned)
+- v1.0 MVP — Phases 1-5 (shipped 2026-01-14)
+- v2.0 Production Ready — Phases 6-22 (shipped 2026-01-18)
+- v2.1 Kapso Persona — Phase 18 + SMTP (planned)
 
 ## Completed Milestones
 
 <details>
-<summary>✅ v1.0 MVP (Phases 1-5) — SHIPPED 2026-01-14</summary>
+<summary>v1.0 MVP (Phases 1-5) — SHIPPED 2026-01-14</summary>
 
 - [x] Phase 1: Foundation (3/3 plans) — completed 2026-01-14
 - [x] Phase 2: Database View (3/3 plans) — completed 2026-01-14
@@ -32,7 +32,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 </details>
 
 <details>
-<summary>✅ v2.0 Production Ready (Phases 6-22) — SHIPPED 2026-01-18</summary>
+<summary>v2.0 Production Ready (Phases 6-22) — SHIPPED 2026-01-18</summary>
 
 - [x] Phase 6: Kapso Live (1/1 plan) — completed 2026-01-14
 - [x] Phase 7: Landing Page (3/3 plans) — completed 2026-01-14
@@ -65,31 +65,143 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 
 </details>
 
-## v2.1 — Kapso Persona + SMTP (Planned)
+## v2.1 — Client Launch Ready
 
-### Phase 18: Kapso Bot Setup & Verification
+**Goal:** Complete package to onboard Eagle as first paying client — trust-building features, not feature expansion.
 
-**Goal:** Configure Kia persona for Eagle Overseas with CRM context integration
-**Status:** Not started
+**Key insight:** First paying client success defines the business. VIP treatment for Eagle.
+
+---
+
+### Phase 1: Brand Guidelines
+**Goal:** Foundation for all visual work — logo, colors, typography, voice
+**Status:** Planned
+**Plans:** 2 plans
 
 Plans:
-- [ ] 18-01: Contact lookup API by phone (for Kapso function context)
-- [ ] 18-02: Deploy Kia persona + end-to-end verification
+- [ ] 01-01-PLAN.md — Create BRAND.md and logo SVG files
+- [ ] 01-02-PLAN.md — Generate logo PNGs and update references
 
-**Scope:**
-- Build contact lookup API (`/api/contacts/by-phone/[phone]`)
-- Update Kapso sea-lion-reply function with Kia persona
-- Integrate CRM context into AI responses
+---
 
-### Phase 23: SMTP Email Delivery (NEW)
-
-**Goal:** Fix team invitation email delivery from Vercel
+### Phase 2: Email System (Resend)
+**Goal:** Fix email delivery — switch from broken SMTP to Resend HTTP API
 **Status:** Not started
 
 **Scope:**
-- Investigate DNS resolution issues (smtp.hostinger.com EBADNAME)
-- Try alternative SMTP providers (SendGrid, Resend, Mailgun)
-- Or use Supabase email triggers
+- Replace nodemailer/SMTP with Resend
+- Add React Email for templates
+- Update invitation flow
+- DNS records (SPF, DKIM, DMARC)
+
+**Addresses:** P0 SMTP DNS resolution issue
+
+---
+
+### Phase 3: Workspace Roles Enhancement
+**Goal:** Permission infrastructure — owner/admin/member enforcement
+**Status:** Not started
+
+**Scope:**
+- Create `hasPermission()` utility
+- Extend `requireWorkspaceMembership` for roles
+- Audit all RLS policies
+- Role management UI in settings
+
+**Addresses:** P0 RLS policy gaps
+
+---
+
+### Phase 4: Support Ticketing Core
+**Goal:** Trust-building feature — 4-stage workflow (Report -> Discuss -> Outcome -> Implementation)
+**Status:** Not started
+
+**Scope:**
+- Tables: tickets, comments, status_history (with RLS)
+- Ticket list + detail pages
+- Status transition logic
+- Email notifications on status change
+
+**Depends on:** Phase 2 (Email), Phase 3 (Roles)
+
+---
+
+### Phase 5: Tawk.to Integration
+**Goal:** Quick win for live chat + backup ticketing
+**Status:** Not started (optional)
+
+**Scope:**
+- Embed Tawk.to widget on landing + CRM
+- Configure Bahasa Indonesia
+- Test chat -> ticket flow
+
+**Note:** Skip if Phase 4 ticketing is sufficient
+
+---
+
+### Phase 6: Security Info Page
+**Goal:** Trust signal for paying clients
+**Status:** Not started
+
+**Scope:**
+- Static page (Bahasa Indonesia)
+- Data storage location (Singapore)
+- Encryption explanation
+- FAQ accordion
+- WhatsApp contact
+
+**Can parallelize with:** Phase 7
+
+---
+
+### Phase 7: Landing Page Redesign
+**Goal:** Mobile-first conversion optimization
+**Status:** Not started
+
+**Scope:**
+- Hero: "WhatsApp Automation untuk UMKM"
+- Social proof (testimonials, client logos)
+- Features grid per BRAND.md
+- Single WhatsApp CTA per section
+- Bundle optimization
+
+**Depends on:** Phase 1 (Brand Guidelines)
+**Can parallelize with:** Phase 6
+
+---
+
+### Phase 8: Performance Optimization
+**Goal:** First impression polish for Eagle
+**Status:** Not started
+
+**Scope:**
+- Bundle analyzer, identify targets
+- Dynamic imports for heavy components
+- TanStack Query for client caching
+- Verify Supabase connection pooling
+
+**Note:** Optimize after features stable
+
+---
+
+### Phase 9: Kapso Bot Setup (Eagle)
+**Goal:** Get Kia persona working on Eagle's WhatsApp — most important for first client
+**Status:** Not started
+**Priority:** HIGH — can start early, minimal dependencies
+
+**Scope:**
+- Contact lookup API (`/api/contacts/by-phone/[phone]`)
+- Update Kapso sea-lion-reply function with Kia persona
+- Integrate CRM context into AI responses
+- End-to-end testing with Eagle's number
+
+**Note:** Can run in parallel with Phases 2-8
+
+---
+
+### Deferred to v2.2
+
+- Folder Restructure (my21staff/ vs my21staff-business/)
 
 ---
 
@@ -99,9 +211,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 18 | v2.1 | 0/2 | Planned | — |
-| 23 | v2.1 | 0/1 | Planned | — |
+| 1-9 | v2.1 | 2/? | Phase 1 planned | — |
+
+**Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-18 after v2.0 milestone*
+*Last updated: 2026-01-18 — Phase 1 planned (2 plans)*
