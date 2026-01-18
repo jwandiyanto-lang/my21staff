@@ -185,6 +185,8 @@
   },
   "active": "ccbd897c4fb28da1",
   "lastOpenFiles": [
+    "src/app/api/invitations/set-password/route.ts",
+    "src/app/api/invitations/set-password",
     "src/app/(dashboard)/[workspace]/support/[id]/ticket-detail-client.tsx.tmp.1069217.1768750386915",
     "supabase/migrations/27_ticket_auto_close.sql",
     "src/lib/tickets/email.ts",
@@ -194,8 +196,6 @@
     "src/components/workspace/sidebar.tsx.tmp.1069217.1768744990968",
     "src/components/ui/alert.tsx",
     "src/app/(dashboard)/[workspace]/support/[id]/ticket-detail-client.tsx",
-    "src/app/(dashboard)/[workspace]/support/[id]/page.tsx",
-    "src/app/(dashboard)/[workspace]/support/[id]",
     "node_modules/@radix-ui/react-radio-group/README.md",
     "node_modules/@hookform/resolvers/README.md",
     "node_modules/react-hook-form/README.md",

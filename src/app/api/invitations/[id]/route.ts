@@ -146,34 +146,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const inviterName = inviterProfile?.full_name || inviterProfile?.email || user.email || 'Team member'
 
-    // Generate a new link for the user
+    // Generate direct link to set-password page
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
-    const finalDestination = `/set-password?invitation=${invitation.token}`
-    const redirectTo = `${appUrl}/auth/callback?next=${encodeURIComponent(finalDestination)}`
-
-    // Check if user exists to determine link type
-    const { data: { users } } = await adminClient.auth.admin.listUsers()
-    const existingUser = users.find(u => u.email?.toLowerCase() === invitation.email.toLowerCase())
-    const linkType = existingUser ? 'recovery' : 'invite'
-
-    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
-      type: linkType,
-      email: invitation.email,
-      options: {
-        redirectTo,
-      },
-    })
-
-    if (linkError || !linkData) {
-      console.error('Failed to generate recovery link:', linkError)
-      return NextResponse.json(
-        { error: `Failed to generate invitation link: ${linkError?.message || 'Unknown error'}` },
-        { status: 500 }
-      )
-    }
-
-    // The recovery link from Supabase
-    const inviteLink = linkData.properties.action_link
+    const inviteLink = `${appUrl}/set-password?invitation=${invitation.token}`
 
     // Send invitation email
     try {

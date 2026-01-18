@@ -129,33 +129,7 @@ export async function POST(request: NextRequest) {
       authUserId = newUser.user.id
     }
 
-    // Generate link for password setup
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
-
-    // Use auth/callback with next parameter to ensure proper redirect after PKCE exchange
-    const finalDestination = `/set-password?invitation=${invitationToken}`
-    const redirectTo = `${appUrl}/auth/callback?next=${encodeURIComponent(finalDestination)}`
-
-    // Use 'invite' for new users (no password yet), 'recovery' for existing users
-    const linkType = existingAuthUser ? 'recovery' : 'invite'
-
-    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
-      type: linkType,
-      email: normalizedEmail,
-      options: {
-        redirectTo,
-      },
-    })
-
-    if (linkError || !linkData) {
-      console.error('Failed to generate recovery link:', linkError)
-      return NextResponse.json(
-        { error: `Failed to generate invitation link: ${linkError?.message || 'Unknown error'}` },
-        { status: 500 }
-      )
-    }
-
-    // Create invitation record
+    // Create invitation record first
     const { data: invitation, error: insertError } = await adminClient
       .from('workspace_invitations')
       .insert({
@@ -178,9 +152,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // The recovery link from Supabase (contains the magic token)
-    // This link, when clicked, will validate the token and redirect to our callback
-    const inviteLink = linkData.properties.action_link
+    // Generate direct link to set-password page (bypasses Supabase auth flow)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
+    const inviteLink = `${appUrl}/set-password?invitation=${invitationToken}`
 
     // Send invitation email via our SMTP
     try {

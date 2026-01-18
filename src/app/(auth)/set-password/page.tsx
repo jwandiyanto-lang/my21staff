@@ -1,82 +1,20 @@
 'use client'
 
-import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Lock, Loader2, CheckCircle } from 'lucide-react'
+import { Lock, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 
 function SetPasswordForm() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [checkingAuth, setCheckingAuth] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const invitationToken = searchParams.get('invitation')
-  const supabase = useMemo(() => createClient(), [])
-
-  useEffect(() => {
-    async function checkAuth() {
-      // First check if there's already a session
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setCheckingAuth(false)
-        return
-      }
-
-      // No session yet - check if there's a code in URL to exchange (PKCE flow)
-      const url = new URL(window.location.href)
-      const code = url.searchParams.get('code')
-
-      if (code) {
-        // Exchange code for session
-        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
-        if (exchangeError) {
-          console.error('Code exchange error:', exchangeError)
-          setError('Failed to verify invitation link. Please try again.')
-          setCheckingAuth(false)
-          return
-        }
-
-        // Remove code from URL to prevent re-exchange on refresh
-        url.searchParams.delete('code')
-        window.history.replaceState({}, '', url.toString())
-
-        setCheckingAuth(false)
-        return
-      }
-
-      // Check for tokens in URL hash (implicit flow fallback)
-      const hashParams = new URLSearchParams(window.location.hash.substring(1))
-      const accessToken = hashParams.get('access_token')
-      const refreshToken = hashParams.get('refresh_token')
-
-      if (accessToken && refreshToken) {
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        })
-        if (sessionError) {
-          console.error('Session error:', sessionError)
-          setError('Failed to verify invitation link. Please try again.')
-          setCheckingAuth(false)
-          return
-        }
-
-        // Clear hash from URL
-        window.history.replaceState({}, '', window.location.pathname + window.location.search)
-
-        setCheckingAuth(false)
-        return
-      }
-
-      // No session, no code, no tokens - redirect to login
-      router.push('/login?error=session_expired')
-    }
-    checkAuth()
-  }, [supabase, router])
 
   const validatePassword = (password: string): string | null => {
     if (password.length < 8) {
@@ -112,28 +50,52 @@ function SetPasswordForm() {
     }
 
     if (!invitationToken) {
-      setError('Invalid invitation link')
+      setError('Invalid invitation link. Please request a new invitation.')
       return
     }
 
     setLoading(true)
 
     try {
-      // Update password in Supabase Auth
-      const { error: updateError } = await supabase.auth.updateUser({
+      // Call our API to set password (doesn't require Supabase auth)
+      const response = await fetch('/api/invitations/set-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invitationToken,
+          password: newPassword,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to set password')
+      }
+
+      setUserEmail(data.email)
+      setSuccess(true)
+
+      // Sign in the user with their new credentials
+      const supabase = createClient()
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
         password: newPassword,
       })
 
-      if (updateError) {
-        throw updateError
+      if (signInError) {
+        console.error('Auto sign-in failed:', signInError)
+        // Still show success - they can sign in manually
       }
 
-      setSuccess(true)
-
-      // Redirect to accept invitation after short delay
+      // Redirect to workspace after short delay
       setTimeout(() => {
-        router.push(`/api/invitations/accept?token=${invitationToken}`)
-      }, 1500)
+        if (data.workspaceSlug) {
+          router.push(`/${data.workspaceSlug}/dashboard`)
+        } else {
+          router.push('/dashboard')
+        }
+      }, 2000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to set password')
     } finally {
@@ -141,10 +103,27 @@ function SetPasswordForm() {
     }
   }
 
-  if (checkingAuth) {
+  // No invitation token - show error
+  if (!invitationToken) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#9CB99C] via-[#A8C5A8] to-[#B5D1B5]">
-        <Loader2 className="w-8 h-8 animate-spin text-white" />
+        <div className="w-full max-w-md px-4">
+          <div className="backdrop-blur-xl bg-white/70 rounded-3xl shadow-2xl border border-white/50 p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-red-500" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Link</h1>
+            <p className="text-gray-600 mb-6">
+              This invitation link is invalid or has expired. Please request a new invitation from your team admin.
+            </p>
+            <button
+              onClick={() => router.push('/')}
+              className="px-6 py-2 rounded-xl bg-[#2D4B3E] text-white font-semibold hover:bg-[#243D32] transition-all"
+            >
+              Go to Homepage
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
@@ -152,13 +131,15 @@ function SetPasswordForm() {
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#9CB99C] via-[#A8C5A8] to-[#B5D1B5]">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md px-4">
           <div className="backdrop-blur-xl bg-white/70 rounded-3xl shadow-2xl border border-white/50 p-8 text-center">
             <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-green-500" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Password Set!</h1>
-            <p className="text-gray-600">Completing your invitation...</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome aboard!</h1>
+            <p className="text-gray-600">
+              Your account is ready. Taking you to your dashboard...
+            </p>
           </div>
         </div>
       </div>
