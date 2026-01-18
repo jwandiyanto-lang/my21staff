@@ -11,6 +11,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  Headphones,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WorkspaceSwitcher } from './workspace-switcher'
@@ -41,6 +42,11 @@ const operationsNav = [
     title: 'Conversations',
     icon: MessageCircle,
     href: '/inbox',
+  },
+  {
+    title: 'Dukungan',
+    icon: Headphones,
+    href: '/support',
   },
 ]
 
