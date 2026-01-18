@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
+import { type WorkspaceRole } from '@/lib/permissions/types'
 import { NextResponse } from 'next/server'
 
 export interface AuthResult {
   user: { id: string; email: string }
   workspaceId: string
+  role: WorkspaceRole
 }
 
 export async function requireWorkspaceMembership(
@@ -18,10 +20,10 @@ export async function requireWorkspaceMembership(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Verify workspace membership
+  // Verify workspace membership and get role
   const { data: membership } = await supabase
     .from('workspace_members')
-    .select('id')
+    .select('id, role')
     .eq('workspace_id', workspaceId)
     .eq('user_id', user.id)
     .single()
@@ -33,5 +35,9 @@ export async function requireWorkspaceMembership(
     )
   }
 
-  return { user: { id: user.id, email: user.email || '' }, workspaceId }
+  return {
+    user: { id: user.id, email: user.email || '' },
+    workspaceId,
+    role: membership.role as WorkspaceRole
+  }
 }
