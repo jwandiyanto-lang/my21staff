@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 
 ## Current Position
 
-Phase: 2 of 9 — Email System + Member Onboarding
-Plan: 02 of 02 complete
-Status: Phase complete (with known issues)
-Last activity: 2026-01-18 — Completed 02-02-PLAN.md (Password Reset + DNS)
+Phase: 3 of 9 — Workspace Roles Enhancement
+Plan: 01 of 03 complete
+Status: In progress
+Last activity: 2026-01-18 — Completed 03-01-PLAN.md (Permission Infrastructure)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ████░░░░░░ Phase 1-2 Complete
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ████░░░░░░ Phase 1-2 + Plan 3.1 Complete
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 57 (14 in v1.0 + 38 in v2.0 + 5 in v2.1)
+- Total plans completed: 58 (14 in v1.0 + 38 in v2.0 + 6 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 16 in v2.1
+- Commits: 325 in v2.0, 20 in v2.1
 
 **Codebase:**
 - Lines: 23,856 TypeScript
@@ -51,6 +51,9 @@ Key v2.1 decisions:
 - Resend HTTP API for email (replaces broken nodemailer/SMTP)
 - Lazy-loaded Resend client (getResend) for build-time safety
 - React Email templates in src/emails/
+- Permission utilities in src/lib/permissions/ (types, constants, check)
+- SECURITY DEFINER function in private schema for RLS performance
+- requireWorkspaceMembership extended to return role
 
 ### Deferred Issues
 
@@ -69,9 +72,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed Phase 2 (Email System)
+Stopped at: Completed 03-01-PLAN.md (Permission Infrastructure)
 Resume file: None
-Next: Phase 3 (Workspace Roles Enhancement)
+Next: 03-02-PLAN.md (Permission UI Enforcement)
 
 ## Deployment Info
 
@@ -91,4 +94,4 @@ Next: Phase 3 (Workspace Roles Enhancement)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 — Phase 2 complete (with known issues)*
+*Last updated: 2026-01-18 — Plan 03-01 complete (Permission Infrastructure)*
