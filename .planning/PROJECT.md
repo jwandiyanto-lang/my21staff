@@ -1,14 +1,36 @@
-# my21staff v2
+# my21staff
 
 ## What This Is
 
 **No system = Can't grow. I help you build that system.**
 
-WhatsApp CRM + AI team for Indonesian SMEs. Not just software — guidance from real business experience.
+WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-tenant admin, AI-powered WhatsApp responses, comprehensive lead management, and team collaboration features.
 
 ## Core Value
 
 The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
+
+## Current State (v2.0)
+
+**Production URL:** https://my21staff.vercel.app
+
+**Shipped Features:**
+- Lead database with status, tags, score, notes, activity timeline
+- Two-way WhatsApp messaging via Kapso (send/receive)
+- AI-powered auto-replies via Sea Lion LLM
+- Multi-tenant admin with client management
+- Dashboard with client stats and task management
+- CSV import/export for contacts and notes
+- Team invitations with password setup flow
+- Pricing form → CRM leads integration
+- Security hardening (rate limiting, input validation, API key encryption)
+
+**Tech Stack:**
+- 23,856 lines TypeScript
+- Next.js 15 + React 19
+- Supabase (PostgreSQL + Auth + RLS)
+- Shadcn/ui + Tailwind CSS
+- Kapso API for WhatsApp
 
 ## Requirements
 
@@ -17,12 +39,21 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - ✓ **Database View** — Lead table with form submissions, status badges, filters, detail sheet — v1.0
 - ✓ **Kapso Send + Filter** — Send messages via Kapso API, load message history, status filtering, optimistic UI — v1.0
 - ✓ **Website Manager** — CMS for articles/webinars, public pages, registration flows creating contacts — v1.0
+- ✓ **Production deployment** — Live at my21staff.vercel.app with real Supabase — v2.0
+- ✓ **Multi-tenant admin** — Client management, dummy credentials, first-login password change — v2.0
+- ✓ **AI-powered responses** — Sea Lion LLM via Kapso for WhatsApp auto-replies — v2.0
+- ✓ **Lead management polish** — Editable fields, tags, AI handover toggle, pagination — v2.0
+- ✓ **Security hardening** — Rate limiting, input validation, webhook verification, API key encryption — v2.0
+- ✓ **Dashboard** — Client stats (total, today, week, month), tag analytics — v2.0
+- ✓ **Task management** — Notes with due dates, completion tracking — v2.0
+- ✓ **CSV import/export** — Contacts and notes with validation and duplicate detection — v2.0
+- ✓ **Team invitations** — Direct user creation with recovery links — v2.0
+- ✓ **Pricing form leads** — Public API endpoint for pricing form → CRM — v2.0
 
 ### Active
 
-- [ ] Production deployment and testing
-- [ ] Real Kapso API integration (currently dev mode mock)
-- [ ] Supabase migration execution
+- [ ] Kapso persona configuration (Kia for Eagle Overseas)
+- [ ] SMTP email delivery for team invitations
 
 ### Out of Scope
 
@@ -30,7 +61,6 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - WhatsApp template messages (24h rule) — requires Meta approval process
 - Self-service onboarding — manual for now
 - Billing/subscriptions — not needed yet
-- AI auto-reply — future version
 - Multi-user chat assignment — single user per workspace for v2
 
 ## Context
@@ -39,20 +69,16 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 **Target Users:** Indonesian SMEs who have leads everywhere but no system to manage them.
 
-**Current State (v1.0):**
-- 9,043 lines TypeScript, Next.js 15 + React 19
-- Tech stack: Supabase (PostgreSQL + Auth + RLS), Shadcn/ui, Tailwind CSS
-- Dev mode with mock data for local testing
-- Schema ready for Supabase migration
-
-**v1 Reference:** `~/Desktop/21/my21staff/` was used for patterns (auth, RLS, Kapso integration).
+**Workspaces:**
+- My21Staff: `0318fda5-22c4-419b-bdd8-04471b818d17` (for pricing form leads)
+- Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ## Constraints
 
-- **Tech Stack**: Next.js 15 + React 19 + TypeScript, Supabase (PostgreSQL + Auth + RLS), Shadcn/ui, Tailwind CSS, Framer Motion
+- **Tech Stack**: Next.js 15 + React 19 + TypeScript, Supabase (PostgreSQL + Auth + RLS), Shadcn/ui, Tailwind CSS
 - **Design System**: CRM uses peach/forest green palette (Plus Jakarta Sans), Landing uses sage/orange (Plus Jakarta Sans + Inter)
-- **Integration**: Kapso API for WhatsApp (API key exists in v1)
-- **Reference**: Always reference v1 for patterns before building new
+- **Integration**: Kapso API for WhatsApp (API key stored encrypted)
+- **Deployment**: Vercel (single instance, in-memory rate limiting)
 
 ## Key Decisions
 
@@ -63,9 +89,15 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | Kapso over official WhatsApp API | Already integrated in v1, simpler | ✓ Good — working integration |
 | Dev mode bypass for local testing | Test without Supabase/Kapso setup | ✓ Good — fast iteration |
 | Multi-env Supabase via SUPABASE_ENV | Switch dev/prod with one variable | ✓ Good — flexible |
-| Simplified v2 schema (core tables) | Only what's needed for v2 features | ✓ Good — lean schema |
-| Public SELECT for articles/webinars | No auth required for public pages | ✓ Good — lead gen works |
-| Contact lookup before create | Prevent duplicate contacts on registration | ✓ Good — clean data |
+| Centralized workspace auth | Single requireWorkspaceMembership function | ✓ Good — consistent security |
+| Production safeguard for DEV_MODE | Requires NODE_ENV !== 'production' | ✓ Good — safe defaults |
+| In-memory rate limiting | Simple sliding window for single instance | ⚠️ Revisit — won't scale multi-instance |
+| HMAC-SHA256 webhook verification | Kapso signature validation | ✓ Good — secure webhooks |
+| AES-256-GCM API key encryption | Encrypt at rest with ENCRYPTION_KEY | ✓ Good — secure storage |
+| WIB timezone utilities | Hardcoded UTC+7 (no daylight saving) | ✓ Good — simple, correct |
+| Load more pagination | Better UX than page numbers | ✓ Good — smoother experience |
+| Direct user creation for invites | Supabase admin API + recovery links | ✓ Good — bypasses email issues |
+| Phone E.164 normalization | Indonesian 0812 → +6281 | ✓ Good — consistent data |
 
 ---
-*Last updated: 2026-01-14 after v1.0 milestone*
+*Last updated: 2026-01-18 after v2.0 milestone*
