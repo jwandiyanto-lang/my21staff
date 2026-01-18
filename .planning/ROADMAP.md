@@ -75,7 +75,7 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 
 ### Phase 1: Brand Guidelines
 **Goal:** Foundation for all visual work — logo, colors, typography, voice
-**Status:** Complete ✓
+**Status:** Complete
 **Plans:** 3/3 plans — completed 2026-01-18
 
 Plans:
@@ -85,17 +85,23 @@ Plans:
 
 ---
 
-### Phase 2: Email System (Resend)
-**Goal:** Fix email delivery — switch from broken SMTP to Resend HTTP API
-**Status:** Not started
+### Phase 2: Email System + Member Onboarding
+**Goal:** Fix email delivery AND complete member invitation flow — from adding member to working account
+**Status:** Planned
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Resend setup + React Email templates (invitation)
+- [ ] 02-02-PLAN.md — Password reset template + DNS verification
 
 **Scope:**
-- Replace nodemailer/SMTP with Resend
-- Add React Email for templates
-- Update invitation flow
+- Replace nodemailer/SMTP with Resend HTTP API
+- Add React Email for invitation templates
+- Member addition UI in webapp (already exists)
+- Invitation acceptance flow (already exists)
 - DNS records (SPF, DKIM, DMARC)
 
-**Addresses:** P0 SMTP DNS resolution issue
+**Addresses:** P0 SMTP DNS resolution issue + complete team onboarding
 
 ---
 
@@ -212,10 +218,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 3/? | Phase 1 complete | — |
+| 1-9 | v2.1 | 5/? | Phase 1 complete, Phase 2 planned | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-18 — Phase 1 complete (3/3 plans)*
+*Last updated: 2026-01-18 — Phase 2 planned (2 plans)*
