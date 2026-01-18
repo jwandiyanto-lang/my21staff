@@ -134,7 +134,7 @@ npm install @kapso/whatsapp-cloud-api
 
 ## Design System
 
-See **[BRAND.md](./BRAND.md)** for complete brand guideline.
+See **[BRAND.md](./business/brand/BRAND.md)** for complete brand guidelines.
 
 | Context | Palette | Font |
 |---------|---------|------|
@@ -203,7 +203,8 @@ N8N_HOST=0.0.0.0 N8N_SECURE_COOKIE=false nohup npx n8n start &
 
 ## Key Files
 
-- `BRAND.md` — Brand guideline (colors, fonts, logo)
+- `business/brand/BRAND.md` — Brand guidelines (colors, fonts, logo, voice)
+- `business/brand/logos/` — Logo files (SVG source + PNG exports)
 - `.planning/PROJECT.md` — Project overview & decisions
 - `.planning/ROADMAP.md` — Development roadmap
 - `src/app/page.tsx` — Landing page
@@ -212,4 +213,4 @@ N8N_HOST=0.0.0.0 N8N_SECURE_COOKIE=false nohup npx n8n start &
 
 ---
 
-*Last updated: 2026-01-14*
+*Last updated: 2026-01-18*
