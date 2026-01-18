@@ -3,18 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
 import { sendInvitationEmail } from '@/lib/email/send'
 import { randomBytes } from 'crypto'
+import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
+import { requirePermission } from '@/lib/permissions/check'
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
     const adminClient = createApiAdminClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
     const { email, workspaceId } = await request.json()
 
@@ -25,22 +20,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verify membership and get role
+    const authResult = await requireWorkspaceMembership(workspaceId)
+    if (authResult instanceof NextResponse) return authResult
+
+    // Check permission - only owners can invite
+    const permError = requirePermission(
+      authResult.role,
+      'team:invite',
+      'Only workspace owners can invite team members'
+    )
+    if (permError) return permError
+
+    const user = authResult.user
     const normalizedEmail = email.toLowerCase().trim()
-
-    // Verify user is admin/owner of the workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('role')
-      .eq('workspace_id', workspaceId)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership || !['owner', 'admin'].includes(membership.role)) {
-      return NextResponse.json(
-        { error: 'Only admins can invite team members' },
-        { status: 403 }
-      )
-    }
 
     // Get workspace info
     const { data: workspace } = await supabase

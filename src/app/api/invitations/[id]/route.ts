@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
 import { sendInvitationEmail } from '@/lib/email/send'
+import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
+import { requirePermission } from '@/lib/permissions/check'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -11,17 +13,9 @@ interface RouteParams {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
-    const supabase = await createClient()
     const adminClient = createApiAdminClient()
 
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get the invitation
+    // Get the invitation first to get workspace_id
     const { data: invitation, error: invError } = await adminClient
       .from('workspace_invitations')
       .select('id, workspace_id, status')
@@ -32,20 +26,17 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Invitation not found' }, { status: 404 })
     }
 
-    // Verify user is admin/owner of the workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('role')
-      .eq('workspace_id', invitation.workspace_id)
-      .eq('user_id', user.id)
-      .single()
+    // Verify membership and get role
+    const authResult = await requireWorkspaceMembership(invitation.workspace_id)
+    if (authResult instanceof NextResponse) return authResult
 
-    if (!membership || !['owner', 'admin'].includes(membership.role)) {
-      return NextResponse.json(
-        { error: 'Only admins can delete invitations' },
-        { status: 403 }
-      )
-    }
+    // Check permission - only owners can delete invitations
+    const permError = requirePermission(
+      authResult.role,
+      'team:remove',
+      'Only workspace owners can delete invitations'
+    )
+    if (permError) return permError
 
     // Delete the invitation
     const { error: deleteError } = await adminClient
@@ -78,14 +69,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const supabase = await createClient()
     const adminClient = createApiAdminClient()
 
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get the invitation with workspace info
+    // Get the invitation first to get workspace_id
     const { data: invitation, error: invError } = await adminClient
       .from('workspace_invitations')
       .select('id, workspace_id, email, token, status')
@@ -103,20 +87,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Verify user is admin/owner of the workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('role')
-      .eq('workspace_id', invitation.workspace_id)
-      .eq('user_id', user.id)
-      .single()
+    // Verify membership and get role
+    const authResult = await requireWorkspaceMembership(invitation.workspace_id)
+    if (authResult instanceof NextResponse) return authResult
 
-    if (!membership || !['owner', 'admin'].includes(membership.role)) {
-      return NextResponse.json(
-        { error: 'Only admins can resend invitations' },
-        { status: 403 }
-      )
-    }
+    // Check permission - only owners can resend invitations
+    const permError = requirePermission(
+      authResult.role,
+      'team:invite',
+      'Only workspace owners can resend invitations'
+    )
+    if (permError) return permError
+
+    const user = authResult.user
 
     // Get workspace info
     const { data: workspace } = await supabase
