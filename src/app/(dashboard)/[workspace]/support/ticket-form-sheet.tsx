@@ -130,17 +130,18 @@ export function TicketFormSheet({
         </SheetHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-8">
             {/* Title */}
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Subject</FormLabel>
+                  <FormLabel className="text-sm font-medium">Subject</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Brief summary of your issue or request"
+                      className="mt-2"
                       {...field}
                     />
                   </FormControl>
@@ -155,12 +156,12 @@ export function TicketFormSheet({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="text-sm font-medium">Description</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Describe your issue or request in detail..."
                       rows={4}
-                      className="resize-none"
+                      className="mt-2 resize-none"
                       {...field}
                     />
                   </FormControl>
@@ -175,13 +176,13 @@ export function TicketFormSheet({
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel className="text-sm font-medium">Category</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="mt-2">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                     </FormControl>
@@ -204,12 +205,12 @@ export function TicketFormSheet({
               name="priority"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Priority</FormLabel>
+                  <FormLabel className="text-sm font-medium">Priority</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="grid grid-cols-3 gap-2"
+                      className="mt-3 grid grid-cols-3 gap-3"
                     >
                       {priorities.map((p) => (
                         <div key={p.value}>
@@ -220,10 +221,10 @@ export function TicketFormSheet({
                           />
                           <Label
                             htmlFor={`priority-${p.value}`}
-                            className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-background p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
+                            className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-background px-4 py-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
                           >
-                            <span className="text-sm font-medium">{p.label}</span>
-                            <span className="text-[10px] text-muted-foreground mt-0.5">
+                            <span className="text-sm font-semibold">{p.label}</span>
+                            <span className="text-xs text-muted-foreground mt-1">
                               {p.description}
                             </span>
                           </Label>
@@ -237,7 +238,7 @@ export function TicketFormSheet({
             />
 
             {/* Submit Button */}
-            <div className="flex gap-3 pt-4 border-t">
+            <div className="flex gap-3 pt-6 border-t">
               <Button
                 type="button"
                 variant="outline"

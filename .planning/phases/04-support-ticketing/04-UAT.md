@@ -8,21 +8,21 @@ updated: 2026-01-18T14:30:00Z
 
 ## Current Test
 
-number: 1
-name: Navigate to Support Page
+number: 2
+name: Create New Ticket
 expected: |
-  Click "Dukungan" in sidebar. Support page loads showing ticket list (may be empty).
-  Tab filters visible: Semua, Laporan, Diskusi, Hasil, Implementasi, Selesai.
+  Click "New Ticket" button. Form opens with Subject, Description, Category, Priority fields.
+  Submit creates ticket and shows in list with "Report" stage badge.
 awaiting: user response
 
 ## Tests
 
 ### 1. Navigate to Support Page
-expected: Click "Dukungan" in sidebar. Support page loads showing ticket list with tab filters (Semua, Laporan, Diskusi, Hasil, Implementasi, Selesai).
-result: [pending]
+expected: Click "Support" in sidebar. Support page loads showing ticket list with tab filters (All, Report, Discuss, Outcome, Implementation, Closed).
+result: pass
 
 ### 2. Create New Ticket
-expected: Click "Tiket Baru" button. Form opens with category, priority, subject, description fields. Submit creates ticket and shows in list with "Laporan" stage badge.
+expected: Click "New Ticket" button. Form opens with Subject, Description, Category, Priority fields. Submit creates ticket and shows in list with "Report" stage badge.
 result: [pending]
 
 ### 3. View Ticket Detail
@@ -60,9 +60,9 @@ result: [pending]
 ## Summary
 
 total: 10
-passed: 0
+passed: 1
 issues: 0
-pending: 10
+pending: 9
 skipped: 0
 
 ## Gaps
