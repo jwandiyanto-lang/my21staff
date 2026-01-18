@@ -16,11 +16,19 @@ export const ROLE_PERMISSIONS: Record<WorkspaceRole, Permission[]> = {
     'team:invite',
     'team:remove',
     'team:change_role',
-    'workspace:settings'
+    'workspace:settings',
+    // Ticket permissions
+    'tickets:assign',
+    'tickets:transition',
+    'tickets:skip_stage'
   ],
   admin: [
     'leads:view_all',
-    'leads:export'
+    'leads:export',
+    // Ticket permissions
+    'tickets:assign',
+    'tickets:transition',
+    'tickets:skip_stage'
   ],
   member: []
 }

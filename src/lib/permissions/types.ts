@@ -8,3 +8,7 @@ export type Permission =
   | 'team:remove'
   | 'team:change_role'
   | 'workspace:settings'
+  // Ticket permissions
+  | 'tickets:assign'      // Assign tickets to team members
+  | 'tickets:transition'  // Move tickets between stages
+  | 'tickets:skip_stage'  // Skip stages (requires approval)
