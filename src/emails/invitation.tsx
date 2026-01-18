@@ -19,28 +19,37 @@ export function InvitationEmail({
   inviterName,
 }: InvitationEmailProps) {
   return (
-    <BaseLayout preview={`${inviterName} mengundang Anda ke ${workspaceName}`}>
+    <BaseLayout preview={`${inviterName} invited you to ${workspaceName}`}>
       <Heading className="text-xl font-semibold text-brand-text mb-4">
-        Undangan Bergabung
+        Team Invitation
       </Heading>
 
       <Text className="text-brand-text leading-6 mb-4">
-        <strong>{inviterName}</strong> mengundang Anda untuk bergabung ke{' '}
-        <strong>{workspaceName}</strong> di my21staff.
+        <strong>{inviterName}</strong> has invited you to join{' '}
+        <strong>{workspaceName}</strong> on my21staff.
       </Text>
 
       <Section className="my-8 text-center">
         <Button
           href={inviteLink}
-          className="bg-brand-forest text-white px-6 py-3 rounded-lg font-semibold"
+          style={{
+            backgroundColor: '#2D4B3E',
+            color: '#ffffff',
+            padding: '14px 28px',
+            borderRadius: '8px',
+            fontWeight: '600',
+            fontSize: '14px',
+            textDecoration: 'none',
+            display: 'inline-block',
+          }}
         >
-          Terima Undangan
+          Accept Invitation
         </Button>
       </Section>
 
       <Text className="text-sm text-brand-muted">
-        Link ini berlaku selama 7 hari. Jika Anda tidak mengenal pengirim,
-        abaikan email ini.
+        This link expires in 7 days. If you don&apos;t recognize the sender,
+        you can safely ignore this email.
       </Text>
     </BaseLayout>
   )

@@ -33,7 +33,7 @@ interface BaseLayoutProps {
 
 export function BaseLayout({ preview, children }: BaseLayoutProps) {
   return (
-    <Html lang="id">
+    <Html lang="en">
       <Head />
       <Preview>{preview}</Preview>
       <Tailwind config={brandConfig}>
@@ -55,14 +55,11 @@ export function BaseLayout({ preview, children }: BaseLayoutProps) {
             <Hr className="my-6 border-gray-200" />
             <Section className="text-center">
               <Text className="text-xs text-brand-muted m-0">
+                my21staff - WhatsApp CRM for your business
+              </Text>
+              <Text className="text-xs text-brand-muted m-0">
                 &copy; {new Date().getFullYear()} my21staff
               </Text>
-              <Link
-                href="https://wa.me/6281234567890"
-                className="text-xs text-brand-muted"
-              >
-                Hubungi via WhatsApp
-              </Link>
             </Section>
           </Container>
         </Body>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
   Dialog,
@@ -124,6 +125,16 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
                   'Sign in'
                 )}
               </button>
+
+              <div className="text-center pt-2">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-[#2D4B3E] hover:underline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </form>
           </div>
         </div>
