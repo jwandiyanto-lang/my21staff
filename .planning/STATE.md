@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 4 of 9 — Support Ticketing Core
-Plan: 04 of 05 complete
-Status: In progress
-Last activity: 2026-01-18 — Completed 04-04-PLAN.md (UI Components)
+Plan: 05 of 05 complete
+Status: Phase complete
+Last activity: 2026-01-18 — Completed 04-05-PLAN.md (Email Notifications)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ████████░░ Phase 4 in progress
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 █████████░ Phase 4 complete
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 66 (14 in v1.0 + 38 in v2.0 + 14 in v2.1)
+- Total plans completed: 67 (14 in v1.0 + 38 in v2.0 + 15 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 41 in v2.1
+- Commits: 325 in v2.0, 44 in v2.1
 
 **Codebase:**
 - Lines: ~24,500 TypeScript
@@ -67,6 +67,9 @@ Key v2.1 decisions:
 - One-time reopen tokens (cleared after successful reopen)
 - react-hook-form for ticket creation form validation
 - Type casting for Supabase joins (as unknown as Type) when Relationships missing
+- Ticket email templates (created/updated/closed) with Resend
+- pg_cron auto-close job for stale implementation tickets (7 days)
+- Email participants = requester + unique commenters
 
 ### Deferred Issues
 
@@ -85,9 +88,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 04-04-PLAN.md (UI Components)
+Stopped at: Completed 04-05-PLAN.md (Email Notifications) - Phase 04 complete
 Resume file: None
-Next: 04-05-PLAN.md (Email Notifications)
+Next: Phase 05 per roadmap
 
 ## Deployment Info
 
@@ -107,4 +110,4 @@ Next: 04-05-PLAN.md (Email Notifications)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 — Phase 04 in progress, 04-04 complete (UI Components)*
+*Last updated: 2026-01-18 — Phase 04 complete, 04-05 complete (Email Notifications)*
