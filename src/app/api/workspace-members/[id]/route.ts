@@ -58,6 +58,25 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // Check if user has any other workspace memberships
+    const { data: otherMemberships } = await adminClient
+      .from('workspace_members')
+      .select('id')
+      .eq('user_id', memberToDelete.user_id)
+      .limit(1)
+
+    // If no other memberships, delete the user from Supabase auth
+    if (!otherMemberships || otherMemberships.length === 0) {
+      const { error: authDeleteError } = await adminClient.auth.admin.deleteUser(
+        memberToDelete.user_id
+      )
+
+      if (authDeleteError) {
+        console.error('Failed to delete user from auth:', authDeleteError)
+        // Don't fail the request - membership was already deleted
+      }
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Delete member error:', error)

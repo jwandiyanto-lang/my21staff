@@ -15,10 +15,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { id } = await params
     const adminClient = createApiAdminClient()
 
-    // Get the invitation first to get workspace_id
+    // Get the invitation first to get workspace_id and email
     const { data: invitation, error: invError } = await adminClient
       .from('workspace_invitations')
-      .select('id, workspace_id, status')
+      .select('id, workspace_id, email, status')
       .eq('id', id)
       .single()
 
@@ -50,6 +50,31 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         { error: 'Failed to delete invitation' },
         { status: 500 }
       )
+    }
+
+    // If invitation was pending, clean up the auth user if they have no other workspaces
+    if (invitation.status === 'pending') {
+      // Find the user by email
+      const { data: { users } } = await adminClient.auth.admin.listUsers()
+      const authUser = users.find(u => u.email?.toLowerCase() === invitation.email.toLowerCase())
+
+      if (authUser) {
+        // Check if user has any workspace memberships
+        const { data: memberships } = await adminClient
+          .from('workspace_members')
+          .select('id')
+          .eq('user_id', authUser.id)
+          .limit(1)
+
+        // If no memberships, delete the auth user
+        if (!memberships || memberships.length === 0) {
+          const { error: authDeleteError } = await adminClient.auth.admin.deleteUser(authUser.id)
+          if (authDeleteError) {
+            console.error('Failed to delete auth user:', authDeleteError)
+            // Don't fail - invitation was already deleted
+          }
+        }
+      }
     }
 
     return NextResponse.json({ success: true })
@@ -121,12 +146,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const inviterName = inviterProfile?.full_name || inviterProfile?.email || user.email || 'Team member'
 
-    // Generate a new recovery link for the user
+    // Generate a new link for the user
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
-    const redirectTo = `${appUrl}/set-password?invitation=${invitation.token}`
+    const finalDestination = `/set-password?invitation=${invitation.token}`
+    const redirectTo = `${appUrl}/auth/callback?next=${encodeURIComponent(finalDestination)}`
+
+    // Check if user exists to determine link type
+    const { data: { users } } = await adminClient.auth.admin.listUsers()
+    const existingUser = users.find(u => u.email?.toLowerCase() === invitation.email.toLowerCase())
+    const linkType = existingUser ? 'recovery' : 'invite'
 
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
-      type: 'recovery',
+      type: linkType,
       email: invitation.email,
       options: {
         redirectTo,

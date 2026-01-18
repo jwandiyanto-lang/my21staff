@@ -131,7 +131,10 @@ export async function POST(request: NextRequest) {
 
     // Generate link for password setup
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
-    const redirectTo = `${appUrl}/set-password?invitation=${invitationToken}`
+
+    // Use auth/callback with next parameter to ensure proper redirect after PKCE exchange
+    const finalDestination = `/set-password?invitation=${invitationToken}`
+    const redirectTo = `${appUrl}/auth/callback?next=${encodeURIComponent(finalDestination)}`
 
     // Use 'invite' for new users (no password yet), 'recovery' for existing users
     const linkType = existingAuthUser ? 'recovery' : 'invite'
