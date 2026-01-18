@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import Papa from 'papaparse'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/permissions/check'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -16,6 +17,14 @@ export async function GET(request: NextRequest) {
   if (authResult instanceof Response) {
     return authResult
   }
+
+  // Check export permission - owners and admins only
+  const permError = requirePermission(
+    authResult.role,
+    'leads:export',
+    'Only workspace owners and admins can export data'
+  )
+  if (permError) return permError
 
   const supabase = await createClient()
 
