@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 4 of 9 — Support Ticketing Core
-Plan: 03 of 05 complete
+Plan: 04 of 05 complete
 Status: In progress
-Last activity: 2026-01-18 — Completed 04-03-PLAN.md (API Routes)
+Last activity: 2026-01-18 — Completed 04-04-PLAN.md (UI Components)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ███████░░░ Phase 4 in progress
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ████████░░ Phase 4 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 65 (14 in v1.0 + 38 in v2.0 + 13 in v2.1)
+- Total plans completed: 66 (14 in v1.0 + 38 in v2.0 + 14 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 38 in v2.1
+- Commits: 325 in v2.0, 41 in v2.1
 
 **Codebase:**
 - Lines: ~24,500 TypeScript
@@ -65,6 +65,8 @@ Key v2.1 decisions:
 - Ticket API routes follow contacts pattern (fetch ticket, then verify workspace membership)
 - Dual-mode reopen (HMAC token for email links, authenticated for logged-in users)
 - One-time reopen tokens (cleared after successful reopen)
+- react-hook-form for ticket creation form validation
+- Type casting for Supabase joins (as unknown as Type) when Relationships missing
 
 ### Deferred Issues
 
@@ -83,9 +85,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 04-03-PLAN.md (API Routes)
+Stopped at: Completed 04-04-PLAN.md (UI Components)
 Resume file: None
-Next: 04-04-PLAN.md (UI Components)
+Next: 04-05-PLAN.md (Email Notifications)
 
 ## Deployment Info
 
@@ -105,4 +107,4 @@ Next: 04-04-PLAN.md (UI Components)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 — Phase 04 in progress, 04-03 complete (API Routes)*
+*Last updated: 2026-01-18 — Phase 04 in progress, 04-04 complete (UI Components)*
