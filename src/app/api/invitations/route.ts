@@ -129,12 +129,15 @@ export async function POST(request: NextRequest) {
       authUserId = newUser.user.id
     }
 
-    // Generate a recovery link (for password setup)
+    // Generate link for password setup
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
     const redirectTo = `${appUrl}/set-password?invitation=${invitationToken}`
 
+    // Use 'invite' for new users (no password yet), 'recovery' for existing users
+    const linkType = existingAuthUser ? 'recovery' : 'invite'
+
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
-      type: 'recovery',
+      type: linkType,
       email: normalizedEmail,
       options: {
         redirectTo,
