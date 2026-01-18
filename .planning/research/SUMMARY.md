@@ -100,9 +100,25 @@ Workspace Roles → Permission enforcement across features
 
 ## Implications for Roadmap
 
+**Note:** v2.1 uses fresh phase numbering (1, 2, 3...) — not continuing from v2.0's Phase 22.
+
 Based on research, suggested phase structure for v2.1:
 
-### Phase 23: Email System (Resend)
+### Phase 1: Brand Guidelines
+**Rationale:** Foundation for all visual work. Landing page and UI consistency depend on this.
+
+- Create BRAND.md with complete guidelines
+- Logo rules (my**21**staff with orange "21", usage, spacing)
+- Color palette (CRM: Peach + Forest Green #2D4B3E, Landing: Sage + Orange #F7931A)
+- Typography (Plus Jakarta Sans primary, Inter secondary)
+- Voice & tone guidelines (Bahasa Indonesia, professional but approachable)
+- Usage examples and don'ts
+
+**Current state:** Brand info scattered in CLAUDE.md, needs consolidation.
+
+**Estimated:** 0.5-1 day
+
+### Phase 2: Email System (Resend)
 **Rationale:** Foundation for all notifications. Fixes SMTP issue blocking invitations.
 
 - Switch from nodemailer/SMTP to Resend HTTP API
@@ -116,7 +132,7 @@ Based on research, suggested phase structure for v2.1:
 
 **Estimated:** 1-2 days
 
-### Phase 24: Workspace Roles Enhancement
+### Phase 3: Workspace Roles Enhancement
 **Rationale:** Permission infrastructure affects all other features.
 
 - Create permissions utility (`hasPermission()`)
@@ -132,7 +148,7 @@ Based on research, suggested phase structure for v2.1:
 
 **Estimated:** 2-3 days
 
-### Phase 25: Support Ticketing Core
+### Phase 4: Support Ticketing Core
 **Rationale:** Trust-building feature for first client. Depends on email + roles.
 
 - Define workflow first: Report → Discuss → Outcome → Implementation
@@ -148,18 +164,18 @@ Based on research, suggested phase structure for v2.1:
 
 **Estimated:** 3-4 days
 
-### Phase 26: Tawk.to Integration (Optional)
+### Phase 5: Tawk.to Integration (Optional)
 **Rationale:** Quick win for live chat + backup ticketing. No backend work.
 
 - Embed Tawk.to widget on landing + CRM
 - Configure Bahasa Indonesia
 - Test chat → ticket flow
 
-**Alternative:** Skip if Phase 25 ticketing is sufficient.
+**Alternative:** Skip if Phase 4 ticketing is sufficient.
 
 **Estimated:** 0.5 day
 
-### Phase 27: Security Info Page
+### Phase 6: Security Info Page
 **Rationale:** Trust signal for paying clients. Can parallelize.
 
 - Static page with key points (Bahasa Indonesia)
@@ -173,22 +189,23 @@ Based on research, suggested phase structure for v2.1:
 
 **Estimated:** 1 day
 
-### Phase 28: Landing Page Redesign
-**Rationale:** Conversion optimization. Can parallelize.
+### Phase 7: Landing Page Redesign
+**Rationale:** Conversion optimization. Can parallelize. Uses brand guidelines.
 
 - Mobile-first hero with "WhatsApp Automation untuk UMKM"
 - Social proof section (testimonials, client logos)
-- Features grid
+- Features grid following BRAND.md
 - Single WhatsApp CTA per section
 - Performance optimization (bundle, images)
 
 **Addresses:**
 - FEATURES.md: Landing page best practices
 - PITFALLS.md: Cold start latency (P2)
+- Phase 1: Brand Guidelines
 
 **Estimated:** 2-3 days
 
-### Phase 29: Performance Optimization
+### Phase 8: Performance Optimization
 **Rationale:** First impression for Eagle. Address after features stable.
 
 - Run bundle analyzer, identify targets
@@ -206,19 +223,21 @@ Based on research, suggested phase structure for v2.1:
 
 ## Phase Ordering Rationale
 
-1. **Email first** — Unblocks notifications for everything else. Current SMTP is broken.
+1. **Brand first** — Foundation for visual consistency. Landing page depends on this.
 
-2. **Roles second** — Affects who can do what in ticketing and settings. Must audit RLS.
+2. **Email second** — Unblocks notifications for everything else. Current SMTP is broken.
 
-3. **Ticketing third** — Primary trust feature. Uses email, respects roles.
+3. **Roles third** — Affects who can do what in ticketing and settings. Must audit RLS.
 
-4. **Security + Landing parallel** — Independent pages, can build simultaneously.
+4. **Ticketing fourth** — Primary trust feature. Uses email, respects roles.
 
-5. **Performance last** — Optimize after features are stable. Measure before improving.
+5. **Security + Landing parallel** — Independent pages, can build simultaneously.
+
+6. **Performance last** — Optimize after features are stable. Measure before improving.
 
 **Parallelization opportunities:**
-- Security Info Page + Landing Page Redesign (Phases 27-28)
-- Tawk.to is optional and quick if needed
+- Security Info Page + Landing Page Redesign (Phases 6-7)
+- Tawk.to (Phase 5) is optional and quick if needed
 
 ---
 
@@ -226,12 +245,14 @@ Based on research, suggested phase structure for v2.1:
 
 | Phase | Research Needed? | Reason |
 |-------|------------------|--------|
-| Email System | No | Solution clear (Resend) |
-| Workspace Roles | Maybe | Permission matrix design if complex |
-| Support Ticketing | No | Standard patterns, well-documented |
-| Security Page | No | Simple static page |
-| Landing Page | No | Best practices documented |
-| Performance | No | Standard Next.js patterns |
+| 1. Brand Guidelines | No | Consolidate existing info from CLAUDE.md |
+| 2. Email System | No | Solution clear (Resend) |
+| 3. Workspace Roles | Maybe | Permission matrix design if complex |
+| 4. Support Ticketing | No | Standard patterns, well-documented |
+| 5. Tawk.to | No | Simple embed script |
+| 6. Security Page | No | Simple static page |
+| 7. Landing Page | No | Best practices documented |
+| 8. Performance | No | Standard Next.js patterns |
 
 ---
 
