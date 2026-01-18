@@ -32,7 +32,14 @@
       "Bash(npm install:*)",
       "Bash(npm audit:*)",
       "Bash(npm outdated:*)",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(xargs:*)",
+      "Bash(npx get-shit-done-cc@latest)",
+      "Skill(jon:daily-digest)",
+      "WebFetch(domain:skillsmp.com)",
+      "WebFetch(domain:chatarmin.com)",
+      "WebFetch(domain:www.hoppycopy.co)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }
