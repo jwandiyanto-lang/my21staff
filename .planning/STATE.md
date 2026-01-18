@@ -9,17 +9,17 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 
 ## Current Position
 
-Phase: 2 of 9 — Email System
-Plan: 01 of 03 complete
-Status: In progress
-Last activity: 2026-01-18 — Completed 02-01-PLAN.md (Resend Email Infrastructure)
+Phase: 2 of 9 — Email System + Member Onboarding
+Plan: 02 of 02 complete
+Status: Phase complete (with known issues)
+Last activity: 2026-01-18 — Completed 02-02-PLAN.md (Password Reset + DNS)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ███░░░░░░░ Phase 2 Started
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ████░░░░░░ Phase 1-2 Complete
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 56 (14 in v1.0 + 38 in v2.0 + 4 in v2.1)
+- Total plans completed: 57 (14 in v1.0 + 38 in v2.0 + 5 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
 - Commits: 325 in v2.0, 16 in v2.1
 
@@ -57,16 +57,21 @@ Key v2.1 decisions:
 - Phase 18 (Kapso Bot Setup) → v2.1
 - ~~SMTP email delivery from Vercel (DNS issues)~~ → Fixed in 02-01 with Resend
 
+### Known Issues (Phase 2)
+
+- Forgot password email uses Supabase email, not Resend (P1)
+- Resend/delete invitation returns 401 unauthorized (P0)
+
 ### Blockers/Concerns
 
 None.
 
 ## Session Continuity
 
-Last session: 2026-01-18 08:38 UTC
-Stopped at: Completed 02-01-PLAN.md (Resend Email Infrastructure)
+Last session: 2026-01-18
+Stopped at: Completed Phase 2 (Email System)
 Resume file: None
-Next: 02-02-PLAN.md (Member Onboarding) or 02-03-PLAN.md (Password Reset)
+Next: Phase 3 (Workspace Roles Enhancement)
 
 ## Deployment Info
 
@@ -86,4 +91,4 @@ Next: 02-02-PLAN.md (Member Onboarding) or 02-03-PLAN.md (Password Reset)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 after 02-01 completed (Resend email infrastructure replacing nodemailer)*
+*Last updated: 2026-01-18 — Phase 2 complete (with known issues)*
