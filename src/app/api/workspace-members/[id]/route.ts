@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
+import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
+import { requirePermission } from '@/lib/permissions/check'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -10,15 +11,7 @@ interface RouteParams {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
-    const supabase = await createClient()
     const adminClient = createApiAdminClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
     // Get the membership to delete
     const { data: memberToDelete, error: memberError } = await adminClient
@@ -39,20 +32,17 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Verify current user is admin/owner of the workspace
-    const { data: currentUserMembership } = await supabase
-      .from('workspace_members')
-      .select('role')
-      .eq('workspace_id', memberToDelete.workspace_id)
-      .eq('user_id', user.id)
-      .single()
+    // Verify membership and get role
+    const authResult = await requireWorkspaceMembership(memberToDelete.workspace_id)
+    if (authResult instanceof NextResponse) return authResult
 
-    if (!currentUserMembership || !['owner', 'admin'].includes(currentUserMembership.role)) {
-      return NextResponse.json(
-        { error: 'Only admins can remove team members' },
-        { status: 403 }
-      )
-    }
+    // Check permission - only owners can remove team members
+    const permError = requirePermission(
+      authResult.role,
+      'team:remove',
+      'Only workspace owners can remove team members'
+    )
+    if (permError) return permError
 
     // Delete the membership
     const { error: deleteError } = await adminClient
