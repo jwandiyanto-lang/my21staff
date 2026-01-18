@@ -130,13 +130,23 @@ Plans:
 
 ### Phase 4: Support Ticketing Core
 **Goal:** Trust-building feature — 4-stage workflow (Report -> Discuss -> Outcome -> Implementation)
-**Status:** Not started
+**Status:** Complete
+**Plans:** 5/5 plans — completed 2026-01-18
+
+Plans:
+- [x] 04-01-PLAN.md — Database migration (tickets, comments, status_history + RLS)
+- [x] 04-02-PLAN.md — TypeScript utilities (types, constants, transitions, tokens)
+- [x] 04-03-PLAN.md — API routes (CRUD, transition, comments, approval, reopen)
+- [x] 04-04-PLAN.md — UI pages (ticket list, detail, form sheet + navigation)
+- [x] 04-05-PLAN.md — Email notifications + pg_cron auto-close
 
 **Scope:**
 - Tables: tickets, comments, status_history (with RLS)
-- Ticket list + detail pages
-- Status transition logic
-- Email notifications on status change
+- TypeScript state machine for stage transitions
+- Ticket list + detail pages with comments
+- Stage transition with approval workflow for skips
+- Email notifications (opt-in per action)
+- Auto-close after 7 days in Implementation + reopen capability
 
 **Depends on:** Phase 2 (Email), Phase 3 (Roles)
 
@@ -227,10 +237,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 10/? | Phase 1-3 complete | — |
+| 1-9 | v2.1 | 19/? | Phase 1-4 complete | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-18 — Phase 3 complete (4/4 plans)*
+*Last updated: 2026-01-18 — Phase 4 complete (5/5 plans)*
