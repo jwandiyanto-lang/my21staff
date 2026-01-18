@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 3 of 9 — Workspace Roles Enhancement
-Plan: 01 of 03 complete
+Plan: 02 of 03 complete
 Status: In progress
-Last activity: 2026-01-18 — Completed 03-01-PLAN.md (Permission Infrastructure)
+Last activity: 2026-01-18 — Completed 03-02-PLAN.md (Permission API Enforcement)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ████░░░░░░ Phase 1-2 + Plan 3.1 Complete
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 █████░░░░░ Phase 1-2 + Plans 3.1-3.2 Complete
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 58 (14 in v1.0 + 38 in v2.0 + 6 in v2.1)
+- Total plans completed: 59 (14 in v1.0 + 38 in v2.0 + 7 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 20 in v2.1
+- Commits: 325 in v2.0, 23 in v2.1
 
 **Codebase:**
 - Lines: 23,856 TypeScript
@@ -54,6 +54,7 @@ Key v2.1 decisions:
 - Permission utilities in src/lib/permissions/ (types, constants, check)
 - SECURITY DEFINER function in private schema for RLS performance
 - requireWorkspaceMembership extended to return role
+- API permission guard pattern: requirePermission(role, 'perm'); if (err) return err
 
 ### Deferred Issues
 
@@ -63,7 +64,7 @@ Key v2.1 decisions:
 ### Known Issues (Phase 2)
 
 - Forgot password email uses Supabase email, not Resend (P1)
-- Resend/delete invitation returns 401 unauthorized (P0)
+- ~~Resend/delete invitation returns 401 unauthorized (P0)~~ — Fixed in 03-02 (was using wrong auth check)
 
 ### Blockers/Concerns
 
@@ -72,9 +73,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 03-01-PLAN.md (Permission Infrastructure)
+Stopped at: Completed 03-02-PLAN.md (Permission API Enforcement)
 Resume file: None
-Next: 03-02-PLAN.md (Permission UI Enforcement)
+Next: 03-03-PLAN.md (Team Management UI)
 
 ## Deployment Info
 
@@ -94,4 +95,4 @@ Next: 03-02-PLAN.md (Permission UI Enforcement)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 — Plan 03-01 complete (Permission Infrastructure)*
+*Last updated: 2026-01-18 — Plan 03-02 complete (Permission API Enforcement)*
