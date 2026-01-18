@@ -54,9 +54,9 @@ completed: 2026-01-18
 
 ## Performance
 
-- **Duration:** 5 min
-- **Tasks:** 5/5
-- **Commits:** 5
+- **Duration:** 10 min
+- **Tasks:** 6/6
+- **Commits:** 6
 
 ## Accomplishments
 
@@ -67,6 +67,8 @@ completed: 2026-01-18
 - Created Eagle Overseas client template
 - Created bots folder with README
 - Rewrote CLAUDE.md as lightweight directory index (217 → 98 lines)
+- Consolidated all remaining content: bots/, brainstorm/, client/, TODO-FEATURES.md
+- Clean root folder with clear separation
 
 ## Task Commits
 
@@ -75,6 +77,7 @@ completed: 2026-01-18
 3. `92ef03c` — docs(clients): add Eagle Overseas reference
 4. `da7186f` — docs(bots): add bots folder with README
 5. `f3b2cd6` — docs: rewrite CLAUDE.md as directory index
+6. `09d0b70` — refactor: consolidate all remaining business content
 
 ## Final Structure
 
@@ -84,15 +87,17 @@ my21staff/
 │   ├── brand/
 │   │   ├── BRAND.md
 │   │   ├── logos/
-│   │   ├── scripts/generate-logos.js
+│   │   ├── scripts/
 │   │   └── docs/
-│   ├── brainstorm/
-│   ├── bots/README.md
-│   └── clients/eagle-overseas.md
-├── src/
-├── public/
-├── .planning/
-└── CLAUDE.md (slim index)
+│   ├── brainstorm/       # Ideas, reviews, TODO-FEATURES
+│   ├── bots/             # Bot personas + scripts
+│   └── clients/          # Eagle Overseas + references
+├── src/                  # Next.js webapp
+├── public/               # Static assets
+├── supabase/             # Database migrations
+├── .planning/            # GSD workflow
+├── CLAUDE.md             # Slim directory index
+└── [config files]        # package.json, tsconfig, etc.
 ```
 
 ## Issues Encountered
