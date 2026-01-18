@@ -44,7 +44,7 @@ const operationsNav = [
     href: '/inbox',
   },
   {
-    title: 'Dukungan',
+    title: 'Support',
     icon: Headphones,
     href: '/support',
   },

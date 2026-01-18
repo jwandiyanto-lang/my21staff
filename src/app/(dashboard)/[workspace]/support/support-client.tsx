@@ -23,7 +23,6 @@ import {
 } from '@/components/ui/card'
 import { Plus, Ticket } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import { id as idLocale } from 'date-fns/locale'
 import { TicketFormSheet } from './ticket-form-sheet'
 import { type WorkspaceRole } from '@/lib/permissions/types'
 import {
@@ -60,12 +59,12 @@ interface SupportClientProps {
 }
 
 const stageFilters: { value: TicketStage | 'all'; label: string }[] = [
-  { value: 'all', label: 'Semua' },
-  { value: 'report', label: 'Laporan' },
-  { value: 'discuss', label: 'Diskusi' },
-  { value: 'outcome', label: 'Keputusan' },
-  { value: 'implementation', label: 'Implementasi' },
-  { value: 'closed', label: 'Selesai' },
+  { value: 'all', label: 'All' },
+  { value: 'report', label: 'Report' },
+  { value: 'discuss', label: 'Discuss' },
+  { value: 'outcome', label: 'Outcome' },
+  { value: 'implementation', label: 'Implementation' },
+  { value: 'closed', label: 'Closed' },
 ]
 
 function getPriorityBadgeVariant(priority: TicketPriority): 'default' | 'secondary' | 'destructive' {
@@ -110,14 +109,14 @@ export function SupportClient({
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dukungan</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Support</h1>
           <p className="text-muted-foreground mt-1">
-            Kelola tiket dukungan dan permintaan layanan
+            Manage support tickets and service requests
           </p>
         </div>
         <Button onClick={() => setSheetOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Tiket Baru
+          New Ticket
         </Button>
       </div>
 
@@ -140,25 +139,25 @@ export function SupportClient({
       {/* Ticket List */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Daftar Tiket</CardTitle>
+          <CardTitle className="text-lg">Ticket List</CardTitle>
           <CardDescription>
-            {filteredTickets.length} tiket{stageFilter !== 'all' ? ` dalam tahap ${STAGE_CONFIG[stageFilter].labelId}` : ''}
+            {filteredTickets.length} ticket{filteredTickets.length !== 1 ? 's' : ''}{stageFilter !== 'all' ? ` in ${STAGE_CONFIG[stageFilter].label} stage` : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {filteredTickets.length === 0 ? (
             <div className="text-center py-12">
               <Ticket className="mx-auto h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-semibold">Belum ada tiket</h3>
+              <h3 className="mt-4 text-lg font-semibold">No tickets yet</h3>
               <p className="text-muted-foreground mt-2">
                 {stageFilter === 'all'
-                  ? 'Buat tiket pertama untuk memulai.'
-                  : `Tidak ada tiket dalam tahap ${STAGE_CONFIG[stageFilter].labelId}.`}
+                  ? 'Create your first ticket to get started.'
+                  : `No tickets in ${STAGE_CONFIG[stageFilter].label} stage.`}
               </p>
               {stageFilter === 'all' && (
                 <Button onClick={() => setSheetOpen(true)} className="mt-4">
                   <Plus className="h-4 w-4 mr-2" />
-                  Buat Tiket
+                  Create Ticket
                 </Button>
               )}
             </div>
@@ -166,13 +165,13 @@ export function SupportClient({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Judul</TableHead>
-                  <TableHead>Kategori</TableHead>
-                  <TableHead>Prioritas</TableHead>
-                  <TableHead>Tahap</TableHead>
-                  <TableHead>Pemohon</TableHead>
-                  <TableHead>Ditugaskan ke</TableHead>
-                  <TableHead>Dibuat</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Priority</TableHead>
+                  <TableHead>Stage</TableHead>
+                  <TableHead>Requester</TableHead>
+                  <TableHead>Assigned To</TableHead>
+                  <TableHead>Created</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -187,35 +186,34 @@ export function SupportClient({
                       </Link>
                       {ticket.pending_approval && (
                         <Badge variant="outline" className="ml-2 text-xs text-amber-600 border-amber-300">
-                          Menunggu Persetujuan
+                          Pending Approval
                         </Badge>
                       )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {CATEGORY_CONFIG[ticket.category as TicketCategory].labelId}
+                        {CATEGORY_CONFIG[ticket.category as TicketCategory].label}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={getPriorityBadgeVariant(ticket.priority as TicketPriority)}>
-                        {PRIORITY_CONFIG[ticket.priority as TicketPriority].labelId}
+                        {PRIORITY_CONFIG[ticket.priority as TicketPriority].label}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={getStageBadgeVariant(ticket.stage as TicketStage)}>
-                        {STAGE_CONFIG[ticket.stage as TicketStage].labelId}
+                        {STAGE_CONFIG[ticket.stage as TicketStage].label}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {ticket.requester?.full_name || ticket.requester?.email || '-'}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {ticket.assignee?.full_name || ticket.assignee?.email || 'Belum ditugaskan'}
+                      {ticket.assignee?.full_name || ticket.assignee?.email || 'Unassigned'}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {formatDistanceToNow(new Date(ticket.created_at), {
                         addSuffix: true,
-                        locale: idLocale,
                       })}
                     </TableCell>
                   </TableRow>

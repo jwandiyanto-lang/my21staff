@@ -37,7 +37,6 @@ import {
   Send,
 } from 'lucide-react'
 import { formatDistanceToNow, format } from 'date-fns'
-import { id as idLocale } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { type WorkspaceRole } from '@/lib/permissions/types'
 import { hasPermission } from '@/lib/permissions/check'
@@ -161,16 +160,16 @@ export function TicketDetailClient({
       })
 
       if (response.ok) {
-        toast.success('Komentar berhasil ditambahkan')
+        toast.success('Comment added successfully')
         setCommentText('')
         router.refresh()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Gagal menambahkan komentar')
+        toast.error(error.error || 'Failed to add comment')
       }
     } catch (error) {
       console.error('Failed to add comment:', error)
-      toast.error('Gagal menambahkan komentar')
+      toast.error('Failed to add comment')
     } finally {
       setIsSubmittingComment(false)
     }
@@ -186,15 +185,15 @@ export function TicketDetailClient({
       })
 
       if (response.ok) {
-        toast.success(userId ? 'Tiket berhasil ditugaskan' : 'Penugasan dihapus')
+        toast.success(userId ? 'Ticket assigned successfully' : 'Assignment removed')
         router.refresh()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Gagal menugaskan tiket')
+        toast.error(error.error || 'Failed to assign ticket')
       }
     } catch (error) {
       console.error('Failed to assign ticket:', error)
-      toast.error('Gagal menugaskan tiket')
+      toast.error('Failed to assign ticket')
     } finally {
       setIsAssigning(false)
     }
@@ -218,9 +217,9 @@ export function TicketDetailClient({
       if (response.ok) {
         const data = await response.json()
         if (data.pendingApproval) {
-          toast.success('Permintaan skip menunggu persetujuan pemohon')
+          toast.success('Skip request pending requester approval')
         } else {
-          toast.success(`Tiket dipindahkan ke tahap ${STAGE_CONFIG[selectedTargetStage].labelId}`)
+          toast.success(`Ticket moved to ${STAGE_CONFIG[selectedTargetStage].label} stage`)
         }
         setSelectedTargetStage('')
         setTransitionComment('')
@@ -228,11 +227,11 @@ export function TicketDetailClient({
         router.refresh()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Gagal memindahkan tiket')
+        toast.error(error.error || 'Failed to transition ticket')
       }
     } catch (error) {
       console.error('Failed to transition ticket:', error)
-      toast.error('Gagal memindahkan tiket')
+      toast.error('Failed to transition ticket')
     } finally {
       setIsTransitioning(false)
     }
@@ -248,15 +247,15 @@ export function TicketDetailClient({
       })
 
       if (response.ok) {
-        toast.success(approved ? 'Skip disetujui' : 'Skip ditolak')
+        toast.success(approved ? 'Skip approved' : 'Skip rejected')
         router.refresh()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Gagal memproses persetujuan')
+        toast.error(error.error || 'Failed to process approval')
       }
     } catch (error) {
       console.error('Failed to process approval:', error)
-      toast.error('Gagal memproses persetujuan')
+      toast.error('Failed to process approval')
     } finally {
       setIsApproving(false)
     }
@@ -272,15 +271,15 @@ export function TicketDetailClient({
       })
 
       if (response.ok) {
-        toast.success('Tiket berhasil dibuka kembali')
+        toast.success('Ticket reopened successfully')
         router.refresh()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Gagal membuka kembali tiket')
+        toast.error(error.error || 'Failed to reopen ticket')
       }
     } catch (error) {
       console.error('Failed to reopen ticket:', error)
-      toast.error('Gagal membuka kembali tiket')
+      toast.error('Failed to reopen ticket')
     } finally {
       setIsReopening(false)
     }
@@ -295,7 +294,7 @@ export function TicketDetailClient({
           className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
-          Kembali ke Daftar Tiket
+          Back to Ticket List
         </Link>
 
         <div className="flex items-start justify-between gap-4">
@@ -303,13 +302,13 @@ export function TicketDetailClient({
             <h1 className="text-2xl font-bold tracking-tight">{ticket.title}</h1>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="outline">
-                {CATEGORY_CONFIG[ticket.category as TicketCategory].labelId}
+                {CATEGORY_CONFIG[ticket.category as TicketCategory].label}
               </Badge>
               <Badge variant={getPriorityBadgeVariant(ticket.priority as TicketPriority)}>
-                {PRIORITY_CONFIG[ticket.priority as TicketPriority].labelId}
+                {PRIORITY_CONFIG[ticket.priority as TicketPriority].label}
               </Badge>
               <Badge variant={getStageBadgeVariant(currentStage)}>
-                {STAGE_CONFIG[currentStage].labelId}
+                {STAGE_CONFIG[currentStage].label}
               </Badge>
             </div>
           </div>
@@ -317,17 +316,17 @@ export function TicketDetailClient({
           {/* Assignment dropdown (for owner/admin) */}
           {canAssign && (
             <div className="shrink-0">
-              <Label className="text-xs text-muted-foreground mb-1 block">Ditugaskan ke</Label>
+              <Label className="text-xs text-muted-foreground mb-1 block">Assigned To</Label>
               <Select
                 value={ticket.assigned_to || 'unassigned'}
                 onValueChange={(v) => handleAssign(v === 'unassigned' ? null : v)}
                 disabled={isAssigning}
               >
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Pilih anggota" />
+                  <SelectValue placeholder="Select member" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="unassigned">Belum ditugaskan</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {workspaceMembers.map((member) => (
                     <SelectItem key={member.user_id} value={member.user_id}>
                       {member.full_name || member.email || member.user_id.slice(0, 8)}
@@ -358,7 +357,7 @@ export function TicketDetailClient({
                     ${!isCurrent && !isPast ? 'bg-muted text-muted-foreground' : ''}
                   `}
                 >
-                  {config.labelId}
+                  {config.label}
                 </div>
                 {index < STAGES_ORDER.length - 1 && (
                   <ChevronRight className="h-4 w-4 text-muted-foreground mx-1" />
@@ -373,13 +372,13 @@ export function TicketDetailClient({
       {ticket.pending_approval && isRequester && (
         <Alert className="mb-6 border-amber-300 bg-amber-50">
           <AlertTriangle className="h-4 w-4 text-amber-600" />
-          <AlertTitle className="text-amber-800">Menunggu Persetujuan Anda</AlertTitle>
+          <AlertTitle className="text-amber-800">Your Approval Required</AlertTitle>
           <AlertDescription className="text-amber-700">
-            Admin meminta untuk melewati tahap dan langsung ke{' '}
+            Admin has requested to skip stages and move directly to{' '}
             <span className="font-semibold">
-              {ticket.pending_stage ? STAGE_CONFIG[ticket.pending_stage as TicketStage].labelId : ''}
+              {ticket.pending_stage ? STAGE_CONFIG[ticket.pending_stage as TicketStage].label : ''}
             </span>
-            . Apakah Anda setuju?
+            . Do you approve?
           </AlertDescription>
           <div className="flex gap-2 mt-3">
             <Button
@@ -388,7 +387,7 @@ export function TicketDetailClient({
               disabled={isApproving}
             >
               {isApproving && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-              Setuju
+              Approve
             </Button>
             <Button
               size="sm"
@@ -396,7 +395,7 @@ export function TicketDetailClient({
               onClick={() => handleApproval(false)}
               disabled={isApproving}
             >
-              Tolak
+              Reject
             </Button>
           </div>
         </Alert>
@@ -406,9 +405,9 @@ export function TicketDetailClient({
       {currentStage === 'closed' && isRequester && (
         <Alert className="mb-6">
           <MessageSquare className="h-4 w-4" />
-          <AlertTitle>Tiket Sudah Ditutup</AlertTitle>
+          <AlertTitle>Ticket Closed</AlertTitle>
           <AlertDescription>
-            Tiket ini sudah selesai. Jika ada masalah lain, Anda dapat membuka kembali tiket ini.
+            This ticket has been resolved. If you have additional issues, you can reopen it.
           </AlertDescription>
           <Button
             size="sm"
@@ -417,7 +416,7 @@ export function TicketDetailClient({
             disabled={isReopening}
           >
             {isReopening && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-            Buka Kembali
+            Reopen Ticket
           </Button>
         </Alert>
       )}
@@ -428,7 +427,7 @@ export function TicketDetailClient({
           {/* Ticket Description */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Deskripsi</CardTitle>
+              <CardTitle className="text-lg">Description</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="whitespace-pre-wrap text-sm">{ticket.description}</div>
@@ -436,11 +435,11 @@ export function TicketDetailClient({
                 <div className="flex items-center gap-1">
                   <User className="h-3 w-3" />
                   <span>
-                    Pemohon: {ticket.requester?.full_name || ticket.requester?.email || 'Tidak diketahui'}
+                    Requester: {ticket.requester?.full_name || ticket.requester?.email || 'Unknown'}
                   </span>
                 </div>
                 <div>
-                  Dibuat: {format(new Date(ticket.created_at), 'dd MMM yyyy HH:mm', { locale: idLocale })}
+                  Created: {format(new Date(ticket.created_at), 'MMM d, yyyy HH:mm')}
                 </div>
               </div>
             </CardContent>
@@ -449,9 +448,9 @@ export function TicketDetailClient({
           {/* Comments */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Diskusi</CardTitle>
+              <CardTitle className="text-lg">Discussion</CardTitle>
               <CardDescription>
-                {comments.length} komentar
+                {comments.length} comment{comments.length !== 1 ? 's' : ''}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -459,7 +458,7 @@ export function TicketDetailClient({
               <div className="space-y-4 mb-6">
                 {comments.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    Belum ada komentar. Mulai diskusi di bawah.
+                    No comments yet. Start the discussion below.
                   </div>
                 ) : (
                   comments.map((comment) => (
@@ -473,12 +472,11 @@ export function TicketDetailClient({
                     >
                       <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                         <span className="font-medium">
-                          {comment.author?.full_name || comment.author?.email || 'Anonim'}
+                          {comment.author?.full_name || comment.author?.email || 'Anonymous'}
                         </span>
                         <span>
                           {formatDistanceToNow(new Date(comment.created_at), {
                             addSuffix: true,
-                            locale: idLocale,
                           })}
                         </span>
                       </div>
@@ -491,10 +489,11 @@ export function TicketDetailClient({
               {/* New Comment Form */}
               <div className="border-t pt-4">
                 <Textarea
-                  placeholder="Tulis komentar..."
+                  placeholder="Write a comment..."
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   rows={3}
+                  className="resize-none"
                 />
                 <div className="flex justify-end mt-2">
                   <Button
@@ -507,7 +506,7 @@ export function TicketDetailClient({
                     ) : (
                       <Send className="h-4 w-4 mr-1" />
                     )}
-                    Kirim
+                    Send
                   </Button>
                 </div>
               </div>
@@ -521,25 +520,25 @@ export function TicketDetailClient({
           {canTransition && currentStage !== 'closed' && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Ubah Tahap</CardTitle>
+                <CardTitle className="text-lg">Change Stage</CardTitle>
                 <CardDescription>
-                  Pindahkan tiket ke tahap selanjutnya
+                  Move ticket to the next stage
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label className="text-sm mb-1 block">Tahap Tujuan</Label>
+                  <Label className="text-sm mb-1 block">Target Stage</Label>
                   <Select
                     value={selectedTargetStage}
                     onValueChange={(v) => setSelectedTargetStage(v as TicketStage)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih tahap" />
+                      <SelectValue placeholder="Select stage" />
                     </SelectTrigger>
                     <SelectContent>
                       {validTargetStages.map((stage) => (
                         <SelectItem key={stage} value={stage}>
-                          {STAGE_CONFIG[stage].labelId}
+                          {STAGE_CONFIG[stage].label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -547,12 +546,13 @@ export function TicketDetailClient({
                 </div>
 
                 <div>
-                  <Label className="text-sm mb-1 block">Catatan (opsional)</Label>
+                  <Label className="text-sm mb-1 block">Note (optional)</Label>
                   <Textarea
-                    placeholder="Alasan perpindahan tahap..."
+                    placeholder="Reason for stage change..."
                     value={transitionComment}
                     onChange={(e) => setTransitionComment(e.target.value)}
                     rows={2}
+                    className="resize-none"
                   />
                 </div>
 
@@ -563,7 +563,7 @@ export function TicketDetailClient({
                     onCheckedChange={(checked) => setNotifyParticipants(checked === true)}
                   />
                   <Label htmlFor="notify" className="text-sm font-normal cursor-pointer">
-                    Beritahu peserta via email
+                    Notify participants via email
                   </Label>
                 </div>
 
@@ -573,7 +573,7 @@ export function TicketDetailClient({
                   className="w-full"
                 >
                   {isTransitioning && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-                  Pindah ke {selectedTargetStage ? STAGE_CONFIG[selectedTargetStage].labelId : '...'}
+                  Move to {selectedTargetStage ? STAGE_CONFIG[selectedTargetStage].label : '...'}
                 </Button>
               </CardContent>
             </Card>
@@ -582,36 +582,36 @@ export function TicketDetailClient({
           {/* Ticket Info Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Informasi Tiket</CardTitle>
+              <CardTitle className="text-lg">Ticket Info</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">ID Tiket</span>
+                <span className="text-muted-foreground">Ticket ID</span>
                 <span className="font-mono text-xs">{ticket.id.slice(0, 8)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Ditugaskan ke</span>
+                <span className="text-muted-foreground">Assigned To</span>
                 <span>
-                  {ticket.assignee?.full_name || ticket.assignee?.email || 'Belum ditugaskan'}
+                  {ticket.assignee?.full_name || ticket.assignee?.email || 'Unassigned'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Pemohon</span>
+                <span className="text-muted-foreground">Requester</span>
                 <span>
                   {ticket.requester?.full_name || ticket.requester?.email || '-'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Dibuat</span>
+                <span className="text-muted-foreground">Created</span>
                 <span>
-                  {format(new Date(ticket.created_at), 'dd MMM yyyy', { locale: idLocale })}
+                  {format(new Date(ticket.created_at), 'MMM d, yyyy')}
                 </span>
               </div>
               {ticket.closed_at && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Ditutup</span>
+                  <span className="text-muted-foreground">Closed</span>
                   <span>
-                    {format(new Date(ticket.closed_at), 'dd MMM yyyy', { locale: idLocale })}
+                    {format(new Date(ticket.closed_at), 'MMM d, yyyy')}
                   </span>
                 </div>
               )}

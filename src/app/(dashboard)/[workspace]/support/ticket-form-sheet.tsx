@@ -43,11 +43,11 @@ import {
 const ticketSchema = z.object({
   title: z
     .string()
-    .min(3, 'Judul minimal 3 karakter')
-    .max(255, 'Judul maksimal 255 karakter'),
+    .min(3, 'Title must be at least 3 characters')
+    .max(255, 'Title must be at most 255 characters'),
   description: z
     .string()
-    .min(1, 'Deskripsi wajib diisi'),
+    .min(1, 'Description is required'),
   category: z.enum(['bug', 'feature', 'question'] as const),
   priority: z.enum(['low', 'medium', 'high'] as const),
 })
@@ -62,15 +62,15 @@ interface TicketFormSheetProps {
 }
 
 const categories: { value: TicketCategory; label: string }[] = [
-  { value: 'bug', label: CATEGORY_CONFIG.bug.labelId },
-  { value: 'feature', label: CATEGORY_CONFIG.feature.labelId },
-  { value: 'question', label: CATEGORY_CONFIG.question.labelId },
+  { value: 'bug', label: CATEGORY_CONFIG.bug.label },
+  { value: 'feature', label: CATEGORY_CONFIG.feature.label },
+  { value: 'question', label: CATEGORY_CONFIG.question.label },
 ]
 
 const priorities: { value: TicketPriority; label: string; description: string }[] = [
-  { value: 'low', label: PRIORITY_CONFIG.low.labelId, description: 'Tidak mendesak' },
-  { value: 'medium', label: PRIORITY_CONFIG.medium.labelId, description: 'Perlu ditangani' },
-  { value: 'high', label: PRIORITY_CONFIG.high.labelId, description: 'Mendesak' },
+  { value: 'low', label: 'Low', description: 'Not urgent' },
+  { value: 'medium', label: 'Medium', description: 'Needs attention' },
+  { value: 'high', label: 'High', description: 'Urgent' },
 ]
 
 export function TicketFormSheet({
@@ -104,16 +104,16 @@ export function TicketFormSheet({
       })
 
       if (response.ok) {
-        toast.success('Tiket berhasil dibuat')
+        toast.success('Ticket created successfully')
         form.reset()
         onSuccess()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Gagal membuat tiket')
+        toast.error(error.error || 'Failed to create ticket')
       }
     } catch (error) {
       console.error('Failed to create ticket:', error)
-      toast.error('Gagal membuat tiket')
+      toast.error('Failed to create ticket')
     } finally {
       setIsSubmitting(false)
     }
@@ -122,25 +122,25 @@ export function TicketFormSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>Buat Tiket Baru</SheetTitle>
+        <SheetHeader className="pb-4">
+          <SheetTitle>Create New Ticket</SheetTitle>
           <SheetDescription>
-            Laporkan masalah atau ajukan permintaan baru
+            Report an issue or submit a new request
           </SheetDescription>
         </SheetHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Title */}
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Judul</FormLabel>
+                  <FormLabel>Subject</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ringkasan masalah atau permintaan"
+                      placeholder="Brief summary of your issue or request"
                       {...field}
                     />
                   </FormControl>
@@ -155,11 +155,12 @@ export function TicketFormSheet({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Deskripsi</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Jelaskan masalah atau permintaan Anda secara detail..."
-                      rows={5}
+                      placeholder="Describe your issue or request in detail..."
+                      rows={4}
+                      className="resize-none"
                       {...field}
                     />
                   </FormControl>
@@ -174,14 +175,14 @@ export function TicketFormSheet({
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Kategori</FormLabel>
+                  <FormLabel>Category</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Pilih kategori" />
+                        <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -203,12 +204,12 @@ export function TicketFormSheet({
               name="priority"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Prioritas</FormLabel>
+                  <FormLabel>Priority</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="grid grid-cols-3 gap-3"
+                      className="grid grid-cols-3 gap-2"
                     >
                       {priorities.map((p) => (
                         <div key={p.value}>
@@ -219,9 +220,9 @@ export function TicketFormSheet({
                           />
                           <Label
                             htmlFor={`priority-${p.value}`}
-                            className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                            className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-background p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
                           >
-                            <span className="font-medium">{p.label}</span>
+                            <span className="text-sm font-medium">{p.label}</span>
                             <span className="text-[10px] text-muted-foreground mt-0.5">
                               {p.description}
                             </span>
@@ -236,18 +237,18 @@ export function TicketFormSheet({
             />
 
             {/* Submit Button */}
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-3 pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 className="flex-1"
               >
-                Batal
+                Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting} className="flex-1">
                 {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {isSubmitting ? 'Membuat...' : 'Buat Tiket'}
+                {isSubmitting ? 'Creating...' : 'Create Ticket'}
               </Button>
             </div>
           </form>
