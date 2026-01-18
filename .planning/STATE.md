@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 
 ## Current Position
 
-Phase: 1 of 9 — Brand Guidelines
-Plan: 03 of 03 complete
-Status: Phase complete
-Last activity: 2026-01-18 — Completed 01-03-PLAN.md (Folder Restructure)
+Phase: 2 of 9 — Email System
+Plan: 01 of 03 complete
+Status: In progress
+Last activity: 2026-01-18 — Completed 02-01-PLAN.md (Resend Email Infrastructure)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ██░░░░░░░░ Phase 1 Complete
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ███░░░░░░░ Phase 2 Started
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 55 (14 in v1.0 + 38 in v2.0 + 3 in v2.1)
+- Total plans completed: 56 (14 in v1.0 + 38 in v2.0 + 4 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 14 in v2.1
+- Commits: 325 in v2.0, 16 in v2.1
 
 **Codebase:**
 - Lines: 23,856 TypeScript
@@ -47,10 +47,15 @@ Key v2.0 decisions:
 - Direct user creation for team invitations
 - Phone E.164 normalization
 
+Key v2.1 decisions:
+- Resend HTTP API for email (replaces broken nodemailer/SMTP)
+- Lazy-loaded Resend client (getResend) for build-time safety
+- React Email templates in src/emails/
+
 ### Deferred Issues
 
 - Phase 18 (Kapso Bot Setup) → v2.1
-- SMTP email delivery from Vercel (DNS issues) → v2.1
+- ~~SMTP email delivery from Vercel (DNS issues)~~ → Fixed in 02-01 with Resend
 
 ### Blockers/Concerns
 
@@ -58,10 +63,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-18 06:00 UTC
-Stopped at: Completed 01-03-PLAN.md (Folder Restructure)
+Last session: 2026-01-18 08:38 UTC
+Stopped at: Completed 02-01-PLAN.md (Resend Email Infrastructure)
 Resume file: None
-Next: Phase 2 (Email System - Resend)
+Next: 02-02-PLAN.md (Member Onboarding) or 02-03-PLAN.md (Password Reset)
 
 ## Deployment Info
 
@@ -81,4 +86,4 @@ Next: Phase 2 (Email System - Resend)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 after 01-03 completed (Phase 1 Brand Guidelines complete with folder restructure)*
+*Last updated: 2026-01-18 after 02-01 completed (Resend email infrastructure replacing nodemailer)*
