@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
-import { sendInvitationEmail } from '@/lib/email/transporter'
+import { sendInvitationEmail } from '@/lib/email/send'
 import { randomBytes } from 'crypto'
 
 export async function POST(request: NextRequest) {

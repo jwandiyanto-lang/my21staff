@@ -1,4 +1,4 @@
-import { resend, FROM_EMAIL } from './resend'
+import { getResend, FROM_EMAIL } from './resend'
 import { InvitationEmail } from '@/emails/invitation'
 
 export async function sendInvitationEmail({
@@ -12,6 +12,7 @@ export async function sendInvitationEmail({
   workspaceName: string
   inviterName: string
 }) {
+  const resend = getResend()
   const { data, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
