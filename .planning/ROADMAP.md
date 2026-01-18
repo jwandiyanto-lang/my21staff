@@ -75,12 +75,12 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 
 ### Phase 1: Brand Guidelines
 **Goal:** Foundation for all visual work — logo, colors, typography, voice
-**Status:** Planned
-**Plans:** 2 plans
+**Status:** Complete ✓
+**Plans:** 2/2 plans — completed 2026-01-18
 
 Plans:
-- [ ] 01-01-PLAN.md — Create BRAND.md and logo SVG files
-- [ ] 01-02-PLAN.md — Generate logo PNGs and update references
+- [x] 01-01-PLAN.md — Create BRAND.md and logo SVG files
+- [x] 01-02-PLAN.md — Generate logo PNGs and update references
 
 ---
 
@@ -211,10 +211,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 2/? | Phase 1 planned | — |
+| 1-9 | v2.1 | 2/? | Phase 1 complete | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-18 — Phase 1 planned (2 plans)*
+*Last updated: 2026-01-18 — Phase 1 complete (2/2 plans)*
