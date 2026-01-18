@@ -163,7 +163,7 @@ function LoginForm() {
                   href="/forgot-password"
                   className="text-sm font-semibold text-[#2D4B3E] hover:underline"
                 >
-                  Lupa password?
+                  Forgot password?
                 </Link>
               </div>
             </div>

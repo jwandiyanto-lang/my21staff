@@ -39,16 +39,16 @@ export default function ForgotPasswordPage() {
             <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-green-500" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Cek email Anda</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h1>
             <p className="text-gray-600 mb-6">
-              Kami telah mengirim link untuk reset password ke <strong>{email}</strong>
+              We&apos;ve sent a password reset link to <strong>{email}</strong>
             </p>
             <Link
               href="/login"
               className="inline-flex items-center gap-2 text-[#2D4B3E] font-semibold hover:underline"
             >
               <ArrowLeft className="w-4 h-4" />
-              Kembali ke login
+              Back to login
             </Link>
           </div>
         </div>
@@ -102,10 +102,10 @@ export default function ForgotPasswordPage() {
                   <Mail className="w-8 h-8 text-[#2D4B3E]" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  Lupa password?
+                  Forgot password?
                 </h1>
                 <p className="text-gray-600">
-                  Masukkan email Anda dan kami akan mengirim link untuk reset password
+                  Enter your email and we&apos;ll send you a link to reset your password
                 </p>
               </div>
 
@@ -143,10 +143,10 @@ export default function ForgotPasswordPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Mengirim...
+                      Sending...
                     </span>
                   ) : (
-                    'Kirim link reset'
+                    'Send reset link'
                   )}
                 </button>
               </form>
@@ -158,7 +158,7 @@ export default function ForgotPasswordPage() {
                   className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-[#2D4B3E]"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Kembali ke login
+                  Back to login
                 </Link>
               </div>
             </div>

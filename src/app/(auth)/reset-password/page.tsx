@@ -27,7 +27,7 @@ function ResetPasswordForm() {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
         if (exchangeError) {
           console.error('Code exchange error:', exchangeError)
-          setError('Link reset password tidak valid atau sudah kadaluarsa. Silakan minta link baru.')
+          setError('Reset password link is invalid or expired. Please request a new link.')
           setCheckingAuth(false)
           return
         }
@@ -52,7 +52,7 @@ function ResetPasswordForm() {
         })
         if (sessionError) {
           console.error('Session error:', sessionError)
-          setError('Link reset password tidak valid. Silakan minta link baru.')
+          setError('Reset password link is invalid. Please request a new link.')
           setCheckingAuth(false)
           return
         }
@@ -72,7 +72,7 @@ function ResetPasswordForm() {
       }
 
       // No session, no code, no tokens - invalid state
-      setError('Link reset password tidak valid. Silakan minta link baru dari halaman lupa password.')
+      setError('Reset password link is invalid. Please request a new link from the forgot password page.')
       setCheckingAuth(false)
     }
     checkAuth()
@@ -80,16 +80,16 @@ function ResetPasswordForm() {
 
   const validatePassword = (password: string): string | null => {
     if (password.length < 8) {
-      return 'Password harus minimal 8 karakter'
+      return 'Password must be at least 8 characters'
     }
     if (!/[A-Z]/.test(password)) {
-      return 'Password harus memiliki minimal satu huruf besar'
+      return 'Password must contain at least one uppercase letter'
     }
     if (!/[a-z]/.test(password)) {
-      return 'Password harus memiliki minimal satu huruf kecil'
+      return 'Password must contain at least one lowercase letter'
     }
     if (!/[0-9]/.test(password)) {
-      return 'Password harus memiliki minimal satu angka'
+      return 'Password must contain at least one number'
     }
     return null
   }
@@ -100,7 +100,7 @@ function ResetPasswordForm() {
 
     // Validate passwords match
     if (newPassword !== confirmPassword) {
-      setError('Password tidak cocok')
+      setError('Passwords do not match')
       return
     }
 
@@ -130,7 +130,7 @@ function ResetPasswordForm() {
         router.push('/login')
       }, 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal mengubah password')
+      setError(err instanceof Error ? err.message : 'Failed to update password')
     } finally {
       setLoading(false)
     }
@@ -152,8 +152,8 @@ function ResetPasswordForm() {
             <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-green-500" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Password berhasil diubah!</h1>
-            <p className="text-gray-600">Mengalihkan ke halaman login...</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Password updated!</h1>
+            <p className="text-gray-600">Redirecting to login...</p>
           </div>
         </div>
       </div>
@@ -169,13 +169,13 @@ function ResetPasswordForm() {
             <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
               <Lock className="w-8 h-8 text-red-500" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Link tidak valid</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid link</h1>
             <p className="text-gray-600 mb-6">{error}</p>
             <Link
               href="/forgot-password"
               className="inline-block py-3 px-6 rounded-xl bg-[#2D4B3E] text-white font-semibold hover:bg-[#243D32] transition-all"
             >
-              Minta link baru
+              Request new link
             </Link>
           </div>
         </div>
@@ -232,7 +232,7 @@ function ResetPasswordForm() {
                   Reset Password
                 </h1>
                 <p className="text-gray-600">
-                  Masukkan password baru Anda
+                  Enter your new password
                 </p>
               </div>
 
@@ -246,12 +246,12 @@ function ResetPasswordForm() {
 
                 <div className="space-y-2">
                   <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
-                    Password Baru
+                    New Password
                   </label>
                   <input
                     id="newPassword"
                     type="password"
-                    placeholder="Masukkan password baru"
+                    placeholder="Enter new password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
@@ -262,12 +262,12 @@ function ResetPasswordForm() {
 
                 <div className="space-y-2">
                   <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                    Konfirmasi Password
+                    Confirm Password
                   </label>
                   <input
                     id="confirmPassword"
                     type="password"
-                    placeholder="Ulangi password baru"
+                    placeholder="Confirm new password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -278,12 +278,12 @@ function ResetPasswordForm() {
 
                 {/* Password requirements */}
                 <div className="p-3 bg-gray-50/50 rounded-xl text-xs text-gray-600">
-                  <p className="font-medium mb-1">Syarat password:</p>
+                  <p className="font-medium mb-1">Password requirements:</p>
                   <ul className="space-y-0.5 list-disc list-inside">
-                    <li>Minimal 8 karakter</li>
-                    <li>Minimal satu huruf besar</li>
-                    <li>Minimal satu huruf kecil</li>
-                    <li>Minimal satu angka</li>
+                    <li>At least 8 characters</li>
+                    <li>At least one uppercase letter</li>
+                    <li>At least one lowercase letter</li>
+                    <li>At least one number</li>
                   </ul>
                 </div>
 
@@ -295,10 +295,10 @@ function ResetPasswordForm() {
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Menyimpan...
+                      Saving...
                     </span>
                   ) : (
-                    'Simpan Password Baru'
+                    'Save New Password'
                   )}
                 </button>
               </form>
