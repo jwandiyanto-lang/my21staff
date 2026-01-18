@@ -1,14 +1,32 @@
 import nodemailer from 'nodemailer'
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_PORT === '465',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-})
+function getTransporter() {
+  const user = process.env.SMTP_USER
+  const pass = process.env.SMTP_PASS
+
+  console.log('SMTP Config:', {
+    user: user ? `${user.substring(0, 5)}...` : 'MISSING',
+    pass: pass ? '***SET***' : 'MISSING',
+  })
+
+  if (!user || !pass) {
+    throw new Error(`SMTP credentials missing: SMTP_USER=${user ? 'set' : 'MISSING'}, SMTP_PASS=${pass ? 'set' : 'MISSING'}`)
+  }
+
+  // Use hardcoded Hostinger settings that work
+  return nodemailer.createTransport({
+    host: 'smtp.hostinger.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user,
+      pass,
+    },
+    // Explicit DNS resolution
+    dnsTimeout: 30000,
+    connectionTimeout: 30000,
+  })
+}
 
 export async function sendInvitationEmail({
   to,
@@ -21,6 +39,7 @@ export async function sendInvitationEmail({
   workspaceName: string
   inviterName: string
 }) {
+  const transporter = getTransporter()
   await transporter.sendMail({
     from: `"my21staff" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
     to,

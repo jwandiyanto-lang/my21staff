@@ -138,17 +138,44 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const inviterName = inviterProfile?.full_name || inviterProfile?.email || user.email || 'Team member'
 
-    // Build invite link
+    // Generate a new recovery link for the user
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
-    const inviteLink = `${appUrl}/api/invitations/accept?token=${invitation.token}`
+    const redirectTo = `${appUrl}/set-password?invitation=${invitation.token}`
+
+    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+      type: 'recovery',
+      email: invitation.email,
+      options: {
+        redirectTo,
+      },
+    })
+
+    if (linkError || !linkData) {
+      console.error('Failed to generate recovery link:', linkError)
+      return NextResponse.json(
+        { error: `Failed to generate invitation link: ${linkError?.message || 'Unknown error'}` },
+        { status: 500 }
+      )
+    }
+
+    // The recovery link from Supabase
+    const inviteLink = linkData.properties.action_link
 
     // Send invitation email
-    await sendInvitationEmail({
-      to: invitation.email,
-      inviteLink,
-      workspaceName: workspace.name,
-      inviterName,
-    })
+    try {
+      await sendInvitationEmail({
+        to: invitation.email,
+        inviteLink,
+        workspaceName: workspace.name,
+        inviterName,
+      })
+    } catch (emailError) {
+      console.error('Failed to send invitation email:', emailError)
+      return NextResponse.json(
+        { error: `Failed to send email: ${emailError instanceof Error ? emailError.message : 'Unknown error'}` },
+        { status: 500 }
+      )
+    }
 
     // Update the invitation timestamp
     await adminClient
@@ -160,7 +187,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error('Resend invitation error:', error)
     return NextResponse.json(
-      { error: 'Failed to resend invitation' },
+      { error: `Failed to resend invitation: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     )
   }

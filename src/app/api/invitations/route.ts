@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const normalizedEmail = email.toLowerCase().trim()
+
     // Verify user is admin/owner of the workspace
     const { data: membership } = await supabase
       .from('workspace_members')
@@ -63,19 +65,25 @@ export async function POST(request: NextRequest) {
 
     const inviterName = inviterProfile?.full_name || inviterProfile?.email || user.email || 'Team member'
 
-    // Check if user already a member
-    const { data: existingMember } = await adminClient
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', workspaceId)
-      .eq('user_id', (await adminClient.auth.admin.listUsers()).data.users.find(u => u.email === email)?.id || '')
-      .single()
+    // Check if user already exists in Supabase auth
+    const { data: { users: existingUsers } } = await adminClient.auth.admin.listUsers()
+    const existingAuthUser = existingUsers.find(u => u.email?.toLowerCase() === normalizedEmail)
 
-    if (existingMember) {
-      return NextResponse.json(
-        { error: 'User is already a member of this workspace' },
-        { status: 400 }
-      )
+    // Check if already a member of this workspace
+    if (existingAuthUser) {
+      const { data: existingMember } = await adminClient
+        .from('workspace_members')
+        .select('id')
+        .eq('workspace_id', workspaceId)
+        .eq('user_id', existingAuthUser.id)
+        .single()
+
+      if (existingMember) {
+        return NextResponse.json(
+          { error: 'User is already a member of this workspace' },
+          { status: 400 }
+        )
+      }
     }
 
     // Check for pending invitation
@@ -83,7 +91,7 @@ export async function POST(request: NextRequest) {
       .from('workspace_invitations')
       .select('id, status')
       .eq('workspace_id', workspaceId)
-      .eq('email', email.toLowerCase())
+      .eq('email', normalizedEmail)
       .eq('status', 'pending')
       .single()
 
@@ -94,21 +102,68 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate unique token
-    const token = randomBytes(32).toString('hex')
+    // Generate unique invitation token
+    const invitationToken = randomBytes(32).toString('hex')
 
     // Calculate expiry (7 days)
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7)
 
-    // Create invitation record using admin client (bypass RLS for insert)
+    // Create or get the user in Supabase auth
+    let authUserId: string
+
+    if (existingAuthUser) {
+      // User exists - they'll just need to log in
+      authUserId = existingAuthUser.id
+    } else {
+      // Create new user with email_confirm: true (skip Supabase email)
+      const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
+        email: normalizedEmail,
+        email_confirm: true, // Skip email confirmation
+        user_metadata: {
+          invited_to_workspace: workspaceId,
+        },
+      })
+
+      if (createError) {
+        console.error('Failed to create user:', createError)
+        return NextResponse.json(
+          { error: `Failed to create user account: ${createError.message}` },
+          { status: 500 }
+        )
+      }
+
+      authUserId = newUser.user.id
+    }
+
+    // Generate a recovery link (for password setup)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
+    const redirectTo = `${appUrl}/set-password?invitation=${invitationToken}`
+
+    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+      type: 'recovery',
+      email: normalizedEmail,
+      options: {
+        redirectTo,
+      },
+    })
+
+    if (linkError || !linkData) {
+      console.error('Failed to generate recovery link:', linkError)
+      return NextResponse.json(
+        { error: `Failed to generate invitation link: ${linkError?.message || 'Unknown error'}` },
+        { status: 500 }
+      )
+    }
+
+    // Create invitation record
     const { data: invitation, error: insertError } = await adminClient
       .from('workspace_invitations')
       .insert({
         workspace_id: workspaceId,
-        email: email.toLowerCase(),
+        email: normalizedEmail,
         role: 'member',
-        token,
+        token: invitationToken,
         status: 'pending',
         invited_by: user.id,
         expires_at: expiresAt.toISOString(),
@@ -119,27 +174,30 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       console.error('Failed to create invitation:', insertError)
       return NextResponse.json(
-        { error: 'Failed to create invitation' },
+        { error: `Failed to create invitation: ${insertError.message}` },
         { status: 500 }
       )
     }
 
-    // Build invite link
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
-    const inviteLink = `${appUrl}/api/invitations/accept?token=${token}`
+    // The recovery link from Supabase (contains the magic token)
+    // This link, when clicked, will validate the token and redirect to our callback
+    const inviteLink = linkData.properties.action_link
 
-    // Send invitation email
+    // Send invitation email via our SMTP
     try {
       await sendInvitationEmail({
-        to: email,
+        to: normalizedEmail,
         inviteLink,
         workspaceName: workspace.name,
         inviterName,
       })
     } catch (emailError) {
       console.error('Failed to send invitation email:', emailError)
-      // Don't fail the whole operation - invitation is created
-      // User can see it in pending list and we can resend later
+      // Return error with details - email is required for invitation to work
+      return NextResponse.json(
+        { error: `Failed to send invitation email: ${emailError instanceof Error ? emailError.message : 'Unknown error'}` },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
