@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 5 of 9 — Central Support Hub
-Plan: 01 of 05 complete
+Plan: 02 of 05 complete
 Status: In progress
-Last activity: 2026-01-19 — Completed 05-01-PLAN.md (Schema & Types)
+Last activity: 2026-01-19 — Completed 05-02-PLAN.md (Image Attachments)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 █████████░ Phase 5 started
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 █████████░ Phase 5 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 68 (14 in v1.0 + 38 in v2.0 + 16 in v2.1)
+- Total plans completed: 69 (14 in v1.0 + 38 in v2.0 + 17 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
 - Commits: 325 in v2.0, 46 in v2.1
 
@@ -74,6 +74,8 @@ Key v2.1 decisions:
 - Support config module: Centralized constants at src/lib/config/support.ts
 - admin_workspace_id nullable for workspace-internal vs routed tickets
 - supabase migration repair for syncing migration history
+- Private storage bucket with RLS for ticket attachments (not public bucket)
+- Storage path format: {ticket_id}/{timestamp}-{sanitized_filename}
 
 ### Deferred Issues
 
@@ -84,6 +86,7 @@ Key v2.1 decisions:
 
 - Forgot password email uses Supabase email, not Resend (P1)
 - ~~Resend/delete invitation returns 401 unauthorized (P0)~~ — Fixed in 03-02 (was using wrong auth check)
+- Website content tables (articles, webinars) not in remote DB — manual types added (P2)
 
 ### Blockers/Concerns
 
@@ -92,9 +95,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Completed 05-01-PLAN.md (Schema & Types) - Phase 05 started
+Stopped at: Completed 05-02-PLAN.md (Image Attachments)
 Resume file: None
-Next: 05-02-PLAN.md (Image Attachments)
+Next: 05-03-PLAN.md (Tawk.to Widget Integration)
 
 ## Deployment Info
 
@@ -114,4 +117,4 @@ Next: 05-02-PLAN.md (Image Attachments)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-19 — Phase 05 started, 05-01 complete (Schema & Types)*
+*Last updated: 2026-01-19 — Phase 05 in progress, 05-02 complete (Image Attachments)*
