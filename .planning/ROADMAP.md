@@ -179,11 +179,11 @@ Plans:
 
 ### Phase 6: Security Info Page
 **Goal:** Trust signal for paying clients — simple explanation of data security
-**Status:** Planned
-**Plans:** 1 plan
+**Status:** Complete
+**Plans:** 1/1 plan — completed 2026-01-19
 
 Plans:
-- [ ] 06-01-PLAN.md — Security info page at /keamanan + footer links
+- [x] 06-01-PLAN.md — Security info page at /keamanan + footer links
 
 **Scope:**
 - Static page (Bahasa Indonesia)
@@ -253,10 +253,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 21/? | Phase 1-5 complete, Phase 6 planned | — |
+| 1-9 | v2.1 | 22/? | Phase 1-6 complete | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-19 — Phase 6 planned (Security Info Page, 1 plan)*
+*Last updated: 2026-01-19 — Phase 6 complete (Security Info Page, 1 plan)*
