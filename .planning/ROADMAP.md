@@ -197,18 +197,23 @@ Plans:
 ---
 
 ### Phase 7: Landing Page Redesign
-**Goal:** Mobile-first conversion optimization
-**Status:** Not started
+**Goal:** Mobile-first English landing page with conversion optimization
+**Status:** Planning complete
+**Plans:** 3 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Foundation (component folder + constants)
+- [ ] 07-02-PLAN.md — Hero section + Features grid
+- [ ] 07-03-PLAN.md — CTA sections + Page integration + Checkpoint
 
 **Scope:**
-- Hero: "WhatsApp Automation untuk UMKM"
-- Social proof (testimonials, client logos)
-- Features grid per BRAND.md
+- English language ("24/7 Digital Workforce" headline)
+- Hero with WhatsApp CTA and StaffDeck visual
+- Minimalist features grid (4 cards)
+- Mobile sticky CTA (appears after scrolling)
 - Single WhatsApp CTA per section
-- Bundle optimization
 
 **Depends on:** Phase 1 (Brand Guidelines)
-**Can parallelize with:** Phase 6
 
 ---
 
@@ -253,10 +258,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 22/? | Phase 1-6 complete | — |
+| 1-9 | v2.1 | 25/? | Phase 1-6 complete | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-19 — Phase 6 complete (Security Info Page, 1 plan)*
+*Last updated: 2026-01-19 — Phase 7 planned (Landing Page Redesign, 3 plans)*
