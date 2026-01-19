@@ -176,7 +176,7 @@ export async function POST(
           })) || []
 
         if (recipients.length > 0 && workspace) {
-          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.com'
           await sendTicketUpdatedEmail(recipients, {
             ticketTitle: ticket.title,
             ticketId,

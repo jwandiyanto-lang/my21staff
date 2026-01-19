@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate direct link to set-password page (bypasses Supabase auth flow)
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.com'
     const inviteLink = `${appUrl}/set-password?invitation=${invitationToken}`
 
     // Send invitation email via our SMTP

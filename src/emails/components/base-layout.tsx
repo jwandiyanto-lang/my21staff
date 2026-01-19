@@ -42,7 +42,7 @@ export function BaseLayout({ preview, children }: BaseLayoutProps) {
             {/* Logo */}
             <Section className="mb-8">
               <Img
-                src="https://my21staff.vercel.app/logo.png"
+                src="https://my21staff.com/logo.png"
                 alt="my21staff"
                 width={120}
               />

@@ -147,7 +147,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const inviterName = inviterProfile?.full_name || inviterProfile?.email || user.email || 'Team member'
 
     // Generate direct link to set-password page
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.com'
     const inviteLink = `${appUrl}/set-password?invitation=${invitation.token}`
 
     // Send invitation email
