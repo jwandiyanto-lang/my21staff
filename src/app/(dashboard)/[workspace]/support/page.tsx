@@ -54,7 +54,7 @@ export default async function SupportPage({ params }: Props) {
     .order('created_at', { ascending: false })
 
   // Fetch client tickets routed to this admin workspace
-  const { data: clientTickets } = await supabase
+  const { data: clientTickets, error: clientTicketsError } = await supabase
     .from('tickets')
     .select(`
       *,
@@ -64,6 +64,12 @@ export default async function SupportPage({ params }: Props) {
     `)
     .eq('admin_workspace_id', workspace.id)
     .order('created_at', { ascending: false })
+
+  console.log('Fetching client tickets for admin workspace:', workspace.id)
+  console.log('Client tickets found:', clientTickets?.length || 0)
+  if (clientTicketsError) {
+    console.error('Error fetching client tickets:', clientTicketsError)
+  }
 
   // Combine and sort by created_at descending
   const allTickets = [

@@ -27,6 +27,22 @@ import {
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, RefreshCw } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useRef } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDistanceToNow } from 'date-fns'
@@ -115,9 +131,9 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
   const [saved, setSaved] = useState(false)
 
   // Team invite state
-  const [email, setEmail] = useState('')
+  const [isInviteSheetOpen, setIsInviteSheetOpen] = useState(false)
+  const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: 'member' })
   const [isInviting, setIsInviting] = useState(false)
-  const [inviteSent, setInviteSent] = useState(false)
   const [localInvitations, setLocalInvitations] = useState<Invitation[]>(invitations)
   const [localMembers, setLocalMembers] = useState<TeamMember[]>(members)
   const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null)
@@ -179,16 +195,20 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
   }
 
   const handleInvite = async () => {
-    if (!email.trim()) return
+    if (!inviteForm.email.trim() || !inviteForm.name.trim()) {
+      alert('Name and email are required')
+      return
+    }
 
     setIsInviting(true)
-    setInviteSent(false)
     try {
       const res = await fetch('/api/invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: email.trim(),
+          email: inviteForm.email.trim(),
+          name: inviteForm.name.trim(),
+          role: inviteForm.role,
           workspaceId: workspace.id,
         }),
       })
@@ -209,9 +229,8 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
         expires_at: data.invitation.expires_at,
       }, ...prev])
 
-      setEmail('')
-      setInviteSent(true)
-      setTimeout(() => setInviteSent(false), 3000)
+      setInviteForm({ name: '', email: '', role: 'member' })
+      setIsInviteSheetOpen(false)
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to invite')
     } finally {
@@ -993,38 +1012,81 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
             <CardHeader>
               <CardTitle className="text-lg">Invite Team Member</CardTitle>
               <CardDescription>
-                Add a new member to your workspace by email
+                Add a new member to your workspace
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4 items-center">
-                <div className="flex-1">
-                  <Label htmlFor="inviteEmail" className="sr-only">
-                    Email
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="inviteEmail"
-                      type="email"
-                      placeholder="colleague@company.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                    />
+              <Dialog open={isInviteSheetOpen} onOpenChange={setIsInviteSheetOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Invite Member
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Invite Team Member</DialogTitle>
+                    <DialogDescription>
+                      Send an invitation email to add a new member
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="invite-name">Full Name</Label>
+                      <Input
+                        id="invite-name"
+                        placeholder="John Doe"
+                        value={inviteForm.name}
+                        onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="invite-email">Email</Label>
+                      <Input
+                        id="invite-email"
+                        type="email"
+                        placeholder="john@company.com"
+                        value={inviteForm.email}
+                        onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="invite-role">Role</Label>
+                      <Select
+                        value={inviteForm.role}
+                        onValueChange={(value) => setInviteForm({ ...inviteForm, role: value })}
+                      >
+                        <SelectTrigger id="invite-role">
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="member">Member</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                </div>
-                <Button onClick={handleInvite} disabled={isInviting || !email.trim()}>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  {isInviting ? 'Inviting...' : 'Invite'}
-                </Button>
-                {inviteSent && (
-                  <span className="text-sm text-green-600 flex items-center gap-1">
-                    <Check className="w-4 h-4" />
-                    Invitation sent!
-                  </span>
-                )}
-              </div>
+                  <DialogFooter>
+                    <Button
+                      onClick={handleInvite}
+                      disabled={isInviting || !inviteForm.email.trim() || !inviteForm.name.trim()}
+                      className="w-full"
+                    >
+                      {isInviting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="mr-2 h-4 w-4" />
+                          Send Invitation
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
 

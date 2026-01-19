@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -26,11 +27,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { PermissionButton } from '@/components/ui/permission-button'
 import { hasPermission } from '@/lib/permissions/check'
 import { type WorkspaceRole } from '@/lib/permissions/types'
-import { UserPlus, Mail, Trash2 } from 'lucide-react'
+import { UserPlus, Mail, Trash2, User } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
 
@@ -61,24 +71,34 @@ export function TeamClient({
   currentUserRole,
 }: TeamClientProps) {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: 'member' })
   const [isInviting, setIsInviting] = useState(false)
   const [changingRoleId, setChangingRoleId] = useState<string | null>(null)
 
   const handleInvite = async () => {
-    if (!email.trim()) return
+    if (!inviteForm.email.trim() || !inviteForm.name.trim()) {
+      toast.error('Nama dan email wajib diisi')
+      return
+    }
 
     setIsInviting(true)
     try {
       const response = await fetch('/api/invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), workspaceId: workspace.id }),
+        body: JSON.stringify({
+          email: inviteForm.email.trim(),
+          name: inviteForm.name.trim(),
+          role: inviteForm.role,
+          workspaceId: workspace.id,
+        }),
       })
 
       if (response.ok) {
-        toast.success(`Undangan berhasil dikirim ke ${email.trim()}`)
-        setEmail('')
+        toast.success(`Undangan berhasil dikirim ke ${inviteForm.email.trim()}`)
+        setInviteForm({ name: '', email: '', role: 'member' })
+        setIsSheetOpen(false)
         router.refresh()
       } else {
         const data = await response.json()
@@ -159,33 +179,70 @@ export function TeamClient({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Label htmlFor="email" className="sr-only">
-                Email
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="rekan@perusahaan.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                />
+          <Dialog open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <DialogTrigger asChild>
+              <PermissionButton
+                permission="team:invite"
+                userRole={currentUserRole}
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Undang Anggota
+              </PermissionButton>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Undang Anggota Baru</DialogTitle>
+                <DialogDescription>
+                  Masukkan email untuk mengirim undangan
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="invite-name">Nama</Label>
+                  <Input
+                    id="invite-name"
+                    placeholder="Nama lengkap"
+                    value={inviteForm.name}
+                    onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="invite-email">Email</Label>
+                  <Input
+                    id="invite-email"
+                    type="email"
+                    placeholder="email@perusahaan.com"
+                    value={inviteForm.email}
+                    onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="invite-role">Role</Label>
+                  <Select
+                    value={inviteForm.role}
+                    onValueChange={(value) => setInviteForm({ ...inviteForm, role: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="member">Member</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
-            <PermissionButton
-              permission="team:invite"
-              userRole={currentUserRole}
-              onClick={handleInvite}
-              disabled={isInviting || !email.trim()}
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              {isInviting ? 'Mengundang...' : 'Undang'}
-            </PermissionButton>
-          </div>
+              <DialogFooter>
+                <Button
+                  onClick={handleInvite}
+                  disabled={isInviting || !inviteForm.email.trim() || !inviteForm.name.trim()}
+                  className="w-full"
+                >
+                  {isInviting ? 'Mengirim...' : 'Kirim Undangan'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
 

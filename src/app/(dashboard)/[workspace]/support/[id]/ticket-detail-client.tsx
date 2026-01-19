@@ -37,6 +37,7 @@ import {
   Send,
   Building2,
   ImageIcon,
+  MessageCircle,
 } from 'lucide-react'
 import { ImageUpload } from '@/components/portal/image-upload'
 import { formatDistanceToNow, format } from 'date-fns'
@@ -726,6 +727,29 @@ export function TicketDetailClient({
                   <span>
                     {format(new Date(ticket.closed_at), 'MMM d, yyyy')}
                   </span>
+                </div>
+              )}
+
+              {/* WhatsApp Contact Button */}
+              {isClientTicket && (
+                <div className="pt-3 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-green-600 border-green-200 hover:bg-green-50 hover:border-green-300"
+                    onClick={() => {
+                      const message = encodeURIComponent(
+                        `Hi, regarding your support ticket "${ticket.title}" (ID: ${ticket.id.slice(0, 8)}):\n\n`
+                      )
+                      window.open(`https://wa.me/?text=${message}`, '_blank')
+                    }}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Contact via WhatsApp
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-1.5 text-center">
+                    Opens WhatsApp with ticket context
+                  </p>
                 </div>
               )}
             </CardContent>

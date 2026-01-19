@@ -11,14 +11,17 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const adminClient = createApiAdminClient()
 
-    const { email, workspaceId } = await request.json()
+    const { email, name, role, workspaceId } = await request.json()
 
-    if (!email || !workspaceId) {
+    if (!email || !workspaceId || !name) {
       return NextResponse.json(
-        { error: 'Email and workspaceId are required' },
+        { error: 'Email, name, and workspaceId are required' },
         { status: 400 }
       )
     }
+
+    // Validate role
+    const validRole = role === 'admin' ? 'admin' : 'member'
 
     // Verify membership and get role
     const authResult = await requireWorkspaceMembership(workspaceId)
@@ -128,15 +131,31 @@ export async function POST(request: NextRequest) {
       }
 
       authUserId = newUser.user.id
+
+      // Create profile for the new user with provided name
+      const { error: profileError } = await adminClient
+        .from('profiles')
+        .insert({
+          id: authUserId,
+          email: normalizedEmail,
+          full_name: name.trim(),
+        })
+
+      if (profileError) {
+        console.error('Failed to create profile:', profileError)
+        // Don't fail - profile will be created on set-password
+      }
     }
 
     // Create invitation record first
+    console.log('Creating invitation for workspace:', workspaceId, 'email:', normalizedEmail)
     const { data: invitation, error: insertError } = await adminClient
       .from('workspace_invitations')
       .insert({
         workspace_id: workspaceId,
         email: normalizedEmail,
-        role: 'member',
+        name: name.trim(),
+        role: validRole,
         token: invitationToken,
         status: 'pending',
         invited_by: user.id,
@@ -144,6 +163,7 @@ export async function POST(request: NextRequest) {
       })
       .select()
       .single()
+    console.log('Invitation created:', invitation, 'error:', insertError)
 
     if (insertError) {
       console.error('Failed to create invitation:', insertError)

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { Lock, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 
 function SetPasswordForm() {
@@ -11,10 +10,22 @@ function SetPasswordForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [redirecting, setRedirecting] = useState(false)
+  const hasSubmitted = useRef(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const invitationToken = searchParams.get('invitation')
+
+  // Check if already completed (persisted in sessionStorage)
+  useEffect(() => {
+    const completed = sessionStorage.getItem(`invitation_${invitationToken}`)
+    if (completed) {
+      setSuccess(true)
+      setRedirecting(true)
+      const data = JSON.parse(completed)
+      router.replace(data.workspaceSlug ? `/${data.workspaceSlug}` : '/dashboard')
+    }
+  }, [invitationToken, router])
 
   const validatePassword = (password: string): string | null => {
     if (password.length < 8) {
@@ -34,6 +45,12 @@ function SetPasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Prevent double submission
+    if (loading || success || hasSubmitted.current) {
+      return
+    }
+
     setError(null)
 
     // Validate passwords match
@@ -54,6 +71,8 @@ function SetPasswordForm() {
       return
     }
 
+    // Mark as submitted immediately
+    hasSubmitted.current = true
     setLoading(true)
 
     try {
@@ -70,35 +89,23 @@ function SetPasswordForm() {
       const data = await response.json()
 
       if (!response.ok) {
+        hasSubmitted.current = false
         throw new Error(data.error || 'Failed to set password')
       }
 
-      setUserEmail(data.email)
-      setSuccess(true)
-
-      // Sign in the user with their new credentials
-      const supabase = createClient()
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      // Persist success state to prevent re-showing form on re-render
+      sessionStorage.setItem(`invitation_${invitationToken}`, JSON.stringify({
         email: data.email,
-        password: newPassword,
-      })
+        workspaceSlug: data.workspaceSlug,
+      }))
 
-      if (signInError) {
-        console.error('Auto sign-in failed:', signInError)
-        // Still show success - they can sign in manually
-      }
+      setSuccess(true)
+      setRedirecting(true)
 
-      // Redirect to workspace after short delay
-      setTimeout(() => {
-        if (data.workspaceSlug) {
-          router.push(`/${data.workspaceSlug}/dashboard`)
-        } else {
-          router.push('/dashboard')
-        }
-      }, 2000)
+      // Redirect to landing page for manual login (cleaner user flow)
+      router.replace('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to set password')
-    } finally {
       setLoading(false)
     }
   }
@@ -128,7 +135,7 @@ function SetPasswordForm() {
     )
   }
 
-  if (success) {
+  if (success || redirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#9CB99C] via-[#A8C5A8] to-[#B5D1B5]">
         <div className="w-full max-w-md px-4">
@@ -136,9 +143,10 @@ function SetPasswordForm() {
             <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-green-500" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome aboard!</h1>
-            <p className="text-gray-600">
-              Your account is ready. Taking you to your dashboard...
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Account created!</h1>
+            <p className="text-gray-600 flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Redirecting to login...
             </p>
           </div>
         </div>

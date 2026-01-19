@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createApiAdminClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { SettingsClient } from './settings-client'
 
@@ -30,21 +30,36 @@ export default async function SettingsPage({ params }: Props) {
     notFound()
   }
 
+  // Use admin client to fetch members (bypasses RLS - safe since we verified workspace access)
+  const adminClient = createApiAdminClient()
+
   // Get workspace members with their profiles
-  const { data: members } = await supabase
+  const { data: members, error: membersError } = await adminClient
     .from('workspace_members')
     .select('id, user_id, role, created_at')
     .eq('workspace_id', workspace.id)
     .order('created_at', { ascending: true })
 
+  if (membersError) {
+    console.error('Error fetching members:', membersError)
+  }
+  console.log('Fetched members for workspace', workspace.id, ':', members)
+
   // Get profiles for each member
   const memberIds = members?.map((m) => m.user_id).filter(Boolean) || []
-  const { data: profiles } = memberIds.length > 0
-    ? await supabase
+  console.log('Member IDs to fetch profiles for:', memberIds)
+
+  const { data: profiles, error: profilesError } = memberIds.length > 0
+    ? await adminClient
         .from('profiles')
         .select('id, email, full_name')
         .in('id', memberIds)
-    : { data: [] }
+    : { data: [], error: null }
+
+  if (profilesError) {
+    console.error('Error fetching profiles:', profilesError)
+  }
+  console.log('Fetched profiles:', profiles)
 
   // Combine members with their profiles
   const membersWithProfiles = (members || []).map((member) => ({
@@ -55,12 +70,17 @@ export default async function SettingsPage({ params }: Props) {
   }))
 
   // Get pending invitations
-  const { data: invitationsRaw } = await supabase
+  const { data: invitationsRaw, error: invitationsError } = await adminClient
     .from('workspace_invitations')
     .select('*')
     .eq('workspace_id', workspace.id)
     .eq('status', 'pending')
     .order('created_at', { ascending: false })
+
+  if (invitationsError) {
+    console.error('Error fetching invitations:', invitationsError)
+  }
+  console.log('Fetched invitations for workspace', workspace.id, ':', invitationsRaw)
 
   // Normalize invitation types
   const invitations = (invitationsRaw || []).map((inv) => ({

@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
 
+// Type for invitation with name (column added in migration 33)
+interface InvitationWithName {
+  id: string
+  email: string
+  workspace_id: string
+  status: string
+  role: string | null
+  name: string | null
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { invitationToken, password } = await request.json()
@@ -23,11 +33,13 @@ export async function POST(request: NextRequest) {
     const adminClient = createApiAdminClient()
 
     // Look up invitation by token
-    const { data: invitation, error: inviteError } = await adminClient
+    const { data: invitationData, error: inviteError } = await adminClient
       .from('workspace_invitations')
-      .select('id, email, workspace_id, status')
+      .select('id, email, workspace_id, status, role, name')
       .eq('token', invitationToken)
       .single()
+
+    const invitation = invitationData as unknown as InvitationWithName | null
 
     if (inviteError || !invitation) {
       return NextResponse.json(
@@ -68,6 +80,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Create profile if it doesn't exist
+    const { data: existingProfile } = await adminClient
+      .from('profiles')
+      .select('id, full_name')
+      .eq('id', authUser.id)
+      .maybeSingle()
+
+    if (!existingProfile) {
+      // Use name from invitation, fallback to email prefix
+      const fullName = invitation.name || invitation.email.split('@')[0]
+      const { error: profileError } = await adminClient
+        .from('profiles')
+        .insert({
+          id: authUser.id,
+          email: invitation.email,
+          full_name: fullName,
+        })
+
+      if (profileError) {
+        console.error('Failed to create profile:', profileError)
+        // Don't fail - continue with the flow
+      }
+    } else if (invitation.name && !existingProfile.full_name) {
+      // Update existing profile with name if it was missing
+      await adminClient
+        .from('profiles')
+        .update({ full_name: invitation.name })
+        .eq('id', authUser.id)
+    }
+
     // Get workspace info for redirect
     const { data: workspace } = await adminClient
       .from('workspaces')
@@ -75,18 +117,29 @@ export async function POST(request: NextRequest) {
       .eq('id', invitation.workspace_id)
       .single()
 
-    // Add user to workspace
-    const { error: memberError } = await adminClient
+    // Add user to workspace with role from invitation
+    console.log('Adding user to workspace:', {
+      workspace_id: invitation.workspace_id,
+      user_id: authUser.id,
+      role: invitation.role || 'member',
+    })
+
+    const { data: newMember, error: memberError } = await adminClient
       .from('workspace_members')
       .insert({
         workspace_id: invitation.workspace_id,
         user_id: authUser.id,
-        role: 'member',
+        role: invitation.role || 'member',
+        must_change_password: false, // User just set their password via invitation
       })
+      .select()
+      .single()
 
     if (memberError && !memberError.message.includes('duplicate')) {
       console.error('Failed to add member:', memberError)
       // Don't fail - password was set, they can join later
+    } else {
+      console.log('Successfully added member:', newMember)
     }
 
     // Update invitation status

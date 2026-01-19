@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 
 const BUCKET_NAME = 'ticket-attachments'
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 // POST /api/tickets/[id]/attachments - Upload attachment
@@ -51,7 +51,7 @@ export async function POST(
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: 'File too large (max 5MB)' },
+        { error: 'File too large (max 10MB)' },
         { status: 400 }
       )
     }
