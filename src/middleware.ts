@@ -44,9 +44,9 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // Public routes that don't require auth
-  const publicRoutes = ['/', '/login', '/signup', '/change-password', '/pricing']
+  const publicRoutes = ['/', '/login', '/signup', '/change-password', '/pricing', '/set-password', '/forgot-password', '/reset-password']
   const isPublicRoute = publicRoutes.some(route =>
-    pathname === route || pathname.startsWith('/api/')
+    pathname === route || pathname.startsWith('/api/') || pathname.startsWith('/articles/')
   )
 
   // If user is not logged in and trying to access protected route
