@@ -168,10 +168,12 @@ export async function POST(
           .select('id, email, full_name')
           .in('id', Array.from(participantIds))
 
-        const recipients = profiles?.map(p => ({
-          email: p.email,
-          name: p.full_name || p.email
-        })) || []
+        const recipients = profiles
+          ?.filter(p => p.email) // Filter out profiles without email
+          .map(p => ({
+            email: p.email as string,
+            name: p.full_name || p.email as string
+          })) || []
 
         if (recipients.length > 0 && workspace) {
           const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my21staff.vercel.app'

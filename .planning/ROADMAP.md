@@ -163,6 +163,13 @@ Plans:
 - Optional: Tawk.to widget for live chat fallback
 
 **Depends on:** Phase 4 (Ticketing Core)
+
+**Architecture Notes:**
+- All tickets managed inside **my21staff admin workspace** (not in client workspaces)
+- **Client view:** Description + Discussion only (limited visibility)
+- **Image uploads:** Both clients and admins can upload pictures (clients for reporting issues, admins for showing changes/progress)
+- **Admin view:** Full ticket details, stage control, assignment
+
 **Note:** Critical for support operations with multiple clients
 
 ---
