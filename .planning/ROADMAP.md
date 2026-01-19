@@ -154,39 +154,26 @@ Plans:
 
 ### Phase 5: Central Support Hub
 **Goal:** All client support flows to my21staff workspace for centralized handling
-**Status:** Planned
-**Plans:** 6 plans in 3 waves
+**Status:** Complete
+**Plans:** 6/6 plans — completed 2026-01-19
 
 Plans:
-- [ ] 05-01-PLAN.md — Database migration (admin_workspace_id, is_internal, RLS policies)
-- [ ] 05-02-PLAN.md — Storage bucket for ticket attachments
-- [ ] 05-03-PLAN.md — Portal API routes (client ticket CRUD)
-- [ ] 05-04-PLAN.md — Admin UI updates (client ticket visibility, internal notes)
-- [ ] 05-05-PLAN.md — Client portal UI (ticket list, create, detail with image upload)
-- [ ] 05-06-PLAN.md — Tawk.to live chat widget (optional)
-
-**Wave Structure:**
-- Wave 1: 05-01, 05-02 (database + storage - parallel)
-- Wave 2: 05-03, 05-04 (APIs + admin UI - parallel)
-- Wave 3: 05-05, 05-06 (portal UI + Tawk.to - parallel)
+- [x] 05-01-PLAN.md — Database migration (admin_workspace_id, is_internal, RLS policies)
+- [x] 05-02-PLAN.md — Storage bucket for ticket attachments
+- [x] 05-03-PLAN.md — Portal API routes (client ticket CRUD)
+- [x] 05-04-PLAN.md — Admin UI updates (client ticket visibility, internal notes)
+- [x] 05-05-PLAN.md — Client portal UI (ticket list, create, detail with image upload)
+- [x] 05-06-PLAN.md — Tawk.to live chat widget (optional)
 
 **Scope:**
 - Cross-workspace ticketing: Client tickets -> my21staff workspace
 - my21staff team can view/respond to all client tickets
-- Client portal: Clients see only their own tickets
+- Client portal at /portal/support: Clients see only their own tickets
 - Image attachments for both clients and admins
-- Internal notes (admin-only comments)
-- Optional: Tawk.to widget for live chat fallback
+- Internal notes (admin-only comments, amber styling)
+- Tawk.to widget for live chat (optional, requires env vars)
 
 **Depends on:** Phase 4 (Ticketing Core)
-
-**Architecture Notes:**
-- All tickets managed inside **my21staff admin workspace** (not in client workspaces)
-- **Client view:** Description + Discussion only (limited visibility)
-- **Image uploads:** Both clients and admins can upload pictures (clients for reporting issues, admins for showing changes/progress)
-- **Admin view:** Full ticket details, stage control, assignment
-
-**Note:** Critical for support operations with multiple clients
 
 ---
 
@@ -262,10 +249,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 20/? | Phase 1-4 complete | — |
+| 1-9 | v2.1 | 26/? | Phase 1-5 complete | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-19 — Phase 5 planned (6 plans)*
+*Last updated: 2026-01-19 — Phase 5 complete (Central Support Hub, 6/6 plans)*
