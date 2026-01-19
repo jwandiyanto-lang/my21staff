@@ -198,13 +198,13 @@ Plans:
 
 ### Phase 7: Landing Page Redesign
 **Goal:** Mobile-first English landing page with conversion optimization
-**Status:** Planning complete
-**Plans:** 3 plans
+**Status:** Complete
+**Plans:** 3/3 plans — completed 2026-01-19
 
 Plans:
-- [ ] 07-01-PLAN.md — Foundation (component folder + constants)
-- [ ] 07-02-PLAN.md — Hero section + Features grid
-- [ ] 07-03-PLAN.md — CTA sections + Page integration + Checkpoint
+- [x] 07-01-PLAN.md — Foundation (component folder + constants)
+- [x] 07-02-PLAN.md — Hero section + Features grid
+- [x] 07-03-PLAN.md — CTA sections + Page integration + Checkpoint
 
 **Scope:**
 - English language ("24/7 Digital Workforce" headline)
@@ -258,10 +258,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 25/? | Phase 1-6 complete | — |
+| 1-9 | v2.1 | 28/? | Phase 1-7 complete | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-19 — Phase 7 planned (Landing Page Redesign, 3 plans)*
+*Last updated: 2026-01-19 — Phase 7 complete (Landing Page Redesign)*
