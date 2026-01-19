@@ -412,58 +412,65 @@ export function TicketDetailClient({
 
       {/* Reopen Banner */}
       {currentStage === 'closed' && isRequester && (
-        <Alert className="mb-6">
-          <MessageSquare className="h-4 w-4" />
-          <AlertTitle>Ticket Closed</AlertTitle>
-          <AlertDescription>
-            This ticket has been resolved. If you have additional issues, you can reopen it.
-          </AlertDescription>
-
-          {!showReopenForm ? (
-            <Button
-              size="sm"
-              variant="outline"
-              className="mt-3"
-              onClick={() => setShowReopenForm(true)}
-            >
-              Reopen Ticket
-            </Button>
-          ) : (
-            <div className="mt-4 space-y-3">
-              <div>
-                <Label className="text-sm mb-1.5 block">Reason for reopening *</Label>
-                <Textarea
-                  placeholder="Please explain why you need to reopen this ticket..."
-                  value={reopenReason}
-                  onChange={(e) => setReopenReason(e.target.value)}
-                  rows={3}
-                  className="resize-none"
-                />
+        <Card className="mb-6 border-muted-foreground/20">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-muted p-2">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
               </div>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  onClick={handleReopen}
-                  disabled={isReopening || !reopenReason.trim()}
-                >
-                  {isReopening && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-                  Confirm
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setShowReopenForm(false)
-                    setReopenReason('')
-                  }}
-                  disabled={isReopening}
-                >
-                  Cancel
-                </Button>
+              <div className="flex-1">
+                <h4 className="font-semibold mb-1">Ticket Closed</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  This ticket has been resolved. If you have additional issues, you can reopen it.
+                </p>
+
+                {!showReopenForm ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowReopenForm(true)}
+                  >
+                    Reopen Ticket
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm mb-1.5 block">Reason for reopening *</Label>
+                      <Textarea
+                        placeholder="Please explain why you need to reopen this ticket..."
+                        value={reopenReason}
+                        onChange={(e) => setReopenReason(e.target.value)}
+                        rows={3}
+                        className="resize-none"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleReopen}
+                        disabled={isReopening || !reopenReason.trim()}
+                      >
+                        {isReopening && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+                        Confirm
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setShowReopenForm(false)
+                          setReopenReason('')
+                        }}
+                        disabled={isReopening}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          )}
-        </Alert>
+          </CardContent>
+        </Card>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
