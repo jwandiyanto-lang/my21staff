@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
       .eq('user_id', user.id)
       .eq('must_change_password', true)
       .limit(1)
-      .single()
+      .maybeSingle() // Use maybeSingle to avoid error when no rows found
 
     // If user must change password, redirect to change-password page
     if (membership?.must_change_password) {
