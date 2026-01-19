@@ -185,6 +185,7 @@
   },
   "active": "600c2f6ee49ae613",
   "lastOpenFiles": [
+    "src/app/portal/page.tsx",
     "supabase/migrations/30_fix_rls_policies.sql",
     "supabase/debug_rls.sql",
     "src/app/portal/support/[id]/portal-ticket-detail.tsx.tmp.190960.1768807518185",
@@ -195,7 +196,6 @@
     "src/app/portal/support/page.tsx",
     "src/app/portal/support/[id]",
     "src/app/portal/support/new",
-    "src/app/portal/support",
     "node_modules/dotenv/SECURITY.md",
     "node_modules/dotenv/README.md",
     "node_modules/dotenv/README-es.md",
