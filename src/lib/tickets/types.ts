@@ -19,9 +19,12 @@ export interface Ticket {
   closed_at: string | null
   created_at: string
   updated_at: string
+  // Cross-workspace support
+  admin_workspace_id: string | null
   // Joined data
   requester?: { id: string; full_name: string | null; email: string }
   assignee?: { id: string; full_name: string | null; email: string } | null
+  source_workspace?: { id: string; name: string; slug: string }
 }
 
 export interface TicketComment {
@@ -30,6 +33,7 @@ export interface TicketComment {
   author_id: string
   content: string
   is_stage_change: boolean
+  is_internal: boolean
   created_at: string
   // Joined data
   author?: { id: string; full_name: string | null; email: string }
