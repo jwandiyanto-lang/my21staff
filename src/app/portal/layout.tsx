@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { PortalHeader } from '@/components/portal/portal-header'
+import { TawkChat } from '@/components/tawk-chat'
 
 export default async function PortalLayout({
   children,
@@ -30,6 +31,11 @@ export default async function PortalLayout({
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {children}
       </main>
+      {/* Tawk.to live chat - only on portal, not admin */}
+      <TawkChat
+        userName={profile?.full_name || undefined}
+        userEmail={profile?.email || undefined}
+      />
     </div>
   )
 }
