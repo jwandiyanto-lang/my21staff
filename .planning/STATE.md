@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 5 of 9 — Central Support Hub
-Plan: 02 of 05 complete
+Plan: 03 of 05 complete
 Status: In progress
-Last activity: 2026-01-19 — Completed 05-02-PLAN.md (Image Attachments)
+Last activity: 2026-01-19 — Completed 05-03-PLAN.md (Client Portal API)
 
 Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 █████████░ Phase 5 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 69 (14 in v1.0 + 38 in v2.0 + 17 in v2.1)
+- Total plans completed: 70 (14 in v1.0 + 38 in v2.0 + 18 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
 - Commits: 325 in v2.0, 46 in v2.1
 
@@ -76,6 +76,8 @@ Key v2.1 decisions:
 - supabase migration repair for syncing migration history
 - Private storage bucket with RLS for ticket attachments (not public bucket)
 - Storage path format: {ticket_id}/{timestamp}-{sanitized_filename}
+- Portal APIs filter by requester_id for client isolation (no workspace membership check)
+- Internal comment filtering: or('is_internal.is.null,is_internal.eq.false')
 
 ### Deferred Issues
 
@@ -95,9 +97,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Completed 05-02-PLAN.md (Image Attachments)
+Stopped at: Completed 05-03-PLAN.md (Client Portal API)
 Resume file: None
-Next: 05-03-PLAN.md (Tawk.to Widget Integration)
+Next: 05-04-PLAN.md (Admin Ticket List)
 
 ## Deployment Info
 
@@ -117,4 +119,4 @@ Next: 05-03-PLAN.md (Tawk.to Widget Integration)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-19 — Phase 05 in progress, 05-02 complete (Image Attachments)*
+*Last updated: 2026-01-19 — Phase 05 in progress, 05-03 complete (Client Portal API)*
