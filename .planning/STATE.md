@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 
 ## Current Position
 
-Phase: 4 of 9 — Support Ticketing Core
-Plan: 05 of 05 complete
-Status: Phase complete
-Last activity: 2026-01-18 — Completed 04-05-PLAN.md (Email Notifications)
+Phase: 5 of 9 — Central Support Hub
+Plan: 01 of 05 complete
+Status: In progress
+Last activity: 2026-01-19 — Completed 05-01-PLAN.md (Schema & Types)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 █████████░ Phase 4 complete
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 █████████░ Phase 5 started
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 67 (14 in v1.0 + 38 in v2.0 + 15 in v2.1)
+- Total plans completed: 68 (14 in v1.0 + 38 in v2.0 + 16 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 44 in v2.1
+- Commits: 325 in v2.0, 46 in v2.1
 
 **Codebase:**
 - Lines: ~24,500 TypeScript
@@ -70,6 +70,10 @@ Key v2.1 decisions:
 - Ticket email templates (created/updated/closed) with Resend
 - pg_cron auto-close job for stale implementation tickets (7 days)
 - Email participants = requester + unique commenters
+- Cross-workspace RLS: Check private.get_user_role_in_workspace(admin_workspace_id) IN ('owner', 'admin')
+- Support config module: Centralized constants at src/lib/config/support.ts
+- admin_workspace_id nullable for workspace-internal vs routed tickets
+- supabase migration repair for syncing migration history
 
 ### Deferred Issues
 
@@ -87,10 +91,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-18
-Stopped at: Completed 04-05-PLAN.md (Email Notifications) - Phase 04 complete
+Last session: 2026-01-19
+Stopped at: Completed 05-01-PLAN.md (Schema & Types) - Phase 05 started
 Resume file: None
-Next: Phase 05 per roadmap
+Next: 05-02-PLAN.md (Image Attachments)
 
 ## Deployment Info
 
@@ -110,4 +114,4 @@ Next: Phase 05 per roadmap
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-18 — Phase 04 complete, 04-05 complete (Email Notifications)*
+*Last updated: 2026-01-19 — Phase 05 started, 05-01 complete (Schema & Types)*
