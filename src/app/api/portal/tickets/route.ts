@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { ADMIN_WORKSPACE_ID } from '@/lib/config/support'
+// Hardcoded for debugging - my21staff workspace ID
+const ADMIN_WORKSPACE_ID = '0318fda5-22c4-419b-bdd8-04471b818d17'
 import { type TicketCategory, type TicketPriority } from '@/lib/tickets'
 
 const VALID_CATEGORIES: TicketCategory[] = ['bug', 'feature', 'question']
@@ -87,20 +88,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Create ticket routed to admin workspace
+    const insertData = {
+      workspace_id: membership.workspace_id,
+      admin_workspace_id: ADMIN_WORKSPACE_ID,
+      requester_id: user.id,
+      title: title.trim(),
+      description: description.trim(),
+      category,
+      priority,
+      stage: 'report'
+    }
+
+    console.log('Portal ticket insert data:', JSON.stringify(insertData))
+
     const { data: ticket, error: createError } = await supabase
       .from('tickets')
-      .insert({
-        workspace_id: membership.workspace_id,
-        admin_workspace_id: ADMIN_WORKSPACE_ID, // Route to my21staff
-        requester_id: user.id,
-        title: title.trim(),
-        description: description.trim(),
-        category,
-        priority,
-        stage: 'report'
-      })
-      .select('id, title, category, priority, stage, created_at')
+      .insert(insertData)
+      .select('id, title, category, priority, stage, created_at, admin_workspace_id')
       .single()
+
+    console.log('Portal ticket created:', JSON.stringify(ticket))
 
     if (createError) {
       console.error('Error creating ticket:', createError)
