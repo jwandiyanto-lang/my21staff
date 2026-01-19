@@ -75,32 +75,41 @@ score: 9/9 must-haves verified
 |------|------|---------|----------|--------|
 | None | - | - | - | No blockers or warnings found |
 
-### Human Verification Required
+### Human Verification Completed
 
-#### 1. Portal Ticket Creation Flow
-**Test:** As a client user, navigate to /portal/support/new, create a ticket
-**Expected:** Ticket created with admin_workspace_id set, visible in my21staff admin support page
-**Why human:** Full end-to-end flow including database state
+**Date:** 2026-01-19
+**Tester:** Jonathan (via Claude browser automation)
+
+#### 1. Portal Ticket Creation Flow ✅ PASSED
+**Test:** As a client user (manjowan@gmail.com), navigate to /portal/support/new, create a ticket
+**Result:** Ticket created with admin_workspace_id set, visible in my21staff admin workspace
+**Note:** Required fixes for login redirect loop (auto-accept pending invitations)
 
 #### 2. Internal Comment Visibility
-**Test:** As admin, add internal note on client ticket. As client, view same ticket in portal
-**Expected:** Client does NOT see internal note, admin sees it with amber styling
-**Why human:** Cross-user visibility verification
+**Status:** Not tested in this session (deferred)
 
 #### 3. Image Upload on Portal
-**Test:** In portal ticket detail, click Add Image, upload an image, submit comment
-**Expected:** Image uploaded to Supabase storage, markdown embedded in comment, image displays
-**Why human:** File upload behavior, visual display
+**Status:** Not tested in this session (deferred)
 
 #### 4. Source Filter in Admin
-**Test:** In admin support page, click Internal/Client/All tabs
-**Expected:** Correct filtering, client tickets show source workspace name
-**Why human:** UI interaction and visual verification
+**Status:** Not tested in this session (deferred)
 
 #### 5. Tawk.to Widget (if configured)
-**Test:** Set NEXT_PUBLIC_TAWK_PROPERTY_ID and NEXT_PUBLIC_TAWK_WIDGET_ID, visit /portal/support
-**Expected:** Tawk.to chat widget appears in bottom-right corner
-**Why human:** External service integration
+**Status:** Not tested in this session (deferred)
+
+### Issues Fixed During Verification
+
+| Issue | Root Cause | Fix |
+|-------|------------|-----|
+| Login redirect loop | User reset password via forgot-password, workspace membership never created | Dashboard auto-accepts pending invitations |
+| Query errors | `.single()` throws when no rows | Changed to `.maybeSingle()` |
+| /portal 404 | No portal index page | Created `/portal/page.tsx` redirect |
+| Fallback loop | Dashboard redirected to /login when no membership | Changed fallback to /portal |
+
+### Files Modified During Verification
+
+- `src/app/(dashboard)/dashboard/page.tsx` — Auto-accept invitations, maybeSingle, portal fallback
+- `src/app/portal/page.tsx` — New file, redirects to /portal/support
 
 ### Summary
 
