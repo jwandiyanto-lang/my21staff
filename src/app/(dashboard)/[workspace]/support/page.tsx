@@ -41,8 +41,8 @@ export default async function SupportPage({ params }: Props) {
 
   const currentUserRole = (currentMembership?.role || 'member') as WorkspaceRole
 
-  // Get tickets with requester and assignee info
-  const { data: tickets } = await supabase
+  // Fetch internal tickets (created in this workspace, not routed elsewhere)
+  const { data: internalTickets } = await supabase
     .from('tickets')
     .select(`
       *,
@@ -50,12 +50,31 @@ export default async function SupportPage({ params }: Props) {
       assignee:profiles!tickets_assigned_to_fkey(id, full_name, email)
     `)
     .eq('workspace_id', workspace.id)
+    .is('admin_workspace_id', null)
     .order('created_at', { ascending: false })
+
+  // Fetch client tickets routed to this admin workspace
+  const { data: clientTickets } = await supabase
+    .from('tickets')
+    .select(`
+      *,
+      requester:profiles!tickets_requester_id_fkey(id, full_name, email),
+      assignee:profiles!tickets_assigned_to_fkey(id, full_name, email),
+      source_workspace:workspaces!tickets_workspace_id_fkey(id, name, slug)
+    `)
+    .eq('admin_workspace_id', workspace.id)
+    .order('created_at', { ascending: false })
+
+  // Combine and sort by created_at descending
+  const allTickets = [
+    ...(internalTickets || []).map(t => ({ ...t, isClientTicket: false, source_workspace: null })),
+    ...(clientTickets || []).map(t => ({ ...t, isClientTicket: true }))
+  ].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
 
   return (
     <SupportClient
       workspace={workspace}
-      tickets={(tickets || []) as unknown as TicketData[]}
+      tickets={allTickets as unknown as TicketData[]}
       currentUserRole={currentUserRole}
       currentUserId={user.id}
     />

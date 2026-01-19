@@ -44,6 +44,8 @@ export interface TicketData {
   created_at: string
   requester: { id: string; full_name: string | null; email: string } | null
   assignee: { id: string; full_name: string | null; email: string } | null
+  isClientTicket: boolean
+  source_workspace: { id: string; name: string; slug: string } | null
 }
 
 interface SupportClientProps {
@@ -64,6 +66,12 @@ const stageFilters: { value: TicketStage | 'all'; label: string }[] = [
   { value: 'outcome', label: 'Outcome' },
   { value: 'implementation', label: 'Implementation' },
   { value: 'closed', label: 'Closed' },
+]
+
+const sourceFilters: { value: 'all' | 'internal' | 'client'; label: string }[] = [
+  { value: 'all', label: 'All Sources' },
+  { value: 'internal', label: 'Internal' },
+  { value: 'client', label: 'Client' },
 ]
 
 function getPriorityBadgeVariant(priority: TicketPriority): 'default' | 'secondary' | 'destructive' {
@@ -93,11 +101,20 @@ export function SupportClient({
 }: SupportClientProps) {
   const router = useRouter()
   const [stageFilter, setStageFilter] = useState<TicketStage | 'all'>('all')
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'internal' | 'client'>('all')
   const [sheetOpen, setSheetOpen] = useState(false)
 
-  const filteredTickets = stageFilter === 'all'
-    ? tickets
-    : tickets.filter(t => t.stage as TicketStage === stageFilter)
+  // Check if there are any client tickets (to determine if we show source filter)
+  const hasClientTickets = tickets.some(t => t.isClientTicket)
+
+  const filteredTickets = tickets
+    .filter(t => stageFilter === 'all' || t.stage as TicketStage === stageFilter)
+    .filter(t => {
+      if (sourceFilter === 'all') return true
+      if (sourceFilter === 'internal') return !t.isClientTicket
+      if (sourceFilter === 'client') return t.isClientTicket
+      return true
+    })
 
   const handleTicketCreated = () => {
     setSheetOpen(false)
@@ -119,21 +136,45 @@ export function SupportClient({
         </Button>
       </div>
 
-      {/* Stage Filter Tabs */}
-      <Tabs value={stageFilter} onValueChange={(v) => setStageFilter(v as TicketStage | 'all')} className="mb-6">
-        <TabsList>
-          {stageFilters.map(filter => (
-            <TabsTrigger key={filter.value} value={filter.value}>
-              {filter.label}
-              {filter.value !== 'all' && (
-                <span className="ml-1.5 text-xs text-muted-foreground">
-                  ({tickets.filter(t => t.stage as TicketStage === filter.value).length})
-                </span>
-              )}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      {/* Filter Tabs */}
+      <div className="flex flex-wrap items-center gap-4 mb-6">
+        {/* Stage Filter */}
+        <Tabs value={stageFilter} onValueChange={(v) => setStageFilter(v as TicketStage | 'all')}>
+          <TabsList>
+            {stageFilters.map(filter => (
+              <TabsTrigger key={filter.value} value={filter.value}>
+                {filter.label}
+                {filter.value !== 'all' && (
+                  <span className="ml-1.5 text-xs text-muted-foreground">
+                    ({tickets.filter(t => t.stage as TicketStage === filter.value).length})
+                  </span>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+
+        {/* Source Filter - only show if there are client tickets */}
+        {hasClientTickets && (
+          <Tabs value={sourceFilter} onValueChange={(v) => setSourceFilter(v as 'all' | 'internal' | 'client')}>
+            <TabsList>
+              {sourceFilters.map(filter => (
+                <TabsTrigger key={filter.value} value={filter.value}>
+                  {filter.label}
+                  <span className="ml-1.5 text-xs text-muted-foreground">
+                    ({filter.value === 'all'
+                      ? tickets.length
+                      : filter.value === 'internal'
+                        ? tickets.filter(t => !t.isClientTicket).length
+                        : tickets.filter(t => t.isClientTicket).length
+                    })
+                  </span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        )}
+      </div>
 
       {/* Ticket List */}
       <Card>
@@ -168,6 +209,7 @@ export function SupportClient({
                   <TableHead>Category</TableHead>
                   <TableHead>Priority</TableHead>
                   <TableHead>Stage</TableHead>
+                  {hasClientTickets && <TableHead>Source</TableHead>}
                   <TableHead>Requester</TableHead>
                   <TableHead>Assigned To</TableHead>
                   <TableHead>Created</TableHead>
@@ -205,6 +247,22 @@ export function SupportClient({
                         {STAGE_CONFIG[ticket.stage as TicketStage].label}
                       </Badge>
                     </TableCell>
+                    {hasClientTickets && (
+                      <TableCell>
+                        {ticket.isClientTicket ? (
+                          <div className="flex items-center gap-1.5">
+                            <Badge variant="outline" className="text-xs text-blue-600 border-blue-300 bg-blue-50">
+                              Client
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {ticket.source_workspace?.name || '-'}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Internal</span>
+                        )}
+                      </TableCell>
+                    )}
                     <TableCell className="text-muted-foreground">
                       {ticket.requester?.full_name || ticket.requester?.email || '-'}
                     </TableCell>
