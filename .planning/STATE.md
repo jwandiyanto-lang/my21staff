@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 5 of 9 — Central Support Hub (COMPLETE)
-Plan: 05 of 05 complete
+Plan: 06 of 06 complete
 Status: Phase complete
-Last activity: 2026-01-19 — Completed 05-05-PLAN.md (Client Portal UI)
+Last activity: 2026-01-19 — Completed 05-06-PLAN.md (Tawk.to Widget Integration)
 
 Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ██████████ Phase 5 complete
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 72 (14 in v1.0 + 38 in v2.0 + 20 in v2.1)
+- Total plans completed: 73 (14 in v1.0 + 38 in v2.0 + 21 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 50 in v2.1
+- Commits: 325 in v2.0, 52 in v2.1
 
 **Codebase:**
 - Lines: ~24,500 TypeScript
@@ -82,6 +82,7 @@ Key v2.1 decisions:
 - Source filter tabs only shown when client tickets exist in list
 - Portal layout: header-only (no sidebar), auth check in layout.tsx
 - Client portal isolation: requester_id filter for all queries
+- Custom Tawk.to integration via script injection (React 19 compatible, avoiding tawkto-react peer dependency)
 
 ### Deferred Issues
 
@@ -101,7 +102,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Completed 05-05-PLAN.md (Client Portal UI) - Phase 5 complete
+Stopped at: Completed 05-06-PLAN.md (Tawk.to Widget Integration) - Phase 5 complete
 Resume file: None
 Next: Phase 6 (plans to be created)
 
@@ -123,4 +124,4 @@ Next: Phase 6 (plans to be created)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-19 — Phase 05 complete (Central Support Hub)*
+*Last updated: 2026-01-19 — Phase 05 complete (Central Support Hub, 6/6 plans)*
