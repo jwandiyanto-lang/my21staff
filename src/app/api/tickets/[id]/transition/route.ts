@@ -98,7 +98,12 @@ export async function POST(
       // If closing, set closed_at and generate reopen token
       if (toStage === 'closed') {
         updateData.closed_at = new Date().toISOString()
-        updateData.reopen_token = generateReopenToken(ticketId, ticket.requester_id)
+        try {
+          updateData.reopen_token = generateReopenToken(ticketId, ticket.requester_id)
+        } catch (tokenError) {
+          // Token generation requires ENCRYPTION_KEY - skip if not set
+          console.warn('Could not generate reopen token:', tokenError)
+        }
       }
     }
 
