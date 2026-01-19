@@ -10,7 +10,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
@@ -33,6 +32,7 @@ import {
 import { ChevronDown, ChevronLeft, ChevronRight, Filter, Tag, SlidersHorizontal, X, Loader2, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { useContacts, useUpdateContact, useDeleteContact } from '@/lib/queries/use-contacts'
 import type { Contact, Workspace, WorkspaceMember, Profile } from '@/types/database'
 
 type TeamMember = WorkspaceMember & { profile: Profile | null }
@@ -88,8 +88,7 @@ interface DatabaseClientProps {
 
 const PAGE_SIZE = 25
 
-export function DatabaseClient({ workspace, contacts: initialContacts, totalCount, contactTags = ['Community', '1on1'], teamMembers = [] }: DatabaseClientProps) {
-  const [contacts, setContacts] = useState<Contact[]>(initialContacts)
+export function DatabaseClient({ workspace, contacts: initialContacts, totalCount: initialTotalCount, contactTags = ['Community', '1on1'], teamMembers = [] }: DatabaseClientProps) {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>(() => loadFiltersFromStorage().activeStatus)
   const [selectedTags, setSelectedTags] = useState<string[]>(() => loadFiltersFromStorage().selectedTags)
   const [assignedTo, setAssignedTo] = useState<string>(() => loadFiltersFromStorage().assignedTo)
@@ -97,9 +96,18 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const [isLoadingPage, setIsLoadingPage] = useState(false)
+
+  // TanStack Query for contacts with pagination
+  const { data, isLoading, isFetching } = useContacts(workspace.id, currentPage)
+
+  // Use TanStack Query data or fallback to initialContacts for SSR
+  const contacts = data?.contacts ?? initialContacts
+  const totalCount = data?.total ?? initialTotalCount
+
+  // TanStack Query mutations
+  const updateMutation = useUpdateContact(workspace.id)
+  const deleteMutation = useDeleteContact(workspace.id)
 
   // Persist filters to localStorage
   useEffect(() => {
@@ -107,140 +115,74 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filters))
   }, [activeStatus, selectedTags, assignedTo, visibleColumns])
 
-  // Handle inline status change
-  const handleStatusChange = useCallback(async (contactId: string, newStatus: LeadStatus) => {
-    // Optimistic update
-    setContacts((prev) =>
-      prev.map((c) =>
-        c.id === contactId ? { ...c, lead_status: newStatus } : c
-      )
-    )
-
-    // Call API
-    try {
-      const response = await fetch(`/api/contacts/${contactId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lead_status: newStatus }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to update status')
+  // Handle inline status change using mutation
+  const handleStatusChange = useCallback((contactId: string, newStatus: LeadStatus) => {
+    updateMutation.mutate(
+      { contactId, updates: { lead_status: newStatus } },
+      {
+        onError: () => {
+          toast.error('Failed to update status')
+        },
       }
-    } catch (error) {
-      console.error('Failed to update contact status:', error)
-      // Revert on error
-      setContacts(initialContacts)
-    }
-  }, [initialContacts])
-
-  // Handle inline assignee change
-  const handleAssigneeChange = useCallback(async (contactId: string, assigneeId: string | null) => {
-    // Optimistic update
-    setContacts((prev) =>
-      prev.map((c) =>
-        c.id === contactId ? { ...c, assigned_to: assigneeId } : c
-      )
     )
+  }, [updateMutation])
 
-    // Call API
-    try {
-      const response = await fetch(`/api/contacts/${contactId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assigned_to: assigneeId }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to update assignee')
+  // Handle inline assignee change using mutation
+  const handleAssigneeChange = useCallback((contactId: string, assigneeId: string | null) => {
+    updateMutation.mutate(
+      { contactId, updates: { assigned_to: assigneeId } },
+      {
+        onSuccess: () => {
+          toast.success(assigneeId ? 'Contact assigned' : 'Contact unassigned')
+        },
+        onError: () => {
+          toast.error('Failed to update assignee')
+        },
       }
-      toast.success(assigneeId ? 'Contact assigned' : 'Contact unassigned')
-    } catch (error) {
-      console.error('Failed to update contact assignee:', error)
-      // Revert on error
-      setContacts(initialContacts)
-      toast.error('Failed to update assignee')
-    }
-  }, [initialContacts])
-
-  // Handle inline tags change
-  const handleTagsChange = useCallback(async (contactId: string, newTags: string[]) => {
-    // Optimistic update
-    setContacts((prev) =>
-      prev.map((c) =>
-        c.id === contactId ? { ...c, tags: newTags } : c
-      )
     )
+  }, [updateMutation])
 
-    // Call API
-    try {
-      const response = await fetch(`/api/contacts/${contactId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tags: newTags }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to update tags')
+  // Handle inline tags change using mutation
+  const handleTagsChange = useCallback((contactId: string, newTags: string[]) => {
+    updateMutation.mutate(
+      { contactId, updates: { tags: newTags } },
+      {
+        onSuccess: () => {
+          toast.success('Tags updated')
+        },
+        onError: () => {
+          toast.error('Failed to update tags')
+        },
       }
-      toast.success('Tags updated')
-    } catch (error) {
-      console.error('Failed to update contact tags:', error)
-      // Revert on error
-      setContacts(initialContacts)
-      toast.error('Failed to update tags')
-    }
-  }, [initialContacts])
+    )
+  }, [updateMutation])
 
-  // Handle delete contact
-  const handleDeleteContact = useCallback(async () => {
+  // Handle delete contact using mutation
+  const handleDeleteContact = useCallback(() => {
     if (!contactToDelete) return
 
-    setIsDeleting(true)
-    try {
-      const response = await fetch(`/api/contacts/${contactToDelete.id}`, {
-        method: 'DELETE',
-      })
+    deleteMutation.mutate(contactToDelete.id, {
+      onSuccess: () => {
+        toast.success('Contact deleted successfully')
+        setContactToDelete(null)
+      },
+      onError: (error) => {
+        toast.error(error instanceof Error ? error.message : 'Failed to delete contact')
+      },
+    })
+  }, [contactToDelete, deleteMutation])
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to delete contact')
-      }
-
-      // Remove from local state
-      setContacts((prev) => prev.filter((c) => c.id !== contactToDelete.id))
-      toast.success('Contact deleted successfully')
-      setContactToDelete(null)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to delete contact')
-    } finally {
-      setIsDeleting(false)
-    }
-  }, [contactToDelete])
-
-  // Handle page navigation
-  const goToPage = useCallback(async (page: number) => {
+  // Handle page navigation - just set the page, TanStack Query handles fetching
+  const goToPage = useCallback((page: number) => {
     if (page === currentPage) return
-    setIsLoadingPage(true)
-    try {
-      const response = await fetch(`/api/contacts?workspace=${workspace.id}&page=${page}&limit=${PAGE_SIZE}`)
-      if (response.ok) {
-        const data = await response.json()
-        setContacts(data.contacts)
-        setCurrentPage(page)
-      } else {
-        toast.error('Failed to load contacts')
-      }
-    } catch (error) {
-      console.error('Failed to load contacts:', error)
-      toast.error('Failed to load contacts')
-    } finally {
-      setIsLoadingPage(false)
-    }
-  }, [currentPage, workspace.id])
+    setCurrentPage(page)
+  }, [currentPage])
 
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+
+  // Loading state combines initial load and page transitions
+  const isLoadingPage = isLoading || isFetching
 
   // Convert team members to column format
   const columnTeamMembers = useMemo(
@@ -652,13 +594,13 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteContact}
-              disabled={isDeleting}
+              disabled={deleteMutation.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? (
+              {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Deleting...
