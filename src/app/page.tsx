@@ -604,6 +604,9 @@ export default function Home() {
           <div className="flex items-center justify-center gap-4 text-xs text-landing-text-muted">
             <span className="font-black text-landing-cta">21</span>
             <span>&copy; 2026</span>
+            <Link href="/keamanan" className="hover:text-landing-text transition-colors">
+              Keamanan Data
+            </Link>
           </div>
         </div>
       </footer>
