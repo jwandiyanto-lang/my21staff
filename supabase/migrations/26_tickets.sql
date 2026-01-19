@@ -8,8 +8,8 @@
 CREATE TABLE tickets (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
-  requester_id UUID NOT NULL REFERENCES auth.users(id),
-  assigned_to UUID REFERENCES auth.users(id),
+  requester_id UUID NOT NULL REFERENCES profiles(id),
+  assigned_to UUID REFERENCES profiles(id),
 
   -- Core fields
   title VARCHAR(255) NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE tickets (
 CREATE TABLE ticket_comments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
-  author_id UUID NOT NULL REFERENCES auth.users(id),
+  author_id UUID NOT NULL REFERENCES profiles(id),
   content TEXT NOT NULL,
   is_stage_change BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -60,7 +60,7 @@ CREATE TABLE ticket_comments (
 CREATE TABLE ticket_status_history (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
-  changed_by UUID NOT NULL REFERENCES auth.users(id),
+  changed_by UUID NOT NULL REFERENCES profiles(id),
   from_stage VARCHAR(50),
   to_stage VARCHAR(50) NOT NULL,
   reason TEXT,
@@ -136,6 +136,16 @@ CREATE POLICY "Members can view status history" ON ticket_status_history
       SELECT id FROM tickets
       WHERE (SELECT private.get_user_role_in_workspace(workspace_id)) IS NOT NULL
     )
+  );
+
+-- INSERT: Members can create status history entries
+CREATE POLICY "Members can create status history" ON ticket_status_history
+  FOR INSERT WITH CHECK (
+    ticket_id IN (
+      SELECT id FROM tickets
+      WHERE (SELECT private.get_user_role_in_workspace(workspace_id)) IS NOT NULL
+    )
+    AND changed_by = auth.uid()
   );
 
 -- ============================================================================

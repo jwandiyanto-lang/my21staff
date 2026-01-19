@@ -18,8 +18,8 @@ export async function GET(
       .from('tickets')
       .select(`
         *,
-        requester:users!tickets_requester_id_fkey(id, full_name, email),
-        assignee:users!tickets_assigned_to_fkey(id, full_name, email)
+        requester:profiles!tickets_requester_id_fkey(id, full_name, email),
+        assignee:profiles!tickets_assigned_to_fkey(id, full_name, email)
       `)
       .eq('id', id)
       .single()
@@ -105,8 +105,8 @@ export async function PATCH(
       .eq('id', id)
       .select(`
         *,
-        requester:users!tickets_requester_id_fkey(id, full_name, email),
-        assignee:users!tickets_assigned_to_fkey(id, full_name, email)
+        requester:profiles!tickets_requester_id_fkey(id, full_name, email),
+        assignee:profiles!tickets_assigned_to_fkey(id, full_name, email)
       `)
       .single()
 

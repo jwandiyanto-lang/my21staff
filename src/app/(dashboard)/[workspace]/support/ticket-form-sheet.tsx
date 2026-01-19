@@ -121,7 +121,7 @@ export function TicketFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto p-6">
         <SheetHeader className="pb-4">
           <SheetTitle>Create New Ticket</SheetTitle>
           <SheetDescription>
@@ -130,7 +130,7 @@ export function TicketFormSheet({
         </SheetHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 space-y-6">
             {/* Title */}
             <FormField
               control={form.control}
@@ -210,7 +210,7 @@ export function TicketFormSheet({
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="mt-3 grid grid-cols-3 gap-3"
+                      className="mt-3 grid grid-cols-3 gap-2"
                     >
                       {priorities.map((p) => (
                         <div key={p.value}>
@@ -221,10 +221,10 @@ export function TicketFormSheet({
                           />
                           <Label
                             htmlFor={`priority-${p.value}`}
-                            className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-background px-4 py-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
+                            className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-background px-2 py-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
                           >
                             <span className="text-sm font-semibold">{p.label}</span>
-                            <span className="text-xs text-muted-foreground mt-1">
+                            <span className="text-[11px] text-muted-foreground mt-0.5">
                               {p.description}
                             </span>
                           </Label>
@@ -238,7 +238,7 @@ export function TicketFormSheet({
             />
 
             {/* Submit Button */}
-            <div className="flex gap-3 pt-6 border-t">
+            <div className="flex gap-3 pt-4 mt-4 border-t">
               <Button
                 type="button"
                 variant="outline"

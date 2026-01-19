@@ -51,8 +51,8 @@ export default async function TicketDetailPage({ params }: Props) {
     .from('tickets')
     .select(`
       *,
-      requester:users!tickets_requester_id_fkey(id, full_name, email),
-      assignee:users!tickets_assigned_to_fkey(id, full_name, email)
+      requester:profiles!tickets_requester_id_fkey(id, full_name, email),
+      assignee:profiles!tickets_assigned_to_fkey(id, full_name, email)
     `)
     .eq('id', ticketId)
     .single()
@@ -71,7 +71,7 @@ export default async function TicketDetailPage({ params }: Props) {
     .from('ticket_comments')
     .select(`
       *,
-      author:users!ticket_comments_author_id_fkey(id, full_name, email)
+      author:profiles!ticket_comments_author_id_fkey(id, full_name, email)
     `)
     .eq('ticket_id', ticketId)
     .order('created_at', { ascending: true })

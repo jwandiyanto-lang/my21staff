@@ -46,8 +46,8 @@ export default async function SupportPage({ params }: Props) {
     .from('tickets')
     .select(`
       *,
-      requester:users!tickets_requester_id_fkey(id, full_name, email),
-      assignee:users!tickets_assigned_to_fkey(id, full_name, email)
+      requester:profiles!tickets_requester_id_fkey(id, full_name, email),
+      assignee:profiles!tickets_assigned_to_fkey(id, full_name, email)
     `)
     .eq('workspace_id', workspace.id)
     .order('created_at', { ascending: false })

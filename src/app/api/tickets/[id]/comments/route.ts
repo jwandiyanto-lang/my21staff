@@ -34,7 +34,7 @@ export async function GET(
       .from('ticket_comments')
       .select(`
         *,
-        author:users!ticket_comments_author_id_fkey(id, full_name, email)
+        author:profiles!ticket_comments_author_id_fkey(id, full_name, email)
       `)
       .eq('ticket_id', ticketId)
       .order('created_at', { ascending: true })
@@ -106,7 +106,7 @@ export async function POST(
       })
       .select(`
         *,
-        author:users!ticket_comments_author_id_fkey(id, full_name, email)
+        author:profiles!ticket_comments_author_id_fkey(id, full_name, email)
       `)
       .single()
 
