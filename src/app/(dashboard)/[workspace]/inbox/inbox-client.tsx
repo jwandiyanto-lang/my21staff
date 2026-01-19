@@ -22,10 +22,11 @@ import { ConversationList } from './conversation-list'
 import { MessageThread } from './message-thread'
 import { MessageInput } from './message-input'
 import { InfoSidebar } from '@/components/contact/info-sidebar'
-import { isDevMode, MOCK_MESSAGES } from '@/lib/mock-data'
+import { isDevMode } from '@/lib/mock-data'
 import { createClient } from '@/lib/supabase/client'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
+import { useMessages, useAddOptimisticMessage, useRemoveOptimisticMessage, useReplaceOptimisticMessage } from '@/lib/queries/use-messages'
 import type { Workspace, ConversationWithContact, Message, WorkspaceMember, Profile } from '@/types/database'
 
 interface QuickReply {
@@ -55,8 +56,6 @@ export function InboxClient({ workspace, conversations: initialConversations, to
   const [tagFilter, setTagFilter] = useState<string[]>([])
   const [assignedFilter, setAssignedFilter] = useState<string>('all') // 'all' | 'unassigned' | user_id
   const [showUnreadOnly, setShowUnreadOnly] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [showInfoPanel, setShowInfoPanel] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<Message | null>(null)
 
@@ -64,6 +63,14 @@ export function InboxClient({ workspace, conversations: initialConversations, to
   const [page, setPage] = useState(0)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const PAGE_SIZE = 50
+
+  // TanStack Query for messages with real-time subscription
+  const { data: messages = [], isLoading: isLoadingMessages } = useMessages(selectedConversation?.id ?? null)
+
+  // Optimistic update helpers
+  const addOptimisticMessage = useAddOptimisticMessage()
+  const removeOptimisticMessage = useRemoveOptimisticMessage()
+  const replaceOptimisticMessage = useReplaceOptimisticMessage()
 
   // Count unread conversations
   const unreadCount = useMemo(() => {
@@ -121,87 +128,6 @@ export function InboxClient({ workspace, conversations: initialConversations, to
     )
   }
 
-  // Load messages when conversation changes
-  useEffect(() => {
-    // Clear messages immediately when conversation changes to prevent stale data showing
-    setMessages([])
-
-    async function loadMessages(conversationId: string) {
-      setIsLoadingMessages(true)
-
-      if (isDevMode()) {
-        // Dev mode: filter mock messages
-        const filtered = MOCK_MESSAGES.filter((m) => m.conversation_id === conversationId)
-        // Sort by created_at ascending
-        filtered.sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
-        setMessages(filtered)
-      } else {
-        // Production: query Supabase
-        const supabase = createClient()
-        const { data } = await supabase
-          .from('messages')
-          .select('*')
-          .eq('conversation_id', conversationId)
-          .order('created_at', { ascending: true })
-          .limit(100)
-        setMessages(data || [])
-      }
-
-      setIsLoadingMessages(false)
-    }
-
-    if (selectedConversation) {
-      loadMessages(selectedConversation.id)
-    }
-  }, [selectedConversation?.id])
-
-  // Real-time subscription for new messages in selected conversation
-  useEffect(() => {
-    if (isDevMode() || !selectedConversation) return
-
-    const supabase = createClient()
-
-    const channel = supabase
-      .channel(`messages:${selectedConversation.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${selectedConversation.id}`,
-        },
-        (payload) => {
-          const newMessage = payload.new as Message
-          // Avoid duplicates (optimistic updates)
-          setMessages((prev) => {
-            // Check for exact ID match first
-            if (prev.some((m) => m.id === newMessage.id)) return prev
-
-            // Check for optimistic message match (outbound + same content + sending status)
-            if (newMessage.direction === 'outbound') {
-              const optimisticMatch = prev.find((m) =>
-                m.direction === 'outbound' &&
-                m.content === newMessage.content &&
-                (m.metadata as Record<string, unknown>)?.status === 'sending'
-              )
-              if (optimisticMatch) {
-                // Replace optimistic with real message
-                return prev.map((m) => m.id === optimisticMatch.id ? newMessage : m)
-              }
-            }
-
-            return [...prev, newMessage]
-          })
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [selectedConversation?.id])
-
   // Real-time subscription for conversation updates (new messages, unread counts)
   useEffect(() => {
     if (isDevMode()) return
@@ -258,26 +184,25 @@ export function InboxClient({ workspace, conversations: initialConversations, to
 
   // Handle message sent (optimistic or real)
   const handleMessageSent = useCallback((message: Message & { _optimisticId?: string }, isOptimistic: boolean) => {
+    if (!selectedConversation) return
+
     if (isOptimistic) {
-      // Add optimistic message
-      setMessages((prev) => [...prev, message])
+      // Add optimistic message using TanStack Query cache helper
+      addOptimisticMessage(selectedConversation.id, message)
     } else {
-      // Replace optimistic message with real one, ensuring no duplicates
+      // Replace optimistic message with real one using TanStack Query cache helper
       const optimisticId = message._optimisticId
-      setMessages((prev) => {
-        // Remove both the optimistic message AND any duplicate that came via real-time
-        const filtered = prev.filter((m) =>
-          m.id !== optimisticId && m.id !== message.id
-        )
-        return [...filtered, message]
-      })
+      if (optimisticId) {
+        replaceOptimisticMessage(selectedConversation.id, optimisticId, message)
+      }
     }
-  }, [])
+  }, [selectedConversation, addOptimisticMessage, replaceOptimisticMessage])
 
   // Handle message error (remove optimistic message)
   const handleMessageError = useCallback((optimisticId: string) => {
-    setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-  }, [])
+    if (!selectedConversation) return
+    removeOptimisticMessage(selectedConversation.id, optimisticId)
+  }, [selectedConversation, removeOptimisticMessage])
 
   // Handle conversation selection - mark as read instantly
   const handleSelectConversation = useCallback((conversation: ConversationWithContact) => {
