@@ -62,7 +62,7 @@ export async function POST(
   try {
     const { id: ticketId } = await params
     const body = await request.json()
-    const { content } = body
+    const { content, is_internal = false } = body
 
     // Validate content
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
@@ -78,10 +78,10 @@ export async function POST(
 
     const supabase = await createClient()
 
-    // Fetch ticket first to verify it exists and get workspace_id
+    // Fetch ticket first to verify it exists and get workspace_id and admin_workspace_id
     const { data: ticket, error: ticketError } = await supabase
       .from('tickets')
-      .select('workspace_id')
+      .select('workspace_id, admin_workspace_id')
       .eq('id', ticketId)
       .single()
 
@@ -89,11 +89,46 @@ export async function POST(
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
-    // Verify workspace membership (any member can comment)
-    const authResult = await requireWorkspaceMembership(ticket.workspace_id)
+    // Verify workspace membership - allow if member of workspace_id OR admin_workspace_id
+    let authResult = await requireWorkspaceMembership(ticket.workspace_id)
+    let userRole: string | null = null
+
+    if (authResult instanceof NextResponse && ticket.admin_workspace_id) {
+      // Try admin workspace if not member of source workspace
+      authResult = await requireWorkspaceMembership(ticket.admin_workspace_id)
+    }
+
     if (authResult instanceof NextResponse) {
       return authResult
     }
+
+    // Get user's role to check if they can create internal comments
+    const { data: membership } = await supabase
+      .from('workspace_members')
+      .select('role')
+      .eq('workspace_id', ticket.workspace_id)
+      .eq('user_id', authResult.user.id)
+      .single()
+
+    userRole = membership?.role || null
+
+    // Also check admin workspace role if applicable
+    if (ticket.admin_workspace_id) {
+      const { data: adminMembership } = await supabase
+        .from('workspace_members')
+        .select('role')
+        .eq('workspace_id', ticket.admin_workspace_id)
+        .eq('user_id', authResult.user.id)
+        .single()
+
+      // Use the higher privilege role
+      if (adminMembership?.role === 'owner' || adminMembership?.role === 'admin') {
+        userRole = adminMembership.role
+      }
+    }
+
+    // Only allow is_internal for owner/admin
+    const isInternal = is_internal && (userRole === 'owner' || userRole === 'admin')
 
     // Create comment
     const { data: comment, error: createError } = await supabase
@@ -102,7 +137,8 @@ export async function POST(
         ticket_id: ticketId,
         author_id: authResult.user.id,
         content: content.trim(),
-        is_stage_change: false
+        is_stage_change: false,
+        is_internal: isInternal
       })
       .select(`
         *,

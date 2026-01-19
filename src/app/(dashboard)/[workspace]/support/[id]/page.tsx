@@ -46,13 +46,14 @@ export default async function TicketDetailPage({ params }: Props) {
 
   const currentUserRole = (currentMembership.role || 'member') as WorkspaceRole
 
-  // Get ticket with requester and assignee info
+  // Get ticket with requester, assignee, and source workspace info
   const { data: ticket, error: ticketError } = await supabase
     .from('tickets')
     .select(`
       *,
       requester:profiles!tickets_requester_id_fkey(id, full_name, email),
-      assignee:profiles!tickets_assigned_to_fkey(id, full_name, email)
+      assignee:profiles!tickets_assigned_to_fkey(id, full_name, email),
+      source_workspace:workspaces!tickets_workspace_id_fkey(id, name, slug)
     `)
     .eq('id', ticketId)
     .single()
@@ -61,10 +62,16 @@ export default async function TicketDetailPage({ params }: Props) {
     notFound()
   }
 
-  // Verify ticket belongs to this workspace
-  if (ticket.workspace_id !== workspace.id) {
+  // Verify access - either workspace member or admin workspace member
+  const isWorkspaceMember = ticket.workspace_id === workspace.id
+  const isAdminWorkspaceMember = ticket.admin_workspace_id === workspace.id
+
+  if (!isWorkspaceMember && !isAdminWorkspaceMember) {
     notFound()
   }
+
+  // Determine if this is a client ticket (has admin_workspace_id set)
+  const isClientTicket = ticket.admin_workspace_id !== null
 
   // Get comments with author info
   const { data: comments } = await supabase
@@ -110,6 +117,7 @@ export default async function TicketDetailPage({ params }: Props) {
       currentUserRole={currentUserRole}
       currentUserId={user.id}
       workspaceMembers={workspaceMembers}
+      isClientTicket={isClientTicket}
     />
   )
 }

@@ -35,6 +35,7 @@ import {
   AlertTriangle,
   User,
   Send,
+  Building2,
 } from 'lucide-react'
 import { formatDistanceToNow, format } from 'date-fns'
 import { toast } from 'sonner'
@@ -54,6 +55,7 @@ import {
 export interface TicketDetailData {
   id: string
   workspace_id: string
+  admin_workspace_id: string | null
   requester_id: string
   assigned_to: string | null
   title: string
@@ -70,6 +72,7 @@ export interface TicketDetailData {
   updated_at: string
   requester: { id: string; full_name: string | null; email: string } | null
   assignee: { id: string; full_name: string | null; email: string } | null
+  source_workspace: { id: string; name: string; slug: string } | null
 }
 
 export interface CommentData {
@@ -78,6 +81,7 @@ export interface CommentData {
   author_id: string
   content: string
   is_stage_change: boolean
+  is_internal: boolean
   created_at: string
   author: { id: string; full_name: string | null; email: string } | null
 }
@@ -100,6 +104,7 @@ interface TicketDetailClientProps {
   currentUserRole: WorkspaceRole
   currentUserId: string
   workspaceMembers: WorkspaceMemberData[]
+  isClientTicket: boolean
 }
 
 function getPriorityBadgeVariant(priority: TicketPriority): 'default' | 'secondary' | 'destructive' {
@@ -128,10 +133,12 @@ export function TicketDetailClient({
   currentUserRole,
   currentUserId,
   workspaceMembers,
+  isClientTicket,
 }: TicketDetailClientProps) {
   const router = useRouter()
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [commentText, setCommentText] = useState('')
+  const [isInternalComment, setIsInternalComment] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isAssigning, setIsAssigning] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
@@ -158,12 +165,13 @@ export function TicketDetailClient({
       const response = await fetch(`/api/tickets/${ticket.id}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: commentText }),
+        body: JSON.stringify({ content: commentText, is_internal: isInternalComment }),
       })
 
       if (response.ok) {
-        toast.success('Comment added successfully')
+        toast.success(isInternalComment ? 'Internal note added' : 'Comment added successfully')
         setCommentText('')
+        setIsInternalComment(false)
         router.refresh()
       } else {
         const error = await response.json()
@@ -319,6 +327,12 @@ export function TicketDetailClient({
               <Badge variant={getStageBadgeVariant(currentStage)}>
                 {STAGE_CONFIG[currentStage].label}
               </Badge>
+              {isClientTicket && ticket.source_workspace && (
+                <Badge variant="outline" className="text-blue-600 border-blue-300 bg-blue-50">
+                  <Building2 className="h-3 w-3 mr-1" />
+                  Client: {ticket.source_workspace.name}
+                </Badge>
+              )}
             </div>
           </div>
 
@@ -517,11 +531,18 @@ export function TicketDetailClient({
                     <div
                       key={comment.id}
                       className={`p-4 rounded-lg ${
-                        comment.is_stage_change
-                          ? 'bg-muted/50 border-l-2 border-primary'
-                          : 'bg-muted/30'
+                        comment.is_internal
+                          ? 'bg-amber-50 border-l-2 border-amber-400'
+                          : comment.is_stage_change
+                            ? 'bg-muted/50 border-l-2 border-primary'
+                            : 'bg-muted/30'
                       }`}
                     >
+                      {comment.is_internal && (
+                        <Badge variant="outline" className="mb-2 text-xs text-amber-600 border-amber-300">
+                          Internal Note
+                        </Badge>
+                      )}
                       <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                         <span className="font-medium">
                           {comment.author?.full_name || comment.author?.email || 'Anonymous'}
@@ -541,13 +562,28 @@ export function TicketDetailClient({
               {/* New Comment Form */}
               <div className="border-t pt-4">
                 <Textarea
-                  placeholder="Write a comment..."
+                  placeholder={isInternalComment ? "Write an internal note (hidden from client)..." : "Write a comment..."}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   rows={3}
-                  className="resize-none"
+                  className={`resize-none ${isInternalComment ? 'border-amber-300 bg-amber-50/50' : ''}`}
                 />
-                <div className="flex justify-end mt-2">
+                <div className="flex items-center justify-between mt-2">
+                  {/* Internal comment toggle - only show for owner/admin on client tickets */}
+                  {(currentUserRole === 'owner' || currentUserRole === 'admin') && isClientTicket ? (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="internal"
+                        checked={isInternalComment}
+                        onCheckedChange={(checked) => setIsInternalComment(checked === true)}
+                      />
+                      <Label htmlFor="internal" className="text-sm font-normal cursor-pointer text-muted-foreground">
+                        Internal note (hidden from client)
+                      </Label>
+                    </div>
+                  ) : (
+                    <div />
+                  )}
                   <Button
                     onClick={handleSubmitComment}
                     disabled={isSubmittingComment || !commentText.trim()}
@@ -558,7 +594,7 @@ export function TicketDetailClient({
                     ) : (
                       <Send className="h-4 w-4 mr-1" />
                     )}
-                    Send
+                    {isInternalComment ? 'Add Note' : 'Send'}
                   </Button>
                 </div>
               </div>
