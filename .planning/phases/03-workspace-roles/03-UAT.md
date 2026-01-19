@@ -2,8 +2,8 @@
 status: complete
 phase: 03-workspace-roles
 source: 03-01-SUMMARY.md, 03-02-SUMMARY.md, 03-03-SUMMARY.md, 03-04-SUMMARY.md
-started: 2026-01-18T23:00:00Z
-updated: 2026-01-18T23:05:00Z
+started: 2026-01-19T10:00:00Z
+updated: 2026-01-19T10:15:00Z
 ---
 
 ## Current Test
@@ -12,54 +12,78 @@ updated: 2026-01-18T23:05:00Z
 
 ## Tests
 
-### 1. Member Lead Visibility (RLS)
-expected: As a member (not owner/admin), you should only see contacts assigned to you in the leads list. Owner/admin see all contacts.
-result: skipped
-reason: Need working member invitation link from Phase 2 to test
+### 1. Invite Member UI
+expected: On Team page, click "Undang Anggota" button. A sheet slides open with fields for Name, Email, and Role dropdown (Admin/Member options).
+result: issue
+reported: "yes, but UI needs to change"
+severity: minor
 
-### 2. Delete Lead - Owner Only
-expected: Owner can delete leads via the delete button. Non-owners see the delete button disabled with tooltip "Contact your workspace owner to access this".
-result: skipped
-reason: Need working team invitation from Phase 2 to test role permissions
+### 2. Send Invitation
+expected: Fill in name, email, select role, click "Kirim Undangan". Toast shows "Undangan berhasil dikirim ke [email]". Sheet closes.
+result: pass
 
-### 3. Export Leads - Owner/Admin Only
-expected: Owner and admin can export leads via the export button. Members see the export button disabled with tooltip.
-result: skipped
-reason: Need working team invitation from Phase 2 to test role permissions
+### 3. Invitation Email Received
+expected: Check the invited email inbox. Email arrives from "Kia from my21staff" with a green "Set Password & Join Team" button.
+result: pass
 
-### 4. Invite Team Member - Owner Only
-expected: On team page, owner can click "Invite Member", enter email, and send invitation. Non-owners see the invite button disabled with tooltip.
-result: skipped
-reason: Need working team invitation from Phase 2 to test role permissions
+### 4. Set Password Page
+expected: Click the button in email. Opens /set-password page with password requirements listed and two password fields.
+result: pass
 
-### 5. Remove Team Member - Owner Only
-expected: On team page, owner can remove a team member (not themselves, not other owners). Non-owners see remove action disabled.
-result: skipped
-reason: Need working team invitation from Phase 2 to test role permissions
+### 5. Complete Invitation
+expected: Enter valid password (8+ chars, uppercase, lowercase, number). Click "Set Password & Join Team". Redirects to dashboard.
+result: issue
+reported: "After setting password, redirects to forgot password page instead of dashboard. User has to enter password twice."
+severity: major
 
-### 6. Change Member Role - Owner Only
-expected: On team page, owner sees role dropdown for each member (admin/member options). Non-owners see static role badge, no dropdown.
-result: skipped
-reason: Need working team invitation from Phase 2 to test role permissions
+### 6. New Member in Team List
+expected: Back on Team page, the newly invited member appears in the team list with their name, email, and assigned role.
+result: pass
 
-### 7. Owner Role Protected
-expected: Owner role cannot be changed - no dropdown to change owner to admin/member. Owners remain owners.
-result: skipped
-reason: Need working team invitation from Phase 2 to test role permissions
+### 7. Role Dropdown (Owner View)
+expected: As owner, team members show a role dropdown (admin/member). Owner row shows static "owner" badge with no dropdown.
+result: pass
 
-### 8. Role Change Email Notification
-expected: When owner changes someone's role, that person receives an email notification about the role change.
+### 8. Change Member Role
+expected: Use dropdown to change a member's role. Toast shows "Role berhasil diubah". Role updates in the table.
 result: skipped
-reason: Need working team invitation from Phase 2 to test role permissions
+reason: Will test with other changes
+
+### 9. Remove Team Member
+expected: Click trash icon on a non-owner member. Confirmation dialog appears. Confirm to remove. Toast shows success. Member disappears from list.
+result: pass
+
+### 10. Permission Button (Non-Owner)
+expected: As a non-owner member, "Undang Anggota" and remove buttons appear disabled with tooltip "Contact your workspace owner to access this".
+result: skipped
+reason: Will test after fixes
 
 ## Summary
 
-total: 8
-passed: 0
-issues: 0
+total: 10
+passed: 6
+issues: 2
 pending: 0
-skipped: 8
+skipped: 2
 
 ## Gaps
 
-[none yet]
+- truth: "Invite Member UI sheet displays cleanly"
+  status: failed
+  reason: "User reported: yes, but UI needs to change"
+  severity: minor
+  test: 1
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "After setting password, user redirects directly to dashboard"
+  status: failed
+  reason: "User reported: After setting password, redirects to forgot password page instead of dashboard. User has to enter password twice."
+  severity: major
+  test: 5
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
