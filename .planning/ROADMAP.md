@@ -178,15 +178,19 @@ Plans:
 ---
 
 ### Phase 6: Security Info Page
-**Goal:** Trust signal for paying clients
-**Status:** Not started
+**Goal:** Trust signal for paying clients — simple explanation of data security
+**Status:** Planned
+**Plans:** 1 plan
+
+Plans:
+- [ ] 06-01-PLAN.md — Security info page at /keamanan + footer links
 
 **Scope:**
 - Static page (Bahasa Indonesia)
 - Data storage location (Singapore)
-- Encryption explanation
-- FAQ accordion
-- WhatsApp contact
+- Data control (export/delete)
+- Contact options (WhatsApp + email)
+- Footer link on landing/pricing pages
 
 **Can parallelize with:** Phase 7
 
@@ -249,10 +253,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 26/? | Phase 1-5 complete | — |
+| 1-9 | v2.1 | 21/? | Phase 1-5 complete, Phase 6 planned | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-19 — Phase 5 complete (Central Support Hub, 6/6 plans)*
+*Last updated: 2026-01-19 — Phase 6 planned (Security Info Page, 1 plan)*
