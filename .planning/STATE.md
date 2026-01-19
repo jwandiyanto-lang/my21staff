@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 
 ## Current Position
 
-Phase: 5 of 9 — Central Support Hub
-Plan: 04 of 05 complete
-Status: In progress
-Last activity: 2026-01-19 — Completed 05-04-PLAN.md (Admin Support Features)
+Phase: 5 of 9 — Central Support Hub (COMPLETE)
+Plan: 05 of 05 complete
+Status: Phase complete
+Last activity: 2026-01-19 — Completed 05-05-PLAN.md (Client Portal UI)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 █████████░ Phase 5 in progress
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ██████████ Phase 5 complete
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 71 (14 in v1.0 + 38 in v2.0 + 19 in v2.1)
+- Total plans completed: 72 (14 in v1.0 + 38 in v2.0 + 20 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 48 in v2.1
+- Commits: 325 in v2.0, 50 in v2.1
 
 **Codebase:**
 - Lines: ~24,500 TypeScript
@@ -80,6 +80,8 @@ Key v2.1 decisions:
 - Internal comment filtering: or('is_internal.is.null,is_internal.eq.false')
 - Dual workspace access check: membership in workspace_id OR admin_workspace_id
 - Source filter tabs only shown when client tickets exist in list
+- Portal layout: header-only (no sidebar), auth check in layout.tsx
+- Client portal isolation: requester_id filter for all queries
 
 ### Deferred Issues
 
@@ -99,9 +101,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Completed 05-04-PLAN.md (Admin Support Features)
+Stopped at: Completed 05-05-PLAN.md (Client Portal UI) - Phase 5 complete
 Resume file: None
-Next: 05-05-PLAN.md (Tawk.to Widget Integration)
+Next: Phase 6 (plans to be created)
 
 ## Deployment Info
 
@@ -121,4 +123,4 @@ Next: 05-05-PLAN.md (Tawk.to Widget Integration)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-19 — Phase 05 in progress, 05-04 complete (Admin Support Features)*
+*Last updated: 2026-01-19 — Phase 05 complete (Central Support Hub)*
