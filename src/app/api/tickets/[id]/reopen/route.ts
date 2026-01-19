@@ -97,14 +97,14 @@ export async function POST(
       changed_by: reopenedBy!,
       from_stage: 'closed',
       to_stage: 'report',
-      reason: `Tiket dibuka kembali: ${reason.trim()}`
+      reason: `Ticket reopened: ${reason.trim()}`
     })
 
     // Add system comment with the reason
     await supabase.from('ticket_comments').insert({
       ticket_id: ticketId,
       author_id: reopenedBy!,
-      content: `Tiket dibuka kembali.\n\nAlasan: ${reason.trim()}`,
+      content: `Ticket reopened.\n\nReason: ${reason.trim()}`,
       is_stage_change: true
     })
 

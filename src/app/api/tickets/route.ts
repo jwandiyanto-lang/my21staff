@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         ticket_id: ticket.id,
         changed_by: authResult.user.id,
         to_stage: 'report',
-        reason: 'Tiket dibuat'
+        reason: 'Ticket created'
       })
 
     if (historyError) {

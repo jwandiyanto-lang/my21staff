@@ -29,14 +29,14 @@ export function TicketUpdatedEmail({
   ticketLink,
 }: TicketUpdatedEmailProps) {
   return (
-    <BaseLayout preview={`Tiket diperbarui: ${ticketTitle}`}>
+    <BaseLayout preview={`Ticket updated: ${ticketTitle}`}>
       <Heading className="text-xl font-semibold text-brand-text mb-4">
-        Tiket Diperbarui
+        Ticket Updated
       </Heading>
 
       <Text className="text-brand-text leading-6 mb-4">
-        <strong>{changedByName}</strong> memindahkan tiket ke tahap{' '}
-        <strong>{toStage}</strong>.
+        <strong>{changedByName}</strong> moved the ticket to{' '}
+        <strong>{toStage}</strong> stage.
       </Text>
 
       <Section className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -53,7 +53,7 @@ export function TicketUpdatedEmail({
 
       {comment && (
         <Section className="bg-gray-100 rounded-lg p-4 mb-6 border-l-4 border-brand-forest">
-          <Text className="text-sm text-brand-muted m-0 mb-1">Catatan:</Text>
+          <Text className="text-sm text-brand-muted m-0 mb-1">Note:</Text>
           <Text className="text-brand-text m-0">{comment}</Text>
         </Section>
       )}
@@ -63,12 +63,12 @@ export function TicketUpdatedEmail({
           href={ticketLink}
           className="bg-brand-forest text-white px-6 py-3 rounded-lg font-semibold"
         >
-          Lihat Tiket
+          View Ticket
         </Button>
       </Section>
 
       <Text className="text-sm text-brand-muted">
-        Anda menerima email ini karena terlibat dalam tiket di {workspaceName}.
+        You received this email because you are involved in a ticket at {workspaceName}.
       </Text>
     </BaseLayout>
   )

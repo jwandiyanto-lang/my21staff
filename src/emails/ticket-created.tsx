@@ -27,13 +27,13 @@ export function TicketCreatedEmail({
   ticketLink,
 }: TicketCreatedEmailProps) {
   return (
-    <BaseLayout preview={`Tiket baru: ${ticketTitle}`}>
+    <BaseLayout preview={`New ticket: ${ticketTitle}`}>
       <Heading className="text-xl font-semibold text-brand-text mb-4">
-        Tiket Baru Dibuat
+        New Ticket Created
       </Heading>
 
       <Text className="text-brand-text leading-6 mb-4">
-        <strong>{requesterName}</strong> membuat tiket baru di{' '}
+        <strong>{requesterName}</strong> created a new ticket in{' '}
         <strong>{workspaceName}</strong>.
       </Text>
 
@@ -42,7 +42,7 @@ export function TicketCreatedEmail({
           {ticketTitle}
         </Text>
         <Text className="text-sm text-brand-muted m-0">
-          Kategori: {category} | Prioritas: {priority}
+          Category: {category} | Priority: {priority}
         </Text>
         <Text className="text-xs text-brand-muted m-0 mt-2">
           ID: {ticketId}
@@ -54,12 +54,12 @@ export function TicketCreatedEmail({
           href={ticketLink}
           className="bg-brand-forest text-white px-6 py-3 rounded-lg font-semibold"
         >
-          Lihat Tiket
+          View Ticket
         </Button>
       </Section>
 
       <Text className="text-sm text-brand-muted">
-        Anda menerima email ini karena terlibat dalam tiket di {workspaceName}.
+        You received this email because you are involved in a ticket at {workspaceName}.
       </Text>
     </BaseLayout>
   )

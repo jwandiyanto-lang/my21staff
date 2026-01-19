@@ -120,8 +120,8 @@ export async function POST(
 
     // Add status history entry
     const historyReason = isSkip
-      ? `Permintaan skip ke tahap ${toStage} (menunggu persetujuan)`
-      : `Transisi ke tahap ${toStage}`
+      ? `Skip request to ${toStage} stage (pending approval)`
+      : `Transitioned to ${toStage} stage`
 
     await supabase.from('ticket_status_history').insert({
       ticket_id: ticketId,

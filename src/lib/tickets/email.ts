@@ -21,7 +21,7 @@ export async function sendTicketCreatedEmail(
       await resend.emails.send({
         from: FROM_EMAIL,
         to: recipient.email,
-        subject: `Tiket Baru: ${props.ticketTitle}`,
+        subject: `New Ticket: ${props.ticketTitle}`,
         html
       })
     } catch (error) {
@@ -42,7 +42,7 @@ export async function sendTicketUpdatedEmail(
       await resend.emails.send({
         from: FROM_EMAIL,
         to: recipient.email,
-        subject: `Tiket Diperbarui: ${props.ticketTitle}`,
+        subject: `Ticket Updated: ${props.ticketTitle}`,
         html
       })
     } catch (error) {
@@ -62,7 +62,7 @@ export async function sendTicketClosedEmail(
     await resend.emails.send({
       from: FROM_EMAIL,
       to: recipient.email,
-      subject: `Tiket Selesai: ${props.ticketTitle}`,
+      subject: `Ticket Closed: ${props.ticketTitle}`,
       html
     })
   } catch (error) {

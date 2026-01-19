@@ -21,14 +21,14 @@ export function TicketClosedEmail({
   reopenLink,
 }: TicketClosedEmailProps) {
   return (
-    <BaseLayout preview={`Tiket selesai: ${ticketTitle}`}>
+    <BaseLayout preview={`Ticket closed: ${ticketTitle}`}>
       <Heading className="text-xl font-semibold text-brand-text mb-4">
-        Tiket Telah Selesai
+        Ticket Closed
       </Heading>
 
       <Text className="text-brand-text leading-6 mb-4">
-        Tiket Anda di <strong>{workspaceName}</strong> telah ditutup otomatis
-        setelah 7 hari di tahap Implementasi.
+        Your ticket at <strong>{workspaceName}</strong> has been automatically closed
+        after 7 days in the Implementation stage.
       </Text>
 
       <Section className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -41,8 +41,8 @@ export function TicketClosedEmail({
       </Section>
 
       <Text className="text-brand-text leading-6 mb-4">
-        Jika Anda belum puas dengan hasilnya atau ada masalah yang belum
-        terselesaikan, Anda dapat membuka kembali tiket ini dalam waktu 7 hari.
+        If you are not satisfied with the result or have unresolved issues,
+        you can reopen this ticket within 7 days.
       </Text>
 
       <Section className="my-8 text-center">
@@ -50,16 +50,16 @@ export function TicketClosedEmail({
           href={reopenLink}
           className="bg-brand-forest text-white px-6 py-3 rounded-lg font-semibold"
         >
-          Buka Kembali Tiket
+          Reopen Ticket
         </Button>
       </Section>
 
       <Text className="text-sm text-brand-muted">
-        Link ini berlaku selama 7 hari. Setelah itu, tiket tidak dapat dibuka kembali.
+        This link is valid for 7 days. After that, the ticket cannot be reopened.
       </Text>
 
       <Text className="text-sm text-brand-muted mt-4">
-        Anda menerima email ini karena Anda adalah pembuat tiket ini di {workspaceName}.
+        You received this email because you created this ticket at {workspaceName}.
       </Text>
     </BaseLayout>
   )

@@ -185,6 +185,7 @@
   },
   "active": "ccbd897c4fb28da1",
   "lastOpenFiles": [
+    "src/emails/ticket-created.tsx.tmp.190960.1768799425596",
     "src/app/api/invitations/set-password/route.ts",
     "src/app/api/invitations/set-password",
     "src/app/(dashboard)/[workspace]/support/[id]/ticket-detail-client.tsx.tmp.1069217.1768750386915",
@@ -195,7 +196,6 @@
     "src/emails/ticket-created.tsx",
     "src/components/workspace/sidebar.tsx.tmp.1069217.1768744990968",
     "src/components/ui/alert.tsx",
-    "src/app/(dashboard)/[workspace]/support/[id]/ticket-detail-client.tsx",
     "node_modules/@radix-ui/react-radio-group/README.md",
     "node_modules/@hookform/resolvers/README.md",
     "node_modules/react-hook-form/README.md",

@@ -414,9 +414,9 @@ export function TicketDetailClient({
       {currentStage === 'closed' && isRequester && (
         <Alert className="mb-6">
           <MessageSquare className="h-4 w-4" />
-          <AlertTitle>Tiket Selesai</AlertTitle>
+          <AlertTitle>Ticket Closed</AlertTitle>
           <AlertDescription>
-            Tiket ini telah diselesaikan. Jika ada masalah tambahan, Anda dapat membuka kembali.
+            This ticket has been resolved. If you have additional issues, you can reopen it.
           </AlertDescription>
 
           {!showReopenForm ? (
@@ -426,14 +426,14 @@ export function TicketDetailClient({
               className="mt-3"
               onClick={() => setShowReopenForm(true)}
             >
-              Buka Kembali Tiket
+              Reopen Ticket
             </Button>
           ) : (
             <div className="mt-4 space-y-3">
               <div>
-                <Label className="text-sm mb-1.5 block">Alasan membuka kembali tiket *</Label>
+                <Label className="text-sm mb-1.5 block">Reason for reopening *</Label>
                 <Textarea
-                  placeholder="Jelaskan mengapa Anda perlu membuka kembali tiket ini..."
+                  placeholder="Please explain why you need to reopen this ticket..."
                   value={reopenReason}
                   onChange={(e) => setReopenReason(e.target.value)}
                   rows={3}
@@ -447,7 +447,7 @@ export function TicketDetailClient({
                   disabled={isReopening || !reopenReason.trim()}
                 >
                   {isReopening && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-                  Konfirmasi
+                  Confirm
                 </Button>
                 <Button
                   size="sm"
@@ -458,7 +458,7 @@ export function TicketDetailClient({
                   }}
                   disabled={isReopening}
                 >
-                  Batal
+                  Cancel
                 </Button>
               </div>
             </div>

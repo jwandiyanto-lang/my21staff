@@ -71,7 +71,7 @@ export async function POST(
     if (approved) {
       // Apply the stage change
       updateData.stage = pendingStage
-      historyReason = `Persetujuan skip ke tahap ${pendingStage}`
+      historyReason = `Skip approved to ${pendingStage} stage`
 
       // If closing, set closed_at and generate reopen token
       if (pendingStage === 'closed') {
@@ -80,7 +80,7 @@ export async function POST(
       }
     } else {
       // Rejected - stay at current stage
-      historyReason = `Penolakan skip ke tahap ${pendingStage} - tetap di ${currentStage}`
+      historyReason = `Skip rejected to ${pendingStage} stage - staying at ${currentStage}`
     }
 
     // Update ticket
@@ -108,7 +108,7 @@ export async function POST(
       await supabase.from('ticket_comments').insert({
         ticket_id: ticketId,
         author_id: authResult.user.id,
-        content: `Penolakan: permintaan skip ke tahap "${pendingStage}" ditolak.`,
+        content: `Rejected: skip request to "${pendingStage}" stage was declined.`,
         is_stage_change: true
       })
     }
