@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -176,14 +175,15 @@ export function SupportClient({
               </TableHeader>
               <TableBody>
                 {filteredTickets.map((ticket) => (
-                  <TableRow key={ticket.id}>
+                  <TableRow
+                    key={ticket.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => router.push(`/${workspace.slug}/support/${ticket.id}`)}
+                  >
                     <TableCell>
-                      <Link
-                        href={`/${workspace.slug}/support/${ticket.id}`}
-                        className="font-medium hover:underline"
-                      >
+                      <span className="font-medium hover:underline">
                         {ticket.title}
-                      </Link>
+                      </span>
                       {ticket.pending_approval && (
                         <Badge variant="outline" className="ml-2 text-xs text-amber-600 border-amber-300">
                           Pending Approval
