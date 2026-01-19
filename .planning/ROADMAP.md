@@ -218,14 +218,21 @@ Plans:
 ---
 
 ### Phase 8: Performance Optimization
-**Goal:** First impression polish for Eagle
-**Status:** Not started
+**Goal:** First impression polish for Eagle — make dashboard feel snappy
+**Status:** Planned
+**Plans:** 3 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Bundle analyzer + TanStack Query provider setup
+- [ ] 08-02-PLAN.md — Inbox + Database TanStack Query migration
+- [ ] 08-03-PLAN.md — Loading skeletons for all dashboard routes
 
 **Scope:**
-- Bundle analyzer, identify targets
-- Dynamic imports for heavy components
-- TanStack Query for client caching
-- Verify Supabase connection pooling
+- Bundle analyzer setup (visibility into bundle size)
+- TanStack Query v5 for client-side caching
+- Stale-while-revalidate for instant navigation feel
+- Skeleton loading states (eliminate blank screens)
+- Real-time integration with query cache
 
 **Note:** Optimize after features stable
 
@@ -264,4 +271,4 @@ Plans:
 
 ---
 
-*Last updated: 2026-01-19 — Phase 7 complete (Landing Page Redesign)*
+*Last updated: 2026-01-19 — Phase 8 planned (Performance Optimization)*
