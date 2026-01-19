@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 05-central-support-hub
 source: 05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md, 05-05-SUMMARY.md, 05-06-SUMMARY.md
 started: 2026-01-19T11:45:00Z
@@ -81,17 +81,25 @@ skipped: 6
   reason: "User reported: appears in the list but admin sees nothing"
   severity: major
   test: 6
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "RLS policy 'Admin workspace can view routed tickets' from migration 28 not applied to database"
+  artifacts:
+    - path: "supabase/migrations/28_central_support_hub.sql"
+      issue: "Migration may not be applied - policy checks admin_workspace_id"
+  missing:
+    - "Apply migration 28 to database OR run policy SQL directly"
+  debug_session: ".planning/debug/portal-tickets-not-routed.md"
 
 - truth: "Image upload button exists on ticket detail for attachments"
   status: failed
   reason: "User reported: dont have that image uploaded button"
   severity: major
   test: 4
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "ImageUpload component exists in portal but missing from admin ticket-detail-client.tsx"
+  artifacts:
+    - path: "src/app/(dashboard)/[workspace]/support/[id]/ticket-detail-client.tsx"
+      issue: "Missing ImageUpload import and integration"
+  missing:
+    - "Import ImageUpload from @/components/portal/image-upload"
+    - "Add attachments state and handlers"
+    - "Render ImageUpload in comment form section"
   debug_session: ""
