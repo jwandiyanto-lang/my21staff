@@ -9,17 +9,17 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 
 ## Current Position
 
-Phase: 7 of 9 — Landing Page Redesign (VERIFIED)
-Plan: 03 of 03 complete
-Status: Phase verified
-Last activity: 2026-01-19 — Phase 7 verified (10/10 must-haves)
+Phase: 8 of 9 — Performance Optimization
+Plan: 01 of 03 complete
+Status: In progress
+Last activity: 2026-01-19 — Completed 08-01-PLAN.md (Performance Infrastructure)
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ████████████████░░░░ Phase 7 complete
+Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 █████████████████░░░ Phase 8 in progress
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 77 (14 in v1.0 + 38 in v2.0 + 25 in v2.1)
+- Total plans completed: 78 (14 in v1.0 + 38 in v2.0 + 26 in v2.1)
 - v2.0 timeline: 4 days (Jan 14 → Jan 18)
 - Commits: 325 in v2.0, 57 in v2.1
 
@@ -83,6 +83,9 @@ Key v2.1 decisions:
 - Portal layout: header-only (no sidebar), auth check in layout.tsx
 - Client portal isolation: requester_id filter for all queries
 - Custom Tawk.to integration via script injection (React 19 compatible, avoiding tawkto-react peer dependency)
+- TanStack Query defaults: 1min staleTime, refetchOnWindowFocus disabled, retry once (dashboard-appropriate)
+- No 08-04 plan: bundle already well-optimized, no significant dynamic import targets
+- Providers pattern: Client-side providers in src/app/providers.tsx
 
 ### Deferred Issues
 
@@ -102,9 +105,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Phase 7 verified (Landing Page Redesign)
+Stopped at: Completed 08-01-PLAN.md (Performance Infrastructure)
 Resume file: None
-Next: Phase 8 (Performance Optimization)
+Next: 08-02-PLAN.md (Data Fetching Migration)
 
 ## Deployment Info
 
@@ -124,4 +127,4 @@ Next: Phase 8 (Performance Optimization)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-19 — Phase 7 verified (Landing Page Redesign)*
+*Last updated: 2026-01-19 — Completed 08-01 (Performance Infrastructure)*
