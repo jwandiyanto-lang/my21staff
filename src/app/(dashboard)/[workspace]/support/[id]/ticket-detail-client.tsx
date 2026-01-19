@@ -36,7 +36,9 @@ import {
   User,
   Send,
   Building2,
+  ImageIcon,
 } from 'lucide-react'
+import { ImageUpload } from '@/components/portal/image-upload'
 import { formatDistanceToNow, format } from 'date-fns'
 import { toast } from 'sonner'
 import { type WorkspaceRole } from '@/lib/permissions/types'
@@ -139,6 +141,7 @@ export function TicketDetailClient({
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [isInternalComment, setIsInternalComment] = useState(false)
+  const [attachments, setAttachments] = useState<Array<{ url: string; path: string }>>([])
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isAssigning, setIsAssigning] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
@@ -172,6 +175,7 @@ export function TicketDetailClient({
         toast.success(isInternalComment ? 'Internal note added' : 'Comment added successfully')
         setCommentText('')
         setIsInternalComment(false)
+        setAttachments([])
         router.refresh()
       } else {
         const error = await response.json()
@@ -183,6 +187,16 @@ export function TicketDetailClient({
     } finally {
       setIsSubmittingComment(false)
     }
+  }
+
+  const handleImageUpload = (url: string, path: string) => {
+    setAttachments((prev) => [...prev, { url, path }])
+    // Add image markdown to comment
+    setCommentText((prev) => prev + (prev ? '\n' : '') + `![Attachment](${url})`)
+  }
+
+  const handleImageRemove = (path: string) => {
+    setAttachments((prev) => prev.filter((a) => a.path !== path))
   }
 
   const handleAssign = async (userId: string | null) => {
@@ -568,6 +582,17 @@ export function TicketDetailClient({
                   rows={3}
                   className={`resize-none ${isInternalComment ? 'border-amber-300 bg-amber-50/50' : ''}`}
                 />
+
+                <div className="mt-3">
+                  <ImageUpload
+                    ticketId={ticket.id}
+                    images={attachments}
+                    onUpload={handleImageUpload}
+                    onRemove={handleImageRemove}
+                    disabled={isSubmittingComment}
+                  />
+                </div>
+
                 <div className="flex items-center justify-between mt-2">
                   {/* Internal comment toggle - only show for owner/admin on client tickets */}
                   {(currentUserRole === 'owner' || currentUserRole === 'admin') && isClientTicket ? (
