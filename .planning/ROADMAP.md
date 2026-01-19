@@ -152,16 +152,18 @@ Plans:
 
 ---
 
-### Phase 5: Tawk.to Integration
-**Goal:** Quick win for live chat + backup ticketing
-**Status:** Not started (optional)
+### Phase 5: Central Support Hub
+**Goal:** All client support flows to my21staff workspace for centralized handling
+**Status:** Not started
 
 **Scope:**
-- Embed Tawk.to widget on landing + CRM
-- Configure Bahasa Indonesia
-- Test chat -> ticket flow
+- Cross-workspace ticketing: Client tickets → my21staff workspace
+- my21staff team can view/respond to all client tickets
+- Client portal: Clients see only their own tickets
+- Optional: Tawk.to widget for live chat fallback
 
-**Note:** Skip if Phase 4 ticketing is sufficient
+**Depends on:** Phase 4 (Ticketing Core)
+**Note:** Critical for support operations with multiple clients
 
 ---
 

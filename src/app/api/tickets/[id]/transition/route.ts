@@ -157,9 +157,9 @@ export async function POST(
           ...comments?.map(c => c.author_id) || []
         ])
 
-        // Get email addresses from users table
+        // Get email addresses from profiles table
         const { data: profiles } = await supabase
-          .from('users')
+          .from('profiles')
           .select('id, email, full_name')
           .in('id', Array.from(participantIds))
 

@@ -8,10 +8,10 @@ updated: 2026-01-19T08:35:00Z
 
 ## Current Test
 
-number: 4
-name: Add Comment to Ticket
+number: 8
+name: Close Ticket
 expected: |
-  Type in comment textarea and submit. Comment appears in timeline with author name and timestamp.
+  Transition ticket to "Closed" stage. Reopen button appears for requester. Stage progress shows completed.
 awaiting: user response
 
 ## Tests
@@ -30,25 +30,25 @@ result: pass
 
 ### 4. Add Comment to Ticket
 expected: Type in comment textarea and submit. Comment appears in timeline with author name and timestamp.
-result: issue
-reported: "Comment section is not visible anywhere on ticket detail page"
-severity: blocker
+result: pass
 
 ### 5. Transition Ticket Stage
 expected: Click transition button (e.g., "Lanjut ke Diskusi"). Stage advances. Status history shows the transition.
-result: [pending]
+result: pass
 
 ### 6. Skip Stage (Admin)
 expected: As admin, attempt to skip stages. Sets pending approval. Approval banner appears for requester.
-result: [pending]
+result: pass
 
 ### 7. Approve/Reject Skip
 expected: As requester viewing pending skip ticket, approval banner shows with approve/reject options. Approving advances stage, rejecting returns to previous.
-result: [pending]
+result: pass
 
 ### 8. Close Ticket
 expected: Transition ticket to "Selesai" (Closed). Reopen button appears. Stage shows completed.
-result: [pending]
+result: issue
+reported: "Internal server error when moving to closed stage"
+severity: blocker
 
 ### 9. Reopen Closed Ticket
 expected: On closed ticket, click "Buka Kembali" (Reopen). Ticket returns to Report stage and can be worked on again.
@@ -61,9 +61,9 @@ result: [pending]
 ## Summary
 
 total: 10
-passed: 3
+passed: 7
 issues: 0
-pending: 7
+pending: 3
 skipped: 0
 
 ## Gaps
