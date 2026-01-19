@@ -219,13 +219,13 @@ Plans:
 
 ### Phase 8: Performance Optimization
 **Goal:** First impression polish for Eagle — make dashboard feel snappy
-**Status:** Planned
-**Plans:** 3 plans
+**Status:** Complete
+**Plans:** 3/3 plans — completed 2026-01-19
 
 Plans:
-- [ ] 08-01-PLAN.md — Bundle analyzer + TanStack Query provider setup
-- [ ] 08-02-PLAN.md — Inbox + Database TanStack Query migration
-- [ ] 08-03-PLAN.md — Loading skeletons for all dashboard routes
+- [x] 08-01-PLAN.md — Bundle analyzer + TanStack Query provider setup
+- [x] 08-02-PLAN.md — Inbox + Database TanStack Query migration
+- [x] 08-03-PLAN.md — Loading skeletons for all dashboard routes
 
 **Scope:**
 - Bundle analyzer setup (visibility into bundle size)
@@ -265,10 +265,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 28/? | Phase 1-7 complete | — |
+| 1-9 | v2.1 | 28/? | Phase 1-8 complete | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-19 — Phase 8 planned (Performance Optimization)*
+*Last updated: 2026-01-19 — Phase 8 complete (Performance Optimization)*
