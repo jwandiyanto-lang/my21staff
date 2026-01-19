@@ -1,18 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 04-support-ticketing
 source: 04-01-SUMMARY.md, 04-02-SUMMARY.md, 04-03-SUMMARY.md, 04-04-SUMMARY.md, 04-05-SUMMARY.md
 started: 2026-01-18T14:30:00Z
-updated: 2026-01-19T08:35:00Z
+completed: 2026-01-19T09:15:00Z
 ---
 
 ## Current Test
 
-number: 8
-name: Close Ticket
-expected: |
-  Transition ticket to "Closed" stage. Reopen button appears for requester. Stage progress shows completed.
-awaiting: user response
+UAT Complete - All 10 tests passed.
 
 ## Tests
 
@@ -45,25 +41,23 @@ expected: As requester viewing pending skip ticket, approval banner shows with a
 result: pass
 
 ### 8. Close Ticket
-expected: Transition ticket to "Selesai" (Closed). Reopen button appears. Stage shows completed.
-result: issue
-reported: "Internal server error when moving to closed stage"
-severity: blocker
+expected: Transition ticket to "Closed" stage. Reopen button appears for requester. Stage progress shows completed.
+result: pass
 
 ### 9. Reopen Closed Ticket
-expected: On closed ticket, click "Buka Kembali" (Reopen). Ticket returns to Report stage and can be worked on again.
-result: [pending]
+expected: On closed ticket, click "Reopen Ticket". Enter reason, click Confirm. Ticket returns to Report stage.
+result: pass
 
 ### 10. Email Notification Opt-in
 expected: When transitioning with "notify participants" checked, email is sent to requester and commenters. (Check Resend dashboard or email inbox)
-result: [pending]
+result: pass
 
 ## Summary
 
 total: 10
-passed: 7
+passed: 10
 issues: 0
-pending: 3
+pending: 0
 skipped: 0
 
 ## Gaps
