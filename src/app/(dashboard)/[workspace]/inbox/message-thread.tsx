@@ -239,7 +239,7 @@ function MessageBubble({ message, contactName, contactPhone, onReply, allMessage
                 Sending...
               </span>
             ) : (
-              formatWIB(message.created_at, DATE_FORMATS.TIME_12H)
+              message.created_at && formatWIB(message.created_at, DATE_FORMATS.TIME_12H)
             )}
           </span>
         </div>
@@ -264,7 +264,7 @@ function MessageBubble({ message, contactName, contactPhone, onReply, allMessage
         {renderMedia()}
         {message.content && <p className="whitespace-pre-wrap text-sm">{message.content}</p>}
         <span className="text-xs block mt-1 text-muted-foreground">
-          {formatWIB(message.created_at, DATE_FORMATS.TIME_12H)}
+          {message.created_at && formatWIB(message.created_at, DATE_FORMATS.TIME_12H)}
         </span>
       </div>
       {onReply && <ReplyButton />}
@@ -504,8 +504,9 @@ export function MessageThread({
   }
 
   // Calculate last activity time
-  const lastActivityTime = messages.length > 0
-    ? formatDistanceWIB(messages[messages.length - 1].created_at, { addSuffix: false })
+  const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null
+  const lastActivityTime = lastMessage?.created_at
+    ? formatDistanceWIB(lastMessage.created_at, { addSuffix: false })
     : null
 
   const isActive = conversationStatus === 'open' || conversationStatus === 'handover'
@@ -678,7 +679,7 @@ export function MessageThread({
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">First Contact</p>
-                <p className="font-medium">{formatWIB(conversationContact.created_at, DATE_FORMATS.DATE_LONG)}</p>
+                <p className="font-medium">{conversationContact.created_at ? formatWIB(conversationContact.created_at, DATE_FORMATS.DATE_LONG) : 'Unknown'}</p>
               </div>
             </div>
           </div>
@@ -711,9 +712,9 @@ export function MessageThread({
         ) : (
           <div className="flex flex-col gap-3">
             {messages.map((message, index) => {
-              const messageDate = new Date(message.created_at)
+              const messageDate = new Date(message.created_at || 0)
               const prevMessage = index > 0 ? messages[index - 1] : null
-              const showDaySeparator = !prevMessage || !isSameDay(messageDate, new Date(prevMessage.created_at))
+              const showDaySeparator = !prevMessage || !prevMessage.created_at || !isSameDay(messageDate, new Date(prevMessage.created_at))
 
               return (
                 <div key={message.id}>

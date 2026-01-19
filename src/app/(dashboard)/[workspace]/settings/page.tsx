@@ -49,16 +49,26 @@ export default async function SettingsPage({ params }: Props) {
   // Combine members with their profiles
   const membersWithProfiles = (members || []).map((member) => ({
     ...member,
+    role: member.role || 'member',
+    created_at: member.created_at || new Date().toISOString(),
     profiles: profiles?.find((p) => p.id === member.user_id) || null,
   }))
 
   // Get pending invitations
-  const { data: invitations } = await supabase
+  const { data: invitationsRaw } = await supabase
     .from('workspace_invitations')
     .select('*')
     .eq('workspace_id', workspace.id)
     .eq('status', 'pending')
     .order('created_at', { ascending: false })
+
+  // Normalize invitation types
+  const invitations = (invitationsRaw || []).map((inv) => ({
+    ...inv,
+    status: inv.status || 'pending',
+    role: inv.role || 'member',
+    created_at: inv.created_at || new Date().toISOString(),
+  }))
 
   // Cast settings to expected type
   const workspaceWithSettings = {
@@ -70,7 +80,7 @@ export default async function SettingsPage({ params }: Props) {
     <SettingsClient
       workspace={workspaceWithSettings}
       members={membersWithProfiles}
-      invitations={invitations || []}
+      invitations={invitations}
     />
   )
 }

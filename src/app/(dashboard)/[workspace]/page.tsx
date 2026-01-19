@@ -81,9 +81,9 @@ export default async function WorkspaceDashboard({
   const consultationTag = '1on1 consultation'
   const contactsWithTag = allContacts?.filter(c => c.tags?.includes(consultationTag)) || []
   const tagAllTime = contactsWithTag.length
-  const tagToday = contactsWithTag.filter(c => c.created_at >= todayStart).length
-  const tagThisWeek = contactsWithTag.filter(c => c.created_at >= weekStart).length
-  const tagThisMonth = contactsWithTag.filter(c => c.created_at >= monthStart).length
+  const tagToday = contactsWithTag.filter(c => c.created_at && c.created_at >= todayStart).length
+  const tagThisWeek = contactsWithTag.filter(c => c.created_at && c.created_at >= weekStart).length
+  const tagThisMonth = contactsWithTag.filter(c => c.created_at && c.created_at >= monthStart).length
 
   // Fetch contact details for tasks
   const taskContactIds = upcomingTasks?.map(t => t.contact_id).filter(Boolean) || []

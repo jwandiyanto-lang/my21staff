@@ -66,8 +66,15 @@ export default async function AdminClientsPage() {
 
       return {
         ...workspace,
+        created_at: workspace.created_at || new Date().toISOString(),
+        updated_at: workspace.updated_at || new Date().toISOString(),
         contact_count: contactCount || 0,
-        members: members || [],
+        members: (members || []).map(m => ({
+          ...m,
+          role: m.role || 'member',
+          must_change_password: m.must_change_password ?? false,
+          created_at: m.created_at || new Date().toISOString(),
+        })),
       }
     })
   )

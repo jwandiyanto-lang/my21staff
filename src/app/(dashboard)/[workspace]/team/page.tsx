@@ -61,6 +61,8 @@ export default async function TeamPage({ params }: Props) {
   // Combine members with their profiles
   const membersWithProfiles = (members || []).map((member) => ({
     ...member,
+    role: member.role || 'member',
+    created_at: member.created_at || new Date().toISOString(),
     profiles: profiles?.find((p) => p.id === member.user_id) || null,
   }))
 

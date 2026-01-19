@@ -96,7 +96,7 @@ export default async function TicketDetailPage({ params }: Props) {
     const profile = profiles?.find(p => p.id === m.user_id)
     return {
       user_id: m.user_id,
-      role: m.role,
+      role: m.role || 'member',
       full_name: profile?.full_name || null,
       email: profile?.email || null,
     }

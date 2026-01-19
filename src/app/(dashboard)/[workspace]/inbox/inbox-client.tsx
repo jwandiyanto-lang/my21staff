@@ -67,7 +67,7 @@ export function InboxClient({ workspace, conversations: initialConversations, to
 
   // Count unread conversations
   const unreadCount = useMemo(() => {
-    return conversations.filter((c) => c.unread_count > 0).length
+    return conversations.filter((c) => (c.unread_count ?? 0) > 0).length
   }, [conversations])
 
   // Filter conversations by status, tags, assigned, and unread
@@ -76,7 +76,7 @@ export function InboxClient({ workspace, conversations: initialConversations, to
 
     // Filter by unread
     if (showUnreadOnly) {
-      filtered = filtered.filter((conv) => conv.unread_count > 0)
+      filtered = filtered.filter((conv) => (conv.unread_count ?? 0) > 0)
     }
 
     // Filter by status
@@ -133,7 +133,7 @@ export function InboxClient({ workspace, conversations: initialConversations, to
         // Dev mode: filter mock messages
         const filtered = MOCK_MESSAGES.filter((m) => m.conversation_id === conversationId)
         // Sort by created_at ascending
-        filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        filtered.sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
         setMessages(filtered)
       } else {
         // Production: query Supabase
@@ -284,7 +284,7 @@ export function InboxClient({ workspace, conversations: initialConversations, to
     setSelectedConversation(conversation)
 
     // Instantly mark as read in UI (optimistic)
-    if (conversation.unread_count > 0) {
+    if ((conversation.unread_count ?? 0) > 0) {
       setConversations((prev) =>
         prev.map((c) =>
           c.id === conversation.id ? { ...c, unread_count: 0 } : c
@@ -602,7 +602,7 @@ export function InboxClient({ workspace, conversations: initialConversations, to
               messages={messages}
               conversationContact={selectedConversation.contact}
               conversationId={selectedConversation.id}
-              conversationStatus={selectedConversation.status}
+              conversationStatus={selectedConversation.status || 'open'}
               workspaceId={workspace.id}
               isLoading={isLoadingMessages}
               assignedTo={selectedConversation.assigned_to}
@@ -621,7 +621,7 @@ export function InboxClient({ workspace, conversations: initialConversations, to
               quickReplies={quickReplies}
               onMessageSent={handleMessageSent}
               onMessageError={handleMessageError}
-              conversationStatus={selectedConversation.status}
+              conversationStatus={selectedConversation.status || 'open'}
               replyToMessage={replyToMessage}
               onClearReply={() => setReplyToMessage(null)}
             />
@@ -645,7 +645,7 @@ export function InboxClient({ workspace, conversations: initialConversations, to
           contact={selectedConversation.contact}
           messagesCount={messages.length}
           lastActivity={messages.length > 0 ? messages[messages.length - 1].created_at : null}
-          conversationStatus={selectedConversation.status}
+          conversationStatus={selectedConversation.status || 'open'}
           contactTags={contactTags}
           teamMembers={teamMembers}
           assignedTo={selectedConversation.assigned_to}

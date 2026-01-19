@@ -556,7 +556,7 @@ export function InfoSidebar({
 
               {/* Created date - not editable */}
               <div className="text-sm text-muted-foreground">
-                Added {format(new Date(contact.created_at), 'MMM d, yyyy')}
+                Added {contact.created_at ? format(new Date(contact.created_at), 'MMM d, yyyy') : 'Unknown'}
               </div>
             </div>
           </div>

@@ -159,7 +159,7 @@ export function ContactDetailSheet({
   useEffect(() => {
     if (contact) {
       setLocalStatus(contact.lead_status as LeadStatus)
-      setLocalScore(contact.lead_score)
+      setLocalScore(contact.lead_score ?? 0)
       setLocalTags(contact.tags || [])
       setLocalAssignedTo(contact.assigned_to || null)
       setLocalName(contact.name || '')
@@ -195,7 +195,7 @@ export function ContactDetailSheet({
             })
             if (!response.ok) {
               // Revert on error
-              if (contact) setLocalScore(contact.lead_score)
+              if (contact) setLocalScore(contact.lead_score ?? 0)
               console.error('Failed to update score')
             } else {
               // Refresh data
@@ -205,7 +205,7 @@ export function ContactDetailSheet({
             }
           } catch (error) {
             // Revert on error
-            if (contact) setLocalScore(contact.lead_score)
+            if (contact) setLocalScore(contact.lead_score ?? 0)
             console.error('Error updating score:', error)
           } finally {
             setIsUpdatingScore(false)
@@ -467,7 +467,7 @@ export function ContactDetailSheet({
             type: 'form_submission',
             content: 'Submitted questionnaire',
             metadata: formAnswers,
-            created_at: contact.created_at,
+            created_at: contact.created_at || new Date().toISOString(),
           })
         }
       }
@@ -487,7 +487,7 @@ export function ContactDetailSheet({
                 ...(note.due_date ? { due_date: note.due_date } : {}),
               },
               author: note.author ? { full_name: note.author.full_name, email: note.author.email } : undefined,
-              created_at: note.created_at,
+              created_at: note.created_at || new Date().toISOString(),
             })
           })
         }
@@ -519,17 +519,18 @@ export function ContactDetailSheet({
             const messagesByDay = new Map<string, MessageItem[]>()
 
             messages.forEach((msg) => {
-              const dateKey = format(new Date(msg.created_at), 'yyyy-MM-dd')
+              const msgCreatedAt = msg.created_at || new Date().toISOString()
+              const dateKey = format(new Date(msgCreatedAt), 'yyyy-MM-dd')
               if (!messagesByDay.has(dateKey)) {
                 messagesByDay.set(dateKey, [])
               }
               messagesByDay.get(dateKey)!.push({
                 id: msg.id,
                 content: msg.content || '',
-                direction: msg.direction,
+                direction: msg.direction || 'outbound',
                 message_type: msg.message_type || 'text',
                 media_url: msg.media_url,
-                created_at: msg.created_at,
+                created_at: msgCreatedAt,
               })
             })
 
@@ -602,7 +603,7 @@ export function ContactDetailSheet({
           content: note.content,
           metadata: note.due_date ? { due_date: note.due_date } : undefined,
           author: note.author ? { full_name: note.author.full_name, email: note.author.email } : undefined,
-          created_at: note.created_at,
+          created_at: note.created_at || new Date().toISOString(),
         }, ...prev])
         setNewNoteContent('')
         setNewNoteDueDate(undefined)
@@ -1028,7 +1029,7 @@ export function ContactDetailSheet({
 
                     {/* Created date - not editable */}
                     <div className="text-sm text-muted-foreground">
-                      Added {formatWIB(contact.created_at, DATE_FORMATS.DATE_LONG)}
+                      Added {contact.created_at ? formatWIB(contact.created_at, DATE_FORMATS.DATE_LONG) : 'Unknown'}
                     </div>
                   </div>
                 </div>
@@ -1243,7 +1244,7 @@ export function ContactDetailSheet({
                           'text-xs block mt-1',
                           isOutbound ? 'text-primary-foreground/70' : 'text-muted-foreground'
                         )}>
-                          {formatWIB(message.created_at, DATE_FORMATS.DATETIME)}
+                          {message.created_at && formatWIB(message.created_at, DATE_FORMATS.DATETIME)}
                         </span>
                       </div>
                     )
