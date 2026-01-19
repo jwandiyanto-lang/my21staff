@@ -13,7 +13,15 @@ export async function POST(
   try {
     const { id: ticketId } = await params
     const body = await request.json()
-    const { token } = body
+    const { token, reason } = body
+
+    // Reason is required
+    if (!reason || typeof reason !== 'string' || reason.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Reason is required to reopen ticket' },
+        { status: 400 }
+      )
+    }
 
     const supabase = await createClient()
 
@@ -89,14 +97,14 @@ export async function POST(
       changed_by: reopenedBy!,
       from_stage: 'closed',
       to_stage: 'report',
-      reason: 'Tiket dibuka kembali'
+      reason: `Tiket dibuka kembali: ${reason.trim()}`
     })
 
-    // Add system comment
+    // Add system comment with the reason
     await supabase.from('ticket_comments').insert({
       ticket_id: ticketId,
       author_id: reopenedBy!,
-      content: 'Tiket dibuka kembali oleh pemohon.',
+      content: `Tiket dibuka kembali.\n\nAlasan: ${reason.trim()}`,
       is_stage_change: true
     })
 

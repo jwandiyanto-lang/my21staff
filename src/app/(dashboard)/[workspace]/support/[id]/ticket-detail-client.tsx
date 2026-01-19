@@ -136,6 +136,8 @@ export function TicketDetailClient({
   const [isAssigning, setIsAssigning] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
   const [isReopening, setIsReopening] = useState(false)
+  const [showReopenForm, setShowReopenForm] = useState(false)
+  const [reopenReason, setReopenReason] = useState('')
   const [notifyParticipants, setNotifyParticipants] = useState(false)
   const [transitionComment, setTransitionComment] = useState('')
   const [selectedTargetStage, setSelectedTargetStage] = useState<TicketStage | ''>('')
@@ -262,16 +264,23 @@ export function TicketDetailClient({
   }
 
   const handleReopen = async () => {
+    if (!reopenReason.trim()) {
+      toast.error('Please provide a reason for reopening')
+      return
+    }
+
     setIsReopening(true)
     try {
       const response = await fetch(`/api/tickets/${ticket.id}/reopen`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ reason: reopenReason }),
       })
 
       if (response.ok) {
         toast.success('Ticket reopened successfully')
+        setShowReopenForm(false)
+        setReopenReason('')
         router.refresh()
       } else {
         const error = await response.json()
@@ -405,19 +414,55 @@ export function TicketDetailClient({
       {currentStage === 'closed' && isRequester && (
         <Alert className="mb-6">
           <MessageSquare className="h-4 w-4" />
-          <AlertTitle>Ticket Closed</AlertTitle>
+          <AlertTitle>Tiket Selesai</AlertTitle>
           <AlertDescription>
-            This ticket has been resolved. If you have additional issues, you can reopen it.
+            Tiket ini telah diselesaikan. Jika ada masalah tambahan, Anda dapat membuka kembali.
           </AlertDescription>
-          <Button
-            size="sm"
-            className="mt-3"
-            onClick={handleReopen}
-            disabled={isReopening}
-          >
-            {isReopening && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-            Reopen Ticket
-          </Button>
+
+          {!showReopenForm ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-3"
+              onClick={() => setShowReopenForm(true)}
+            >
+              Buka Kembali Tiket
+            </Button>
+          ) : (
+            <div className="mt-4 space-y-3">
+              <div>
+                <Label className="text-sm mb-1.5 block">Alasan membuka kembali tiket *</Label>
+                <Textarea
+                  placeholder="Jelaskan mengapa Anda perlu membuka kembali tiket ini..."
+                  value={reopenReason}
+                  onChange={(e) => setReopenReason(e.target.value)}
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleReopen}
+                  disabled={isReopening || !reopenReason.trim()}
+                >
+                  {isReopening && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+                  Konfirmasi
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setShowReopenForm(false)
+                    setReopenReason('')
+                  }}
+                  disabled={isReopening}
+                >
+                  Batal
+                </Button>
+              </div>
+            </div>
+          )}
         </Alert>
       )}
 
