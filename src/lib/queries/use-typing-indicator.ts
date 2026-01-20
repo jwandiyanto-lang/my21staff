@@ -105,23 +105,3 @@ export function useTypingIndicator(workspaceId: string) {
   }
 }
 
-/**
- * Server-side function to broadcast typing indicator from webhook
- * Called when Kapso sends typing status update
- */
-export async function broadcastTypingFromServer(
-  workspaceId: string,
-  phone: string,
-  isTyping: boolean
-) {
-  // This would be called from webhook - using service role client
-  const { createApiAdminClient } = await import('@/lib/supabase/server')
-  const supabase = createApiAdminClient()
-
-  const channel = supabase.channel(`typing:${workspaceId}`)
-  await channel.send({
-    type: 'broadcast',
-    event: 'typing',
-    payload: { phone, isTyping },
-  })
-}
