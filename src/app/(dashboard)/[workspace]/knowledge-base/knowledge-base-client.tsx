@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Calendar, Bot, GitBranch, Database, Target } from 'lucide-react'
 import { SlotManager } from '@/components/knowledge-base/slot-manager'
 import { PersonaTab } from '@/components/knowledge-base/persona-tab'
+import { FlowTab } from '@/components/knowledge-base/flow-tab'
 import { DatabaseTab } from '@/components/knowledge-base/database-tab'
 import { ScoringTab } from '@/components/knowledge-base/scoring-tab'
 
@@ -43,7 +44,7 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
             <Bot className="w-4 h-4" />
             <span>Persona</span>
           </TabsTrigger>
-          <TabsTrigger value="flow" disabled className="flex items-center gap-2 opacity-50">
+          <TabsTrigger value="flow" className="flex items-center gap-2">
             <GitBranch className="w-4 h-4" />
             <span>Flow</span>
           </TabsTrigger>
@@ -65,10 +66,8 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
           <PersonaTab workspaceId={workspace.id} />
         </TabsContent>
 
-        <TabsContent value="flow">
-          <div className="text-center py-12 text-muted-foreground">
-            Conversation flow configuration coming soon
-          </div>
+        <TabsContent value="flow" className="space-y-6">
+          <FlowTab workspaceId={workspace.id} />
         </TabsContent>
 
         <TabsContent value="database" className="space-y-6">
