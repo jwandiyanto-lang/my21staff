@@ -53,7 +53,7 @@ const operationsNav = [
 
 const adminNav = [
   {
-    title: 'Knowledge Base',
+    title: 'Your Intern',
     icon: BookOpen,
     href: '/knowledge-base',
   },
