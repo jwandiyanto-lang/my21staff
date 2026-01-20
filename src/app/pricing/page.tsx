@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X } from "lucide-react";
+import { Check, X, MessageCircle, RefreshCw, BarChart3, Snowflake, Lock } from "lucide-react";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -19,7 +19,7 @@ const inter = Inter({
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.15 } },
 };
 
 const staggerContainer = {
@@ -27,29 +27,83 @@ const staggerContainer = {
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
 
+const PROBLEMS = [
+  {
+    icon: MessageCircle,
+    title: "WhatsApp Overwhelm",
+    problem: "Too many chats coming in, can't focus on anything else. Reply to one, five more come in.",
+    solutions: [
+      "WhatsApp Bot auto-replies 24/7",
+      "Lead scoring in CRM",
+      "Get notified only for serious leads",
+    ],
+  },
+  {
+    icon: RefreshCw,
+    title: "Stuck in Day-to-Day",
+    problem: "Always busy with operations, no time to think about new products or build relationships.",
+    solutions: [
+      "Automated tasks from AI",
+      "Partner follow-up reminders",
+      "Time for you to plan strategy",
+    ],
+  },
+  {
+    icon: BarChart3,
+    title: "Messy Bookkeeping",
+    problem: "No proper records. When tax season comes, panic looking for data.",
+    solutions: [
+      "Transactions recorded automatically",
+      "Weekly reports to your WhatsApp",
+      "Clean books ready for you",
+    ],
+  },
+  {
+    icon: Snowflake,
+    title: "Leads Go Cold",
+    problem: "Replied once, then forgot to follow up. Customer buys elsewhere.",
+    solutions: [
+      "Auto follow-up at the right time",
+      "Tasks appear in CRM",
+      "Nothing slips through",
+    ],
+  },
+  {
+    icon: Lock,
+    title: "Can't Step Away",
+    problem: "Want a day off? Can't. Business stops when you stop.",
+    solutions: [
+      "AI runs 24/7",
+      "All activity tracked",
+      "Notified only for important things",
+      "Take over anytime you want",
+    ],
+  },
+];
+
 export default function PricingPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("");
 
   // Form state
-  const [nama, setNama] = useState("");
+  const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+62");
   const [whatsapp, setWhatsapp] = useState("");
-  const [jenisBisnis, setJenisBisnis] = useState("");
-  const [dariManaTahu, setDariManaTahu] = useState("");
+  const [businessType, setBusinessType] = useState("");
+  const [referralSource, setReferralSource] = useState("");
   const [leadSources, setLeadSources] = useState<string[]>([]);
   const [currentTracking, setCurrentTracking] = useState("");
   const [leadsPerMonth, setLeadsPerMonth] = useState("");
-  const [masalahBisnis, setMasalahBisnis] = useState("");
+  const [biggestProblem, setBiggestProblem] = useState("");
   const [teamSize, setTeamSize] = useState("");
 
   // Country codes for WhatsApp
   const countryCodes = [
-    { code: "+62", flag: "🇮🇩", country: "Indonesia" },
-    { code: "+971", flag: "🇦🇪", country: "UAE" },
-    { code: "+65", flag: "🇸🇬", country: "Singapore" },
-    { code: "+60", flag: "🇲🇾", country: "Malaysia" },
-    { code: "+1", flag: "🇺🇸", country: "USA" },
+    { code: "+62", flag: "ID", country: "Indonesia" },
+    { code: "+971", flag: "AE", country: "UAE" },
+    { code: "+65", flag: "SG", country: "Singapore" },
+    { code: "+60", flag: "MY", country: "Malaysia" },
+    { code: "+1", flag: "US", country: "USA" },
   ];
 
   // Toggle lead source checkbox
@@ -67,15 +121,15 @@ export default function PricingPage() {
   };
 
   const resetForm = () => {
-    setNama("");
+    setName("");
     setCountryCode("+62");
     setWhatsapp("");
-    setJenisBisnis("");
-    setDariManaTahu("");
+    setBusinessType("");
+    setReferralSource("");
     setLeadSources([]);
     setCurrentTracking("");
     setLeadsPerMonth("");
-    setMasalahBisnis("");
+    setBiggestProblem("");
     setTeamSize("");
   };
 
@@ -94,14 +148,14 @@ export default function PricingPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          nama,
+          nama: name,
           whatsapp: `${countryCode}${whatsapp}`,
-          jenisBisnis,
-          dariManaTahu,
+          jenisBisnis: businessType,
+          dariManaTahu: referralSource,
           leadSources: leadSources.join(", "),
           currentTracking,
           leadsPerMonth,
-          masalahBisnis,
+          masalahBisnis: biggestProblem,
           teamSize,
           paket: selectedPlan,
         }),
@@ -123,7 +177,7 @@ export default function PricingPage() {
       }, 2000);
     } catch (error) {
       console.error("Form submission error:", error);
-      alert("Gagal mengirim form. Silakan coba lagi.");
+      alert("Failed to submit form. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -131,267 +185,223 @@ export default function PricingPage() {
 
   return (
     <div
-      className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}
+      className={`${plusJakartaSans.variable} ${inter.variable} antialiased bg-[#f1f5f0]`}
       style={{ fontFamily: "var(--font-inter)" }}
     >
-      {/* Navigation - Matches home page */}
-      <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
-        <div className="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-black text-white">21</span>
-            </Link>
-          </div>
+      {/* Navigation - matches landing page */}
+      <nav className="sticky top-0 z-50 bg-[#f1f5f0]/80 backdrop-blur-md border-b border-[#284b31]/10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center">
+            <span className="text-xl font-extrabold tracking-[-0.02em]">
+              <span className="text-[#2D2A26]">my</span>
+              <span className="text-[#F7931A]">21</span>
+              <span className="text-[#2D2A26]">staff</span>
+            </span>
+          </Link>
           <a
             href="#pricing"
-            className="text-sm text-white px-5 py-2 rounded-full bg-white/20 backdrop-blur-sm font-semibold hover:bg-white/30 transition-all"
+            className="text-sm text-[#2D2A26] hover:text-[#F7931A] transition-colors duration-150 font-medium tracking-[-0.02em]"
           >
-            Mulai
+            Get Started
           </a>
         </div>
       </nav>
 
       <main>
-        {/* The Letter */}
-        <section className="bg-[#FDFBF7] text-landing-text pt-20 pb-16">
-          <div className="mx-auto max-w-2xl px-6">
-            {/* Quote block - letter from future self */}
-            <blockquote className="border-l-4 border-landing-cta/30 pl-6 md:pl-8">
-              <p className="text-landing-text/60 text-sm mb-6 italic">
-                Surat dari dirimu, 6 bulan dari sekarang
+        {/* Hero Quote */}
+        <section className="bg-[#284b31] text-white pt-16 pb-12 px-6">
+          <div className="mx-auto max-w-2xl">
+            <blockquote className="border-l-4 border-[#F7931A]/30 pl-6 md:pl-8">
+              <p className="text-white/60 text-sm mb-6 italic tracking-[-0.02em]">
+                A letter from yourself, 6 months from now
               </p>
 
-              <div className="space-y-6 text-lg leading-relaxed">
+              <div className="space-y-6 text-lg leading-relaxed tracking-[-0.02em]">
                 <div>
-                  <p className="font-semibold text-landing-hero mb-3">Dulu...</p>
+                  <p className="font-semibold text-[#F7931A] mb-3">Before...</p>
                   <p>
-                    Kemarin ada yang chat. Tanya harga. Sudah mau DP.
+                    Someone messaged yesterday. Asked about pricing. Ready to pay deposit.
                   </p>
                   <p className="mt-3">
-                    Tapi karena saya sedang sibuk mengurus customer langganan, jadi lupa membalas. Saya chat lagi — dia sudah <strong>ghosting</strong>.
+                    But I was busy handling regular customers, so I forgot to reply.
+                    When I messaged back — they had <strong>ghosted</strong>.
                   </p>
                   <p className="mt-3">
-                    Lalu kadang saya bisa mengurus client baru, tapi tidak juga membeli. Sampai keluarga mengeluh karena saya tidak ada waktu untuk mereka.
+                    Sometimes I manage to handle new clients, but they don&apos;t buy either.
+                    Meanwhile, family complains I have no time for them.
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-semibold text-landing-hero mb-3">Sekarang...</p>
+                  <p className="font-semibold text-[#F7931A] mb-3">Now...</p>
                   <p>
-                    Setelah pakai sistem, setiap leads masuk sudah otomatis dinilai dan ada yang follow up.
+                    After using the system, every incoming lead is automatically scored and followed up.
                   </p>
                   <p className="mt-3">
-                    Ketika ada leads bagus, saya terima notif dan bisa ambil alih chatnya.
+                    When there&apos;s a good lead, I get notified and can take over the chat.
                   </p>
                   <p className="mt-3">
-                    Hasilnya jauh lebih bagus — dan saya bisa gunakan energi saya untuk susun planning bisnis dan bangun relasi.
+                    Results are much better — and I have energy for business planning and building relationships.
                   </p>
                 </div>
               </div>
 
-              <p className="text-landing-cta font-semibold mt-10 text-right">
-                — Kamu, 6 bulan dari sekarang
+              <p className="text-[#F7931A] font-semibold mt-10 text-right tracking-[-0.02em]">
+                — You, 6 months from now
               </p>
             </blockquote>
           </div>
         </section>
 
-        {/* Header - Dark green */}
-        <section className="bg-landing-hero text-white px-6 py-12 md:py-16">
+        {/* Tagline */}
+        <section className="bg-[#284b31] text-white px-6 py-8">
           <div className="mx-auto max-w-3xl">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center">
-              No system = <span className="text-landing-cta">No growth.</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-center tracking-[-0.02em]">
+              No system = <span className="text-[#F7931A]">No growth.</span>
             </h2>
           </div>
         </section>
 
-        {/* Story - Cream background */}
-        <section className="bg-[#FDFBF7] px-6 py-12 md:py-16">
+        {/* Story / Problem */}
+        <section className="bg-white px-6 py-12 md:py-16">
           <div className="mx-auto max-w-3xl">
-            {/* Problem */}
-            <div className="space-y-6 text-lg md:text-xl text-landing-text leading-relaxed">
+            <div className="space-y-6 text-lg md:text-xl text-[#2D2A26] leading-relaxed tracking-[-0.02em]">
               <p>
-                Bisnis mau maju, tapi <strong className="text-landing-text">kepala sudah penuh</strong>.
+                Business wants to grow, but <strong>your head is full</strong>.
               </p>
 
               <p>
-                Setiap lead yang masuk harus <strong className="text-landing-text">diurus manual</strong>.
-                Setiap follow-up harus <strong className="text-landing-text">diingat sendiri</strong>.
-                Setiap peluang yang datang — <strong className="text-landing-text">lewat</strong>, karena tidak sempat.
+                Every lead needs <strong>manual handling</strong>.
+                Every follow-up needs <strong>remembering</strong>.
+                Every opportunity that comes — <strong>slips away</strong> because no time.
               </p>
 
               <p>
-                Mau hire orang? <strong className="text-landing-text">Ribet</strong>. Harus training, harus awasi, harus bayar tiap bulan.
-                Dan kalau resign? <strong className="text-landing-text">Mulai dari nol lagi</strong>.
+                Want to hire? <strong>Complicated</strong>. Training, supervision, monthly salary.
+                And if they quit? <strong>Start from zero again</strong>.
               </p>
 
               <p>
-                Mau kasih ke orang lain? <strong className="text-landing-text">Takut salah</strong>. Takut tidak sesuai standar.
+                Want to delegate? <strong>Scared of mistakes</strong>. Scared it won&apos;t meet standards.
               </p>
 
               <p>
-                Ujung-ujungnya <strong className="text-landing-text">harus kerja sendiri</strong>.
-                Belum lagi <strong className="text-landing-text">tukang pajak</strong> yang tiba-tiba datang.
+                End up <strong>doing everything yourself</strong>. Not to mention the <strong>tax man</strong> who shows up unexpectedly.
               </p>
 
-              <p className="text-landing-text font-medium">
-                Rasanya tidak adil. Susah berbisnis.<br />
-                Tapi mau kerja sama siapa?
+              <p className="text-[#2D2A26] font-medium">
+                Feels unfair. Hard to do business.<br />
+                But who can you work with?
               </p>
             </div>
 
-            {/* Divider */}
-            <hr className="my-12 border-landing-text/10" />
+            <hr className="my-12 border-[#2D2A26]/10" />
 
-            {/* Solution */}
-            <div className="space-y-6 text-lg md:text-xl text-landing-text leading-relaxed">
-              <p className="text-2xl md:text-3xl font-bold text-landing-hero">
-                Solusinya bukan tambah tenaga.<br />
-                Solusinya adalah <span className="text-landing-cta">sistem</span> — dengan <span className="text-landing-cta">staff digital</span>.
+            <div className="space-y-6 text-lg md:text-xl text-[#2D2A26] leading-relaxed tracking-[-0.02em]">
+              <p className="text-2xl md:text-3xl font-extrabold text-[#284b31]">
+                The solution isn&apos;t more staff.<br />
+                The solution is a <span className="text-[#F7931A]">system</span> — with <span className="text-[#F7931A]">digital staff</span>.
               </p>
 
               <p>
-                Staff digital <strong className="text-landing-text">tidak sakit</strong>. <strong className="text-landing-text">Tidak resign</strong>. <strong className="text-landing-text">Tidak perlu diawasi</strong>.
+                Digital staff <strong>don&apos;t get sick</strong>. <strong>Don&apos;t resign</strong>. <strong>Don&apos;t need supervision</strong>.
               </p>
 
               <p>
-                Mereka mengikuti instruksi <strong className="text-landing-text">persis seperti yang Anda inginkan</strong>.
-                Dan semua aktivitas bisa <strong className="text-landing-text">di-track kapan saja</strong>.
+                They follow instructions <strong>exactly as you want</strong>.
+                And all activity can be <strong>tracked anytime</strong>.
               </p>
 
-              <p className="text-landing-text font-medium">
-                Anda tetap memegang kontrol. Tapi tidak perlu mengerjakan semuanya sendiri.
+              <p className="text-[#2D2A26] font-medium">
+                You stay in control. But you don&apos;t have to do everything yourself.
               </p>
             </div>
 
             {/* Why we exist */}
-            <div className="mt-12 p-8 md:p-10 bg-landing-cta/90 rounded-2xl shadow-lg max-w-4xl mx-auto">
-              <p className="text-2xl md:text-3xl font-bold text-white mb-4">
-                Ini alasan kami ada.
+            <div className="mt-12 p-8 md:p-10 bg-[#F7931A] rounded-2xl shadow-lg max-w-4xl mx-auto">
+              <p className="text-2xl md:text-3xl font-extrabold text-white mb-4 tracking-[-0.02em]">
+                This is why we exist.
               </p>
-              <p className="text-lg md:text-xl text-white leading-relaxed">
-                Kami <strong className="text-black">tidak jual software lalu Anda ikut aturan kami</strong>.
+              <p className="text-lg md:text-xl text-white leading-relaxed tracking-[-0.02em]">
+                We <strong className="text-[#284b31]">don&apos;t sell software then make you follow our rules</strong>.
               </p>
-              <p className="text-lg md:text-xl text-white leading-relaxed mt-3">
-                Kami <strong className="text-black">diskusi dan bangun sistem dari awal</strong> seiring bisnis Anda bertumbuh.
+              <p className="text-lg md:text-xl text-white leading-relaxed mt-3 tracking-[-0.02em]">
+                We <strong className="text-[#284b31]">discuss and build your system from scratch</strong> as your business grows.
               </p>
             </div>
           </div>
         </section>
 
-        {/* 5 Problems Section */}
-        <section className="bg-[#FDFBF7] py-16">
-          <div className="mx-auto max-w-5xl px-6">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-landing-text mb-4">
-              Masalah yang sering kami temui
-            </h2>
-            <p className="text-center text-landing-text/60 mb-12">
-              Dan bagaimana <span className="text-landing-cta font-semibold">my21staff</span> membantu
-            </p>
+        {/* Problems & Solutions */}
+        <section className="bg-[#f1f5f0] px-6 py-16">
+          <div className="mx-auto max-w-5xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.15 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-2xl md:text-3xl font-extrabold text-[#284b31] tracking-[-0.02em]">
+                Problems we often see — And how my21staff helps
+              </h2>
+            </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Problem 1 */}
-              <div className="border-2 border-landing-text/20 rounded-2xl p-6 bg-white">
-                <div className="text-3xl mb-3">💬</div>
-                <h3 className="text-lg font-bold text-landing-text mb-2">WhatsApp Overwhelm</h3>
-                <p className="text-landing-text/60 text-sm mb-4">
-                  Terlalu banyak chat masuk, tidak bisa fokus ke hal lain. Balas satu, masuk lima.
-                </p>
-                <div className="border-t border-landing-text/10 pt-4">
-                  <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
-                  <ul className="text-sm text-landing-text space-y-1">
-                    <li>→ WhatsApp Bot balas otomatis 24/7</li>
-                    <li>→ Grading score setiap lead di CRM</li>
-                    <li>→ Anda diinformasikan mana yang serius</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Problem 2 */}
-              <div className="border-2 border-landing-text/20 rounded-2xl p-6 bg-white">
-                <div className="text-3xl mb-3">🔄</div>
-                <h3 className="text-lg font-bold text-landing-text mb-2">Stuck di Day-to-Day</h3>
-                <p className="text-landing-text/60 text-sm mb-4">
-                  Sibuk operasional terus, tidak sempat pikirkan produk baru atau kembangkan relasi.
-                </p>
-                <div className="border-t border-landing-text/10 pt-4">
-                  <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
-                  <ul className="text-sm text-landing-text space-y-1">
-                    <li>→ Task otomatis dari AI</li>
-                    <li>→ Reminder follow-up partner</li>
-                    <li>→ Waktu untuk Anda mengatur strategi</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Problem 3 */}
-              <div className="border-2 border-landing-text/20 rounded-2xl p-6 bg-white">
-                <div className="text-3xl mb-3">📊</div>
-                <h3 className="text-lg font-bold text-landing-text mb-2">Pembukuan Berantakan</h3>
-                <p className="text-landing-text/60 text-sm mb-4">
-                  Tidak ada catatan rapi. Waktu pajak datang, panik cari data.
-                </p>
-                <div className="border-t border-landing-text/10 pt-4">
-                  <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
-                  <ul className="text-sm text-landing-text space-y-1">
-                    <li>→ Transaksi tercatat otomatis</li>
-                    <li>→ Laporan mingguan ke WhatsApp Anda</li>
-                    <li>→ Pembukuan rapi untuk Anda</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Problem 4 */}
-              <div className="border-2 border-landing-text/20 rounded-2xl p-6 bg-white">
-                <div className="text-3xl mb-3">❄️</div>
-                <h3 className="text-lg font-bold text-landing-text mb-2">Leads Jadi Dingin</h3>
-                <p className="text-landing-text/60 text-sm mb-4">
-                  Sudah balas sekali, lalu lupa follow up. Customer beli di tempat lain.
-                </p>
-                <div className="border-t border-landing-text/10 pt-4">
-                  <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
-                  <ul className="text-sm text-landing-text space-y-1">
-                    <li>→ Auto follow-up di waktu tepat</li>
-                    <li>→ Task muncul di CRM</li>
-                    <li>→ Tidak ada yang terlewat</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Problem 5 */}
-              <div className="border-2 border-landing-text/20 rounded-2xl p-6 bg-white">
-                <div className="text-3xl mb-3">🔒</div>
-                <h3 className="text-lg font-bold text-landing-text mb-2">Tidak Bisa Lepas</h3>
-                <p className="text-landing-text/60 text-sm mb-4">
-                  Mau libur? Tidak bisa. Bisnis berhenti kalau kamu berhenti.
-                </p>
-                <div className="border-t border-landing-text/10 pt-4">
-                  <p className="text-xs text-landing-cta font-semibold mb-2">SISTEM KAMI:</p>
-                  <ul className="text-sm text-landing-text space-y-1">
-                    <li>→ AI jalan terus 24/7</li>
-                    <li>→ Semua aktivitas di-track</li>
-                    <li>→ Anda dinotifikasi untuk hal penting saja</li>
-                    <li>→ Anda bisa ambil alih kapan saja</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* CTA Card */}
-              <div className="border-2 border-landing-cta bg-landing-cta/10 rounded-2xl p-6 flex flex-col justify-center">
-                <p className="text-xl font-bold text-landing-text mb-2">Punya masalah serupa?</p>
-                <p className="text-landing-text/70 text-sm">
-                  Apa masalah Anda? Mari kita atur sistemnya.
-                </p>
-              </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {PROBLEMS.map((item, index) => (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.15, delay: 0.05 * index }}
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-[#284b31]/5"
+                >
+                  <div className="w-10 h-10 bg-[#284b31] rounded-xl flex items-center justify-center mb-4">
+                    <item.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-[#284b31] mb-2 tracking-[-0.02em]">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-[#2D2A26]/70 mb-4 tracking-[-0.02em]">
+                    {item.problem}
+                  </p>
+                  <div className="pt-4 border-t border-[#284b31]/10">
+                    <p className="text-xs font-semibold text-[#F7931A] uppercase tracking-wider mb-2">
+                      Our System
+                    </p>
+                    <ul className="space-y-1.5">
+                      {item.solutions.map((solution) => (
+                        <li key={solution} className="flex items-start gap-2 text-sm text-[#2D2A26]/80 tracking-[-0.02em]">
+                          <span className="text-[#284b31] mt-0.5">→</span>
+                          {solution}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+              ))}
             </div>
+          </div>
+        </section>
+
+        {/* CTA before pricing */}
+        <section className="bg-[#dce8dc] px-6 py-12">
+          <div className="mx-auto max-w-2xl text-center">
+            <h3 className="text-2xl font-extrabold text-[#284b31] mb-3 tracking-[-0.02em]">
+              Have similar problems?
+            </h3>
+            <p className="text-[#2D2A26]/70 tracking-[-0.02em]">
+              Tell us your challenges. Let&apos;s set up your system.
+            </p>
           </div>
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="bg-landing-hero text-white py-16">
+        <section id="pricing" className="bg-[#284b31] text-white py-16">
           <div className="mx-auto max-w-5xl px-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              Siap untuk membangun <span className="text-landing-cta">Sistem Anda</span>?
+            <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-12 tracking-[-0.02em]">
+              Ready to build <span className="text-[#F7931A]">Your System</span>?
             </h2>
 
             <motion.div
@@ -403,46 +413,46 @@ export default function PricingPage() {
             >
               {/* Solo */}
               <motion.div
-                className="bg-white text-landing-text rounded-2xl p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                className="bg-white text-[#2D2A26] rounded-2xl p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-150"
                 variants={fadeInUp}
               >
-                <h3 className="text-xl font-bold">Solo</h3>
-                <p className="text-xs text-landing-text-muted mb-4">Founder & freelancer</p>
+                <h3 className="text-xl font-extrabold tracking-[-0.02em]">Solo</h3>
+                <p className="text-xs text-[#2D2A26]/60 mb-4 tracking-[-0.02em]">Founders & freelancers</p>
                 <div className="mb-4">
-                  <span className="text-3xl font-extrabold">Rp3.9jt</span>
-                  <span className="text-sm text-landing-text-muted">/bln</span>
+                  <span className="text-3xl font-extrabold">$240</span>
+                  <span className="text-sm text-[#2D2A26]/60">/mo</span>
                 </div>
-                <ul className="space-y-2 mb-6 text-sm">
+                <ul className="space-y-2 mb-6 text-sm tracking-[-0.02em]">
                   {["1 WhatsApp Number", "200 Marketing Messages/mo", "100 Utility Messages/mo", "30,000 AI Chats/mo"].map((item) => (
                     <li key={item} className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-landing-hero" />
+                      <Check className="w-4 h-4 text-[#284b31]" />
                       {item}
                     </li>
                   ))}
                 </ul>
                 <button
                   onClick={() => openModal("Solo")}
-                  className="block w-full text-center py-3 rounded-full border-2 border-landing-hero text-landing-hero font-bold text-sm hover:bg-landing-hero hover:text-white transition-all cursor-pointer"
+                  className="block w-full text-center py-3 rounded-xl border-2 border-[#284b31] text-[#284b31] font-bold text-sm hover:bg-[#284b31] hover:text-white transition-all duration-150 cursor-pointer"
                 >
-                  Pilih Solo
+                  Choose Solo
                 </button>
               </motion.div>
 
               {/* Team */}
               <motion.div
-                className="bg-landing-cta text-white rounded-2xl p-6 relative md:-translate-y-2 hover:shadow-xl hover:-translate-y-3 transition-all duration-300"
+                className="bg-[#F7931A] text-white rounded-2xl p-6 relative md:-translate-y-2 hover:shadow-xl hover:-translate-y-3 transition-all duration-150"
                 variants={fadeInUp}
               >
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-landing-hero text-white text-xs font-bold px-3 py-1 rounded-full">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#284b31] text-white text-xs font-bold px-3 py-1 rounded-full tracking-[-0.02em]">
                   POPULAR
                 </span>
-                <h3 className="text-xl font-bold mt-1">Team</h3>
-                <p className="text-xs text-white/80 mb-4">Tim kecil & UMKM</p>
+                <h3 className="text-xl font-extrabold mt-1 tracking-[-0.02em]">Team</h3>
+                <p className="text-xs text-white/80 mb-4 tracking-[-0.02em]">Small teams & SMBs</p>
                 <div className="mb-4">
-                  <span className="text-3xl font-extrabold">Rp7.9jt</span>
-                  <span className="text-sm text-white/80">/bln</span>
+                  <span className="text-3xl font-extrabold">$490</span>
+                  <span className="text-sm text-white/80">/mo</span>
                 </div>
-                <ul className="space-y-2 mb-6 text-sm">
+                <ul className="space-y-2 mb-6 text-sm tracking-[-0.02em]">
                   {["3 WhatsApp Numbers", "500 Marketing Messages/mo", "300 Utility Messages/mo", "60,000 AI Chats/mo"].map((item) => (
                     <li key={item} className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-white" />
@@ -452,51 +462,54 @@ export default function PricingPage() {
                 </ul>
                 <button
                   onClick={() => openModal("Team")}
-                  className="block w-full text-center py-3 rounded-full bg-white text-landing-cta font-bold text-sm hover:bg-white/90 transition-all cursor-pointer"
+                  className="block w-full text-center py-3 rounded-xl bg-white text-[#F7931A] font-bold text-sm hover:bg-white/90 transition-all duration-150 cursor-pointer"
                 >
-                  Pilih Team
+                  Choose Team
                 </button>
               </motion.div>
 
               {/* Studio */}
               <motion.div
-                className="bg-white text-landing-text rounded-2xl p-6 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                className="bg-white text-[#2D2A26] rounded-2xl p-6 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-150"
                 variants={fadeInUp}
               >
-                <h3 className="text-xl font-bold">Studio</h3>
-                <p className="text-xs text-landing-text-muted mb-4">Enterprise & custom</p>
+                <h3 className="text-xl font-extrabold tracking-[-0.02em]">Studio</h3>
+                <p className="text-xs text-[#2D2A26]/60 mb-4 tracking-[-0.02em]">Enterprise & custom</p>
                 <div className="mb-4">
                   <span className="text-3xl font-extrabold">Custom</span>
                 </div>
-                <p className="text-sm text-landing-text/70 mb-6 flex-1">
-                  Butuh lebih dari Solo atau Team? Mari diskusi, kami sesuaikan dengan kebutuhan bisnis Anda.
+                <p className="text-sm text-[#2D2A26]/70 mb-6 flex-1 tracking-[-0.02em]">
+                  Need more than Solo or Team? Let&apos;s discuss and tailor the solution to your business needs.
                 </p>
                 <button
                   onClick={() => openModal("Studio")}
-                  className="block w-full text-center py-3 rounded-full border-2 border-landing-hero text-landing-hero font-bold text-sm hover:bg-landing-hero hover:text-white transition-all cursor-pointer"
+                  className="block w-full text-center py-3 rounded-xl border-2 border-[#284b31] text-[#284b31] font-bold text-sm hover:bg-[#284b31] hover:text-white transition-all duration-150 cursor-pointer"
                 >
-                  Hubungi Kami
+                  Contact Us
                 </button>
               </motion.div>
             </motion.div>
 
             {/* Setup Fee Box */}
-            <div className="mt-8 max-w-xl mx-auto bg-gray-100 rounded-lg py-3 px-6 text-center">
-              <p className="text-sm text-gray-500">One-time setup fee: <span className="font-bold text-gray-800">Rp7.5jt</span> — Website / Web App + Business Consultation</p>
+            <div className="mt-8 max-w-xl mx-auto bg-white/10 rounded-xl py-3 px-6 text-center">
+              <p className="text-sm text-white/80 tracking-[-0.02em]">One-time setup fee: <span className="font-bold text-white">$465</span> — Website / Web App + Business Consultation</p>
             </div>
           </div>
         </section>
-
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-notion py-4">
+      {/* Footer - matches landing page */}
+      <footer className="bg-[#284b31] border-t border-white/10 py-6">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="flex items-center justify-center gap-4 text-xs text-landing-text-muted">
-            <span className="font-black text-landing-cta">21</span>
+          <div className="flex items-center justify-center gap-4 text-sm text-white/60 tracking-[-0.02em]">
+            <span className="font-extrabold">
+              <span className="text-white/60">my</span>
+              <span className="text-[#F7931A]">21</span>
+              <span className="text-white/60">staff</span>
+            </span>
             <span>&copy; 2026</span>
-            <Link href="/keamanan" className="hover:text-landing-text transition-colors">
-              Keamanan Data
+            <Link href="/security" className="hover:text-white transition-colors duration-150">
+              Security
             </Link>
           </div>
         </div>
@@ -522,7 +535,7 @@ export default function PricingPage() {
 
             {/* Modal Content */}
             <motion.div
-              className="relative bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+              className="relative bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -533,49 +546,48 @@ export default function PricingPage() {
                   setModalOpen(false);
                   resetForm();
                 }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-150"
               >
                 <X className="w-6 h-6" />
               </button>
 
               {/* Form Header */}
-              <h3 className="text-2xl font-bold text-landing-text mb-2">
-                Tertarik paket {selectedPlan}?
+              <h3 className="text-2xl font-extrabold text-[#2D2A26] mb-2 tracking-[-0.02em]">
+                Interested in {selectedPlan}?
               </h3>
-              <p className="text-sm text-landing-text/60 mb-6">
-                Isi form ini, kami akan menghubungi Anda segera.
+              <p className="text-sm text-[#2D2A26]/60 mb-6 tracking-[-0.02em]">
+                Fill this form and we&apos;ll contact you shortly.
               </p>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-                {/* Hidden field for selected plan */}
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <input type="hidden" name="paket" value={selectedPlan} />
 
-                {/* 1. Nama */}
+                {/* Name */}
                 <div>
-                  <label className="block text-sm font-medium text-landing-text mb-1">
-                    Nama
+                  <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
+                    Name
                   </label>
                   <input
                     type="text"
-                    placeholder="Nama lengkap"
-                    value={nama}
-                    onChange={(e) => setNama(e.target.value)}
+                    placeholder="Full name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] outline-none transition-all duration-150 text-sm"
                   />
                 </div>
 
-                {/* 2. WhatsApp with country code */}
+                {/* WhatsApp */}
                 <div>
-                  <label className="block text-sm font-medium text-landing-text mb-1">
+                  <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
                     WhatsApp
                   </label>
                   <div className="flex gap-2">
                     <select
                       value={countryCode}
                       onChange={(e) => setCountryCode(e.target.value)}
-                      className="px-3 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                      className="px-3 py-3 rounded-xl border border-gray-200 focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] outline-none transition-all duration-150 text-sm bg-white"
                     >
                       {countryCodes.map((c) => (
                         <option key={c.code} value={c.code}>
@@ -589,67 +601,67 @@ export default function PricingPage() {
                       value={whatsapp}
                       onChange={(e) => setWhatsapp(e.target.value)}
                       required
-                      className="flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
+                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] outline-none transition-all duration-150 text-sm"
                     />
                   </div>
                 </div>
 
-                {/* 3. Jenis Bisnis */}
+                {/* Business Type */}
                 <div>
-                  <label className="block text-sm font-medium text-landing-text mb-1">
-                    Jenis Bisnis
+                  <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
+                    Business Type
                   </label>
                   <input
                     type="text"
-                    placeholder="Contoh: Konsultan pendidikan, Toko online"
-                    value={jenisBisnis}
-                    onChange={(e) => setJenisBisnis(e.target.value)}
+                    placeholder="e.g., Education consultant, E-commerce"
+                    value={businessType}
+                    onChange={(e) => setBusinessType(e.target.value)}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] outline-none transition-all duration-150 text-sm"
                   />
                 </div>
 
-                {/* 4. Dari mana tahu my21staff */}
+                {/* How did you hear about us */}
                 <div>
-                  <label className="block text-sm font-medium text-landing-text mb-1">
-                    Dari mana tahu my21staff?
+                  <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
+                    How did you hear about us?
                   </label>
                   <select
-                    value={dariManaTahu}
-                    onChange={(e) => setDariManaTahu(e.target.value)}
+                    value={referralSource}
+                    onChange={(e) => setReferralSource(e.target.value)}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] outline-none transition-all duration-150 text-sm bg-white"
                   >
-                    <option value="">Pilih...</option>
+                    <option value="">Select...</option>
                     <option value="Instagram">Instagram</option>
                     <option value="TikTok">TikTok</option>
                     <option value="Google Search">Google Search</option>
-                    <option value="Rekomendasi teman/kolega">Rekomendasi teman/kolega</option>
+                    <option value="Friend/Colleague">Friend/Colleague</option>
                     <option value="LinkedIn">LinkedIn</option>
-                    <option value="Iklan">Iklan</option>
-                    <option value="Lainnya">Lainnya</option>
+                    <option value="Ads">Ads</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
-                {/* 5. Dari mana leads masuk (checkboxes) */}
+                {/* Lead Sources */}
                 <div>
-                  <label className="block text-sm font-medium text-landing-text mb-2">
-                    Dari mana leads Anda biasanya masuk?
+                  <label className="block text-sm font-medium text-[#2D2A26] mb-2 tracking-[-0.02em]">
+                    Where do your leads come from?
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      "WhatsApp langsung",
+                      "WhatsApp direct",
                       "Instagram DM",
                       "Website/Form",
                       "Referral",
-                      "Iklan (Meta/Google)",
-                      "Lainnya",
+                      "Ads (Meta/Google)",
+                      "Other",
                     ].map((source) => (
                       <label
                         key={source}
-                        className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all text-sm ${
+                        className={`flex items-center gap-2 p-2 rounded-xl border cursor-pointer transition-all duration-150 text-sm ${
                           leadSources.includes(source)
-                            ? "border-landing-cta bg-landing-cta/10"
+                            ? "border-[#F7931A] bg-[#F7931A]/10"
                             : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
@@ -662,7 +674,7 @@ export default function PricingPage() {
                         <div
                           className={`w-4 h-4 rounded border flex items-center justify-center ${
                             leadSources.includes(source)
-                              ? "bg-landing-cta border-landing-cta"
+                              ? "bg-[#F7931A] border-[#F7931A]"
                               : "border-gray-300"
                           }`}
                         >
@@ -670,43 +682,43 @@ export default function PricingPage() {
                             <Check className="w-3 h-3 text-white" />
                           )}
                         </div>
-                        <span className="text-landing-text">{source}</span>
+                        <span className="text-[#2D2A26]">{source}</span>
                       </label>
                     ))}
                   </div>
                 </div>
 
-                {/* 6. Cara track leads sekarang */}
+                {/* Current Tracking */}
                 <div>
-                  <label className="block text-sm font-medium text-landing-text mb-1">
-                    Bagaimana cara track leads sekarang?
+                  <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
+                    How do you track leads now?
                   </label>
                   <select
                     value={currentTracking}
                     onChange={(e) => setCurrentTracking(e.target.value)}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] outline-none transition-all duration-150 text-sm bg-white"
                   >
-                    <option value="">Pilih...</option>
-                    <option value="Belum ada sistem">Belum ada sistem (ingatan saja)</option>
-                    <option value="Catatan/Notes HP">Catatan/Notes HP</option>
+                    <option value="">Select...</option>
+                    <option value="No system">No system (just memory)</option>
+                    <option value="Notes app">Notes app</option>
                     <option value="Excel/Google Sheet">Excel/Google Sheet</option>
-                    <option value="CRM lain">CRM lain</option>
+                    <option value="Other CRM">Other CRM</option>
                   </select>
                 </div>
 
-                {/* 7. Leads per bulan */}
+                {/* Leads per month */}
                 <div>
-                  <label className="block text-sm font-medium text-landing-text mb-1">
-                    Berapa leads masuk per bulan?
+                  <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
+                    How many leads per month?
                   </label>
                   <select
                     value={leadsPerMonth}
                     onChange={(e) => setLeadsPerMonth(e.target.value)}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] outline-none transition-all duration-150 text-sm bg-white"
                   >
-                    <option value="">Pilih...</option>
+                    <option value="">Select...</option>
                     <option value="< 10 leads">&lt; 10 leads</option>
                     <option value="10-30 leads">10-30 leads</option>
                     <option value="30-100 leads">30-100 leads</option>
@@ -714,57 +726,57 @@ export default function PricingPage() {
                   </select>
                 </div>
 
-                {/* 8. Masalah terbesar di bisnis */}
+                {/* Biggest Problem */}
                 <div>
-                  <label className="block text-sm font-medium text-landing-text mb-1">
-                    Masalah terbesar di bisnis?
+                  <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
+                    Biggest business problem?
                   </label>
                   <select
-                    value={masalahBisnis}
-                    onChange={(e) => setMasalahBisnis(e.target.value)}
+                    value={biggestProblem}
+                    onChange={(e) => setBiggestProblem(e.target.value)}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] outline-none transition-all duration-150 text-sm bg-white"
                   >
-                    <option value="">Pilih...</option>
-                    <option value="Lupa follow-up leads">Lupa follow-up leads</option>
-                    <option value="Tidak sempat balas chat">Tidak sempat balas chat</option>
-                    <option value="Pembukuan berantakan">Pembukuan berantakan</option>
-                    <option value="Tidak bisa lepas dari operasional">Tidak bisa lepas dari operasional</option>
-                    <option value="Tidak tahu mana leads yang serius">Tidak tahu mana leads yang serius</option>
-                    <option value="Semua di atas">Semua di atas</option>
+                    <option value="">Select...</option>
+                    <option value="Forgetting to follow up">Forgetting to follow up</option>
+                    <option value="No time to reply chats">No time to reply chats</option>
+                    <option value="Messy bookkeeping">Messy bookkeeping</option>
+                    <option value="Cannot step away from operations">Cannot step away from operations</option>
+                    <option value="Cannot identify serious leads">Cannot identify serious leads</option>
+                    <option value="All of the above">All of the above</option>
                   </select>
                 </div>
 
-                {/* 9. Team size */}
+                {/* Team Size */}
                 <div>
-                  <label className="block text-sm font-medium text-landing-text mb-1">
-                    Berapa orang yang akan pakai sistem ini?
+                  <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
+                    How many people will use this?
                   </label>
                   <select
                     value={teamSize}
                     onChange={(e) => setTeamSize(e.target.value)}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-landing-cta focus:ring-1 focus:ring-landing-cta outline-none transition-all text-sm bg-white"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] outline-none transition-all duration-150 text-sm bg-white"
                   >
-                    <option value="">Pilih...</option>
-                    <option value="Hanya saya">Hanya saya</option>
-                    <option value="2-5 orang">2-5 orang</option>
-                    <option value="6-10 orang">6-10 orang</option>
-                    <option value="Lebih dari 10">Lebih dari 10</option>
+                    <option value="">Select...</option>
+                    <option value="Just me">Just me</option>
+                    <option value="2-5 people">2-5 people</option>
+                    <option value="6-10 people">6-10 people</option>
+                    <option value="More than 10">More than 10</option>
                   </select>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting || submitSuccess}
-                  className="w-full py-3 rounded-full bg-landing-cta text-white font-bold text-sm hover:bg-landing-cta/90 transition-all mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 rounded-xl bg-[#F7931A] text-white font-bold text-sm hover:bg-[#e8850f] transition-all duration-150 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {submitSuccess ? "✓ Terkirim!" : isSubmitting ? "Mengirim..." : "Kirim"}
+                  {submitSuccess ? "Sent!" : isSubmitting ? "Sending..." : "Submit"}
                 </button>
               </form>
 
-              <p className="text-xs text-center text-gray-400 mt-4">
-                Kami akan menghubungi via WhatsApp dalam 24 jam.
+              <p className="text-xs text-center text-gray-400 mt-4 tracking-[-0.02em]">
+                We&apos;ll contact you via WhatsApp within 24 hours.
               </p>
             </motion.div>
           </motion.div>
