@@ -22,11 +22,13 @@ import { ConversationList } from './conversation-list'
 import { MessageThread } from './message-thread'
 import { MessageInput } from './message-input'
 import { InfoSidebar } from '@/components/contact/info-sidebar'
+import { InboxSkeleton } from '@/components/skeletons/inbox-skeleton'
 import { isDevMode } from '@/lib/mock-data'
 import { createClient } from '@/lib/supabase/client'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
 import { useMessages, useAddOptimisticMessage, useRemoveOptimisticMessage, useReplaceOptimisticMessage } from '@/lib/queries/use-messages'
+import { useConversations } from '@/lib/queries/use-conversations'
 import type { Workspace, ConversationWithContact, Message, WorkspaceMember, Profile } from '@/types/database'
 
 interface QuickReply {
@@ -39,18 +41,22 @@ type TeamMember = WorkspaceMember & { profile: Profile | null }
 
 interface InboxClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
-  conversations: ConversationWithContact[]
-  totalCount: number
-  quickReplies?: QuickReply[]
-  teamMembers?: TeamMember[]
-  contactTags?: string[]
 }
 
-export function InboxClient({ workspace, conversations: initialConversations, totalCount, quickReplies, teamMembers = [], contactTags = ['Community', '1on1'] }: InboxClientProps) {
-  const [conversations, setConversations] = useState<ConversationWithContact[]>(initialConversations)
-  const [selectedConversation, setSelectedConversation] = useState<ConversationWithContact | null>(
-    conversations[0] || null
-  )
+export function InboxClient({ workspace }: InboxClientProps) {
+  // TanStack Query for conversations with all related data
+  const { data, isLoading: isLoadingConversations } = useConversations(workspace.id)
+
+  // Extract data from query result
+  const conversationsFromQuery = data?.conversations ?? []
+  const totalCount = data?.totalCount ?? 0
+  const quickReplies = data?.quickReplies ?? []
+  const teamMembers = data?.teamMembers ?? []
+  const contactTags = data?.contactTags ?? ['Community', '1on1']
+
+  // Local state for conversations (for real-time updates and pagination)
+  const [conversations, setConversations] = useState<ConversationWithContact[]>([])
+  const [selectedConversation, setSelectedConversation] = useState<ConversationWithContact | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
   const [tagFilter, setTagFilter] = useState<string[]>([])
@@ -63,6 +69,17 @@ export function InboxClient({ workspace, conversations: initialConversations, to
   const [page, setPage] = useState(0)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const PAGE_SIZE = 50
+
+  // Sync conversations from query to local state
+  useEffect(() => {
+    if (conversationsFromQuery.length > 0) {
+      setConversations(conversationsFromQuery)
+      // Select first conversation if none selected
+      if (!selectedConversation && conversationsFromQuery.length > 0) {
+        setSelectedConversation(conversationsFromQuery[0])
+      }
+    }
+  }, [conversationsFromQuery]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // TanStack Query for messages with real-time subscription
   const { data: messages = [], isLoading: isLoadingMessages } = useMessages(selectedConversation?.id ?? null)
@@ -199,10 +216,11 @@ export function InboxClient({ workspace, conversations: initialConversations, to
   }, [selectedConversation, addOptimisticMessage, replaceOptimisticMessage])
 
   // Handle message error (remove optimistic message)
-  const handleMessageError = useCallback((optimisticId: string) => {
-    if (!selectedConversation) return
-    removeOptimisticMessage(selectedConversation.id, optimisticId)
-  }, [selectedConversation, removeOptimisticMessage])
+  // Takes conversationId as parameter to ensure rollback targets correct conversation
+  // even if user switches conversations during API call
+  const handleMessageError = useCallback((conversationId: string, optimisticId: string) => {
+    removeOptimisticMessage(conversationId, optimisticId)
+  }, [removeOptimisticMessage])
 
   // Handle conversation selection - mark as read instantly
   const handleSelectConversation = useCallback((conversation: ConversationWithContact) => {
@@ -285,8 +303,8 @@ export function InboxClient({ workspace, conversations: initialConversations, to
         `/api/conversations?workspace=${workspace.id}&page=${nextPage}&limit=${PAGE_SIZE}`
       )
       if (response.ok) {
-        const data = await response.json()
-        setConversations(prev => [...prev, ...data.conversations])
+        const responseData = await response.json()
+        setConversations(prev => [...prev, ...responseData.conversations])
         setPage(nextPage)
       }
     } catch (error) {
@@ -300,6 +318,11 @@ export function InboxClient({ workspace, conversations: initialConversations, to
   useEffect(() => {
     setReplyToMessage(null)
   }, [selectedConversation?.id])
+
+  // Show skeleton while loading (first visit only - cached visits skip this)
+  if (isLoadingConversations) {
+    return <InboxSkeleton />
+  }
 
   return (
     <div className="flex h-full">
