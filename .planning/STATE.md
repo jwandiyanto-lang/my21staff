@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 5 of 7 — Scheduling & Handoff
-Plan: 2 of 4 (05-02-PLAN complete)
+Plan: 3 of 4 (05-03-PLAN complete)
 Status: In progress
-Last activity: 2026-01-20 — Completed 05-02-PLAN (Knowledge Base UI)
+Last activity: 2026-01-20 — Completed 05-03-PLAN (Booking Flow)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████░░░░ (16/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████░░░░ (17/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 98 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 16 in v2.2)
+- Total plans completed: 99 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 17 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 -> Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
@@ -95,6 +95,12 @@ Key v2.2 decisions:
 - Tabbed interface with disabled placeholders for Phase 6 - IMPLEMENTED 05-02
 - Indonesian day labels (Senin, Selasa, etc.) in Slot Manager - IMPLEMENTED 05-02
 - Slot Manager CRUD UI (add, toggle active, delete) - IMPLEMENTED 05-02
+- Direct booking -> scheduling transition (payment skipped in v2.2) - IMPLEMENTED 05-03
+- Scheduling sub-states: asking_day -> showing_slots -> confirming -> booked - IMPLEMENTED 05-03
+- Indonesian day/time parsing for booking (Senin, pagi, siang, etc.) - IMPLEMENTED 05-03
+- Slot selection by number or time keyword - IMPLEMENTED 05-03
+- Explicit confirmation required (ya/oke/betul) before booking finalizes - IMPLEMENTED 05-03
+- Booking creates ari_appointments with auto-handoff - IMPLEMENTED 05-03
 
 ### Deferred Issues
 
@@ -109,9 +115,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 05-02-PLAN (Knowledge Base UI)
+Stopped at: Completed 05-03-PLAN (Booking Flow)
 Resume file: None
-Next: 05-03-PLAN (Booking Flow)
+Next: 05-04-PLAN (Handoff Context)
 
 ## Deployment Info
 
@@ -136,4 +142,4 @@ Next: 05-03-PLAN (Booking Flow)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed 05-02-PLAN (Knowledge Base UI)*
+*Last updated: 2026-01-20 — Completed 05-03-PLAN (Booking Flow)*
