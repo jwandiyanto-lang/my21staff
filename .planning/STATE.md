@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 Phase: 8 of 9 — Performance Optimization (VERIFIED + Gap Closure)
 Plan: 5 of 5 complete (3 original + 2 gap closure)
 Status: Phase complete with UAT gaps closed
-Last activity: 2026-01-20 — Completed 08-05 optimistic rollback fix
+Last activity: 2026-01-20 — Completed 08-04 client-side caching for Inbox/Database
 
 Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ██████████████████░░ Phase 8 complete
 
@@ -84,11 +84,13 @@ Key v2.1 decisions:
 - Client portal isolation: requester_id filter for all queries
 - Custom Tawk.to integration via script injection (React 19 compatible, avoiding tawkto-react peer dependency)
 - TanStack Query defaults: 1min staleTime, refetchOnWindowFocus disabled, retry once (dashboard-appropriate)
-- No 08-04 plan: bundle already well-optimized, no significant dynamic import targets
 - Providers pattern: Client-side providers in src/app/providers.tsx
 - Loading states: Reusable skeleton components in src/components/skeletons/
 - Next.js loading.tsx convention for route-level loading states
 - Async callback parameters: Capture IDs at action initiation, not in handler closures (08-05)
+- Minimal server component + client-side TanStack Query pattern for cache-first navigation (08-04)
+- useConversations hook with real-time subscription for cache invalidation (08-04)
+- useWorkspaceSettings hook for shared workspace data (team members, tags) (08-04)
 
 ### Deferred Issues
 
@@ -108,7 +110,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 08-05 (Optimistic rollback fix)
+Stopped at: Completed 08-04 (Client-side caching for Inbox/Database)
 Resume file: None
 Next: Phase 9 (Kapso Bot Setup)
 
@@ -130,4 +132,4 @@ Next: Phase 9 (Kapso Bot Setup)
 - Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
 
 ---
-*Last updated: 2026-01-20 — Completed 08-05 (UAT gap closure)*
+*Last updated: 2026-01-20 — Completed 08-04 (Client-side caching for Inbox/Database)*
