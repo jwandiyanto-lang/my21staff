@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 2 of 7 — ARI Core Conversation (IN PROGRESS)
-Plan: 1 of 9 (02-01-PLAN complete)
+Plan: 2 of 9 (02-02-PLAN complete)
 Status: In progress
-Last activity: 2026-01-20 — Completed 02-01-PLAN (ARI Foundation - Types and AI Clients)
+Last activity: 2026-01-20 — Completed 02-02-PLAN (ARI State Machine and Context Builder)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██░░░░░░░░ (6/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ███░░░░░░░ (7/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 88 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 6 in v2.2)
+- Total plans completed: 89 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 7 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 → Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
@@ -59,6 +59,10 @@ Key v2.2 decisions:
 - Idempotent real-time updates with ID deduplication (prevents INBOX-07) - IMPLEMENTED 01-05
 - OpenAI SDK for both Grok and Sea-Lion (both support OpenAI-compatible API) - IMPLEMENTED 02-01
 - Hash-based A/B selection: same contact always gets same model (prevents contamination) - IMPLEMENTED 02-01
+- State machine with escape hatch: handoff always allowed regardless of current state - IMPLEMENTED 02-02
+- Business thresholds: MIN_SCORE_FOR_SCORING=40, HOT_LEAD_THRESHOLD=70 - IMPLEMENTED 02-02
+- Auto-handoff after 10 messages in same state to prevent loops - IMPLEMENTED 02-02
+- WIB timezone (UTC+7) for Indonesian time-based greetings - IMPLEMENTED 02-02
 
 ### Deferred Issues
 
@@ -73,9 +77,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 02-01-PLAN (ARI Foundation - Types and AI Clients)
+Stopped at: Completed 02-02-PLAN (ARI State Machine and Context Builder)
 Resume file: None
-Next: 02-02-PLAN (Prompt Templates & Persona System)
+Next: 02-03-PLAN (Conversation Handler)
 
 ## Deployment Info
 
@@ -100,4 +104,4 @@ Next: 02-02-PLAN (Prompt Templates & Persona System)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed 02-01-PLAN (ARI Foundation - Types and AI Clients)*
+*Last updated: 2026-01-20 — Completed 02-02-PLAN (ARI State Machine and Context Builder)*
