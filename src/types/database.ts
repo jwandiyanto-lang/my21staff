@@ -307,6 +307,92 @@ export type Database = {
           },
         ]
       }
+      ari_knowledge_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number
+          id: string
+          name: string
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          name: string
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          name?: string
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ari_knowledge_categories_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ari_knowledge_entries: {
+        Row: {
+          category_id: string | null
+          content: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          title: string
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          category_id?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          category_id?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ari_knowledge_entries_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "ari_knowledge_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ari_knowledge_entries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ari_messages: {
         Row: {
           ai_model: string | null

@@ -27,7 +27,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const supabase = await createClient()
 
     // Get existing stages ordered by stage_order
-    const { data: stages, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: stages, error } = await (supabase as any)
       .from('ari_flow_stages')
       .select('*')
       .eq('workspace_id', workspaceId)
@@ -83,7 +84,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     // Get current max order
-    const { data: existingStages } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: existingStages } = await (supabase as any)
       .from('ari_flow_stages')
       .select('stage_order')
       .eq('workspace_id', workspaceId)
@@ -104,7 +106,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       is_active: body.is_active ?? true,
     }
 
-    const { data: stage, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: stage, error } = await (supabase as any)
       .from('ari_flow_stages')
       .insert(stageData)
       .select()
@@ -152,7 +155,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       // Clear existing orders to avoid unique constraint violations during reorder
       // We'll set them to negative values temporarily
       for (let i = 0; i < updates.length; i++) {
-        await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any)
           .from('ari_flow_stages')
           .update({ stage_order: -(i + 1000) })
           .eq('id', updates[i].id)
@@ -161,7 +165,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
       // Now set the correct orders
       for (const update of updates) {
-        const { error } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
           .from('ari_flow_stages')
           .update({ stage_order: update.stage_order })
           .eq('id', update.id)
@@ -197,7 +202,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.exit_criteria !== undefined) updateData.exit_criteria = body.exit_criteria?.trim() || null
     if (body.is_active !== undefined) updateData.is_active = body.is_active
 
-    const { data: stage, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: stage, error } = await (supabase as any)
       .from('ari_flow_stages')
       .update(updateData)
       .eq('id', body.id)
@@ -235,7 +241,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const supabase = await createClient()
 
     // Get the stage being deleted to know its order
-    const { data: deletedStage, error: fetchError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: deletedStage, error: fetchError } = await (supabase as any)
       .from('ari_flow_stages')
       .select('stage_order')
       .eq('id', stageId)
@@ -247,7 +254,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Delete the stage
-    const { error: deleteError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: deleteError } = await (supabase as any)
       .from('ari_flow_stages')
       .delete()
       .eq('id', stageId)
@@ -259,7 +267,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Reorder remaining stages to close the gap
-    const { data: remainingStages } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: remainingStages } = await (supabase as any)
       .from('ari_flow_stages')
       .select('id, stage_order')
       .eq('workspace_id', workspaceId)
@@ -268,7 +277,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (remainingStages && remainingStages.length > 0) {
       for (const stage of remainingStages) {
-        await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any)
           .from('ari_flow_stages')
           .update({ stage_order: stage.stage_order - 1 })
           .eq('id', stage.id)
