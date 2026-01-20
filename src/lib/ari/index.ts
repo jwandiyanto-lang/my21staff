@@ -126,3 +126,24 @@ export {
   type MissingFieldsResult,
   type DocumentStatus,
 } from './qualification';
+
+// ===========================================
+// Knowledge Base
+// ===========================================
+
+export {
+  // Query functions
+  getDestinationsForCountry,
+  findMatchingDestinations,
+  getPromotedDestinations,
+  // Formatting
+  formatDestinationInfo,
+  formatDestinationList,
+  getRecommendationText,
+  // Question detection
+  detectUniversityQuestion,
+  // Types
+  type Destination,
+  type SearchCriteria,
+  type UniversityQuestionResult,
+} from './knowledge-base';

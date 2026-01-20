@@ -16,6 +16,17 @@ import {
 } from './context-builder';
 import { selectModel, generateResponse } from './ai-router';
 import { getNextState, shouldAutoHandoff } from './state-machine';
+import {
+  parseDocumentResponse,
+  updateDocumentStatus,
+  getNextDocumentKey,
+  type DocumentStatus,
+} from './qualification';
+import {
+  getDestinationsForCountry,
+  detectUniversityQuestion,
+  type Destination,
+} from './knowledge-base';
 import type {
   ARIConversation,
   ARIConfig,
@@ -296,6 +307,64 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
     // 5. Extract form answers from contact metadata
     const formAnswers = extractFormAnswers(contact.metadata);
 
+    // 5b. Process document response if in qualifying state with pending question
+    const conversationContext = conversation.context as ARIContext & {
+      documents?: DocumentStatus;
+      pendingDocumentQuestion?: keyof DocumentStatus;
+    };
+
+    if (
+      conversation.state === 'qualifying' &&
+      conversationContext.pendingDocumentQuestion
+    ) {
+      const parsedResponse = parseDocumentResponse(userMessage);
+      if (parsedResponse !== null) {
+        const currentDocs: DocumentStatus = conversationContext.documents || {
+          passport: null,
+          cv: null,
+          english_test: null,
+          transcript: null,
+        };
+        const pendingKey = conversationContext.pendingDocumentQuestion;
+        const newDocs = updateDocumentStatus(currentDocs, pendingKey, parsedResponse);
+
+        // Update conversation context with new document status
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const updatedContext = {
+          ...conversationContext,
+          documents: newDocs,
+          pendingDocumentQuestion: null, // Clear pending
+        } as any;
+        await supabase
+          .from('ari_conversations')
+          .update({ context: updatedContext })
+          .eq('id', conversation.id);
+
+        // Update local context for prompt building
+        conversationContext.documents = newDocs;
+        conversationContext.pendingDocumentQuestion = undefined;
+
+        console.log(`[ARI] Document ${pendingKey} status updated to: ${parsedResponse}`);
+      }
+    }
+
+    // 5c. Detect university questions and fetch destinations
+    let destinations: Destination[] = [];
+    const detection = detectUniversityQuestion(userMessage);
+    if (detection.isQuestion) {
+      // Use detected country, or fall back to form answer
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const metadataFormAnswers = (contact.metadata as any)?.form_answers;
+      const targetCountry = detection.country ||
+        formAnswers.country ||
+        (metadataFormAnswers?.country as string | undefined);
+
+      if (targetCountry) {
+        destinations = await getDestinationsForCountry(supabase, workspaceId, targetCountry);
+        console.log(`[ARI] Fetched ${destinations.length} destinations for ${targetCountry}`);
+      }
+    }
+
     // 6. Check for auto-handoff (stuck in same state too long)
     const messageCount = await countMessagesInState(
       supabase,
@@ -356,7 +425,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
       },
       conversation: {
         state: conversation.state,
-        context: conversation.context as ARIContext,
+        context: conversationContext,
         recentMessages: recentMessages.map(m => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
@@ -368,6 +437,14 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
         tone: config.tone as ARITone,
         language: config.language,
       },
+      // Include destinations for university questions
+      destinations: destinations.length > 0 ? destinations.map(d => ({
+        country: d.country,
+        university: d.university_name,
+        requirements: d.requirements as Record<string, unknown>,
+      })) : undefined,
+      // Full destinations for detailed formatting in prompt
+      fullDestinations: destinations.length > 0 ? destinations : undefined,
     };
 
     const systemPrompt = buildSystemPrompt(promptContext);

@@ -13,6 +13,7 @@ import {
   getNextDocumentQuestion,
   type DocumentStatus,
 } from './qualification';
+import { formatDestinationList, type Destination } from './knowledge-base';
 
 // ===========================================
 // Type Definitions
@@ -34,6 +35,8 @@ export interface PromptContext {
       documents?: DocumentStatus;
       /** Fields already asked about to avoid repeating */
       askedFields?: string[];
+      /** Pending document question key for tracking responses */
+      pendingDocumentQuestion?: keyof DocumentStatus;
     };
     recentMessages: Array<{ role: 'user' | 'assistant'; content: string }>;
   };
@@ -43,11 +46,14 @@ export interface PromptContext {
     tone: ARITone;
     language: string;
   };
+  /** Destinations from knowledge base for university questions */
   destinations?: Array<{
     country: string;
     university: string;
     requirements: Record<string, unknown>;
   }>;
+  /** Full destination objects for detailed formatting */
+  fullDestinations?: Destination[];
 }
 
 // ===========================================
@@ -277,9 +283,17 @@ export function buildSystemPrompt(ctx: PromptContext): string {
     }
   }
 
-  // 7. Relevant Destinations (if provided and in qualifying/scoring)
-  if (ctx.destinations && ctx.destinations.length > 0 &&
+  // 7. Knowledge Base - Relevant Destinations (if provided)
+  if (ctx.fullDestinations && ctx.fullDestinations.length > 0) {
+    // Full destination data available - use detailed formatting
+    parts.push('\n## KNOWLEDGE BASE - UNIVERSITAS');
+    parts.push('Berikut data universitas yang tersedia:');
+    parts.push(formatDestinationList(ctx.fullDestinations));
+    parts.push('\nGunakan data ini untuk menjawab pertanyaan tentang universitas, syarat, dan biaya.');
+    parts.push('Jika user tanya tentang universitas yang tidak ada di data, bilang "Saya cek dulu ya kak, nanti saya infoin."');
+  } else if (ctx.destinations && ctx.destinations.length > 0 &&
       ['qualifying', 'scoring', 'booking'].includes(ctx.conversation.state)) {
+    // Basic destination data - simple listing
     parts.push('\n## Universitas Relevan');
     ctx.destinations.slice(0, 3).forEach(dest => {
       parts.push(`- ${dest.university} (${dest.country})`);
