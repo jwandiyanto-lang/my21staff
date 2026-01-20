@@ -4,49 +4,41 @@
 
 **No system = Can't grow. I help you build that system.**
 
-WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-tenant admin, AI-powered WhatsApp responses, comprehensive lead management, and team collaboration features.
+WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-tenant admin, AI-powered WhatsApp responses, comprehensive lead management, team collaboration, support ticketing, and client-first trust-building features.
 
 ## Core Value
 
 The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
-## Current Milestone: v2.1 Client Launch Ready
+## Current State (v2.1)
 
-**Goal:** Complete package to onboard Eagle as first paying client — brand foundation, functional CRM features, working integrations.
+**Production URL:** https://my21staff.com (Vercel)
 
-**Target features:**
-- Brand Guidelines Document (logo, colors, typography, voice)
-- Folder Restructure (my21staff/ vs my21staff-business/)
-- Email System via Hostinger (invitation, welcome, support templates)
-- Landing Page Redesign (mobile-friendly, "WhatsApp Automation" hook)
-- Workspace Ownership & Roles (owner permissions, member management)
-- WhatsApp Bot via Kapso (Eagle's number, SeaLion AI)
-- Support Page with Full Ticketing (Report → Discuss → Outcome → Implementation)
-- Security Info Page
-- Performance Optimization (edge caching, DB query caching, bundle reduction)
-- Deferred: Kapso Persona Config, SMTP Email Delivery fix
-
-## Current State (v2.0)
-
-**Production URL:** https://my21staff.vercel.app
+**First Client:** Eagle Overseas Education (onboarding ready)
 
 **Shipped Features:**
 - Lead database with status, tags, score, notes, activity timeline
 - Two-way WhatsApp messaging via Kapso (send/receive)
-- AI-powered auto-replies via Sea Lion LLM
+- AI-powered auto-replies via Sea Lion LLM (Ari persona for Eagle)
 - Multi-tenant admin with client management
 - Dashboard with client stats and task management
 - CSV import/export for contacts and notes
 - Team invitations with password setup flow
-- Pricing form → CRM leads integration
-- Security hardening (rate limiting, input validation, API key encryption)
+- Role-based permissions (owner/admin/member)
+- 4-stage support ticketing with approval workflow
+- Central support hub for all client tickets
+- Security info page for trust-building
+- Performance optimization with TanStack Query caching
+- Brand-aligned landing page with pricing integration
 
 **Tech Stack:**
-- 23,856 lines TypeScript
+- 32,172 lines TypeScript
 - Next.js 15 + React 19
 - Supabase (PostgreSQL + Auth + RLS)
 - Shadcn/ui + Tailwind CSS
 - Kapso API for WhatsApp
+- Resend for transactional email
+- TanStack Query v5 for client caching
 
 ## Requirements
 
@@ -65,20 +57,19 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - ✓ **CSV import/export** — Contacts and notes with validation and duplicate detection — v2.0
 - ✓ **Team invitations** — Direct user creation with recovery links — v2.0
 - ✓ **Pricing form leads** — Public API endpoint for pricing form → CRM — v2.0
+- ✓ **Brand Guidelines Document** — Logo rules, colors, typography, voice & tone — v2.1
+- ✓ **Email System** — Resend HTTP API for invitation emails — v2.1
+- ✓ **Workspace Ownership & Roles** — Owner permissions, member management — v2.1
+- ✓ **Support Page** — Full ticketing system (Report → Discuss → Outcome → Implementation) — v2.1
+- ✓ **Central Support Hub** — Cross-workspace ticketing, client portal, image attachments — v2.1
+- ✓ **Security Info Page** — Data storage, protection methods — v2.1
+- ✓ **Landing Page Redesign** — Mobile-friendly, conversion-focused — v2.1
+- ✓ **Performance Optimization** — TanStack Query caching, loading skeletons — v2.1
+- ✓ **WhatsApp Bot Setup** — Eagle's number via Kapso, Ari persona — v2.1
 
 ### Active
 
-- [ ] Brand Guidelines Document — logo rules, colors, typography, voice & tone
-- [ ] Folder Restructure — my21staff/ (web app) vs my21staff-business/ (private)
-- [ ] Email System — templates via admin@my21staff.com (Hostinger)
-- [ ] Landing Page Redesign — mobile-friendly, "WhatsApp Automation" hook
-- [ ] Workspace Ownership & Roles — owner permissions, member management
-- [ ] WhatsApp Bot Setup — Eagle's number via Kapso, SeaLion AI
-- [ ] Support Page — full ticketing system (Report → Discuss → Outcome → Implementation)
-- [ ] Security Info Page — data storage, protection methods
-- [ ] Performance Optimization — edge caching, DB query caching, bundle reduction
-- [ ] Kapso persona configuration (Kia for Eagle Overseas) — deferred from v2.0
-- [ ] SMTP email delivery fix — deferred from v2.0
+(No active requirements — ready for next milestone planning)
 
 ### Out of Scope
 
@@ -87,11 +78,11 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - Self-service onboarding — manual for now
 - Billing/subscriptions — not needed yet
 - Multi-user chat assignment — single user per workspace for v2
-- Ads campaign launch — v2.2
-- Advanced analytics dashboard — v2.2
-- Meta Ads integration — v2.2
-- Content creation tools — v2.2
-- Telegram bot connection — v2.2 (persona only in v2.1)
+- Ads campaign launch — v2.2+
+- Advanced analytics dashboard — v2.2+
+- Meta Ads integration — v2.2+
+- Content creation tools — v2.2+
+- Telegram bot connection — v2.2+
 
 ## Context
 
@@ -101,13 +92,18 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 **Workspaces:**
 - My21Staff: `0318fda5-22c4-419b-bdd8-04471b818d17` (for pricing form leads)
-- Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
+- Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (first paying client)
+
+**Known Issues (Deferred):**
+- Forgot password still uses Supabase email (not Resend)
+- Resend/delete invitation has auth bug
+- In-memory rate limiting won't scale multi-instance
 
 ## Constraints
 
 - **Tech Stack**: Next.js 15 + React 19 + TypeScript, Supabase (PostgreSQL + Auth + RLS), Shadcn/ui, Tailwind CSS
-- **Design System**: CRM uses peach/forest green palette (Plus Jakarta Sans), Landing uses sage/orange (Plus Jakarta Sans + Inter)
-- **Integration**: Kapso API for WhatsApp (API key stored encrypted)
+- **Design System**: CRM uses cool green palette, Landing uses sage/orange (Plus Jakarta Sans + Inter)
+- **Integration**: Kapso API for WhatsApp (API key stored encrypted), Resend for email
 - **Deployment**: Vercel (single instance, in-memory rate limiting)
 
 ## Key Decisions
@@ -128,6 +124,10 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | Load more pagination | Better UX than page numbers | ✓ Good — smoother experience |
 | Direct user creation for invites | Supabase admin API + recovery links | ✓ Good — bypasses email issues |
 | Phone E.164 normalization | Indonesian 0812 → +6281 | ✓ Good — consistent data |
+| Resend over SMTP | HTTP API more reliable than DNS-dependent SMTP | ✓ Good — v2.1 fix |
+| TanStack Query for caching | Stale-while-revalidate for instant navigation | ✓ Good — v2.1 perf |
+| 4-stage ticket workflow | Trust-building with clear progress | ✓ Good — v2.1 feature |
+| Central support hub | All client tickets → my21staff workspace | ✓ Good — v2.1 feature |
 
 ---
-*Last updated: 2026-01-18 after v2.1 milestone started*
+*Last updated: 2026-01-20 after v2.1 milestone shipped*

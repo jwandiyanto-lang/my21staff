@@ -1,5 +1,41 @@
 # Project Milestones: my21staff
 
+## v2.1 Client Launch Ready (Shipped: 2026-01-20)
+
+**Delivered:** Complete client onboarding package with brand foundation, email delivery, role-based permissions, support ticketing, performance optimization, and Kapso bot setup for Eagle as first paying client.
+
+**Phases completed:** 1-9 (30 plans total)
+
+**Key accomplishments:**
+
+- Brand guidelines with logo system, color palette, typography rules
+- Email delivery via Resend HTTP API (replaced broken SMTP)
+- Role-based permissions with owner/admin/member enforcement and RLS policies
+- 4-stage support ticketing workflow (Report → Discuss → Outcome → Implementation)
+- Central support hub for all client tickets with image attachments
+- Security info page for trust-building with clients
+- Landing page redesign with conversion optimization
+- Performance optimization with TanStack Query caching and loading skeletons
+- Kapso bot setup with Ari persona for Eagle's WhatsApp
+
+**Stats:**
+
+- 282 commits
+- 32,172 lines of TypeScript
+- 9 phases, 30 plans
+- 3 days (Jan 18 → Jan 20, 2026)
+
+**Git range:** `d01108c` → `35d40c3`
+
+**Known issues deferred:**
+- Forgot password uses Supabase email (not Resend)
+- Resend/delete invitation auth bug
+- In-memory rate limiting won't scale multi-instance
+
+**What's next:** Eagle onboarding, then v2.2 planning
+
+---
+
 ## v2.0 Production Ready (Shipped: 2026-01-18)
 
 **Delivered:** Production-ready WhatsApp CRM SaaS with multi-tenant admin, AI-powered responses, comprehensive lead management, security hardening, and settings/data management.
