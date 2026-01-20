@@ -269,6 +269,32 @@ export function buildSystemPrompt(ctx: PromptContext): string {
     }
   }
 
+  // 5c. Scoring state context
+  if (ctx.conversation.state === 'scoring' && ctx.contact.leadScore !== undefined) {
+    const temp = ctx.contact.leadScore >= 70 ? 'hot' :
+                 ctx.contact.leadScore >= 40 ? 'warm' : 'cold';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const scoreReasons = (ctx.conversation.context as any).score_reasons || [];
+
+    parts.push('\n## HASIL SCORING');
+    parts.push(`Lead Score: ${ctx.contact.leadScore}/100 (${temp})`);
+    if (scoreReasons.length > 0) {
+      parts.push('Alasan:');
+      scoreReasons.slice(0, 5).forEach((reason: string) => parts.push(`- ${reason}`));
+    }
+
+    if (temp === 'hot') {
+      parts.push('\nINSTRUKSI: Lead ini HOT. Transisi ke handoff. Bilang konsultan akan segera menghubungi.');
+    } else if (temp === 'cold') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const communityMsg = (ctx.conversation.context as any).pendingCommunityMessage;
+      if (communityMsg) {
+        parts.push(`\nINSTRUKSI: Lead ini COLD. Kirim pesan community: "${communityMsg}"`);
+      }
+      parts.push('Kemudian bilang konsultan akan follow up nanti.');
+    }
+  }
+
   // 6. Collected Data Summary
   if (ctx.conversation.context.lead_data) {
     const ld = ctx.conversation.context.lead_data;

@@ -158,3 +158,14 @@ export {
   getLeadTemperature,
   type ScoreBreakdown as ScoringBreakdown, // Alias to avoid conflict with types.ts export
 } from './scoring';
+
+// ===========================================
+// Routing
+// ===========================================
+
+export {
+  determineRouting,
+  temperatureToLeadStatus,
+  type RoutingDecision,
+  type RoutingAction,
+} from './routing';
