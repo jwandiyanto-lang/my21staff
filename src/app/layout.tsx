@@ -17,8 +17,25 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "my21staff",
-  description: "WhatsApp CRM for lead management and two-way messaging",
+  title: "my21staff | The CRM that grows with you",
+  description: "Scale your business with an adaptive digital workforce. AI-powered WhatsApp automation and database management in one system.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-icon.png",
+  },
+  openGraph: {
+    title: "my21staff | The CRM that grows with you",
+    description: "Scale your business with an adaptive digital workforce. AI-powered WhatsApp automation and database management in one system.",
+    siteName: "my21staff",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "my21staff | The CRM that grows with you",
+    description: "Scale your business with an adaptive digital workforce. AI-powered WhatsApp automation and database management in one system.",
+  },
 };
 
 export default function RootLayout({
