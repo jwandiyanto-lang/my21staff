@@ -1,5 +1,37 @@
 # Project Milestones: my21staff
 
+## v2.2 ARI & User Flow (Shipped: 2026-01-20)
+
+**Delivered:** AI WhatsApp assistant (ARI) that handles lead qualification, scoring, consultation booking, and handoff — from social media leads to booked consultations.
+
+**Phases completed:** 1-6 (23 plans total, Phases 4 & 7 deferred)
+
+**Key accomplishments:**
+
+- ARI database infrastructure (7 tables with workspace-scoped RLS)
+- Multi-LLM AI system with Grok + Sea-Lion and deterministic A/B testing
+- Lead scoring engine (0-100 with category breakdown: basic, qualification, documents, engagement)
+- Automated lead routing (hot → consultation, warm → nurture, cold → community)
+- Consultation booking flow with Indonesian day/time parsing and slot management
+- Admin configuration UI ("Your Intern" page with 5 tabs: Persona, Flow, Database, Scoring, Slots)
+
+**Stats:**
+
+- 43,048 lines of TypeScript
+- 6 phases, 23 plans
+- Same day (Jan 20, 2026)
+
+**Git range:** v2.1 → v2.2
+
+**Deferred to v2.3:**
+- Phase 4: Payment Integration (Midtrans)
+- Phase 7: AI Model Selection UI
+- Your Intern page API timeout issue (to be debugged)
+
+**What's next:** v2.3 — Payment integration, AI model selection UI, API debugging
+
+---
+
 ## v2.1 Client Launch Ready (Shipped: 2026-01-20)
 
 **Delivered:** Complete client onboarding package with brand foundation, email delivery, role-based permissions, support ticketing, performance optimization, and Kapso bot setup for Eagle as first paying client.

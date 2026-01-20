@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-20)
 
 **Core value:** The system that lets you grow — lead management, follow-up automation, guided by real business experience.
-**Current focus:** v2.2 ARI & User Flow — End-to-end journey from social media leads to paid consultations
+**Current focus:** v2.3 Polish & Payment (next milestone planning)
 
 ## Current Position
 
-Phase: 6 of 7 — Admin Interface (COMPLETE)
-Plan: 5 of 5 (06-05-PLAN complete)
-Status: Phase complete
-Last activity: 2026-01-20 — Completed 06-05-PLAN (Tab Integration)
+Phase: Milestone complete
+Plan: N/A
+Status: Ready for next milestone
+Last activity: 2026-01-20 — v2.2 ARI & User Flow shipped
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ████████░░ (23/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ (105 plans shipped)
 
 ## Performance Metrics
 
@@ -130,6 +130,9 @@ Key v2.2 decisions:
 - Forgot password email uses Supabase email, not Resend (P1)
 - Resend/delete invitation auth bug
 - In-memory rate limiting won't scale multi-instance
+- Phase 6 "Your Intern" page API timeout (needs debugging)
+- Payment integration (Midtrans) → v2.3
+- AI model selection UI → v2.3
 
 ### Blockers/Concerns
 
@@ -138,9 +141,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 06-05-PLAN (Tab Integration) - Phase 6 complete
+Stopped at: v2.2 milestone complete
 Resume file: None
-Next: 07-ai-models Phase (Phase 7)
+Next: /gsd:new-milestone for v2.3
 
 ## Deployment Info
 
@@ -165,4 +168,4 @@ Next: 07-ai-models Phase (Phase 7)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed 06-05-PLAN (Tab Integration) - Phase 6 Complete*
+*Last updated: 2026-01-20 — v2.2 ARI & User Flow shipped*

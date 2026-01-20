@@ -9,188 +9,10 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 - v1.0 MVP — Phases 1-5 (shipped 2026-01-14)
 - v2.0 Production Ready — Phases 6-22 (shipped 2026-01-18)
 - v2.1 Client Launch Ready — Phases 1-9 (shipped 2026-01-20)
-- **v2.2 ARI & User Flow** — Phases 1-7 (in progress)
+- v2.2 ARI & User Flow — Phases 1-6 (shipped 2026-01-20)
+- **v2.3 Polish & Payment** — TBD (next milestone)
 
 ---
-
-## Current Milestone: v2.2 ARI & User Flow
-
-**Goal:** End-to-end user journey from social media leads to paid consultations via ARI WhatsApp bot.
-
-**First Client:** Eagle Overseas Education
-
-### Phase 1: Database Schema & Inbox Overhaul ✓
-
-**Goal:** Foundation for ARI + improved inbox experience
-
-**Requirements:** DB-01 through DB-09, INBOX-01 through INBOX-07
-
-**Status:** Complete (2026-01-20)
-
-**Success Criteria:**
-- [x] ARI tables created with RLS policies
-- [x] Kapso metadata cached on contacts table
-- [x] Inbox loads instantly with cached contact data
-- [x] Real-time message updates via Supabase subscriptions
-- [x] Active/All and tag filters working
-
-**Plans:** 5/5 complete
-
-Plans:
-- [x] 01-01-PLAN.md — ARI database tables (7 tables, 21 RLS policies)
-- [x] 01-02-PLAN.md — Contacts cache fields + phone normalization
-- [x] 01-03-PLAN.md — RLS policies + realtime publication for ARI tables
-- [x] 01-04-PLAN.md — Active/All filter toggle + enhanced inbox filters
-- [x] 01-05-PLAN.md — Typing indicators + real-time sync improvements
-
----
-
-### Phase 2: ARI Core Conversation ✓
-
-**Goal:** ARI pulls form data and has intelligent conversations
-
-**Requirements:** ARI-01 through ARI-07
-
-**Status:** Complete (2026-01-20)
-
-**Success Criteria:**
-- [x] ARI matches incoming WhatsApp number to CRM contact
-- [x] ARI greets with context from form submission
-- [x] ARI asks follow-up questions for missing data
-- [x] ARI answers university/destination questions from knowledge base
-- [x] Natural Indonesian conversation with configurable persona
-
-**Plans:** 5/5 complete
-
-Plans:
-- [x] 02-01-PLAN.md — ARI foundation: types and multi-LLM clients (Grok + Sea-Lion)
-- [x] 02-02-PLAN.md — State machine and context builder
-- [x] 02-03-PLAN.md — Webhook integration and message processing
-- [x] 02-04-PLAN.md — Form validation and qualification logic
-- [x] 02-05-PLAN.md — Knowledge base integration for university questions
-
----
-
-### Phase 3: Lead Scoring & Routing ✓
-
-**Goal:** Dynamic scoring and automatic lead routing
-
-**Requirements:** SCORE-01 through SCORE-06, ROUTE-01 through ROUTE-04
-
-**Status:** Complete (2026-01-20)
-
-**Success Criteria:**
-- [x] Lead score calculated (0-100) based on form + conversation
-- [x] Hot leads (70+) receive consultation push
-- [x] Cold leads (<40) receive community link
-- [x] Lead phase auto-updates in CRM
-
-**Plans:** 4/4 complete
-
-Plans:
-- [x] 03-01-PLAN.md — Scoring calculation engine (0-100 with breakdown)
-- [x] 03-02-PLAN.md — Processor integration and routing logic
-- [x] 03-03-PLAN.md — UI: Score breakdown component in sidebar
-- [x] 03-04-PLAN.md — Routing action execution (handoff, community link)
-
----
-
-### Phase 4: Payment Integration ⏭
-
-**Goal:** Midtrans payment gateway for consultation booking
-
-**Status:** Skipped — Client (Eagle) has existing payment method
-
-**Requirements:** PAY-01 through PAY-06 (deferred to v2.3)
-
-**Notes:** Can be added later for clients without existing payment infrastructure.
-
----
-
-### Phase 5: Scheduling & Handoff ✓
-
-**Goal:** Book consultations and hand off to consultants
-
-**Requirements:** SCHED-01 through SCHED-06, HAND-01 through HAND-05
-
-**Status:** Complete (2026-01-20)
-
-**Success Criteria:**
-- [x] Admin enters available consultant slots
-- [x] ARI displays slots and books appointments
-- [x] Meeting link notification sent before appointment
-- [x] Consultant receives full context (score, conversation summary)
-
-**Plans:** 4/4 complete
-
-Plans:
-- [x] 05-01-PLAN.md — Slot database schema and CRUD API
-- [x] 05-02-PLAN.md — Knowledge Base UI with slot management
-- [x] 05-03-PLAN.md — ARI booking conversation flow
-- [x] 05-04-PLAN.md — Handoff automation and notifications
-
----
-
-### Phase 6: Admin Interface ✓
-
-**Goal:** "Your Intern" configuration page for persona, flow, knowledge, and scoring
-
-**Requirements:** ADMIN-01 through ADMIN-07, KB-01 through KB-06
-
-**Status:** Complete (2026-01-20)
-
-**Success Criteria:**
-- [x] Persona settings editable (name, tone, greeting template)
-- [x] Custom conversation flow stages configurable
-- [x] Knowledge database with custom categories
-- [x] Scoring thresholds and weights configurable
-- [x] Community link configurable
-
-**Plans:** 5/5 complete
-
-Plans:
-- [x] 06-01-PLAN.md — Persona tab (name, tone, greeting, community link)
-- [x] 06-02-PLAN.md — Flow tab (custom conversation stages)
-- [x] 06-03-PLAN.md — Database tab (categories + entries)
-- [x] 06-04-PLAN.md — Scoring tab (thresholds + weights)
-- [x] 06-05-PLAN.md — Integration (enable all tabs)
-
----
-
-### Phase 7: AI Model Selection
-
-**Goal:** Grok + Sea-Lion A/B testing
-
-**Requirements:** AI-01 through AI-04
-
-**Success Criteria:**
-- [ ] AI model selection in settings
-- [ ] A/B testing mode splits traffic
-- [ ] Comparison dashboard shows metrics
-- [ ] Default model selectable based on results
-
-**Plans:** TBD during `/gsd:plan-phase 7`
-
----
-
-### v2.2 Requirements Coverage
-
-| Category | Requirements | Phase |
-|----------|--------------|-------|
-| Database Schema | DB-01 to DB-09 | Phase 1 |
-| Inbox Improvements | INBOX-01 to INBOX-07 | Phase 1 |
-| ARI Core | ARI-01 to ARI-07 | Phase 2 |
-| Lead Scoring | SCORE-01 to SCORE-06 | Phase 3 |
-| Lead Routing | ROUTE-01 to ROUTE-04 | Phase 3 |
-| Payment | PAY-01 to PAY-06 | Phase 4 |
-| Scheduling | SCHED-01 to SCHED-06 | Phase 5 |
-| Handoff | HAND-01 to HAND-05 | Phase 5 |
-| Admin Persona | ADMIN-01 to ADMIN-05 | Phase 6 |
-| Knowledge Base | KB-01 to KB-06 | Phase 6 |
-| Admin Scoring | ADMIN-06 to ADMIN-07 | Phase 6 |
-| AI Models | AI-01 to AI-04 | Phase 7 |
-
-**Total:** 56 requirements across 7 phases
 
 ## Completed Milestones
 
@@ -275,6 +97,29 @@ Full details: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 
 </details>
 
+<details>
+<summary>v2.2 ARI & User Flow (Phases 1-6) — SHIPPED 2026-01-20</summary>
+
+- [x] Phase 1: Database Schema & Inbox Overhaul (5/5 plans) — completed 2026-01-20
+- [x] Phase 2: ARI Core Conversation (5/5 plans) — completed 2026-01-20
+- [x] Phase 3: Lead Scoring & Routing (4/4 plans) — completed 2026-01-20
+- [x] Phase 4: Payment Integration — SKIPPED (deferred to v2.3)
+- [x] Phase 5: Scheduling & Handoff (4/4 plans) — completed 2026-01-20
+- [x] Phase 6: Admin Interface (5/5 plans) — completed 2026-01-20
+- [x] Phase 7: AI Model Selection — DEFERRED to v2.3
+
+**Key accomplishments:**
+- ARI database infrastructure (7 tables with RLS)
+- Multi-LLM AI system (Grok + Sea-Lion with A/B testing)
+- Lead scoring engine (0-100 with category breakdown)
+- Automated lead routing (hot/warm/cold)
+- Consultation booking flow with scheduling
+- Admin configuration UI ("Your Intern" page)
+
+Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
+
+</details>
+
 ---
 
 ## Progress
@@ -284,10 +129,10 @@ Full details: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 | v1.0 MVP | 1-5 | 14/14 | Complete | 2026-01-14 |
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
-| v2.2 ARI & User Flow | 1-7 | 23/28 | In Progress | — |
+| v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 
-**Total shipped:** 82 plans across 3 milestones
+**Total shipped:** 105 plans across 4 milestones
 
 ---
 
-*Last updated: 2026-01-20 — Phase 6 complete (Admin Interface)*
+*Last updated: 2026-01-20 — v2.2 milestone complete*
