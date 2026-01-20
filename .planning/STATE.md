@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 2 of 7 — ARI Core Conversation (IN PROGRESS)
-Plan: 2 of 9 (02-02-PLAN complete)
+Plan: 4 of 9 (02-04-PLAN complete)
 Status: In progress
-Last activity: 2026-01-20 — Completed 02-02-PLAN (ARI State Machine and Context Builder)
+Last activity: 2026-01-20 — Completed 02-04-PLAN (ARI Form Validation and Qualification)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ███░░░░░░░ (7/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ███░░░░░░░ (9/28 plans)
 
 ## Performance Metrics
 
@@ -63,6 +63,9 @@ Key v2.2 decisions:
 - Business thresholds: MIN_SCORE_FOR_SCORING=40, HOT_LEAD_THRESHOLD=70 - IMPLEMENTED 02-02
 - Auto-handoff after 10 messages in same state to prevent loops - IMPLEMENTED 02-02
 - WIB timezone (UTC+7) for Indonesian time-based greetings - IMPLEMENTED 02-02
+- Required fields for qualification: name, email, english_level, budget, timeline, country - IMPLEMENTED 02-04
+- Document tracking: passport, cv, english_test, transcript - IMPLEMENTED 02-04
+- Indonesian yes/no parsing for document responses - IMPLEMENTED 02-04
 
 ### Deferred Issues
 
@@ -77,9 +80,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 02-02-PLAN (ARI State Machine and Context Builder)
+Stopped at: Completed 02-04-PLAN (ARI Form Validation and Qualification)
 Resume file: None
-Next: 02-03-PLAN (Conversation Handler)
+Next: 02-05-PLAN (Response Generation)
 
 ## Deployment Info
 
@@ -104,4 +107,4 @@ Next: 02-03-PLAN (Conversation Handler)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed 02-02-PLAN (ARI State Machine and Context Builder)*
+*Last updated: 2026-01-20 — Completed 02-04-PLAN (ARI Form Validation and Qualification)*
