@@ -369,3 +369,76 @@ export const DEFAULT_SCORING_CONFIG = {
   weight_document: 30,
   weight_engagement: 10,
 } as const;
+
+// ===========================================
+// Flow Stage Types (for Flow tab)
+// ===========================================
+
+/** Custom conversation flow stage (ari_flow_stages table) */
+export interface FlowStage {
+  id: string;
+  workspace_id: string;
+  name: string;
+  goal: string;
+  sample_script: string | null;
+  exit_criteria: string | null;
+  stage_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type FlowStageInsert = Omit<FlowStage, 'id' | 'created_at' | 'updated_at'>;
+export type FlowStageUpdate = Partial<Omit<FlowStage, 'id' | 'workspace_id' | 'created_at' | 'updated_at'>>;
+
+/** Default flow stages (used when no custom stages exist) */
+export const DEFAULT_FLOW_STAGES: Array<Omit<FlowStage, 'id' | 'workspace_id' | 'created_at' | 'updated_at'>> = [
+  {
+    name: 'Greeting',
+    goal: 'Welcome lead, establish rapport',
+    sample_script: null,
+    exit_criteria: 'Lead responds',
+    stage_order: 0,
+    is_active: true,
+  },
+  {
+    name: 'Qualifying',
+    goal: 'Gather key info: destination, budget, timeline',
+    sample_script: null,
+    exit_criteria: 'All required fields collected',
+    stage_order: 1,
+    is_active: true,
+  },
+  {
+    name: 'Scoring',
+    goal: 'Assess lead readiness based on collected data',
+    sample_script: null,
+    exit_criteria: 'Score calculated, routing determined',
+    stage_order: 2,
+    is_active: true,
+  },
+  {
+    name: 'Booking',
+    goal: 'Offer consultation for hot leads',
+    sample_script: null,
+    exit_criteria: 'Lead accepts or declines',
+    stage_order: 3,
+    is_active: true,
+  },
+  {
+    name: 'Scheduling',
+    goal: 'Book consultation time slot',
+    sample_script: null,
+    exit_criteria: 'Appointment confirmed',
+    stage_order: 4,
+    is_active: true,
+  },
+  {
+    name: 'Handoff',
+    goal: 'Transfer to human consultant',
+    sample_script: null,
+    exit_criteria: 'Consultant takes over',
+    stage_order: 5,
+    is_active: true,
+  },
+];
