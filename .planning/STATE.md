@@ -63,6 +63,8 @@ Key v2.2 decisions:
 - Business thresholds: MIN_SCORE_FOR_SCORING=40, HOT_LEAD_THRESHOLD=70 - IMPLEMENTED 02-02
 - Auto-handoff after 10 messages in same state to prevent loops - IMPLEMENTED 02-02
 - WIB timezone (UTC+7) for Indonesian time-based greetings - IMPLEMENTED 02-02
+- Fire-and-forget webhook pattern: processWithARI() not awaited, webhook returns 200 immediately - IMPLEMENTED 02-03
+- ARI only for text messages (media skipped), check ari_config before processing - IMPLEMENTED 02-03
 - Required fields for qualification: name, email, english_level, budget, timeline, country - IMPLEMENTED 02-04
 - Document tracking: passport, cv, english_test, transcript - IMPLEMENTED 02-04
 - Indonesian yes/no parsing for document responses - IMPLEMENTED 02-04
