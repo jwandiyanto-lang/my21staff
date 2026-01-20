@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 1 of 7 — Database Schema & Inbox Overhaul
-Plan: 0 of TBD
-Status: Ready for phase planning
-Last activity: 2026-01-20 — v2.2 milestone initialized
+Plan: 1 of 4 (01-01-PLAN complete)
+Status: In progress
+Last activity: 2026-01-20 — Completed 01-01-PLAN (ARI Database Tables)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ░░░░░░░░░░
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ░░░░░░░░░░ (1/28 plans)
 
 ## Performance Metrics
 
@@ -40,14 +40,16 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 All decisions logged in PROJECT.md Key Decisions table.
 
-Key v2.2 decisions (pending):
-- Multi-tenant ARI infrastructure (workspace_id on all tables)
+Key v2.2 decisions:
+- Multi-tenant ARI infrastructure (workspace_id on all tables) - IMPLEMENTED 01-01
 - User-initiated WhatsApp trigger (form shows WA CTA, user starts conversation)
 - Phone number matching for CRM contact identification
 - Midtrans payment gateway for Indonesian payments
 - Manual consultant slots (calendar integration deferred to v2.3)
-- Both Grok + Sea-Lion from day 1 for A/B testing
+- Both Grok + Sea-Lion from day 1 for A/B testing - Schema ready (ari_ai_comparison table)
 - Kapso metadata caching for instant inbox loading
+- ARI state machine: greeting -> qualifying -> scoring -> booking -> payment -> scheduling -> handoff -> completed
+- One ARI conversation per contact per workspace (UNIQUE constraint)
 
 ### Deferred Issues
 
@@ -62,9 +64,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: v2.2 milestone initialized
+Stopped at: Completed 01-01-PLAN (ARI Database Tables)
 Resume file: None
-Next: `/gsd:plan-phase 1` (Database Schema & Inbox Overhaul)
+Next: 01-02-PLAN (next plan in phase 1)
 
 ## Deployment Info
 
@@ -88,4 +90,4 @@ Next: `/gsd:plan-phase 1` (Database Schema & Inbox Overhaul)
 - Grok: API access available
 
 ---
-*Last updated: 2026-01-20 — v2.2 milestone initialized*
+*Last updated: 2026-01-20 — Completed 01-01-PLAN (ARI Database Tables)*
