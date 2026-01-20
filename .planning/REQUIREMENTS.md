@@ -61,25 +61,25 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 ### Admin Interface - Persona
 
-- [ ] **ADMIN-01**: Editable bot name (default: "ARI")
-- [ ] **ADMIN-02**: Greeting style configuration (casual/formal/professional)
-- [ ] **ADMIN-03**: Language setting (Bahasa Indonesia primary, English fallback)
-- [ ] **ADMIN-04**: Tone configuration (supportive, clear, encouraging)
-- [ ] **ADMIN-05**: Community link setting for cold lead routing
+- [x] **ADMIN-01**: Editable bot name (default: "ARI")
+- [x] **ADMIN-02**: Greeting style configuration (casual/formal/professional)
+- [x] **ADMIN-03**: Language setting (Bahasa Indonesia primary, English fallback)
+- [x] **ADMIN-04**: Tone configuration (supportive, clear, encouraging)
+- [x] **ADMIN-05**: Community link setting for cold lead routing
 
 ### Admin Interface - Knowledge Base
 
-- [ ] **KB-01**: University/destination CRUD (add, edit, delete)
-- [ ] **KB-02**: Country > City > University hierarchy
-- [ ] **KB-03**: Requirements per university (IELTS min, GPA min, budget range, deadline)
-- [ ] **KB-04**: Programs list per university
-- [ ] **KB-05**: Promotion toggle and priority for destinations
-- [ ] **KB-06**: Notes field for special info (scholarships, etc.)
+- [x] **KB-01**: University/destination CRUD (add, edit, delete)
+- [x] **KB-02**: Country > City > University hierarchy
+- [x] **KB-03**: Requirements per university (IELTS min, GPA min, budget range, deadline)
+- [x] **KB-04**: Programs list per university
+- [x] **KB-05**: Promotion toggle and priority for destinations
+- [x] **KB-06**: Notes field for special info (scholarships, etc.)
 
 ### Admin Interface - Scoring
 
-- [ ] **ADMIN-06**: Scoring threshold configuration (Hot/Warm/Cold cutoffs)
-- [ ] **ADMIN-07**: Scoring weight adjustments (basic/qualification/engagement)
+- [x] **ADMIN-06**: Scoring threshold configuration (Hot/Warm/Cold cutoffs)
+- [x] **ADMIN-07**: Scoring weight adjustments (basic/qualification/engagement)
 
 ### Admin Interface - AI Models
 
@@ -164,30 +164,30 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 | PAY-04 | Phase 4 | Deferred |
 | PAY-05 | Phase 4 | Deferred |
 | PAY-06 | Phase 4 | Deferred |
-| SCHED-01 | Phase 5 | Pending |
-| SCHED-02 | Phase 5 | Pending |
-| SCHED-03 | Phase 5 | Pending |
-| SCHED-04 | Phase 5 | Pending |
-| SCHED-05 | Phase 5 | Pending |
-| SCHED-06 | Phase 5 | Pending |
-| HAND-01 | Phase 5 | Pending |
-| HAND-02 | Phase 5 | Pending |
-| HAND-03 | Phase 5 | Pending |
-| HAND-04 | Phase 5 | Pending |
-| HAND-05 | Phase 5 | Pending |
-| ADMIN-01 | Phase 6 | Pending |
-| ADMIN-02 | Phase 6 | Pending |
-| ADMIN-03 | Phase 6 | Pending |
-| ADMIN-04 | Phase 6 | Pending |
-| ADMIN-05 | Phase 6 | Pending |
-| KB-01 | Phase 6 | Pending |
-| KB-02 | Phase 6 | Pending |
-| KB-03 | Phase 6 | Pending |
-| KB-04 | Phase 6 | Pending |
-| KB-05 | Phase 6 | Pending |
-| KB-06 | Phase 6 | Pending |
-| ADMIN-06 | Phase 6 | Pending |
-| ADMIN-07 | Phase 6 | Pending |
+| SCHED-01 | Phase 5 | Complete |
+| SCHED-02 | Phase 5 | Complete |
+| SCHED-03 | Phase 5 | Complete |
+| SCHED-04 | Phase 5 | Complete |
+| SCHED-05 | Phase 5 | Complete |
+| SCHED-06 | Phase 5 | Complete |
+| HAND-01 | Phase 5 | Complete |
+| HAND-02 | Phase 5 | Complete |
+| HAND-03 | Phase 5 | Complete |
+| HAND-04 | Phase 5 | Complete |
+| HAND-05 | Phase 5 | Complete |
+| ADMIN-01 | Phase 6 | Complete |
+| ADMIN-02 | Phase 6 | Complete |
+| ADMIN-03 | Phase 6 | Complete |
+| ADMIN-04 | Phase 6 | Complete |
+| ADMIN-05 | Phase 6 | Complete |
+| KB-01 | Phase 6 | Complete |
+| KB-02 | Phase 6 | Complete |
+| KB-03 | Phase 6 | Complete |
+| KB-04 | Phase 6 | Complete |
+| KB-05 | Phase 6 | Complete |
+| KB-06 | Phase 6 | Complete |
+| ADMIN-06 | Phase 6 | Complete |
+| ADMIN-07 | Phase 6 | Complete |
 | AI-01 | Phase 7 | Pending |
 | AI-02 | Phase 7 | Pending |
 | AI-03 | Phase 7 | Pending |
@@ -216,4 +216,4 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 ---
 *Requirements defined: 2026-01-20*
-*Last updated: 2026-01-20 — Phase 4 deferred (PAY-01 to PAY-06 moved to v2.3)*
+*Last updated: 2026-01-20 — Phase 6 complete (ADMIN-01 to ADMIN-07, KB-01 to KB-06)*
