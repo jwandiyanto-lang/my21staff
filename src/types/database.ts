@@ -688,6 +688,7 @@ export type Database = {
           id: string
           must_change_password: boolean | null
           role: string | null
+          settings: Record<string, unknown> | null
           user_id: string
           workspace_id: string
         }
@@ -696,6 +697,7 @@ export type Database = {
           id?: string
           must_change_password?: boolean | null
           role?: string | null
+          settings?: Record<string, unknown> | null
           user_id: string
           workspace_id: string
         }
@@ -704,6 +706,7 @@ export type Database = {
           id?: string
           must_change_password?: boolean | null
           role?: string | null
+          settings?: Record<string, unknown> | null
           user_id?: string
           workspace_id?: string
         }
