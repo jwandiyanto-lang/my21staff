@@ -24,7 +24,7 @@ interface MessageInputProps {
   workspaceId: string
   quickReplies?: QuickReply[]
   onMessageSent: (message: Message, isOptimistic: boolean) => void
-  onMessageError: (optimisticId: string) => void
+  onMessageError: (conversationId: string, optimisticId: string) => void
   conversationStatus?: string
   replyToMessage?: Message | null
   onClearReply?: () => void
@@ -191,8 +191,8 @@ export function MessageInput({
     } catch (error) {
       console.error('Send error:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to send message')
-      // Remove optimistic message on error
-      onMessageError(optimisticId)
+      // Remove optimistic message on error - pass conversationId captured at send time
+      onMessageError(conversationId, optimisticId)
     } finally {
       setIsSending(false)
       // Auto-focus input after sending - wait for React to re-enable the input
