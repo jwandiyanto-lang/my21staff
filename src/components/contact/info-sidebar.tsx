@@ -33,6 +33,7 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Phone, Mail, Calendar as CalendarIcon, User, Loader2, Tag, Pencil, Check, X, Clock } from 'lucide-react'
+import { ScoreBreakdown } from './score-breakdown'
 import { format, formatDistanceToNow } from 'date-fns'
 import { formatWIB, DATE_FORMATS } from '@/lib/utils/timezone'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
@@ -53,6 +54,16 @@ interface InfoSidebarProps {
   conversationId?: string
   onContactUpdate?: (contactId: string, updates: Partial<Contact>) => void
   onAssignmentChange?: (userId: string | null) => void
+  ariScoreData?: {
+    score: number;
+    breakdown?: {
+      basic_score?: number;
+      qualification_score?: number;
+      document_score?: number;
+      engagement_score?: number;
+    };
+    reasons?: string[];
+  };
 }
 
 // Helper function for avatar color - uses phone for stability (doesn't change when name is edited)
@@ -91,6 +102,7 @@ export function InfoSidebar({
   conversationId,
   onContactUpdate,
   onAssignmentChange,
+  ariScoreData,
 }: InfoSidebarProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -629,39 +641,49 @@ export function InfoSidebar({
 
           <Separator />
 
-          {/* Lead Score */}
+          {/* ARI Score - shows breakdown if available, falls back to manual slider */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Lead Score
-              </h3>
-              <div className="flex items-center gap-2">
-                {isUpdatingScore && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-                <span
-                  className="text-lg font-semibold tabular-nums"
-                  style={{ color: getScoreColor(localScore) }}
-                >
-                  {localScore}
-                </span>
-              </div>
-            </div>
-            <div className="h-2 rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${Math.min(localScore, 100)}%`,
-                  backgroundColor: getScoreColor(localScore),
-                }}
+            {ariScoreData ? (
+              <ScoreBreakdown
+                score={ariScoreData.score}
+                breakdown={ariScoreData.breakdown}
+                reasons={ariScoreData.reasons}
               />
-            </div>
-            <Slider
-              value={[localScore]}
-              onValueChange={handleScoreChange}
-              min={0}
-              max={100}
-              step={1}
-              className="w-full"
-            />
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Lead Score
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {isUpdatingScore && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                    <span
+                      className="text-lg font-semibold tabular-nums"
+                      style={{ color: getScoreColor(localScore) }}
+                    >
+                      {localScore}
+                    </span>
+                  </div>
+                </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(localScore, 100)}%`,
+                      backgroundColor: getScoreColor(localScore),
+                    }}
+                  />
+                </div>
+                <Slider
+                  value={[localScore]}
+                  onValueChange={handleScoreChange}
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+              </>
+            )}
           </div>
 
           <Separator />
