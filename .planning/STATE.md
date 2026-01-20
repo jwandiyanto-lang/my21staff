@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 1 of 7 — Database Schema & Inbox Overhaul
-Plan: 2 of 4 (01-02-PLAN complete)
+Plan: 3 of 4 (01-03-PLAN complete)
 Status: In progress
-Last activity: 2026-01-20 — Completed 01-02-PLAN (Kapso Metadata Caching)
+Last activity: 2026-01-20 — Completed 01-03-PLAN (RLS & Realtime for ARI Tables)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ░░░░░░░░░░ (2/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 █░░░░░░░░░ (3/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 82 (14 in v1.0 + 38 in v2.0 + 30 in v2.1)
+- Total plans completed: 83 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 1 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 → Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
@@ -51,6 +51,7 @@ Key v2.2 decisions:
 - E.164 phone normalization with libphonenumber-js - IMPLEMENTED 01-02
 - ARI state machine: greeting -> qualifying -> scoring -> booking -> payment -> scheduling -> handoff -> completed
 - One ARI conversation per contact per workspace (UNIQUE constraint)
+- Realtime subscriptions enabled for all ARI tables - IMPLEMENTED 01-03
 
 ### Deferred Issues
 
@@ -65,9 +66,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 01-02-PLAN (Kapso Metadata Caching)
+Stopped at: Completed 01-03-PLAN (RLS & Realtime for ARI Tables)
 Resume file: None
-Next: 01-03-PLAN (next plan in phase 1)
+Next: 01-04-PLAN (next plan in phase 1)
 
 ## Deployment Info
 
@@ -91,4 +92,4 @@ Next: 01-03-PLAN (next plan in phase 1)
 - Grok: API access available
 
 ---
-*Last updated: 2026-01-20 — Completed 01-02-PLAN (Kapso Metadata Caching)*
+*Last updated: 2026-01-20 — Completed 01-03-PLAN (RLS & Realtime for ARI Tables)*
