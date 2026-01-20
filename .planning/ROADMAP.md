@@ -9,6 +9,148 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 - ✅ v1.0 MVP — Phases 1-5 (shipped 2026-01-14)
 - ✅ v2.0 Production Ready — Phases 6-22 (shipped 2026-01-18)
 - ✅ v2.1 Client Launch Ready — Phases 1-9 (shipped 2026-01-20)
+- 🚧 **v2.2 ARI & User Flow** — Phases 1-7 (in progress)
+
+---
+
+## Current Milestone: v2.2 ARI & User Flow
+
+**Goal:** End-to-end user journey from social media leads to paid consultations via ARI WhatsApp bot.
+
+**First Client:** Eagle Overseas Education
+
+### Phase 1: Database Schema & Inbox Overhaul
+
+**Goal:** Foundation for ARI + improved inbox experience
+
+**Requirements:** DB-01 through DB-09, INBOX-01 through INBOX-07
+
+**Success Criteria:**
+- [ ] ARI tables created with RLS policies
+- [ ] Kapso metadata cached on contacts table
+- [ ] Inbox loads instantly with cached contact data
+- [ ] Real-time message updates via Supabase subscriptions
+- [ ] Active/All and tag filters working
+
+**Plans:** TBD during `/gsd:plan-phase 1`
+
+---
+
+### Phase 2: ARI Core Conversation
+
+**Goal:** ARI pulls form data and has intelligent conversations
+
+**Requirements:** ARI-01 through ARI-07
+
+**Success Criteria:**
+- [ ] ARI matches incoming WhatsApp number to CRM contact
+- [ ] ARI greets with context from form submission
+- [ ] ARI asks follow-up questions for missing data
+- [ ] ARI answers university/destination questions from knowledge base
+- [ ] Natural Indonesian conversation with configurable persona
+
+**Plans:** TBD during `/gsd:plan-phase 2`
+
+---
+
+### Phase 3: Lead Scoring & Routing
+
+**Goal:** Dynamic scoring and automatic lead routing
+
+**Requirements:** SCORE-01 through SCORE-06, ROUTE-01 through ROUTE-04
+
+**Success Criteria:**
+- [ ] Lead score calculated (0-100) based on form + conversation
+- [ ] Hot leads (70+) receive consultation push
+- [ ] Cold leads (<40) receive community link
+- [ ] Lead phase auto-updates in CRM
+
+**Plans:** TBD during `/gsd:plan-phase 3`
+
+---
+
+### Phase 4: Payment Integration
+
+**Goal:** Midtrans payment gateway for consultation booking
+
+**Requirements:** PAY-01 through PAY-06
+
+**Success Criteria:**
+- [ ] Payment link generated for Rp500,000 consultation
+- [ ] Indonesian payment methods supported (QRIS, GoPay, etc.)
+- [ ] Payment callback updates CRM
+- [ ] Failed payments handled with retry link
+
+**Plans:** TBD during `/gsd:plan-phase 4`
+
+---
+
+### Phase 5: Scheduling & Handoff
+
+**Goal:** Book consultations and hand off to consultants
+
+**Requirements:** SCHED-01 through SCHED-06, HAND-01 through HAND-05
+
+**Success Criteria:**
+- [ ] Admin enters available consultant slots
+- [ ] ARI displays slots and books appointments
+- [ ] Meeting link notification sent before appointment
+- [ ] Consultant receives full context (score, conversation summary)
+
+**Plans:** TBD during `/gsd:plan-phase 5`
+
+---
+
+### Phase 6: Admin Interface
+
+**Goal:** CRM settings for persona, universities, and scoring
+
+**Requirements:** ADMIN-01 through ADMIN-07, KB-01 through KB-06
+
+**Success Criteria:**
+- [ ] Persona settings editable (name, tone, language)
+- [ ] Universities CRUD with requirements and promotion toggle
+- [ ] Scoring thresholds configurable
+- [ ] Community link configurable
+
+**Plans:** TBD during `/gsd:plan-phase 6`
+
+---
+
+### Phase 7: AI Model Selection
+
+**Goal:** Grok + Sea-Lion A/B testing
+
+**Requirements:** AI-01 through AI-04
+
+**Success Criteria:**
+- [ ] AI model selection in settings
+- [ ] A/B testing mode splits traffic
+- [ ] Comparison dashboard shows metrics
+- [ ] Default model selectable based on results
+
+**Plans:** TBD during `/gsd:plan-phase 7`
+
+---
+
+### v2.2 Requirements Coverage
+
+| Category | Requirements | Phase |
+|----------|--------------|-------|
+| Database Schema | DB-01 to DB-09 | Phase 1 |
+| Inbox Improvements | INBOX-01 to INBOX-07 | Phase 1 |
+| ARI Core | ARI-01 to ARI-07 | Phase 2 |
+| Lead Scoring | SCORE-01 to SCORE-06 | Phase 3 |
+| Lead Routing | ROUTE-01 to ROUTE-04 | Phase 3 |
+| Payment | PAY-01 to PAY-06 | Phase 4 |
+| Scheduling | SCHED-01 to SCHED-06 | Phase 5 |
+| Handoff | HAND-01 to HAND-05 | Phase 5 |
+| Admin Persona | ADMIN-01 to ADMIN-05 | Phase 6 |
+| Knowledge Base | KB-01 to KB-06 | Phase 6 |
+| Admin Scoring | ADMIN-06 to ADMIN-07 | Phase 6 |
+| AI Models | AI-01 to AI-04 | Phase 7 |
+
+**Total:** 56 requirements across 7 phases
 
 ## Completed Milestones
 
@@ -102,9 +244,10 @@ Full details: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 | v1.0 MVP | 1-5 | 14/14 | Complete | 2026-01-14 |
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
+| v2.2 ARI & User Flow | 1-7 | 0/TBD | In Progress | — |
 
 **Total shipped:** 82 plans across 3 milestones
 
 ---
 
-*Last updated: 2026-01-20 — v2.1 SHIPPED*
+*Last updated: 2026-01-20 — v2.2 milestone initialized*

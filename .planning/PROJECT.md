@@ -10,7 +10,21 @@ WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-t
 
 The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
-## Current State (v2.1)
+## Current Milestone: v2.2 ARI & User Flow
+
+**Goal:** Implement end-to-end user journey that converts social media leads into paid consultations via ARI WhatsApp bot integrated with CRM.
+
+**Target features:**
+- ARI intelligent conversation with CRM data integration and lead scoring
+- Lead qualification and routing (Hot → consultation, Warm → nurture, Cold → community)
+- Midtrans payment integration for consultation booking
+- Manual scheduling with consultant availability slots
+- Consultant handoff with automated notes and notifications
+- Admin interface for persona, universities, scoring rules, AI models (Grok/Sea-Lion)
+- Inbox overhaul with Kapso sync, real-time updates, active/all filter, tag filters
+- Kapso metadata caching for instant chat list loading
+
+## Previous State (v2.1)
 
 **Production URL:** https://my21staff.com (Vercel)
 
@@ -69,7 +83,33 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 ### Active
 
-(No active requirements — ready for next milestone planning)
+**ARI Core:**
+- [ ] ARI conversation engine with CRM data integration
+- [ ] Dynamic lead scoring (0-100 scale, Hot/Warm/Cold routing)
+- [ ] Form data validation and follow-up question generation
+- [ ] University/destination knowledge base with editable placeholders
+- [ ] Document readiness qualification questions
+- [ ] AI model router (Grok + Sea-Lion A/B testing)
+
+**Conversion Flow:**
+- [ ] Midtrans payment gateway integration
+- [ ] Payment link generation and callback handling
+- [ ] Manual consultant availability slots
+- [ ] Appointment booking via WhatsApp
+- [ ] Consultant handoff with automated notes
+
+**Admin Interface:**
+- [ ] ARI persona configuration (name, tone, language)
+- [ ] University/destination CRUD (add/edit/delete/promote)
+- [ ] Scoring rules configuration
+- [ ] AI model selection and A/B testing dashboard
+
+**Inbox Overhaul:**
+- [ ] Kapso metadata caching (contact names, profile pics, online status)
+- [ ] Real-time message updates via Supabase subscriptions
+- [ ] Active/All conversation filter
+- [ ] Tag and lead status filters
+- [ ] Improved Kapso sync (no missing messages)
 
 ### Out of Scope
 
@@ -78,11 +118,11 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - Self-service onboarding — manual for now
 - Billing/subscriptions — not needed yet
 - Multi-user chat assignment — single user per workspace for v2
-- Ads campaign launch — v2.2+
-- Advanced analytics dashboard — v2.2+
-- Meta Ads integration — v2.2+
-- Content creation tools — v2.2+
-- Telegram bot connection — v2.2+
+- Google Calendar integration — v2.3+ (start with manual slots)
+- Voice note transcription — v2.3+
+- Document upload handling — v2.3+
+- Video call support — use external platforms
+- Scholarship/visa application automation — out of scope
 
 ## Context
 
@@ -103,7 +143,8 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 - **Tech Stack**: Next.js 15 + React 19 + TypeScript, Supabase (PostgreSQL + Auth + RLS), Shadcn/ui, Tailwind CSS
 - **Design System**: CRM uses cool green palette, Landing uses sage/orange (Plus Jakarta Sans + Inter)
-- **Integration**: Kapso API for WhatsApp (API key stored encrypted), Resend for email
+- **Integration**: Kapso API for WhatsApp, Resend for email, Midtrans for payments
+- **AI Models**: Grok API + Sea-Lion (Ollama at 100.113.96.25:11434)
 - **Deployment**: Vercel (single instance, in-memory rate limiting)
 
 ## Key Decisions
@@ -130,4 +171,4 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | Central support hub | All client tickets → my21staff workspace | ✓ Good — v2.1 feature |
 
 ---
-*Last updated: 2026-01-20 after v2.1 milestone shipped*
+*Last updated: 2026-01-20 after v2.2 milestone initialized*

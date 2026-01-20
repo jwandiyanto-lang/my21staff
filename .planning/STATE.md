@@ -2,31 +2,30 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-01-18)
+See: .planning/PROJECT.md (updated 2026-01-20)
 
 **Core value:** The system that lets you grow — lead management, follow-up automation, guided by real business experience.
-**Current focus:** v2.1 Client Launch Ready — First paying client onboarding
+**Current focus:** v2.2 ARI & User Flow — End-to-end journey from social media leads to paid consultations
 
 ## Current Position
 
-Phase: 9 of 9 — Kapso Bot Setup (COMPLETE ✓)
-Plan: 1 of 1 complete
-Status: v2.1 MILESTONE COMPLETE — Eagle has working AI bot
-Last activity: 2026-01-20 — Phase 9 complete (Kapso bot deployed)
+Phase: 1 of 7 — Database Schema & Inbox Overhaul
+Plan: 0 of TBD
+Status: Ready for phase planning
+Last activity: 2026-01-20 — v2.2 milestone initialized
 
-Progress: v1.0 ██████████ Shipped | v2.0 ██████████ Shipped | v2.1 ██████████████████████ SHIPPED
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ░░░░░░░░░░
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 86 (14 in v1.0 + 38 in v2.0 + 34 in v2.1)
-- v2.0 timeline: 4 days (Jan 14 → Jan 18)
-- Commits: 325 in v2.0, 57 in v2.1
+- Total plans completed: 82 (14 in v1.0 + 38 in v2.0 + 30 in v2.1)
+- v2.1 timeline: 3 days (Jan 18 → Jan 20)
+- Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
-- Lines: ~24,800 TypeScript
-- Files: ~137 TypeScript files
-- Phases: 24 complete (Phase 18 skipped)
+- Lines: ~32,172 TypeScript
+- Phases completed: 24 total (v1.0: 5, v2.0: 16, v2.1: 9)
 
 ## Accumulated Context
 
@@ -34,74 +33,27 @@ Progress: v1.0 ██████████ Shipped | v2.0 ██████�
 
 **v1.0 (Phases 1-5):** Foundation, Database, Inbox, Send, Website Manager
 **v2.0 (Phases 6-22):** Kapso Live, Landing, AI, Deployment, Admin, Lead Polish, Security, Dashboard, Settings
+**v2.1 (Phases 1-9):** Brand, Email, Roles, Support, Central Hub, Security Page, Landing Redesign, Performance, Kapso Bot
+**v2.2 (Phases 1-7):** Database/Inbox, ARI Core, Scoring, Payment, Scheduling, Admin, AI Models
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
 
-Key v2.0 decisions:
-- Centralized workspace auth (requireWorkspaceMembership)
-- In-memory rate limiting (single Vercel instance)
-- HMAC-SHA256 webhook verification
-- AES-256-GCM API key encryption
-- Direct user creation for team invitations
-- Phone E.164 normalization
-
-Key v2.1 decisions:
-- Resend HTTP API for email (replaces broken nodemailer/SMTP)
-- Lazy-loaded Resend client (getResend) for build-time safety
-- React Email templates in src/emails/
-- Permission utilities in src/lib/permissions/ (types, constants, check)
-- SECURITY DEFINER function in private schema for RLS performance
-- requireWorkspaceMembership extended to return role
-- API permission guard pattern: requirePermission(role, 'perm'); if (err) return err
-- PermissionButton with disabled:pointer-events-auto for tooltip accessibility
-- Owner role protected from change (contact support for ownership transfer)
-- CHECK constraints over ENUM types for ticket category/priority/stage (flexibility)
-- Subquery RLS pattern for joined tables (comments/history via tickets)
-- Ticket state machine in src/lib/tickets/ (types, transitions, tokens)
-- HMAC tokens reuse ENCRYPTION_KEY (TICKET_TOKEN_SECRET fallback)
-- Ticket permissions: tickets:assign, tickets:transition, tickets:skip_stage
-- Ticket API routes follow contacts pattern (fetch ticket, then verify workspace membership)
-- Dual-mode reopen (HMAC token for email links, authenticated for logged-in users)
-- One-time reopen tokens (cleared after successful reopen)
-- react-hook-form for ticket creation form validation
-- Type casting for Supabase joins (as unknown as Type) when Relationships missing
-- Ticket email templates (created/updated/closed) with Resend
-- pg_cron auto-close job for stale implementation tickets (7 days)
-- Email participants = requester + unique commenters
-- Cross-workspace RLS: Check private.get_user_role_in_workspace(admin_workspace_id) IN ('owner', 'admin')
-- Support config module: Centralized constants at src/lib/config/support.ts
-- admin_workspace_id nullable for workspace-internal vs routed tickets
-- supabase migration repair for syncing migration history
-- Private storage bucket with RLS for ticket attachments (not public bucket)
-- Storage path format: {ticket_id}/{timestamp}-{sanitized_filename}
-- Portal APIs filter by requester_id for client isolation (no workspace membership check)
-- Internal comment filtering: or('is_internal.is.null,is_internal.eq.false')
-- Dual workspace access check: membership in workspace_id OR admin_workspace_id
-- Source filter tabs only shown when client tickets exist in list
-- Portal layout: header-only (no sidebar), auth check in layout.tsx
-- Client portal isolation: requester_id filter for all queries
-- Custom Tawk.to integration via script injection (React 19 compatible, avoiding tawkto-react peer dependency)
-- TanStack Query defaults: 1min staleTime, refetchOnWindowFocus disabled, retry once (dashboard-appropriate)
-- Providers pattern: Client-side providers in src/app/providers.tsx
-- Loading states: Reusable skeleton components in src/components/skeletons/
-- Next.js loading.tsx convention for route-level loading states
-- Async callback parameters: Capture IDs at action initiation, not in handler closures (08-05)
-- Minimal server component + client-side TanStack Query pattern for cache-first navigation (08-04)
-- useConversations hook with real-time subscription for cache invalidation (08-04)
-- useWorkspaceSettings hook for shared workspace data (team members, tags) (08-04)
+Key v2.2 decisions (pending):
+- Multi-tenant ARI infrastructure (workspace_id on all tables)
+- User-initiated WhatsApp trigger (form shows WA CTA, user starts conversation)
+- Phone number matching for CRM contact identification
+- Midtrans payment gateway for Indonesian payments
+- Manual consultant slots (calendar integration deferred to v2.3)
+- Both Grok + Sea-Lion from day 1 for A/B testing
+- Kapso metadata caching for instant inbox loading
 
 ### Deferred Issues
 
-- Phase 18 (Kapso Bot Setup) → v2.1
-- ~~SMTP email delivery from Vercel (DNS issues)~~ → Fixed in 02-01 with Resend
-
-### Known Issues (Phase 2)
-
 - Forgot password email uses Supabase email, not Resend (P1)
-- ~~Resend/delete invitation returns 401 unauthorized (P0)~~ — Fixed in 03-02 (was using wrong auth check)
-- Website content tables (articles, webinars) not in remote DB — manual types added (P2)
+- Resend/delete invitation auth bug
+- In-memory rate limiting won't scale multi-instance
 
 ### Blockers/Concerns
 
@@ -110,13 +62,13 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: v2.1 COMPLETE — All 9 phases shipped
+Stopped at: v2.2 milestone initialized
 Resume file: None
-Next: v2.2 planning (or client onboarding)
+Next: `/gsd:plan-phase 1` (Database Schema & Inbox Overhaul)
 
 ## Deployment Info
 
-**Production URL:** https://my21staff.vercel.app
+**Production URL:** https://my21staff.com
 **Vercel CLI:** Installed and linked
 **Supabase Project:** my21staff (tcpqqublnkphuwhhwizx)
 
@@ -129,7 +81,11 @@ Next: v2.2 planning (or client onboarding)
 
 **Workspaces:**
 - My21Staff: `0318fda5-22c4-419b-bdd8-04471b818d17` (for pricing form leads)
-- Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (CRM data)
+- Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (first paying client, ARI pilot)
+
+**AI Models:**
+- Sea-Lion: http://100.113.96.25:11434 (Ollama, via Tailscale)
+- Grok: API access available
 
 ---
-*Last updated: 2026-01-20 — v2.1 COMPLETE (Client Launch Ready)*
+*Last updated: 2026-01-20 — v2.2 milestone initialized*
