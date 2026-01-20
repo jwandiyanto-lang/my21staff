@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Calendar, Bot, GitBranch, Database, Target } from 'lucide-react'
 import { SlotManager } from '@/components/knowledge-base/slot-manager'
 import { PersonaTab } from '@/components/knowledge-base/persona-tab'
+import { ScoringTab } from '@/components/knowledge-base/scoring-tab'
 
 interface TeamMember {
   id: string
@@ -49,7 +50,7 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
             <Database className="w-4 h-4" />
             <span>Database</span>
           </TabsTrigger>
-          <TabsTrigger value="scoring" disabled className="flex items-center gap-2 opacity-50">
+          <TabsTrigger value="scoring" className="flex items-center gap-2">
             <Target className="w-4 h-4" />
             <span>Scoring</span>
           </TabsTrigger>
@@ -75,10 +76,8 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
           </div>
         </TabsContent>
 
-        <TabsContent value="scoring">
-          <div className="text-center py-12 text-muted-foreground">
-            Scoring configuration coming soon
-          </div>
+        <TabsContent value="scoring" className="space-y-6">
+          <ScoringTab workspaceId={workspace.id} />
         </TabsContent>
 
         <TabsContent value="slots" className="space-y-6">
