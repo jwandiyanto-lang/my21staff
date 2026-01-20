@@ -305,3 +305,67 @@ export interface AvailableSlot {
   slot_id: string; // Reference to ConsultantSlot
   booked: boolean;
 }
+
+// ===========================================
+// Knowledge Base Types (for Database tab)
+// ===========================================
+
+/** Knowledge category for organizing entries (ari_knowledge_categories table) */
+export interface KnowledgeCategory {
+  id: string;
+  workspace_id: string;
+  name: string;
+  description: string | null;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Knowledge entry with title and content (ari_knowledge_entries table) */
+export interface KnowledgeEntry {
+  id: string;
+  workspace_id: string;
+  category_id: string | null;
+  title: string;
+  content: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type KnowledgeCategoryInsert = Omit<KnowledgeCategory, 'id' | 'created_at' | 'updated_at'>;
+export type KnowledgeCategoryUpdate = Partial<Omit<KnowledgeCategory, 'id' | 'workspace_id' | 'created_at' | 'updated_at'>>;
+
+export type KnowledgeEntryInsert = Omit<KnowledgeEntry, 'id' | 'created_at' | 'updated_at'>;
+export type KnowledgeEntryUpdate = Partial<Omit<KnowledgeEntry, 'id' | 'workspace_id' | 'created_at' | 'updated_at'>>;
+
+// ===========================================
+// Scoring Config Types
+// ===========================================
+
+/** Scoring configuration per workspace (ari_scoring_config table) */
+export interface ScoringConfig {
+  id: string;
+  workspace_id: string;
+  hot_threshold: number;   // Score >= this = hot lead (default 70)
+  warm_threshold: number;  // Score >= this = warm lead (default 40)
+  weight_basic: number;         // Points for basic data (default 25)
+  weight_qualification: number; // Points for qualification (default 35)
+  weight_document: number;      // Points for documents (default 30)
+  weight_engagement: number;    // Points for engagement (default 10)
+  created_at: string;
+  updated_at: string;
+}
+
+export type ScoringConfigInsert = Omit<ScoringConfig, 'id' | 'created_at' | 'updated_at'>;
+export type ScoringConfigUpdate = Partial<Omit<ScoringConfig, 'id' | 'workspace_id' | 'created_at' | 'updated_at'>>;
+
+/** Default scoring config values (used when no config exists) */
+export const DEFAULT_SCORING_CONFIG = {
+  hot_threshold: 70,
+  warm_threshold: 40,
+  weight_basic: 25,
+  weight_qualification: 35,
+  weight_document: 30,
+  weight_engagement: 10,
+} as const;
