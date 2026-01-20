@@ -1,12 +1,12 @@
 # Phase 9: Kapso Bot Setup (Eagle) - Context
 
-**Gathered:** 2026-01-19
+**Gathered:** 2026-01-20
 **Status:** Ready for planning
 
 <domain>
 ## Phase Boundary
 
-Get Ari persona working on Eagle's WhatsApp — first client bot. Includes contact lookup API, CRM context integration, and end-to-end testing with Eagle's number.
+Get Kia persona working on Eagle's WhatsApp — AI responds to leads using CRM context, qualifies them, and drives toward paid consultation booking. Includes contact lookup API, CRM context integration, and end-to-end testing with Eagle's number.
 
 **Client:** Eagle Overseas Education (education consulting for students wanting to study abroad)
 **Bot serves:** Prospective students and parents inquiring about overseas education
@@ -16,30 +16,63 @@ Get Ari persona working on Eagle's WhatsApp — first client bot. Includes conta
 <decisions>
 ## Implementation Decisions
 
-### Ari's Persona
-- Rename persona from "Kia" to "Ari"
-- Keep role as intern ("intern di Eagle Overseas Indonesia")
+### Kia's Persona
+- Name: Kia (Eagle's AI assistant)
+- Casual & conversational tone — like chatting with a friend
+- Bahasa Indonesia only — no English mixing
+- Short & punchy responses — 1-2 sentences max, quick replies like real chat
+- No emojis — keep it human-like and natural
 - Use 'kak' for everyone (safe, works for students and parents)
 - Pronouns: saya/kamu (more polite than aku/kamu, less formal than saya/Anda)
-- Language: Mirror customer (if they write English, reply in English)
-- Keep existing style: 1-2 sentences, no emoji, one question per message
 
 ### Education Context
-- University recommendations: **configurable list** — Eagle can set which universities to promote, Ari recommends from that list
+- University recommendations: **configurable list** — Eagle can set which universities to promote, Kia recommends from that list
 - Cost estimates: **ranges only** — general ballpark ("Australia sekitar 300-500jt per tahun"), no detailed breakdowns
 - Scholarships: **detailed info** — can discuss LPDP, AAS, Chevening, Fulbright with deadlines, requirements, and tips
 - Visa process: **general steps only** — explain typical flow (apply uni → get CoE → apply visa), not detailed doc requirements
 
 ### CRM Integration
 - Known contacts: Greet as "Hai kak [nama]" if contact exists in CRM
-- Conversation history: Reference previous topics ("Terakhir kita bahas soal Australia kan?")
-- Lead status: Adapt tone — new lead gets full intro flow, hot lead skips basics and goes to next steps
-- Team notes: Ari has access to notes added by Eagle's team to inform responses
+- Use contact's main qualification questions from CRM record
+- If questions not answered, proactively ask them
+- Reference notes from CRM for context
+- Consider message history for conversation continuity
+- Lead status: Adapt tone — new lead gets full intro flow, hot lead skips basics
+- Unknown contacts: Ask qualifying questions to identify/qualify them
 
-### Handover Triggers
-- Always hand off for: booking consultation, complaints/issues, pricing questions (all three)
+### Qualifying Questions
+- Budget: What's their budget for studying abroad?
+- Timeline: When are they planning to go?
+- (Destination/program handled conversationally)
+
+### Sales Flow
+- Primary goal: Close 1-on-1 paid consultation booking
+- Share pricing directly — Kia can quote price
+- Handle payment and scheduling — full flow to booking
+- Fallback: If lead declines consultation, offer free webinar community link
+- After decline: Stop active selling, but still respond to questions
+
+### Configuration Placeholders
+- `CONSULTATION_PRICE` — to be provided later
+- `PAYMENT_LINK` — to be provided later
+- `WEBINAR_COMMUNITY_LINK` — to be provided later
+
+### Handoff Rules
+- Trigger handoff on: complaints/anger, "speak to someone" requests, complex questions (visa details, legal)
+- Handoff message: Include 24-hour timeframe promise ("Dalam 1x24 jam tim kami akan follow up")
 - Signal: "Saya connect-kan ke tim kita ya" (generic, no specific consultant name)
-- Action on handoff: Update contact notes with context + create task with due date so team is notified
+- Create task in CRM when handing off
+- Task due date: Same day (urgent follow-up)
+
+### Error Handling
+- API failures: Silent fail — no response, let human handle later
+- Confusion: Ask for clarification ("Bisa jelaskan lebih detail?")
+- All errors create tasks for human review — nothing slips through
+
+### Response Limits
+- No hard limit on responses per hour
+- Limit triggered after lead declines consultation — stop active selling after offering webinar community
+- Can still respond to questions after limit, just not actively selling
 
 ### Technical Stack
 - AI Model: Sea Lion (`aisingapore/Gemma-SEA-LION-v4-27B-IT`)
@@ -49,7 +82,9 @@ Get Ari persona working on Eagle's WhatsApp — first client bot. Includes conta
 ### Claude's Discretion
 - Exact wording for handoff messages
 - How to structure conversation history context in prompts
-- Task due date timing (e.g., 1 hour, 24 hours)
+- Exact phrasing of qualification questions
+- How to naturally weave in sales pitch
+- Conversation flow and timing of offers
 - How to handle edge cases (unknown country, unclear intent)
 
 </decisions>
@@ -57,10 +92,12 @@ Get Ari persona working on Eagle's WhatsApp — first client bot. Includes conta
 <specifics>
 ## Specific Ideas
 
-- Current bot file: `business/bots/eagle-studenthub-bot.md` (has working Kia persona code)
+- Current bot file: `business/bots/eagle-studenthub-bot.md` (has working persona code)
 - 3-phase conversation flow already defined: intro → documents → closing
 - Time-based greeting already implemented: pagi/siang/sore/malam based on WIB
 - Sea Lion API already integrated in existing function
+- Kia should feel like a helpful friend, not a bot
+- Natural sales progression: qualify → pitch consultation → if no, offer free webinar
 
 </specifics>
 
@@ -74,4 +111,4 @@ None — discussion stayed within phase scope
 ---
 
 *Phase: 09-kapso-bot-setup*
-*Context gathered: 2026-01-19*
+*Context gathered: 2026-01-20 (merged with 2026-01-19)*
