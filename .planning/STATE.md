@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 6 of 7 — Admin Interface (IN PROGRESS)
-Plan: 1 of 4 (06-01-PLAN complete)
+Plan: 2 of 4 (06-02-PLAN complete)
 Status: In progress
-Last activity: 2026-01-20 — Completed 06-01-PLAN (Persona Tab)
+Last activity: 2026-01-20 — Completed 06-02-PLAN (Flow Configuration)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ███████░░░ (19/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ████████░░ (20/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 101 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 19 in v2.2)
+- Total plans completed: 102 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 20 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 -> Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
@@ -110,6 +110,10 @@ Key v2.2 decisions:
 - ARI config API (GET/PUT) with upsert pattern - IMPLEMENTED 06-01
 - Page renamed from 'Knowledge Base' to 'Your Intern' - IMPLEMENTED 06-01
 - Store tone_description and greeting_template in tone JSONB - IMPLEMENTED 06-01
+- FlowTab component with expandable stage cards and CRUD UI - IMPLEMENTED 06-02
+- ari_flow_stages table for custom conversation flow stages - IMPLEMENTED 06-02
+- Default stages returned from API when no custom stages exist - IMPLEMENTED 06-02
+- Batch reorder support with temporary negative values to avoid constraint - IMPLEMENTED 06-02
 
 ### Deferred Issues
 
@@ -124,9 +128,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 06-01-PLAN (Persona Tab)
+Stopped at: Completed 06-02-PLAN (Flow Configuration)
 Resume file: None
-Next: 06-02-PLAN (Flow Configuration)
+Next: 06-03-PLAN (Knowledge Database)
 
 ## Deployment Info
 
@@ -151,4 +155,4 @@ Next: 06-02-PLAN (Flow Configuration)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed 06-01-PLAN (Persona Tab)*
+*Last updated: 2026-01-20 — Completed 06-02-PLAN (Flow Configuration)*
