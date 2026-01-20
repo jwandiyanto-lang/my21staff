@@ -83,7 +83,13 @@ Plans:
 - [ ] Cold leads (<40) receive community link
 - [ ] Lead phase auto-updates in CRM
 
-**Plans:** TBD during `/gsd:plan-phase 3`
+**Plans:** 4 plans in 3 waves
+
+Plans:
+- [ ] 03-01-PLAN.md — Scoring calculation engine (0-100 with breakdown)
+- [ ] 03-02-PLAN.md — Processor integration and routing logic
+- [ ] 03-03-PLAN.md — UI: Score breakdown component in sidebar
+- [ ] 03-04-PLAN.md — Routing action execution (handoff, community link)
 
 ---
 
@@ -262,10 +268,10 @@ Full details: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 | v1.0 MVP | 1-5 | 14/14 | Complete | 2026-01-14 |
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
-| v2.2 ARI & User Flow | 1-7 | 10/15+ | In Progress | — |
+| v2.2 ARI & User Flow | 1-7 | 10/18+ | In Progress | — |
 
 **Total shipped:** 82 plans across 3 milestones
 
 ---
 
-*Last updated: 2026-01-20 — Phase 2 complete (5/5 plans)*
+*Last updated: 2026-01-20 — Phase 3 planned (4 plans)*
