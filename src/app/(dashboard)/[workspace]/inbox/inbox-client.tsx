@@ -121,7 +121,7 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
         .single()
 
       if (data?.settings?.filterPresets) {
-        setPresets(data.settings.filterPresets)
+        setPresets(data.settings.filterPresets as FilterPreset[])
       }
     }
     loadPresets()
