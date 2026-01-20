@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { waitUntil } from '@vercel/functions'
 import { createApiAdminClient } from '@/lib/supabase/server'
 import { verifyKapsoSignature } from '@/lib/kapso/verify-signature'
 import { normalizePhone } from '@/lib/phone/normalize'
@@ -116,11 +117,13 @@ export async function POST(request: NextRequest) {
 
     // Check if this is Meta/WhatsApp format (has entry array)
     if (rawPayload.entry && Array.isArray(rawPayload.entry)) {
-      // Process asynchronously - don't await
-      // This ensures we return 200 immediately while processing continues
-      processWebhookAsync(rawPayload as MetaWebhookPayload).catch(error => {
-        console.error('[Webhook] Async processing error:', error)
-      })
+      // Use waitUntil to keep function alive after returning 200
+      // This ensures we return 200 immediately while processing continues in background
+      waitUntil(
+        processWebhookAsync(rawPayload as MetaWebhookPayload).catch(error => {
+          console.error('[Webhook] Async processing error:', error)
+        })
+      )
     } else {
       // Legacy format or unknown - log for debugging
       console.log('[Webhook] Unknown payload format - not Meta format')
