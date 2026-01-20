@@ -4,7 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { LoginModal } from "@/components/auth/login-modal";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
-import { HeroSection, FeaturesGrid, CTASection, StickyCTA } from "@/components/landing";
+import {
+  NavBar,
+  HeroSection,
+  WorkforceSection,
+  ConsoleSection,
+  FeaturesSection,
+  CTASection,
+} from "@/components/landing";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -21,60 +28,48 @@ export default function Home() {
 
   return (
     <div
-      className={`${plusJakartaSans.variable} ${inter.variable} bg-landing-bg text-landing-text antialiased`}
+      className={`${plusJakartaSans.variable} ${inter.variable} bg-white text-[#2D2A26] antialiased`}
       style={{ fontFamily: "var(--font-inter)" }}
     >
-      {/* Noise Overlay */}
-      <div className="noise-overlay" />
-
       {/* Login Modal */}
       <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
 
-      {/* Navigation - Blends with sections */}
-      <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
-        <div className="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-black text-white">21</span>
-            </Link>
-          </div>
-          <button
-            onClick={() => setLoginOpen(true)}
-            className="text-sm text-white px-5 py-2 rounded-full bg-white/20 backdrop-blur-sm font-semibold hover:bg-white/30 transition-all"
-          >
-            Login
-          </button>
-        </div>
-      </nav>
+      {/* Navigation */}
+      <NavBar onLoginClick={() => setLoginOpen(true)} />
 
       <main>
-        {/* Hero Section - New English version */}
-        <section className="pt-14">
-          <HeroSection />
-        </section>
+        {/* 1. Hero Section (Off White) */}
+        <HeroSection />
 
-        {/* Features Grid */}
-        <FeaturesGrid />
+        {/* 2. Digital Workforce Section (White) */}
+        <WorkforceSection />
 
-        {/* Final CTA Section */}
+        {/* 3. Central Console Section (Sage Green) */}
+        <ConsoleSection />
+
+        {/* 4. Growth Engine Section (White) */}
+        <FeaturesSection />
+
+        {/* 5. Final CTA Section (Light Sage) */}
         <CTASection />
       </main>
 
-      {/* Footer - Compact One-liner */}
-      <footer className="bg-white border-t border-notion py-4">
+      {/* Footer - Compact */}
+      <footer className="bg-white border-t border-gray-100 py-4">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="flex items-center justify-center gap-4 text-xs text-landing-text-muted">
-            <span className="font-black text-landing-cta">21</span>
+          <div className="flex items-center justify-center gap-4 text-xs text-[#2D2A26]/50">
+            <span className="font-extrabold">
+              <span className="text-[#2D2A26]/50">my</span>
+              <span className="text-[#F7931A]">21</span>
+              <span className="text-[#2D2A26]/50">staff</span>
+            </span>
             <span>&copy; 2026</span>
-            <Link href="/keamanan" className="hover:text-landing-text transition-colors">
-              Keamanan Data
+            <Link href="/security" className="hover:text-[#2D2A26] transition-colors">
+              Security
             </Link>
           </div>
         </div>
       </footer>
-
-      {/* Mobile Sticky CTA */}
-      <StickyCTA />
     </div>
   );
 }

@@ -163,19 +163,24 @@ html {
   --client-badge-text: oklch(0.15 0 0);
 }
 
-/* Landing Page Design Tokens - Notion-inspired */
+/* Landing Page Design Tokens - Modern Redesign */
 :root {
-  /* Landing page colors */
+  /* Landing page colors - Updated for new design */
   --landing-bg: oklch(0.985 0.002 90);           /* #FBFBFA off-white */
-  --landing-hero: oklch(0.81 0.04 150);          /* #B6C9BB sage green */
-  --landing-cta: oklch(0.70 0.16 45);            /* #F7931A orange (same as primary) */
-  --landing-cta-dark: oklch(0.60 0.16 45);       /* #d67c0d darker orange */
+  --landing-primary: oklch(0.35 0.08 145);       /* #284b31 dark green */
+  --landing-surface: oklch(0.96 0.01 145);       /* #f1f5f0 light green surface */
+  --landing-cta: oklch(0.55 0.18 30);            /* #e65c2e orange-red */
+  --landing-cta-dark: oklch(0.48 0.18 30);       /* darker orange-red hover */
+  --landing-dark: oklch(0.18 0.04 145);          /* #14261a very dark green */
   --landing-text: oklch(0.25 0.02 80);           /* #37352F near-black */
   --landing-text-muted: oklch(0.25 0.02 80 / 0.6); /* #37352F99 60% opacity */
-  --landing-dark-bg: oklch(0.15 0 0);            /* #1A1A1A for CTA section */
-  --landing-border: oklch(0.25 0.02 80 / 0.1);   /* notion-style border */
+  --landing-border: oklch(0.25 0.02 80 / 0.1);   /* subtle border */
 
-  /* New section colors */
+  /* Legacy colors for backwards compatibility */
+  --landing-hero: oklch(0.35 0.08 145);          /* Now uses primary */
+  --landing-dark-bg: oklch(0.18 0.04 145);       /* Now uses dark */
+
+  /* Section colors */
   --landing-pale-peach: oklch(0.97 0.02 70);     /* #FFF1E6 warm peach */
   --landing-coral: oklch(0.65 0.20 25);          /* #FF6B6B coral pop */
   --landing-lavender: oklch(0.95 0.04 300);      /* #F3E8FF lavender card */
@@ -186,12 +191,17 @@ html {
 /* Landing page color utilities for Tailwind */
 @theme inline {
   --color-landing-bg: var(--landing-bg);
-  --color-landing-hero: var(--landing-hero);
+  --color-landing-primary: var(--landing-primary);
+  --color-landing-surface: var(--landing-surface);
   --color-landing-cta: var(--landing-cta);
   --color-landing-cta-dark: var(--landing-cta-dark);
+  --color-landing-dark: var(--landing-dark);
   --color-landing-text: var(--landing-text);
   --color-landing-text-muted: var(--landing-text-muted);
+  /* Legacy */
+  --color-landing-hero: var(--landing-hero);
   --color-landing-dark-bg: var(--landing-dark-bg);
+  /* Section colors */
   --color-landing-pale-peach: var(--landing-pale-peach);
   --color-landing-coral: var(--landing-coral);
   --color-landing-lavender: var(--landing-lavender);
@@ -278,6 +288,64 @@ html {
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23182229' fill-opacity='0.6'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
+/* Glass phone mockup for landing page */
+.glass-phone {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 2rem;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.glass-phone::before {
+  content: '';
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4rem;
+  height: 0.375rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+}
+
+/* Chat bubble styles for landing page phone mockups */
+.chat-bubble {
+  max-width: 85%;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.chat-bubble-incoming {
+  background: white;
+  color: #1a1a1a;
+  border-bottom-left-radius: 0.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.chat-bubble-outgoing {
+  background: #dcf8c6;
+  color: #1a1a1a;
+  border-bottom-right-radius: 0.25rem;
+  margin-left: auto;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Stats card overlay for landing page */
+.stats-card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -285,4 +353,31 @@ html {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Hide scrollbar for horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Marquee animation for auto-scroll */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }

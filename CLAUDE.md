@@ -25,7 +25,7 @@ S
 
 | Resource | Path |
 |----------|------|
-| Brand Guidelines | [business/brand/BRAND.md](business/brand/BRAND.md) |
+| Brand Guidelines | [business/brand/docs/BRAND.md](business/brand/docs/BRAND.md) |
 | Business Plan | [business/brand/docs/BUSINESS-PLAN.md](business/brand/docs/BUSINESS-PLAN.md) |
 | Pricing | [business/brand/docs/PRICING.md](business/brand/docs/PRICING.md) |
 | Project | [.planning/PROJECT.md](.planning/PROJECT.md) |

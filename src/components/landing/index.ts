@@ -1,7 +1,8 @@
 // Landing page components
 
+export { NavBar } from './nav-bar'
 export { HeroSection } from './hero-section'
-export { FeatureCard } from './feature-card'
-export { FeaturesGrid } from './features-grid'
-export { StickyCTA } from './sticky-cta'
+export { WorkforceSection } from './workforce-section'
+export { ConsoleSection } from './console-section'
+export { FeaturesSection } from './features-section'
 export { CTASection } from './cta-section'
