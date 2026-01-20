@@ -133,17 +133,27 @@ Plans:
 
 ### Phase 6: Admin Interface
 
-**Goal:** CRM settings for persona, universities, and scoring
+**Goal:** "Your Intern" configuration page for persona, flow, knowledge, and scoring
 
 **Requirements:** ADMIN-01 through ADMIN-07, KB-01 through KB-06
 
+**Status:** In Progress
+
 **Success Criteria:**
-- [ ] Persona settings editable (name, tone, language)
-- [ ] Universities CRUD with requirements and promotion toggle
-- [ ] Scoring thresholds configurable
+- [ ] Persona settings editable (name, tone, greeting template)
+- [ ] Custom conversation flow stages configurable
+- [ ] Knowledge database with custom categories
+- [ ] Scoring thresholds and weights configurable
 - [ ] Community link configurable
 
-**Plans:** TBD during `/gsd:plan-phase 6`
+**Plans:** 5 plans in 2 waves
+
+Plans:
+- [ ] 06-01-PLAN.md — Persona tab (name, tone, greeting, community link)
+- [ ] 06-02-PLAN.md — Flow tab (custom conversation stages)
+- [ ] 06-03-PLAN.md — Database tab (categories + entries)
+- [ ] 06-04-PLAN.md — Scoring tab (thresholds + weights)
+- [ ] 06-05-PLAN.md — Integration (enable all tabs)
 
 ---
 
@@ -274,10 +284,10 @@ Full details: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 | v1.0 MVP | 1-5 | 14/14 | Complete | 2026-01-14 |
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
-| v2.2 ARI & User Flow | 1-7 | 18/22+ | In Progress | — |
+| v2.2 ARI & User Flow | 1-7 | 18/23 | In Progress | — |
 
 **Total shipped:** 82 plans across 3 milestones
 
 ---
 
-*Last updated: 2026-01-20 — Phase 5 complete (Scheduling & Handoff)*
+*Last updated: 2026-01-20 — Phase 6 planned (Admin Interface)*
