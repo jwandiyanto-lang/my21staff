@@ -152,7 +152,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .eq('user_id', user.id)
       .single();
 
-    if (!member || !['owner', 'admin'].includes(member.role)) {
+    if (!member || !member.role || !['owner', 'admin'].includes(member.role)) {
       return NextResponse.json(
         { error: 'Only workspace owners and admins can update scoring config' },
         { status: 403 }
@@ -191,7 +191,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Upsert config (insert or update on workspace_id conflict)
-    const { data: config, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: config, error } = await (supabase as any)
       .from('ari_scoring_config')
       .upsert(configData, {
         onConflict: 'workspace_id',
