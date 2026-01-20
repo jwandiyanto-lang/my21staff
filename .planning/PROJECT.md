@@ -10,43 +10,47 @@ WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-t
 
 The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
-## Current Milestone: v2.2 ARI & User Flow
+## Current Milestone: v3.0 Performance & Speed
 
-**Goal:** Implement end-to-end user journey that converts social media leads into paid consultations via ARI WhatsApp bot integrated with CRM.
+**Goal:** Achieve sub-500ms P95 response times through Convex spike evaluation and potential hybrid migration (Supabase auth + Convex data).
 
-**Target features:**
-- ARI intelligent conversation with CRM data integration and lead scoring
-- Lead qualification and routing (Hot → consultation, Warm → nurture, Cold → community)
-- Midtrans payment integration for consultation booking
-- Manual scheduling with consultant availability slots
-- Consultant handoff with automated notes and notifications
-- Admin interface for persona, universities, scoring rules, AI models (Grok/Sea-Lion)
-- Inbox overhaul with Kapso sync, real-time updates, active/all filter, tag filters
-- Kapso metadata caching for instant chat list loading
+**Target outcomes:**
+- Page load time < 2 seconds (P95)
+- API response time < 500ms (P95)
+- Query count per page < 5 queries
+- Real-time updates without polling
+- Crisp webhooks and smooth database operations
 
-## Previous State (v2.1)
+**Approach:**
+1. Convex spike — convert `/api/contacts/by-phone` to Convex, compare performance
+2. If Convex wins decisively: hybrid migration (keep Supabase auth, use Convex for data)
+3. If comparable: apply Supabase optimizations (nested queries, indexes, column selection)
+4. End state: Production CRM that's "crystal clear" and snappy
+
+**Current problem:** 2-6 second response times (sometimes 9+ seconds) despite matching Vercel + Supabase regions.
+
+## Previous State (v2.2)
 
 **Production URL:** https://my21staff.com (Vercel)
 
 **First Client:** Eagle Overseas Education (onboarding ready)
 
-**Shipped Features:**
-- Lead database with status, tags, score, notes, activity timeline
-- Two-way WhatsApp messaging via Kapso (send/receive)
-- AI-powered auto-replies via Sea Lion LLM (Ari persona for Eagle)
-- Multi-tenant admin with client management
-- Dashboard with client stats and task management
-- CSV import/export for contacts and notes
-- Team invitations with password setup flow
-- Role-based permissions (owner/admin/member)
-- 4-stage support ticketing with approval workflow
-- Central support hub for all client tickets
-- Security info page for trust-building
-- Performance optimization with TanStack Query caching
-- Brand-aligned landing page with pricing integration
+**Shipped in v2.2:**
+- ARI database infrastructure (7 tables with workspace-scoped RLS)
+- Multi-LLM AI system with Grok + Sea-Lion and deterministic A/B testing
+- Lead scoring engine (0-100 with category breakdown)
+- Automated lead routing (hot → consultation, warm → nurture, cold → community)
+- Consultation booking flow with Indonesian day/time parsing
+- Admin configuration UI ("Your Intern" page with 5 tabs)
+
+**Shipped in v2.1:**
+- Brand guidelines, email via Resend, role-based permissions
+- 4-stage support ticketing with central hub
+- Security info page, landing page redesign
+- TanStack Query caching, Kapso bot setup
 
 **Tech Stack:**
-- 32,172 lines TypeScript
+- ~43,000 lines TypeScript
 - Next.js 15 + React 19
 - Supabase (PostgreSQL + Auth + RLS)
 - Shadcn/ui + Tailwind CSS
@@ -83,46 +87,29 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 ### Active
 
-**ARI Core:**
-- [ ] ARI conversation engine with CRM data integration
-- [ ] Dynamic lead scoring (0-100 scale, Hot/Warm/Cold routing)
-- [ ] Form data validation and follow-up question generation
-- [ ] University/destination knowledge base with editable placeholders
-- [ ] Document readiness qualification questions
-- [ ] AI model router (Grok + Sea-Lion A/B testing)
-
-**Conversion Flow:**
-- [ ] Midtrans payment gateway integration
-- [ ] Payment link generation and callback handling
-- [ ] Manual consultant availability slots
-- [ ] Appointment booking via WhatsApp
-- [ ] Consultant handoff with automated notes
-
-**Admin Interface:**
-- [ ] ARI persona configuration (name, tone, language)
-- [ ] University/destination CRUD (add/edit/delete/promote)
-- [ ] Scoring rules configuration
-- [ ] AI model selection and A/B testing dashboard
-
-**Inbox Overhaul:**
-- [ ] Kapso metadata caching (contact names, profile pics, online status)
-- [ ] Real-time message updates via Supabase subscriptions
-- [ ] Active/All conversation filter
-- [ ] Tag and lead status filters
-- [ ] Improved Kapso sync (no missing messages)
+**Performance & Speed (v3.0):**
+- [ ] Convex spike — convert `/api/contacts/by-phone` and compare performance
+- [ ] Decision gate — compare Convex vs optimized Supabase response times
+- [ ] If Convex wins: hybrid migration (Supabase auth + Convex data layer)
+- [ ] If comparable: Supabase optimizations (nested queries, indexes, column selection)
+- [ ] Performance monitoring (request timing, query logging, Web Vitals)
+- [ ] Database indexes for hot paths (conversations, messages, contacts)
+- [ ] Replace polling with real-time subscriptions
+- [ ] Target: sub-500ms P95 response times
 
 ### Out of Scope
 
+- Payment Integration (Midtrans) — deferred to v3.1, focus on speed first
+- AI Model Selection UI — deferred to v3.1
 - Visual workflow builder — future version
 - WhatsApp template messages (24h rule) — requires Meta approval process
 - Self-service onboarding — manual for now
 - Billing/subscriptions — not needed yet
-- Multi-user chat assignment — single user per workspace for v2
-- Google Calendar integration — v2.3+ (start with manual slots)
-- Voice note transcription — v2.3+
-- Document upload handling — v2.3+
+- Multi-user chat assignment — single user per workspace
+- Google Calendar integration — future version
+- Voice note transcription — future version
+- Document upload handling — future version
 - Video call support — use external platforms
-- Scholarship/visa application automation — out of scope
 
 ## Context
 
@@ -141,11 +128,12 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 ## Constraints
 
-- **Tech Stack**: Next.js 15 + React 19 + TypeScript, Supabase (PostgreSQL + Auth + RLS), Shadcn/ui, Tailwind CSS
+- **Tech Stack**: Next.js 15 + React 19 + TypeScript, Supabase (Auth) + potentially Convex (data), Shadcn/ui, Tailwind CSS
 - **Design System**: CRM uses cool green palette, Landing uses sage/orange (Plus Jakarta Sans + Inter)
-- **Integration**: Kapso API for WhatsApp, Resend for email, Midtrans for payments
+- **Integration**: Kapso API for WhatsApp, Resend for email
 - **AI Models**: Grok API + Sea-Lion (Ollama at 100.113.96.25:11434)
-- **Deployment**: Vercel (single instance, in-memory rate limiting)
+- **Deployment**: Vercel (single instance)
+- **Performance**: Must achieve sub-500ms P95 response times
 
 ## Key Decisions
 
@@ -171,4 +159,4 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | Central support hub | All client tickets → my21staff workspace | ✓ Good — v2.1 feature |
 
 ---
-*Last updated: 2026-01-20 after v2.2 milestone initialized*
+*Last updated: 2026-01-20 after v3.0 milestone initialized*
