@@ -53,30 +53,30 @@ html {
 :root {
   --radius: 0.625rem;
 
-  /* CRM Theme - Peach/Forest Green */
-  /* Base colors - Peach background */
-  --background: oklch(0.97 0.02 55);              /* #FFF1E6 peach-bg */
+  /* CRM Theme - Cool Green (aligned with landing page) */
+  /* Base colors - Off White background */
+  --background: oklch(0.96 0.01 145);             /* #f1f5f0 off-white green */
   --foreground: oklch(0.22 0.02 60);              /* #2D2A26 text-main */
 
-  /* Card/Panel - Lighter peach */
-  --card: oklch(0.98 0.015 55);                   /* #FFF8F2 panel-bg */
+  /* Card/Panel - White */
+  --card: oklch(1 0 0);                           /* #ffffff white */
   --card-foreground: oklch(0.22 0.02 60);
 
   /* Popover - White */
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.22 0.02 60);
 
-  /* Primary - Forest Green */
-  --primary: oklch(0.38 0.06 160);                /* #2D4B3E forest green */
+  /* Primary - Dark Green */
+  --primary: oklch(0.35 0.08 145);                /* #284b31 dark green */
   --primary-foreground: oklch(0.99 0 0);
 
-  /* Secondary - Light peach */
-  --secondary: oklch(0.96 0.02 55);
+  /* Secondary - Light sage */
+  --secondary: oklch(0.92 0.02 145);              /* #dce8dc sage */
   --secondary-foreground: oklch(0.22 0.02 60);
 
-  /* Muted - Warm gray */
-  --muted: oklch(0.95 0.015 55);
-  --muted-foreground: oklch(0.60 0.03 55);        /* #8C7E74 text-muted */
+  /* Muted - Cool gray-green */
+  --muted: oklch(0.94 0.01 145);
+  --muted-foreground: oklch(0.50 0.02 145);       /* muted green-gray */
 
   /* Accent - Bitcoin Orange (for highlights) */
   --accent: oklch(0.70 0.16 45);                  /* #F7931A */
@@ -86,35 +86,36 @@ html {
   --destructive: oklch(0.577 0.245 27.325);
 
   /* Borders and inputs */
-  --border: oklch(0.38 0.06 160 / 0.08);          /* Subtle forest green border */
+  --border: oklch(0.35 0.08 145 / 0.10);          /* Subtle dark green border */
   --input: oklch(0.99 0 0);
-  --ring: oklch(0.38 0.06 160);
+  --ring: oklch(0.35 0.08 145);
 
-  /* Charts - Forest green + orange palette */
-  --chart-1: oklch(0.38 0.06 160);
+  /* Charts - Dark green + orange palette */
+  --chart-1: oklch(0.35 0.08 145);
   --chart-2: oklch(0.70 0.16 45);
-  --chart-3: oklch(0.45 0.05 160);
+  --chart-3: oklch(0.45 0.06 145);
   --chart-4: oklch(0.75 0.14 50);
-  --chart-5: oklch(0.55 0.04 160);
+  --chart-5: oklch(0.55 0.05 145);
 
-  /* Sidebar - Warm peach */
-  --sidebar: oklch(0.94 0.03 55);                 /* #FCE9D9 sidebar-bg */
-  --sidebar-foreground: oklch(0.22 0.02 60);
-  --sidebar-primary: oklch(0.38 0.06 160);
+  /* Sidebar - Deep Forest (dark green) */
+  --sidebar: oklch(0.18 0.04 145);                /* #14261a deep forest */
+  --sidebar-foreground: oklch(0.95 0 0);          /* white text */
+  --sidebar-primary: oklch(0.70 0.16 45);         /* orange for active */
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.38 0.06 160);         /* Active state - forest green */
+  --sidebar-accent: oklch(0.70 0.16 45);          /* Active state - orange */
   --sidebar-accent-foreground: oklch(0.99 0 0);
-  --sidebar-border: oklch(0 0 0 / 0.05);
-  --sidebar-ring: oklch(0.38 0.06 160);
+  --sidebar-border: oklch(1 0 0 / 0.08);          /* subtle white border */
+  --sidebar-ring: oklch(0.70 0.16 45);
 
-  /* CRM-specific tokens */
-  --crm-forest: oklch(0.38 0.06 160);             /* #2D4B3E */
+  /* CRM-specific tokens (updated to match landing) */
+  --crm-forest: oklch(0.35 0.08 145);             /* #284b31 dark green */
+  --crm-deep-forest: oklch(0.18 0.04 145);        /* #14261a deep forest */
   --crm-orange: oklch(0.70 0.16 45);              /* #F7931A */
-  --crm-peach: oklch(0.97 0.02 55);               /* #FFF1E6 */
-  --crm-panel: oklch(0.98 0.015 55);              /* #FFF8F2 */
-  --crm-sidebar: oklch(0.94 0.03 55);             /* #FCE9D9 */
+  --crm-surface: oklch(0.96 0.01 145);            /* #f1f5f0 off-white */
+  --crm-panel: oklch(1 0 0);                      /* #ffffff white */
+  --crm-sage: oklch(0.92 0.02 145);               /* #dce8dc sage */
   --crm-text: oklch(0.22 0.02 60);                /* #2D2A26 */
-  --crm-text-muted: oklch(0.60 0.03 55);          /* #8C7E74 */
+  --crm-text-muted: oklch(0.50 0.02 145);         /* muted green-gray */
 }
 
 .dark {
@@ -210,10 +211,11 @@ html {
 
   /* CRM color utilities */
   --color-crm-forest: var(--crm-forest);
+  --color-crm-deep-forest: var(--crm-deep-forest);
   --color-crm-orange: var(--crm-orange);
-  --color-crm-peach: var(--crm-peach);
+  --color-crm-surface: var(--crm-surface);
   --color-crm-panel: var(--crm-panel);
-  --color-crm-sidebar: var(--crm-sidebar);
+  --color-crm-sage: var(--crm-sage);
   --color-crm-text: var(--crm-text);
   --color-crm-text-muted: var(--crm-text-muted);
 }
@@ -259,9 +261,9 @@ html {
 }
 
 .active-nav {
-  background-color: oklch(0.38 0.06 160);
+  background-color: oklch(0.70 0.16 45);          /* Orange active state */
   color: white;
-  box-shadow: 0 4px 12px rgba(45, 75, 62, 0.2);
+  box-shadow: 0 4px 12px rgba(247, 147, 26, 0.3);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -273,7 +275,7 @@ html {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: oklch(0.90 0.03 55);
+  background: oklch(0.80 0.02 145);               /* Cool gray-green scrollbar */
   border-radius: 10px;
 }
 

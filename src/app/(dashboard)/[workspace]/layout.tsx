@@ -109,10 +109,10 @@ export default async function WorkspaceLayout({
         </div>
 
         {/* Footer */}
-        <footer className="h-10 px-8 bg-sidebar/40 border-t border-black/5 flex items-center justify-between shrink-0">
+        <footer className="h-10 px-8 bg-secondary border-t border-primary/10 flex items-center justify-between shrink-0">
 <div />
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Network Stable
             </span>
