@@ -19,19 +19,19 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 ### Lead Scoring
 
-- [ ] **SCORE-01**: Dynamic lead scoring (0-100) based on form data + conversation responses
-- [ ] **SCORE-02**: Basic data scoring: form completeness, valid phone/email, target country
-- [ ] **SCORE-03**: Qualification scoring: IELTS score, GPA, budget, program clarity, timeline
-- [ ] **SCORE-04**: Engagement scoring: response time, question quality, interest signals
-- [ ] **SCORE-05**: Score thresholds: Hot (70+), Warm (40-69), Cold (<40)
-- [ ] **SCORE-06**: Lead phase auto-update in CRM based on score threshold
+- [x] **SCORE-01**: Dynamic lead scoring (0-100) based on form data + conversation responses
+- [x] **SCORE-02**: Basic data scoring: form completeness, valid phone/email, target country
+- [x] **SCORE-03**: Qualification scoring: IELTS score, GPA, budget, program clarity, timeline
+- [x] **SCORE-04**: Engagement scoring: response time, question quality, interest signals
+- [x] **SCORE-05**: Score thresholds: Hot (70+), Warm (40-69), Cold (<40)
+- [x] **SCORE-06**: Lead phase auto-update in CRM based on score threshold
 
 ### Lead Routing
 
-- [ ] **ROUTE-01**: Hot leads (70+) receive consultation booking push
-- [ ] **ROUTE-02**: Warm leads (40-69) continue qualification conversation
-- [ ] **ROUTE-03**: Cold leads (<40) receive WhatsApp community link
-- [ ] **ROUTE-04**: Cold lead follow-up scheduled (30 days)
+- [x] **ROUTE-01**: Hot leads (70+) receive consultation booking push
+- [x] **ROUTE-02**: Warm leads (40-69) continue qualification conversation
+- [x] **ROUTE-03**: Cold leads (<40) receive WhatsApp community link
+- [x] **ROUTE-04**: Cold lead follow-up scheduled (30 days)
 
 ### Payment Integration
 
@@ -148,16 +148,16 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 | ARI-05 | Phase 2 | Complete |
 | ARI-06 | Phase 2 | Complete |
 | ARI-07 | Phase 2 | Complete |
-| SCORE-01 | Phase 3 | Pending |
-| SCORE-02 | Phase 3 | Pending |
-| SCORE-03 | Phase 3 | Pending |
-| SCORE-04 | Phase 3 | Pending |
-| SCORE-05 | Phase 3 | Pending |
-| SCORE-06 | Phase 3 | Pending |
-| ROUTE-01 | Phase 3 | Pending |
-| ROUTE-02 | Phase 3 | Pending |
-| ROUTE-03 | Phase 3 | Pending |
-| ROUTE-04 | Phase 3 | Pending |
+| SCORE-01 | Phase 3 | Complete |
+| SCORE-02 | Phase 3 | Complete |
+| SCORE-03 | Phase 3 | Complete |
+| SCORE-04 | Phase 3 | Complete |
+| SCORE-05 | Phase 3 | Complete |
+| SCORE-06 | Phase 3 | Complete |
+| ROUTE-01 | Phase 3 | Complete |
+| ROUTE-02 | Phase 3 | Complete |
+| ROUTE-03 | Phase 3 | Complete |
+| ROUTE-04 | Phase 3 | Complete |
 | PAY-01 | Phase 4 | Pending |
 | PAY-02 | Phase 4 | Pending |
 | PAY-03 | Phase 4 | Pending |
@@ -216,4 +216,4 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 ---
 *Requirements defined: 2026-01-20*
-*Last updated: 2026-01-20 — Phase 2 complete (ARI-01 to ARI-07)*
+*Last updated: 2026-01-20 — Phase 3 complete (SCORE-01 to SCORE-06, ROUTE-01 to ROUTE-04)*
