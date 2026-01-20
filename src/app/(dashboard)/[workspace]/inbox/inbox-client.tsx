@@ -163,16 +163,15 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
         .eq('user_id', currentUserId)
         .single()
 
-      const currentSettings = currentData?.settings || {}
+      const currentSettings = (currentData?.settings && typeof currentData.settings === 'object' && !Array.isArray(currentData.settings))
+        ? (currentData.settings as Record<string, unknown>)
+        : {}
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newSettings = { ...currentSettings, filterPresets: updatedPresets } as any
       const { data: updateResult, error } = await supabase
         .from('workspace_members')
-        .update({
-          settings: {
-            ...currentSettings,
-            filterPresets: updatedPresets,
-          },
-        })
+        .update({ settings: newSettings })
         .eq('workspace_id', workspace.id)
         .eq('user_id', currentUserId)
         .select('settings')
@@ -220,16 +219,15 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
         .eq('user_id', currentUserId)
         .single()
 
-      const currentSettings = currentData?.settings || {}
+      const currentSettings = (currentData?.settings && typeof currentData.settings === 'object' && !Array.isArray(currentData.settings))
+        ? (currentData.settings as Record<string, unknown>)
+        : {}
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newSettings = { ...currentSettings, filterPresets: updatedPresets } as any
       await supabase
         .from('workspace_members')
-        .update({
-          settings: {
-            ...currentSettings,
-            filterPresets: updatedPresets,
-          },
-        })
+        .update({ settings: newSettings })
         .eq('workspace_id', workspace.id)
         .eq('user_id', currentUserId)
     }

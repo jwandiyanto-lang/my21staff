@@ -56,6 +56,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         id,
         workspace_id: 'dev-workspace-001',
         phone: '+6281234567890',
+        phone_normalized: '+6281234567890',
         name: name ?? 'Dev Contact',
         email: email ?? null,
         lead_score: lead_score ?? 50,
@@ -65,6 +66,11 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         metadata: {},
         created_at: now,
         updated_at: now,
+        cache_updated_at: null,
+        kapso_is_online: null,
+        kapso_last_seen: null,
+        kapso_name: null,
+        kapso_profile_pic: null,
       }
       return NextResponse.json(mockContact)
     }
@@ -169,6 +175,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
         id,
         workspace_id: 'dev-workspace-001',
         phone: '+6281234567890',
+        phone_normalized: '+6281234567890',
         name: 'Dev Contact',
         email: 'dev@example.com',
         lead_score: 50,
@@ -178,6 +185,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
         metadata: {},
         created_at: now,
         updated_at: now,
+        cache_updated_at: null,
+        kapso_is_online: null,
+        kapso_last_seen: null,
+        kapso_name: null,
+        kapso_profile_pic: null,
       }
       return NextResponse.json(mockContact)
     }
