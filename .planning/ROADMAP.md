@@ -107,25 +107,27 @@ Plans:
 
 ---
 
-### Phase 5: Scheduling & Handoff
+### Phase 5: Scheduling & Handoff ✓
 
 **Goal:** Book consultations and hand off to consultants
 
 **Requirements:** SCHED-01 through SCHED-06, HAND-01 through HAND-05
 
-**Success Criteria:**
-- [ ] Admin enters available consultant slots
-- [ ] ARI displays slots and books appointments
-- [ ] Meeting link notification sent before appointment
-- [ ] Consultant receives full context (score, conversation summary)
+**Status:** Complete (2026-01-20)
 
-**Plans:** 4 plans in 2 waves
+**Success Criteria:**
+- [x] Admin enters available consultant slots
+- [x] ARI displays slots and books appointments
+- [x] Meeting link notification sent before appointment
+- [x] Consultant receives full context (score, conversation summary)
+
+**Plans:** 4/4 complete
 
 Plans:
-- [ ] 05-01-PLAN.md — Slot database schema and CRUD API
-- [ ] 05-02-PLAN.md — Knowledge Base UI with slot management
-- [ ] 05-03-PLAN.md — ARI booking conversation flow
-- [ ] 05-04-PLAN.md — Handoff automation and notifications
+- [x] 05-01-PLAN.md — Slot database schema and CRUD API
+- [x] 05-02-PLAN.md — Knowledge Base UI with slot management
+- [x] 05-03-PLAN.md — ARI booking conversation flow
+- [x] 05-04-PLAN.md — Handoff automation and notifications
 
 ---
 
@@ -272,10 +274,10 @@ Full details: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 | v1.0 MVP | 1-5 | 14/14 | Complete | 2026-01-14 |
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
-| v2.2 ARI & User Flow | 1-7 | 14/22+ | In Progress | — |
+| v2.2 ARI & User Flow | 1-7 | 18/22+ | In Progress | — |
 
 **Total shipped:** 82 plans across 3 milestones
 
 ---
 
-*Last updated: 2026-01-20 — Phase 5 planned (Scheduling & Handoff)*
+*Last updated: 2026-01-20 — Phase 5 complete (Scheduling & Handoff)*

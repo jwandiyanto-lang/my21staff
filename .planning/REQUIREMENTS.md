@@ -44,20 +44,20 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 ### Scheduling
 
-- [ ] **SCHED-01**: Admin enters consultant availability slots in CRM
-- [ ] **SCHED-02**: ARI displays available slots after payment success
-- [ ] **SCHED-03**: User selects slot via WhatsApp (reply with number)
-- [ ] **SCHED-04**: Appointment confirmation with date/time/consultant name
-- [ ] **SCHED-05**: Meeting link notification 1 hour before appointment
-- [ ] **SCHED-06**: Appointment status tracking (scheduled, completed, cancelled, no-show)
+- [x] **SCHED-01**: Admin enters consultant availability slots in CRM
+- [x] **SCHED-02**: ARI displays available slots after scoring (payment skipped in v2.2)
+- [x] **SCHED-03**: User selects slot via WhatsApp (reply with number)
+- [x] **SCHED-04**: Appointment confirmation with date/time/consultant name
+- [x] **SCHED-05**: Meeting link notification 1 hour before appointment
+- [x] **SCHED-06**: Appointment status tracking (scheduled, completed, cancelled, no-show)
 
 ### Consultant Handoff
 
-- [ ] **HAND-01**: Lead phase updates to "Hot" after payment
-- [ ] **HAND-02**: Auto-generated notes with conversation summary
-- [ ] **HAND-03**: Due date set to consultation date
-- [ ] **HAND-04**: Consultant assignment to appointment
-- [ ] **HAND-05**: Consultant notification with full lead context (score, form data, conversation)
+- [x] **HAND-01**: Lead status updates to "hot_lead" after booking
+- [x] **HAND-02**: Auto-generated notes with conversation summary
+- [x] **HAND-03**: Due date set to consultation date
+- [x] **HAND-04**: Consultant assignment to appointment
+- [x] **HAND-05**: Consultant notification with full lead context (score, form data, conversation)
 
 ### Admin Interface - Persona
 
