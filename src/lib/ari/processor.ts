@@ -39,6 +39,7 @@ import {
   bookAppointment,
   formatBookingConfirmation,
 } from './scheduling';
+import { executeHandoff } from './handoff';
 import type {
   ARIConversation,
   ARIConfig,
@@ -768,6 +769,24 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
                 handoff_reason: 'appointment_booked',
               })
               .eq('id', conversation.id);
+
+            // Execute handoff: update contact notes, tags, lead status, notify consultant
+            // Note: consultant_id is set on the appointment from the slot lookup in scheduling.ts
+            const handoffResult = await executeHandoff(supabase, {
+              workspaceId,
+              contactId,
+              ariConversationId: conversation.id,
+              appointmentId: appointment.id,
+              consultationType: 'consultation',
+              consultantId: appointment.consultant_id || undefined,
+            });
+
+            if (!handoffResult.success) {
+              console.error('[ARI] Handoff execution failed:', handoffResult.error);
+              // Continue anyway - booking succeeded, handoff is secondary
+            } else {
+              console.log('[ARI] Handoff executed successfully');
+            }
 
             // Send confirmation message
             const confirmMsg = formatBookingConfirmation({
