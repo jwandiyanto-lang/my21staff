@@ -86,3 +86,31 @@ export {
   SEALION_MODEL,
   type SealionOptions,
 } from './clients/sealion';
+
+// ===========================================
+// Form Validation & Qualification
+// ===========================================
+
+export {
+  // Field detection
+  REQUIRED_FIELDS,
+  IMPORTANT_FIELDS,
+  getMissingFields,
+  hasAllRequiredFields,
+  getFieldLabel,
+  getFollowUpQuestion,
+  // Document tracking
+  INITIAL_DOCUMENT_STATUS,
+  getDocumentQuestions,
+  parseDocumentResponse,
+  updateDocumentStatus,
+  getNextDocumentQuestion,
+  getNextDocumentKey,
+  allDocumentsAsked,
+  getDocumentSummary,
+  // Types
+  type RequiredField,
+  type ImportantField,
+  type MissingFieldsResult,
+  type DocumentStatus,
+} from './qualification';

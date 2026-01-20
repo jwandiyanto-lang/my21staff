@@ -7,6 +7,12 @@
 
 import type { ARIState, ARIContext, ARIMessage, ARITone } from './types';
 import type { Json } from '@/types/database';
+import {
+  getMissingFields,
+  getFollowUpQuestion,
+  getNextDocumentQuestion,
+  type DocumentStatus,
+} from './qualification';
 
 // ===========================================
 // Type Definitions
@@ -23,7 +29,12 @@ export interface PromptContext {
   };
   conversation: {
     state: ARIState;
-    context: ARIContext;
+    context: ARIContext & {
+      /** Document readiness status tracked during qualifying */
+      documents?: DocumentStatus;
+      /** Fields already asked about to avoid repeating */
+      askedFields?: string[];
+    };
     recentMessages: Array<{ role: 'user' | 'assistant'; content: string }>;
   };
   config: {
@@ -214,6 +225,43 @@ export function buildSystemPrompt(ctx: PromptContext): string {
   // 5. Current State Instructions
   parts.push(`\n## Status Saat Ini: ${ctx.conversation.state.toUpperCase()}`);
   parts.push(STATE_INSTRUCTIONS[ctx.conversation.state]);
+
+  // 5b. Qualifying-specific instructions (missing fields + documents)
+  if (ctx.conversation.state === 'qualifying') {
+    const formAnswers = ctx.contact.formAnswers || {};
+    const missingFields = getMissingFields(formAnswers);
+
+    // Check if there are missing required fields
+    if (missingFields.required.length > 0) {
+      // Get first missing field that hasn't been asked yet
+      const askedFields = ctx.conversation.context.askedFields || [];
+      const nextMissing = missingFields.required.find(f => !askedFields.includes(f));
+
+      if (nextMissing) {
+        parts.push('\n## INSTRUKSI KUALIFIKASI');
+        parts.push(`Data yang masih kosong: ${missingFields.required.join(', ')}`);
+        parts.push(`Tanyakan: ${getFollowUpQuestion(nextMissing)}`);
+        parts.push('\nPENTING: Tanya SATU hal per pesan. Jangan borong!');
+      }
+    } else {
+      // All form fields complete, check documents
+      const documentStatus = ctx.conversation.context.documents || {
+        passport: null,
+        cv: null,
+        english_test: null,
+        transcript: null,
+      };
+
+      const nextDocQuestion = getNextDocumentQuestion(documentStatus);
+
+      if (nextDocQuestion) {
+        parts.push('\n## INSTRUKSI KUALIFIKASI');
+        parts.push('Data form sudah lengkap. Sekarang tanya dokumen.');
+        parts.push(`Tanyakan: ${nextDocQuestion}`);
+        parts.push('\nPENTING: Tanya SATU hal per pesan. Jangan borong!');
+      }
+    }
+  }
 
   // 6. Collected Data Summary
   if (ctx.conversation.context.lead_data) {
