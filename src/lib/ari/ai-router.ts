@@ -44,7 +44,8 @@ function hashString(str: string): number {
  * selectModel('abc-123', 70)
  * ```
  */
-export function selectModel(contactId: string, grokWeight: number = 50): AIModelType {
+// TODO: Restore to 50 after Sea-Lion is verified working
+export function selectModel(contactId: string, grokWeight: number = 100): AIModelType {
   const hash = hashString(contactId);
   return hash < grokWeight ? 'grok' : 'sealion';
 }

@@ -185,6 +185,7 @@
   },
   "active": "600c2f6ee49ae613",
   "lastOpenFiles": [
+    "src/lib/ari/ai-router.ts.tmp.1952260.1768912965601",
     "node_modules/@vercel/functions/LICENSE",
     "node_modules/@vercel/functions/wait-until.d.ts",
     "node_modules/@vercel/functions/middleware.d.ts",
@@ -206,7 +207,6 @@
     "node_modules/@vercel/functions/docs/README.md",
     "node_modules/@vercel/functions/docs",
     "node_modules/@vercel/functions/CHANGELOG.md",
-    "node_modules/@vercel/functions/package.json",
     "node_modules/@vercel/oidc/README.md",
     "node_modules/@vercel/oidc/docs/README.md",
     "node_modules/@vercel/oidc/CHANGELOG.md",
