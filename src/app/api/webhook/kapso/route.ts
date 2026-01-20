@@ -337,8 +337,11 @@ async function processWorkspaceMessages(
 
   console.log(`[Webhook] Saved ${messageInserts.length} messages, updated ${conversationUpdates.size} conversations`)
 
-  // === ARI PROCESSING (async, non-blocking) ===
+  // === ARI PROCESSING ===
   // Process with ARI for each new text message
+  // Collect promises to await them all (required for waitUntil to work)
+  const ariPromises: Promise<void>[] = []
+
   for (const messageData of newMessages) {
     const contact = contactMap.get(messageData.phone)
     if (!contact) continue
@@ -360,9 +363,8 @@ async function processWorkspaceMessages(
     const messageContent = messageData.message.text?.body || ''
     if (!messageContent) continue // Skip non-text messages for now
 
-    // Process with ARI (async, don't block webhook)
-    // Important: NOT awaited - webhook returns 200 immediately
-    processWithARI({
+    // Process with ARI - collect promise to await later
+    const ariPromise = processWithARI({
       workspaceId,
       contactId: contact.id,
       contactPhone: messageData.phone,
@@ -371,6 +373,15 @@ async function processWorkspaceMessages(
     }).catch(err => {
       console.error('[Webhook] ARI processing error:', err)
     })
+
+    ariPromises.push(ariPromise as Promise<void>)
+  }
+
+  // Wait for all ARI processing to complete
+  // This ensures waitUntil keeps the function alive long enough
+  if (ariPromises.length > 0) {
+    await Promise.all(ariPromises)
+    console.log(`[Webhook] ARI processing complete for ${ariPromises.length} messages`)
   }
 }
 
