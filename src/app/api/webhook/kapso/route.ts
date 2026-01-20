@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
 import { verifyKapsoSignature } from '@/lib/kapso/verify-signature'
 import { normalizePhone } from '@/lib/phone/normalize'
+import { processWithARI } from '@/lib/ari/processor'
+import { safeDecrypt } from '@/lib/crypto'
 import type { Json } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -331,6 +333,42 @@ async function processWorkspaceMessages(
   }
 
   console.log(`[Webhook] Saved ${messageInserts.length} messages, updated ${conversationUpdates.size} conversations`)
+
+  // === ARI PROCESSING (async, non-blocking) ===
+  // Process with ARI for each new text message
+  for (const messageData of newMessages) {
+    const contact = contactMap.get(messageData.phone)
+    if (!contact) continue
+
+    // Check if workspace has ARI enabled (has ari_config)
+    const { data: ariConfig } = await supabase
+      .from('ari_config')
+      .select('id')
+      .eq('workspace_id', workspaceId)
+      .single()
+
+    if (!ariConfig) continue // No ARI for this workspace
+
+    // Get Kapso credentials
+    const credentials = await getKapsoCredentials(supabase, workspaceId)
+    if (!credentials) continue
+
+    // Get message content - only process text messages
+    const messageContent = messageData.message.text?.body || ''
+    if (!messageContent) continue // Skip non-text messages for now
+
+    // Process with ARI (async, don't block webhook)
+    // Important: NOT awaited - webhook returns 200 immediately
+    processWithARI({
+      workspaceId,
+      contactId: contact.id,
+      contactPhone: messageData.phone,
+      userMessage: messageContent,
+      kapsoCredentials: credentials,
+    }).catch(err => {
+      console.error('[Webhook] ARI processing error:', err)
+    })
+  }
 }
 
 // GET for webhook verification (Kapso sends hub.challenge)
@@ -347,6 +385,39 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ status: 'Webhook endpoint ready' })
+}
+
+// Helper: Get decrypted Kapso credentials for a workspace
+async function getKapsoCredentials(
+  supabase: SupabaseClient,
+  workspaceId: string
+): Promise<{ apiKey: string; phoneId: string } | null> {
+  const { data: workspace, error } = await supabase
+    .from('workspaces')
+    .select('kapso_api_key, kapso_phone_id')
+    .eq('id', workspaceId)
+    .single()
+
+  if (error || !workspace) {
+    console.error('[Webhook] Failed to get workspace credentials:', error)
+    return null
+  }
+
+  if (!workspace.kapso_api_key || !workspace.kapso_phone_id) {
+    return null
+  }
+
+  try {
+    // Decrypt API key (safeDecrypt handles unencrypted values gracefully)
+    const apiKey = safeDecrypt(workspace.kapso_api_key)
+    return {
+      apiKey,
+      phoneId: workspace.kapso_phone_id,
+    }
+  } catch (err) {
+    console.error('[Webhook] Failed to decrypt Kapso credentials:', err)
+    return null
+  }
 }
 
 // Batch helper: Get or create contacts for multiple phone numbers
