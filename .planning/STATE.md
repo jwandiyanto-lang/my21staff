@@ -9,23 +9,23 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 
 ## Current Position
 
-Phase: 2 of 7 — ARI Core Conversation (COMPLETE)
-Plan: 5 of 5 (02-05-PLAN complete)
-Status: Phase complete
-Last activity: 2026-01-20 — Completed Phase 2 (ARI Core Conversation)
+Phase: 3 of 7 — Lead Scoring & Routing
+Plan: 1 of 3 (03-01-PLAN complete)
+Status: In progress
+Last activity: 2026-01-20 — Completed 03-01-PLAN (Scoring Engine)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ███░░░░░░░ (10/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ████░░░░░░ (11/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 92 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 10 in v2.2)
+- Total plans completed: 93 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 11 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 → Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
-- Lines: ~35,400 TypeScript
-- Phases completed: 26 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 2)
+- Lines: ~35,800 TypeScript
+- Phases completed: 26 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 2 + 03-01)
 
 ## Accumulated Context
 
@@ -71,6 +71,11 @@ Key v2.2 decisions:
 - Knowledge base query functions for ari_destinations with country mapping - IMPLEMENTED 02-05
 - University question detection (Indonesian + English keywords) triggers destination lookup - IMPLEMENTED 02-05
 - Document response tracking via conversationContext.pendingDocumentQuestion - IMPLEMENTED 02-05
+- Lead scoring weights: basic 25pts, qualification 35pts, documents 30pts, engagement 10pts - IMPLEMENTED 03-01
+- Timeline penalty (-10 points) for 2+ year timelines - IMPLEMENTED 03-01
+- IELTS 6.5+ bonus (+3 points) - IMPLEMENTED 03-01
+- Temperature thresholds: hot >= 70, warm >= 40, cold < 40 - IMPLEMENTED 03-01
+- Jest test infrastructure added for unit testing - IMPLEMENTED 03-01
 
 ### Deferred Issues
 
@@ -85,9 +90,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed Phase 2 (ARI Core Conversation) - all 5 plans executed
+Stopped at: Completed 03-01-PLAN (Scoring Engine)
 Resume file: None
-Next: Phase 3 (Lead Scoring & Routing)
+Next: 03-02-PLAN (Routing Logic)
 
 ## Deployment Info
 
@@ -112,4 +117,4 @@ Next: Phase 3 (Lead Scoring & Routing)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed Phase 2 (ARI Core Conversation)*
+*Last updated: 2026-01-20 — Completed 03-01-PLAN (Scoring Engine)*
