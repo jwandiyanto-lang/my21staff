@@ -1,365 +1,562 @@
-# Stack Research: v2.1 Client Launch Ready
+# Stack Research: Performance Optimization (v3.0)
 
 **Project:** my21staff
-**Researched:** 2026-01-18
-**Focus:** Email system, Support ticketing, Performance optimization
+**Researched:** 2026-01-20
+**Overall Confidence:** HIGH
+**Focus:** Convex vs Optimized Supabase for sub-500ms P95 latency
 
 ---
 
 ## Executive Summary
 
-For v2.1, use **Resend** (already installed) with **React Email** for transactional emails - this solves the Vercel SMTP DNS issues by using HTTP API instead of SMTP. For support ticketing, **Tawk.to** provides free unlimited ticketing and live chat - perfect for early-stage SaaS. For performance, leverage Next.js 16's built-in caching with `use cache` directive plus **TanStack Query** with Supabase Cache Helpers for client-side data caching.
+**Recommendation: Optimized Supabase, not Convex migration.**
+
+For a 43k-line production CRM with multi-tenant workspaces, Supabase Auth, and existing RLS policies, migrating to Convex would cost 4-8 weeks with high risk for marginal performance gains. The current 2-6 second response times stem from identifiable Supabase anti-patterns (sequential queries, missing indexes, `select('*')`) that can achieve sub-500ms P95 through optimization alone.
 
 ---
 
-## Email System
+## Current Architecture Analysis
 
-### Recommended: Resend + React Email
+### Observed Anti-Patterns (from codebase review)
 
-| Component | Version | Purpose |
-|-----------|---------|---------|
-| `resend` | ^6.7.0 | Email API (already installed) |
-| `@react-email/components` | ^0.0.31 | Email templates |
+1. **Sequential Queries in Server Components**
+   - `/dashboard/page.tsx` executes 7-8 sequential queries
+   - Each query waits for prior query: auth check -> membership check -> profile -> workspace -> etc.
+   - Fix: Parallel execution with `Promise.all()` or consolidated queries
 
-**Why Resend over Hostinger SMTP:**
-- **Solves DNS issue:** Resend uses HTTP API, not SMTP. No DNS resolution problems on Vercel.
-- **Vercel-native:** Built by ex-Vercel engineers, first-class Next.js support
-- **React Email integration:** Build emails with JSX/TSX components, not HTML tables
-- **Free tier:** 3,000 emails/month (100/day) - sufficient for early traction
+2. **Over-fetching with `select('*')`**
+   - `/api/contacts/route.ts`: `.select('*')` returns all columns
+   - Network overhead and parsing time for unused fields
+   - Fix: Explicit column selection
 
-**Implementation pattern:**
+3. **Missing Nested Relations**
+   - Multiple queries to fetch related data (workspace -> members -> profiles)
+   - Could be single query with Supabase nested relations syntax
+   - Fix: Use `.select('*, members(*), profiles(*)')` pattern
+
+4. **Realtime as Invalidation Trigger**
+   - `use-conversations.ts` subscribes to changes, then invalidates TanStack Query cache
+   - This triggers a refetch (polling behavior with extra steps)
+   - Fix: Use realtime payload directly or optimistic updates
+
+---
+
+## Convex
+
+### Why Convex
+
+- **Built-in Reactivity**: All queries automatically subscribe to changes. No polling, no manual cache invalidation. Real-time is the default, not an add-on.
+- **End-to-End Type Safety**: TypeScript types flow from database schema through queries to React components. No type generation step or runtime mismatches.
+- **Transactional Document Store**: Flexibility of documents with ACID guarantees. No N+1 queries because data access patterns are explicit in functions.
+- **Serverless Functions at Database Edge**: Backend logic runs in isolated environment within Convex, eliminating cold starts and network round-trips.
+
+### When Convex Wins
+
+| Scenario | Why Convex Excels |
+|----------|-------------------|
+| Greenfield real-time apps | Zero setup for live sync, collaboration features |
+| Chat/messaging products | Built for exactly this use case |
+| TypeScript-heavy teams | Unmatched DX with auto-generated types |
+| Rapid prototyping | Ship features in hours, not days |
+| Multiplayer/collaborative | Conflict-free state sync built-in |
+
+### Convex for Next.js 15
+
+**SDK Version:** `convex@1.31.5` (latest as of 2025-01)
+
+**Setup Pattern:**
 ```typescript
-// src/lib/email/send.ts
-import { Resend } from 'resend';
-import { WelcomeEmail } from '@/emails/welcome';
+// src/app/ConvexClientProvider.tsx
+"use client";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-export async function sendWelcomeEmail(to: string, name: string) {
-  return resend.emails.send({
-    from: 'My21Staff <noreply@my21staff.com>',
-    to,
-    subject: 'Selamat datang di my21staff!',
-    react: WelcomeEmail({ name }),
-  });
+export default function ConvexClientProvider({ children }: { children: React.ReactNode }) {
+  return <ConvexProvider client={convex}>{children}</ConvexProvider>;
 }
-```
 
-**Pricing (Resend):**
-| Tier | Cost | Emails/month | Daily limit |
-|------|------|--------------|-------------|
-| Free | $0 | 3,000 | 100 |
-| Pro | $20 | 50,000 | None |
-| Scale | $90 | 100,000 | None |
-
-**Confidence:** HIGH - Resend already installed, verified Vercel compatibility via official docs.
-
-### Alternatives Considered
-
-| Provider | Pros | Cons | When to use |
-|----------|------|------|-------------|
-| **Postmark** | Best deliverability (22% better than SendGrid), 45-day log retention | $15/month minimum, no generous free tier | When deliverability is critical (e.g., auth emails) |
-| **SendGrid** | 100 emails/day free | 7-day log retention, complex pricing | Legacy choice, not recommended for new projects |
-| **Nodemailer + Hostinger SMTP** | Already configured | DNS resolution fails on Vercel serverless | Only for local development/testing |
-
-### NOT Recommended
-
-| Approach | Why Avoid |
-|----------|-----------|
-| **Direct SMTP from Vercel** | DNS resolution issues (EBADNAME), unreliable in serverless |
-| **AWS SES directly** | Complex setup, requires AWS account, no React Email support |
-| **MailChimp/Mailgun** | Overkill for transactional, designed for marketing campaigns |
-
----
-
-## Support Ticketing
-
-### Recommended: Tawk.to (Free Tier)
-
-**Why Tawk.to:**
-- **100% free:** Unlimited agents, chats, ticketing, and knowledge base
-- **Integrated ticketing:** Chat conversations automatically convert to tickets
-- **Indonesian support:** Common in Indonesian SME market, familiar to users
-- **No seat limits:** Unlike Crisp/Intercom, no per-agent fees
-
-**What's included free:**
-- Live chat widget
-- Ticketing system
-- Knowledge base
-- Mobile apps (iOS/Android)
-- CRM basics
-- Unlimited chat history
-
-**Optional paid add-ons:**
-| Add-on | Cost | Need it? |
-|--------|------|----------|
-| Remove branding | $29/month | Later (brand polish) |
-| AI Assist | $29/month | Later (scale) |
-| Video + Voice | $29/month | Not needed for CRM support |
-
-**Implementation:**
-```html
-<!-- Add to src/app/layout.tsx or landing page -->
-<Script
-  id="tawk-to"
-  strategy="lazyOnload"
-  dangerouslySetInnerHTML={{
-    __html: `
-      var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-      (function(){
-        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-        s1.async=true;
-        s1.src='https://embed.tawk.to/YOUR_PROPERTY_ID/YOUR_WIDGET_ID';
-        s1.charset='UTF-8';
-        s1.setAttribute('crossorigin','*');
-        s0.parentNode.insertBefore(s1,s0);
-      })();
-    `
-  }}
-/>
-```
-
-**Confidence:** HIGH - Verified free tier includes ticketing, widely used.
-
-### Alternatives Considered
-
-| Solution | Pros | Cons | When to use |
-|----------|------|------|-------------|
-| **Crisp** | Beautiful UI, good DX | Ticketing only on $295/month Plus plan | When budget allows premium UX |
-| **Chatwoot (self-hosted)** | Open source, full control | Requires server infrastructure | When data sovereignty is critical |
-| **Freshdesk** | Free for 2 agents, robust ticketing | Limited free tier, per-agent scaling | When formal SLA/escalation needed |
-| **Build custom** | Full control | Development time, maintenance burden | Only if support is core differentiator |
-
-### NOT Recommended
-
-| Approach | Why Avoid |
-|----------|-----------|
-| **Intercom** | $0.99/resolution AI fees, $39-139/seat minimum, unpredictable costs |
-| **Zendesk** | Enterprise pricing, overkill for early-stage SaaS |
-| **Crisp Free** | No ticketing on free/basic tiers, misleading pricing |
-
----
-
-## Performance Optimization
-
-### Database Query Caching: TanStack Query + Supabase Cache Helpers
-
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `@tanstack/react-query` | ^5.x | Client-side data caching |
-| `@supabase-cache-helpers/postgrest-react-query` | ^1.x | Supabase integration |
-
-**Why TanStack Query:**
-- Automatic caching and background refetching
-- Optimistic updates for smooth UX
-- Built-in pagination support
-- Reduces Supabase API calls (lower costs)
-
-**Implementation pattern:**
-```typescript
-// src/lib/query-client.tsx
-'use client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000, // 1 minute
-      gcTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
-
-// src/hooks/use-leads.ts
-import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
-
-export function useLeads(tenantId: string) {
-  const supabase = createBrowserClient();
-  return useQuery(
-    supabase
-      .from('leads')
-      .select('*')
-      .eq('tenant_id', tenantId)
-      .order('created_at', { ascending: false })
+// src/app/layout.tsx
+import ConvexClientProvider from "./ConvexClientProvider";
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <ConvexClientProvider>{children}</ConvexClientProvider>
+      </body>
+    </html>
   );
 }
 ```
 
-**Confidence:** HIGH - Official Supabase blog recommends this pattern.
-
-### Server-Side Caching: `use cache` Directive
-
-Next.js 16 introduces the `use cache` directive (replacing `unstable_cache`).
-
-**Enable in next.config.ts:**
+**Query Pattern:**
 ```typescript
-const nextConfig = {
-  experimental: {
-    cacheComponents: true,
+// convex/conversations.ts
+import { query } from "./_generated/server";
+import { v } from "convex/values";
+
+export const list = query({
+  args: { workspaceId: v.id("workspaces") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("conversations")
+      .withIndex("by_workspace", (q) => q.eq("workspaceId", args.workspaceId))
+      .order("desc")
+      .take(50);
   },
+});
+
+// React component
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+
+function ConversationList({ workspaceId }) {
+  const conversations = useQuery(api.conversations.list, { workspaceId });
+  // Automatically re-renders on database changes
+}
+```
+
+**Auth Integration with External Provider (Supabase Auth):**
+```typescript
+// convex/auth.config.ts
+export default {
+  providers: [
+    {
+      type: "customJwt",
+      applicationID: "my21staff",
+      issuer: "https://your-project.supabase.co/auth/v1",
+      jwks: "https://your-project.supabase.co/auth/v1/.well-known/jwks.json",
+      algorithm: "RS256",
+    },
+  ],
 };
 ```
 
-**Usage pattern:**
-```typescript
-// src/lib/data/get-leads.ts
-'use cache';
-import { unstable_cacheLife, unstable_cacheTag } from 'next/cache';
+**Required JWT claims from Supabase Auth:**
+- Header: `kid`, `alg`, `typ`
+- Payload: `sub`, `iss`, `exp`, `iat` (recommended)
 
-export async function getLeads(tenantId: string) {
-  unstable_cacheLife('minutes'); // Cache for a few minutes
-  unstable_cacheTag(`leads-${tenantId}`);
+### Convex Pricing (2025)
 
-  const { data } = await supabase
-    .from('leads')
-    .select('*')
-    .eq('tenant_id', tenantId);
+| Resource | Free Tier | Pro ($25/dev/mo) |
+|----------|-----------|------------------|
+| Function calls | 1M/month | 25M/month |
+| Database storage | 0.5 GB | 50 GB |
+| Database bandwidth | 1 GB/month | 50 GB/month |
+| Query concurrency | 16 | 256+ |
 
-  return data;
-}
+### Migration Complexity: Supabase to Convex
 
-// Invalidate on mutation
-import { revalidateTag } from 'next/cache';
-revalidateTag(`leads-${tenantId}`);
-```
+**Estimated effort:** 4-8 weeks for 43k LOC codebase
 
-**Confidence:** MEDIUM - `use cache` is stable in Next.js 16 but API may evolve.
+| Task | Effort | Risk |
+|------|--------|------|
+| Schema conversion (SQL -> document) | 1-2 weeks | Medium |
+| Rewrite queries as Convex functions | 2-3 weeks | High |
+| Auth migration (RLS -> Convex auth) | 1 week | High |
+| Real-time refactoring | 1 week | Low |
+| Testing and validation | 1-2 weeks | High |
 
-### Bundle Size Optimization
-
-| Tool | Version | Purpose |
-|------|---------|---------|
-| `@next/bundle-analyzer` | ^16.0.1 | Analyze bundle size |
-| `next/dynamic` | Built-in | Code splitting |
-
-**Setup bundle analyzer:**
-```bash
-npm install @next/bundle-analyzer
-```
-
-```javascript
-// next.config.ts
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-});
-
-module.exports = withBundleAnalyzer(nextConfig);
-```
-
-**Run analysis:**
-```bash
-ANALYZE=true npm run build
-```
-
-**Dynamic imports pattern:**
-```typescript
-// For heavy components not needed on initial load
-import dynamic from 'next/dynamic';
-
-const ChartComponent = dynamic(
-  () => import('@/components/analytics/chart'),
-  { ssr: false, loading: () => <ChartSkeleton /> }
-);
-
-const PDFViewer = dynamic(
-  () => import('@/components/proposals/pdf-viewer'),
-  { ssr: false }
-);
-```
-
-**Quick wins for bundle reduction:**
-- Use `next/dynamic` for modals, charts, PDF viewers
-- Use `optimizePackageImports` for lucide-react icons
-- Review large dependencies with bundle analyzer
-
-**Confidence:** HIGH - Official Next.js documentation patterns.
-
-### Edge Caching (Vercel)
-
-Vercel automatically caches static assets at edge locations. For dynamic content:
-
-```typescript
-// For API routes that can be cached
-export const runtime = 'edge';
-
-export async function GET() {
-  return new Response(JSON.stringify(data), {
-    headers: {
-      'Cache-Control': 's-maxage=60, stale-while-revalidate=300',
-    },
-  });
-}
-```
-
-**Confidence:** HIGH - Standard Vercel pattern.
+**Key risks:**
+- RLS policies must be reimplemented as Convex function logic
+- Multi-tenant isolation patterns differ significantly
+- Existing Supabase Storage/Auth dependencies
+- No rollback path once committed
 
 ---
 
-## Installation Summary
+## Supabase Optimizations
 
-```bash
-# Email (React Email components - Resend already installed)
-npm install @react-email/components
+### Query Optimizations
 
-# Query caching
-npm install @tanstack/react-query @supabase-cache-helpers/postgrest-react-query
+**1. Parallel Query Execution**
 
-# Bundle analysis (dev only)
-npm install -D @next/bundle-analyzer
-
-# Tawk.to - No npm package, uses embed script
+Before (sequential):
+```typescript
+const { data: user } = await supabase.auth.getUser()
+const { data: membership } = await supabase.from('workspace_members').select('role')...
+const { data: profile } = await supabase.from('profiles').select('is_admin')...
+const { data: workspaces } = await supabase.from('workspaces').select('slug')...
 ```
+
+After (parallel):
+```typescript
+const [
+  { data: { user } },
+  { data: membership },
+  { data: profile },
+  { data: workspaces }
+] = await Promise.all([
+  supabase.auth.getUser(),
+  supabase.from('workspace_members').select('role')...,
+  supabase.from('profiles').select('is_admin')...,
+  supabase.from('workspaces').select('slug')...
+])
+```
+
+**2. Nested Relations Syntax**
+
+Before (3 queries):
+```typescript
+const { data: workspace } = await supabase.from('workspaces').select('*').eq('id', id)
+const { data: members } = await supabase.from('workspace_members').select('*').eq('workspace_id', id)
+const { data: profiles } = await supabase.from('profiles').select('*').in('id', memberIds)
+```
+
+After (1 query):
+```typescript
+const { data: workspace } = await supabase
+  .from('workspaces')
+  .select(`
+    id,
+    name,
+    slug,
+    workspace_members (
+      id,
+      role,
+      user_id,
+      profiles:user_id (
+        id,
+        email,
+        full_name,
+        avatar_url
+      )
+    )
+  `)
+  .eq('id', id)
+  .single()
+```
+
+**Multi-foreign-key disambiguation:**
+```typescript
+// When a table has multiple FKs to the same table
+const { data } = await supabase.from('shifts').select(`
+  *,
+  start_scan:scans!scan_id_start (id, badge_scan_time),
+  end_scan:scans!scan_id_end (id, badge_scan_time)
+`)
+```
+
+**3. Explicit Column Selection**
+
+Before:
+```typescript
+.select('*')  // Returns 20+ columns
+```
+
+After:
+```typescript
+.select('id, name, phone, status, created_at')  // Only what's needed
+```
+
+**4. Database Functions (RPC) for Complex Operations**
+
+```sql
+-- Create function for dashboard data
+CREATE OR REPLACE FUNCTION get_dashboard_data(p_user_id uuid)
+RETURNS json AS $$
+DECLARE
+  result json;
+BEGIN
+  SELECT json_build_object(
+    'profile', (SELECT row_to_json(p) FROM profiles p WHERE p.id = p_user_id),
+    'memberships', (SELECT json_agg(row_to_json(m)) FROM workspace_members m WHERE m.user_id = p_user_id),
+    'workspaces', (SELECT json_agg(row_to_json(w)) FROM workspaces w
+                   WHERE w.id IN (SELECT workspace_id FROM workspace_members WHERE user_id = p_user_id))
+  ) INTO result;
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+Usage:
+```typescript
+const { data } = await supabase.rpc('get_dashboard_data', { p_user_id: user.id })
+```
+
+### Index Recommendations
+
+**Critical indexes for this codebase:**
+
+```sql
+-- Contacts: Most queried table
+CREATE INDEX idx_contacts_workspace_created
+  ON contacts(workspace_id, created_at DESC);
+
+CREATE INDEX idx_contacts_workspace_phone
+  ON contacts(workspace_id, phone);
+
+CREATE INDEX idx_contacts_workspace_status
+  ON contacts(workspace_id, status);
+
+-- Conversations: Real-time list
+CREATE INDEX idx_conversations_workspace_updated
+  ON conversations(workspace_id, updated_at DESC);
+
+CREATE INDEX idx_conversations_workspace_unread
+  ON conversations(workspace_id, unread_count)
+  WHERE unread_count > 0;  -- Partial index for active filter
+
+-- Workspace members: Auth check on every request
+CREATE INDEX idx_workspace_members_user_workspace
+  ON workspace_members(user_id, workspace_id);
+
+-- Messages: Conversation threads
+CREATE INDEX idx_messages_conversation_created
+  ON messages(conversation_id, created_at DESC);
+```
+
+**Index types for specific use cases:**
+
+| Index Type | Use Case | Benefit |
+|------------|----------|---------|
+| B-tree (default) | Equality, range queries | General purpose |
+| BRIN | `created_at` on append-only tables | 10x smaller than B-tree |
+| Partial | Filtered subsets (`WHERE unread > 0`) | Index only relevant rows |
+| Composite | Multi-column filters | Avoid multiple index lookups |
+
+**Use index_advisor:**
+```sql
+-- In Supabase SQL Editor
+SELECT * FROM index_advisor('
+  SELECT * FROM contacts
+  WHERE workspace_id = $1
+  ORDER BY created_at DESC
+  LIMIT 25
+');
+```
+
+### RLS Performance Optimization
+
+**SLOW pattern (function called per row):**
+```sql
+CREATE POLICY "workspace_access" ON contacts
+  FOR SELECT USING (
+    workspace_id IN (
+      SELECT workspace_id FROM workspace_members
+      WHERE user_id = auth.uid()
+    )
+  );
+```
+
+**FAST pattern (wrapped in SELECT for optimizer caching):**
+```sql
+CREATE POLICY "workspace_access" ON contacts
+  FOR SELECT USING (
+    workspace_id IN (
+      (SELECT workspace_id FROM workspace_members
+       WHERE user_id = (SELECT auth.uid()))
+    )
+  );
+```
+
+**Additional RLS optimizations:**
+1. Add index on RLS filter columns: `CREATE INDEX idx_contacts_user ON contacts(user_id)`
+2. Use `TO authenticated` clause to skip RLS for anonymous users
+3. Add explicit client-side WHERE clauses alongside RLS policies
+4. Use SECURITY DEFINER functions for complex multi-table joins
+
+### Connection Pooling Configuration
+
+**For serverless (Vercel):**
+```
+# Use Supavisor transaction mode
+Connection string: postgres://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
+
+# Pool size recommendations by compute tier
+Small (1GB):  40% to pool = ~15 connections
+Medium (2GB): 60% to pool = ~30 connections
+Large (4GB):  80% to pool = ~60 connections
+```
+
+**Key settings:**
+- Use transaction mode (port 6543), not session mode
+- Don't use both PgBouncer and Supavisor simultaneously
+- Direct connections for long-lived sessions only
+
+### When Optimized Supabase is Enough
+
+| Scenario | Why Supabase Wins |
+|----------|-------------------|
+| Existing production app | No migration cost, proven stability |
+| Multi-tenant SaaS | RLS built for this use case |
+| Complex SQL queries | Full PostgreSQL power |
+| Self-hosting option | Zero vendor lock-in possible |
+| Team knows SQL | Lower learning curve |
+| Need SQL analytics | Direct psql access |
+
+---
+
+## Hybrid Approach
+
+### Supabase Auth + Convex Data
+
+**How it works:**
+1. Keep Supabase Auth for authentication
+2. Migrate data layer to Convex
+3. Pass Supabase JWT to Convex for identity
+
+**Configuration:**
+```typescript
+// convex/auth.config.ts
+export default {
+  providers: [{
+    type: "customJwt",
+    applicationID: "my21staff", // Must match JWT aud claim
+    issuer: "https://[project].supabase.co/auth/v1",
+    jwks: "https://[project].supabase.co/auth/v1/.well-known/jwks.json",
+    algorithm: "RS256",
+  }],
+};
+
+// Client-side token bridging
+const { data: { session } } = await supabase.auth.getSession()
+const accessToken = session?.access_token
+// Pass to Convex client for authenticated requests
+```
+
+**Complexity estimate:** HIGH
+
+| Challenge | Impact |
+|-----------|--------|
+| Two systems to maintain | Operational complexity doubles |
+| Session sync issues | Auth state can drift between systems |
+| RLS reimplementation | Security model must be rebuilt |
+| File storage migration | Supabase Storage != Convex Files |
+
+**When to choose hybrid:**
+- Immediate need for reactive features (chat, presence)
+- Plan to fully migrate eventually
+- Team has capacity for dual-system maintenance
+
+**Recommendation for my21staff:** Avoid hybrid. Either commit to full Convex migration or optimize Supabase. Hybrid adds complexity without proportional benefit.
+
+---
+
+## Performance Comparison
+
+### Expected Latency by Approach
+
+| Approach | P50 Latency | P95 Latency | Effort |
+|----------|-------------|-------------|--------|
+| Current (unoptimized) | 2-3s | 6-9s | - |
+| Optimized Supabase | 100-200ms | 300-500ms | 1-2 weeks |
+| Convex migration | 50-100ms | 150-300ms | 4-8 weeks |
+| Hybrid | 100-150ms | 250-400ms | 3-4 weeks |
+
+### Real-time Capabilities
+
+| Feature | Supabase Realtime | Convex |
+|---------|-------------------|--------|
+| Latency | <100ms typical | <50ms typical |
+| Setup | Manual subscription | Automatic |
+| Filtering | WAL-based, per-table | Query-level |
+| Concurrent connections | 10k+ | Scales with plan |
+| Cost model | Per message + connections | Included in function calls |
+
+---
+
+## Recommendation
+
+### For my21staff: Optimize Supabase
+
+**Rationale:**
+1. **ROI Analysis**: 1-2 weeks of Supabase optimization vs 4-8 weeks of Convex migration
+2. **Risk Profile**: Production app with paying customers; migration risk is high
+3. **Root Cause**: Performance issues are fixable anti-patterns, not platform limitations
+4. **Real-time Already Working**: TanStack Query + Supabase Realtime provides adequate reactivity
+
+**Optimization Roadmap:**
+
+| Phase | Effort | Expected Impact |
+|-------|--------|-----------------|
+| 1. Parallel queries (Promise.all) | 2-3 days | 40-60% latency reduction |
+| 2. Add missing indexes | 1 day | 50-100x for specific queries |
+| 3. Nested relations refactor | 3-5 days | 3-5x fewer queries |
+| 4. Column selection audit | 1-2 days | 20-30% payload reduction |
+| 5. RLS policy optimization | 1-2 days | Variable (profile with EXPLAIN) |
+
+**Target Metrics:**
+- P95 latency: < 500ms (current: 2-6s)
+- Queries per page load: 1-2 (current: 4-8)
+- Database connections: Stable under load
+
+### When to Reconsider Convex
+
+Revisit if:
+- Building new features requiring true real-time collaboration (shared cursors, live editing)
+- Supabase optimization plateau (still > 1s after all fixes)
+- Greenfield product/module with no migration cost
+- Team composition changes (more TypeScript-native, less SQL experience)
 
 ---
 
 ## Confidence Assessment
 
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Email (Resend) | HIGH | Already installed, verified Vercel compatibility, official docs |
-| Email (React Email) | HIGH | Official integration with Resend |
-| Ticketing (Tawk.to) | HIGH | Verified free tier includes ticketing, widely adopted |
-| Query Caching (TanStack) | HIGH | Official Supabase blog recommendation |
-| Server Caching (`use cache`) | MEDIUM | Stable in Next.js 16 but API evolving |
-| Bundle Analyzer | HIGH | Official Next.js package |
+| Finding | Confidence | Basis |
+|---------|------------|-------|
+| Supabase optimization techniques | HIGH | Official docs, verified patterns |
+| Convex SDK patterns | HIGH | Official docs (docs.convex.dev) |
+| Convex + Supabase Auth integration | MEDIUM | Official docs, limited production examples |
+| Migration effort estimate | MEDIUM | Community reports, no direct experience |
+| Performance improvement predictions | MEDIUM | Standard PostgreSQL patterns, needs validation |
 
 ---
 
 ## Sources
 
-**Email:**
-- [Resend + Next.js](https://resend.com/docs/send-with-nextjs)
-- [Resend Pricing](https://resend.com/pricing)
-- [Vercel Email Guide](https://vercel.com/kb/guide/sending-emails-from-an-application-on-vercel)
-- [Postmark vs SendGrid Comparison](https://postmarkapp.com/compare/sendgrid-alternative)
+### Convex
+- [Convex Next.js App Router Docs](https://docs.convex.dev/client/nextjs/app-router/)
+- [Convex Custom JWT Auth](https://docs.convex.dev/auth/advanced/custom-jwt)
+- [Convex Pricing](https://www.convex.dev/pricing)
+- [convex npm package](https://www.npmjs.com/package/convex)
+- [Convex vs Supabase Comparison](https://www.convex.dev/compare/supabase)
+- [Next.js Quickstart](https://docs.convex.dev/quickstart/nextjs)
+- [Server Rendering Guide](https://docs.convex.dev/client/nextjs/app-router/server-rendering)
 
-**Ticketing:**
-- [Tawk.to Official](https://www.tawk.to/)
-- [Tawk.to Ticketing](https://www.tawk.to/software/ticketing/)
-- [Crisp Pricing Analysis](https://www.featurebase.app/blog/crisp-pricing)
-- [Chatwoot](https://www.chatwoot.com/)
+### Supabase
+- [Query Optimization](https://supabase.com/docs/guides/database/query-optimization)
+- [Joins and Nested Relations](https://supabase.com/docs/guides/database/joins-and-nesting)
+- [RLS Performance Best Practices](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv)
+- [Connection Management](https://supabase.com/docs/guides/database/connection-management)
+- [Index Advisor](https://supabase.com/docs/guides/database/extensions/index_advisor)
+- [Realtime Benchmarks](https://supabase.com/docs/guides/realtime/benchmarks)
+- [Performance Tuning](https://supabase.com/docs/guides/platform/performance)
 
-**Performance:**
-- [Next.js Caching Guide](https://nextjs.org/docs/app/guides/caching)
-- [use cache Directive](https://nextjs.org/docs/app/api-reference/directives/use-cache)
-- [Supabase + React Query](https://supabase.com/blog/react-query-nextjs-app-router-cache-helpers)
-- [Next.js Bundle Analyzer](https://nextjs.org/docs/app/guides/package-bundling)
-- [Bundle Size Optimization](https://dev.to/maurya-sachin/reducing-javascript-bundle-size-in-nextjs-practical-guide-for-faster-apps-h0)
+### Comparisons
+- [Convex vs Supabase 2025 - Makers' Den](https://makersden.io/blog/convex-vs-supabase-2025)
+- [Supabase vs Convex for Next.js SaaS](https://www.nextbuild.co/blog/supabase-vs-convex-best-baas-for-next-js-saas)
+- [Migrating from Postgres to Convex](https://stack.convex.dev/migrate-data-postgres-to-convex)
+- [Convex vs Supabase Comparison 2026](https://openalternative.co/compare/convex/vs/supabase)
+
+### Performance Issues
+- [LATERAL JOIN Performance Issue - PostgREST #3938](https://github.com/PostgREST/postgrest/issues/3938)
+- [Supabase Realtime Real-World Experience](https://medium.com/@saravananshanmugam/what-weve-learned-using-supabase-real-time-subscriptions-in-our-browser-extension-d82126c236a1)
 
 ---
 
 ## Roadmap Implications
 
-1. **Email Phase:** Can start immediately - Resend already installed, just add React Email templates
-2. **Ticketing Phase:** Quick win - Tawk.to is embed-only, no backend work
-3. **Performance Phase:**
-   - TanStack Query requires refactoring existing data fetching hooks
-   - Bundle analysis should run first to identify quick wins
-   - `use cache` can be added incrementally to slow queries
+Based on this research, the v3.0 performance milestone should:
 
-**Phase ordering recommendation:**
-1. Email system (Resend templates) - foundation for notifications
-2. Tawk.to integration - quick customer support win
-3. Bundle analysis - identify optimization targets
-4. TanStack Query - refactor data fetching
-5. `use cache` - optimize critical server queries
+1. **Phase 1: Quick Wins (Days 1-3)**
+   - Parallel query execution with Promise.all
+   - Add critical indexes identified above
+   - Expected: 50-70% latency reduction
+
+2. **Phase 2: Query Consolidation (Days 4-7)**
+   - Refactor to nested relations syntax
+   - Explicit column selection audit
+   - Expected: 3-5x fewer database round-trips
+
+3. **Phase 3: Advanced Optimization (Days 8-10)**
+   - RLS policy optimization (wrap auth functions)
+   - Database functions for complex operations
+   - Connection pooling tuning
+
+4. **Phase 4: Validation (Days 11-14)**
+   - Performance benchmarking
+   - P95 latency verification
+   - Load testing
+
+**Do NOT proceed with Convex migration** unless Phase 3 fails to achieve sub-500ms P95.
