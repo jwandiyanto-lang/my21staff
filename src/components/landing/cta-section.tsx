@@ -15,7 +15,7 @@ export function CTASection() {
           className="flex flex-col sm:flex-row items-center justify-between gap-4"
         >
           <h2 className="text-lg sm:text-xl font-bold text-white tracking-[-0.02em]">
-            Ready to deploy your 24/7 digital workforce?
+            Ready to grow your business?
           </h2>
 
           <Link

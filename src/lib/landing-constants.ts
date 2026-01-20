@@ -27,9 +27,9 @@ export const NAV_LINKS = [
  */
 export const HERO_CONTENT = {
   tagline: 'No system, no growth.',
-  headline: 'Sales on Autopilot.',
-  subheadline: 'Connect WhatsApp to let your digital staff handle the heavy lifting. Manage leads, automate chats, and scale without the chaos.',
-  cta: 'Deploy Your Staff',
+  headline: 'Manage Your WhatsApp Leads with AI',
+  subheadline: 'Capture, track, and close more sales on WhatsApp. Our AI assistant handles 24/7 replies while you focus on growing your business.',
+  cta: 'Get Started',
 } as const
 
 /**
@@ -65,23 +65,23 @@ export const STATS: Stat[] = [
  */
 export const VALUE_PROPS = [
   {
-    title: 'AI Staff',
-    description: '8 specialists execute routine tasks 24/7 — follow-ups, reminders, reports.',
+    title: 'AI Chatbot',
+    description: 'Replies to WhatsApp messages 24/7. Captures leads automatically.',
     icon: 'Bot',
   },
   {
-    title: 'Human Team',
-    description: 'Real people handle complex decisions, strategy, and troubleshooting.',
+    title: 'Your Team',
+    description: 'Real people handle complex decisions, strategy, and closing deals.',
     icon: 'Users',
   },
   {
-    title: 'Database CRM',
-    description: 'All leads organized with status tracking. Nothing falls through the cracks.',
+    title: 'Growing Database',
+    description: 'Every lead saved in your CRM. Track status, notes, and history like HubSpot.',
     icon: 'Database',
   },
   {
-    title: 'Website Manager',
-    description: 'Landing pages that capture more leads and convert visitors.',
+    title: 'Follow-Up Sequences',
+    description: 'Automatic reminders so no lead goes cold. Never forget to follow up.',
     icon: 'Globe',
   },
 ] as const
@@ -132,7 +132,7 @@ export const FEATURE_CARDS = [
  * CTA text constants
  */
 export const CTA_TEXT = {
-  primary: 'Deploy Your Staff',
+  primary: 'Start Free Trial',
   secondary: 'See Pricing',
   pricing: '/pricing',
 } as const

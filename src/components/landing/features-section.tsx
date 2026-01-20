@@ -7,20 +7,20 @@ const GROWTH_FEATURES = [
   {
     icon: Layers,
     focus: 'Beyond Templates',
-    title: 'Modular Foundation',
-    description: 'Unlike rigid CRMs, our database is a flexible foundation designed to scale with your business complexity, not force you into a box.',
+    title: 'Flexible Database',
+    description: 'Most CRMs force you into their template. Our database grows with you — add fields, customize stages, track what matters to your business.',
   },
   {
     icon: Link2,
     focus: 'Meta & Web Integration',
-    title: 'Unified Channels',
-    description: 'Every growth channel—from Meta Ads to high-converting landing pages—feeds directly into your central console. Zero chaos, total tracking.',
+    title: 'All Sources Connected',
+    description: 'WhatsApp, Instagram, Facebook Ads, your website — all feed into your CRM database automatically.',
   },
   {
     icon: Users,
-    focus: 'Digital Workforce',
-    title: 'Scale via AI Staff',
-    description: 'Scale your staff, not your headcount. Deploy digital agents to handle routine lead intake and 24/7 support while you stay lean.',
+    focus: 'Scale with AI',
+    title: 'Handle 10x More Leads',
+    description: 'Add AI chatbots without hiring more people. Scale from 10 to 10,000+ customers seamlessly.',
   },
 ]
 
@@ -40,10 +40,10 @@ export function FeaturesSection() {
             The Growth Engine
           </p>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#284b31] tracking-[-0.02em]">
-            The CRM that evolves as you do.
+            A Database That Grows With You
           </h2>
           <p className="mt-4 text-lg text-[#2D2A26]/70 max-w-3xl mx-auto tracking-[-0.02em]">
-            Stop adjusting your business to fit a template. my21staff is built on an adaptive architecture that wraps around your unique workflows, ensuring your system never becomes a bottleneck for your growth.
+            Most CRMs lock you into their template. Our database is flexible — customize fields, add stages, track what matters. Build your own CRM as you grow.
           </p>
         </motion.div>
 

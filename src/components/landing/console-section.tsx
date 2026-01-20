@@ -16,10 +16,10 @@ export function ConsoleSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#284b31] tracking-[-0.02em]">
-            The Central Console
+            Everything in One Place
           </h2>
           <p className="mt-4 text-lg text-[#2D2A26]/70 max-w-2xl mx-auto tracking-[-0.02em]">
-            Your command center for leads, chats, and growth metrics.
+            WhatsApp, CRM database, and analytics — all connected. No switching between tools.
           </p>
         </motion.div>
 
@@ -39,10 +39,10 @@ export function ConsoleSection() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-[#284b31] mb-2 tracking-[-0.02em]">
-                  Workflow Sync
+                  WhatsApp + CRM Sync
                 </h3>
                 <p className="text-[#2D2A26]/70 mb-4 tracking-[-0.02em]">
-                  Custom workflow engineering saves time by syncing your database with WhatsApp activity automatically.
+                  Every WhatsApp message saves to your database automatically. Track leads, notes, and history like HubSpot.
                 </p>
               </div>
             </div>

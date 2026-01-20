@@ -15,98 +15,98 @@ interface Agent {
 const AI_AGENTS: Agent[] = [
   {
     id: 'intake',
-    title: 'Intake Specialist',
+    title: 'Lead Capture',
     icon: UserPlus,
-    status: 'Processing lead data',
+    status: 'Saving new leads',
     activities: [
       'Lead #821 captured from WhatsApp',
       'Parsing contact: +62 812 **** 4521',
-      'Syncing to Database... Done',
-      'Auto-tagging: "High Intent"',
+      'Saved to Database... Done',
+      'Tagged as "High Intent"',
     ],
   },
   {
     id: 'support',
-    title: '24/7 Support Agent',
+    title: '24/7 AI Chat',
     icon: Headphones,
-    status: 'Handling customer query',
+    status: 'Replying to customer',
     activities: [
       'New message from Chat #1204',
-      'Intent detected: Product inquiry',
-      'Generating response...',
+      'Question: Product inquiry',
+      'Generating AI response...',
       'Reply sent in 1.2s',
     ],
   },
   {
     id: 'followup',
-    title: 'Follow-Up Manager',
+    title: 'Auto Follow-Up',
     icon: CalendarCheck,
     status: 'Running sequence',
     activities: [
-      'Checking dormant leads...',
-      'Found 12 leads > 48hrs inactive',
-      'Scheduling follow-up messages',
-      'Sequence triggered for Lead #445',
+      'Checking cold leads...',
+      'Found 12 leads inactive > 48hrs',
+      'Sending follow-up messages',
+      'Message sent to Lead #445',
     ],
   },
   {
     id: 'qualifier',
-    title: 'Lead Qualifier',
+    title: 'Lead Scoring',
     icon: Target,
-    status: 'Scoring prospects',
+    status: 'Analyzing interest',
     activities: [
-      'Analyzing Lead #892 behavior',
+      'Analyzing Lead #892 activity',
       'Engagement score: 87/100',
-      'Marking as "Hot Prospect"',
-      'Notifying sales team...',
+      'Marked as "Hot Prospect"',
+      'Notified sales team',
     ],
   },
   {
     id: 'router',
-    title: 'Chat Router',
+    title: 'Chat Routing',
     icon: MessageCircle,
-    status: 'Directing conversations',
+    status: 'Organizing conversations',
     activities: [
       'New chat from @BudiStore',
       'Topic: Pricing question',
       'Routing to Sales channel',
-      'Handoff complete',
+      'Ready for your reply',
     ],
   },
   {
     id: 'broadcast',
-    title: 'Broadcast Coordinator',
+    title: 'Bulk Messages',
     icon: Mail,
     status: 'Sending campaign',
     activities: [
       'Campaign: Weekend Promo',
-      'Segment: Active customers',
+      'Selected: Active customers',
       'Sending to 2,841 contacts...',
       'Delivered: 2,839 (99.9%)',
     ],
   },
   {
     id: 'analytics',
-    title: 'Analytics Reporter',
+    title: 'Reports Ready',
     icon: BarChart2,
-    status: 'Compiling insights',
+    status: 'Compiling data',
     activities: [
-      'Aggregating daily metrics...',
+      'Gathering daily metrics...',
       'Conversion rate: +5.2%',
       'Top source: WhatsApp Ads',
-      'Report ready for review',
+      'Dashboard updated',
     ],
   },
   {
     id: 'scheduler',
-    title: 'Appointment Setter',
+    title: 'Booking Assistant',
     icon: Clock,
-    status: 'Booking meetings',
+    status: 'Scheduling meetings',
     activities: [
       'Request: Demo booking',
-      'Checking calendar availability',
-      'Slot found: Tomorrow 2PM',
-      'Confirmation sent to lead',
+      'Checking calendar slots',
+      'Found: Tomorrow 2PM',
+      'Sent confirmation to lead',
     ],
   },
 ]
@@ -173,10 +173,10 @@ export function WorkforceSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#284b31] tracking-[-0.02em]">
-            Your Digital Workforce
+            Your AI Team, Working 24/7
           </h2>
           <p className="mt-4 text-lg text-[#2D2A26]/70 max-w-2xl mx-auto tracking-[-0.02em]">
-            A full team working 24/7. Watch them in action.
+            Watch how our chatbots capture leads, reply instantly, and organize your database automatically.
           </p>
         </motion.div>
 
@@ -253,7 +253,7 @@ export function WorkforceSection() {
                 <div className="flex items-center gap-2 mb-6">
                   <div className="w-2 h-2 rounded-full bg-[#F7931A] animate-pulse" />
                   <span className="text-xs font-medium text-[#F7931A] uppercase tracking-wider">
-                    Currently Active
+                    Working Now
                   </span>
                 </div>
 
