@@ -12,6 +12,7 @@ export const MOCK_TEAM_MEMBERS: MockTeamMember[] = [
     user_id: 'dev-user-001',
     role: 'owner',
     must_change_password: false,
+    settings: null,
     created_at: '2024-01-01T00:00:00Z',
     profile: {
       id: 'dev-user-001',
@@ -29,6 +30,7 @@ export const MOCK_TEAM_MEMBERS: MockTeamMember[] = [
     user_id: 'dev-user-002',
     role: 'admin',
     must_change_password: false,
+    settings: null,
     created_at: '2024-01-01T00:00:00Z',
     profile: {
       id: 'dev-user-002',
@@ -46,6 +48,7 @@ export const MOCK_TEAM_MEMBERS: MockTeamMember[] = [
     user_id: 'dev-user-003',
     role: 'member',
     must_change_password: false,
+    settings: null,
     created_at: '2024-01-01T00:00:00Z',
     profile: {
       id: 'dev-user-003',
