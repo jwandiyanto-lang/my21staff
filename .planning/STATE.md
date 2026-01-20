@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 1 of 7 — Database Schema & Inbox Overhaul
-Plan: 1 of 4 (01-01-PLAN complete)
+Plan: 2 of 4 (01-02-PLAN complete)
 Status: In progress
-Last activity: 2026-01-20 — Completed 01-01-PLAN (ARI Database Tables)
+Last activity: 2026-01-20 — Completed 01-02-PLAN (Kapso Metadata Caching)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ░░░░░░░░░░ (1/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ░░░░░░░░░░ (2/28 plans)
 
 ## Performance Metrics
 
@@ -47,7 +47,8 @@ Key v2.2 decisions:
 - Midtrans payment gateway for Indonesian payments
 - Manual consultant slots (calendar integration deferred to v2.3)
 - Both Grok + Sea-Lion from day 1 for A/B testing - Schema ready (ari_ai_comparison table)
-- Kapso metadata caching for instant inbox loading
+- Kapso metadata caching for instant inbox loading - IMPLEMENTED 01-02
+- E.164 phone normalization with libphonenumber-js - IMPLEMENTED 01-02
 - ARI state machine: greeting -> qualifying -> scoring -> booking -> payment -> scheduling -> handoff -> completed
 - One ARI conversation per contact per workspace (UNIQUE constraint)
 
@@ -64,9 +65,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 01-01-PLAN (ARI Database Tables)
+Stopped at: Completed 01-02-PLAN (Kapso Metadata Caching)
 Resume file: None
-Next: 01-02-PLAN (next plan in phase 1)
+Next: 01-03-PLAN (next plan in phase 1)
 
 ## Deployment Info
 
@@ -90,4 +91,4 @@ Next: 01-02-PLAN (next plan in phase 1)
 - Grok: API access available
 
 ---
-*Last updated: 2026-01-20 — Completed 01-01-PLAN (ARI Database Tables)*
+*Last updated: 2026-01-20 — Completed 01-02-PLAN (Kapso Metadata Caching)*
