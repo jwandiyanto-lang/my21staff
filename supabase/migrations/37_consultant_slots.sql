@@ -2,7 +2,7 @@
 -- Phase 05-01: Scheduling & Handoff infrastructure
 
 CREATE TABLE consultant_slots (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
   consultant_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
 
