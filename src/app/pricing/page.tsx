@@ -188,19 +188,19 @@ export default function PricingPage() {
       className={`${plusJakartaSans.variable} ${inter.variable} antialiased bg-[#f1f5f0]`}
       style={{ fontFamily: "var(--font-inter)" }}
     >
-      {/* Navigation - matches landing page */}
-      <nav className="sticky top-0 z-50 bg-[#f1f5f0]/80 backdrop-blur-md border-b border-[#284b31]/10">
+      {/* Navigation - blends into hero */}
+      <nav className="bg-[#284b31]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <span className="text-xl font-extrabold tracking-[-0.02em]">
-              <span className="text-[#2D2A26]">my</span>
+              <span className="text-white/80">my</span>
               <span className="text-[#F7931A]">21</span>
-              <span className="text-[#2D2A26]">staff</span>
+              <span className="text-white/80">staff</span>
             </span>
           </Link>
           <a
             href="#pricing"
-            className="text-sm text-[#2D2A26] hover:text-[#F7931A] transition-colors duration-150 font-medium tracking-[-0.02em]"
+            className="text-sm text-white/80 hover:text-[#F7931A] transition-colors duration-150 font-medium tracking-[-0.02em]"
           >
             Get Started
           </a>
@@ -381,19 +381,29 @@ export default function PricingPage() {
                   </div>
                 </motion.div>
               ))}
-            </div>
-          </div>
-        </section>
 
-        {/* CTA before pricing */}
-        <section className="bg-[#dce8dc] px-6 py-12">
-          <div className="mx-auto max-w-2xl text-center">
-            <h3 className="text-2xl font-extrabold text-[#284b31] mb-3 tracking-[-0.02em]">
-              Have similar problems?
-            </h3>
-            <p className="text-[#2D2A26]/70 tracking-[-0.02em]">
-              Tell us your challenges. Let&apos;s set up your system.
-            </p>
+              {/* CTA Card - fills the 6th spot */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.15, delay: 0.25 }}
+                className="bg-[#284b31] rounded-2xl p-6 shadow-sm flex flex-col justify-center"
+              >
+                <h3 className="text-xl font-bold text-white mb-2 tracking-[-0.02em]">
+                  Have similar problems?
+                </h3>
+                <p className="text-sm text-white/70 mb-6 tracking-[-0.02em]">
+                  Tell us your challenges. Let&apos;s set up your system.
+                </p>
+                <a
+                  href="#pricing"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-[#F7931A] text-white font-bold text-sm rounded-xl hover:bg-[#e8850f] transition-colors duration-150"
+                >
+                  Get Started
+                </a>
+              </motion.div>
+            </div>
           </div>
         </section>
 
