@@ -9,22 +9,22 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 
 ## Current Position
 
-Phase: 5 of 7 — Scheduling & Handoff
-Plan: 3 of 4 (05-03-PLAN complete)
-Status: In progress
-Last activity: 2026-01-20 — Completed 05-03-PLAN (Booking Flow)
+Phase: 5 of 7 — Scheduling & Handoff (COMPLETE)
+Plan: 4 of 4 (05-04-PLAN complete)
+Status: Phase complete
+Last activity: 2026-01-20 — Completed 05-04-PLAN (Handoff & Notifications)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████░░░░ (17/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████░░░░ (18/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 99 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 17 in v2.2)
+- Total plans completed: 100 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 18 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 -> Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
-- Lines: ~37,000 TypeScript
+- Lines: ~37,500 TypeScript
 - Phases completed: 27 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 3)
 
 ## Accumulated Context
@@ -101,6 +101,11 @@ Key v2.2 decisions:
 - Slot selection by number or time keyword - IMPLEMENTED 05-03
 - Explicit confirmation required (ya/oke/betul) before booking finalizes - IMPLEMENTED 05-03
 - Booking creates ari_appointments with auto-handoff - IMPLEMENTED 05-03
+- Handoff module generates AI summary from messages and context - IMPLEMENTED 05-04
+- Contact notes updated with summary, tags, lead_status=hot_lead after booking - IMPLEMENTED 05-04
+- Consultant notifications stored in workspace_members.settings JSONB - IMPLEMENTED 05-04
+- Appointment reminder cron (45-75 min window, every 15 min) - IMPLEMENTED 05-04
+- AppointmentCard component with status actions (Selesai/No Show) - IMPLEMENTED 05-04
 
 ### Deferred Issues
 
@@ -115,9 +120,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 05-03-PLAN (Booking Flow)
+Stopped at: Completed 05-04-PLAN (Handoff & Notifications)
 Resume file: None
-Next: 05-04-PLAN (Handoff Context)
+Next: 06-01-PLAN (Admin Dashboard)
 
 ## Deployment Info
 
@@ -142,4 +147,4 @@ Next: 05-04-PLAN (Handoff Context)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed 05-03-PLAN (Booking Flow)*
+*Last updated: 2026-01-20 — Completed 05-04-PLAN (Handoff & Notifications)*
