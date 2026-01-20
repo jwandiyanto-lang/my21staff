@@ -39,26 +39,26 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
 
       {/* Tabs for different sections */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 max-w-2xl">
-          <TabsTrigger value="persona" className="flex items-center gap-2">
-            <Bot className="w-4 h-4" />
-            <span>Persona</span>
+        <TabsList className="grid w-full grid-cols-5 max-w-2xl h-auto">
+          <TabsTrigger value="persona" className="flex items-center gap-2 py-2">
+            <Bot className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Persona</span>
           </TabsTrigger>
-          <TabsTrigger value="flow" className="flex items-center gap-2">
-            <GitBranch className="w-4 h-4" />
-            <span>Flow</span>
+          <TabsTrigger value="flow" className="flex items-center gap-2 py-2">
+            <GitBranch className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Flow</span>
           </TabsTrigger>
-          <TabsTrigger value="database" className="flex items-center gap-2">
-            <Database className="w-4 h-4" />
-            <span>Database</span>
+          <TabsTrigger value="database" className="flex items-center gap-2 py-2">
+            <Database className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Database</span>
           </TabsTrigger>
-          <TabsTrigger value="scoring" className="flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            <span>Scoring</span>
+          <TabsTrigger value="scoring" className="flex items-center gap-2 py-2">
+            <Target className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Scoring</span>
           </TabsTrigger>
-          <TabsTrigger value="slots" className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            <span>Slots</span>
+          <TabsTrigger value="slots" className="flex items-center gap-2 py-2">
+            <Calendar className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Slots</span>
           </TabsTrigger>
         </TabsList>
 
