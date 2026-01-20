@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 2 of 7 — ARI Core Conversation (IN PROGRESS)
-Plan: 4 of 9 (02-04-PLAN complete)
+Plan: 5 of 9 (02-05-PLAN complete)
 Status: In progress
-Last activity: 2026-01-20 — Completed 02-04-PLAN (ARI Form Validation and Qualification)
+Last activity: 2026-01-20 — Completed 02-05-PLAN (ARI Knowledge Base Integration)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ███░░░░░░░ (9/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ███░░░░░░░ (10/28 plans)
 
 ## Performance Metrics
 
@@ -68,6 +68,9 @@ Key v2.2 decisions:
 - Required fields for qualification: name, email, english_level, budget, timeline, country - IMPLEMENTED 02-04
 - Document tracking: passport, cv, english_test, transcript - IMPLEMENTED 02-04
 - Indonesian yes/no parsing for document responses - IMPLEMENTED 02-04
+- Knowledge base query functions for ari_destinations with country mapping - IMPLEMENTED 02-05
+- University question detection (Indonesian + English keywords) triggers destination lookup - IMPLEMENTED 02-05
+- Document response tracking via conversationContext.pendingDocumentQuestion - IMPLEMENTED 02-05
 
 ### Deferred Issues
 
@@ -82,9 +85,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 02-04-PLAN (ARI Form Validation and Qualification)
+Stopped at: Completed 02-05-PLAN (ARI Knowledge Base Integration)
 Resume file: None
-Next: 02-05-PLAN (Response Generation)
+Next: 02-06-PLAN (Scoring Logic)
 
 ## Deployment Info
 
@@ -109,4 +112,4 @@ Next: 02-05-PLAN (Response Generation)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed 02-04-PLAN (ARI Form Validation and Qualification)*
+*Last updated: 2026-01-20 — Completed 02-05-PLAN (ARI Knowledge Base Integration)*
