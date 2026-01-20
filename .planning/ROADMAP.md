@@ -219,20 +219,15 @@ Plans:
 
 ### Phase 8: Performance Optimization
 **Goal:** First impression polish for Eagle — make dashboard feel snappy
-**Status:** UAT issues found — gap closure plans created
-**Plans:** 5 plans (3 complete, 2 gap closure)
+**Status:** Complete
+**Plans:** 5/5 plans — completed 2026-01-20
 
 Plans:
 - [x] 08-01-PLAN.md — Bundle analyzer + TanStack Query provider setup
 - [x] 08-02-PLAN.md — Inbox + Database TanStack Query migration
 - [x] 08-03-PLAN.md — Loading skeletons for all dashboard routes
-- [ ] 08-04-PLAN.md — Gap closure: Client-side caching migration (Inbox + Database)
-- [ ] 08-05-PLAN.md — Gap closure: Optimistic rollback fix
-
-**UAT Gaps (3 issues):**
-1. Inbox caching - skeleton shows on every return (server refetches)
-2. Database caching - same issue
-3. Optimistic rollback - failed messages not removed when user switches conversations
+- [x] 08-04-PLAN.md — Gap closure: Client-side caching migration (Inbox + Database)
+- [x] 08-05-PLAN.md — Gap closure: Optimistic rollback fix
 
 **Scope:**
 - Bundle analyzer setup (visibility into bundle size)
@@ -240,8 +235,8 @@ Plans:
 - Stale-while-revalidate for instant navigation feel
 - Skeleton loading states (eliminate blank screens)
 - Real-time integration with query cache
-
-**Note:** Optimize after features stable
+- Client-side data fetching for Inbox and Database (instant cache hits on navigation)
+- Optimistic rollback fix (correct conversation targeting)
 
 ---
 
@@ -272,10 +267,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 30/? | Phase 1-7 complete, Phase 8 gap closure | — |
+| 1-9 | v2.1 | 32/? | Phase 1-8 complete | — |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-20 — Phase 8 gap closure plans created*
+*Last updated: 2026-01-20 — Phase 8 complete (gap closure executed)*
