@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 08-performance-optimization
 source: 08-01-SUMMARY.md, 08-02-SUMMARY.md, 08-03-SUMMARY.md
 started: 2026-01-20T10:00:00Z
-updated: 2026-01-20T10:30:00Z
+updated: 2026-01-20T10:45:00Z
 ---
 
 ## Current Test
@@ -73,27 +73,43 @@ skipped: 0
   reason: "User reported: yes I see skeleton every time I return"
   severity: major
   test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Architecture mismatch - page.tsx is async server component that refetches on every navigation. loading.tsx shows during server render BEFORE client can check TanStack Query cache."
+  artifacts:
+    - path: "src/app/(dashboard)/[workspace]/inbox/page.tsx"
+      issue: "Async server component does ALL data fetching on every navigation"
+    - path: "src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx"
+      issue: "Takes initialConversations prop - no TanStack Query for conversation list"
+  missing:
+    - "Create useConversations hook for client-side caching"
+    - "Simplify page.tsx to minimal server work"
+    - "Let InboxClient fetch via TanStack Query"
+  debug_session: ".planning/debug/tanstack-query-skeleton-flash.md"
 
 - truth: "Returning to Database loads instantly from cache (no skeleton)"
   status: failed
   reason: "User reported: same issue - skeleton shows every time on return"
   severity: major
   test: 3
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Same as Test 2 - server component refetches on every navigation"
+  artifacts:
+    - path: "src/app/(dashboard)/[workspace]/database/page.tsx"
+      issue: "Same pattern as inbox - server fetches on every navigation"
+  missing:
+    - "Move database fetching to client-side TanStack Query"
+  debug_session: ".planning/debug/tanstack-query-skeleton-flash.md"
 
 - truth: "Failed message sends are rolled back from UI (not shown as sent)"
   status: failed
   reason: "User reported: failed send still shows in chat - optimistic update not rolling back on failure"
   severity: major
   test: 4
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "handleMessageError captures selectedConversation.id via closure. If user switches conversations during API call, wrong cache is targeted."
+  artifacts:
+    - path: "src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx"
+      issue: "handleMessageError uses closure for conversationId instead of parameter"
+    - path: "src/app/(dashboard)/[workspace]/inbox/message-input.tsx"
+      issue: "onMessageError interface doesn't include conversationId parameter"
+  missing:
+    - "Change onMessageError signature to accept (conversationId, optimisticId)"
+    - "Pass conversationId from MessageInput to error handler"
+  debug_session: ".planning/debug/optimistic-rollback-failure.md"
