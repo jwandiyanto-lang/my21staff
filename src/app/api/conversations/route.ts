@@ -84,12 +84,8 @@ export async function GET(request: NextRequest) {
     .select('*, profile:profiles(*)')
     .eq('workspace_id', workspaceId)
 
-  // Get quick replies for the workspace
-  const { data: quickReplies } = await supabase
-    .from('quick_replies')
-    .select('id, label, text')
-    .eq('workspace_id', workspaceId)
-    .order('label')
+  // Quick replies - table not yet created, return empty for now
+  const quickReplies: { id: string; label: string; text: string }[] = []
 
   // Get unique contact tags for filter dropdown
   const { data: contactsWithTags } = await supabase

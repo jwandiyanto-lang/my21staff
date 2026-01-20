@@ -185,6 +185,7 @@
   },
   "active": "ccbd897c4fb28da1",
   "lastOpenFiles": [
+    "src/app/api/conversations/route.ts.tmp.1952260.1768901585991",
     "src/lib/queries/broadcast-typing.ts",
     "src/lib/queries/use-typing-indicator.ts",
     "src/app/(dashboard)/[workspace]/inbox/page.tsx.tmp.1952260.1768898055951",
@@ -195,7 +196,6 @@
     "src/lib/phone/normalize.ts",
     "node_modules/libphonenumber-js/types.d.ts",
     "node_modules/libphonenumber-js/metadata.mobile.json.d.ts",
-    "node_modules/libphonenumber-js/metadata.min.json.d.ts",
     "node_modules/libphonenumber-js/README.md",
     "node_modules/libphonenumber-js/METADATA.md",
     "node_modules/libphonenumber-js/CODE_OF_CONDUCT.md",
