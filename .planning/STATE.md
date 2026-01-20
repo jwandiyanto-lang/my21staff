@@ -9,23 +9,23 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 
 ## Current Position
 
-Phase: 1 of 7 — Database Schema & Inbox Overhaul
-Plan: 3 of 4 (01-03-PLAN complete)
-Status: In progress
-Last activity: 2026-01-20 — Completed 01-03-PLAN (RLS & Realtime for ARI Tables)
+Phase: 1 of 7 — Database Schema & Inbox Overhaul (COMPLETE)
+Plan: 4 of 4 (01-04-PLAN complete)
+Status: Phase complete
+Last activity: 2026-01-20 — Completed 01-04-PLAN (Contact Sync Integration)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 █░░░░░░░░░ (3/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 █░░░░░░░░░ (4/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 83 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 1 in v2.2)
+- Total plans completed: 84 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 2 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 → Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
 - Lines: ~32,172 TypeScript
-- Phases completed: 24 total (v1.0: 5, v2.0: 16, v2.1: 9)
+- Phases completed: 25 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 1)
 
 ## Accumulated Context
 
@@ -52,6 +52,9 @@ Key v2.2 decisions:
 - ARI state machine: greeting -> qualifying -> scoring -> booking -> payment -> scheduling -> handoff -> completed
 - One ARI conversation per contact per workspace (UNIQUE constraint)
 - Realtime subscriptions enabled for all ARI tables - IMPLEMENTED 01-03
+- Active view as default inbox filter (unread only) - IMPLEMENTED 01-04
+- Server-side filtering for conversations API - IMPLEMENTED 01-04
+- Filter presets stored in workspace_members.settings JSONB (max 10) - IMPLEMENTED 01-04
 
 ### Deferred Issues
 
@@ -66,9 +69,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 01-03-PLAN (RLS & Realtime for ARI Tables)
+Stopped at: Completed 01-04-PLAN (Contact Sync Integration) - Phase 01 complete
 Resume file: None
-Next: 01-04-PLAN (next plan in phase 1)
+Next: Phase 02 (ARI Core)
 
 ## Deployment Info
 
@@ -92,4 +95,4 @@ Next: 01-04-PLAN (next plan in phase 1)
 - Grok: API access available
 
 ---
-*Last updated: 2026-01-20 — Completed 01-03-PLAN (RLS & Realtime for ARI Tables)*
+*Last updated: 2026-01-20 — Completed 01-04-PLAN (Contact Sync Integration)*
