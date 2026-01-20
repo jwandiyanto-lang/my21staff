@@ -10,22 +10,22 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 3 of 7 — Lead Scoring & Routing
-Plan: 1 of 3 (03-01-PLAN complete)
+Plan: 2 of 3 (03-02-PLAN complete)
 Status: In progress
-Last activity: 2026-01-20 — Completed 03-01-PLAN (Scoring Engine)
+Last activity: 2026-01-20 — Completed 03-02-PLAN (Routing Logic)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ████░░░░░░ (11/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ████░░░░░░ (12/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 93 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 11 in v2.2)
+- Total plans completed: 94 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 12 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 → Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
-- Lines: ~35,800 TypeScript
-- Phases completed: 26 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 2 + 03-01)
+- Lines: ~35,900 TypeScript
+- Phases completed: 26 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 2 + 03-01 + 03-02)
 
 ## Accumulated Context
 
@@ -76,6 +76,10 @@ Key v2.2 decisions:
 - IELTS 6.5+ bonus (+3 points) - IMPLEMENTED 03-01
 - Temperature thresholds: hot >= 70, warm >= 40, cold < 40 - IMPLEMENTED 03-01
 - Jest test infrastructure added for unit testing - IMPLEMENTED 03-01
+- Routing triggers after qualification complete (all required fields + all documents) - IMPLEMENTED 03-02
+- Score synced to contacts.lead_score for CRM visibility - IMPLEMENTED 03-02
+- Lead status maps: hot -> hot_lead, warm -> prospect, cold -> cold_lead - IMPLEMENTED 03-02
+- Cold leads receive community link (if configured) with 30-day follow-up note - IMPLEMENTED 03-02
 
 ### Deferred Issues
 
@@ -90,9 +94,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 03-01-PLAN (Scoring Engine)
+Stopped at: Completed 03-02-PLAN (Routing Logic)
 Resume file: None
-Next: 03-02-PLAN (Routing Logic)
+Next: 03-03-PLAN (Routing UI)
 
 ## Deployment Info
 
@@ -117,4 +121,4 @@ Next: 03-02-PLAN (Routing Logic)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed 03-01-PLAN (Scoring Engine)*
+*Last updated: 2026-01-20 — Completed 03-02-PLAN (Routing Logic)*
