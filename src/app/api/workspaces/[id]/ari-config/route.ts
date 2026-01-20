@@ -36,7 +36,31 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
 
-    // TEMP: Return defaults immediately to test if request completes
+    // Verify user has access to workspace
+    const authResult = await requireWorkspaceMembership(workspaceId)
+    if (authResult instanceof NextResponse) return authResult
+
+    const supabase = await createClient()
+
+    // Get existing config
+    const { data: config, error } = await supabase
+      .from('ari_config')
+      .select('*')
+      .eq('workspace_id', workspaceId)
+      .single()
+
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 = no rows found (expected for new workspaces)
+      console.error('Failed to fetch ARI config:', error)
+      return NextResponse.json({ error: 'Failed to fetch config' }, { status: 500 })
+    }
+
+    // Return existing config or defaults
+    if (config) {
+      return NextResponse.json({ config })
+    }
+
+    // Return defaults for workspaces without config
     return NextResponse.json({
       config: {
         workspace_id: workspaceId,

@@ -1,14 +1,14 @@
 ---
-status: complete
+status: deferred
 phase: 06-admin-interface
 source: 06-01-SUMMARY.md, 06-02-SUMMARY.md, 06-03-SUMMARY.md, 06-04-SUMMARY.md, 06-05-SUMMARY.md
 started: 2026-01-20T19:30:00Z
-updated: 2026-01-20T19:45:00Z
+updated: 2026-01-20T21:50:00Z
 ---
 
 ## Current Test
 
-[testing complete]
+[testing deferred - API timeout issue to be investigated post-milestone]
 
 ## Tests
 
