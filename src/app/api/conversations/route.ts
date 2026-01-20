@@ -10,6 +10,12 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get('page') || '0')
   const limit = parseInt(searchParams.get('limit') || '50')
 
+  // New filter parameters
+  const active = searchParams.get('active') === 'true'
+  const statusFilters = searchParams.getAll('status')
+  const tagFilters = searchParams.getAll('tags')
+  const assignedFilter = searchParams.get('assigned')
+
   if (!workspaceId) {
     return NextResponse.json({ error: 'Workspace required' }, { status: 400 })
   }
@@ -23,16 +29,85 @@ export async function GET(request: NextRequest) {
   const from = page * limit
   const to = from + limit - 1
 
-  const { data: conversations, error } = await supabase
+  // Build base query
+  let query = supabase
     .from('conversations')
-    .select('*, contact:contacts(*)')
+    .select('*, contact:contacts!inner(*)', { count: 'exact' })
     .eq('workspace_id', workspaceId)
     .order('last_message_at', { ascending: false, nullsFirst: false })
-    .range(from, to)
+
+  // Active filter (unread only)
+  if (active) {
+    query = query.gt('unread_count', 0)
+  }
+
+  // Status filter (if provided) - filter by contact's lead_status
+  if (statusFilters.length > 0) {
+    query = query.in('contact.lead_status', statusFilters)
+  }
+
+  // Tag filter (if provided) - uses array overlap for OR logic
+  if (tagFilters.length > 0) {
+    // Supabase overlaps filter for array column
+    query = query.overlaps('contact.tags', tagFilters)
+  }
+
+  // Assigned filter
+  if (assignedFilter) {
+    if (assignedFilter === 'unassigned') {
+      query = query.is('assigned_to', null)
+    } else {
+      query = query.eq('assigned_to', assignedFilter)
+    }
+  }
+
+  // Apply pagination
+  query = query.range(from, to)
+
+  const { data: conversations, error, count: totalCount } = await query
 
   if (error) {
+    console.error('Conversations query error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ conversations })
+  // Get activeCount (unread conversations) for sidebar badge
+  const { count: activeCount } = await supabase
+    .from('conversations')
+    .select('*', { count: 'exact', head: true })
+    .eq('workspace_id', workspaceId)
+    .gt('unread_count', 0)
+
+  // Get team members for the workspace
+  const { data: teamMembers } = await supabase
+    .from('workspace_members')
+    .select('*, profile:profiles(*)')
+    .eq('workspace_id', workspaceId)
+
+  // Get quick replies for the workspace
+  const { data: quickReplies } = await supabase
+    .from('quick_replies')
+    .select('id, label, text')
+    .eq('workspace_id', workspaceId)
+    .order('label')
+
+  // Get unique contact tags for filter dropdown
+  const { data: contactsWithTags } = await supabase
+    .from('contacts')
+    .select('tags')
+    .eq('workspace_id', workspaceId)
+    .not('tags', 'is', null)
+
+  const contactTags = contactsWithTags
+    ? [...new Set(contactsWithTags.flatMap(c => c.tags || []))]
+    : []
+
+  return NextResponse.json({
+    conversations: conversations ?? [],
+    totalCount: totalCount ?? 0,
+    activeCount: activeCount ?? 0,
+    teamMembers: teamMembers ?? [],
+    quickReplies: quickReplies ?? [],
+    contactTags,
+  })
 }
