@@ -42,6 +42,7 @@ import { createClient } from '@/lib/supabase/client'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
 import { useMessages, useAddOptimisticMessage, useRemoveOptimisticMessage, useReplaceOptimisticMessage } from '@/lib/queries/use-messages'
+import { useTypingIndicator } from '@/lib/queries/use-typing-indicator'
 import { useConversations, type ConversationFilters } from '@/lib/queries/use-conversations'
 import { toast } from 'sonner'
 import type { Workspace, ConversationWithContact, Message } from '@/types/database'
@@ -238,6 +239,9 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
   // TanStack Query for messages with real-time subscription
   const { data: messages = [], isLoading: isLoadingMessages } = useMessages(selectedConversation?.id ?? null)
 
+  // Typing indicators via Supabase Broadcast
+  const { typingContacts, isContactTyping } = useTypingIndicator(workspace.id)
+
   // Optimistic update helpers
   const addOptimisticMessage = useAddOptimisticMessage()
   const removeOptimisticMessage = useRemoveOptimisticMessage()
@@ -272,6 +276,7 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
   }
 
   // Real-time subscription for conversation updates (new messages, unread counts)
+  // Uses idempotent updates with ID deduplication to prevent chat disappearance (INBOX-07)
   useEffect(() => {
     if (isDevMode()) return
 
@@ -297,10 +302,15 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
               .single()
 
             if (newConv && newConv.contact) {
-              setConversations((prev) => [newConv as unknown as ConversationWithContact, ...prev])
+              // Idempotent insert - check if conversation already exists (prevents duplicates)
+              setConversations((prev) => {
+                const exists = prev.some(c => c.id === newConv.id)
+                if (exists) return prev
+                return [newConv as unknown as ConversationWithContact, ...prev]
+              })
             }
           } else if (payload.eventType === 'UPDATE') {
-            // Update existing conversation
+            // Idempotent update - update in place (prevents chat disappearance)
             const updated = payload.new
             setConversations((prev) =>
               prev.map((c) =>
@@ -314,6 +324,15 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
               prev && prev.id === updated.id
                 ? { ...prev, ...updated, contact: prev.contact }
                 : prev
+            )
+          } else if (payload.eventType === 'DELETE') {
+            // Only remove if actually deleted
+            setConversations((prev) =>
+              prev.filter(c => c.id !== (payload.old as { id: string }).id)
+            )
+            // Deselect if this was the selected conversation
+            setSelectedConversation((prev) =>
+              prev && prev.id === (payload.old as { id: string }).id ? null : prev
             )
           }
         }
@@ -722,6 +741,7 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
           searchQuery={searchQuery}
           hasFilters={hasFilters}
           workspaceName={workspace.name}
+          typingContacts={typingContacts}
         />
 
         {/* Load More Button */}
@@ -765,6 +785,7 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
               showInfoPanel={showInfoPanel}
               onToggleInfoPanel={() => setShowInfoPanel(!showInfoPanel)}
               onReply={handleReply}
+              isContactTyping={isContactTyping(selectedConversation.contact.phone)}
             />
             <MessageInput
               conversationId={selectedConversation.id}

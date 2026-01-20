@@ -54,6 +54,7 @@ interface MessageThreadProps {
   showInfoPanel?: boolean
   onToggleInfoPanel?: () => void
   onReply?: (message: Message) => void
+  isContactTyping?: boolean
 }
 
 function getDayLabel(date: Date): string {
@@ -288,6 +289,7 @@ export function MessageThread({
   showInfoPanel = false,
   onToggleInfoPanel,
   onReply,
+  isContactTyping = false,
 }: MessageThreadProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const statusConfig = LEAD_STATUS_CONFIG[conversationContact.lead_status as LeadStatus] || LEAD_STATUS_CONFIG.prospect
@@ -526,13 +528,26 @@ export function MessageThread({
             {conversationContact.name || conversationContact.phone}
           </p>
           <p className="text-xs text-muted-foreground">
-            <span className={isActive ? 'text-emerald-600' : ''}>
-              {isActive ? 'Active' : 'Closed'}
-            </span>
-            {lastActivityTime && (
-              <> • {lastActivityTime} ago</>
+            {isContactTyping ? (
+              <span className="flex items-center gap-1 text-primary">
+                <span className="flex gap-0.5">
+                  <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </span>
+                <span>typing...</span>
+              </span>
+            ) : (
+              <>
+                <span className={isActive ? 'text-emerald-600' : ''}>
+                  {isActive ? 'Active' : 'Closed'}
+                </span>
+                {lastActivityTime && (
+                  <> • {lastActivityTime} ago</>
+                )}
+                <> • {conversationContact.phone}</>
+              </>
             )}
-            <> • {conversationContact.phone}</>
           </p>
         </div>
 
