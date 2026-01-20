@@ -44,19 +44,19 @@ interface SlotManagerProps {
 }
 
 const DAYS_OF_WEEK = [
-  { value: 0, label: 'Minggu' },
-  { value: 1, label: 'Senin' },
-  { value: 2, label: 'Selasa' },
-  { value: 3, label: 'Rabu' },
-  { value: 4, label: 'Kamis' },
-  { value: 5, label: 'Jumat' },
-  { value: 6, label: 'Sabtu' },
+  { value: 0, label: 'Sunday' },
+  { value: 1, label: 'Monday' },
+  { value: 2, label: 'Tuesday' },
+  { value: 3, label: 'Wednesday' },
+  { value: 4, label: 'Thursday' },
+  { value: 5, label: 'Friday' },
+  { value: 6, label: 'Saturday' },
 ]
 
 const DURATION_OPTIONS = [
-  { value: 30, label: '30 menit' },
-  { value: 60, label: '60 menit' },
-  { value: 90, label: '90 menit' },
+  { value: 30, label: '30 min' },
+  { value: 60, label: '60 min' },
+  { value: 90, label: '90 min' },
 ]
 
 export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
@@ -72,7 +72,6 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
     end_time: '10:00',
     duration_minutes: 60,
     booking_window_days: 14,
-    consultant_id: '',
   })
 
   // Fetch slots on mount
@@ -88,7 +87,7 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
       setSlots(data.slots || [])
     } catch (error) {
       console.error('Failed to fetch slots:', error)
-      toast.error('Gagal memuat jadwal')
+      toast.error('Failed to load slots')
     } finally {
       setIsLoading(false)
     }
@@ -100,10 +99,7 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
       const res = await fetch(`/api/workspaces/${workspaceId}/slots`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...newSlot,
-          consultant_id: newSlot.consultant_id || null,
-        }),
+        body: JSON.stringify(newSlot),
       })
 
       if (!res.ok) {
@@ -120,11 +116,10 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
         end_time: '10:00',
         duration_minutes: 60,
         booking_window_days: 14,
-        consultant_id: '',
       })
-      toast.success('Jadwal berhasil ditambahkan')
+      toast.success('Slot added successfully')
     } catch (error: any) {
-      toast.error(error.message || 'Gagal menambah jadwal')
+      toast.error(error.message || 'Failed to add slot')
     } finally {
       setIsSaving(false)
     }
@@ -143,14 +138,14 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
       setSlots(slots.map(s =>
         s.id === slot.id ? { ...s, is_active: !s.is_active } : s
       ))
-      toast.success(slot.is_active ? 'Jadwal dinonaktifkan' : 'Jadwal diaktifkan')
+      toast.success(slot.is_active ? 'Slot disabled' : 'Slot enabled')
     } catch (error) {
-      toast.error('Gagal mengubah status')
+      toast.error('Failed to update status')
     }
   }
 
   async function handleDeleteSlot(slotId: string) {
-    if (!confirm('Hapus jadwal ini?')) return
+    if (!confirm('Delete this slot?')) return
 
     try {
       const res = await fetch(`/api/workspaces/${workspaceId}/slots/${slotId}`, {
@@ -160,21 +155,15 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
       if (!res.ok) throw new Error('Failed to delete')
 
       setSlots(slots.filter(s => s.id !== slotId))
-      toast.success('Jadwal dihapus')
+      toast.success('Slot deleted')
     } catch (error) {
-      toast.error('Gagal menghapus jadwal')
+      toast.error('Failed to delete slot')
     }
   }
 
   function formatTime(time: string) {
     // Convert HH:MM:SS or HH:MM to HH:MM
     return time.slice(0, 5)
-  }
-
-  function getConsultantName(consultantId: string | null) {
-    if (!consultantId) return 'Semua konsultan'
-    const member = teamMembers.find(m => m.id === consultantId)
-    return member?.full_name || member?.email || 'Unknown'
   }
 
   if (isLoading) {
@@ -190,26 +179,26 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
       {/* Header with Add Button */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Jadwal Konsultasi</h2>
+          <h2 className="text-lg font-semibold">Consultation Schedule</h2>
           <p className="text-sm text-muted-foreground">
-            Atur waktu yang tersedia untuk booking konsultasi
+            Set available times for consultation bookings
           </p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              Tambah Jadwal
+              Add Slot
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Tambah Jadwal Konsultasi</DialogTitle>
+              <DialogTitle>Add Consultation Slot</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               {/* Day of Week */}
               <div className="space-y-2">
-                <Label>Hari</Label>
+                <Label>Day</Label>
                 <Select
                   value={String(newSlot.day_of_week)}
                   onValueChange={(v) => setNewSlot({ ...newSlot, day_of_week: parseInt(v) })}
@@ -230,7 +219,7 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
               {/* Time Range */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Jam Mulai</Label>
+                  <Label>Start Time</Label>
                   <Input
                     type="time"
                     value={newSlot.start_time}
@@ -238,7 +227,7 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Jam Selesai</Label>
+                  <Label>End Time</Label>
                   <Input
                     type="time"
                     value={newSlot.end_time}
@@ -249,7 +238,7 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
 
               {/* Duration */}
               <div className="space-y-2">
-                <Label>Durasi per Sesi</Label>
+                <Label>Duration per Session</Label>
                 <Select
                   value={String(newSlot.duration_minutes)}
                   onValueChange={(v) => setNewSlot({ ...newSlot, duration_minutes: parseInt(v) })}
@@ -269,7 +258,7 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
 
               {/* Booking Window */}
               <div className="space-y-2">
-                <Label>Booking Window (hari ke depan)</Label>
+                <Label>Booking Window (days ahead)</Label>
                 <Input
                   type="number"
                   min={1}
@@ -278,35 +267,14 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
                   onChange={(e) => setNewSlot({ ...newSlot, booking_window_days: parseInt(e.target.value) || 14 })}
                 />
               </div>
-
-              {/* Consultant Assignment */}
-              <div className="space-y-2">
-                <Label>Konsultan (opsional)</Label>
-                <Select
-                  value={newSlot.consultant_id || 'any'}
-                  onValueChange={(v) => setNewSlot({ ...newSlot, consultant_id: v === 'any' ? '' : v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Semua konsultan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Semua konsultan</SelectItem>
-                    {teamMembers.map(member => (
-                      <SelectItem key={member.id} value={member.id}>
-                        {member.full_name || member.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Batal
+                Cancel
               </Button>
               <Button onClick={handleAddSlot} disabled={isSaving}>
                 {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Simpan
+                Save
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -317,9 +285,9 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
       {slots.length === 0 ? (
         <div className="text-center py-12 border rounded-lg bg-muted/50">
           <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">Belum ada jadwal konsultasi</p>
+          <p className="text-muted-foreground">No consultation slots yet</p>
           <p className="text-sm text-muted-foreground">
-            Tambahkan jadwal untuk mulai menerima booking
+            Add slots to start accepting bookings
           </p>
         </div>
       ) : (
@@ -327,11 +295,10 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Hari</TableHead>
-                <TableHead>Waktu</TableHead>
-                <TableHead>Durasi</TableHead>
-                <TableHead>Konsultan</TableHead>
-                <TableHead>Aktif</TableHead>
+                <TableHead>Day</TableHead>
+                <TableHead>Time</TableHead>
+                <TableHead>Duration</TableHead>
+                <TableHead>Active</TableHead>
                 <TableHead className="w-[80px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -347,8 +314,7 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
                       {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
                     </span>
                   </TableCell>
-                  <TableCell>{slot.duration_minutes} menit</TableCell>
-                  <TableCell>{getConsultantName(slot.consultant_id)}</TableCell>
+                  <TableCell>{slot.duration_minutes} min</TableCell>
                   <TableCell>
                     <Switch
                       checked={slot.is_active}
@@ -374,11 +340,11 @@ export function SlotManager({ workspaceId, teamMembers }: SlotManagerProps) {
 
       {/* Info card */}
       <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
-        <p className="font-medium text-foreground mb-1">Cara Kerja</p>
+        <p className="font-medium text-foreground mb-1">How It Works</p>
         <ul className="list-disc list-inside space-y-1">
-          <li>Jadwal berulang setiap minggu pada hari dan jam yang ditentukan</li>
-          <li>Lead dapat booking hingga {slots[0]?.booking_window_days || 14} hari ke depan</li>
-          <li>Jadwal yang dinonaktifkan tidak akan ditampilkan untuk booking baru</li>
+          <li>Slots repeat weekly on the specified day and time</li>
+          <li>Leads can book up to {slots[0]?.booking_window_days || 14} days ahead</li>
+          <li>Disabled slots won&apos;t be shown for new bookings</li>
         </ul>
       </div>
     </div>

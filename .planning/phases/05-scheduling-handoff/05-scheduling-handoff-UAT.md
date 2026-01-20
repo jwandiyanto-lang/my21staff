@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 05-scheduling-handoff
 source: 05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md
 started: 2026-01-20T15:10:00Z
@@ -55,7 +55,11 @@ skipped: 1
   reason: "User reported: UI is in Bahasa Indonesia but should be in English. Also 'Semua Konsultan' dropdown exists but slots should only be for one person, not all consultants."
   severity: major
   test: 3
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "slot-manager.tsx has hardcoded Indonesian labels (DAYS_OF_WEEK, DURATION_OPTIONS, all UI strings) and includes consultant_id selection dropdown that shouldn't exist"
+  artifacts:
+    - path: "src/components/knowledge-base/slot-manager.tsx"
+      issue: "Indonesian labels on lines 47-60, 91, 125, 127, 146, 148, etc. Consultant dropdown on lines 282-301"
+  missing:
+    - "Change all Indonesian labels to English"
+    - "Remove consultant dropdown - slots are workspace-wide, not per-consultant"
   debug_session: ""
