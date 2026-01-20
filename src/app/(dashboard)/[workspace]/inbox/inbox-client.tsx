@@ -696,8 +696,8 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
               </Select>
             )}
 
-            {/* Filter presets dropdown */}
-            <DropdownMenu>
+            {/* Filter presets dropdown - HIDDEN: needs debugging, see UAT Phase 01 Test 5 */}
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 gap-1.5 px-3 rounded-full text-xs font-medium">
                   <Bookmark className="h-3.5 w-3.5" />
@@ -745,7 +745,7 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
                   Save current filters
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </div>
         </div>
 
