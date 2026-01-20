@@ -113,15 +113,22 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
 
     const loadPresets = async () => {
       const supabase = createClient()
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('workspace_members')
         .select('settings')
         .eq('workspace_id', workspace.id)
         .eq('user_id', currentUserId)
         .single()
 
-      if (data?.settings?.filterPresets) {
-        setPresets(data.settings.filterPresets as FilterPreset[])
+      if (error) {
+        console.error('Failed to load presets:', error)
+        return
+      }
+
+      // settings is JSONB, filterPresets is nested inside
+      const settings = data?.settings as Record<string, unknown> | null
+      if (settings?.filterPresets && Array.isArray(settings.filterPresets)) {
+        setPresets(settings.filterPresets as FilterPreset[])
       }
     }
     loadPresets()
@@ -158,7 +165,7 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
 
       const currentSettings = currentData?.settings || {}
 
-      const { error } = await supabase
+      const { data: updateResult, error } = await supabase
         .from('workspace_members')
         .update({
           settings: {
@@ -168,8 +175,17 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
         })
         .eq('workspace_id', workspace.id)
         .eq('user_id', currentUserId)
+        .select('settings')
+        .single()
 
       if (error) {
+        console.error('Failed to save preset:', error)
+        toast.error('Failed to save preset')
+        return
+      }
+
+      if (!updateResult) {
+        console.error('No row updated - check workspace_id and user_id match')
         toast.error('Failed to save preset')
         return
       }
