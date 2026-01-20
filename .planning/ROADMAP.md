@@ -10,7 +10,135 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 - v2.0 Production Ready — Phases 6-22 (shipped 2026-01-18)
 - v2.1 Client Launch Ready — Phases 1-9 (shipped 2026-01-20)
 - v2.2 ARI & User Flow — Phases 1-6 (shipped 2026-01-20)
-- **v2.3 Polish & Payment** — TBD (next milestone)
+- **v3.0 Performance & Speed** — Phases 1-5 (current)
+
+---
+
+## v3.0 Performance & Speed
+
+**Goal:** Achieve sub-500ms P95 response times through measured optimization and data-driven architecture decisions.
+
+**Approach:** Instrument first, optimize Supabase, spike Convex in parallel, decide based on data, then implement winning path.
+
+---
+
+### Phase 1: Instrumentation & Baseline
+
+**Goal:** Establish performance baseline before any optimization work begins
+
+**Dependencies:** None (starting phase)
+
+**Requirements:**
+- INST-01: Enable Vercel Speed Insights for Web Vitals tracking
+- INST-02: Add API timing wrapper to `/api/contacts/by-phone`
+- INST-03: Add API timing wrapper to `/api/conversations`
+- INST-04: Log query count per request in instrumented endpoints
+- INST-05: Establish P50/P95/P99 baseline metrics before optimization
+
+**Success Criteria:**
+1. Vercel Speed Insights dashboard shows Web Vitals (LCP, FID, CLS) for production traffic
+2. API routes log response time (ms) for every request in Vercel logs
+3. Query count per request visible in logs (e.g., "5 queries, 2340ms total")
+4. Baseline document exists with P50/P95/P99 for `/api/contacts/by-phone` and `/api/conversations`
+
+---
+
+### Phase 2: Supabase Optimization
+
+**Goal:** Apply known optimization patterns to achieve significant latency reduction with existing stack
+
+**Dependencies:** Phase 1 (need baseline to measure improvement)
+
+**Requirements:**
+- SUPA-01: Refactor `/api/contacts/by-phone` to use `Promise.all()` for parallel queries
+- SUPA-02: Refactor `/api/conversations` to use `Promise.all()` for parallel queries
+- SUPA-03: Add composite index `idx_contacts_workspace_phone` on contacts(workspace_id, phone)
+- SUPA-04: Add composite index `idx_conversations_workspace_time` on conversations(workspace_id, last_message_at DESC)
+- SUPA-05: Add composite index `idx_messages_conversation_time` on messages(conversation_id, created_at DESC)
+- SUPA-06: Refactor contacts query to use nested relations (contact -> notes, conversation -> messages)
+- SUPA-07: Audit and replace `select('*')` with explicit column selection in hot paths
+- SUPA-08: Optimize RLS policies (wrap `auth.uid()` in SELECT for caching)
+
+**Success Criteria:**
+1. `/api/contacts/by-phone` responds in <1 second P95 (down from 2-6 seconds)
+2. `/api/conversations` responds in <1 second P95
+3. Query count per request reduced by at least 50% (e.g., 8 queries -> 4 or fewer)
+4. All hot path queries use indexes (verified via EXPLAIN ANALYZE)
+5. No `select('*')` in `/api/contacts/by-phone`, `/api/conversations`, or `/api/messages`
+
+---
+
+### Phase 3: Convex Spike
+
+**Goal:** Validate whether Convex offers meaningful performance improvement over optimized Supabase
+
+**Dependencies:** Phase 1 (need baseline), runs parallel to Phase 2
+
+**Requirements:**
+- CONV-01: Set up Convex project with Next.js 15 App Router
+- CONV-02: Configure Supabase JWT provider in Convex auth.config.ts
+- CONV-03: Implement Convex schema for contacts table
+- CONV-04: Implement `requireWorkspaceMembership()` helper in Convex
+- CONV-05: Convert `/api/contacts/by-phone` to Convex query function
+- CONV-06: Implement Convex HTTP action for Kapso webhook handling
+- CONV-07: Benchmark Convex vs optimized Supabase response times
+- CONV-08: Test real-time subscription performance in Convex
+
+**Success Criteria:**
+1. Convex project initialized and connected to Next.js app
+2. User can authenticate via Supabase and access Convex data (JWT hybrid works)
+3. `/api/contacts/by-phone` equivalent in Convex responds in <500ms P95
+4. Kapso webhook can be received and processed by Convex HTTP action
+5. Comparison document exists with side-by-side P50/P95/P99 for both approaches
+
+---
+
+### Phase 4: Decision Gate
+
+**Goal:** Make data-driven architecture decision based on spike results
+
+**Dependencies:** Phase 2 (optimized Supabase metrics), Phase 3 (Convex spike results)
+
+**Requirements:**
+- GATE-01: Document spike results (P50/P95/P99 for both approaches)
+- GATE-02: Evaluate webhook handling reliability in Convex
+- GATE-03: Make data-driven decision: Convex migration or enhanced Supabase
+
+**Success Criteria:**
+1. Decision document exists with performance comparison table (Supabase vs Convex)
+2. Webhook reliability assessment complete (success rate, error handling, retry behavior)
+3. Clear written decision with rationale: "Proceed with [Convex/Supabase] because [data-backed reason]"
+
+---
+
+### Phase 5: Implementation
+
+**Goal:** Execute winning path to achieve sub-500ms P95 response times across all hot paths
+
+**Dependencies:** Phase 4 (decision made)
+
+**Requirements (conditional on GATE-03 decision):**
+
+**If Convex wins (GATE-03 = Convex):**
+- IMPL-01: Migrate contacts table to Convex with dual-write
+- IMPL-02: Migrate conversations table to Convex
+- IMPL-03: Migrate messages table to Convex
+- IMPL-04: Update inbox to use Convex real-time subscriptions
+- IMPL-05: Migrate webhook handler to Convex HTTP action
+- IMPL-06: Remove Supabase data queries (keep auth only)
+
+**If Supabase wins (GATE-03 = Supabase):**
+- IMPL-07: Replace polling with Supabase real-time subscriptions for inbox
+- IMPL-08: Create database function for dashboard data aggregation
+- IMPL-09: Tune connection pooling settings
+- IMPL-10: Verify sub-500ms P95 across all hot paths
+
+**Success Criteria:**
+1. `/api/contacts/by-phone` P95 < 500ms in production
+2. `/api/conversations` P95 < 500ms in production
+3. Inbox updates in real-time without polling (subscription-based)
+4. Page load time P95 < 2 seconds (Vercel Speed Insights)
+5. No regression in functionality (all existing features work)
 
 ---
 
@@ -130,9 +258,10 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
+| **v3.0 Performance & Speed** | 1-5 | 0/TBD | Active | - |
 
 **Total shipped:** 105 plans across 4 milestones
 
 ---
 
-*Last updated: 2026-01-20 — v2.2 milestone complete*
+*Last updated: 2026-01-20 — v3.0 roadmap created*

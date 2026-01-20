@@ -116,13 +116,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GATE-01 | Phase 4 | Pending |
 | GATE-02 | Phase 4 | Pending |
 | GATE-03 | Phase 4 | Pending |
-| IMPL-01 to IMPL-10 | Phase 5 | Pending (conditional) |
+| IMPL-01 to IMPL-06 | Phase 5 (Convex path) | Pending (conditional) |
+| IMPL-07 to IMPL-10 | Phase 5 (Supabase path) | Pending (conditional) |
 
 **Coverage:**
-- v1 requirements: 26 total (6 conditional)
+- v1 requirements: 26 total (10 conditional in Phase 5)
 - Mapped to phases: 26
-- Unmapped: 0 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-01-20*
-*Last updated: 2026-01-20 after initial definition*
+*Last updated: 2026-01-20 after roadmap creation*
