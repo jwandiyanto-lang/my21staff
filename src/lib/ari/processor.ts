@@ -29,6 +29,16 @@ import {
   detectUniversityQuestion,
   type Destination,
 } from './knowledge-base';
+import {
+  getAvailableSlots,
+  getSlotsForDay,
+  formatAvailableDays,
+  formatSlotsForDay,
+  parseIndonesianDay,
+  parseSlotSelection,
+  bookAppointment,
+  formatBookingConfirmation,
+} from './scheduling';
 import type {
   ARIConversation,
   ARIConfig,
@@ -627,6 +637,165 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
           model,
           newState: 'handoff',
         };
+      }
+    }
+
+    // 12f. Handle scheduling state transitions
+    if (conversation.state === 'scheduling' || nextState === 'scheduling') {
+      const schedCtx = conversationContext as ARIContext & {
+        scheduling_step?: 'asking_day' | 'showing_slots' | 'confirming' | 'booked';
+        selected_day?: number;
+        available_slots?: Array<{
+          date: string;
+          start_time: string;
+          duration_minutes: number;
+          slot_id: string;
+        }>;
+        selected_slot?: {
+          date: string;
+          start_time: string;
+          duration_minutes: number;
+          slot_id: string;
+        };
+        available_days_summary?: string;
+        slots_summary?: string;
+        appointment_id?: string;
+      };
+
+      // First time entering scheduling - show available days
+      if (!schedCtx.scheduling_step || schedCtx.scheduling_step === 'asking_day') {
+        // Check for day preference in user message
+        const dayPref = parseIndonesianDay(userMessage);
+
+        if (dayPref !== null) {
+          // User specified a day - get slots for that day
+          const daySlots = await getSlotsForDay(supabase, workspaceId, dayPref);
+
+          if (daySlots.length > 0) {
+            schedCtx.scheduling_step = 'showing_slots';
+            schedCtx.selected_day = dayPref;
+            schedCtx.available_slots = daySlots.slice(0, 5).map(s => ({
+              date: s.date,
+              start_time: s.start_time,
+              duration_minutes: s.duration_minutes,
+              slot_id: s.slot_id,
+            }));
+            schedCtx.slots_summary = formatSlotsForDay(daySlots);
+
+            // Update conversation context
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await supabase
+              .from('ari_conversations')
+              .update({ context: schedCtx as any, state: 'scheduling' })
+              .eq('id', conversation.id);
+          } else {
+            // No slots for that day - reload available days
+            const allSlots = await getAvailableSlots(supabase, workspaceId);
+            schedCtx.available_days_summary = formatAvailableDays(allSlots);
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await supabase
+              .from('ari_conversations')
+              .update({ context: schedCtx as any, state: 'scheduling' })
+              .eq('id', conversation.id);
+          }
+        } else if (!schedCtx.available_days_summary) {
+          // First time - load available days
+          const allSlots = await getAvailableSlots(supabase, workspaceId);
+          schedCtx.scheduling_step = 'asking_day';
+          schedCtx.available_days_summary = formatAvailableDays(allSlots);
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await supabase
+            .from('ari_conversations')
+            .update({ context: schedCtx as any, state: 'scheduling' })
+            .eq('id', conversation.id);
+        }
+      }
+
+      // User is selecting from shown slots
+      if (schedCtx.scheduling_step === 'showing_slots' && schedCtx.available_slots) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const selection = parseSlotSelection(userMessage, schedCtx.available_slots as any);
+
+        if (selection !== null) {
+          schedCtx.scheduling_step = 'confirming';
+          schedCtx.selected_slot = schedCtx.available_slots[selection];
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await supabase
+            .from('ari_conversations')
+            .update({ context: schedCtx as any })
+            .eq('id', conversation.id);
+        }
+      }
+
+      // User is confirming selection
+      if (schedCtx.scheduling_step === 'confirming' && schedCtx.selected_slot) {
+        const isConfirm = /^(ya|oke|ok|yes|betul|benar|setuju|deal)/i.test(userMessage.trim());
+
+        if (isConfirm) {
+          // Book the appointment
+          const slot = schedCtx.selected_slot;
+          const appointment = await bookAppointment(supabase, {
+            workspaceId,
+            ariConversationId: conversation.id,
+            slot: {
+              date: slot.date,
+              day_of_week: schedCtx.selected_day || 0,
+              start_time: slot.start_time,
+              end_time: '', // Not needed for booking
+              duration_minutes: slot.duration_minutes,
+              consultant_id: null,
+              slot_id: slot.slot_id,
+              booked: false,
+            },
+            notes: `Booked via ARI. Lead score: ${calculatedScore}`,
+          });
+
+          if (appointment) {
+            schedCtx.scheduling_step = 'booked';
+            schedCtx.appointment_id = appointment.id;
+
+            // Update to handoff state
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await supabase
+              .from('ari_conversations')
+              .update({
+                state: 'handoff' as ARIState,
+                context: schedCtx as any,
+                handoff_at: new Date().toISOString(),
+                handoff_reason: 'appointment_booked',
+              })
+              .eq('id', conversation.id);
+
+            // Send confirmation message
+            const confirmMsg = formatBookingConfirmation({
+              date: slot.date,
+              day_of_week: schedCtx.selected_day || 0,
+              start_time: slot.start_time,
+              end_time: '',
+              duration_minutes: slot.duration_minutes,
+              consultant_id: null,
+              slot_id: slot.slot_id,
+              booked: true,
+            });
+            await sendMessage(kapsoCredentials, contactPhone, confirmMsg);
+
+            await logMessage(supabase, {
+              ariConversationId: conversation.id,
+              workspaceId,
+              role: 'assistant',
+              content: confirmMsg,
+            });
+
+            return {
+              success: true,
+              response: confirmMsg,
+              newState: 'handoff',
+            };
+          }
+        }
       }
     }
 

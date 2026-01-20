@@ -165,7 +165,11 @@ const STATE_INSTRUCTIONS: Record<ARIState, string> = {
   scoring: `Kamu sudah selesai mengumpulkan data. Berdasarkan informasi yang ada, nilai kesiapan lead ini. JANGAN tawarkan konsultasi langsung - tunggu instruksi routing.`,
   booking: `Tawarkan konsultasi berbayar. Jelaskan manfaat: bicara langsung dengan konsultan, dapat rekomendasi universitas personal.`,
   payment: `Guide lead melalui proses pembayaran. Jawab pertanyaan tentang metode bayar dan keamanan.`,
-  scheduling: `Bantu lead pilih waktu konsultasi yang cocok. Konfirmasi jadwal yang dipilih.`,
+  scheduling: `Bantu lead booking jadwal konsultasi. Ikuti flow:
+1. Jika belum pilih hari -> tanya hari yang cocok
+2. Jika sudah pilih hari -> tunjukkan slot tersedia
+3. Jika sudah pilih slot -> konfirmasi dengan repeat-back
+Gunakan bahasa santai dan bantu jika mereka bingung.`,
   handoff: `Lead sudah di-handoff ke konsultan manusia. Jika masih ada pertanyaan, jawab singkat dan bilang konsultan akan membantu lebih detail.`,
   completed: `Percakapan selesai. Ucapkan terima kasih dan ingatkan untuk cek email konfirmasi.`,
 };
@@ -319,6 +323,40 @@ export function buildSystemPrompt(ctx: PromptContext): string {
       parts.push('\n## ROUTING PREVIEW: HOT LEAD');
       parts.push(`Score: ${ctx.contact.leadScore}/100 - Lead ini sudah hot!`);
       parts.push('Selesaikan kualifikasi dengan cepat. Setelah lengkap, akan langsung handoff.');
+    }
+  }
+
+  // 5g. Scheduling context
+  if (ctx.conversation.state === 'scheduling') {
+    const schedCtx = ctx.conversation.context;
+
+    if (schedCtx.scheduling_step === 'asking_day') {
+      // Get available days summary from context
+      const availableDays = schedCtx.available_days_summary;
+      if (availableDays) {
+        parts.push('\n## JADWAL TERSEDIA');
+        parts.push(availableDays);
+        parts.push('\nTanyakan hari apa yang cocok untuk mereka.');
+      }
+    }
+
+    if (schedCtx.scheduling_step === 'showing_slots') {
+      const slotsSummary = schedCtx.slots_summary;
+      if (slotsSummary) {
+        parts.push('\n## SLOT TERSEDIA');
+        parts.push(slotsSummary);
+        parts.push('\nTunjukkan pilihan di atas dan minta mereka pilih nomor.');
+      }
+    }
+
+    if (schedCtx.scheduling_step === 'confirming') {
+      const selectedSlot = schedCtx.selected_slot;
+      if (selectedSlot) {
+        parts.push('\n## KONFIRMASI BOOKING');
+        parts.push(`Mereka memilih: ${selectedSlot.date} jam ${selectedSlot.start_time}`);
+        parts.push('Konfirmasi ulang: "Oke, jadi [hari] tanggal [X] jam [Y] ya?"');
+        parts.push('Tunggu konfirmasi "ya/oke/betul" sebelum finalisasi.');
+      }
     }
   }
 
