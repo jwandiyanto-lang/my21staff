@@ -66,18 +66,35 @@ const MIN_SCORE_FOR_SCORING = 40;
 const HOT_LEAD_THRESHOLD = 70;
 
 /**
+ * Maximum messages for warm leads in scoring before handoff
+ * Prevents warm leads from staying in nurturing forever
+ */
+const WARM_LEAD_MAX_MESSAGES = 5;
+
+/**
+ * Routing actions that can be passed to state machine
+ */
+export type RoutingActionType =
+  | 'handoff_hot'
+  | 'handoff_warm'
+  | 'send_community_cold'
+  | 'continue_qualifying'
+  | 'continue_nurturing';
+
+/**
  * Determine the next state based on current context and lead score
  *
  * This function encodes the business logic for state progression:
  * - greeting: Always moves to qualifying
- * - qualifying: Moves to scoring when enough data collected
- * - scoring: Hot leads go to booking, others to handoff
+ * - qualifying: Moves to scoring when enough data collected, or when routing says complete
+ * - scoring: Hot/cold leads go to handoff, warm leads can stay for nurturing
  * - booking/payment/scheduling: Stay until user action
  * - handoff: Only transitions to completed
  *
  * @param current - Current conversation state
  * @param context - ARI context with collected lead data
  * @param leadScore - Current calculated lead score (0-100)
+ * @param routingAction - Optional routing action from determineRouting
  * @returns Recommended next state
  *
  * @example
@@ -88,17 +105,18 @@ const HOT_LEAD_THRESHOLD = 70;
  * // Lead with good data
  * getNextState('qualifying', { lead_data: {...} }, 75) // 'scoring'
  *
- * // Hot lead after scoring
- * getNextState('scoring', {}, 80) // 'booking'
+ * // Hot lead with routing action
+ * getNextState('scoring', {}, 80, 'handoff_hot') // 'handoff'
  *
- * // Cold lead after scoring
- * getNextState('scoring', {}, 30) // 'handoff'
+ * // Cold lead with routing action
+ * getNextState('scoring', {}, 30, 'send_community_cold') // 'handoff'
  * ```
  */
 export function getNextState(
   current: ARIState,
   context: ARIContext,
-  leadScore: number
+  leadScore: number,
+  routingAction?: RoutingActionType
 ): ARIState {
   switch (current) {
     case 'greeting':
@@ -106,6 +124,10 @@ export function getNextState(
       return 'qualifying';
 
     case 'qualifying':
+      // If routing says we're done qualifying (hot or cold), move to scoring
+      if (routingAction === 'handoff_hot' || routingAction === 'send_community_cold') {
+        return 'scoring';
+      }
       // Need minimum data to move to scoring
       if (leadScore >= MIN_SCORE_FOR_SCORING) {
         return 'scoring';
@@ -114,7 +136,17 @@ export function getNextState(
       return 'qualifying';
 
     case 'scoring':
-      // Hot leads get booking offer, others handoff to human
+      // All paths from scoring lead to handoff or booking
+      // Hot leads: handoff to human who will send consultation offer
+      // Cold leads: already sent community link, now handoff
+      if (routingAction === 'handoff_hot' || routingAction === 'send_community_cold') {
+        return 'handoff';
+      }
+      // Warm leads continue nurturing (stay in scoring for now, will handoff eventually)
+      if (routingAction === 'continue_nurturing' && leadScore < HOT_LEAD_THRESHOLD) {
+        return 'scoring';  // Can stay to answer more questions
+      }
+      // Default: hot leads go to booking, others to handoff
       if (leadScore >= HOT_LEAD_THRESHOLD) {
         return 'booking';
       }
