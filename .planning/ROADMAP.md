@@ -242,11 +242,11 @@ Plans:
 
 ### Phase 9: Kapso Bot Setup (Eagle)
 **Goal:** Get Ari persona working on Eagle's WhatsApp — AI responds to leads with CRM context
-**Status:** Planning complete
-**Plans:** 1 plan
+**Status:** Complete
+**Plans:** 1/1 plan — completed 2026-01-20
 
 Plans:
-- [ ] 09-01-PLAN.md — Deploy Kapso function + verification testing
+- [x] 09-01-PLAN.md — Deploy Kapso function + verification testing
 
 **Scope:**
 - Contact lookup API already complete (`/api/contacts/by-phone`)
@@ -270,10 +270,10 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1-5 | v1.0 | 14/14 | Complete | 2026-01-14 |
 | 6-22 | v2.0 | 38/38 | Complete | 2026-01-18 |
-| 1-9 | v2.1 | 33/33 | Phase 1-8 complete, Phase 9 planned | — |
+| 1-9 | v2.1 | 34/34 | Complete | 2026-01-20 |
 
 **Note:** v2.1 uses fresh phase numbering. Old phases archived in `.planning/phases-v2.0-archive/`
 
 ---
 
-*Last updated: 2026-01-20 — Phase 9 planned (1 plan)*
+*Last updated: 2026-01-20 — v2.1 COMPLETE (34 plans)*
