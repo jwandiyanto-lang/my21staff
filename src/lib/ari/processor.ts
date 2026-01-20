@@ -556,9 +556,10 @@ export async function triggerARIGreeting(
     const supabase = createApiAdminClient();
 
     // Get workspace Kapso credentials
+    // Note: API key is stored in meta_access_token (encrypted)
     const { data: workspace, error: wsError } = await supabase
       .from('workspaces')
-      .select('kapso_api_key, kapso_phone_id')
+      .select('meta_access_token, kapso_phone_id')
       .eq('id', workspaceId)
       .single();
 
@@ -566,14 +567,14 @@ export async function triggerARIGreeting(
       return { success: false, error: 'Workspace not found' };
     }
 
-    if (!workspace.kapso_api_key || !workspace.kapso_phone_id) {
+    if (!workspace.meta_access_token || !workspace.kapso_phone_id) {
       return { success: false, error: 'Kapso credentials not configured' };
     }
 
-    // Note: In production, we'd decrypt the API key here
-    // For now, assuming it's stored decrypted for testing
+    // Import safeDecrypt for decryption
+    const { safeDecrypt } = await import('@/lib/crypto');
     const credentials: KapsoCredentials = {
-      apiKey: workspace.kapso_api_key,
+      apiKey: safeDecrypt(workspace.meta_access_token),
       phoneId: workspace.kapso_phone_id,
     };
 

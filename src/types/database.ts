@@ -14,6 +14,419 @@ export type Database = {
   }
   public: {
     Tables: {
+      ari_ai_comparison: {
+        Row: {
+          ai_model: string
+          avg_response_time_ms: number | null
+          conversation_count: number | null
+          conversion_count: number | null
+          created_at: string | null
+          id: string
+          period_end: string | null
+          period_start: string | null
+          satisfaction_score: number | null
+          total_tokens_used: number | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          ai_model: string
+          avg_response_time_ms?: number | null
+          conversation_count?: number | null
+          conversion_count?: number | null
+          created_at?: string | null
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          satisfaction_score?: number | null
+          total_tokens_used?: number | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          ai_model?: string
+          avg_response_time_ms?: number | null
+          conversation_count?: number | null
+          conversion_count?: number | null
+          created_at?: string | null
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          satisfaction_score?: number | null
+          total_tokens_used?: number | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ari_ai_comparison_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ari_appointments: {
+        Row: {
+          ari_conversation_id: string
+          consultant_id: string | null
+          created_at: string | null
+          duration_minutes: number | null
+          id: string
+          meeting_link: string | null
+          notes: string | null
+          payment_id: string | null
+          reminder_sent_at: string | null
+          scheduled_at: string
+          status: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          ari_conversation_id: string
+          consultant_id?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          meeting_link?: string | null
+          notes?: string | null
+          payment_id?: string | null
+          reminder_sent_at?: string | null
+          scheduled_at: string
+          status?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          ari_conversation_id?: string
+          consultant_id?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          meeting_link?: string | null
+          notes?: string | null
+          payment_id?: string | null
+          reminder_sent_at?: string | null
+          scheduled_at?: string
+          status?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ari_appointments_ari_conversation_id_fkey"
+            columns: ["ari_conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ari_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ari_appointments_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "ari_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ari_appointments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ari_config: {
+        Row: {
+          bot_name: string | null
+          community_link: string | null
+          created_at: string | null
+          greeting_style: string | null
+          id: string
+          language: string | null
+          tone: Json | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          bot_name?: string | null
+          community_link?: string | null
+          created_at?: string | null
+          greeting_style?: string | null
+          id?: string
+          language?: string | null
+          tone?: Json | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          bot_name?: string | null
+          community_link?: string | null
+          created_at?: string | null
+          greeting_style?: string | null
+          id?: string
+          language?: string | null
+          tone?: Json | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ari_config_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ari_conversations: {
+        Row: {
+          ai_model: string | null
+          contact_id: string
+          context: Json | null
+          conversation_id: string | null
+          created_at: string | null
+          handoff_at: string | null
+          handoff_reason: string | null
+          id: string
+          last_ai_message_at: string | null
+          lead_score: number | null
+          lead_temperature: string | null
+          state: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          ai_model?: string | null
+          contact_id: string
+          context?: Json | null
+          conversation_id?: string | null
+          created_at?: string | null
+          handoff_at?: string | null
+          handoff_reason?: string | null
+          id?: string
+          last_ai_message_at?: string | null
+          lead_score?: number | null
+          lead_temperature?: string | null
+          state?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          ai_model?: string | null
+          contact_id?: string
+          context?: Json | null
+          conversation_id?: string | null
+          created_at?: string | null
+          handoff_at?: string | null
+          handoff_reason?: string | null
+          id?: string
+          last_ai_message_at?: string | null
+          lead_score?: number | null
+          lead_temperature?: string | null
+          state?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ari_conversations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ari_conversations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ari_conversations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ari_destinations: {
+        Row: {
+          city: string | null
+          country: string
+          created_at: string | null
+          id: string
+          is_promoted: boolean | null
+          notes: string | null
+          priority: number | null
+          programs: string[] | null
+          requirements: Json | null
+          university_name: string
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          city?: string | null
+          country: string
+          created_at?: string | null
+          id?: string
+          is_promoted?: boolean | null
+          notes?: string | null
+          priority?: number | null
+          programs?: string[] | null
+          requirements?: Json | null
+          university_name: string
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          city?: string | null
+          country?: string
+          created_at?: string | null
+          id?: string
+          is_promoted?: boolean | null
+          notes?: string | null
+          priority?: number | null
+          programs?: string[] | null
+          requirements?: Json | null
+          university_name?: string
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ari_destinations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ari_messages: {
+        Row: {
+          ai_model: string | null
+          ari_conversation_id: string
+          content: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          response_time_ms: number | null
+          role: string
+          tokens_used: number | null
+          workspace_id: string
+        }
+        Insert: {
+          ai_model?: string | null
+          ari_conversation_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          response_time_ms?: number | null
+          role: string
+          tokens_used?: number | null
+          workspace_id: string
+        }
+        Update: {
+          ai_model?: string | null
+          ari_conversation_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          response_time_ms?: number | null
+          role?: string
+          tokens_used?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ari_messages_ari_conversation_id_fkey"
+            columns: ["ari_conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ari_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ari_messages_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ari_payments: {
+        Row: {
+          amount: number
+          ari_conversation_id: string
+          created_at: string | null
+          currency: string | null
+          expires_at: string | null
+          gateway: string | null
+          gateway_response: Json | null
+          gateway_transaction_id: string | null
+          id: string
+          paid_at: string | null
+          payment_method: string | null
+          status: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          amount: number
+          ari_conversation_id: string
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string | null
+          gateway?: string | null
+          gateway_response?: Json | null
+          gateway_transaction_id?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          amount?: number
+          ari_conversation_id?: string
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string | null
+          gateway?: string | null
+          gateway_response?: Json | null
+          gateway_transaction_id?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ari_payments_ari_conversation_id_fkey"
+            columns: ["ari_conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ari_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ari_payments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_notes: {
         Row: {
           author_id: string
@@ -74,42 +487,60 @@ export type Database = {
       contacts: {
         Row: {
           assigned_to: string | null
+          cache_updated_at: string | null
           created_at: string | null
           email: string | null
           id: string
+          kapso_is_online: boolean | null
+          kapso_last_seen: string | null
+          kapso_name: string | null
+          kapso_profile_pic: string | null
           lead_score: number | null
           lead_status: string | null
           metadata: Json | null
           name: string | null
           phone: string
+          phone_normalized: string | null
           tags: string[] | null
           updated_at: string | null
           workspace_id: string
         }
         Insert: {
           assigned_to?: string | null
+          cache_updated_at?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
+          kapso_is_online?: boolean | null
+          kapso_last_seen?: string | null
+          kapso_name?: string | null
+          kapso_profile_pic?: string | null
           lead_score?: number | null
           lead_status?: string | null
           metadata?: Json | null
           name?: string | null
           phone: string
+          phone_normalized?: string | null
           tags?: string[] | null
           updated_at?: string | null
           workspace_id: string
         }
         Update: {
           assigned_to?: string | null
+          cache_updated_at?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
+          kapso_is_online?: boolean | null
+          kapso_last_seen?: string | null
+          kapso_name?: string | null
+          kapso_profile_pic?: string | null
           lead_score?: number | null
           lead_status?: string | null
           metadata?: Json | null
           name?: string | null
           phone?: string
+          phone_normalized?: string | null
           tags?: string[] | null
           updated_at?: string | null
           workspace_id?: string
@@ -640,6 +1071,7 @@ export type Database = {
           expires_at: string
           id: string
           invited_by: string | null
+          name: string | null
           role: string | null
           status: string | null
           token: string
@@ -653,6 +1085,7 @@ export type Database = {
           expires_at: string
           id?: string
           invited_by?: string | null
+          name?: string | null
           role?: string | null
           status?: string | null
           token: string
@@ -666,6 +1099,7 @@ export type Database = {
           expires_at?: string
           id?: string
           invited_by?: string | null
+          name?: string | null
           role?: string | null
           status?: string | null
           token?: string
@@ -688,7 +1122,7 @@ export type Database = {
           id: string
           must_change_password: boolean | null
           role: string | null
-          settings: Record<string, unknown> | null
+          settings: Json | null
           user_id: string
           workspace_id: string
         }
@@ -697,7 +1131,7 @@ export type Database = {
           id?: string
           must_change_password?: boolean | null
           role?: string | null
-          settings?: Record<string, unknown> | null
+          settings?: Json | null
           user_id: string
           workspace_id: string
         }
@@ -706,7 +1140,7 @@ export type Database = {
           id?: string
           must_change_password?: boolean | null
           role?: string | null
-          settings?: Record<string, unknown> | null
+          settings?: Json | null
           user_id?: string
           workspace_id?: string
         }
@@ -933,6 +1367,17 @@ export type WorkspaceInvitation = Database['public']['Tables']['workspace_invita
 export type Ticket = Database['public']['Tables']['tickets']['Row']
 export type TicketComment = Database['public']['Tables']['ticket_comments']['Row']
 export type TicketStatusHistory = Database['public']['Tables']['ticket_status_history']['Row']
+
+// =============================================================================
+// ARI (AI Receptionist Indonesia) Types
+// =============================================================================
+export type ARIConfig = Database['public']['Tables']['ari_config']['Row']
+export type ARIConversation = Database['public']['Tables']['ari_conversations']['Row']
+export type ARIMessage = Database['public']['Tables']['ari_messages']['Row']
+export type ARIDestination = Database['public']['Tables']['ari_destinations']['Row']
+export type ARIPayment = Database['public']['Tables']['ari_payments']['Row']
+export type ARIAppointment = Database['public']['Tables']['ari_appointments']['Row']
+export type ARIAIComparison = Database['public']['Tables']['ari_ai_comparison']['Row']
 
 // =============================================================================
 // Manual type definitions for tables not yet in remote database
