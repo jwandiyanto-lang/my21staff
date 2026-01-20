@@ -22,6 +22,8 @@ import {
   getNextDocumentKey,
   type DocumentStatus,
 } from './qualification';
+import { calculateLeadScore, getLeadTemperature, getScoreReasons, type ScoreBreakdown } from './scoring';
+import { determineRouting, temperatureToLeadStatus } from './routing';
 import {
   getDestinationsForCountry,
   detectUniversityQuestion,
@@ -311,6 +313,9 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
     const conversationContext = conversation.context as ARIContext & {
       documents?: DocumentStatus;
       pendingDocumentQuestion?: keyof DocumentStatus;
+      pendingCommunityMessage?: string;
+      score_breakdown?: ScoreBreakdown;
+      score_reasons?: string[];
     };
 
     if (
@@ -348,7 +353,23 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
       }
     }
 
-    // 5c. Detect university questions and fetch destinations
+    // 5d. Calculate lead score
+    const documentStatus: DocumentStatus = conversationContext.documents || {
+      passport: null,
+      cv: null,
+      english_test: null,
+      transcript: null,
+    };
+
+    const { score: calculatedScore, breakdown, reasons } = calculateLeadScore(
+      formAnswers,
+      documentStatus,
+      undefined  // Engagement score - future enhancement
+    );
+
+    const temperature = getLeadTemperature(calculatedScore);
+
+    // 5e. Detect university questions and fetch destinations
     let destinations: Destination[] = [];
     const detection = detectUniversityQuestion(userMessage);
     if (detection.isQuestion) {
@@ -490,11 +511,57 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
       responseTimeMs: aiResponse.responseTimeMs,
     });
 
-    // 12. Determine next state
-    const leadScore = contact.lead_score || conversation.lead_score;
-    const nextState = getNextState(conversation.state, conversation.context as ARIContext, leadScore);
+    // 12. Determine next state (use calculated score)
+    const nextState = getNextState(conversation.state, conversation.context as ARIContext, calculatedScore);
 
-    // 13. Update conversation if state changed or update AI model
+    // 12b. Update score in ari_conversations if changed
+    if (calculatedScore !== conversation.lead_score) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const updatedContext: any = {
+        ...conversationContext,
+        score_breakdown: breakdown,
+        score_reasons: reasons,
+      };
+
+      await supabase
+        .from('ari_conversations')
+        .update({
+          lead_score: calculatedScore,
+          lead_temperature: temperature,
+          context: updatedContext,
+        })
+        .eq('id', conversation.id);
+
+      console.log(`[ARI] Score updated: ${conversation.lead_score} -> ${calculatedScore} (${temperature})`);
+    }
+
+    // 12c. Sync score to contacts table for CRM visibility
+    await supabase
+      .from('contacts')
+      .update({
+        lead_score: calculatedScore,
+        lead_status: temperatureToLeadStatus(temperature),
+      })
+      .eq('id', contactId);
+
+    // 12d. Check routing decision (for logging and future handoff automation)
+    const routing = determineRouting(
+      calculatedScore,
+      temperature,
+      formAnswers,
+      documentStatus,
+      config.community_link
+    );
+
+    // If cold and ready for routing, add community message to context
+    if (routing.action === 'send_community_cold' && routing.message) {
+      // Store pending message in context for AI to include in response
+      conversationContext.pendingCommunityMessage = routing.message;
+    }
+
+    console.log(`[ARI] Routing decision: ${routing.action} (readyForRouting: ${routing.readyForRouting})`);
+
+    // 13. Update conversation state and AI model
     if (nextState !== conversation.state || conversation.ai_model !== model) {
       await supabase
         .from('ari_conversations')
