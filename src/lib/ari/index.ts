@@ -69,6 +69,18 @@ export {
 } from './ai-router';
 
 // ===========================================
+// Message Processor
+// ===========================================
+
+export {
+  processWithARI,
+  isARIEnabledForWorkspace,
+  triggerARIGreeting,
+  type ProcessParams,
+  type ProcessResult,
+} from './processor';
+
+// ===========================================
 // Individual Clients (for direct access if needed)
 // ===========================================
 
