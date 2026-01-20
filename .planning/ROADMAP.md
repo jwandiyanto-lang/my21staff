@@ -58,7 +58,14 @@ Plans:
 - [ ] ARI answers university/destination questions from knowledge base
 - [ ] Natural Indonesian conversation with configurable persona
 
-**Plans:** TBD during `/gsd:plan-phase 2`
+**Plans:** 5 plans in 4 waves
+
+Plans:
+- [ ] 02-01-PLAN.md — ARI foundation: types and multi-LLM clients (Grok + Sea-Lion)
+- [ ] 02-02-PLAN.md — State machine and context builder
+- [ ] 02-03-PLAN.md — Webhook integration and message processing
+- [ ] 02-04-PLAN.md — Form validation and qualification logic
+- [ ] 02-05-PLAN.md — Knowledge base integration for university questions
 
 ---
 
@@ -253,10 +260,10 @@ Full details: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 | v1.0 MVP | 1-5 | 14/14 | Complete | 2026-01-14 |
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
-| v2.2 ARI & User Flow | 1-7 | 5/5+ | In Progress | — |
+| v2.2 ARI & User Flow | 1-7 | 5/10+ | In Progress | — |
 
 **Total shipped:** 82 plans across 3 milestones
 
 ---
 
-*Last updated: 2026-01-20 — Phase 1 complete (5/5 plans)*
+*Last updated: 2026-01-20 — Phase 2 planned (5 plans in 4 waves)*
