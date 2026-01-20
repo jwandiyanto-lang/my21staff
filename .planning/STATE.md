@@ -10,22 +10,22 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 3 of 7 — Lead Scoring & Routing
-Plan: 3 of 3 (03-03-PLAN complete)
+Plan: 4 of 4 (03-04-PLAN complete)
 Status: Phase complete
-Last activity: 2026-01-20 — Completed 03-03-PLAN (Score Display UI)
+Last activity: 2026-01-20 — Completed 03-04-PLAN (Routing Action Execution)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 █████░░░░░ (13/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 █████░░░░░ (14/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 95 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 13 in v2.2)
+- Total plans completed: 96 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 14 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 -> Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
-- Lines: ~36,100 TypeScript
-- Phases completed: 26 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 2 + 03 complete)
+- Lines: ~36,200 TypeScript
+- Phases completed: 26 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 2 + 03 complete + 04 partial)
 
 ## Accumulated Context
 
@@ -84,6 +84,11 @@ Key v2.2 decisions:
 - Expandable score details showing category breakdown - IMPLEMENTED 03-03
 - ARI score fetched from ari_conversations on conversation selection - IMPLEMENTED 03-03
 - Falls back to manual slider when no ARI data - IMPLEMENTED 03-03
+- Hot leads get handoff with consultation offer context message - IMPLEMENTED 03-04
+- Cold leads receive community link before handoff message - IMPLEMENTED 03-04
+- Warm leads continue ARI nurturing (stay in scoring state) - IMPLEMENTED 03-04
+- State machine accepts routing action for transition decisions - IMPLEMENTED 03-04
+- AI receives explicit prohibitions in scoring state - IMPLEMENTED 03-04
 
 ### Deferred Issues
 
@@ -98,7 +103,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 03-03-PLAN (Score Display UI)
+Stopped at: Completed 03-04-PLAN (Routing Action Execution)
 Resume file: None
 Next: 04-01-PLAN (Payment Integration)
 
@@ -125,4 +130,4 @@ Next: 04-01-PLAN (Payment Integration)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed 03-03-PLAN (Score Display UI)*
+*Last updated: 2026-01-20 — Completed 03-04-PLAN (Routing Action Execution)*
