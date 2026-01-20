@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Calendar, Bot, GitBranch, Database, Target } from 'lucide-react'
 import { SlotManager } from '@/components/knowledge-base/slot-manager'
 import { PersonaTab } from '@/components/knowledge-base/persona-tab'
+import { DatabaseTab } from '@/components/knowledge-base/database-tab'
 import { ScoringTab } from '@/components/knowledge-base/scoring-tab'
 
 interface TeamMember {
@@ -46,7 +47,7 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
             <GitBranch className="w-4 h-4" />
             <span>Flow</span>
           </TabsTrigger>
-          <TabsTrigger value="database" disabled className="flex items-center gap-2 opacity-50">
+          <TabsTrigger value="database" className="flex items-center gap-2">
             <Database className="w-4 h-4" />
             <span>Database</span>
           </TabsTrigger>
@@ -70,10 +71,8 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
           </div>
         </TabsContent>
 
-        <TabsContent value="database">
-          <div className="text-center py-12 text-muted-foreground">
-            Knowledge database coming soon
-          </div>
+        <TabsContent value="database" className="space-y-6">
+          <DatabaseTab workspaceId={workspace.id} />
         </TabsContent>
 
         <TabsContent value="scoring" className="space-y-6">
