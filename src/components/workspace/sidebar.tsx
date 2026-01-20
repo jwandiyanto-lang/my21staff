@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Headphones,
+  BookOpen,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WorkspaceSwitcher } from './workspace-switcher'
@@ -51,6 +52,11 @@ const operationsNav = [
 ]
 
 const adminNav = [
+  {
+    title: 'Knowledge Base',
+    icon: BookOpen,
+    href: '/knowledge-base',
+  },
   {
     title: 'Settings',
     icon: Settings,
