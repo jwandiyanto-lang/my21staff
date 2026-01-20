@@ -4,7 +4,10 @@
  * Multi-LLM AI system for lead qualification and conversation management
  */
 
+// ===========================================
 // Types
+// ===========================================
+
 export type {
   AIModelType,
   AIResponse,
@@ -28,9 +31,36 @@ export type {
   ARIMessageInsert,
 } from './types';
 
-export { STATE_TRANSITIONS } from './types';
+// ===========================================
+// State Machine
+// ===========================================
 
+export {
+  STATE_TRANSITIONS,
+  canTransition,
+  getNextState,
+  shouldAutoHandoff,
+  getStateDescription,
+} from './state-machine';
+
+// ===========================================
+// Context Builder
+// ===========================================
+
+export {
+  getTimeBasedGreeting,
+  extractFormAnswers,
+  buildSystemPrompt,
+  buildMessageHistory,
+  buildChatMessages,
+  type PromptContext,
+  type ChatMessage,
+} from './context-builder';
+
+// ===========================================
 // AI Router
+// ===========================================
+
 export {
   selectModel,
   generateResponse,
@@ -38,7 +68,10 @@ export {
   type AIGenerationOptions,
 } from './ai-router';
 
-// Individual clients (for direct access if needed)
+// ===========================================
+// Individual Clients (for direct access if needed)
+// ===========================================
+
 export {
   generateGrokResponse,
   checkGrokHealth,
