@@ -397,7 +397,7 @@ async function getKapsoCredentials(
 ): Promise<{ apiKey: string; phoneId: string } | null> {
   const { data: workspace, error } = await supabase
     .from('workspaces')
-    .select('kapso_api_key, kapso_phone_id')
+    .select('meta_access_token, kapso_phone_id')
     .eq('id', workspaceId)
     .single()
 
@@ -406,13 +406,13 @@ async function getKapsoCredentials(
     return null
   }
 
-  if (!workspace.kapso_api_key || !workspace.kapso_phone_id) {
+  if (!workspace.meta_access_token || !workspace.kapso_phone_id) {
     return null
   }
 
   try {
     // Decrypt API key (safeDecrypt handles unencrypted values gracefully)
-    const apiKey = safeDecrypt(workspace.kapso_api_key)
+    const apiKey = safeDecrypt(workspace.meta_access_token)
     return {
       apiKey,
       phoneId: workspace.kapso_phone_id,
