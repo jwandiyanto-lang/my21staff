@@ -41,6 +41,13 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 3. Query count per request visible in logs (e.g., "5 queries, 2340ms total")
 4. Baseline document exists with P50/P95/P99 for `/api/contacts/by-phone` and `/api/conversations`
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Install Speed Insights and create timing infrastructure
+- [ ] 01-02-PLAN.md — Instrument /api/contacts/by-phone and /api/conversations
+- [ ] 01-03-PLAN.md — Deploy and establish baseline
+
 ---
 
 ### Phase 2: Supabase Optimization
@@ -258,10 +265,10 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
-| **v3.0 Performance & Speed** | 1-5 | 0/TBD | Active | - |
+| **v3.0 Performance & Speed** | 1-5 | 0/3 | Active | - |
 
 **Total shipped:** 105 plans across 4 milestones
 
 ---
 
-*Last updated: 2026-01-20 — v3.0 roadmap created*
+*Last updated: 2026-01-20 — Phase 1 planned*
