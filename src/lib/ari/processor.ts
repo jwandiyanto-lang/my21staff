@@ -15,7 +15,7 @@ import {
   type PromptContext,
 } from './context-builder';
 import { selectModel, generateResponse } from './ai-router';
-import { getNextState, shouldAutoHandoff } from './state-machine';
+import { getNextState, shouldAutoHandoff, type RoutingActionType } from './state-machine';
 import {
   parseDocumentResponse,
   updateDocumentStatus,
@@ -511,10 +511,26 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
       responseTimeMs: aiResponse.responseTimeMs,
     });
 
-    // 12. Determine next state (use calculated score)
-    const nextState = getNextState(conversation.state, conversation.context as ARIContext, calculatedScore);
+    // 12. Determine routing decision
+    const routing = determineRouting(
+      calculatedScore,
+      temperature,
+      formAnswers,
+      documentStatus,
+      config.community_link
+    );
 
-    // 12b. Update score in ari_conversations if changed
+    console.log(`[ARI] Routing decision: ${routing.action} (readyForRouting: ${routing.readyForRouting})`);
+
+    // 12b. Determine next state (use calculated score and routing action)
+    const nextState = getNextState(
+      conversation.state,
+      conversation.context as ARIContext,
+      calculatedScore,
+      routing.action as RoutingActionType
+    );
+
+    // 12c. Update score in ari_conversations if changed
     if (calculatedScore !== conversation.lead_score) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updatedContext: any = {
@@ -535,7 +551,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
       console.log(`[ARI] Score updated: ${conversation.lead_score} -> ${calculatedScore} (${temperature})`);
     }
 
-    // 12c. Sync score to contacts table for CRM visibility
+    // 12d. Sync score to contacts table for CRM visibility
     await supabase
       .from('contacts')
       .update({
@@ -544,22 +560,75 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
       })
       .eq('id', contactId);
 
-    // 12d. Check routing decision (for logging and future handoff automation)
-    const routing = determineRouting(
-      calculatedScore,
-      temperature,
-      formAnswers,
-      documentStatus,
-      config.community_link
-    );
+    // 12e. Execute routing action if ready
+    if (routing.readyForRouting) {
+      if (routing.action === 'send_community_cold' && routing.message) {
+        // Send community link message BEFORE handoff message
+        try {
+          await sendMessage(kapsoCredentials, contactPhone, routing.message);
+          console.log('[ARI] Sent community link to cold lead');
 
-    // If cold and ready for routing, add community message to context
-    if (routing.action === 'send_community_cold' && routing.message) {
-      // Store pending message in context for AI to include in response
-      conversationContext.pendingCommunityMessage = routing.message;
+          // Log community message
+          await logMessage(supabase, {
+            ariConversationId: conversation.id,
+            workspaceId,
+            role: 'assistant',
+            content: routing.message,
+          });
+        } catch (sendError) {
+          console.error('[ARI] Failed to send community message:', sendError);
+        }
+      }
+
+      if (routing.action === 'handoff_hot' || routing.action === 'send_community_cold') {
+        // Update conversation for handoff
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const handoffContext: any = {
+          ...conversationContext,
+          handoff_notes: routing.handoffNotes,
+          score_breakdown: breakdown,
+          score_reasons: reasons,
+        };
+
+        await supabase
+          .from('ari_conversations')
+          .update({
+            state: 'handoff' as ARIState,
+            handoff_at: new Date().toISOString(),
+            handoff_reason: routing.action === 'handoff_hot' ? 'hot_lead' : 'cold_lead_community_sent',
+            lead_score: calculatedScore,
+            lead_temperature: temperature,
+            context: handoffContext,
+          })
+          .eq('id', conversation.id);
+
+        // Send handoff message
+        const handoffMessage = routing.action === 'handoff_hot'
+          ? 'Terima kasih sudah berbagi info yang lengkap. Konsultan kami akan segera menghubungi kamu untuk mendiskusikan pilihan yang cocok.'
+          : 'Konsultan kami akan follow up nanti ya kak. Kalau ada pertanyaan, langsung chat di grup aja.';
+
+        await logMessage(supabase, {
+          ariConversationId: conversation.id,
+          workspaceId,
+          role: 'assistant',
+          content: handoffMessage,
+        });
+
+        try {
+          await sendMessage(kapsoCredentials, contactPhone, handoffMessage);
+          console.log(`[ARI] Handoff message sent (${routing.action})`);
+        } catch (sendError) {
+          console.error('[ARI] Failed to send handoff message:', sendError);
+        }
+
+        return {
+          success: true,
+          response: handoffMessage,
+          model,
+          newState: 'handoff',
+        };
+      }
     }
-
-    console.log(`[ARI] Routing decision: ${routing.action} (readyForRouting: ${routing.readyForRouting})`);
 
     // 13. Update conversation state and AI model
     if (nextState !== conversation.state || conversation.ai_model !== model) {
