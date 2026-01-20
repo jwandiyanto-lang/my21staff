@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
 import { verifyKapsoSignature } from '@/lib/kapso/verify-signature'
+import { normalizePhone } from '@/lib/phone/normalize'
 import type { Json } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -17,7 +18,9 @@ function maskPayload(payload: unknown): string {
 interface Contact {
   id: string
   phone: string
+  phone_normalized?: string
   name: string | null
+  kapso_name?: string | null
   workspace_id: string
 }
 
@@ -355,41 +358,67 @@ async function getOrCreateContactsBatch(
 ): Promise<Map<string, Contact>> {
   const contactMap = new Map<string, Contact>()
 
-  // Get existing contacts in one query
+  // Normalize all phone numbers for matching
+  const normalizedPhones = phones.map(p => normalizePhone(p) || p)
+  const phoneToNormalized = new Map<string, string>()
+  phones.forEach((p, i) => phoneToNormalized.set(p, normalizedPhones[i]))
+
+  // Get unique normalized phones for query
+  const uniqueNormalizedPhones = [...new Set(normalizedPhones)]
+
+  // Get existing contacts by normalized phone
   const { data: existingContacts } = await supabase
     .from('contacts')
-    .select('id, phone, name, workspace_id')
+    .select('id, phone, phone_normalized, name, kapso_name, workspace_id')
     .eq('workspace_id', workspaceId)
-    .in('phone', phones)
+    .in('phone_normalized', uniqueNormalizedPhones)
 
   for (const contact of existingContacts || []) {
-    contactMap.set(contact.phone, contact as Contact)
+    // Map back to original phone for lookup
+    const originalPhone = phones.find(p =>
+      (normalizePhone(p) || p) === contact.phone_normalized
+    )
+    if (originalPhone) {
+      contactMap.set(originalPhone, contact as Contact)
+    }
 
-    // Update name if we have a new one and contact doesn't have one
-    const newName = phoneToName.get(contact.phone)
-    if (newName && !contact.name) {
+    // Update kapso_name and cache_updated_at if we have new data
+    const kapsoName = phoneToName.get(originalPhone || '')
+    if (kapsoName && kapsoName !== contact.kapso_name) {
       await supabase
         .from('contacts')
-        .update({ name: newName })
+        .update({
+          kapso_name: kapsoName,
+          cache_updated_at: new Date().toISOString(),
+          // Also update name if contact doesn't have one set
+          ...(contact.name ? {} : { name: kapsoName })
+        })
         .eq('id', contact.id)
     }
   }
 
-  // Create missing contacts in batch
+  // Create missing contacts with normalized phone
   const missingPhones = phones.filter(p => !contactMap.has(p))
   if (missingPhones.length > 0) {
-    const newContacts = missingPhones.map(phone => ({
-      workspace_id: workspaceId,
-      phone,
-      name: phoneToName.get(phone) || null,
-      lead_status: 'new',
-      lead_score: 0,
-    }))
+    const newContacts = missingPhones.map(phone => {
+      const normalized = normalizePhone(phone) || phone
+      const kapsoName = phoneToName.get(phone) || null
+      return {
+        workspace_id: workspaceId,
+        phone,
+        phone_normalized: normalized,
+        name: kapsoName, // Use Kapso name as initial name
+        kapso_name: kapsoName,
+        cache_updated_at: new Date().toISOString(),
+        lead_status: 'new',
+        lead_score: 0,
+      }
+    })
 
     const { data: createdContacts, error } = await supabase
       .from('contacts')
       .insert(newContacts)
-      .select('id, phone, name, workspace_id')
+      .select('id, phone, phone_normalized, name, kapso_name, workspace_id')
 
     if (error) {
       console.error('[Webhook] Batch contact create error:', error)
