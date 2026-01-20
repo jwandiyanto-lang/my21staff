@@ -11,7 +11,7 @@ interface ConversationListProps {
   selectedId: string | null
   onSelect: (conversation: ConversationWithContact) => void
   searchQuery: string
-  hasStatusFilter?: boolean
+  hasFilters?: boolean
   workspaceName?: string
 }
 
@@ -45,7 +45,7 @@ export function ConversationList({
   selectedId,
   onSelect,
   searchQuery,
-  hasStatusFilter = false,
+  hasFilters = false,
   workspaceName = 'Workspace',
 }: ConversationListProps) {
   const filteredConversations = conversations.filter((conv) =>
@@ -59,9 +59,9 @@ export function ConversationList({
         {searchQuery ? (
           <div>
             <p className="font-medium mb-1">No results found</p>
-            <p className="text-sm">No conversations match "{searchQuery}"</p>
+            <p className="text-sm">No conversations match &ldquo;{searchQuery}&rdquo;</p>
           </div>
-        ) : hasStatusFilter ? (
+        ) : hasFilters ? (
           <div>
             <p className="font-medium mb-1">No matching conversations</p>
             <p className="text-sm">No conversations match the selected filters</p>

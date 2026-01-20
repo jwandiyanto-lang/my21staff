@@ -28,28 +28,36 @@ import { createClient } from '@/lib/supabase/client'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
 import { useMessages, useAddOptimisticMessage, useRemoveOptimisticMessage, useReplaceOptimisticMessage } from '@/lib/queries/use-messages'
-import { useConversations } from '@/lib/queries/use-conversations'
-import type { Workspace, ConversationWithContact, Message, WorkspaceMember, Profile } from '@/types/database'
-
-interface QuickReply {
-  id: string
-  label: string
-  text: string
-}
-
-type TeamMember = WorkspaceMember & { profile: Profile | null }
+import { useConversations, type ConversationFilters } from '@/lib/queries/use-conversations'
+import type { Workspace, ConversationWithContact, Message } from '@/types/database'
 
 interface InboxClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
 }
 
 export function InboxClient({ workspace }: InboxClientProps) {
-  // TanStack Query for conversations with all related data
-  const { data, isLoading: isLoadingConversations } = useConversations(workspace.id)
+  // View mode: 'active' (unread only) or 'all'
+  const [viewMode, setViewMode] = useState<'active' | 'all'>('active')
+  const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
+  const [tagFilter, setTagFilter] = useState<string[]>([])
+  const [assignedFilter, setAssignedFilter] = useState<string>('all')
+
+  // Build filters object for server-side filtering
+  const filters: ConversationFilters = useMemo(() => ({
+    active: viewMode === 'active',
+    statusFilters: statusFilter,
+    tagFilters: tagFilter,
+    assignedTo: assignedFilter,
+  }), [viewMode, statusFilter, tagFilter, assignedFilter])
+
+  // TanStack Query for conversations with filters
+  const [page, setPage] = useState(0)
+  const { data, isLoading: isLoadingConversations } = useConversations(workspace.id, page, filters)
 
   // Extract data from query result
   const conversationsFromQuery = data?.conversations ?? []
   const totalCount = data?.totalCount ?? 0
+  const activeCount = data?.activeCount ?? 0
   const quickReplies = data?.quickReplies ?? []
   const teamMembers = data?.teamMembers ?? []
   const contactTags = data?.contactTags ?? ['Community', '1on1']
@@ -58,15 +66,10 @@ export function InboxClient({ workspace }: InboxClientProps) {
   const [conversations, setConversations] = useState<ConversationWithContact[]>([])
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithContact | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
-  const [tagFilter, setTagFilter] = useState<string[]>([])
-  const [assignedFilter, setAssignedFilter] = useState<string>('all') // 'all' | 'unassigned' | user_id
-  const [showUnreadOnly, setShowUnreadOnly] = useState(false)
   const [showInfoPanel, setShowInfoPanel] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<Message | null>(null)
 
   // Pagination state
-  const [page, setPage] = useState(0)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const PAGE_SIZE = 50
 
@@ -78,8 +81,11 @@ export function InboxClient({ workspace }: InboxClientProps) {
       if (!selectedConversation && conversationsFromQuery.length > 0) {
         setSelectedConversation(conversationsFromQuery[0])
       }
+    } else if (!isLoadingConversations) {
+      // Clear conversations when filter returns empty
+      setConversations([])
     }
-  }, [conversationsFromQuery]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [conversationsFromQuery, isLoadingConversations]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // TanStack Query for messages with real-time subscription
   const { data: messages = [], isLoading: isLoadingMessages } = useMessages(selectedConversation?.id ?? null)
@@ -89,45 +95,17 @@ export function InboxClient({ workspace }: InboxClientProps) {
   const removeOptimisticMessage = useRemoveOptimisticMessage()
   const replaceOptimisticMessage = useReplaceOptimisticMessage()
 
-  // Count unread conversations
-  const unreadCount = useMemo(() => {
-    return conversations.filter((c) => (c.unread_count ?? 0) > 0).length
-  }, [conversations])
+  // Check if any filters are active (for empty state message)
+  const hasFilters = viewMode === 'active' || statusFilter.length > 0 || tagFilter.length > 0 || assignedFilter !== 'all'
 
-  // Filter conversations by status, tags, assigned, and unread
+  // Filter conversations by search query (client-side for instant feedback)
   const filteredConversations = useMemo(() => {
-    let filtered = conversations
-
-    // Filter by unread
-    if (showUnreadOnly) {
-      filtered = filtered.filter((conv) => (conv.unread_count ?? 0) > 0)
-    }
-
-    // Filter by status
-    if (statusFilter.length > 0) {
-      filtered = filtered.filter((conv) =>
-        statusFilter.includes(conv.contact.lead_status as LeadStatus)
-      )
-    }
-
-    // Filter by tags
-    if (tagFilter.length > 0) {
-      filtered = filtered.filter((conv) =>
-        conv.contact.tags?.some((tag) => tagFilter.includes(tag))
-      )
-    }
-
-    // Filter by assigned
-    if (assignedFilter !== 'all') {
-      if (assignedFilter === 'unassigned') {
-        filtered = filtered.filter((conv) => !conv.assigned_to)
-      } else {
-        filtered = filtered.filter((conv) => conv.assigned_to === assignedFilter)
-      }
-    }
-
-    return filtered
-  }, [conversations, statusFilter, tagFilter, assignedFilter, showUnreadOnly])
+    if (!searchQuery) return conversations
+    return conversations.filter((conv) =>
+      conv.contact.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      conv.contact.phone.includes(searchQuery)
+    )
+  }, [conversations, searchQuery])
 
   const handleStatusToggle = (status: LeadStatus) => {
     setStatusFilter((prev) =>
@@ -299,9 +277,24 @@ export function InboxClient({ workspace }: InboxClientProps) {
     setIsLoadingMore(true)
     try {
       const nextPage = page + 1
-      const response = await fetch(
-        `/api/conversations?workspace=${workspace.id}&page=${nextPage}&limit=${PAGE_SIZE}`
-      )
+      // Build params with current filters
+      const params = new URLSearchParams({
+        workspace: workspace.id,
+        page: nextPage.toString(),
+        limit: PAGE_SIZE.toString(),
+      })
+      if (filters.active) params.set('active', 'true')
+      if (filters.statusFilters?.length) {
+        filters.statusFilters.forEach(s => params.append('status', s))
+      }
+      if (filters.tagFilters?.length) {
+        filters.tagFilters.forEach(t => params.append('tags', t))
+      }
+      if (filters.assignedTo && filters.assignedTo !== 'all') {
+        params.set('assigned', filters.assignedTo)
+      }
+
+      const response = await fetch(`/api/conversations?${params.toString()}`)
       if (response.ok) {
         const responseData = await response.json()
         setConversations(prev => [...prev, ...responseData.conversations])
@@ -319,8 +312,13 @@ export function InboxClient({ workspace }: InboxClientProps) {
     setReplyToMessage(null)
   }, [selectedConversation?.id])
 
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(0)
+  }, [viewMode, statusFilter, tagFilter, assignedFilter])
+
   // Show skeleton while loading (first visit only - cached visits skip this)
-  if (isLoadingConversations) {
+  if (isLoadingConversations && conversations.length === 0) {
     return <InboxSkeleton />
   }
 
@@ -338,31 +336,38 @@ export function InboxClient({ workspace }: InboxClientProps) {
 
           {/* Filter buttons */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Unread toggle */}
-            <button
-              onClick={() => setShowUnreadOnly(!showUnreadOnly)}
-              className={cn(
-                'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                showUnreadOnly
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted hover:bg-muted/80 text-muted-foreground'
-              )}
-            >
-              {showUnreadOnly ? (
+            {/* Active/All toggle */}
+            <div className="flex items-center rounded-full bg-muted p-1">
+              <button
+                onClick={() => setViewMode('active')}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                  viewMode === 'active'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
                 <Mail className="h-3.5 w-3.5" />
-              ) : (
+                Active
+                {activeCount > 0 && (
+                  <span className="bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full text-[10px]">
+                    {activeCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setViewMode('all')}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                  viewMode === 'all'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
                 <MailOpen className="h-3.5 w-3.5" />
-              )}
-              Unread
-              {unreadCount > 0 && (
-                <span className={cn(
-                  'px-1.5 py-0.5 rounded-full text-[10px]',
-                  showUnreadOnly ? 'bg-white/20' : 'bg-primary/10 text-primary'
-                )}>
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+                All
+              </button>
+            </div>
 
             {/* Status filter dropdown */}
             <Popover>
@@ -516,7 +521,7 @@ export function InboxClient({ workspace }: InboxClientProps) {
           selectedId={selectedConversation?.id || null}
           onSelect={handleSelectConversation}
           searchQuery={searchQuery}
-          hasStatusFilter={statusFilter.length > 0}
+          hasFilters={hasFilters}
           workspaceName={workspace.name}
         />
 
