@@ -34,20 +34,31 @@ const DEFAULT_CONFIG = {
 // GET /api/workspaces/[id]/ari-config
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    console.log('[ari-config] GET started')
     const { id: workspaceId } = await params
+    console.log('[ari-config] workspaceId:', workspaceId)
 
     // Verify user has access to workspace
+    console.log('[ari-config] checking auth...')
     const authResult = await requireWorkspaceMembership(workspaceId)
-    if (authResult instanceof NextResponse) return authResult
+    if (authResult instanceof NextResponse) {
+      console.log('[ari-config] auth failed')
+      return authResult
+    }
+    console.log('[ari-config] auth passed')
 
+    console.log('[ari-config] creating supabase client...')
     const supabase = await createClient()
+    console.log('[ari-config] supabase client created')
 
     // Get existing config
+    console.log('[ari-config] querying ari_config...')
     const { data: config, error } = await supabase
       .from('ari_config')
       .select('*')
       .eq('workspace_id', workspaceId)
       .single()
+    console.log('[ari-config] query complete, error:', error?.code)
 
     if (error && error.code !== 'PGRST116') {
       // PGRST116 = no rows found (expected for new workspaces)
