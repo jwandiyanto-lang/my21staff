@@ -9,22 +9,22 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 
 ## Current Position
 
-Phase: 1 of 7 — Database Schema & Inbox Overhaul (COMPLETE)
-Plan: 5 of 5 (01-05-PLAN complete)
-Status: Phase complete
-Last activity: 2026-01-20 — Completed 01-05-PLAN (Typing Indicators & Real-time Sync)
+Phase: 2 of 7 — ARI Core Conversation (IN PROGRESS)
+Plan: 1 of 9 (02-01-PLAN complete)
+Status: In progress
+Last activity: 2026-01-20 — Completed 02-01-PLAN (ARI Foundation - Types and AI Clients)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 █░░░░░░░░░ (5/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██░░░░░░░░ (6/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 87 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 5 in v2.2)
+- Total plans completed: 88 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 6 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 → Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
-- Lines: ~32,300 TypeScript
+- Lines: ~32,500 TypeScript
 - Phases completed: 25 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 1)
 
 ## Accumulated Context
@@ -57,6 +57,8 @@ Key v2.2 decisions:
 - Filter presets stored in workspace_members.settings JSONB (max 10) - IMPLEMENTED 01-04
 - Typing indicators via Supabase Broadcast (ephemeral, no database) - IMPLEMENTED 01-05
 - Idempotent real-time updates with ID deduplication (prevents INBOX-07) - IMPLEMENTED 01-05
+- OpenAI SDK for both Grok and Sea-Lion (both support OpenAI-compatible API) - IMPLEMENTED 02-01
+- Hash-based A/B selection: same contact always gets same model (prevents contamination) - IMPLEMENTED 02-01
 
 ### Deferred Issues
 
@@ -71,9 +73,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 01-05-PLAN (Typing Indicators & Real-time Sync) - Phase 01 fully complete
+Stopped at: Completed 02-01-PLAN (ARI Foundation - Types and AI Clients)
 Resume file: None
-Next: Phase 02 (ARI Core)
+Next: 02-02-PLAN (Prompt Templates & Persona System)
 
 ## Deployment Info
 
@@ -87,6 +89,7 @@ Next: Phase 02 (ARI Core)
 - SUPABASE_SERVICE_ROLE_KEY
 - NEXT_PUBLIC_PRICING_WORKSPACE_ID
 - ENCRYPTION_KEY
+- GROK_API_KEY (needed for ARI)
 
 **Workspaces:**
 - My21Staff: `0318fda5-22c4-419b-bdd8-04471b818d17` (for pricing form leads)
@@ -94,7 +97,7 @@ Next: Phase 02 (ARI Core)
 
 **AI Models:**
 - Sea-Lion: http://100.113.96.25:11434 (Ollama, via Tailscale)
-- Grok: API access available
+- Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed 01-05-PLAN (Typing Indicators & Real-time Sync)*
+*Last updated: 2026-01-20 — Completed 02-01-PLAN (ARI Foundation - Types and AI Clients)*
