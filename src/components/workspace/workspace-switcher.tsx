@@ -60,7 +60,7 @@ export function WorkspaceSwitcher({ currentWorkspaceSlug, isAdmin }: WorkspaceSw
   if (loading) {
     return (
       <div className="px-3 py-2">
-        <div className="h-10 bg-white/30 rounded-xl animate-pulse" />
+        <div className="h-10 bg-white/10 rounded-xl animate-pulse" />
       </div>
     )
   }
@@ -70,21 +70,21 @@ export function WorkspaceSwitcher({ currentWorkspaceSlug, isAdmin }: WorkspaceSw
       {/* Trigger button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/40 hover:bg-white/60 border border-white/40 transition-colors"
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#1e3a24] hover:bg-[#264a2d] border border-white/10 transition-colors"
       >
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Building2 className="w-4 h-4 text-primary" />
+        <div className="w-8 h-8 rounded-lg bg-[#F7931A]/20 flex items-center justify-center">
+          <Building2 className="w-4 h-4 text-[#F7931A]" />
         </div>
         <div className="flex-1 text-left overflow-hidden">
-          <p className="text-sm font-semibold truncate">
+          <p className="text-sm font-semibold text-white truncate">
             {currentWorkspace?.name || 'Select workspace'}
           </p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+          <p className="text-[10px] text-white/50 uppercase tracking-wider">
             {workspaces.length} workspace{workspaces.length !== 1 ? 's' : ''}
           </p>
         </div>
         <ChevronDown className={cn(
-          "w-4 h-4 text-muted-foreground transition-transform",
+          "w-4 h-4 text-white/50 transition-transform",
           isOpen && "rotate-180"
         )} />
       </button>
