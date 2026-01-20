@@ -162,11 +162,11 @@ export function extractFormAnswers(metadata: Json | null): Record<string, string
 const STATE_INSTRUCTIONS: Record<ARIState, string> = {
   greeting: `Kamu baru menyapa lead ini. Referensikan data dari form yang mereka isi (jika ada). Tanyakan apa yang ingin mereka ketahui tentang kuliah di luar negeri.`,
   qualifying: `Kumpulkan informasi yang belum lengkap. SATU pertanyaan per pesan. Fokus pada: negara tujuan, budget, timeline, level bahasa Inggris.`,
-  scoring: `Berdasarkan data yang dikumpulkan, nilai kesiapan lead. Berikan summary singkat dan siapkan transisi ke penawaran konsultasi.`,
+  scoring: `Kamu sudah selesai mengumpulkan data. Berdasarkan informasi yang ada, nilai kesiapan lead ini. JANGAN tawarkan konsultasi langsung - tunggu instruksi routing.`,
   booking: `Tawarkan konsultasi berbayar. Jelaskan manfaat: bicara langsung dengan konsultan, dapat rekomendasi universitas personal.`,
   payment: `Guide lead melalui proses pembayaran. Jawab pertanyaan tentang metode bayar dan keamanan.`,
   scheduling: `Bantu lead pilih waktu konsultasi yang cocok. Konfirmasi jadwal yang dipilih.`,
-  handoff: `Transisi ke konsultan manusia. Jelaskan bahwa konsultan akan segera menghubungi.`,
+  handoff: `Lead sudah di-handoff ke konsultan manusia. Jika masih ada pertanyaan, jawab singkat dan bilang konsultan akan membantu lebih detail.`,
   completed: `Percakapan selesai. Ucapkan terima kasih dan ingatkan untuk cek email konfirmasi.`,
 };
 
@@ -283,15 +283,42 @@ export function buildSystemPrompt(ctx: PromptContext): string {
       scoreReasons.slice(0, 5).forEach((reason: string) => parts.push(`- ${reason}`));
     }
 
+    // 5d. Routing-specific instructions
     if (temp === 'hot') {
-      parts.push('\nINSTRUKSI: Lead ini HOT. Transisi ke handoff. Bilang konsultan akan segera menghubungi.');
+      parts.push('\n## ROUTING: HOT LEAD');
+      parts.push('Lead ini siap untuk konsultasi. JANGAN tawarkan langsung.');
+      parts.push('Bilang: "Data kamu sudah lengkap. Konsultan kami akan segera menghubungi untuk mendiskusikan pilihan yang cocok."');
     } else if (temp === 'cold') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const communityMsg = (ctx.conversation.context as any).pendingCommunityMessage;
+      parts.push('\n## ROUTING: COLD LEAD');
       if (communityMsg) {
-        parts.push(`\nINSTRUKSI: Lead ini COLD. Kirim pesan community: "${communityMsg}"`);
+        parts.push('Lead ini cold. Community link sudah dikirim terpisah.');
       }
-      parts.push('Kemudian bilang konsultan akan follow up nanti.');
+      parts.push('Bilang: "Terima kasih sudah mengisi. Nanti konsultan kami akan follow up ya. Kalau ada pertanyaan, langsung chat di grup."');
+    } else {
+      // Warm lead - continue nurturing
+      parts.push('\n## ROUTING: WARM LEAD');
+      parts.push('Lead ini warm. Lanjutkan percakapan, jawab pertanyaan mereka.');
+      parts.push('Tetap ramah dan informatif. Jangan push terlalu keras.');
+    }
+
+    // 5e. Explicit prohibitions for scoring state
+    parts.push('\n## LARANGAN DI STATE SCORING');
+    parts.push('- JANGAN tawarkan konsultasi atau pembayaran');
+    parts.push('- JANGAN kirim link booking sendiri');
+    parts.push('- TUNGGU handoff ke manusia');
+  }
+
+  // 5f. Qualifying state routing awareness
+  if (ctx.conversation.state === 'qualifying' && ctx.contact.leadScore !== undefined) {
+    const temp = ctx.contact.leadScore >= 70 ? 'hot' :
+                 ctx.contact.leadScore >= 40 ? 'warm' : 'cold';
+
+    if (temp === 'hot') {
+      parts.push('\n## ROUTING PREVIEW: HOT LEAD');
+      parts.push(`Score: ${ctx.contact.leadScore}/100 - Lead ini sudah hot!`);
+      parts.push('Selesaikan kualifikasi dengan cepat. Setelah lengkap, akan langsung handoff.');
     }
   }
 
