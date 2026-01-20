@@ -9,22 +9,22 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 
 ## Current Position
 
-Phase: 3 of 7 — Lead Scoring & Routing
-Plan: 4 of 4 (03-04-PLAN complete)
-Status: Phase complete
-Last activity: 2026-01-20 — Completed 03-04-PLAN (Routing Action Execution)
+Phase: 5 of 7 — Scheduling & Handoff
+Plan: 2 of 4 (05-02-PLAN complete)
+Status: In progress
+Last activity: 2026-01-20 — Completed 05-02-PLAN (Knowledge Base UI)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 █████░░░░░ (14/28 plans)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████░░░░ (16/28 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 96 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 14 in v2.2)
+- Total plans completed: 98 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 16 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 -> Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
-- Lines: ~36,500 TypeScript
+- Lines: ~37,000 TypeScript
 - Phases completed: 27 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 3)
 
 ## Accumulated Context
@@ -89,6 +89,12 @@ Key v2.2 decisions:
 - Warm leads continue ARI nurturing (stay in scoring state) - IMPLEMENTED 03-04
 - State machine accepts routing action for transition decisions - IMPLEMENTED 03-04
 - AI receives explicit prohibitions in scoring state - IMPLEMENTED 03-04
+- consultant_slots table with weekly patterns (day_of_week, start_time, end_time) - IMPLEMENTED 05-01
+- ConsultantSlot and AvailableSlot types for scheduling - IMPLEMENTED 05-01
+- Knowledge Base nav item in Admin section - IMPLEMENTED 05-02
+- Tabbed interface with disabled placeholders for Phase 6 - IMPLEMENTED 05-02
+- Indonesian day labels (Senin, Selasa, etc.) in Slot Manager - IMPLEMENTED 05-02
+- Slot Manager CRUD UI (add, toggle active, delete) - IMPLEMENTED 05-02
 
 ### Deferred Issues
 
@@ -103,9 +109,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed Phase 3 (Lead Scoring & Routing)
+Stopped at: Completed 05-02-PLAN (Knowledge Base UI)
 Resume file: None
-Next: Phase 4 (Payment Integration)
+Next: 05-03-PLAN (Booking Flow)
 
 ## Deployment Info
 
@@ -130,4 +136,4 @@ Next: Phase 4 (Payment Integration)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-20 — Completed Phase 3 (Lead Scoring & Routing)*
+*Last updated: 2026-01-20 — Completed 05-02-PLAN (Knowledge Base UI)*
