@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { InboxClient } from './inbox-client'
 import { MOCK_WORKSPACE, isDevMode } from '@/lib/mock-data'
@@ -19,12 +19,19 @@ export default async function InboxPage({ params }: InboxPageProps) {
           name: MOCK_WORKSPACE.name,
           slug: MOCK_WORKSPACE.slug,
         }}
+        currentUserId="mock-user-id"
       />
     )
   }
 
-  // Production: validate workspace exists
+  // Production: validate workspace exists and user is authenticated
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    redirect('/login')
+  }
+
   const { data: workspace, error } = await supabase
     .from('workspaces')
     .select('id, name, slug')
@@ -35,5 +42,5 @@ export default async function InboxPage({ params }: InboxPageProps) {
     notFound()
   }
 
-  return <InboxClient workspace={workspace} />
+  return <InboxClient workspace={workspace} currentUserId={user.id} />
 }

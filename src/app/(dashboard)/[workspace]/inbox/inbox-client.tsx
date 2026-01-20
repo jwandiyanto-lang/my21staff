@@ -16,7 +16,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Filter, MessageCircle, Mail, MailOpen, ChevronDown, User, Loader2, Tag } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Filter, MessageCircle, Mail, MailOpen, ChevronDown, User, Loader2, Tag, Bookmark, Plus, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { ConversationList } from './conversation-list'
 import { MessageThread } from './message-thread'
@@ -29,18 +43,37 @@ import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-s
 import { cn } from '@/lib/utils'
 import { useMessages, useAddOptimisticMessage, useRemoveOptimisticMessage, useReplaceOptimisticMessage } from '@/lib/queries/use-messages'
 import { useConversations, type ConversationFilters } from '@/lib/queries/use-conversations'
+import { toast } from 'sonner'
 import type { Workspace, ConversationWithContact, Message } from '@/types/database'
+
+// Filter preset interface
+interface FilterPreset {
+  id: string
+  name: string
+  filters: {
+    active: boolean
+    statusFilters: string[]
+    tagFilters: string[]
+    assignedTo: string
+  }
+}
 
 interface InboxClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
+  currentUserId: string
 }
 
-export function InboxClient({ workspace }: InboxClientProps) {
+export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
   // View mode: 'active' (unread only) or 'all'
   const [viewMode, setViewMode] = useState<'active' | 'all'>('active')
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
   const [tagFilter, setTagFilter] = useState<string[]>([])
   const [assignedFilter, setAssignedFilter] = useState<string>('all')
+
+  // Filter presets state
+  const [presets, setPresets] = useState<FilterPreset[]>([])
+  const [showSavePresetDialog, setShowSavePresetDialog] = useState(false)
+  const [presetName, setPresetName] = useState('')
 
   // Build filters object for server-side filtering
   const filters: ConversationFilters = useMemo(() => ({
@@ -72,6 +105,121 @@ export function InboxClient({ workspace }: InboxClientProps) {
   // Pagination state
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const PAGE_SIZE = 50
+
+  // Load filter presets from workspace_members.settings on mount
+  useEffect(() => {
+    if (isDevMode()) return
+
+    const loadPresets = async () => {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('workspace_members')
+        .select('settings')
+        .eq('workspace_id', workspace.id)
+        .eq('user_id', currentUserId)
+        .single()
+
+      if (data?.settings?.filterPresets) {
+        setPresets(data.settings.filterPresets)
+      }
+    }
+    loadPresets()
+  }, [workspace.id, currentUserId])
+
+  // Save preset function
+  const savePreset = async () => {
+    if (!presetName.trim()) return
+
+    const newPreset: FilterPreset = {
+      id: crypto.randomUUID(),
+      name: presetName.trim(),
+      filters: {
+        active: viewMode === 'active',
+        statusFilters: statusFilter,
+        tagFilters: tagFilter,
+        assignedTo: assignedFilter,
+      },
+    }
+
+    // Limit to 10 presets max (per RESEARCH.md pitfall #6)
+    const updatedPresets = [...presets, newPreset].slice(-10)
+
+    if (!isDevMode()) {
+      const supabase = createClient()
+
+      // Get current settings first to preserve other settings
+      const { data: currentData } = await supabase
+        .from('workspace_members')
+        .select('settings')
+        .eq('workspace_id', workspace.id)
+        .eq('user_id', currentUserId)
+        .single()
+
+      const currentSettings = currentData?.settings || {}
+
+      const { error } = await supabase
+        .from('workspace_members')
+        .update({
+          settings: {
+            ...currentSettings,
+            filterPresets: updatedPresets,
+          },
+        })
+        .eq('workspace_id', workspace.id)
+        .eq('user_id', currentUserId)
+
+      if (error) {
+        toast.error('Failed to save preset')
+        return
+      }
+    }
+
+    setPresets(updatedPresets)
+    setPresetName('')
+    setShowSavePresetDialog(false)
+    toast.success('Filter preset saved')
+  }
+
+  // Load preset function
+  const loadPreset = (preset: FilterPreset) => {
+    setViewMode(preset.filters.active ? 'active' : 'all')
+    setStatusFilter(preset.filters.statusFilters as LeadStatus[])
+    setTagFilter(preset.filters.tagFilters)
+    setAssignedFilter(preset.filters.assignedTo)
+  }
+
+  // Delete preset function
+  const deletePreset = async (presetId: string) => {
+    const updatedPresets = presets.filter(p => p.id !== presetId)
+
+    if (!isDevMode()) {
+      const supabase = createClient()
+
+      // Get current settings first to preserve other settings
+      const { data: currentData } = await supabase
+        .from('workspace_members')
+        .select('settings')
+        .eq('workspace_id', workspace.id)
+        .eq('user_id', currentUserId)
+        .single()
+
+      const currentSettings = currentData?.settings || {}
+
+      await supabase
+        .from('workspace_members')
+        .update({
+          settings: {
+            ...currentSettings,
+            filterPresets: updatedPresets,
+          },
+        })
+        .eq('workspace_id', workspace.id)
+        .eq('user_id', currentUserId)
+    }
+
+    setPresets(updatedPresets)
+    toast.success('Preset deleted')
+  }
 
   // Sync conversations from query to local state
   useEffect(() => {
@@ -512,6 +660,57 @@ export function InboxClient({ workspace }: InboxClientProps) {
                 </SelectContent>
               </Select>
             )}
+
+            {/* Filter presets dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 gap-1.5 px-3 rounded-full text-xs font-medium">
+                  <Bookmark className="h-3.5 w-3.5" />
+                  Presets
+                  {presets.length > 0 && (
+                    <span className="text-muted-foreground">({presets.length})</span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {presets.length === 0 ? (
+                  <DropdownMenuItem disabled className="text-muted-foreground">
+                    No saved presets
+                  </DropdownMenuItem>
+                ) : (
+                  presets.map((preset) => (
+                    <DropdownMenuItem
+                      key={preset.id}
+                      className="flex items-center justify-between group"
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      <span
+                        onClick={() => loadPreset(preset)}
+                        className="flex-1 cursor-pointer"
+                      >
+                        {preset.name}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          deletePreset(preset.id)
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuItem>
+                  ))
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowSavePresetDialog(true)}>
+                  <Plus className="h-3.5 w-3.5 mr-2" />
+                  Save current filters
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -607,6 +806,33 @@ export function InboxClient({ workspace }: InboxClientProps) {
           onAssignmentChange={handleAssignmentChange}
         />
       )}
+
+      {/* Save preset dialog */}
+      <Dialog open={showSavePresetDialog} onOpenChange={setShowSavePresetDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Filter Preset</DialogTitle>
+          </DialogHeader>
+          <Input
+            placeholder="Preset name (e.g., 'Hot leads with unread')"
+            value={presetName}
+            onChange={(e) => setPresetName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && presetName.trim()) {
+                savePreset()
+              }
+            }}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSavePresetDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={savePreset} disabled={!presetName.trim()}>
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
