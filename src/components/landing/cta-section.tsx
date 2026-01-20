@@ -3,8 +3,6 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
-import { WHATSAPP_LINK } from '@/lib/landing-constants'
-
 export function CTASection() {
   return (
     <section className="py-6 bg-[#284b31]">
@@ -21,9 +19,7 @@ export function CTASection() {
           </h2>
 
           <Link
-            href={WHATSAPP_LINK}
-            target="_blank"
-            rel="noopener"
+            href="/pricing"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#F7931A] text-white font-bold rounded-xl hover:bg-[#e8850f] transition-all duration-150 flex-shrink-0"
           >
             Get Started
