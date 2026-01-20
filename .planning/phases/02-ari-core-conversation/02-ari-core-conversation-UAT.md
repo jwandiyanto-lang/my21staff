@@ -1,26 +1,26 @@
 ---
-status: testing
+status: complete
 phase: 02-ari-core-conversation
 source: 02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md
 started: 2026-01-20T14:30:00Z
-updated: 2026-01-20T14:30:00Z
+updated: 2026-01-20T17:01:00Z
 ---
 
 ## Current Test
 
-[testing complete - all tests skipped]
+[testing complete]
 
 ## Tests
 
 ### 1. ARI Responds to WhatsApp Message
 expected: Send a WhatsApp message to Eagle's bot number. ARI responds with Indonesian greeting that mentions your name from the form.
-result: skipped
-reason: Kapso not configured for Eagle workspace - no WhatsApp integration to test against
+result: pass
+notes: Response "Selamat malam, Jonathan! Boleh tau nama lengkapnya siapa, kak?"
 
 ### 2. ARI Uses Time-Based Greeting
 expected: ARI greeting uses appropriate Indonesian time greeting - "Selamat pagi" (morning), "Selamat siang" (afternoon), "Selamat sore" (evening), or "Selamat malam" (night) based on WIB time.
-result: skipped
-reason: Kapso not configured for Eagle workspace
+result: pass
+notes: "Selamat malam" used correctly at ~5PM WIB (evening)
 
 ### 3. ARI Asks Follow-Up Questions
 expected: If your form had missing required fields (name, email, english_level, budget, timeline, country), ARI asks natural Indonesian questions to fill them - one at a time, not all at once.
