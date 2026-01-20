@@ -19,7 +19,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 85 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 3 in v2.2)
+- Total plans completed: 87 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 5 in v2.2)
 - v2.1 timeline: 3 days (Jan 18 → Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 

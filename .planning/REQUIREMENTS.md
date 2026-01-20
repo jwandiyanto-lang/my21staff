@@ -90,25 +90,25 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 ### Inbox Improvements
 
-- [ ] **INBOX-01**: Kapso metadata caching (contact name, profile pic, online status)
-- [ ] **INBOX-02**: Cache refresh via Kapso webhook updates
-- [ ] **INBOX-03**: Real-time message updates via Supabase subscriptions
-- [ ] **INBOX-04**: Active/All conversation filter toggle
-- [ ] **INBOX-05**: Filter by tags (e.g., "Australia", "Business")
-- [ ] **INBOX-06**: Filter by lead status (Hot, Warm, Cold, New)
-- [ ] **INBOX-07**: Improved Kapso sync (no disappearing chats)
+- [x] **INBOX-01**: Kapso metadata caching (contact name, profile pic, online status)
+- [x] **INBOX-02**: Cache refresh via Kapso webhook updates
+- [x] **INBOX-03**: Real-time message updates via Supabase subscriptions
+- [x] **INBOX-04**: Active/All conversation filter toggle
+- [x] **INBOX-05**: Filter by tags (e.g., "Australia", "Business")
+- [x] **INBOX-06**: Filter by lead status (Hot, Warm, Cold, New)
+- [x] **INBOX-07**: Improved Kapso sync (no disappearing chats)
 
 ### Database Schema
 
-- [ ] **DB-01**: ari_config table (workspace persona settings)
-- [ ] **DB-02**: ari_destinations table (universities with requirements)
-- [ ] **DB-03**: ari_conversations table (conversation tracking with scoring)
-- [ ] **DB-04**: ari_messages table (message history with role/type)
-- [ ] **DB-05**: ari_payments table (payment records with gateway data)
-- [ ] **DB-06**: ari_appointments table (scheduling with status)
-- [ ] **DB-07**: ari_ai_comparison table (A/B testing metrics)
-- [ ] **DB-08**: Add cached fields to contacts table (Kapso metadata)
-- [ ] **DB-09**: RLS policies for all new tables (workspace isolation)
+- [x] **DB-01**: ari_config table (workspace persona settings)
+- [x] **DB-02**: ari_destinations table (universities with requirements)
+- [x] **DB-03**: ari_conversations table (conversation tracking with scoring)
+- [x] **DB-04**: ari_messages table (message history with role/type)
+- [x] **DB-05**: ari_payments table (payment records with gateway data)
+- [x] **DB-06**: ari_appointments table (scheduling with status)
+- [x] **DB-07**: ari_ai_comparison table (A/B testing metrics)
+- [x] **DB-08**: Add cached fields to contacts table (Kapso metadata)
+- [x] **DB-09**: RLS policies for all new tables (workspace isolation)
 
 ## v2.3+ Requirements (Deferred)
 
@@ -192,22 +192,22 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 | AI-02 | Phase 7 | Pending |
 | AI-03 | Phase 7 | Pending |
 | AI-04 | Phase 7 | Pending |
-| INBOX-01 | Phase 1 | Pending |
-| INBOX-02 | Phase 1 | Pending |
-| INBOX-03 | Phase 1 | Pending |
-| INBOX-04 | Phase 1 | Pending |
-| INBOX-05 | Phase 1 | Pending |
-| INBOX-06 | Phase 1 | Pending |
-| INBOX-07 | Phase 1 | Pending |
-| DB-01 | Phase 1 | Pending |
-| DB-02 | Phase 1 | Pending |
-| DB-03 | Phase 1 | Pending |
-| DB-04 | Phase 1 | Pending |
-| DB-05 | Phase 1 | Pending |
-| DB-06 | Phase 1 | Pending |
-| DB-07 | Phase 1 | Pending |
-| DB-08 | Phase 1 | Pending |
-| DB-09 | Phase 1 | Pending |
+| INBOX-01 | Phase 1 | Complete |
+| INBOX-02 | Phase 1 | Complete |
+| INBOX-03 | Phase 1 | Complete |
+| INBOX-04 | Phase 1 | Complete |
+| INBOX-05 | Phase 1 | Complete |
+| INBOX-06 | Phase 1 | Complete |
+| INBOX-07 | Phase 1 | Complete |
+| DB-01 | Phase 1 | Complete |
+| DB-02 | Phase 1 | Complete |
+| DB-03 | Phase 1 | Complete |
+| DB-04 | Phase 1 | Complete |
+| DB-05 | Phase 1 | Complete |
+| DB-06 | Phase 1 | Complete |
+| DB-07 | Phase 1 | Complete |
+| DB-08 | Phase 1 | Complete |
+| DB-09 | Phase 1 | Complete |
 
 **Coverage:**
 - v2.2 requirements: 56 total
@@ -216,4 +216,4 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 ---
 *Requirements defined: 2026-01-20*
-*Last updated: 2026-01-20 after initial definition*
+*Last updated: 2026-01-20 — Phase 1 complete (DB-01 to DB-09, INBOX-01 to INBOX-07)*

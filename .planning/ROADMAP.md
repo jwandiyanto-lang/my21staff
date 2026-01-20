@@ -19,27 +19,29 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 
 **First Client:** Eagle Overseas Education
 
-### Phase 1: Database Schema & Inbox Overhaul
+### Phase 1: Database Schema & Inbox Overhaul ✓
 
 **Goal:** Foundation for ARI + improved inbox experience
 
 **Requirements:** DB-01 through DB-09, INBOX-01 through INBOX-07
 
-**Success Criteria:**
-- [ ] ARI tables created with RLS policies
-- [ ] Kapso metadata cached on contacts table
-- [ ] Inbox loads instantly with cached contact data
-- [ ] Real-time message updates via Supabase subscriptions
-- [ ] Active/All and tag filters working
+**Status:** Complete (2026-01-20)
 
-**Plans:** 5 plans in 3 waves
+**Success Criteria:**
+- [x] ARI tables created with RLS policies
+- [x] Kapso metadata cached on contacts table
+- [x] Inbox loads instantly with cached contact data
+- [x] Real-time message updates via Supabase subscriptions
+- [x] Active/All and tag filters working
+
+**Plans:** 5/5 complete
 
 Plans:
-- [ ] 01-01-PLAN.md — ARI database tables (config, destinations, conversations, messages, payments, appointments, ai_comparison)
-- [ ] 01-02-PLAN.md — Contacts cache fields + phone normalization
-- [ ] 01-03-PLAN.md — RLS policies + realtime publication for ARI tables
-- [ ] 01-04-PLAN.md — Active/All filter toggle + enhanced inbox filters
-- [ ] 01-05-PLAN.md — Typing indicators + real-time sync improvements
+- [x] 01-01-PLAN.md — ARI database tables (7 tables, 21 RLS policies)
+- [x] 01-02-PLAN.md — Contacts cache fields + phone normalization
+- [x] 01-03-PLAN.md — RLS policies + realtime publication for ARI tables
+- [x] 01-04-PLAN.md — Active/All filter toggle + enhanced inbox filters
+- [x] 01-05-PLAN.md — Typing indicators + real-time sync improvements
 
 ---
 
@@ -251,10 +253,10 @@ Full details: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 | v1.0 MVP | 1-5 | 14/14 | Complete | 2026-01-14 |
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
-| v2.2 ARI & User Flow | 1-7 | 0/5 | In Progress | — |
+| v2.2 ARI & User Flow | 1-7 | 5/5+ | In Progress | — |
 
 **Total shipped:** 82 plans across 3 milestones
 
 ---
 
-*Last updated: 2026-01-20 — Phase 1 planned (5 plans in 3 waves)*
+*Last updated: 2026-01-20 — Phase 1 complete (5/5 plans)*
