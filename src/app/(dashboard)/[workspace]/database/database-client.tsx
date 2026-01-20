@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback, useEffect } from 'react'
 import { DataTable } from '@/components/ui/data-table'
 import { createColumns } from './columns'
 import { ContactDetailSheet } from './contact-detail-sheet'
+import { TableSkeleton } from '@/components/skeletons/table-skeleton'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -31,8 +32,8 @@ import {
 } from '@/components/ui/alert-dialog'
 import { ChevronDown, ChevronLeft, ChevronRight, Filter, Tag, SlidersHorizontal, X, Loader2, User } from 'lucide-react'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
 import { useContacts, useUpdateContact, useDeleteContact } from '@/lib/queries/use-contacts'
+import { useWorkspaceSettings } from '@/lib/queries/use-workspace-settings'
 import type { Contact, Workspace, WorkspaceMember, Profile } from '@/types/database'
 
 type TeamMember = WorkspaceMember & { profile: Profile | null }
@@ -80,15 +81,11 @@ function loadFiltersFromStorage(): DatabaseFilters {
 
 interface DatabaseClientProps {
   workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
-  contacts: Contact[]
-  totalCount: number
-  contactTags?: string[]
-  teamMembers?: TeamMember[]
 }
 
 const PAGE_SIZE = 25
 
-export function DatabaseClient({ workspace, contacts: initialContacts, totalCount: initialTotalCount, contactTags = ['Community', '1on1'], teamMembers = [] }: DatabaseClientProps) {
+export function DatabaseClient({ workspace }: DatabaseClientProps) {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>(() => loadFiltersFromStorage().activeStatus)
   const [selectedTags, setSelectedTags] = useState<string[]>(() => loadFiltersFromStorage().selectedTags)
   const [assignedTo, setAssignedTo] = useState<string>(() => loadFiltersFromStorage().assignedTo)
@@ -99,11 +96,16 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
   const [currentPage, setCurrentPage] = useState(1)
 
   // TanStack Query for contacts with pagination
-  const { data, isLoading, isFetching } = useContacts(workspace.id, currentPage)
+  const { data: contactsData, isLoading: isLoadingContacts, isFetching } = useContacts(workspace.id, currentPage)
 
-  // Use TanStack Query data or fallback to initialContacts for SSR
-  const contacts = data?.contacts ?? initialContacts
-  const totalCount = data?.total ?? initialTotalCount
+  // TanStack Query for workspace settings (team members, tags)
+  const { data: settingsData, isLoading: isLoadingSettings } = useWorkspaceSettings(workspace.id)
+
+  // Extract data from queries
+  const contacts = contactsData?.contacts ?? []
+  const totalCount = contactsData?.total ?? 0
+  const teamMembers = settingsData?.teamMembers ?? []
+  const contactTags = settingsData?.contactTags ?? ['Community', '1on1']
 
   // TanStack Query mutations
   const updateMutation = useUpdateContact(workspace.id)
@@ -181,8 +183,8 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
-  // Loading state combines initial load and page transitions
-  const isLoadingPage = isLoading || isFetching
+  // Loading state for page transitions (not initial load)
+  const isLoadingPage = isFetching
 
   // Convert team members to column format
   const columnTeamMembers = useMemo(
@@ -278,6 +280,11 @@ export function DatabaseClient({ workspace, contacts: initialContacts, totalCoun
   const handleRowClick = (contact: Contact) => {
     setSelectedContact(contact)
     setIsDetailOpen(true)
+  }
+
+  // Show skeleton only on initial load (not page transitions)
+  if (isLoadingContacts && !contactsData) {
+    return <TableSkeleton columns={7} rows={10} />
   }
 
   return (
