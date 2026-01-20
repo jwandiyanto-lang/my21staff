@@ -6,10 +6,10 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 
 ## Milestones
 
-- ✅ v1.0 MVP — Phases 1-5 (shipped 2026-01-14)
-- ✅ v2.0 Production Ready — Phases 6-22 (shipped 2026-01-18)
-- ✅ v2.1 Client Launch Ready — Phases 1-9 (shipped 2026-01-20)
-- 🚧 **v2.2 ARI & User Flow** — Phases 1-7 (in progress)
+- v1.0 MVP — Phases 1-5 (shipped 2026-01-14)
+- v2.0 Production Ready — Phases 6-22 (shipped 2026-01-18)
+- v2.1 Client Launch Ready — Phases 1-9 (shipped 2026-01-20)
+- **v2.2 ARI & User Flow** — Phases 1-7 (in progress)
 
 ---
 
@@ -32,7 +32,14 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 - [ ] Real-time message updates via Supabase subscriptions
 - [ ] Active/All and tag filters working
 
-**Plans:** TBD during `/gsd:plan-phase 1`
+**Plans:** 5 plans in 3 waves
+
+Plans:
+- [ ] 01-01-PLAN.md — ARI database tables (config, destinations, conversations, messages, payments, appointments, ai_comparison)
+- [ ] 01-02-PLAN.md — Contacts cache fields + phone normalization
+- [ ] 01-03-PLAN.md — RLS policies + realtime publication for ARI tables
+- [ ] 01-04-PLAN.md — Active/All filter toggle + enhanced inbox filters
+- [ ] 01-05-PLAN.md — Typing indicators + real-time sync improvements
 
 ---
 
@@ -244,10 +251,10 @@ Full details: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 | v1.0 MVP | 1-5 | 14/14 | Complete | 2026-01-14 |
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
-| v2.2 ARI & User Flow | 1-7 | 0/TBD | In Progress | — |
+| v2.2 ARI & User Flow | 1-7 | 0/5 | In Progress | — |
 
 **Total shipped:** 82 plans across 3 milestones
 
 ---
 
-*Last updated: 2026-01-20 — v2.2 milestone initialized*
+*Last updated: 2026-01-20 — Phase 1 planned (5 plans in 3 waves)*
