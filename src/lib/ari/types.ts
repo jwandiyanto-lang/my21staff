@@ -76,11 +76,11 @@ export interface LeadData {
 
 /** Score breakdown from scoring phase */
 export interface ScoreBreakdown {
-  budget_score: number;
-  readiness_score: number;
-  engagement_score: number;
-  qualification_score: number;
-  total: number;
+  basic_score: number;        // 0-25: Form completeness, email validity, country
+  qualification_score: number; // 0-35: English level, budget, timeline, program
+  document_score: number;     // 0-30: Passport, CV, english_test, transcript
+  engagement_score: number;   // 0-10: Conversation quality
+  total: number;              // 0-100: Sum of all scores
 }
 
 /** ARI conversation context (stored in JSONB) */

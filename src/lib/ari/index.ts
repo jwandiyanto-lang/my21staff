@@ -147,3 +147,14 @@ export {
   type SearchCriteria,
   type UniversityQuestionResult,
 } from './knowledge-base';
+
+// ===========================================
+// Lead Scoring
+// ===========================================
+
+export {
+  calculateLeadScore,
+  getScoreReasons,
+  getLeadTemperature,
+  type ScoreBreakdown as ScoringBreakdown, // Alias to avoid conflict with types.ts export
+} from './scoring';
