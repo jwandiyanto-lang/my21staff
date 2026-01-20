@@ -13,6 +13,7 @@ interface ConversationListProps {
   searchQuery: string
   hasFilters?: boolean
   workspaceName?: string
+  typingContacts?: Map<string, number>
 }
 
 function getInitials(name: string | null, phone: string): string {
@@ -47,6 +48,7 @@ export function ConversationList({
   searchQuery,
   hasFilters = false,
   workspaceName = 'Workspace',
+  typingContacts,
 }: ConversationListProps) {
   const filteredConversations = conversations.filter((conv) =>
     conv.contact.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -84,6 +86,8 @@ export function ConversationList({
         {filteredConversations.map((conversation) => {
           const isSelected = selectedId === conversation.id
           const isActive = conversation.status === 'open' || conversation.status === 'handover'
+          const isTyping = typingContacts?.has(conversation.contact.phone) &&
+            Date.now() - (typingContacts.get(conversation.contact.phone) || 0) < 5000
 
           return (
             <button
@@ -117,9 +121,20 @@ export function ConversationList({
                     </span>
                   </div>
 
-                  {/* Row 2: Preview text */}
+                  {/* Row 2: Preview text or typing indicator */}
                   <p className="text-sm text-muted-foreground truncate mt-0.5">
-                    {conversation.last_message_preview || 'No messages yet'}
+                    {isTyping ? (
+                      <span className="flex items-center gap-1 text-primary">
+                        <span className="flex gap-0.5">
+                          <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </span>
+                        <span>typing...</span>
+                      </span>
+                    ) : (
+                      conversation.last_message_preview || 'No messages yet'
+                    )}
                   </p>
 
                   {/* Row 3: Status + Source */}
