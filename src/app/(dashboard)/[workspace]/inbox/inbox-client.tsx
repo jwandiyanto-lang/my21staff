@@ -103,6 +103,18 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
   const [showInfoPanel, setShowInfoPanel] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<Message | null>(null)
 
+  // ARI score data for the selected contact
+  const [ariScoreData, setAriScoreData] = useState<{
+    score: number;
+    breakdown?: {
+      basic_score?: number;
+      qualification_score?: number;
+      document_score?: number;
+      engagement_score?: number;
+    };
+    reasons?: string[];
+  } | undefined>(undefined)
+
   // Pagination state
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const PAGE_SIZE = 50
@@ -493,6 +505,42 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
     setReplyToMessage(null)
   }, [selectedConversation?.id])
 
+  // Fetch ARI score data when conversation changes
+  useEffect(() => {
+    if (!selectedConversation || isDevMode()) {
+      setAriScoreData(undefined)
+      return
+    }
+
+    const fetchAriScore = async () => {
+      const supabase = createClient()
+      const { data: ariConversation } = await supabase
+        .from('ari_conversations')
+        .select('lead_score, lead_temperature, context')
+        .eq('contact_id', selectedConversation.contact_id)
+        .eq('workspace_id', workspace.id)
+        .single()
+
+      if (ariConversation) {
+        const context = ariConversation.context as Record<string, unknown> | null
+        setAriScoreData({
+          score: ariConversation.lead_score || 0,
+          breakdown: context?.score_breakdown as {
+            basic_score?: number;
+            qualification_score?: number;
+            document_score?: number;
+            engagement_score?: number;
+          } | undefined,
+          reasons: context?.score_reasons as string[] | undefined,
+        })
+      } else {
+        setAriScoreData(undefined)
+      }
+    }
+
+    fetchAriScore()
+  }, [selectedConversation?.id, selectedConversation?.contact_id, workspace.id])
+
   // Reset page when filters change
   useEffect(() => {
     setPage(0)
@@ -839,6 +887,7 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
           conversationId={selectedConversation.id}
           onContactUpdate={handleContactUpdate}
           onAssignmentChange={handleAssignmentChange}
+          ariScoreData={ariScoreData}
         />
       )}
 
