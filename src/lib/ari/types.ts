@@ -99,6 +99,32 @@ export interface ARIContext {
   };
   /** Handoff notes for human consultant */
   handoff_notes?: string;
+  /** Scheduling flow sub-state */
+  scheduling_step?: 'asking_day' | 'showing_slots' | 'confirming' | 'booked';
+  /** Selected day for scheduling */
+  selected_day?: number;
+  /** Available slots for selected day */
+  available_slots?: Array<{
+    date: string;
+    start_time: string;
+    duration_minutes: number;
+    slot_id: string;
+  }>;
+  /** Selected slot index (0-based) */
+  selected_slot_index?: number;
+  /** Selected slot details for confirmation */
+  selected_slot?: {
+    date: string;
+    start_time: string;
+    duration_minutes: number;
+    slot_id: string;
+  };
+  /** Available days summary for display */
+  available_days_summary?: string;
+  /** Slots summary for display */
+  slots_summary?: string;
+  /** Booked appointment ID */
+  appointment_id?: string;
   /** Any additional metadata */
   [key: string]: unknown;
 }

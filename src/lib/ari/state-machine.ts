@@ -17,8 +17,8 @@ export const STATE_TRANSITIONS: Record<ARIState, ARIState[]> = {
   greeting: ['qualifying'],
   qualifying: ['scoring', 'qualifying'], // Can stay to collect more info
   scoring: ['booking', 'handoff'],
-  booking: ['payment', 'handoff'],
-  payment: ['scheduling', 'payment', 'handoff'], // Can retry payment
+  booking: ['scheduling', 'handoff'], // Direct to scheduling (payment skipped in v2.2)
+  payment: ['scheduling', 'payment', 'handoff'], // Keep for future use
   scheduling: ['handoff', 'scheduling'], // Can reschedule
   handoff: ['completed'],
   completed: [],
@@ -153,9 +153,9 @@ export function getNextState(
       return 'handoff';
 
     case 'booking':
-      // Stay in booking until user indicates interest
-      // Actual transition handled by user response
-      return 'booking';
+      // Hot lead accepted booking offer, move to scheduling
+      // Note: Payment integration skipped in v2.2, going direct to scheduling
+      return 'scheduling';
 
     case 'payment':
       // Payment state transitions handled by webhook, not AI
