@@ -9,13 +9,13 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 ### ARI Core Conversation
 
-- [ ] **ARI-01**: ARI pulls form data from CRM when user initiates WhatsApp conversation (phone number matching)
-- [ ] **ARI-02**: ARI greets user by name with context from their form submission
-- [ ] **ARI-03**: ARI validates form completeness and asks follow-up questions for missing data
-- [ ] **ARI-04**: ARI answers questions about universities/destinations using knowledge base
-- [ ] **ARI-05**: ARI asks document readiness questions ("Do you have IELTS/transcript ready?")
-- [ ] **ARI-06**: ARI maintains conversation context across multiple message turns
-- [ ] **ARI-07**: ARI uses natural Indonesian language with configurable persona (tone, pronouns)
+- [x] **ARI-01**: ARI pulls form data from CRM when user initiates WhatsApp conversation (phone number matching)
+- [x] **ARI-02**: ARI greets user by name with context from their form submission
+- [x] **ARI-03**: ARI validates form completeness and asks follow-up questions for missing data
+- [x] **ARI-04**: ARI answers questions about universities/destinations using knowledge base
+- [x] **ARI-05**: ARI asks document readiness questions ("Do you have IELTS/transcript ready?")
+- [x] **ARI-06**: ARI maintains conversation context across multiple message turns
+- [x] **ARI-07**: ARI uses natural Indonesian language with configurable persona (tone, pronouns)
 
 ### Lead Scoring
 
@@ -141,13 +141,13 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ARI-01 | Phase 2 | Pending |
-| ARI-02 | Phase 2 | Pending |
-| ARI-03 | Phase 2 | Pending |
-| ARI-04 | Phase 2 | Pending |
-| ARI-05 | Phase 2 | Pending |
-| ARI-06 | Phase 2 | Pending |
-| ARI-07 | Phase 2 | Pending |
+| ARI-01 | Phase 2 | Complete |
+| ARI-02 | Phase 2 | Complete |
+| ARI-03 | Phase 2 | Complete |
+| ARI-04 | Phase 2 | Complete |
+| ARI-05 | Phase 2 | Complete |
+| ARI-06 | Phase 2 | Complete |
+| ARI-07 | Phase 2 | Complete |
 | SCORE-01 | Phase 3 | Pending |
 | SCORE-02 | Phase 3 | Pending |
 | SCORE-03 | Phase 3 | Pending |
@@ -216,4 +216,4 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 ---
 *Requirements defined: 2026-01-20*
-*Last updated: 2026-01-20 — Phase 1 complete (DB-01 to DB-09, INBOX-01 to INBOX-07)*
+*Last updated: 2026-01-20 — Phase 2 complete (ARI-01 to ARI-07)*
