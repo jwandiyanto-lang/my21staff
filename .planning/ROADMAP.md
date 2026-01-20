@@ -119,7 +119,13 @@ Plans:
 - [ ] Meeting link notification sent before appointment
 - [ ] Consultant receives full context (score, conversation summary)
 
-**Plans:** TBD during `/gsd:plan-phase 5`
+**Plans:** 4 plans in 2 waves
+
+Plans:
+- [ ] 05-01-PLAN.md — Slot database schema and CRUD API
+- [ ] 05-02-PLAN.md — Knowledge Base UI with slot management
+- [ ] 05-03-PLAN.md — ARI booking conversation flow
+- [ ] 05-04-PLAN.md — Handoff automation and notifications
 
 ---
 
@@ -272,4 +278,4 @@ Full details: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 
 ---
 
-*Last updated: 2026-01-20 — Phase 3 complete (Lead Scoring & Routing)*
+*Last updated: 2026-01-20 — Phase 5 planned (Scheduling & Handoff)*
