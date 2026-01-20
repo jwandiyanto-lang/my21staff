@@ -484,6 +484,59 @@ export type Database = {
           },
         ]
       }
+      consultant_slots: {
+        Row: {
+          booking_window_days: number | null
+          consultant_id: string | null
+          created_at: string | null
+          day_of_week: number
+          duration_minutes: number | null
+          end_time: string
+          id: string
+          is_active: boolean | null
+          max_bookings_per_slot: number | null
+          start_time: string
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          booking_window_days?: number | null
+          consultant_id?: string | null
+          created_at?: string | null
+          day_of_week: number
+          duration_minutes?: number | null
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          max_bookings_per_slot?: number | null
+          start_time: string
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          booking_window_days?: number | null
+          consultant_id?: string | null
+          created_at?: string | null
+          day_of_week?: number
+          duration_minutes?: number | null
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          max_bookings_per_slot?: number | null
+          start_time?: string
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_slots_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           assigned_to: string | null

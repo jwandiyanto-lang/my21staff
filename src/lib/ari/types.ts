@@ -244,3 +244,38 @@ export type ARIConversationInsert = Omit<ARIConversation, 'id' | 'created_at' | 
 export type ARIConversationUpdate = Partial<Omit<ARIConversation, 'id' | 'workspace_id' | 'contact_id' | 'created_at' | 'updated_at'>>;
 
 export type ARIMessageInsert = Omit<ARIMessage, 'id' | 'created_at'>;
+
+// ===========================================
+// Consultant Slot Types (for scheduling)
+// ===========================================
+
+/** Weekly availability slot for consultations */
+export interface ConsultantSlot {
+  id: string;
+  workspace_id: string;
+  consultant_id: string | null;
+  day_of_week: number; // 0=Sunday, 6=Saturday
+  start_time: string; // HH:MM:SS format
+  end_time: string;
+  duration_minutes: number;
+  booking_window_days: number;
+  max_bookings_per_slot: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ConsultantSlotInsert = Omit<ConsultantSlot, 'id' | 'created_at' | 'updated_at'>;
+export type ConsultantSlotUpdate = Partial<Omit<ConsultantSlot, 'id' | 'workspace_id' | 'created_at' | 'updated_at'>>;
+
+/** Available time slot for a specific date (computed from ConsultantSlot) */
+export interface AvailableSlot {
+  date: string; // YYYY-MM-DD
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  duration_minutes: number;
+  consultant_id: string | null;
+  slot_id: string; // Reference to ConsultantSlot
+  booked: boolean;
+}
