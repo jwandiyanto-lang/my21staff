@@ -95,19 +95,15 @@ Plans:
 
 ---
 
-### Phase 4: Payment Integration
+### Phase 4: Payment Integration ⏭
 
 **Goal:** Midtrans payment gateway for consultation booking
 
-**Requirements:** PAY-01 through PAY-06
+**Status:** Skipped — Client (Eagle) has existing payment method
 
-**Success Criteria:**
-- [ ] Payment link generated for Rp500,000 consultation
-- [ ] Indonesian payment methods supported (QRIS, GoPay, etc.)
-- [ ] Payment callback updates CRM
-- [ ] Failed payments handled with retry link
+**Requirements:** PAY-01 through PAY-06 (deferred to v2.3)
 
-**Plans:** TBD during `/gsd:plan-phase 4`
+**Notes:** Can be added later for clients without existing payment infrastructure.
 
 ---
 

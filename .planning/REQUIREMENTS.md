@@ -33,14 +33,14 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 - [x] **ROUTE-03**: Cold leads (<40) receive WhatsApp community link
 - [x] **ROUTE-04**: Cold lead follow-up scheduled (30 days)
 
-### Payment Integration
+### Payment Integration (Deferred)
 
-- [ ] **PAY-01**: Midtrans payment gateway integration
-- [ ] **PAY-02**: Payment link generation (Rp500,000 consultation fee)
-- [ ] **PAY-03**: Support Indonesian payment methods (QRIS, GoPay, OVO, bank transfer, cards)
-- [ ] **PAY-04**: Payment success callback updates CRM
-- [ ] **PAY-05**: Payment failure/expiry handling with retry link
-- [ ] **PAY-06**: Payment link validity (24 hours)
+- [ ] **PAY-01**: Midtrans payment gateway integration *(deferred to v2.3)*
+- [ ] **PAY-02**: Payment link generation (Rp500,000 consultation fee) *(deferred to v2.3)*
+- [ ] **PAY-03**: Support Indonesian payment methods (QRIS, GoPay, OVO, bank transfer, cards) *(deferred to v2.3)*
+- [ ] **PAY-04**: Payment success callback updates CRM *(deferred to v2.3)*
+- [ ] **PAY-05**: Payment failure/expiry handling with retry link *(deferred to v2.3)*
+- [ ] **PAY-06**: Payment link validity (24 hours) *(deferred to v2.3)*
 
 ### Scheduling
 
@@ -158,12 +158,12 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 | ROUTE-02 | Phase 3 | Complete |
 | ROUTE-03 | Phase 3 | Complete |
 | ROUTE-04 | Phase 3 | Complete |
-| PAY-01 | Phase 4 | Pending |
-| PAY-02 | Phase 4 | Pending |
-| PAY-03 | Phase 4 | Pending |
-| PAY-04 | Phase 4 | Pending |
-| PAY-05 | Phase 4 | Pending |
-| PAY-06 | Phase 4 | Pending |
+| PAY-01 | Phase 4 | Deferred |
+| PAY-02 | Phase 4 | Deferred |
+| PAY-03 | Phase 4 | Deferred |
+| PAY-04 | Phase 4 | Deferred |
+| PAY-05 | Phase 4 | Deferred |
+| PAY-06 | Phase 4 | Deferred |
 | SCHED-01 | Phase 5 | Pending |
 | SCHED-02 | Phase 5 | Pending |
 | SCHED-03 | Phase 5 | Pending |
@@ -216,4 +216,4 @@ Requirements for ARI & User Flow milestone. Converts social media leads into pai
 
 ---
 *Requirements defined: 2026-01-20*
-*Last updated: 2026-01-20 — Phase 3 complete (SCORE-01 to SCORE-06, ROUTE-01 to ROUTE-04)*
+*Last updated: 2026-01-20 — Phase 4 deferred (PAY-01 to PAY-06 moved to v2.3)*
