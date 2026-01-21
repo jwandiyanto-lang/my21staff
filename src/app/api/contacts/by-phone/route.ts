@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiAdminClient } from '@/lib/supabase/server'
+import {
+  withTiming,
+  createRequestMetrics,
+  logQuery,
+  logQuerySummary,
+} from '@/lib/instrumentation/with-timing'
 
 /**
  * GET /api/contacts/by-phone?phone=628xxx&workspace_id=xxx
@@ -9,7 +15,7 @@ import { createApiAdminClient } from '@/lib/supabase/server'
  *
  * Authentication: X-API-Key header with CRM_API_KEY secret
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     // Verify API key
     const apiKey = request.headers.get('x-api-key')
@@ -53,8 +59,10 @@ export async function GET(request: NextRequest) {
     const normalizedPhone = phone.replace(/\D/g, '')
 
     const supabase = createApiAdminClient()
+    const metrics = createRequestMetrics()
 
     // Look up contact by phone
+    let queryStart = performance.now()
     const { data: contact, error: contactError } = await supabase
       .from('contacts')
       .select(`
@@ -71,6 +79,7 @@ export async function GET(request: NextRequest) {
       .eq('workspace_id', workspaceId)
       .eq('phone', normalizedPhone)
       .single()
+    logQuery(metrics, 'contacts', Math.round(performance.now() - queryStart))
 
     if (contactError || !contact) {
       // Contact not found - return empty context
@@ -81,28 +90,34 @@ export async function GET(request: NextRequest) {
     }
 
     // Get contact notes (team notes)
+    queryStart = performance.now()
     const { data: notes } = await supabase
       .from('contact_notes')
       .select('content, created_at')
       .eq('contact_id', contact.id)
       .order('created_at', { ascending: false })
       .limit(5)
+    logQuery(metrics, 'contact_notes', Math.round(performance.now() - queryStart))
 
     // Get recent conversation history
+    queryStart = performance.now()
     const { data: conversation } = await supabase
       .from('conversations')
       .select('id, last_message_preview, last_message_at')
       .eq('contact_id', contact.id)
       .single()
+    logQuery(metrics, 'conversations', Math.round(performance.now() - queryStart))
 
     let recentMessages: { content: string; direction: string; created_at: string }[] = []
     if (conversation) {
+      queryStart = performance.now()
       const { data: messages } = await supabase
         .from('messages')
         .select('content, direction, created_at')
         .eq('conversation_id', conversation.id)
         .order('created_at', { ascending: false })
         .limit(10)
+      logQuery(metrics, 'messages', Math.round(performance.now() - queryStart))
 
       // Filter out null values and map to correct type
       recentMessages = (messages || [])
@@ -131,6 +146,9 @@ export async function GET(request: NextRequest) {
         : null,
       last_interaction: conversation?.last_message_at || null,
     }
+
+    // Log query summary before returning
+    logQuerySummary('/api/contacts/by-phone', metrics)
 
     return NextResponse.json(crmContext)
   } catch (error) {
@@ -190,3 +208,6 @@ function summarizeConversation(
 
   return `Discussed: ${uniqueTopics.join(', ')}`
 }
+
+// Export wrapped handler with timing instrumentation
+export const GET = withTiming('/api/contacts/by-phone', getHandler)
