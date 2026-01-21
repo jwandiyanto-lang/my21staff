@@ -34,18 +34,24 @@ export default defineSchema({
   contacts: defineTable({
     workspace_id: v.id("workspaces"),
     phone: v.string(),
+    phone_normalized: v.optional(v.string()), // For normalized phone matching (e.g., +6281234567890)
     name: v.optional(v.string()),
+    kapso_name: v.optional(v.string()), // Name from WhatsApp profile (Kapso)
     email: v.optional(v.string()),
-    lead_score: v.number(), // 0-100
+    lead_score: v.number(), // 0-100 ARI lead score
     lead_status: v.string(), // 'new', 'hot', 'warm', 'cold', 'converted', 'lost'
     tags: v.optional(v.array(v.string())),
-    metadata: v.optional(v.any()),
+    assigned_to: v.optional(v.string()), // Supabase user UUID of assigned member
+    source: v.optional(v.string()), // Lead source: 'webinar', 'referral', 'website', 'whatsapp', etc.
+    metadata: v.optional(v.any()), // Additional flexible data (ARI scores, engagement metrics)
+    cache_updated_at: v.optional(v.number()), // Timestamp of last cache refresh
     created_at: v.number(),
     updated_at: v.number(),
     supabaseId: v.string(), // For migration reference
   })
     .index("by_workspace_phone", ["workspace_id", "phone"])
-    .index("by_workspace", ["workspace_id"]),
+    .index("by_workspace", ["workspace_id"])
+    .index("by_assigned", ["workspace_id", "assigned_to"]),
 
   // ============================================
   // CONVERSATIONS
