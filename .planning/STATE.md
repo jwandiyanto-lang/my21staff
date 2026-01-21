@@ -9,23 +9,23 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 
 ## Current Position
 
-Phase: 3 - Convex Spike
-Plan: 06 of 6
-Status: Complete
-Last activity: 2026-01-21 — Phase 3 verified and complete
+Phase: 5 - Implementation
+Plan: 02 of 10
+Status: In progress
+Last activity: 2026-01-21 — Completed Convex mutations and queries
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ (118 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ███░░░░░░ (120 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 118 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 13 in v3.0)
+- Total plans completed: 120 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 15 in v3.0)
 - v2.2 timeline: 1 day (Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
-- Lines: ~43,400 TypeScript
-- Phases completed: 33 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 6, v3.0: 5)
+- Lines: ~44,500 TypeScript
+- Phases completed: 35 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 6, v3.0: 7)
 
 ## Accumulated Context
 
@@ -35,7 +35,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 **v2.0 (Phases 6-22):** Kapso Live, Landing, AI, Deployment, Admin, Lead Polish, Security, Dashboard, Settings
 **v2.1 (Phases 1-9):** Brand, Email, Roles, Support, Central Hub, Security Page, Landing Redesign, Performance, Kapso Bot
 **v2.2 (Phases 1-6):** Database/Inbox, ARI Core, Scoring, Scheduling, Admin
-**v3.0 (Phases 1-5):** Instrumentation, Supabase Optimization, Convex Spike, Decision Gate, Implementation
+**v3.0 (Phases 1-7):** Instrumentation, Supabase Optimization, Convex Spike, Decision Gate, Schema, Mutations/Queries
 
 ### v3.0 Performance Context
 
@@ -78,6 +78,12 @@ Key v3.0 decisions:
 - **Proceed with Convex migration** — Convex API achieves 37ms P95, 25.4x faster than Supabase
 - Do NOT proceed with Supabase enhancement (IMPL-07 through IMPL-10)
 
+**New from Phase 5 Implementation:**
+- Hard delete for contacts (no soft delete) - fresh start without Supabase complexity
+- Phone normalization removes non-digits for consistent WhatsApp matching
+- Upsert pattern for webhook idempotency prevents duplicate data on retry
+- Client-side filtering for search queries (works for moderate datasets, optimize later if needed)
+
 ### Deferred Issues
 
 - Forgot password email uses Supabase email, not Resend (P1)
@@ -93,9 +99,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Phase 3 Complete — Verification report created with benchmark results
+Stopped at: Completed 05-02 — Convex mutations and queries
 Resume file: None
-Next: Phase 4 — Decision Gate (formalize Convex migration decision)
+Next: 05-03 — Kapso webhook HTTP action
 
 ## Deployment Info
 
@@ -122,4 +128,4 @@ Next: Phase 4 — Decision Gate (formalize Convex migration decision)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-21 — Phase 3 (Convex Spike) verified and complete*
+*Last updated: 2026-01-21 — Phase 5 Implementation (05-02: Mutations & Queries) complete*
