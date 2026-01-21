@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 5 - Implementation
-Plan: 02 of 10
+Plan: 03 of 10
 Status: In progress
-Last activity: 2026-01-21 — Completed 05-01: Convex Schema Complete
+Last activity: 2026-01-21 — Completed 05-03: Conversation Query Functions
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ████████░░ (121 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ████████░░ (122 plans shipped)
 
 ## Performance Metrics
 
@@ -86,6 +86,10 @@ Key v3.0 decisions:
 - Phone normalization removes non-digits for consistent WhatsApp matching
 - Upsert pattern for webhook idempotency prevents duplicate data on retry
 - Client-side filtering for search queries (works for moderate datasets, optimize later if needed)
+- Tag filtering done client-side (tags on contacts, conversations on separate table)
+- Assignment filter supports 'unassigned' special value alongside user_id
+- Active count calculated from filtered results instead of separate query call
+- Parallel contact fetching via Promise.all for efficient rendering
 
 ### Deferred Issues
 
@@ -102,9 +106,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Completed 05-01 — Convex Schema Complete
+Stopped at: Completed 05-03 — Conversation Query Functions
 Resume file: None
-Next: 05-02 — CRUD Mutations
+Next: 05-04 — API Migration
 
 ## Deployment Info
 
@@ -131,4 +135,4 @@ Next: 05-02 — CRUD Mutations
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-21 — Phase 5 Implementation (05-01: Convex Schema) complete*
+*Last updated: 2026-01-21 — Phase 5 Implementation (05-03: Conversation Query Functions) complete*
