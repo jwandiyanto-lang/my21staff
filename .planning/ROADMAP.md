@@ -137,10 +137,10 @@ Plans:
 2. Webhook reliability assessment complete (success rate, error handling, retry behavior)
 3. Clear written decision with rationale: "Proceed with [Convex/Supabase] because [data-backed reason]"
 
-**Plans:** 0 plans
+**Plans:** 1 plan in 1 wave
 
 Plans:
-- [ ] TBD — Document comparison metrics and make architecture decision
+- [ ] 04-01-PLAN.md — Document comparison metrics and make architecture decision
 
 ---
 
@@ -302,4 +302,4 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 
 ---
 
-*Last updated: 2026-01-21 — Phase 3 planned with 6 plans in 5 waves*
+*Last updated: 2026-01-21 — Phase 4 planned with 1 plan in 1 wave*
