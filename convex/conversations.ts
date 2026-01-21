@@ -147,3 +147,41 @@ export const countAll = query({
     return allConversations.length;
   },
 });
+
+/**
+ * Get a single conversation by ID.
+ *
+ * Returns the conversation with associated contact information.
+ * Used for conversation detail view and message loading.
+ *
+ * @param conversation_id - The conversation ID to look up
+ * @param workspace_id - The workspace for authorization
+ * @returns The conversation with contact details, or null if not found
+ */
+export const getById = query({
+  args: {
+    conversation_id: v.string(),
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const conversation = await ctx.db.get(args.conversation_id);
+    if (!conversation) {
+      return null;
+    }
+
+    // Verify conversation belongs to the workspace
+    if (conversation.workspace_id !== args.workspace_id) {
+      return null;
+    }
+
+    // Fetch associated contact
+    const contact = await ctx.db.get(conversation.contact_id);
+
+    return {
+      ...conversation,
+      contact,
+    };
+  },
+});
