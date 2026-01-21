@@ -89,25 +89,31 @@ async function getHandler(request: NextRequest) {
       })
     }
 
-    // Get contact notes (team notes)
-    queryStart = performance.now()
-    const { data: notes } = await supabase
-      .from('contact_notes')
-      .select('content, created_at')
-      .eq('contact_id', contact.id)
-      .order('created_at', { ascending: false })
-      .limit(5)
-    logQuery(metrics, 'contact_notes', Math.round(performance.now() - queryStart))
+    // Query 2-3: Notes and Conversation in parallel (both need contact.id)
+    const notesStart = performance.now()
+    const conversationStart = performance.now()
 
-    // Get recent conversation history
-    queryStart = performance.now()
-    const { data: conversation } = await supabase
-      .from('conversations')
-      .select('id, last_message_preview, last_message_at')
-      .eq('contact_id', contact.id)
-      .single()
-    logQuery(metrics, 'conversations', Math.round(performance.now() - queryStart))
+    const [notesResult, conversationResult] = await Promise.all([
+      supabase
+        .from('contact_notes')
+        .select('content, created_at')
+        .eq('contact_id', contact.id)
+        .order('created_at', { ascending: false })
+        .limit(5),
+      supabase
+        .from('conversations')
+        .select('id, last_message_preview, last_message_at')
+        .eq('contact_id', contact.id)
+        .single(),
+    ])
 
+    logQuery(metrics, 'contact_notes', Math.round(performance.now() - notesStart))
+    logQuery(metrics, 'conversations', Math.round(performance.now() - conversationStart))
+
+    const notes = notesResult.data
+    const conversation = conversationResult.data
+
+    // Query 4: Messages (depends on conversation.id)
     let recentMessages: { content: string; direction: string; created_at: string }[] = []
     if (conversation) {
       queryStart = performance.now()
