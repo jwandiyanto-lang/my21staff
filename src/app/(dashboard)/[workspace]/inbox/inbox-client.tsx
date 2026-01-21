@@ -92,9 +92,10 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
   const conversationsFromQuery = data?.conversations ?? []
   const totalCount = data?.totalCount ?? 0
   const activeCount = data?.activeCount ?? 0
-  const quickReplies = data?.quickReplies ?? []
-  const teamMembers = data?.teamMembers ?? []
-  const contactTags = data?.contactTags ?? ['Community', '1on1']
+  // TODO: Implement quick replies in Convex - for now use empty array
+  const quickReplies = [] // data?.quickReplies ?? []
+  const teamMembers = data?.members ?? []
+  const contactTags = data?.tags ?? ['Community', '1on1']
 
   // Local state for conversations (for real-time updates and pagination)
   const [conversations, setConversations] = useState<ConversationWithContact[]>([])
@@ -263,7 +264,9 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
   }, [conversationsFromQuery, isLoadingConversations]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // TanStack Query for messages with real-time subscription
-  const { data: messages = [], isLoading: isLoadingMessages } = useMessages(selectedConversation?.id ?? null)
+  // Note: Convex useQuery automatically subscribes to data changes
+  // When webhook creates messages via Convex, the query results update instantly
+  const { data: messages = [], isLoading: isLoadingMessages } = useMessages(selectedConversation?.id ?? null, workspace.id)
 
   // Typing indicators via Supabase Broadcast
   const { typingContacts, isContactTyping } = useTypingIndicator(workspace.id)
@@ -300,75 +303,6 @@ export function InboxClient({ workspace, currentUserId }: InboxClientProps) {
         : [...prev, tag]
     )
   }
-
-  // Real-time subscription for conversation updates (new messages, unread counts)
-  // Uses idempotent updates with ID deduplication to prevent chat disappearance (INBOX-07)
-  useEffect(() => {
-    if (isDevMode()) return
-
-    const supabase = createClient()
-
-    const channel = supabase
-      .channel(`conversations:${workspace.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'conversations',
-          filter: `workspace_id=eq.${workspace.id}`,
-        },
-        async (payload) => {
-          if (payload.eventType === 'INSERT') {
-            // New conversation - fetch with contact info
-            const { data: newConv } = await supabase
-              .from('conversations')
-              .select('*, contact:contacts!inner(*)')
-              .eq('id', payload.new.id)
-              .single()
-
-            if (newConv && newConv.contact) {
-              // Idempotent insert - check if conversation already exists (prevents duplicates)
-              setConversations((prev) => {
-                const exists = prev.some(c => c.id === newConv.id)
-                if (exists) return prev
-                return [newConv as unknown as ConversationWithContact, ...prev]
-              })
-            }
-          } else if (payload.eventType === 'UPDATE') {
-            // Idempotent update - update in place (prevents chat disappearance)
-            const updated = payload.new
-            setConversations((prev) =>
-              prev.map((c) =>
-                c.id === updated.id
-                  ? { ...c, ...updated, contact: c.contact }
-                  : c
-              )
-            )
-            // Also update selected if matches
-            setSelectedConversation((prev) =>
-              prev && prev.id === updated.id
-                ? { ...prev, ...updated, contact: prev.contact }
-                : prev
-            )
-          } else if (payload.eventType === 'DELETE') {
-            // Only remove if actually deleted
-            setConversations((prev) =>
-              prev.filter(c => c.id !== (payload.old as { id: string }).id)
-            )
-            // Deselect if this was the selected conversation
-            setSelectedConversation((prev) =>
-              prev && prev.id === (payload.old as { id: string }).id ? null : prev
-            )
-          }
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [workspace.id])
 
   // Handle message sent (optimistic or real)
   const handleMessageSent = useCallback((message: Message & { _optimisticId?: string }, isOptimistic: boolean) => {
