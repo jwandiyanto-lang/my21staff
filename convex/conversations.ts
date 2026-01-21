@@ -185,3 +185,67 @@ export const getById = query({
     };
   },
 });
+
+/**
+ * List all workspace members with their roles.
+ *
+ * Used for inbox filter dropdowns (assigned to filter) and team member display.
+ * Returns members without full profile data (profile data comes from auth context).
+ *
+ * @param workspace_id - The workspace to list members for
+ * @returns Array of workspace members with user_id and role
+ */
+export const listMembers = query({
+  args: {
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const members = await ctx.db
+      .query("workspaceMembers")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+      .collect();
+
+    return members.map((m) => ({
+      user_id: m.user_id,
+      role: m.role,
+      created_at: m.created_at,
+    }));
+  },
+});
+
+/**
+ * List all unique tags from contacts in a workspace.
+ *
+ * Used for inbox filter dropdowns (tag filter).
+ * Collects unique tags from all contacts and returns as array.
+ *
+ * @param workspace_id - The workspace to collect tags from
+ * @returns Array of unique tag strings
+ */
+export const listTags = query({
+  args: {
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const contacts = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+      .collect();
+
+    // Collect all tags and deduplicate
+    const tagSet = new Set<string>();
+    for (const contact of contacts) {
+      if (contact.tags) {
+        for (const tag of contact.tags) {
+          tagSet.add(tag);
+        }
+      }
+    }
+
+    return Array.from(tagSet).sort();
+  },
+});
