@@ -162,13 +162,14 @@ Plans:
 **Plans:** 7 plans in 5 waves
 
 Plans:
-- [ ] 05-01-PLAN.md — Complete Convex schema with all Supabase fields
-- [ ] 05-02-PLAN.md — Create Convex mutations and query functions
-- [ ] 05-03-PLAN.md — Create conversation query functions with filters
-- [ ] 05-04-PLAN.md — Implement Kapso webhook HTTP action
-- [ ] 05-05-PLAN.md — Update Next.js API routes to use Convex
-- [ ] 05-06-PLAN.md — Update inbox to use Convex real-time subscriptions
-- [ ] 05-07-PLAN.md — Deploy Convex and verify performance
+- [x] 05-01-PLAN.md — Complete Convex schema with all Supabase fields
+- [x] 05-02-PLAN.md — Create Convex mutations and query functions
+- [x] 05-03-PLAN.md — Create conversation query functions with filters
+- [x] 05-04-PLAN.md — Implement Kapso webhook HTTP action
+- [x] 05-05-PLAN.md — Update Next.js API routes to use Convex
+- [x] 05-06-PLAN.md — Update inbox to use Convex real-time subscriptions
+- [x] 05-07-PLAN.md — Deploy Convex and verify performance
+- [x] VERIFIED 2026-01-21
 
 ---
 
