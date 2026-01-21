@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 5 - Implementation
-Plan: 03 of 10
+Plan: 04 of 10
 Status: In progress
-Last activity: 2026-01-21 — Completed 05-03: Conversation Query Functions
+Last activity: 2026-01-21 — Completed 05-04: Kapso Webhook HTTP Action
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ████████░░ (122 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ████████░░ (123 plans shipped)
 
 ## Performance Metrics
 
@@ -91,6 +91,15 @@ Key v3.0 decisions:
 - Active count calculated from filtered results instead of separate query call
 - Parallel contact fetching via Promise.all for efficient rendering
 
+**New from Phase 5 Plan 04 (Kapso Webhook):**
+- Use ctx.scheduler.runAfter for async webhook processing to prevent Kapso retries
+- Store meta_access_token in workspaces table for Kapso API calls
+- Create separate ARI tables (ariConfig, ariConversations, ariMessages) for AI bot state
+- Support both Sea-Lion (local Ollama) and Grok as AI model fallback
+- Merge HTTP routers via http.route() pattern for modularity
+- Use HMAC-SHA256 for Kapso webhook signature verification
+- PII masking in logs for privacy (phone numbers masked)
+
 ### Deferred Issues
 
 - Forgot password email uses Supabase email, not Resend (P1)
@@ -106,9 +115,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Completed 05-03 — Conversation Query Functions
+Stopped at: Completed 05-04 — Kapso Webhook HTTP Action
 Resume file: None
-Next: 05-04 — API Migration
+Next: 05-05 — API Migration
 
 ## Deployment Info
 
@@ -135,4 +144,4 @@ Next: 05-04 — API Migration
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-21 — Phase 5 Implementation (05-03: Conversation Query Functions) complete*
+*Last updated: 2026-01-21 — Phase 5 Implementation (05-04: Kapso Webhook HTTP Action) complete*
