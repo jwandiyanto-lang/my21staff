@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { fetchQuery } from 'convex/server'
+import { api } from '@/convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import {
   withTiming,
@@ -26,135 +28,60 @@ async function getHandler(request: NextRequest) {
     return NextResponse.json({ error: 'Workspace required' }, { status: 400 })
   }
 
-  // Verify membership
+  // Verify membership with Supabase (auth still via Supabase)
   const authResult = await requireWorkspaceMembership(workspaceId)
   if (authResult instanceof NextResponse) {
     return authResult
   }
 
-  const from = page * limit
-  const to = from + limit - 1
-
   const metrics = createRequestMetrics()
 
-  // Build base query with explicit columns (no select('*'))
-  let query = supabase
-    .from('conversations')
-    .select(`
-      id,
-      status,
-      assigned_to,
-      unread_count,
-      last_message_at,
-      last_message_preview,
-      contact:contacts!inner(
-        id,
-        name,
-        phone,
-        lead_status,
-        tags,
-        assigned_to
-      )
-    `, { count: 'exact' })
-    .eq('workspace_id', workspaceId)
-    .order('last_message_at', { ascending: false, nullsFirst: false })
-
-  // Active filter (unread only)
-  if (active) {
-    query = query.gt('unread_count', 0)
-  }
-
-  // Status filter (if provided) - filter by contact's lead_status
-  if (statusFilters.length > 0) {
-    query = query.in('contact.lead_status', statusFilters)
-  }
-
-  // Tag filter (if provided) - uses array overlap for OR logic
-  if (tagFilters.length > 0) {
-    // Supabase overlaps filter for array column
-    query = query.overlaps('contact.tags', tagFilters)
-  }
-
-  // Assigned filter
-  if (assignedFilter) {
-    if (assignedFilter === 'unassigned') {
-      query = query.is('assigned_to', null)
-    } else {
-      query = query.eq('assigned_to', assignedFilter)
-    }
-  }
-
-  // Apply pagination
-  query = query.range(from, to)
-
-  // Query 1: Main conversations query with contacts
+  // Call Convex query for inbox data
   let queryStart = performance.now()
-  const { data: conversations, error, count: totalCount } = await query
-  logQuery(metrics, 'conversations', Math.round(performance.now() - queryStart))
+  const result = await fetchQuery(
+    api.conversations.listWithFiltersInternal,
+    {
+      workspace_id: workspaceId,
+      active,
+      statusFilters,
+      tagFilters,
+      assignedTo: assignedFilter,
+      limit,
+      page,
+    }
+  )
+  logQuery(metrics, 'convex.conversations.listWithFiltersInternal', Math.round(performance.now() - queryStart))
 
-  if (error) {
-    console.error('Conversations query error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  // Merge Convex data with Supabase profile data for team members
+  // (profiles still in Supabase until migration is complete)
+  const userIds = result.members.map(m => m.user_id)
+  let teamMembers = result.members
+
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, email, full_name, avatar_url')
+      .in('id', userIds)
+
+    teamMembers = result.members.map(m => ({
+      ...m,
+      profile: profiles?.find(p => p.id === m.user_id) || null,
+    }))
   }
-
-  // Parallel queries 2, 3, 4 (independent of main conversations query)
-  const activeCountStart = performance.now()
-  const teamMembersStart = performance.now()
-  const contactsWithTagsStart = performance.now()
-
-  const [activeCountResult, teamMembersResult, contactsWithTagsResult] = await Promise.all([
-    supabase
-      .from('conversations')
-      .select('*', { count: 'exact', head: true })
-      .eq('workspace_id', workspaceId)
-      .gt('unread_count', 0),
-    supabase
-      .from('workspace_members')
-      .select(`
-        id,
-        user_id,
-        role,
-        created_at,
-        profile:profiles(
-          id,
-          email,
-          full_name,
-          avatar_url
-        )
-      `)
-      .eq('workspace_id', workspaceId),
-    supabase
-      .from('contacts')
-      .select('tags')
-      .eq('workspace_id', workspaceId)
-      .not('tags', 'is', null),
-  ])
-
-  logQuery(metrics, 'activeCount', Math.round(performance.now() - activeCountStart))
-  logQuery(metrics, 'teamMembers', Math.round(performance.now() - teamMembersStart))
-  logQuery(metrics, 'contactsWithTags', Math.round(performance.now() - contactsWithTagsStart))
-
-  const activeCount = activeCountResult.count
-  const teamMembers = teamMembersResult.data
 
   // Quick replies - table not yet created, return empty for now
   const quickReplies: { id: string; label: string; text: string }[] = []
-
-  const contactsWithTags = contactsWithTagsResult.data
-  const contactTags = contactsWithTags
-    ? [...new Set(contactsWithTags.flatMap(c => c.tags || []))]
-    : []
 
   // Log query summary before returning
   logQuerySummary('/api/conversations', metrics)
 
   return NextResponse.json({
-    conversations: conversations ?? [],
-    totalCount: totalCount ?? 0,
-    activeCount: activeCount ?? 0,
+    conversations: result.conversations ?? [],
+    totalCount: result.totalCount ?? 0,
+    activeCount: result.activeCount ?? 0,
     teamMembers: teamMembers ?? [],
     quickReplies: quickReplies ?? [],
-    contactTags,
+    contactTags: result.tags ?? [],
   })
 }
 
