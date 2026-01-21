@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Convex Real-time Performance Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f8fafc;
+    }
+    h1 { color: #1e293b; }
+    .section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    label { display: block; margin: 10px 0 5px; font-weight: 500; }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #0f172a;
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { background: #1e293b; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .result {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border-left: 4px solid #3b82f6;
+      background: #eff6ff;
+    }
+    .pass { border-left-color: #22c55e; background: #f0fdf4; }
+    .fail { border-left-color: #ef4444; background: #fef2f2; }
+    .time { font-family: monospace; font-size: 16px; font-weight: 600; }
+    .log { font-family: monospace; font-size: 12px; color: #64748b; max-height: 200px; overflow-y: auto; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat { background: #f1f5f9; padding: 10px; border-radius: 4px; }
+    .stat-label { font-size: 12px; color: #64748b; }
+    .stat-value { font-size: 20px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Convex Real-time Performance Test</h1>
+  <p>Tests real-time subscription latency for contact lookups</p>
+
+  <div class="section">
+    <h2>Configuration</h2>
+    <label>Convex Deployment URL:</label>
+    <input type="text" id="convexUrl" value="https://intent-otter-212.convex.cloud" />
+
+    <label>CRM API Key:</label>
+    <input type="password" id="apiKey" placeholder="Enter your CRM_API_KEY" />
+
+    <label>Workspace ID:</label>
+    <input type="text" id="workspaceId" value="25de3c4e-b9ca-4aff-9639-b35668f0a48e" />
+
+    <label>Test Phone:</label>
+    <input type="text" id="phone" value="6281234567890" />
+
+    <button onclick="runSubscriptionTest()">Run Real-time Test</button>
+  </div>
+
+  <div id="output"></div>
+
+  <script>
+    let subscriptionLatencies = [];
+    let maxTests = 10;
+
+    async function runSubscriptionTest() {
+      const convexUrl = document.getElementById('convexUrl').value;
+      const apiKey = document.getElementById('apiKey').value;
+      const workspaceId = document.getElementById('workspaceId').value;
+      const phone = document.getElementById('phone').value;
+      const output = document.getElementById('output');
+
+      if (!apiKey) {
+        output.innerHTML = '<div class="result fail">Error: Please enter CRM API key</div>';
+        return;
+      }
+
+      output.innerHTML = '<div class="result">Starting real-time subscription test...</div>';
+
+      // First, test the initial query
+      const startTime = performance.now();
+      try {
+        const response = await fetch(`${convexUrl}/http/contacts/getByPhone?phone=${phone}&workspace_id=${workspaceId}`, {
+          method: 'GET',
+          headers: { 'x-api-key': apiKey }
+        });
+        const data = await response.json();
+        const queryTime = (performance.now() - startTime).toFixed(0);
+
+        output.innerHTML += `
+          <div class="result">
+            <h3>Initial Query Result</h3>
+            <p>Found: ${data.found ? 'Yes' : 'No'}</p>
+            <p>Query Time: <span class="time">${queryTime}ms</span></p>
+          </div>
+        `;
+
+        if (data.found) {
+          output.innerHTML += `
+            <div class="result">
+              <h3>Contact Details</h3>
+              <p>Name: ${data.contact?.name || 'N/A'}</p>
+              <p>Status: ${data.contact?.leadStatus || 'N/A'}</p>
+              <p>Score: ${data.contact?.leadScore || 'N/A'}</p>
+            </div>
+          `;
+        }
+      } catch (e) {
+        output.innerHTML += `<div class="result fail">Error: ${e.message}</div>`;
+        return;
+      }
+
+      // Real-time subscription explanation
+      output.innerHTML += `
+        <div class="result">
+          <h3>Real-time Subscription Test</h3>
+          <p>To measure subscription latency, you need to:</p>
+          <ol>
+            <li>Open the Convex dashboard</li>
+            <li>Find the contact with phone ${phone}</li>
+            <li>Modify any field (e.g., name or tags)</li>
+            <li>Watch this page update in real-time</li>
+          </ol>
+          <p><strong>Expected latency: < 100ms</strong></p>
+          <p><strong>Target: < 50ms P95</strong></p>
+        </div>
+
+        <div class="section">
+          <h3>Live Subscription Monitor</h3>
+          <div id="monitor">
+            <p style="color: #64748b;">Waiting for subscription events...</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Latency Statistics</h3>
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">Events Received</div>
+              <div class="stat-value" id="eventCount">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Avg Latency</div>
+              <div class="stat-value" id="avgLatency">-</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">P50</div>
+              <div class="stat-value" id="p50">-</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">P95</div>
+              <div class="stat-value" id="p95">-</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Min</div>
+              <div class="stat-value" id="minLatency">-</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Max</div>
+              <div class="stat-value" id="maxLatency">-</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Note: Actual subscription testing requires Convex React client
+      // This HTML provides a placeholder for future implementation
+      // The Convex React client would use useQuery hook for real-time updates
+    }
+  </script>
+</body>
+</html>
