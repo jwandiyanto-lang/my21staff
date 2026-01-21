@@ -67,7 +67,11 @@ export async function GET(request: NextRequest) {
     const client = supabase as unknown as ArticleClient
     const { data: articles, error } = await client
       .from('articles')
-      .select('*')
+      .select(`
+        id, title, slug, excerpt, content,
+        cover_image_url, status, published_at,
+        created_at, updated_at
+      `)
       .eq('workspace_id', workspaceId)
       .order('created_at', { ascending: false })
 

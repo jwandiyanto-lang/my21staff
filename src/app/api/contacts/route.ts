@@ -37,7 +37,10 @@ export async function GET(request: NextRequest) {
 
     const { data: contacts, error } = await supabase
       .from('contacts')
-      .select('*')
+      .select(`
+        id, name, phone, email, lead_status, lead_score, tags,
+        assigned_to, created_at, updated_at, metadata
+      `)
       .eq('workspace_id', workspaceId)
       .order('created_at', { ascending: false })
       .range(from, to)

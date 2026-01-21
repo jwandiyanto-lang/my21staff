@@ -109,7 +109,10 @@ export async function GET(request: NextRequest) {
     const { data: webinars, error } = await client
       .from('webinars')
       .select(`
-        *,
+        id, title, slug, description, cover_image_url,
+        scheduled_at, duration_minutes, meeting_url,
+        max_registrations, status, published_at,
+        created_at, updated_at,
         webinar_registrations (count)
       `)
       .eq('workspace_id', workspaceId)
