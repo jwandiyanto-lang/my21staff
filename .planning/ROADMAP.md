@@ -146,25 +146,11 @@ Plans:
 
 ### Phase 5: Implementation
 
-**Goal:** Execute winning path to achieve sub-500ms P95 response times across all hot paths
+**Goal:** Execute Convex migration to achieve sub-500ms P95 response times across all hot paths
 
-**Dependencies:** Phase 4 (decision made)
+**Dependencies:** Phase 4 (decision made: proceed with Convex migration)
 
-**Requirements (conditional on GATE-03 decision):**
-
-**If Convex wins (GATE-03 = Convex):**
-- IMPL-01: Migrate contacts table to Convex with dual-write
-- IMPL-02: Migrate conversations table to Convex
-- IMPL-03: Migrate messages table to Convex
-- IMPL-04: Update inbox to use Convex real-time subscriptions
-- IMPL-05: Migrate webhook handler to Convex HTTP action
-- IMPL-06: Remove Supabase data queries (keep auth only)
-
-**If Supabase wins (GATE-03 = Supabase):**
-- IMPL-07: Replace polling with Supabase real-time subscriptions for inbox
-- IMPL-08: Create database function for dashboard data aggregation
-- IMPL-09: Tune connection pooling settings
-- IMPL-10: Verify sub-500ms P95 across all hot paths
+**Implementation Strategy:** Fresh start — no data migration from Supabase (existing data is trial data only)
 
 **Success Criteria:**
 1. `/api/contacts/by-phone` P95 < 500ms in production
@@ -173,10 +159,16 @@ Plans:
 4. Page load time P95 < 2 seconds (Vercel Speed Insights)
 5. No regression in functionality (all existing features work)
 
-**Plans:** 0 plans
+**Plans:** 7 plans in 5 waves
 
 Plans:
-- [ ] TBD — Execute based on Phase 4 decision (Convex migration or Supabase enhancement)
+- [ ] 05-01-PLAN.md — Complete Convex schema with all Supabase fields
+- [ ] 05-02-PLAN.md — Create Convex mutations and query functions
+- [ ] 05-03-PLAN.md — Create conversation query functions with filters
+- [ ] 05-04-PLAN.md — Implement Kapso webhook HTTP action
+- [ ] 05-05-PLAN.md — Update Next.js API routes to use Convex
+- [ ] 05-06-PLAN.md — Update inbox to use Convex real-time subscriptions
+- [ ] 05-07-PLAN.md — Deploy Convex and verify performance
 
 ---
 
@@ -296,10 +288,10 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
-| **v3.0 Performance & Speed** | 1-5 | 13/18 | Active | - |
+| **v3.0 Performance & Speed** | 1-5 | 13/20 | Active | - |
 
 **Total shipped:** 105 plans across 4 milestones
 
 ---
 
-*Last updated: 2026-01-21 — Phase 4 planned with 1 plan in 1 wave*
+*Last updated: 2026-01-21 — Phase 5 planned with 7 plans in 5 waves*
