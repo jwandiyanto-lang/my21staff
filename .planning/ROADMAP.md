@@ -73,6 +73,14 @@ Plans:
 4. All hot path queries use indexes (verified via EXPLAIN ANALYZE)
 5. No `select('*')` in `/api/contacts/by-phone`, `/api/conversations`, or `/api/messages`
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Create composite indexes on contacts, conversations, messages
+- [ ] 02-02-PLAN.md — Refactor /api/contacts/by-phone to parallel queries
+- [ ] 02-03-PLAN.md — Refactor /api/conversations to explicit columns + parallel queries
+- [ ] 02-04-PLAN.md — Verify optimization results and document performance
+
 ---
 
 ### Phase 3: Convex Spike
@@ -98,6 +106,13 @@ Plans:
 4. Kapso webhook can be received and processed by Convex HTTP action
 5. Comparison document exists with side-by-side P50/P95/P99 for both approaches
 
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD — Set up Convex project and auth integration
+- [ ] TBD — Implement contacts schema and query function
+- [ ] TBD — Benchmark vs Supabase and document results
+
 ---
 
 ### Phase 4: Decision Gate
@@ -115,6 +130,11 @@ Plans:
 1. Decision document exists with performance comparison table (Supabase vs Convex)
 2. Webhook reliability assessment complete (success rate, error handling, retry behavior)
 3. Clear written decision with rationale: "Proceed with [Convex/Supabase] because [data-backed reason]"
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD — Document comparison metrics and make architecture decision
 
 ---
 
@@ -146,6 +166,11 @@ Plans:
 3. Inbox updates in real-time without polling (subscription-based)
 4. Page load time P95 < 2 seconds (Vercel Speed Insights)
 5. No regression in functionality (all existing features work)
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD — Execute based on Phase 4 decision (Convex migration or Supabase enhancement)
 
 ---
 
@@ -265,10 +290,10 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
-| **v3.0 Performance & Speed** | 1-5 | 0/3 | Active | - |
+| **v3.0 Performance & Speed** | 1-5 | 0/7 | Active | - |
 
 **Total shipped:** 105 plans across 4 milestones
 
 ---
 
-*Last updated: 2026-01-20 — Phase 1 planned*
+*Last updated: 2026-01-21 — Phase 2 planned with 4 plans in 3 waves*
