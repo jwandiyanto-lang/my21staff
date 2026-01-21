@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 3 - Convex Spike
-Plan: 01 of 5
+Plan: 02 of 5
 Status: In progress
-Last activity: 2026-01-21 — Completed 03-01-PLAN.md (Convex Initialization)
+Last activity: 2026-01-21 — Completed 03-02-PLAN.md (Convex Query Functions)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ████████░░ (113 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 █████████░ (115 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 109 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 4 in v3.0)
+- Total plans completed: 115 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 10 in v3.0)
 - v2.2 timeline: 1 day (Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
@@ -68,6 +68,9 @@ Key v3.0 decisions:
 - Supabase JWT provider using customJwt with JWKS endpoint verification
 - Schema migration with supabaseId field for reference tracking
 - Timestamps stored as numbers (Unix ms) in Convex
+- Use @convex-dev/auth for getAuthUserId integration with Supabase JWT
+- All Convex queries must call requireWorkspaceMembership() for authorization
+- Use parallel Promise.all for non-dependent queries to optimize performance
 
 ### Deferred Issues
 
@@ -84,9 +87,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Completed 03-01-PLAN.md (Convex Initialization)
+Stopped at: Completed 03-02-PLAN.md (Convex Query Functions)
 Resume file: None
-Next: 03-02-PLAN.md (Create Convex functions for performance comparison)
+Next: 03-03-PLAN.md (Benchmark Convex vs Supabase)
 
 ## Deployment Info
 
@@ -115,4 +118,4 @@ Next: 03-02-PLAN.md (Create Convex functions for performance comparison)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-21 — Completed 03-01-PLAN.md (Convex Initialization)*
+*Last updated: 2026-01-21 — Completed 03-02-PLAN.md (Convex Query Functions)*
