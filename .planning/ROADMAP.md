@@ -111,12 +111,13 @@ Plans:
 **Plans:** 6 plans in 5 waves
 
 Plans:
-- [ ] 03-01-PLAN.md — Initialize Convex project and configure Supabase JWT auth
-- [ ] 03-02-PLAN.md — Implement authorization helpers and query functions
-- [ ] 03-03-PLAN.md — Create data migration system
-- [ ] 03-04-PLAN.md — Implement HTTP actions and Next.js API route
-- [ ] 03-05-PLAN.md — Create and run performance benchmark
-- [ ] 03-06-PLAN.md — Verify spike outcomes and document results
+- [x] 03-01-PLAN.md — Initialize Convex project and configure Supabase JWT auth
+- [x] 03-02-PLAN.md — Implement authorization helpers and query functions
+- [x] 03-03-PLAN.md — Create data migration system
+- [x] 03-04-PLAN.md — Implement HTTP actions and Next.js API route
+- [x] 03-05-PLAN.md — Create and run performance benchmark
+- [x] 03-06-PLAN.md — Verify spike outcomes and document results
+- [x] VERIFIED 2026-01-21
 
 ---
 
@@ -295,7 +296,7 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
-| **v3.0 Performance & Speed** | 1-5 | 7/18 | Active | - |
+| **v3.0 Performance & Speed** | 1-5 | 13/18 | Active | - |
 
 **Total shipped:** 105 plans across 4 milestones
 

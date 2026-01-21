@@ -13,9 +13,13 @@
  *   - SUPABASE_SERVICE_ROLE_KEY
  */
 
+import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import { ConvexHttpClient } from "convex/browser";
 import type { Id } from "../convex/_generated/dataModel";
+
+// Load environment variables from .env.local
+config({ path: ".env.local" });
 
 // Type helpers for migration mappings
 interface Mapping {

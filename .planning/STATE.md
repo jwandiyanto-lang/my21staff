@@ -10,22 +10,22 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 3 - Convex Spike
-Plan: 05 of 5
-Status: In progress
-Last activity: 2026-01-21 — Completed 03-05-PLAN.md (Performance Benchmark)
+Plan: 06 of 6
+Status: Complete
+Last activity: 2026-01-21 — Phase 3 verified and complete
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ████████░░ (117 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ (118 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 117 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 12 in v3.0)
+- Total plans completed: 118 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 13 in v3.0)
 - v2.2 timeline: 1 day (Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
-- Lines: ~43,200 TypeScript
-- Phases completed: 32 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 6, v3.0: 5)
+- Lines: ~43,400 TypeScript
+- Phases completed: 33 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 6, v3.0: 5)
 
 ## Accumulated Context
 
@@ -48,6 +48,14 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - RLS policies use per-row subqueries
 - Active polling instead of real-time subscriptions
 
+**Phase 2 (Supabase Optimization) Results:**
+- P50: 504ms, P95: 926ms — improved but still > 500ms target
+
+**Phase 3 (Convex Spike) Results:**
+- Convex API P50: 23ms, P95: 37ms — **25.4x faster** than Supabase
+- Convex meets < 500ms target with significant margin
+- Recommendation: Proceed with Convex migration
+
 **Target outcomes:**
 - Page load time < 2 seconds (P95)
 - API response time < 500ms (P95)
@@ -65,16 +73,10 @@ Key v3.0 decisions:
 - Data-driven decision gate before implementation
 - Hybrid architecture viable (Supabase auth + Convex data)
 - Manual baseline capture: wait 24-48 hours for production traffic before filling metrics
-- Supabase JWT provider using customJwt with JWKS endpoint verification
-- Schema migration with supabaseId field for reference tracking
-- Timestamps stored as numbers (Unix ms) in Convex
-- Use @convex-dev/auth for getAuthUserId integration with Supabase JWT
-- All Convex queries must call requireWorkspaceMembership() for authorization
-- Use parallel Promise.all for non-dependent queries to optimize performance
-- Convex HTTP actions use CRM_API_KEY for authentication (spake), JWT in production
-- Migration system stores supabaseId on all records for reference tracking
-- Migration uses batch processing (100 records) to avoid Convex payload size limits
-- Benchmark runs 50 iterations per test for statistical significance (P50/P95/P99 metrics)
+
+**New from Phase 3 verification:**
+- **Proceed with Convex migration** — Convex API achieves 37ms P95, 25.4x faster than Supabase
+- Do NOT proceed with Supabase enhancement (IMPL-07 through IMPL-10)
 
 ### Deferred Issues
 
@@ -91,16 +93,15 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Completed 03-05-PLAN.md (Performance Benchmark)
+Stopped at: Phase 3 Complete — Verification report created with benchmark results
 Resume file: None
-Next: 03-06-PLAN.md (Decision Gate)
+Next: Phase 4 — Decision Gate (formalize Convex migration decision)
 
 ## Deployment Info
 
 **Production URL:** https://my21staff.com
 **Vercel CLI:** Installed and linked
 **Supabase Project:** my21staff (tcpqqublnkphuwhhwizx)
-**Convex Project:** intent-otter-212
 
 **Environment Variables (Vercel):**
 - NEXT_PUBLIC_SUPABASE_URL
@@ -110,8 +111,7 @@ Next: 03-06-PLAN.md (Decision Gate)
 - ENCRYPTION_KEY
 - GROK_API_KEY (needed for ARI)
 
-**Environment Variables (Convex):**
-- NEXT_PUBLIC_SUPABASE_URL
+**Convex Project:** intent-otter-212 (https://intent-otter-212.convex.cloud)
 
 **Workspaces:**
 - My21Staff: `0318fda5-22c4-419b-bdd8-04471b818d17` (for pricing form leads)
@@ -122,4 +122,4 @@ Next: 03-06-PLAN.md (Decision Gate)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-21 — Completed 03-05-PLAN.md (Performance Benchmark)*
+*Last updated: 2026-01-21 — Phase 3 (Convex Spike) verified and complete*

@@ -9,8 +9,12 @@
  * Outputs P50/P95/P99 statistics for data-driven decision.
  */
 
+import { config } from 'dotenv'
 import { performance } from 'perf_hooks'
 import { createClient } from '@supabase/supabase-js'
+
+// Load environment variables from .env.local
+config({ path: '.env.local' })
 
 // ============================================================================
 // Configuration
