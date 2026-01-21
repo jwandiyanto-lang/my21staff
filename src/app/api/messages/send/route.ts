@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { fetchMutation, fetchQuery } from 'convex/server'
+import { api } from '@/convex/_generated/api'
 import { sendMessage } from '@/lib/kapso/client'
 import type { KapsoCredentials } from '@/lib/kapso/client'
 import type { Conversation, Contact, Workspace } from '@/types/database'
@@ -39,27 +41,26 @@ export async function POST(request: NextRequest) {
     const rateLimitResponse = rateLimitByUser(user.id, 'messages/send', { limit: 30, windowMs: 60 * 1000 })
     if (rateLimitResponse) return rateLimitResponse
 
-    // Fetch conversation to get workspace_id and contact_id
-    const { data: conversationData, error: convError } = await supabase
-      .from('conversations')
-      .select('id, workspace_id, contact_id')
-      .eq('id', conversationId)
-      .single()
+    // Fetch conversation via Convex
+    const conversation = await fetchQuery(
+      api.conversations.getByIdInternal,
+      { conversation_id: conversationId }
+    )
 
-    if (convError || !conversationData) {
+    if (!conversation) {
       return NextResponse.json(
         { error: 'Conversation not found' },
         { status: 404 }
       )
     }
 
-    const conversation = conversationData as Pick<Conversation, 'id' | 'workspace_id' | 'contact_id'>
+    const workspaceId = conversation.workspace_id
 
-    // Check user has access to this workspace
+    // Verify workspace membership via Supabase (auth still via Supabase)
     const { data: membership } = await supabase
       .from('workspace_members')
       .select('id')
-      .eq('workspace_id', conversation.workspace_id)
+      .eq('workspace_id', workspaceId)
       .eq('user_id', user.id)
       .single()
 
@@ -70,39 +71,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Fetch contact phone
-    const { data: contactData, error: contactError } = await supabase
-      .from('contacts')
-      .select('phone')
-      .eq('id', conversation.contact_id)
-      .single()
+    // Fetch contact phone via Convex
+    const contact = await fetchQuery(
+      api.contacts.getByIdInternal,
+      { contact_id: conversation.contact_id }
+    )
 
-    if (contactError || !contactData) {
+    if (!contact) {
       return NextResponse.json(
         { error: 'Contact not found' },
         { status: 404 }
       )
     }
 
-    const contact = contactData as Pick<Contact, 'phone'>
+    const contactPhone = contact.phone
 
-    // Fetch workspace for Kapso credentials
-    const { data: workspaceData, error: wsError } = await supabase
-      .from('workspaces')
-      .select('kapso_phone_id, settings')
-      .eq('id', conversation.workspace_id)
-      .single()
+    // Fetch workspace for Kapso credentials via Convex
+    const workspace = await fetchQuery(
+      api.workspaces.getById,
+      { workspace_id: workspaceId }
+    )
 
-    if (wsError || !workspaceData) {
+    if (!workspace) {
       return NextResponse.json(
         { error: 'Workspace not found' },
         { status: 404 }
       )
     }
 
-    const workspace = workspaceData as Pick<Workspace, 'kapso_phone_id' | 'settings'>
-
-    const contactPhone = contact.phone
     let kapsoMessageId: string | null = null
 
     // Send via Kapso (unless dev mode)
@@ -139,42 +135,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Insert message to database
-    const now = new Date().toISOString()
-    const { data: message, error: insertError } = await supabase
-      .from('messages')
-      .insert({
+    // Insert message to Convex database
+    const message = await fetchMutation(
+      api.createMessageInternal,
+      {
         conversation_id: conversationId,
-        workspace_id: conversation.workspace_id,
-        direction: 'outbound',
+        workspace_id: workspaceId,
+        content: content.trim(),
         sender_type: 'user',
         sender_id: user.id,
-        content: content.trim(),
         message_type: 'text',
+        media_url: undefined,
         kapso_message_id: kapsoMessageId,
-        created_at: now,
-      })
-      .select()
-      .single()
-
-    if (insertError || !message) {
-      console.error('Message insert error:', insertError)
-      return NextResponse.json(
-        { error: 'Failed to save message' },
-        { status: 500 }
-      )
-    }
-
-    // Update conversation last_message_at and preview
-    const preview = content.trim().substring(0, 100)
-    await supabase
-      .from('conversations')
-      .update({
-        last_message_at: now,
-        last_message_preview: preview,
-        updated_at: now,
-      })
-      .eq('id', conversationId)
+        metadata: undefined,
+      }
+    )
 
     return NextResponse.json({ message })
   } catch (error) {

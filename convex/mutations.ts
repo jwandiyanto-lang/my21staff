@@ -12,7 +12,7 @@
  * - Webhook helpers: upsertContact, upsertConversation (for Kapso integration)
  */
 
-import { mutation } from "./_generated/server";
+import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireWorkspaceMembership } from "./lib/auth";
 
@@ -438,6 +438,76 @@ export const markConversationRead = mutation({
 // ============================================
 // MESSAGE MUTATIONS
 // ============================================
+
+/**
+ * Create an outbound message (internal version for API routes).
+ *
+ * Used by /api/messages/send which handles auth via Supabase.
+ * No workspace membership check - API route handles authorization.
+ *
+ * @param conversation_id - The conversation
+ * @param workspace_id - Workspace ID
+ * @param content - Message content
+ * @param sender_type - 'user' or 'bot'
+ * @param sender_id - User ID if sent by user
+ * @param message_type - Type of message (text, image, etc.)
+ * @param media_url - Optional media URL
+ * @param kapso_message_id - Optional Kapso message ID
+ * @param metadata - Optional metadata
+ * @returns The created message document
+ */
+export const createMessageInternal = internalMutation({
+  args: {
+    conversation_id: v.string(),
+    workspace_id: v.string(),
+    content: v.optional(v.string()),
+    sender_type: v.string(),
+    sender_id: v.optional(v.string()),
+    message_type: v.string(),
+    media_url: v.optional(v.string()),
+    kapso_message_id: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+    supabaseId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversation_id as any);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    if (conversation.workspace_id !== args.workspace_id) {
+      throw new Error("Conversation not in this workspace");
+    }
+
+    const now = Date.now();
+    const preview = args.content || (args.message_type !== "text" ? `[${args.message_type}]` : "");
+
+    // Create message
+    const messageId = await ctx.db.insert("messages", {
+      conversation_id: args.conversation_id as any,
+      workspace_id: args.workspace_id as any,
+      direction: "outbound",
+      sender_type: args.sender_type,
+      sender_id: args.sender_id || null,
+      content: args.content,
+      message_type: args.message_type,
+      media_url: args.media_url,
+      kapso_message_id: args.kapso_message_id,
+      metadata: args.metadata || {},
+      created_at: now,
+      supabaseId: args.supabaseId || "",
+    });
+
+    // Update conversation with last message info
+    await ctx.db.patch(args.conversation_id as any, {
+      last_message_at: now,
+      last_message_preview: preview.substring(0, 200),
+      updated_at: now,
+    });
+
+    return await ctx.db.get(messageId);
+  },
+});
 
 /**
  * Create an outbound message (sent by user or bot).

@@ -289,6 +289,25 @@ export const listByTag = query({
 });
 
 /**
+ * Get a contact by ID (internal version for API routes).
+ *
+ * Used by /api/messages/send to get contact phone.
+ * No workspace membership check - API route handles authorization.
+ */
+export const getByIdInternal = internalQuery({
+  args: {
+    contact_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const contact = await ctx.db.get(args.contact_id as any);
+    if (!contact) {
+      return null;
+    }
+    return contact;
+  },
+});
+
+/**
  * Get a contact by ID.
  *
  * @param contact_id - The contact ID

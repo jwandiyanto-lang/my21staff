@@ -10,6 +10,22 @@ import { v } from "convex/values";
 import { requireWorkspaceMembership } from "./lib/auth";
 
 /**
+ * Get a conversation by ID (internal version for API routes).
+ *
+ * Used by /api/messages/send to get conversation details.
+ * No workspace membership check - API route handles authorization.
+ */
+export const getByIdInternal = internalQuery({
+  args: {
+    conversation_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversation_id as any);
+    return conversation;
+  },
+});
+
+/**
  * Internal version of listWithFilters for API routes that handle their own auth.
  *
  * Used by /api/conversations which authenticates via Supabase auth.
