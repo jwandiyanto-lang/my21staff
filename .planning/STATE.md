@@ -12,14 +12,14 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 Phase: 5 - Implementation
 Plan: 02 of 10
 Status: In progress
-Last activity: 2026-01-21 — Completed Convex mutations and queries
+Last activity: 2026-01-21 — Completed 05-01: Convex Schema Complete
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ███░░░░░░ (120 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ████████░░ (121 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 120 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 15 in v3.0)
+- Total plans completed: 121 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 16 in v3.0)
 - v2.2 timeline: 1 day (Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
@@ -79,6 +79,9 @@ Key v3.0 decisions:
 - Do NOT proceed with Supabase enhancement (IMPL-07 through IMPL-10)
 
 **New from Phase 5 Implementation:**
+- Use v.optional(v.any()) for metadata fields (ARI scores, reply context, user preferences)
+- Snake_case naming in Convex to match Supabase for migration consistency
+- by_assigned index for contact assignment filtering
 - Hard delete for contacts (no soft delete) - fresh start without Supabase complexity
 - Phone normalization removes non-digits for consistent WhatsApp matching
 - Upsert pattern for webhook idempotency prevents duplicate data on retry
@@ -99,9 +102,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Completed 05-02 — Convex mutations and queries
+Stopped at: Completed 05-01 — Convex Schema Complete
 Resume file: None
-Next: 05-03 — Kapso webhook HTTP action
+Next: 05-02 — CRUD Mutations
 
 ## Deployment Info
 
@@ -128,4 +131,4 @@ Next: 05-03 — Kapso webhook HTTP action
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-21 — Phase 5 Implementation (05-02: Mutations & Queries) complete*
+*Last updated: 2026-01-21 — Phase 5 Implementation (05-01: Convex Schema) complete*
