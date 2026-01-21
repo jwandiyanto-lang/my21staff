@@ -9,23 +9,23 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 
 ## Current Position
 
-Phase: 2 - Supabase Optimization
-Plan: 04 of 4
-Status: Complete
-Last activity: 2026-01-21 — Phase 2 verified and complete
+Phase: 3 - Convex Spike
+Plan: 01 of 5
+Status: In progress
+Last activity: 2026-01-21 — Completed 03-01-PLAN.md (Convex Initialization)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ███████░░░ (112 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ████████░░ (113 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 108 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 3 in v3.0)
+- Total plans completed: 109 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 4 in v3.0)
 - v2.2 timeline: 1 day (Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
 - Lines: ~43,100 TypeScript
-- Phases completed: 31 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 6, v3.0: 3)
+- Phases completed: 32 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 6, v3.0: 4)
 
 ## Accumulated Context
 
@@ -65,6 +65,9 @@ Key v3.0 decisions:
 - Data-driven decision gate before implementation
 - Hybrid architecture viable (Supabase auth + Convex data)
 - Manual baseline capture: wait 24-48 hours for production traffic before filling metrics
+- Supabase JWT provider using customJwt with JWKS endpoint verification
+- Schema migration with supabaseId field for reference tracking
+- Timestamps stored as numbers (Unix ms) in Convex
 
 ### Deferred Issues
 
@@ -81,15 +84,16 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Completed 01-03-PLAN.md (checkpoint - awaiting user verification)
+Stopped at: Completed 03-01-PLAN.md (Convex Initialization)
 Resume file: None
-Next: Wait for user verification of Speed Insights in Vercel Dashboard
+Next: 03-02-PLAN.md (Create Convex functions for performance comparison)
 
 ## Deployment Info
 
 **Production URL:** https://my21staff.com
 **Vercel CLI:** Installed and linked
 **Supabase Project:** my21staff (tcpqqublnkphuwhhwizx)
+**Convex Project:** intent-otter-212
 
 **Environment Variables (Vercel):**
 - NEXT_PUBLIC_SUPABASE_URL
@@ -98,6 +102,9 @@ Next: Wait for user verification of Speed Insights in Vercel Dashboard
 - NEXT_PUBLIC_PRICING_WORKSPACE_ID
 - ENCRYPTION_KEY
 - GROK_API_KEY (needed for ARI)
+
+**Environment Variables (Convex):**
+- NEXT_PUBLIC_SUPABASE_URL
 
 **Workspaces:**
 - My21Staff: `0318fda5-22c4-419b-bdd8-04471b818d17` (for pricing form leads)
@@ -108,4 +115,4 @@ Next: Wait for user verification of Speed Insights in Vercel Dashboard
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-21 — Completed 01-02-PLAN.md (API instrumentation with query timing)*
+*Last updated: 2026-01-21 — Completed 03-01-PLAN.md (Convex Initialization)*
