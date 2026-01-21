@@ -47,6 +47,7 @@ Plans:
 - [x] 01-01-PLAN.md — Install Speed Insights and create timing infrastructure
 - [x] 01-02-PLAN.md — Instrument /api/contacts/by-phone and /api/conversations
 - [x] 01-03-PLAN.md — Deploy and establish baseline
+- [x] VERIFIED 2026-01-21
 
 ---
 
@@ -76,10 +77,11 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Create composite indexes on contacts, conversations, messages
-- [ ] 02-02-PLAN.md — Refactor /api/contacts/by-phone to parallel queries
-- [ ] 02-03-PLAN.md — Refactor /api/conversations to explicit columns + parallel queries
-- [ ] 02-04-PLAN.md — Verify optimization results and document performance
+- [x] 02-01-PLAN.md — Create composite indexes on contacts, conversations, messages
+- [x] 02-02-PLAN.md — Refactor /api/contacts/by-phone to parallel queries
+- [x] 02-03-PLAN.md — Refactor /api/conversations to explicit columns + parallel queries
+- [x] 02-04-PLAN.md — Verify optimization results and document performance
+- [x] VERIFIED 2026-01-21
 
 ---
 
@@ -290,7 +292,7 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
-| **v3.0 Performance & Speed** | 1-5 | 3/12 | Active | - |
+| **v3.0 Performance & Speed** | 1-5 | 7/12 | Active | - |
 
 **Total shipped:** 105 plans across 4 milestones
 
