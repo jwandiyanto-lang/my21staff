@@ -17,12 +17,26 @@ export function hasPermission(role: WorkspaceRole, permission: Permission): bool
  * const permError = requirePermission(authResult.role, 'leads:delete')
  * if (permError) return permError
  * ```
+ *
+ * With dangerouslySkipPermission (use with caution - bypasses permission checks):
+ * ```ts
+ * const permError = requirePermission(authResult.role, 'leads:delete', undefined, { dangerouslySkipPermission: true })
+ * if (permError) return permError
+ * ```
  */
+interface RequirePermissionOptions {
+  dangerouslySkipPermission?: boolean
+}
+
 export function requirePermission(
   role: WorkspaceRole,
   permission: Permission,
-  errorMessage?: string
+  errorMessage?: string,
+  options?: RequirePermissionOptions
 ): NextResponse | null {
+  if (options?.dangerouslySkipPermission) {
+    return null
+  }
   if (!hasPermission(role, permission)) {
     return NextResponse.json(
       { error: errorMessage || `Insufficient permissions: requires ${permission}` },
