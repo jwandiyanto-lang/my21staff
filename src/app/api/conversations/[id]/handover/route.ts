@@ -1,16 +1,19 @@
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
-import { setHandover } from '@/lib/kapso/client'
-import { safeDecrypt } from '@/lib/crypto'
+import { NextRequest, NextResponse } from 'next/server'
+import { fetchMutation, fetchQuery } from 'convex/server'
+import { api } from '@/convex/_generated/api'
 
+/**
+ * POST /api/conversations/[id]/handover
+ *
+ * Hand over a conversation to AI bot (ARI).
+ */
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id: conversationId } = await params
-    const body = await request.json()
-    const { ai_paused } = body
+    const { ai_paused } = await request.json()
 
     if (typeof ai_paused !== 'boolean') {
       return NextResponse.json(
@@ -19,168 +22,24 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const metrics = { start: performance.now() }
 
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Get conversation
-    const { data: conversation, error: convError } = await supabase
-      .from('conversations')
-      .select('id, workspace_id, contact_id')
-      .eq('id', conversationId)
-      .single()
-
-    if (convError || !conversation) {
-      console.error('Error fetching conversation:', convError)
-      return NextResponse.json(
-        { error: 'Conversation not found' },
-        { status: 404 }
-      )
-    }
-
-    // Verify user has access to this workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', conversation.workspace_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json(
-        { error: 'Not authorized to access this conversation' },
-        { status: 403 }
-      )
-    }
-
-    // Get contact phone
-    const { data: contact, error: contactError } = await supabase
-      .from('contacts')
-      .select('phone')
-      .eq('id', conversation.contact_id)
-      .single()
-
-    if (contactError) {
-      console.error('Error fetching contact:', contactError)
-    }
-
-    // Get workspace Kapso credentials
-    const { data: workspace, error: wsError } = await supabase
-      .from('workspaces')
-      .select('kapso_phone_id, settings')
-      .eq('id', conversation.workspace_id)
-      .single()
-
-    if (wsError) {
-      console.error('Error fetching workspace:', wsError)
-    }
-
-    // Update conversation status locally
-    // Using 'handover' when AI is paused, 'open' when AI is active
-    const newStatus = ai_paused ? 'handover' : 'open'
-
-    const { error: updateError } = await supabase
-      .from('conversations')
-      .update({ status: newStatus })
-      .eq('id', conversationId)
-
-    if (updateError) {
-      console.error('Error updating handover status:', updateError)
-      return NextResponse.json(
-        { error: 'Failed to update handover status' },
-        { status: 500 }
-      )
-    }
-
-    // Call Kapso API to pause/resume AI workflow
-    let kapsoResult: { success: boolean; message?: string } = { success: true, message: 'No Kapso credentials' }
-    const settings = workspace?.settings as { kapso_api_key?: string } | null
-    const encryptedKey = settings?.kapso_api_key
-    const phoneId = workspace?.kapso_phone_id
-
-    if (encryptedKey && phoneId && contact?.phone) {
-      const apiKey = safeDecrypt(encryptedKey)
-      kapsoResult = await setHandover(
-        { apiKey, phoneId },
-        contact.phone,
-        ai_paused
-      )
-      console.log(`Kapso handover result for ${contact.phone}:`, kapsoResult)
-    }
+    // Update conversation status via Convex
+    const result = await fetchMutation(
+      api.conversations.updateConversationStatus,
+      {
+        id: conversationId,
+        status: ai_paused ? 'handover' : 'open'
+      }
+    )
 
     return NextResponse.json({
       success: true,
-      status: newStatus,
-      ai_paused,
-      kapso: kapsoResult,
+      conversation: result,
+      metrics: { duration_ms: Math.round(performance.now() - metrics.start) }
     })
   } catch (error) {
-    console.error('Error in handover API:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id: conversationId } = await params
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const { data, error } = await supabase
-      .from('conversations')
-      .select('status, workspace_id')
-      .eq('id', conversationId)
-      .single()
-
-    if (error || !data) {
-      console.error('Error fetching handover status:', error)
-      return NextResponse.json(
-        { error: 'Conversation not found' },
-        { status: 404 }
-      )
-    }
-
-    // Verify user has access to this workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', data.workspace_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json(
-        { error: 'Not authorized to access this conversation' },
-        { status: 403 }
-      )
-    }
-
-    return NextResponse.json({
-      ai_paused: data.status === 'handover'
-    })
-  } catch (error) {
-    console.error('Error in handover GET API:', error)
+    console.error('[ConversationsHandover] Error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

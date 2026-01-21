@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { fetchQuery } from 'convex/server'
 import { api } from '@/convex/_generated/api'
-import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import {
   withTiming,
   createRequestMetrics,
@@ -10,80 +8,82 @@ import {
   logQuerySummary,
 } from '@/lib/instrumentation/with-timing'
 
+/**
+ * GET /api/conversations?workspace_id=xxx&status=open&assigned_to=user_id
+ *
+ * Inbox conversations API using Convex.
+ *
+ * Returns conversations list with contacts, pagination, and metadata.
+ * Authentication: X-API-Key header with CRM_API_KEY secret
+ */
 async function getHandler(request: NextRequest) {
-  const supabase = await createClient()
-  const { searchParams } = new URL(request.url)
+  try {
+    // Verify API key
+    const apiKey = request.headers.get('x-api-key')
+    const expectedKey = process.env.CRM_API_KEY
 
-  const workspaceId = searchParams.get('workspace')
-  const page = parseInt(searchParams.get('page') || '0')
-  const limit = parseInt(searchParams.get('limit') || '50')
-
-  // New filter parameters
-  const active = searchParams.get('active') === 'true'
-  const statusFilters = searchParams.getAll('status')
-  const tagFilters = searchParams.getAll('tags')
-  const assignedFilter = searchParams.get('assigned')
-
-  if (!workspaceId) {
-    return NextResponse.json({ error: 'Workspace required' }, { status: 400 })
-  }
-
-  // Verify membership with Supabase (auth still via Supabase)
-  const authResult = await requireWorkspaceMembership(workspaceId)
-  if (authResult instanceof NextResponse) {
-    return authResult
-  }
-
-  const metrics = createRequestMetrics()
-
-  // Call Convex query for inbox data
-  let queryStart = performance.now()
-  const result = await fetchQuery(
-    api.conversations.listWithFiltersInternal,
-    {
-      workspace_id: workspaceId,
-      active,
-      statusFilters,
-      tagFilters,
-      assignedTo: assignedFilter,
-      limit,
-      page,
+    if (!expectedKey) {
+      console.error('[Conversations] CRM_API_KEY not configured')
+      return NextResponse.json(
+        { error: 'Service not configured' },
+        { status: 500 }
+      )
     }
-  )
-  logQuery(metrics, 'convex.conversations.listWithFiltersInternal', Math.round(performance.now() - queryStart))
 
-  // Merge Convex data with Supabase profile data for team members
-  // (profiles still in Supabase until migration is complete)
-  const userIds = result.members.map(m => m.user_id)
-  let teamMembers = result.members
+    if (apiKey !== expectedKey) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
 
-  if (userIds.length > 0) {
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, email, full_name, avatar_url')
-      .in('id', userIds)
+    // Get query parameters
+    const { searchParams } = new URL(request.url)
+    const workspaceId = searchParams.get('workspace_id')
 
-    teamMembers = result.members.map(m => ({
-      ...m,
-      profile: profiles?.find(p => p.id === m.user_id) || null,
-    }))
+    if (!workspaceId) {
+      return NextResponse.json(
+        { error: 'Missing workspace_id parameter' },
+        { status: 400 }
+      )
+    }
+
+    // Parse filters
+    const active = searchParams.get('active') === 'true'
+    const statusFilters = searchParams.getAll('status')
+    const assignedTo = searchParams.get('assigned_to')
+    const tagFilters = searchParams.getAll('tag')
+    const page = parseInt(searchParams.get('page') || '0')
+
+    const metrics = createRequestMetrics()
+
+    // Call Convex query
+    let queryStart = performance.now()
+    const result = await fetchQuery(
+      api.conversations.listWithFilters,
+      {
+        workspace_id: workspaceId,
+        active,
+        statusFilters,
+        assignedTo: assignedTo === 'unassigned' ? null : assignedTo,
+        tagFilters,
+        limit: 50,
+        page,
+      }
+    )
+    logQuery(metrics, 'convex.conversations.listWithFilters', Math.round(performance.now() - queryStart))
+
+    // Log query summary before returning
+    logQuerySummary('/api/conversations', metrics)
+
+    return NextResponse.json(result)
+  } catch (error) {
+    console.error('[Conversations] Error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
-
-  // Quick replies - table not yet created, return empty for now
-  const quickReplies: { id: string; label: string; text: string }[] = []
-
-  // Log query summary before returning
-  logQuerySummary('/api/conversations', metrics)
-
-  return NextResponse.json({
-    conversations: result.conversations ?? [],
-    totalCount: result.totalCount ?? 0,
-    activeCount: result.activeCount ?? 0,
-    teamMembers: teamMembers ?? [],
-    quickReplies: quickReplies ?? [],
-    contactTags: result.tags ?? [],
-  })
 }
 
-// Export wrapped handler with timing instrumentation
 export const GET = withTiming('/api/conversations', getHandler)

@@ -1,71 +1,34 @@
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { fetchMutation } from 'convex/server'
+import { api } from '@/convex/_generated/api'
 
+/**
+ * POST /api/conversations/[id]/read
+ *
+ * Mark a conversation as read (clears unread count).
+ */
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id: conversationId } = await params
-    const supabase = await createClient()
 
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    const metrics = { start: performance.now() }
 
-    // Get conversation to verify workspace access
-    const { data: conversation, error: convError } = await supabase
-      .from('conversations')
-      .select('id, workspace_id')
-      .eq('id', conversationId)
-      .single()
+    // Mark conversation as read via Convex
+    const result = await fetchMutation(
+      api.conversations.markConversationRead,
+      { id: conversationId }
+    )
 
-    if (convError || !conversation) {
-      return NextResponse.json(
-        { error: 'Conversation not found' },
-        { status: 404 }
-      )
-    }
-
-    // Verify user has access to this workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', conversation.workspace_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json(
-        { error: 'Not authorized to access this conversation' },
-        { status: 403 }
-      )
-    }
-
-    // Mark conversation as read by setting unread_count to 0
-    const { data, error } = await supabase
-      .from('conversations')
-      .update({ unread_count: 0, updated_at: new Date().toISOString() })
-      .eq('id', conversationId)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error marking conversation as read:', error)
-      return NextResponse.json(
-        { error: 'Failed to mark conversation as read' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({ success: true, conversation: data })
+    return NextResponse.json({
+      success: true,
+      conversation: result,
+      metrics: { duration_ms: Math.round(performance.now() - metrics.start) }
+    })
   } catch (error) {
-    console.error('Error in mark-as-read API:', error)
+    console.error('[ConversationsRead] Error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
