@@ -14,7 +14,8 @@ export default defineSchema({
     created_at: v.number(),
     updated_at: v.number(),
   })
-    .index("by_slug", ["slug"]),
+    .index("by_slug", ["slug"])
+    .index("by_kapso_phone", ["kapso_phone_id"]),
 
   // ============================================
   // WORKSPACE MEMBERS
