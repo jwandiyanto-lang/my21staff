@@ -85,7 +85,7 @@ export default defineSchema({
     message_type: v.string(), // 'text', 'image', 'document', 'audio', 'video', 'interactive'
     media_url: v.optional(v.string()),
     kapso_message_id: v.optional(v.string()),
-    metadata: v.optional(v.any()),
+    metadata: v.optional(v.any()), // Stores reply context: { reply_to_kapso_id, reply_to_from, ... }
     created_at: v.number(),
     supabaseId: v.string(),
   })
