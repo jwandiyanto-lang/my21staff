@@ -6,9 +6,79 @@
  * from Kapso webhooks).
  */
 
-import { query } from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { requireWorkspaceMembership } from "./lib/auth";
+
+/**
+ * Internal version of getContextByPhone for API routes that handle their own auth.
+ *
+ * This is used by /api/contacts/by-phone which authenticates via CRM_API_KEY header.
+ * No workspace membership check here - the API route handles authorization.
+ */
+export const getContextByPhoneInternal = internalQuery({
+  args: {
+    phone: v.string(),
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Get contact first
+    const contact = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace_phone", (q) =>
+        q.eq("workspace_id", args.workspace_id).eq("phone", args.phone)
+      )
+      .first();
+
+    if (!contact) {
+      return { found: false, context: null };
+    }
+
+    // Get conversation and notes in parallel
+    const [conversation, notes] = await Promise.all([
+      ctx.db
+        .query("conversations")
+        .withIndex("by_contact", (q) => q.eq("contact_id", contact._id))
+        .first(),
+      ctx.db
+        .query("contactNotes")
+        .withIndex("by_contact", (q) => q.eq("contact_id", contact._id))
+        .take(5),
+    ]);
+
+    // Get recent messages if conversation exists
+    let recentMessages: any[] = [];
+    if (conversation) {
+      recentMessages = await ctx.db
+        .query("messages")
+        .withIndex("by_conversation_time", (q) =>
+          q.eq("conversation_id", conversation._id)
+        )
+        .order("desc")
+        .take(10);
+    }
+
+    return {
+      found: true,
+      contact: {
+        name: contact.name,
+        kapso_name: contact.kapso_name,
+        lead_status: contact.lead_status,
+        lead_score: contact.lead_score,
+        tags: contact.tags,
+        is_returning: !!conversation?.last_message_at,
+        first_contact_date: contact.created_at,
+      },
+      notes: notes.map((n) => n.content),
+      last_interaction: conversation?.last_message_at || null,
+      recent_messages: recentMessages.map((m) => ({
+        content: m.content,
+        direction: m.direction,
+        created_at: m.created_at,
+      })),
+    };
+  },
+});
 
 /**
  * Get a contact by phone number within a workspace.
