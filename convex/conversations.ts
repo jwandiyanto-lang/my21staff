@@ -13,12 +13,13 @@ import { requireWorkspaceMembership } from "./lib/auth";
  * List conversations for a workspace.
  *
  * Returns conversations ordered by last_message_at (most recent first),
- * optionally filtered by status and limited to a specific count.
+ * optionally filtered by status, assignment, and limited to a specific count.
  * Fetches contact details in parallel for efficient rendering.
  *
  * @param workspace_id - The workspace to list conversations for
  * @param limit - Maximum number of conversations to return (default: 50)
- * @param status - Optional status filter ('open', 'closed', 'snoozed')
+ * @param status - Optional status filter ('open', 'closed', 'handover')
+ * @param assignedTo - Optional assignment filter (user_id or 'unassigned')
  * @returns Array of conversations with contact details
  */
 export const listByWorkspace = query({
@@ -26,6 +27,7 @@ export const listByWorkspace = query({
     workspace_id: v.string(),
     limit: v.optional(v.number()),
     status: v.optional(v.string()),
+    assignedTo: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await requireWorkspaceMembership(ctx, args.workspace_id);
@@ -39,6 +41,18 @@ export const listByWorkspace = query({
 
     if (args.status) {
       q = q.filter((q) => q.eq(q.field("status"), args.status));
+    }
+
+    if (args.assignedTo) {
+      q = q.filter((q) => {
+        if (args.assignedTo === "unassigned") {
+          // Filter for unassigned conversations
+          return q.eq(q.field("assigned_to"), undefined);
+        } else {
+          // Filter for conversations assigned to specific user
+          return q.eq(q.field("assigned_to"), args.assignedTo);
+        }
+      });
     }
 
     const limit = args.limit || 50;
