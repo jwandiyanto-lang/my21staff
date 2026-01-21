@@ -97,3 +97,53 @@ export const getByContact = query({
     return conversation;
   },
 });
+
+/**
+ * Count conversations with unread messages.
+ *
+ * Used for active count badge in inbox UI.
+ * Queries by workspace and filters for unread_count > 0.
+ *
+ * @param workspace_id - The workspace to count unread conversations for
+ * @returns Number of conversations with unread messages
+ */
+export const countUnread = query({
+  args: {
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const unreadConversations = await ctx.db
+      .query("conversations")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+      .filter((q) => q.gt(q.field("unread_count"), 0))
+      .collect();
+
+    return unreadConversations.length;
+  },
+});
+
+/**
+ * Count all conversations in a workspace.
+ *
+ * Used for pagination and total count display.
+ *
+ * @param workspace_id - The workspace to count conversations for
+ * @returns Total number of conversations
+ */
+export const countAll = query({
+  args: {
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const allConversations = await ctx.db
+      .query("conversations")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+      .collect();
+
+    return allConversations.length;
+  },
+});
