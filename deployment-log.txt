@@ -1,0 +1,3056 @@
+- Deploying to https://intent-otter-212.convex.cloud...
+
+Warning: Unknown properties in `convex.json`: `project`, `team`, `origin`
+  These properties will be preserved but are not recognized by this version of Convex.
+esbuild resolving import: {
+  path: './convex/convex.config.js',
+  importer: '',
+  namespace: '',
+  resolveDir: '/home/jfransisco/Desktop/21/my21staff',
+  kind: 'entry-point',
+  pluginData: undefined,
+  with: {}
+}
+  Not a file or virtual config.
+- Bundling modules for Node.js runtime...
+
+[32m✔[39m No large indexes are deleted by this push
+Uploading functions to Convex...
+startPush: {
+  "environmentVariables": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://tcpqqublnkphuwhhwizx.supabase.co"
+  },
+  "externalDepsId": null,
+  "componentDefinitionPackages": {
+    "": {
+      "externalPackageId": null,
+      "nodeVersion": null,
+      "packageSize": {
+        "unzippedSizeBytes": {
+          "$integer": "/jAHAAAAAAA="
+        },
+        "zippedSizeBytes": {
+          "$integer": "fucBAAAAAAA="
+        }
+      },
+      "sha256": {
+        "$bytes": "NhEhPOcoQdQW8uim3kdjqE1m7cnEajNijEQ20CASrCQ="
+      },
+      "storageKey": "71f7d891-f19d-4c55-84cb-7c581f7a956f"
+    }
+  },
+  "appAuth": [
+    {
+      "type": "customJwt",
+      "applicationID": "tcpqqublnkphuwhhwizx",
+      "issuer": "https://tcpqqublnkphuwhhwizx.supabase.co/auth/v1",
+      "jwks": "https://tcpqqublnkphuwhhwizx.supabase.co/.well-known/jwks.json",
+      "algorithm": "RS256"
+    }
+  ],
+  "analysis": {
+    "": {
+      "definition": {
+        "path": "",
+        "definitionType": {
+          "type": "app"
+        },
+        "childComponents": [],
+        "httpMounts": {},
+        "exports": {
+          "type": "branch",
+          "branch": []
+        }
+      },
+      "schema": {
+        "tables": [
+          {
+            "tableName": "ariConfig",
+            "indexes": [
+              {
+                "indexDescriptor": "by_workspace",
+                "fields": [
+                  "workspace_id",
+                  "_creationTime"
+                ]
+              }
+            ],
+            "searchIndexes": [],
+            "vectorIndexes": [],
+            "documentType": {
+              "type": "object",
+              "value": {
+                "bot_name": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "community_link": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "created_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "greeting_style": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "language": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "tone": {
+                  "fieldType": {
+                    "type": "any"
+                  },
+                  "optional": true
+                },
+                "updated_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "workspace_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "workspaces"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "stagedDbIndexes": [],
+            "stagedSearchIndexes": [],
+            "stagedVectorIndexes": []
+          },
+          {
+            "tableName": "ariConversations",
+            "indexes": [
+              {
+                "indexDescriptor": "by_workspace",
+                "fields": [
+                  "workspace_id",
+                  "_creationTime"
+                ]
+              },
+              {
+                "indexDescriptor": "by_workspace_contact",
+                "fields": [
+                  "workspace_id",
+                  "contact_id",
+                  "_creationTime"
+                ]
+              }
+            ],
+            "searchIndexes": [],
+            "vectorIndexes": [],
+            "documentType": {
+              "type": "object",
+              "value": {
+                "ai_model": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "contact_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "contacts"
+                  },
+                  "optional": false
+                },
+                "context": {
+                  "fieldType": {
+                    "type": "any"
+                  },
+                  "optional": true
+                },
+                "created_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "handoff_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": true
+                },
+                "handoff_reason": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "last_ai_message_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": true
+                },
+                "lead_score": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "lead_temperature": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "state": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "supabaseId": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "updated_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "workspace_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "workspaces"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "stagedDbIndexes": [],
+            "stagedSearchIndexes": [],
+            "stagedVectorIndexes": []
+          },
+          {
+            "tableName": "ariMessages",
+            "indexes": [
+              {
+                "indexDescriptor": "by_conversation_time",
+                "fields": [
+                  "ari_conversation_id",
+                  "created_at",
+                  "_creationTime"
+                ]
+              },
+              {
+                "indexDescriptor": "by_workspace",
+                "fields": [
+                  "workspace_id",
+                  "_creationTime"
+                ]
+              }
+            ],
+            "searchIndexes": [],
+            "vectorIndexes": [],
+            "documentType": {
+              "type": "object",
+              "value": {
+                "ai_model": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "ari_conversation_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "ariConversations"
+                  },
+                  "optional": false
+                },
+                "content": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "created_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "metadata": {
+                  "fieldType": {
+                    "type": "any"
+                  },
+                  "optional": true
+                },
+                "response_time_ms": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": true
+                },
+                "role": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "tokens_used": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": true
+                },
+                "workspace_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "workspaces"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "stagedDbIndexes": [],
+            "stagedSearchIndexes": [],
+            "stagedVectorIndexes": []
+          },
+          {
+            "tableName": "contactNotes",
+            "indexes": [
+              {
+                "indexDescriptor": "by_contact",
+                "fields": [
+                  "contact_id",
+                  "_creationTime"
+                ]
+              },
+              {
+                "indexDescriptor": "by_workspace",
+                "fields": [
+                  "workspace_id",
+                  "_creationTime"
+                ]
+              }
+            ],
+            "searchIndexes": [],
+            "vectorIndexes": [],
+            "documentType": {
+              "type": "object",
+              "value": {
+                "contact_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "contacts"
+                  },
+                  "optional": false
+                },
+                "content": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "created_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "supabaseId": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "user_id": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "workspace_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "workspaces"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "stagedDbIndexes": [],
+            "stagedSearchIndexes": [],
+            "stagedVectorIndexes": []
+          },
+          {
+            "tableName": "contacts",
+            "indexes": [
+              {
+                "indexDescriptor": "by_assigned",
+                "fields": [
+                  "workspace_id",
+                  "assigned_to",
+                  "_creationTime"
+                ]
+              },
+              {
+                "indexDescriptor": "by_workspace",
+                "fields": [
+                  "workspace_id",
+                  "_creationTime"
+                ]
+              },
+              {
+                "indexDescriptor": "by_workspace_phone",
+                "fields": [
+                  "workspace_id",
+                  "phone",
+                  "_creationTime"
+                ]
+              }
+            ],
+            "searchIndexes": [],
+            "vectorIndexes": [],
+            "documentType": {
+              "type": "object",
+              "value": {
+                "assigned_to": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "cache_updated_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": true
+                },
+                "created_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "email": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "kapso_name": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "lead_score": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "lead_status": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "metadata": {
+                  "fieldType": {
+                    "type": "any"
+                  },
+                  "optional": true
+                },
+                "name": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "phone": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "phone_normalized": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "source": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "supabaseId": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "tags": {
+                  "fieldType": {
+                    "type": "array",
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "optional": true
+                },
+                "updated_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "workspace_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "workspaces"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "stagedDbIndexes": [],
+            "stagedSearchIndexes": [],
+            "stagedVectorIndexes": []
+          },
+          {
+            "tableName": "conversations",
+            "indexes": [
+              {
+                "indexDescriptor": "by_contact",
+                "fields": [
+                  "contact_id",
+                  "_creationTime"
+                ]
+              },
+              {
+                "indexDescriptor": "by_workspace",
+                "fields": [
+                  "workspace_id",
+                  "_creationTime"
+                ]
+              },
+              {
+                "indexDescriptor": "by_workspace_time",
+                "fields": [
+                  "workspace_id",
+                  "last_message_at",
+                  "_creationTime"
+                ]
+              }
+            ],
+            "searchIndexes": [],
+            "vectorIndexes": [],
+            "documentType": {
+              "type": "object",
+              "value": {
+                "assigned_to": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "contact_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "contacts"
+                  },
+                  "optional": false
+                },
+                "created_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "last_message_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": true
+                },
+                "last_message_preview": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "status": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "supabaseId": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "unread_count": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "updated_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "workspace_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "workspaces"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "stagedDbIndexes": [],
+            "stagedSearchIndexes": [],
+            "stagedVectorIndexes": []
+          },
+          {
+            "tableName": "messages",
+            "indexes": [
+              {
+                "indexDescriptor": "by_conversation_time",
+                "fields": [
+                  "conversation_id",
+                  "created_at",
+                  "_creationTime"
+                ]
+              },
+              {
+                "indexDescriptor": "by_workspace",
+                "fields": [
+                  "workspace_id",
+                  "_creationTime"
+                ]
+              }
+            ],
+            "searchIndexes": [],
+            "vectorIndexes": [],
+            "documentType": {
+              "type": "object",
+              "value": {
+                "content": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "conversation_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "conversations"
+                  },
+                  "optional": false
+                },
+                "created_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "direction": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "kapso_message_id": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "media_url": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "message_type": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "metadata": {
+                  "fieldType": {
+                    "type": "any"
+                  },
+                  "optional": true
+                },
+                "sender_id": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "sender_type": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "supabaseId": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "workspace_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "workspaces"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "stagedDbIndexes": [],
+            "stagedSearchIndexes": [],
+            "stagedVectorIndexes": []
+          },
+          {
+            "tableName": "workspaceMembers",
+            "indexes": [
+              {
+                "indexDescriptor": "by_user_workspace",
+                "fields": [
+                  "user_id",
+                  "workspace_id",
+                  "_creationTime"
+                ]
+              },
+              {
+                "indexDescriptor": "by_workspace",
+                "fields": [
+                  "workspace_id",
+                  "_creationTime"
+                ]
+              }
+            ],
+            "searchIndexes": [],
+            "vectorIndexes": [],
+            "documentType": {
+              "type": "object",
+              "value": {
+                "created_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "role": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "settings": {
+                  "fieldType": {
+                    "type": "any"
+                  },
+                  "optional": true
+                },
+                "user_id": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "workspace_id": {
+                  "fieldType": {
+                    "type": "id",
+                    "tableName": "workspaces"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "stagedDbIndexes": [],
+            "stagedSearchIndexes": [],
+            "stagedVectorIndexes": []
+          },
+          {
+            "tableName": "workspaces",
+            "indexes": [
+              {
+                "indexDescriptor": "by_kapso_phone",
+                "fields": [
+                  "kapso_phone_id",
+                  "_creationTime"
+                ]
+              },
+              {
+                "indexDescriptor": "by_slug",
+                "fields": [
+                  "slug",
+                  "_creationTime"
+                ]
+              }
+            ],
+            "searchIndexes": [],
+            "vectorIndexes": [],
+            "documentType": {
+              "type": "object",
+              "value": {
+                "created_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                },
+                "kapso_phone_id": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "meta_access_token": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "name": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "owner_id": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "settings": {
+                  "fieldType": {
+                    "type": "any"
+                  },
+                  "optional": true
+                },
+                "slug": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "updated_at": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "stagedDbIndexes": [],
+            "stagedSearchIndexes": [],
+            "stagedVectorIndexes": []
+          }
+        ],
+        "schemaValidation": true
+      },
+      "functions": {
+        "auth.config.js": {
+          "functions": [],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "contacts.js": {
+          "functions": [
+            {
+              "name": "getContextByPhoneInternal",
+              "pos": {
+                "path": "contacts.js",
+                "start_lineno": 26,
+                "start_col": 13
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"phone\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "getByPhone",
+              "pos": {
+                "path": "contacts.js",
+                "start_lineno": 103,
+                "start_col": 17
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"phone\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "getContextByPhone",
+              "pos": {
+                "path": "contacts.js",
+                "start_lineno": 134,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"phone\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "listByWorkspace",
+              "pos": {
+                "path": "contacts.js",
+                "start_lineno": 216,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"assigned_to\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"lead_status\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"limit\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "listByTag",
+              "pos": {
+                "path": "contacts.js",
+                "start_lineno": 268,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"limit\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"tag\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "getByIdInternal",
+              "pos": {
+                "path": "contacts.js",
+                "start_lineno": 301,
+                "start_col": 42
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"contact_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "getById",
+              "pos": {
+                "path": "contacts.js",
+                "start_lineno": 322,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"contact_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "searchByPhoneOrName",
+              "pos": {
+                "path": "contacts.js",
+                "start_lineno": 355,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"limit\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"query\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            }
+          ],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "conversations.js": {
+          "functions": [
+            {
+              "name": "getByIdInternal",
+              "pos": {
+                "path": "conversations.js",
+                "start_lineno": 33,
+                "start_col": 53
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "listWithFiltersInternal",
+              "pos": {
+                "path": "conversations.js",
+                "start_lineno": 46,
+                "start_col": 10
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"active\":{\"fieldType\":{\"type\":\"boolean\"},\"optional\":true},\"assignedTo\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"limit\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"page\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"statusFilters\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"string\"}},\"optional\":true},\"tagFilters\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"string\"}},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "listByWorkspace",
+              "pos": {
+                "path": "conversations.js",
+                "start_lineno": 171,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"assignedTo\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"limit\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"status\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "getByContact",
+              "pos": {
+                "path": "conversations.js",
+                "start_lineno": 248,
+                "start_col": 33
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"contact_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "countUnread",
+              "pos": {
+                "path": "conversations.js",
+                "start_lineno": 273,
+                "start_col": 30
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "countAll",
+              "pos": {
+                "path": "conversations.js",
+                "start_lineno": 299,
+                "start_col": 29
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "getById",
+              "pos": {
+                "path": "conversations.js",
+                "start_lineno": 305,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "listMembers",
+              "pos": {
+                "path": "conversations.js",
+                "start_lineno": 341,
+                "start_col": 27
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "listTags",
+              "pos": {
+                "path": "conversations.js",
+                "start_lineno": 370,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "listWithFilters",
+              "pos": {
+                "path": "conversations.js",
+                "start_lineno": 417,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"active\":{\"fieldType\":{\"type\":\"boolean\"},\"optional\":true},\"assignedTo\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"limit\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"page\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"statusFilters\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"string\"}},\"optional\":true},\"tagFilters\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"string\"}},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            }
+          ],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "http/contacts.js": {
+          "functions": [],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "http/index.js": {
+          "functions": [],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "http/kapso.js": {
+          "functions": [],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "kapso.js": {
+          "functions": [
+            {
+              "name": "processWebhook",
+              "pos": {
+                "path": "kapso.js",
+                "start_lineno": 53,
+                "start_col": 21
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"payload\":{\"fieldType\":{\"type\":\"any\"},\"optional\":false},\"receivedAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "processARI",
+              "pos": {
+                "path": "kapso.js",
+                "start_lineno": 435,
+                "start_col": 10
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"contact_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"contact_phone\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"kapso_message_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"user_message\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            }
+          ],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "lib/auth.js": {
+          "functions": [],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "messages.js": {
+          "functions": [
+            {
+              "name": "listByConversation",
+              "pos": {
+                "path": "messages.js",
+                "start_lineno": 31,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"limit\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "listByConversationAsc",
+              "pos": {
+                "path": "messages.js",
+                "start_lineno": 74,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"limit\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "getById",
+              "pos": {
+                "path": "messages.js",
+                "start_lineno": 114,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"message_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "countByConversation",
+              "pos": {
+                "path": "messages.js",
+                "start_lineno": 149,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "listRecentByWorkspace",
+              "pos": {
+                "path": "messages.js",
+                "start_lineno": 187,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"limit\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "searchByContent",
+              "pos": {
+                "path": "messages.js",
+                "start_lineno": 231,
+                "start_col": 59
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"limit\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"query\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            }
+          ],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "migrate.js": {
+          "functions": [
+            {
+              "name": "migrateWorkspaces",
+              "pos": {
+                "path": "migrate.js",
+                "start_lineno": 36,
+                "start_col": 21
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"workspaces\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"object\",\"value\":{\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"kapso_phone_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"owner_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"settings\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"slug\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"updated_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false}}}},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "migrateWorkspaceMembers",
+              "pos": {
+                "path": "migrate.js",
+                "start_lineno": 75,
+                "start_col": 21
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"members\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"object\",\"value\":{\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"role\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"user_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "migrateContacts",
+              "pos": {
+                "path": "migrate.js",
+                "start_lineno": 117,
+                "start_col": 21
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"contacts\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"object\",\"value\":{\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"email\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"lead_score\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"lead_status\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"phone\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"tags\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"string\"}},\"optional\":true},\"updated_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "migrateConversations",
+              "pos": {
+                "path": "migrate.js",
+                "start_lineno": 165,
+                "start_col": 21
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"conversations\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"object\",\"value\":{\"assigned_to\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"contact_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"contacts\"},\"optional\":false},\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"last_message_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"last_message_preview\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"status\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"unread_count\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"updated_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "migrateMessages",
+              "pos": {
+                "path": "migrate.js",
+                "start_lineno": 214,
+                "start_col": 21
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"messages\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"object\",\"value\":{\"content\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"conversation_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"conversations\"},\"optional\":false},\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"direction\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"kapso_message_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"media_url\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"message_type\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"sender_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"sender_type\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "migrateContactNotes",
+              "pos": {
+                "path": "migrate.js",
+                "start_lineno": 259,
+                "start_col": 21
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"notes\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"object\",\"value\":{\"contact_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"contacts\"},\"optional\":false},\"content\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"user_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},\"optional\":false}}}",
+              "returns": "null"
+            }
+          ],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "mutations.js": {
+          "functions": [
+            {
+              "name": "createContact",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 54,
+                "start_col": 27
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"email\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"phone\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"source\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"tags\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"string\"}},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "updateContact",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 113,
+                "start_col": 27
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"assigned_to\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"cache_updated_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"contact_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"email\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"kapso_name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"lead_score\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"lead_status\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"tags\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"string\"}},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "deleteContact",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 159,
+                "start_col": 27
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"contact_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "upsertContact",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 197,
+                "start_col": 13
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"email\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"kapso_name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"phone\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "createConversation",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 268,
+                "start_col": 59
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"assigned_to\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"contact_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"status\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "upsertConversation",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 304,
+                "start_col": 59
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"contact_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "updateConversationStatus",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 348,
+                "start_col": 59
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"status\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "assignConversation",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 383,
+                "start_col": 59
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"assigned_to\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "markConversationRead",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 416,
+                "start_col": 59
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "createMessageInternal",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 472,
+                "start_col": 47
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"content\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"kapso_message_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"media_url\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"message_type\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"sender_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"sender_type\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "createMessage",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 539,
+                "start_col": 29
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"content\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"kapso_message_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"media_url\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"message_type\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"sender_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"sender_type\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "createInboundMessage",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 610,
+                "start_col": 59
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"conversation_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"kapso_message_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"message\":{\"fieldType\":{\"type\":\"object\",\"value\":{\"audio\":{\"fieldType\":{\"type\":\"object\",\"value\":{\"link\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}},\"optional\":true},\"document\":{\"fieldType\":{\"type\":\"object\",\"value\":{\"link\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}},\"optional\":true},\"id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"image\":{\"fieldType\":{\"type\":\"object\",\"value\":{\"link\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}},\"optional\":true},\"reply_to_from\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"reply_to_kapso_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"text\":{\"fieldType\":{\"type\":\"object\",\"value\":{\"body\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}},\"optional\":false},\"type\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"video\":{\"fieldType\":{\"type\":\"object\",\"value\":{\"link\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}},\"optional\":true}}},\"optional\":false},\"phone\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "markMessageRead",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 692,
+                "start_col": 59
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"message_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "createContactNote",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 731,
+                "start_col": 29
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"contact_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"content\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"user_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "deleteContactNote",
+              "pos": {
+                "path": "mutations.js",
+                "start_lineno": 768,
+                "start_col": 59
+              },
+              "udfType": "Mutation",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"note_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            }
+          ],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "workspaceMembers.js": {
+          "functions": [
+            {
+              "name": "getByUserWorkspace",
+              "pos": {
+                "path": "workspaceMembers.js",
+                "start_lineno": 28,
+                "start_col": 17
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"user_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "listByWorkspace",
+              "pos": {
+                "path": "workspaceMembers.js",
+                "start_lineno": 57,
+                "start_col": 17
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "checkMembership",
+              "pos": {
+                "path": "workspaceMembers.js",
+                "start_lineno": 81,
+                "start_col": 17
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"user_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            }
+          ],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        },
+        "workspaces.js": {
+          "functions": [
+            {
+              "name": "getById",
+              "pos": {
+                "path": "workspaces.js",
+                "start_lineno": 37,
+                "start_col": 31
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"workspace_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "getBySlug",
+              "pos": {
+                "path": "workspaces.js",
+                "start_lineno": 59,
+                "start_col": 47
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "public"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"slug\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "getByKapsoPhoneId",
+              "pos": {
+                "path": "workspaces.js",
+                "start_lineno": 80,
+                "start_col": 41
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"kapso_phone_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            },
+            {
+              "name": "getIdBySlug",
+              "pos": {
+                "path": "workspaces.js",
+                "start_lineno": 91,
+                "start_col": 1
+              },
+              "udfType": "Query",
+              "visibility": {
+                "kind": "internal"
+              },
+              "args": "{\"type\":\"object\",\"value\":{\"slug\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}",
+              "returns": "null"
+            }
+          ],
+          "httpRoutes": null,
+          "cronSpecs": null,
+          "sourceMapped": null
+        }
+      },
+      "udfConfig": {
+        "serverVersion": "1.31.5",
+        "importPhaseRngSeed": {
+          "$bytes": "Km6g9WY1hgQkGiw15LznAEo7sNuqziiEmKPLJXLE1y0="
+        },
+        "importPhaseUnixTimestamp": {
+          "$integer": "bPfzHX3QjBg="
+        }
+      }
+    }
+  },
+  "app": {
+    "definitionPath": "",
+    "componentPath": "",
+    "args": {},
+    "childComponents": {},
+    "httpRoutes": {
+      "httpModuleRoutes": null,
+      "mounts": []
+    },
+    "exports": {
+      "contacts": {
+        "type": "branch",
+        "children": {
+          "getById": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "contacts.js:getById"
+              }
+            }
+          },
+          "getByPhone": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "contacts.js:getByPhone"
+              }
+            }
+          },
+          "getContextByPhone": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "contacts.js:getContextByPhone"
+              }
+            }
+          },
+          "listByTag": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "contacts.js:listByTag"
+              }
+            }
+          },
+          "listByWorkspace": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "contacts.js:listByWorkspace"
+              }
+            }
+          },
+          "searchByPhoneOrName": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "contacts.js:searchByPhoneOrName"
+              }
+            }
+          }
+        }
+      },
+      "conversations": {
+        "type": "branch",
+        "children": {
+          "countAll": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "conversations.js:countAll"
+              }
+            }
+          },
+          "countUnread": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "conversations.js:countUnread"
+              }
+            }
+          },
+          "getByContact": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "conversations.js:getByContact"
+              }
+            }
+          },
+          "getById": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "conversations.js:getById"
+              }
+            }
+          },
+          "listByWorkspace": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "conversations.js:listByWorkspace"
+              }
+            }
+          },
+          "listMembers": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "conversations.js:listMembers"
+              }
+            }
+          },
+          "listTags": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "conversations.js:listTags"
+              }
+            }
+          },
+          "listWithFilters": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "conversations.js:listWithFilters"
+              }
+            }
+          }
+        }
+      },
+      "messages": {
+        "type": "branch",
+        "children": {
+          "countByConversation": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "messages.js:countByConversation"
+              }
+            }
+          },
+          "getById": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "messages.js:getById"
+              }
+            }
+          },
+          "listByConversation": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "messages.js:listByConversation"
+              }
+            }
+          },
+          "listByConversationAsc": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "messages.js:listByConversationAsc"
+              }
+            }
+          },
+          "listRecentByWorkspace": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "messages.js:listRecentByWorkspace"
+              }
+            }
+          },
+          "searchByContent": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "messages.js:searchByContent"
+              }
+            }
+          }
+        }
+      },
+      "migrate": {
+        "type": "branch",
+        "children": {
+          "migrateContactNotes": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "migrate.js:migrateContactNotes"
+              }
+            }
+          },
+          "migrateContacts": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "migrate.js:migrateContacts"
+              }
+            }
+          },
+          "migrateConversations": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "migrate.js:migrateConversations"
+              }
+            }
+          },
+          "migrateMessages": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "migrate.js:migrateMessages"
+              }
+            }
+          },
+          "migrateWorkspaceMembers": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "migrate.js:migrateWorkspaceMembers"
+              }
+            }
+          },
+          "migrateWorkspaces": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "migrate.js:migrateWorkspaces"
+              }
+            }
+          }
+        }
+      },
+      "mutations": {
+        "type": "branch",
+        "children": {
+          "assignConversation": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:assignConversation"
+              }
+            }
+          },
+          "createContact": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:createContact"
+              }
+            }
+          },
+          "createContactNote": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:createContactNote"
+              }
+            }
+          },
+          "createConversation": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:createConversation"
+              }
+            }
+          },
+          "createInboundMessage": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:createInboundMessage"
+              }
+            }
+          },
+          "createMessage": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:createMessage"
+              }
+            }
+          },
+          "deleteContact": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:deleteContact"
+              }
+            }
+          },
+          "deleteContactNote": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:deleteContactNote"
+              }
+            }
+          },
+          "markConversationRead": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:markConversationRead"
+              }
+            }
+          },
+          "markMessageRead": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:markMessageRead"
+              }
+            }
+          },
+          "updateContact": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:updateContact"
+              }
+            }
+          },
+          "updateConversationStatus": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:updateConversationStatus"
+              }
+            }
+          },
+          "upsertContact": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:upsertContact"
+              }
+            }
+          },
+          "upsertConversation": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "mutations.js:upsertConversation"
+              }
+            }
+          }
+        }
+      },
+      "workspaceMembers": {
+        "type": "branch",
+        "children": {
+          "listByWorkspace": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "workspaceMembers.js:listByWorkspace"
+              }
+            }
+          }
+        }
+      },
+      "workspaces": {
+        "type": "branch",
+        "children": {
+          "getBySlug": {
+            "type": "leaf",
+            "resource": {
+              "type": "function",
+              "path": {
+                "component": "",
+                "udfPath": "workspaces.js:getBySlug"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "schemaChange": {
+    "allocatedComponentIds": {},
+    "schemaIds": {
+      "": "LcaZtRLz01hHCvvCPuFP-g|rqharo3BIRma6gKeBiFP-g"
+    },
+    "indexDiffs": {
+      "": {
+        "added_indexes": [
+          {
+            "name": "ariConfig.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "ariConversations.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "ariConversations.by_workspace_contact",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "contact_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "ariMessages.by_conversation_time",
+            "type": "database",
+            "fields": [
+              "ari_conversation_id",
+              "created_at",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "ariMessages.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contactNotes.by_contact",
+            "type": "database",
+            "fields": [
+              "contact_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contactNotes.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_assigned",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "assigned_to",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_workspace_phone",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "phone",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_contact",
+            "type": "database",
+            "fields": [
+              "contact_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_workspace_time",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "last_message_at",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_conversation_time",
+            "type": "database",
+            "fields": [
+              "conversation_id",
+              "created_at",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_user_workspace",
+            "type": "database",
+            "fields": [
+              "user_id",
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaces.by_kapso_phone",
+            "type": "database",
+            "fields": [
+              "kapso_phone_id",
+              "_creationTime"
+            ],
+            "staged": false
+          }
+        ],
+        "removed_indexes": [
+          {
+            "name": "contactNotes.by_contact",
+            "type": "database",
+            "fields": [
+              "contactId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contactNotes.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspaceId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspaceId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_workspace_phone",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "phone",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_contact",
+            "type": "database",
+            "fields": [
+              "contactId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspaceId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspaceId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspaceId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_workspace_supabase",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_workspace_status",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "status",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_workspace_user",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "userId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_supabase_id",
+            "type": "database",
+            "fields": [
+              "supabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_supabase_id",
+            "type": "database",
+            "fields": [
+              "supabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaces.by_kapso_phone_id",
+            "type": "database",
+            "fields": [
+              "kapsoPhoneId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_conversation",
+            "type": "database",
+            "fields": [
+              "conversationId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contactNotes.by_supabase_id",
+            "type": "database",
+            "fields": [
+              "supabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaces.by_supabase_id",
+            "type": "database",
+            "fields": [
+              "supabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_kapso_id",
+            "type": "database",
+            "fields": [
+              "kapsoMessageId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_workspace_last_message",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "lastMessageAt",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_user",
+            "type": "database",
+            "fields": [
+              "userId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_supabase_id",
+            "type": "database",
+            "fields": [
+              "supabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_created",
+            "type": "database",
+            "fields": [
+              "createdAt",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_workspace_status",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "leadStatus",
+              "_creationTime"
+            ],
+            "staged": false
+          }
+        ],
+        "enabled_indexes": [],
+        "disabled_indexes": []
+      }
+    }
+  }
+}
+Generating TypeScript bindings...
+Running TypeScript...
+Pushing code to your Convex deployment...
+Schema validation complete.
+Downloading current deployment state...
+- Bundling modules for Convex's runtime...
+
+Convex's runtime modules:  [
+  'migrate.js',          'mutations.js',
+  'workspaceMembers.js', 'workspaces.js',
+  'contacts.js',         'conversations.js',
+  'http/contacts.js',    'http/index.js',
+  '_deps/5ZBYFT3Y.js',   'http/kapso.js',
+  '_deps/XI3M6EU4.js',   '_deps/FFDBH3DG.js',
+  'kapso.js',            'lib/auth.js',
+  'messages.js',         '_deps/4D4U4VMM.js',
+  '_deps/B6TKHSI3.js',   '_deps/5CPWOBQZ.js'
+]
+[32m✔[39m Remote config will be overwritten with the following changes:
+  Change the server's version for Node.js actions:
+  
+Finalizing push...
+{
+  "authDiff": {
+    "added": [
+      "{\"algorithm\":\"\\\"RS256\\\"\",\"applicationID\":\"tcpqqublnkphuwhhwizx\",\"issuer\":\"https://tcpqqublnkphuwhhwizx.supabase.co/auth/v1\",\"jwks\":\"https://tcpqqublnkphuwhhwizx.supabase.co/.well-known/jwks.json\",\"type\":\"customJwt\"}"
+    ],
+    "removed": []
+  },
+  "definitionDiffs": {
+    "": {}
+  },
+  "componentDiffs": {
+    "": {
+      "diffType": {
+        "type": "modify"
+      },
+      "moduleDiff": {
+        "added": [
+          "auth.config.js",
+          "conversations.js",
+          "http/index.js",
+          "http/kapso.js",
+          "kapso.js",
+          "messages.js",
+          "mutations.js",
+          "workspaceMembers.js",
+          "workspaces.js"
+        ],
+        "removed": []
+      },
+      "udfConfigDiff": null,
+      "cronDiff": {
+        "added": [],
+        "updated": [],
+        "deleted": []
+      },
+      "indexDiff": {
+        "added_indexes": [
+          {
+            "name": "ariConfig.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "ariConversations.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "ariConversations.by_workspace_contact",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "contact_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "ariMessages.by_conversation_time",
+            "type": "database",
+            "fields": [
+              "ari_conversation_id",
+              "created_at",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "ariMessages.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contactNotes.by_contact",
+            "type": "database",
+            "fields": [
+              "contact_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contactNotes.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_assigned",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "assigned_to",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_workspace_phone",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "phone",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_contact",
+            "type": "database",
+            "fields": [
+              "contact_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_workspace_time",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "last_message_at",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_conversation_time",
+            "type": "database",
+            "fields": [
+              "conversation_id",
+              "created_at",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_user_workspace",
+            "type": "database",
+            "fields": [
+              "user_id",
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspace_id",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaces.by_kapso_phone",
+            "type": "database",
+            "fields": [
+              "kapso_phone_id",
+              "_creationTime"
+            ],
+            "staged": false
+          }
+        ],
+        "removed_indexes": [
+          {
+            "name": "contactNotes.by_contact",
+            "type": "database",
+            "fields": [
+              "contactId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contactNotes.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspaceId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspaceId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_workspace_phone",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "phone",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_contact",
+            "type": "database",
+            "fields": [
+              "contactId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspaceId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspaceId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_workspace",
+            "type": "database",
+            "fields": [
+              "workspaceId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_workspace_last_message",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "lastMessageAt",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_workspace_supabase",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_workspace_status",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "leadStatus",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_supabase_id",
+            "type": "database",
+            "fields": [
+              "supabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_user",
+            "type": "database",
+            "fields": [
+              "userId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_conversation",
+            "type": "database",
+            "fields": [
+              "conversationId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contacts.by_supabase_id",
+            "type": "database",
+            "fields": [
+              "supabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaceMembers.by_workspace_user",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "userId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaces.by_kapso_phone_id",
+            "type": "database",
+            "fields": [
+              "kapsoPhoneId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_supabase_id",
+            "type": "database",
+            "fields": [
+              "supabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "workspaces.by_supabase_id",
+            "type": "database",
+            "fields": [
+              "supabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_kapso_id",
+            "type": "database",
+            "fields": [
+              "kapsoMessageId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "messages.by_created",
+            "type": "database",
+            "fields": [
+              "createdAt",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "contactNotes.by_supabase_id",
+            "type": "database",
+            "fields": [
+              "supabaseId",
+              "_creationTime"
+            ],
+            "staged": false
+          },
+          {
+            "name": "conversations.by_workspace_status",
+            "type": "database",
+            "fields": [
+              "workspaceSupabaseId",
+              "status",
+              "_creationTime"
+            ],
+            "staged": false
+          }
+        ],
+        "enabled_indexes": [],
+        "disabled_indexes": []
+      },
+      "schemaDiff": {
+        "previous_schema": "{\"tables\":[{\"tableName\":\"contactNotes\",\"indexes\":[{\"indexDescriptor\":\"by_contact\",\"fields\":[\"contactId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_supabase_id\",\"fields\":[\"supabaseId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspaceId\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"completed\":{\"fieldType\":{\"type\":\"boolean\"},\"optional\":true},\"completedAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"contactId\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"contacts\"},\"optional\":false},\"contactSupabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"content\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"createdAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"createdBy\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspaceId\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false},\"workspaceSupabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}},{\"tableName\":\"contacts\",\"indexes\":[{\"indexDescriptor\":\"by_supabase_id\",\"fields\":[\"supabaseId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspaceId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace_phone\",\"fields\":[\"workspaceSupabaseId\",\"phone\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace_status\",\"fields\":[\"workspaceSupabaseId\",\"leadStatus\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"createdAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"email\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"leadScore\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"leadStatus\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"phone\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"tags\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"string\"}},\"optional\":true},\"updatedAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"workspaceId\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false},\"workspaceSupabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}},{\"tableName\":\"conversations\",\"indexes\":[{\"indexDescriptor\":\"by_contact\",\"fields\":[\"contactId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_supabase_id\",\"fields\":[\"supabaseId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspaceId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace_last_message\",\"fields\":[\"workspaceSupabaseId\",\"lastMessageAt\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace_status\",\"fields\":[\"workspaceSupabaseId\",\"status\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"assignedTo\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"contactId\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"contacts\"},\"optional\":false},\"contactSupabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"createdAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"lastMessageAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"lastMessagePreview\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"status\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"unreadCount\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"updatedAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"workspaceId\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false},\"workspaceSupabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}},{\"tableName\":\"messages\",\"indexes\":[{\"indexDescriptor\":\"by_conversation\",\"fields\":[\"conversationId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_created\",\"fields\":[\"createdAt\",\"_creationTime\"]},{\"indexDescriptor\":\"by_kapso_id\",\"fields\":[\"kapsoMessageId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_supabase_id\",\"fields\":[\"supabaseId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspaceId\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"content\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"conversationId\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"conversations\"},\"optional\":false},\"conversationSupabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"createdAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"direction\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"kapsoMessageId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"mediaUrl\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"messageType\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"senderId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"senderType\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspaceId\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false},\"workspaceSupabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}},{\"tableName\":\"workspaceMembers\",\"indexes\":[{\"indexDescriptor\":\"by_user\",\"fields\":[\"userId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspaceId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace_supabase\",\"fields\":[\"workspaceSupabaseId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace_user\",\"fields\":[\"workspaceSupabaseId\",\"userId\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"createdAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"role\":{\"fieldType\":{\"type\":\"union\",\"value\":[{\"type\":\"literal\",\"value\":\"owner\"},{\"type\":\"literal\",\"value\":\"admin\"},{\"type\":\"literal\",\"value\":\"member\"}]},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"userId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspaceId\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false},\"workspaceSupabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false}}}},{\"tableName\":\"workspaces\",\"indexes\":[{\"indexDescriptor\":\"by_kapso_phone_id\",\"fields\":[\"kapsoPhoneId\",\"_creationTime\"]},{\"indexDescriptor\":\"by_slug\",\"fields\":[\"slug\",\"_creationTime\"]},{\"indexDescriptor\":\"by_supabase_id\",\"fields\":[\"supabaseId\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"createdAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"kapsoPhoneId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"ownerId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"settings\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"slug\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"updatedAt\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false}}}}],\"schemaValidation\":true}",
+        "next_schema": "{\"tables\":[{\"tableName\":\"ariConfig\",\"indexes\":[{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspace_id\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"bot_name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"community_link\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"greeting_style\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"language\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"tone\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"updated_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},{\"tableName\":\"ariConversations\",\"indexes\":[{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspace_id\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace_contact\",\"fields\":[\"workspace_id\",\"contact_id\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"ai_model\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"contact_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"contacts\"},\"optional\":false},\"context\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"handoff_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"handoff_reason\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"last_ai_message_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"lead_score\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"lead_temperature\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"state\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"updated_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},{\"tableName\":\"ariMessages\",\"indexes\":[{\"indexDescriptor\":\"by_conversation_time\",\"fields\":[\"ari_conversation_id\",\"created_at\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspace_id\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"ai_model\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"ari_conversation_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"ariConversations\"},\"optional\":false},\"content\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"response_time_ms\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"role\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"tokens_used\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},{\"tableName\":\"contactNotes\",\"indexes\":[{\"indexDescriptor\":\"by_contact\",\"fields\":[\"contact_id\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspace_id\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"contact_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"contacts\"},\"optional\":false},\"content\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"user_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},{\"tableName\":\"contacts\",\"indexes\":[{\"indexDescriptor\":\"by_assigned\",\"fields\":[\"workspace_id\",\"assigned_to\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspace_id\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace_phone\",\"fields\":[\"workspace_id\",\"phone\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"assigned_to\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"cache_updated_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"email\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"kapso_name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"lead_score\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"lead_status\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"phone\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"phone_normalized\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"source\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"tags\":{\"fieldType\":{\"type\":\"array\",\"value\":{\"type\":\"string\"}},\"optional\":true},\"updated_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},{\"tableName\":\"conversations\",\"indexes\":[{\"indexDescriptor\":\"by_contact\",\"fields\":[\"contact_id\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspace_id\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace_time\",\"fields\":[\"workspace_id\",\"last_message_at\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"assigned_to\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"contact_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"contacts\"},\"optional\":false},\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"last_message_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":true},\"last_message_preview\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"status\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"unread_count\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"updated_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},{\"tableName\":\"messages\",\"indexes\":[{\"indexDescriptor\":\"by_conversation_time\",\"fields\":[\"conversation_id\",\"created_at\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspace_id\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"content\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"conversation_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"conversations\"},\"optional\":false},\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"direction\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"kapso_message_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"media_url\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"message_type\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"metadata\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"sender_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"sender_type\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"supabaseId\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},{\"tableName\":\"workspaceMembers\",\"indexes\":[{\"indexDescriptor\":\"by_user_workspace\",\"fields\":[\"user_id\",\"workspace_id\",\"_creationTime\"]},{\"indexDescriptor\":\"by_workspace\",\"fields\":[\"workspace_id\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"role\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"settings\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"user_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"workspace_id\":{\"fieldType\":{\"type\":\"id\",\"tableName\":\"workspaces\"},\"optional\":false}}}},{\"tableName\":\"workspaces\",\"indexes\":[{\"indexDescriptor\":\"by_kapso_phone\",\"fields\":[\"kapso_phone_id\",\"_creationTime\"]},{\"indexDescriptor\":\"by_slug\",\"fields\":[\"slug\",\"_creationTime\"]}],\"stagedDbIndexes\":[],\"searchIndexes\":[],\"stagedSearchIndexes\":[],\"vectorIndexes\":[],\"stagedVectorIndexes\":[],\"documentType\":{\"type\":\"object\",\"value\":{\"created_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false},\"kapso_phone_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"meta_access_token\":{\"fieldType\":{\"type\":\"string\"},\"optional\":true},\"name\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"owner_id\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"settings\":{\"fieldType\":{\"type\":\"any\"},\"optional\":true},\"slug\":{\"fieldType\":{\"type\":\"string\"},\"optional\":false},\"updated_at\":{\"fieldType\":{\"type\":\"number\"},\"optional\":false}}}}],\"schemaValidation\":true}"
+      }
+    }
+  }
+}
+✔ Deployed Convex functions to https://intent-otter-212.convex.cloud
