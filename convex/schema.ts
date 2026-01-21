@@ -10,6 +10,7 @@ export default defineSchema({
     slug: v.string(),
     owner_id: v.string(), // Supabase user UUID
     kapso_phone_id: v.optional(v.string()), // The phone_number_id from Kapso
+    meta_access_token: v.optional(v.string()), // Encrypted Meta/Kapso API access token
     settings: v.optional(v.any()),
     created_at: v.number(),
     updated_at: v.number(),
@@ -106,5 +107,58 @@ export default defineSchema({
     supabaseId: v.string(),
   })
     .index("by_contact", ["contact_id"])
+    .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // ARI CONFIG (AI Response Intelligence)
+  // ============================================
+  ariConfig: defineTable({
+    workspace_id: v.id("workspaces"),
+    bot_name: v.string(),
+    greeting_style: v.string(), // 'professional', 'friendly', 'casual'
+    language: v.string(), // 'id', 'en'
+    tone: v.optional(v.any()), // { supportive: boolean, clear: boolean, encouraging: boolean }
+    community_link: v.optional(v.string()), // Telegram/WhatsApp community link
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // ARI CONVERSATIONS (AI bot state per contact)
+  // ============================================
+  ariConversations: defineTable({
+    workspace_id: v.id("workspaces"),
+    contact_id: v.id("contacts"),
+    state: v.string(), // 'greeting', 'qualifying', 'scheduling', 'handoff', 'ended'
+    lead_score: v.number(),
+    lead_temperature: v.optional(v.string()), // 'hot', 'warm', 'cold'
+    context: v.optional(v.any()), // Form answers, document status, scheduling state
+    ai_model: v.optional(v.string()), // 'sea-lion', 'grok', 'gpt-4'
+    handoff_at: v.optional(v.number()),
+    handoff_reason: v.optional(v.string()),
+    last_ai_message_at: v.optional(v.number()),
+    created_at: v.number(),
+    updated_at: v.number(),
+    supabaseId: v.string(),
+  })
+    .index("by_workspace_contact", ["workspace_id", "contact_id"])
+    .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // ARI MESSAGES (AI conversation history)
+  // ============================================
+  ariMessages: defineTable({
+    ari_conversation_id: v.id("ariConversations"),
+    workspace_id: v.id("workspaces"),
+    role: v.string(), // 'user', 'assistant', 'system'
+    content: v.string(),
+    ai_model: v.optional(v.string()),
+    tokens_used: v.optional(v.number()),
+    response_time_ms: v.optional(v.number()),
+    metadata: v.optional(v.any()),
+    created_at: v.number(),
+  })
+    .index("by_conversation_time", ["ari_conversation_id", "created_at"])
     .index("by_workspace", ["workspace_id"]),
 });
