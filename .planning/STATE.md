@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 ## Current Position
 
 Phase: 3 - Convex Spike
-Plan: 04 of 5
+Plan: 03 of 5
 Status: In progress
-Last activity: 2026-01-21 — Completed 03-04-PLAN.md (Convex HTTP Actions)
+Last activity: 2026-01-21 — Completed 03-03-PLAN.md (Data Migration System)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 █████████░ (117 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 █████████░ (116 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 117 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 12 in v3.0)
+- Total plans completed: 116 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 11 in v3.0)
 - v2.2 timeline: 1 day (Jan 20)
 - Commits: 325 in v2.0, 282 in v2.1
 
@@ -72,6 +72,8 @@ Key v3.0 decisions:
 - All Convex queries must call requireWorkspaceMembership() for authorization
 - Use parallel Promise.all for non-dependent queries to optimize performance
 - Convex HTTP actions use CRM_API_KEY for authentication (spake), JWT in production
+- Migration system stores supabaseId on all records for reference tracking
+- Migration uses batch processing (100 records) to avoid Convex payload size limits
 
 ### Deferred Issues
 
@@ -88,9 +90,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-21
-Stopped at: Completed 03-04-PLAN.md (Convex HTTP Actions)
+Stopped at: Completed 03-03-PLAN.md (Data Migration System)
 Resume file: None
-Next: 03-03-PLAN.md (Benchmark Convex vs Supabase)
+Next: 03-04-PLAN.md (Convex HTTP Actions)
 
 ## Deployment Info
 
@@ -119,4 +121,4 @@ Next: 03-03-PLAN.md (Benchmark Convex vs Supabase)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-21 — Completed 03-04-PLAN.md (Convex HTTP Actions)*
+*Last updated: 2026-01-21 — Completed 03-03-PLAN.md (Data Migration System)*
