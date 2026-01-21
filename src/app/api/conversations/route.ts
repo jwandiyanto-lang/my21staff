@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchQuery } from 'convex/server'
-import { api } from '@/convex/_generated/api'
+import { fetchQuery } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import {
   withTiming,
   createRequestMetrics,

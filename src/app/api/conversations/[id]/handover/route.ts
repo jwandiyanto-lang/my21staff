@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchMutation, fetchQuery } from 'convex/server'
-import { api } from '@/convex/_generated/api'
+import { fetchMutation, fetchQuery } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 
 /**
  * POST /api/conversations/[id]/handover

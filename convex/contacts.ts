@@ -26,7 +26,7 @@ export const getContextByPhoneInternal = internalQuery({
     const contact = await ctx.db
       .query("contacts")
       .withIndex("by_workspace_phone", (q) =>
-        q.eq("workspace_id", args.workspace_id).eq("phone", args.phone)
+        q.eq("workspace_id", args.workspace_id as any).eq("phone", args.phone)
       )
       .first();
 
@@ -38,7 +38,7 @@ export const getContextByPhoneInternal = internalQuery({
     const [conversation, notes] = await Promise.all([
       ctx.db
         .query("conversations")
-        .withIndex("by_contact", (q) => q.eq("contact_id", contact._id))
+        .withIndex("by_contact", (q) => q.eq("contact_id", contact._id as any))
         .first(),
       ctx.db
         .query("contactNotes")
@@ -102,7 +102,7 @@ export const getByPhone = query({
     const contact = await ctx.db
       .query("contacts")
       .withIndex("by_workspace_phone", (q) =>
-        q.eq("workspace_id", args.workspace_id).eq("phone", args.phone)
+        q.eq("workspace_id", args.workspace_id as any).eq("phone", args.phone)
       )
       .first();
 
@@ -138,7 +138,7 @@ export const getContextByPhone = query({
     const contact = await ctx.db
       .query("contacts")
       .withIndex("by_workspace_phone", (q) =>
-        q.eq("workspace_id", args.workspace_id).eq("phone", args.phone)
+        q.eq("workspace_id", args.workspace_id as any).eq("phone", args.phone)
       )
       .first();
 
@@ -323,14 +323,6 @@ export const getById = query({
     await requireWorkspaceMembership(ctx, args.workspace_id);
 
     const contact = await ctx.db.get(args.contact_id as any);
-
-    if (!contact) {
-      return null;
-    }
-
-    if (contact.workspace_id !== args.workspace_id) {
-      throw new Error("Contact not in this workspace");
-    }
 
     return contact;
   },

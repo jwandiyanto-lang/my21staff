@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchMutation, fetchQuery } from 'convex/server'
-import { api } from '@/convex/_generated/api'
+import { fetchMutation, fetchQuery } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import {
   withTiming,
   createRequestMetrics,
-  logMutation,
+  logQuery,
 } from '@/lib/instrumentation/with-timing'
 
 /**
@@ -54,7 +54,7 @@ async function postHandler(request: NextRequest) {
       api.conversations.getById,
       { id: conversation_id }
     )
-    logMutation(metrics, 'convex.conversations.getById', Math.round(performance.now() - queryStart))
+    logQuery(metrics, 'convex.conversations.getById', Math.round(performance.now() - queryStart))
 
     if (!conversation) {
       return NextResponse.json(
@@ -69,7 +69,7 @@ async function postHandler(request: NextRequest) {
       api.contacts.getById,
       { id: conversation.contact_id, workspace_id: conversation.workspace_id }
     )
-    logMutation(metrics, 'convex.contacts.getById', Math.round(performance.now() - queryStart))
+    logQuery(metrics, 'convex.contacts.getById', Math.round(performance.now() - queryStart))
 
     // Note: Kapso API call and message creation happen in parallel
     // Kapso API is external service - credentials from workspace.settings

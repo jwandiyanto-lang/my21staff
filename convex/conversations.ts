@@ -63,7 +63,7 @@ export const listWithFiltersInternal = internalQuery({
     if (args.statusFilters && args.statusFilters.length > 0) {
       q = q.filter((q) => {
         const status = q.field("status");
-        return args.statusFilters!.some((s) => status.value === s);
+        return args.statusFilters!.some((s) => (status as any).value === s);
       });
     }
 
@@ -113,11 +113,11 @@ export const listWithFiltersInternal = internalQuery({
     const [members, allContacts] = await Promise.all([
       ctx.db
         .query("workspaceMembers")
-        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
         .collect(),
       ctx.db
         .query("contacts")
-        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
         .collect(),
     ]);
 
@@ -213,7 +213,7 @@ export const listByWorkspace = query({
 /**
  * Get a conversation by contact ID.
  *
- * Returns the conversation for a specific contact within a workspace.
+ * Returns conversation for a specific contact within a workspace.
  * Used to check if an active conversation exists when a message arrives.
  *
  * @param contact_id - The contact ID to look up
@@ -280,7 +280,7 @@ export const countAll = query({
 
     const allConversations = await ctx.db
       .query("conversations")
-      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
       .collect();
 
     return allConversations.length;
@@ -290,7 +290,7 @@ export const countAll = query({
 /**
  * Get a single conversation by ID.
  *
- * Returns the conversation with associated contact information.
+ * Returns conversation with associated contact information.
  * Used for conversation detail view and message loading.
  *
  * @param conversation_id - The conversation ID to look up
@@ -310,7 +310,7 @@ export const getById = query({
       return null;
     }
 
-    // Verify conversation belongs to the workspace
+    // Verify conversation belongs to workspace
     if (conversation.workspace_id !== args.workspace_id) {
       return null;
     }
@@ -343,7 +343,7 @@ export const listMembers = query({
 
     const members = await ctx.db
       .query("workspaceMembers")
-      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
       .collect();
 
     return members.map((m) => ({
@@ -372,7 +372,7 @@ export const listTags = query({
 
     const contacts = await ctx.db
       .query("contacts")
-      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
       .collect();
 
     // Collect all tags and deduplicate
@@ -393,7 +393,7 @@ export const listTags = query({
  * Comprehensive inbox query with all filters.
  *
  * Returns conversations with filters, counts, members, and tags in a single call.
- * Matches the structure used by /api/conversations route for easy API migration.
+ * Matches structure used by /api/conversations route for easy API migration.
  *
  * @param workspace_id - The workspace to query
  * @param active - Filter for only unread conversations (optional)
@@ -438,7 +438,7 @@ export const listWithFilters = query({
     if (args.statusFilters && args.statusFilters.length > 0) {
       q = q.filter((q) => {
         const status = q.field("status");
-        return args.statusFilters!.some((s) => status.value === s);
+        return args.statusFilters!.some((s) => (status as any).value === s);
       });
     }
 

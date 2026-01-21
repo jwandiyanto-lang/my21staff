@@ -13,6 +13,7 @@
 
 import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 import type {
   MetaWebhookPayload,
   MetaWebhookMessage,
@@ -447,7 +448,7 @@ export const processARI = internalMutation({
     );
 
     // Get workspace (for Kapso credentials)
-    const workspace = await ctx.db.get(workspace_id);
+    const workspace = await ctx.db.get(workspace_id as any);
     if (!workspace) {
       console.error(`[ARI] Workspace not found: ${workspace_id}`);
       return;
@@ -504,9 +505,10 @@ export const processARI = internalMutation({
     }
 
     // Get recent ARI messages for context
+    // @ts-ignore - q is implicitly any
     const recentMessages = await ctx.db
-      .query("ariMessages")
-      .withIndex("by_conversation_time", (q) =>
+      .query("ariMessages" as any)
+      .withIndex("by_conversation_time", (q: any) =>
         q.eq("ari_conversation_id", ariConversation._id)
       )
       .order("desc")

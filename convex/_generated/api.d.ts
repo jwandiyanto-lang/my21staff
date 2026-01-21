@@ -8,9 +8,10 @@
  * @module
  */
 
+import type * as _internal_webhook from "../_internal/webhook.js";
 import type * as contacts from "../contacts.js";
 import type * as conversations from "../conversations.js";
-import type * as https from "../https.js";
+import type * as http_kapso from "../http/kapso.js";
 import type * as kapso from "../kapso.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as messages from "../messages.js";
@@ -26,9 +27,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "_internal/webhook": typeof _internal_webhook;
   contacts: typeof contacts;
   conversations: typeof conversations;
-  https: typeof https;
+  "http/kapso": typeof http_kapso;
   kapso: typeof kapso;
   "lib/auth": typeof lib_auth;
   messages: typeof messages;
