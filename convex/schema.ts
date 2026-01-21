@@ -23,6 +23,7 @@ export default defineSchema({
     workspace_id: v.id("workspaces"),
     user_id: v.string(), // Supabase user UUID
     role: v.string(), // 'owner', 'admin', 'member'
+    settings: v.optional(v.any()), // User preferences: { filterPresets, ... }
     created_at: v.number(),
   })
     .index("by_user_workspace", ["user_id", "workspace_id"])
