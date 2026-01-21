@@ -44,9 +44,9 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Install Speed Insights and create timing infrastructure
-- [ ] 01-02-PLAN.md — Instrument /api/contacts/by-phone and /api/conversations
-- [ ] 01-03-PLAN.md — Deploy and establish baseline
+- [x] 01-01-PLAN.md — Install Speed Insights and create timing infrastructure
+- [x] 01-02-PLAN.md — Instrument /api/contacts/by-phone and /api/conversations
+- [x] 01-03-PLAN.md — Deploy and establish baseline
 
 ---
 
@@ -62,7 +62,7 @@ Plans:
 - SUPA-03: Add composite index `idx_contacts_workspace_phone` on contacts(workspace_id, phone)
 - SUPA-04: Add composite index `idx_conversations_workspace_time` on conversations(workspace_id, last_message_at DESC)
 - SUPA-05: Add composite index `idx_messages_conversation_time` on messages(conversation_id, created_at DESC)
-- SUPA-06: Refactor contacts query to use nested relations (contact -> notes, conversation -> messages)
+- SUPA-06: Use nested relations for `/api/conversations` (already uses conversations -> contacts!inner join)
 - SUPA-07: Audit and replace `select('*')` with explicit column selection in hot paths
 - SUPA-08: Optimize RLS policies (wrap `auth.uid()` in SELECT for caching)
 
@@ -290,10 +290,10 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
-| **v3.0 Performance & Speed** | 1-5 | 0/7 | Active | - |
+| **v3.0 Performance & Speed** | 1-5 | 3/12 | Active | - |
 
 **Total shipped:** 105 plans across 4 milestones
 
 ---
 
-*Last updated: 2026-01-21 — Phase 2 planned with 4 plans in 3 waves*
+*Last updated: 2026-01-21 — Phase 2 revised to clarify SUPA-06 requirement*
