@@ -5,7 +5,7 @@
  * used for dashboard listing and conversation lookup by contact.
  */
 
-import { query } from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { requireWorkspaceMembership } from "./lib/auth";
 
@@ -247,5 +247,139 @@ export const listTags = query({
     }
 
     return Array.from(tagSet).sort();
+  },
+});
+
+/**
+ * Comprehensive inbox query with all filters.
+ *
+ * Returns conversations with filters, counts, members, and tags in a single call.
+ * Matches the structure used by /api/conversations route for easy API migration.
+ *
+ * @param workspace_id - The workspace to query
+ * @param active - Filter for only unread conversations (optional)
+ * @param statusFilters - Array of statuses to filter by (optional)
+ * @param tagFilters - Array of tags to filter by (optional)
+ * @param assignedTo - Filter by assignment: user_id, 'unassigned', or 'all' (default: 'all')
+ * @param limit - Maximum conversations per page (default: 50)
+ * @param page - Page number for pagination (0-based, default: 0)
+ * @returns Object with conversations, totalCount, activeCount, members, tags
+ */
+export const listWithFilters = query({
+  args: {
+    workspace_id: v.string(),
+    active: v.optional(v.boolean()),
+    statusFilters: v.optional(v.array(v.string())),
+    tagFilters: v.optional(v.array(v.string())),
+    assignedTo: v.optional(v.string()),
+    limit: v.optional(v.number()),
+    page: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const limit = args.limit || 50;
+    const page = args.page || 0;
+    const offset = page * limit;
+
+    // Build conversation query with filters
+    let q = ctx.db
+      .query("conversations")
+      .withIndex("by_workspace_time", (q) =>
+        q.eq("workspace_id", args.workspace_id)
+      )
+      .order("desc");
+
+    // Apply active filter (unread_count > 0)
+    if (args.active) {
+      q = q.filter((q) => q.gt(q.field("unread_count"), 0));
+    }
+
+    // Apply status filters
+    if (args.statusFilters && args.statusFilters.length > 0) {
+      q = q.filter((q) => {
+        const status = q.field("status");
+        return args.statusFilters!.some((s) => status.value === s);
+      });
+    }
+
+    // Apply assignment filter
+    if (args.assignedTo && args.assignedTo !== "all") {
+      q = q.filter((q) => {
+        const assignedTo = q.field("assigned_to");
+        if (args.assignedTo === "unassigned") {
+          return assignedTo === undefined;
+        } else {
+          return assignedTo === args.assignedTo;
+        }
+      });
+    }
+
+    // Get total count before pagination
+    const allConversations = await q.collect();
+    const totalCount = allConversations.length;
+
+    // Apply pagination
+    const conversations = allConversations.slice(offset, offset + limit);
+
+    // Fetch contacts in parallel
+    const contactIds = conversations.map((c) => c.contact_id);
+    const contacts = await Promise.all(
+      contactIds.map((id) => ctx.db.get(id))
+    );
+
+    // Filter by tags client-side (since tags are on contacts, not conversations)
+    let filteredConversations = conversations;
+    if (args.tagFilters && args.tagFilters.length > 0) {
+      filteredConversations = conversations.filter((conv) => {
+        const contact = contacts.find((c) => c?._id === conv.contact_id);
+        if (!contact || !contact.tags) return false;
+        // Include if contact has any of the requested tags
+        return args.tagFilters!.some((tag) => contact.tags!.includes(tag));
+      });
+    }
+
+    // Build result with contact data
+    const conversationsWithContacts = filteredConversations.map((conv) => ({
+      ...conv,
+      contact: contacts.find((c) => c?._id === conv.contact_id) || null,
+    }));
+
+    // Get members in parallel
+    const [members, allContacts] = await Promise.all([
+      ctx.db
+        .query("workspaceMembers")
+        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+        .collect(),
+      ctx.db
+        .query("contacts")
+        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+        .collect(),
+    ]);
+
+    // Calculate active count (unread conversations)
+    const activeCount = allConversations.filter((c) => c.unread_count > 0).length;
+
+    // Collect unique tags
+    const tagSet = new Set<string>();
+    for (const contact of allContacts) {
+      if (contact.tags) {
+        for (const tag of contact.tags) {
+          tagSet.add(tag);
+        }
+      }
+    }
+
+    return {
+      conversations: conversationsWithContacts,
+      totalCount,
+      activeCount,
+      members: members.map((m) => ({
+        user_id: m.user_id,
+        role: m.role,
+        created_at: m.created_at,
+      })),
+      tags: Array.from(tagSet).sort(),
+    };
   },
 });
