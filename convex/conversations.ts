@@ -1,0 +1,85 @@
+/**
+ * Conversation query functions for Convex.
+ *
+ * These functions provide workspace-scoped conversation access,
+ * used for dashboard listing and conversation lookup by contact.
+ */
+
+import { query } from "./_generated/server";
+import { v } from "convex/values";
+import { requireWorkspaceMembership } from "./lib/auth";
+
+/**
+ * List conversations for a workspace.
+ *
+ * Returns conversations ordered by last_message_at (most recent first),
+ * optionally filtered by status and limited to a specific count.
+ * Fetches contact details in parallel for efficient rendering.
+ *
+ * @param workspace_id - The workspace to list conversations for
+ * @param limit - Maximum number of conversations to return (default: 50)
+ * @param status - Optional status filter ('open', 'closed', 'snoozed')
+ * @returns Array of conversations with contact details
+ */
+export const listByWorkspace = query({
+  args: {
+    workspace_id: v.string(),
+    limit: v.optional(v.number()),
+    status: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    let q = ctx.db
+      .query("conversations")
+      .withIndex("by_workspace_time", (q) =>
+        q.eq("workspace_id", args.workspace_id)
+      )
+      .order("desc");
+
+    if (args.status) {
+      q = q.filter((q) => q.eq(q.field("status"), args.status));
+    }
+
+    const limit = args.limit || 50;
+    const conversations = await q.take(limit);
+
+    // Fetch contacts in parallel for efficiency
+    const contactIds = conversations.map((c) => c.contact_id);
+    const contacts = await Promise.all(
+      contactIds.map((id) => ctx.db.get(id))
+    );
+
+    return conversations.map((conv) => ({
+      ...conv,
+      contact: contacts.find((c) => c?._id === conv.contact_id) || null,
+    }));
+  },
+});
+
+/**
+ * Get a conversation by contact ID.
+ *
+ * Returns the conversation for a specific contact within a workspace.
+ * Used to check if an active conversation exists when a message arrives.
+ *
+ * @param contact_id - The contact ID to look up
+ * @param workspace_id - The workspace for authorization
+ * @returns The conversation document or null if not found
+ */
+export const getByContact = query({
+  args: {
+    contact_id: v.string(),
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const conversation = await ctx.db
+      .query("conversations")
+      .withIndex("by_contact", (q) => q.eq("contact_id", args.contact_id))
+      .first();
+
+    return conversation;
+  },
+});
