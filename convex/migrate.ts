@@ -9,7 +9,8 @@
  * for reference and potential dual-write implementation later.
  */
 
-import { mutation, v } from "./_generated/server";
+import { mutation } from "./_generated/server";
+import { v } from "convex/values";
 
 /**
  * Migrate workspaces from Supabase to Convex.

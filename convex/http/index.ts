@@ -2,7 +2,7 @@
  * HTTP router entry point for Convex.
  *
  * This file merges all HTTP routers into a single entry point.
- * Each router is imported and merged with the main http instance.
+ * Routes from each router module are added directly to the main router.
  *
  * Routers:
  * - Kapso webhook: /webhook/kapso (POST/GET)
@@ -15,12 +15,28 @@ import { httpRouter } from "convex/server";
 import { router as kapsoRouter } from "./kapso";
 import { router as contactsRouter } from "./contacts";
 
+// Get routes from sub-routers and register them directly
+const getRoutes = (router: any) => {
+  if (router.getRoutes) {
+    return router.getRoutes();
+  }
+  return [];
+};
+
 const http = httpRouter();
 
-// Merge Kapso webhook routes
-http.route(kapsoRouter);
+// Register Kapso webhook routes
+const kapsoRoutes = getRoutes(kapsoRouter);
+for (const [path, method, handler] of kapsoRoutes) {
+  // @ts-ignore - handler type inference
+  http.route({ path, method, handler });
+}
 
-// Merge contacts routes
-http.route(contactsRouter);
+// Register contacts routes
+const contactsRoutes = getRoutes(contactsRouter);
+for (const [path, method, handler] of contactsRoutes) {
+  // @ts-ignore - handler type inference
+  http.route({ path, method, handler });
+}
 
 export default http;
