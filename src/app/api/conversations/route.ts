@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
+import {
+  withTiming,
+  createRequestMetrics,
+  logQuery,
+  logQuerySummary,
+} from '@/lib/instrumentation/with-timing'
 
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   const supabase = await createClient()
   const { searchParams } = new URL(request.url)
 
@@ -28,6 +34,8 @@ export async function GET(request: NextRequest) {
 
   const from = page * limit
   const to = from + limit - 1
+
+  const metrics = createRequestMetrics()
 
   // Build base query
   let query = supabase
@@ -64,39 +72,51 @@ export async function GET(request: NextRequest) {
   // Apply pagination
   query = query.range(from, to)
 
+  // Query 1: Main conversations query with contacts
+  let queryStart = performance.now()
   const { data: conversations, error, count: totalCount } = await query
+  logQuery(metrics, 'conversations', Math.round(performance.now() - queryStart))
 
   if (error) {
     console.error('Conversations query error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // Get activeCount (unread conversations) for sidebar badge
+  // Query 2: Get activeCount (unread conversations) for sidebar badge
+  queryStart = performance.now()
   const { count: activeCount } = await supabase
     .from('conversations')
     .select('*', { count: 'exact', head: true })
     .eq('workspace_id', workspaceId)
     .gt('unread_count', 0)
+  logQuery(metrics, 'activeCount', Math.round(performance.now() - queryStart))
 
-  // Get team members for the workspace
+  // Query 3: Get team members for the workspace
+  queryStart = performance.now()
   const { data: teamMembers } = await supabase
     .from('workspace_members')
     .select('*, profile:profiles(*)')
     .eq('workspace_id', workspaceId)
+  logQuery(metrics, 'teamMembers', Math.round(performance.now() - queryStart))
 
   // Quick replies - table not yet created, return empty for now
   const quickReplies: { id: string; label: string; text: string }[] = []
 
-  // Get unique contact tags for filter dropdown
+  // Query 4: Get unique contact tags for filter dropdown
+  queryStart = performance.now()
   const { data: contactsWithTags } = await supabase
     .from('contacts')
     .select('tags')
     .eq('workspace_id', workspaceId)
     .not('tags', 'is', null)
+  logQuery(metrics, 'contactsWithTags', Math.round(performance.now() - queryStart))
 
   const contactTags = contactsWithTags
     ? [...new Set(contactsWithTags.flatMap(c => c.tags || []))]
     : []
+
+  // Log query summary before returning
+  logQuerySummary('/api/conversations', metrics)
 
   return NextResponse.json({
     conversations: conversations ?? [],
@@ -107,3 +127,6 @@ export async function GET(request: NextRequest) {
     contactTags,
   })
 }
+
+// Export wrapped handler with timing instrumentation
+export const GET = withTiming('/api/conversations', getHandler)
