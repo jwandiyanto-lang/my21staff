@@ -62,14 +62,14 @@ Plans:
 - SUPA-03: Add composite index `idx_contacts_workspace_phone` on contacts(workspace_id, phone)
 - SUPA-04: Add composite index `idx_conversations_workspace_time` on conversations(workspace_id, last_message_at DESC)
 - SUPA-05: Add composite index `idx_messages_conversation_time` on messages(conversation_id, created_at DESC)
-- SUPA-06: Use nested relations for `/api/conversations` (already uses conversations -> contacts!inner join)
+- SUPA-06: Use nested relations for `/api/conversations` (SATISFIED - already uses conversations -> contacts!inner join)
 - SUPA-07: Audit and replace `select('*')` with explicit column selection in hot paths
-- SUPA-08: Optimize RLS policies (wrap `auth.uid()` in SELECT for caching)
+- SUPA-08: Review RLS policies for performance (verification-only in this phase)
 
 **Success Criteria:**
 1. `/api/contacts/by-phone` responds in <1 second P95 (down from 2-6 seconds)
 2. `/api/conversations` responds in <1 second P95
-3. Query count per request reduced by at least 50% (e.g., 8 queries -> 4 or fewer)
+3. Response latency reduced via parallel query execution (Promise.all())
 4. All hot path queries use indexes (verified via EXPLAIN ANALYZE)
 5. No `select('*')` in `/api/contacts/by-phone`, `/api/conversations`, or `/api/messages`
 
@@ -296,4 +296,4 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 
 ---
 
-*Last updated: 2026-01-21 — Phase 2 revised to clarify SUPA-06 requirement*
+*Last updated: 2026-01-21 — Phase 2 revised to clarify success criteria and SUPA-06 status*
