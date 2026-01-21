@@ -237,4 +237,5 @@ http.route({
   }),
 });
 
-export default http;
+// Export router for merging in main HTTP router
+export const router = http;

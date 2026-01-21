@@ -1,51 +1,16 @@
 /**
- * HTTP actions for external API access to Convex.
+ * HTTP actions for contacts endpoint access.
  *
- * These endpoints provide headless access to Convex queries for integration
- * with external services (Kapso webhooks, Next.js API routes).
+ * This provides headless access to Convex queries for integration
+ * with external services.
  *
- * For the spike, we use CRM_API_KEY for authentication. In production with
- * Supabase JWT auth, we'd use the JWT token instead.
+ * Note: Kapso webhook is now in kapso.ts
  */
 
 import { httpRouter, httpAction } from "convex/server";
 import { api } from "../_generated/server";
 
 const http = httpRouter();
-
-/**
- * POST /webhook/kapso
- *
- * Kapso webhook endpoint for receiving message events.
- *
- * For the spike, this accepts the webhook and responds immediately.
- * In full implementation: create/update conversation, messages, and trigger
- * AI responses.
- */
-http.route({
-  path: "/webhook/kapso",
-  method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    // Verify API key for internal use
-    const apiKey = request.headers.get("x-api-key");
-    if (apiKey !== process.env.CRM_API_KEY) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-
-    const body = await request.json();
-
-    // Process webhook (placeholder for spike)
-    // In full implementation: create/update conversation, messages
-
-    console.log("[Webhook] Kapso webhook received:", JSON.stringify(body, null, 2));
-
-    // Respond immediately to prevent retries
-    return new Response(JSON.stringify({ received: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  }),
-});
 
 /**
  * GET /http/contacts/getByPhone?phone={phone}&workspace_id={workspace_id}
@@ -93,4 +58,5 @@ http.route({
   }),
 });
 
-export default http;
+// Export router for merging in main HTTP router
+export const router = http;
