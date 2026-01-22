@@ -104,6 +104,7 @@ No blocker anti-patterns found.
 |------|-----------|--------|
 | 05-07 | Task 5 failed (API rate limit), Tasks 7-11 skipped | Non-blocking — Convex deployment and benchmark pending manual execution |
 | 05-07 | Main contacts route still uses Supabase | Non-blocking | by-phone-convex route exists as test, needs manual verification |
+| 05-01-07 | Fixed 2026-01-22: internalQuery → query for API routes | Critical fix — API routes couldn't call internalQuery via fetchQuery |
 
 **Noted:** 05-05 was re-attempted due to API rate limit, partial completion achieved by manual code changes
 
@@ -127,9 +128,9 @@ No blocker anti-patterns found.
 - **Performance:** Convex 37ms P95 vs Supabase 926ms = 25.4x speedup
 
 **Remaining Work (Manual/Optional):**
-1. Deploy Convex functions (`npx convex deploy`)
+1. ~Deploy Convex functions (`npx convex deploy`)~ **COMPLETED 2026-01-22** to https://pleasant-antelope-109.convex.cloud
 2. Run performance benchmark to verify P95 < 500ms
-3. Update Kapso dashboard webhook URL to `https://intent-otter-212.convex.cloud/api/webhook/kapso`
+3. Update Kapso dashboard webhook URL to `https://pleasant-antelope-109.convex.cloud/api/webhook/kapso`
 4. Test webhook endpoint manually (curl/Postman)
 5. Verify inbox shows real-time updates
 6. Clean up by-phone-convex test route if main route confirmed working
@@ -141,4 +142,5 @@ No blocker anti-patterns found.
 ---
 
 *Verified: 2026-01-21*
+*Deployed: 2026-01-22*
 *Verifier: gsd-verifier (orchestrator)*

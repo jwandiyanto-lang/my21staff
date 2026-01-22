@@ -169,7 +169,7 @@ Plans:
 - [x] 05-05-PLAN.md — Update Next.js API routes to use Convex
 - [x] 05-06-PLAN.md — Update inbox to use Convex real-time subscriptions
 - [x] 05-07-PLAN.md — Deploy Convex and verify performance
-- [x] VERIFIED 2026-01-21
+- [x] VERIFIED 2026-01-21, DEPLOYED 2026-01-22
 
 ---
 
@@ -295,4 +295,4 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 
 ---
 
-*Last updated: 2026-01-21 — Phase 5 planned with 7 plans in 5 waves*
+*Last updated: 2026-01-22 — Convex deployed, API routes fixed to use public queries*
