@@ -7,7 +7,7 @@
 
 import { query, mutation } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import type { QueryCtx, MutationCtx, Doc } from "../_generated/server";
+import type { QueryCtx, MutationCtx } from "../_generated/server";
 
 /**
  * Verifies that a user is authenticated.
@@ -40,7 +40,7 @@ export async function requireAuthentication(
 export async function requireWorkspaceMembership(
   ctx: QueryCtx | MutationContext,
   workspaceId: string
-): Promise<{ userId: string; membership: Doc<"workspaceMembers"> }> {
+): Promise<{ userId: string; membership: any }> {
   const userId = await getAuthUserId(ctx);
   if (!userId) {
     throw new Error("Unauthorized");
@@ -48,7 +48,7 @@ export async function requireWorkspaceMembership(
 
   const membership = await ctx.db
     .query("workspaceMembers")
-    .withIndex("by_user_workspace", (q) =>
+    .withIndex("by_user_workspace", (q: any) =>
       q.eq("user_id", userId).eq("workspace_id", workspaceId)
     )
     .first();

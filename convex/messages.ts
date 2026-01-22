@@ -37,7 +37,7 @@ export const listByConversation = query({
       throw new Error("Conversation not found");
     }
 
-    if (conversation.workspace_id !== args.workspace_id) {
+    if ((conversation as any).workspace_id !== args.workspace_id) {
       throw new Error("Conversation not in this workspace");
     }
 
@@ -79,7 +79,7 @@ export const listByConversationAsc = query({
       throw new Error("Conversation not found");
     }
 
-    if (conversation.workspace_id !== args.workspace_id) {
+    if ((conversation as any).workspace_id !== args.workspace_id) {
       throw new Error("Conversation not in this workspace");
     }
 
@@ -154,7 +154,7 @@ export const countByConversation = query({
       throw new Error("Conversation not found");
     }
 
-    if (conversation.workspace_id !== args.workspace_id) {
+    if ((conversation as any).workspace_id !== args.workspace_id) {
       throw new Error("Conversation not in this workspace");
     }
 

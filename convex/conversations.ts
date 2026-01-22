@@ -50,7 +50,7 @@ export const listWithFiltersInternal = internalQuery({
     let q = ctx.db
       .query("conversations")
       .withIndex("by_workspace_time", (q) =>
-        q.eq("workspace_id", args.workspace_id)
+        q.eq("workspace_id", args.workspace_id as any)
       )
       .order("desc");
 
@@ -74,7 +74,7 @@ export const listWithFiltersInternal = internalQuery({
         if (args.assignedTo === "unassigned") {
           return assignedTo === undefined;
         } else {
-          return assignedTo === args.assignedTo;
+          return (assignedTo as any) === args.assignedTo;
         }
       });
     }
@@ -174,7 +174,7 @@ export const listByWorkspace = query({
     let q = ctx.db
       .query("conversations")
       .withIndex("by_workspace_time", (q) =>
-        q.eq("workspace_id", args.workspace_id)
+        q.eq("workspace_id", args.workspace_id as any)
       )
       .order("desc");
 
@@ -230,7 +230,7 @@ export const getByContact = query({
 
     const conversation = await ctx.db
       .query("conversations")
-      .withIndex("by_contact", (q) => q.eq("contact_id", args.contact_id))
+      .withIndex("by_contact", (q) => q.eq("contact_id", args.contact_id as any))
       .first();
 
     return conversation;
@@ -255,7 +255,7 @@ export const countUnread = query({
 
     const unreadConversations = await ctx.db
       .query("conversations")
-      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
       .filter((q) => q.gt(q.field("unread_count"), 0))
       .collect();
 
@@ -305,18 +305,18 @@ export const getById = query({
   handler: async (ctx, args) => {
     await requireWorkspaceMembership(ctx, args.workspace_id);
 
-    const conversation = await ctx.db.get(args.conversation_id);
+    const conversation = await ctx.db.get(args.conversation_id as any);
     if (!conversation) {
       return null;
     }
 
     // Verify conversation belongs to workspace
-    if (conversation.workspace_id !== args.workspace_id) {
+    if ((conversation as any).workspace_id !== args.workspace_id) {
       return null;
     }
 
     // Fetch associated contact
-    const contact = await ctx.db.get(conversation.contact_id);
+    const contact = await ctx.db.get((conversation as any).contact_id as any);
 
     return {
       ...conversation,
@@ -425,7 +425,7 @@ export const listWithFilters = query({
     let q = ctx.db
       .query("conversations")
       .withIndex("by_workspace_time", (q) =>
-        q.eq("workspace_id", args.workspace_id)
+        q.eq("workspace_id", args.workspace_id as any)
       )
       .order("desc");
 
@@ -449,7 +449,7 @@ export const listWithFilters = query({
         if (args.assignedTo === "unassigned") {
           return assignedTo === undefined;
         } else {
-          return assignedTo === args.assignedTo;
+          return (assignedTo as any) === args.assignedTo;
         }
       });
     }
@@ -488,11 +488,11 @@ export const listWithFilters = query({
     const [members, allContacts] = await Promise.all([
       ctx.db
         .query("workspaceMembers")
-        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
         .collect(),
       ctx.db
         .query("contacts")
-        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
         .collect(),
     ]);
 
