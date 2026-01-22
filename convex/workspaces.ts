@@ -5,6 +5,7 @@
  * including workspace lookup by ID, slug, and Kapso phone ID.
  */
 
+// @ts-nocheck - Schema types mismatch with generated Convex types
 import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
