@@ -6,13 +6,6 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 const nextConfig: NextConfig = {
-  // Skip Convex types generation in Vercel build
-  webpack: (config) => {
-    if (process.env.SKIP_CONVEX_BUILD === '1') {
-      config.externals = [...(config.externals || []), 'convex/_generated/server', 'convex/_generated/api'];
-    }
-    return config;
-  },
   async headers() {
     return [
       {
