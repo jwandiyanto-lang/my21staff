@@ -64,10 +64,10 @@ async function getHandler(request: NextRequest) {
     // Call Convex query directly
     let queryStart = performance.now()
     const result = await fetchQuery(
-      api.contacts.getContextByPhoneInternal,
+      api.contacts.getContextByPhone,
       { phone: normalizedPhone, workspace_id: workspaceId }
     )
-    logQuery(metrics, 'convex.contacts.getContextByPhoneInternal', Math.round(performance.now() - queryStart))
+    logQuery(metrics, 'convex.contacts.getContextByPhone', Math.round(performance.now() - queryStart))
 
     // Log query summary before returning
     logQuerySummary('/api/contacts/by-phone', metrics)

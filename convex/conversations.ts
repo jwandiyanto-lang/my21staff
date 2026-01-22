@@ -31,7 +31,7 @@ export const getByIdInternal = internalQuery({
  * Used by /api/conversations which authenticates via Supabase auth.
  * No workspace membership check here - API route handles authorization.
  */
-export const listWithFiltersInternal = internalQuery({
+export const listWithFiltersInternal = query({
   args: {
     workspace_id: v.string(),
     active: v.optional(v.boolean()),

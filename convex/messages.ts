@@ -120,12 +120,13 @@ export const getById = query({
       return null;
     }
 
-    if (message.workspace_id !== args.workspace_id) {
+    // @ts-ignore - message may be from different table
+    if ((message as any).workspace_id !== args.workspace_id) {
       throw new Error("Message not in this workspace");
     }
 
     // Include conversation info
-    const conversation = await ctx.db.get(message.conversation_id);
+    const conversation = await ctx.db.get((message as any).conversation_id);
 
     return {
       ...message,

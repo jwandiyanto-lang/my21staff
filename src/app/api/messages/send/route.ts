@@ -51,10 +51,10 @@ async function postHandler(request: NextRequest) {
     // Get conversation via Convex
     let queryStart = performance.now()
     const conversation = await fetchQuery(
-      api.conversations.getById,
-      { id: conversation_id }
+      api.conversations.getByIdInternal,
+      { conversation_id }
     )
-    logQuery(metrics, 'convex.conversations.getById', Math.round(performance.now() - queryStart))
+    logQuery(metrics, 'convex.conversations.getByIdInternal', Math.round(performance.now() - queryStart))
 
     if (!conversation) {
       return NextResponse.json(
@@ -66,10 +66,10 @@ async function postHandler(request: NextRequest) {
     // Get contact phone via Convex
     queryStart = performance.now()
     const contact = await fetchQuery(
-      api.contacts.getById,
-      { id: conversation.contact_id, workspace_id: conversation.workspace_id }
+      api.contacts.getByIdInternal,
+      { contact_id: conversation.contact_id }
     )
-    logQuery(metrics, 'convex.contacts.getById', Math.round(performance.now() - queryStart))
+    logQuery(metrics, 'convex.contacts.getByIdInternal', Math.round(performance.now() - queryStart))
 
     // Note: Kapso API call and message creation happen in parallel
     // Kapso API is external service - credentials from workspace.settings

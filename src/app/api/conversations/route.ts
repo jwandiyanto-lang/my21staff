@@ -60,7 +60,7 @@ async function getHandler(request: NextRequest) {
     // Call Convex query
     let queryStart = performance.now()
     const result = await fetchQuery(
-      api.conversations.listWithFilters,
+      api.conversations.listWithFiltersInternal,
       {
         workspace_id: workspaceId,
         active,
@@ -71,7 +71,7 @@ async function getHandler(request: NextRequest) {
         page,
       }
     )
-    logQuery(metrics, 'convex.conversations.listWithFilters', Math.round(performance.now() - queryStart))
+    logQuery(metrics, 'convex.conversations.listWithFiltersInternal', Math.round(performance.now() - queryStart))
 
     // Log query summary before returning
     logQuerySummary('/api/conversations', metrics)

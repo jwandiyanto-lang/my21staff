@@ -16,7 +16,7 @@ import { requireWorkspaceMembership } from "./lib/auth";
  * This is used by /api/contacts/by-phone which authenticates via CRM_API_KEY header.
  * No workspace membership check here - the API route handles authorization.
  */
-export const getContextByPhoneInternal = internalQuery({
+export const getContextByPhoneInternal = query({
   args: {
     phone: v.string(),
     workspace_id: v.string(),
@@ -294,7 +294,7 @@ export const listByTag = query({
  * Used by /api/messages/send to get contact phone.
  * No workspace membership check - API route handles authorization.
  */
-export const getByIdInternal = internalQuery({
+export const getByIdInternal = query({
   args: {
     contact_id: v.string(),
   },
