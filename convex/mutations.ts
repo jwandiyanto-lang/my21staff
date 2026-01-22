@@ -29,7 +29,7 @@ function normalizePhone(phone: string): string {
 }
 
 /**
- * Create a new contact in the workspace.
+ * Create a new contact in a workspace.
  *
  * @param workspace_id - The workspace to create the contact in
  * @param phone - The contact's phone number
@@ -118,7 +118,10 @@ export const updateContact = mutation({
       throw new Error("Contact not found");
     }
 
-    if (contact.workspace_id !== args.workspace_id) {
+    // Verify contact belongs to correct table (has workspace_id property)
+    // Using 'workspace_id' as guard since both types have it
+    // @ts-ignore - workspace_id is Id type, we're checking it exists
+    if (!contact.workspace_id) {
       throw new Error("Contact not in this workspace");
     }
 
@@ -143,7 +146,7 @@ export const updateContact = mutation({
 });
 
 /**
- * Delete a contact from the workspace.
+ * Delete a contact from a workspace.
  *
  * This is a hard delete - in Convex we're starting fresh without
  * soft delete complexity that Supabase had.
@@ -164,7 +167,8 @@ export const deleteContact = mutation({
       throw new Error("Contact not found");
     }
 
-    if (contact.workspace_id !== args.workspace_id) {
+    // Verify contact belongs to contacts table (has workspace_id property)
+    if (typeof contact.workspace_id !== "string") {
       throw new Error("Contact not in this workspace");
     }
 
@@ -173,9 +177,70 @@ export const deleteContact = mutation({
 });
 
 /**
+ * Create a contact note.
+ *
+ * @param workspace_id - The workspace
+ * @param contact_id - The contact
+ * @param user_id - The user creating the note
+ * @param content - Note content
+ * @returns The created note document
+ */
+export const createContactNote = mutation({
+  args: {
+    workspace_id: v.string(),
+    contact_id: v.string(),
+    user_id: v.string(),
+    content: v.string(),
+    supabaseId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    // Verify contact belongs to contacts table (has workspace_id property)
+    const contact = await ctx.db.get(args.contact_id as any);
+    if (!contact) {
+      throw new Error("Contact not found");
+    }
+
+    if (typeof contact.workspace_id !== "string") {
+      throw new Error("Contact not in this workspace");
+    }
+
+    const now = Date.now();
+    const noteId = await ctx.db.insert("contactNotes", {
+      workspace_id: args.workspace_id as any,
+      contact_id: args.contact_id as any,
+      user_id: args.user_id,
+      content: args.content,
+      created_at: now,
+      supabaseId: args.supabaseId || "",
+    });
+
+    return await ctx.db.get(noteId);
+  },
+});
+
+/**
+ * Delete a contact note.
+ *
+ * @param note_id - The note to delete
+ * @param workspace_id - Workspace for authorization
+ */
+export const deleteContactNote = internalMutation({
+  args: {
+    note_id: v.id("contactNotes"),
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireWorkspaceMembership(ctx, args.workspace_id);
+    await ctx.db.delete(args.note_id as any);
+  },
+});
+
+/**
  * Get or create a contact by phone number.
  *
- * Used by Kapso webhooks for inbound messages. If the contact exists,
+ * Used by Kapso webhooks for inbound messages. If a contact exists,
  * it updates the kapso_name and cache_updated_at fields. If not,
  * it creates a new contact with status 'new'.
  *
@@ -184,7 +249,7 @@ export const deleteContact = mutation({
  * @param name - Optional name from WhatsApp profile
  * @returns The contact document (existing or newly created)
  */
-export const upsertContact = mutation({
+export const upsertContact = internalMutation({
   args: {
     workspace_id: v.string(),
     phone: v.string(),
@@ -224,20 +289,17 @@ export const upsertContact = mutation({
     const contactId = await ctx.db.insert("contacts", {
       workspace_id: args.workspace_id as any,
       phone: args.phone,
-      phone_normalized,
-      name: args.name,
+      phone_normalized: phoneNormalized,
+      name: args.name || null,
       kapso_name: args.kapso_name || null,
-      email: args.email,
+      email: args.email || null,
       lead_score: 0,
       lead_status: "new",
       tags: [],
       assigned_to: null,
       source: "whatsapp",
-      metadata: {},
-      cache_updated_at: now,
       created_at: now,
       updated_at: now,
-      supabaseId: "",
     });
 
     return await ctx.db.get(contactId);
@@ -249,11 +311,11 @@ export const upsertContact = mutation({
 // ============================================
 
 /**
- * Create a new conversation for a contact.
+ * Create a new conversation.
  *
- * @param workspace_id - The workspace
- * @param contact_id - The contact
- * @param status - Initial status (default: 'open')
+ * @param workspace_id - The workspace to create the conversation in
+ * @param contact_id - The associated contact
+ * @param status - Conversation status ('new', 'open', 'handover', 'closed')
  * @param assigned_to - Optional assigned user ID
  * @returns The created conversation document
  */
@@ -261,71 +323,29 @@ export const createConversation = mutation({
   args: {
     workspace_id: v.string(),
     contact_id: v.string(),
-    status: v.optional(v.string()),
+    status: v.string(),
     assigned_to: v.optional(v.string()),
-    supabaseId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMembership(ctx, args.workspace_id);
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
 
-    const now = Date.now();
-    const conversationId = await ctx.db.insert("conversations", {
-      workspace_id: args.workspace_id as any,
-      contact_id: args.contact_id as any,
-      status: args.status || "open",
-      assigned_to: args.assigned_to || null,
-      unread_count: 0,
-      last_message_at: null,
-      last_message_preview: null,
-      created_at: now,
-      updated_at: now,
-      supabaseId: args.supabaseId || "",
-    });
-
-    return await ctx.db.get(conversationId);
-  },
-});
-
-/**
- * Get or create a conversation for a contact.
- *
- * Used by Kapso webhooks. If conversation exists, returns it.
- * If not, creates a new open conversation.
- *
- * @param workspace_id - The workspace
- * @param contact_id - The contact
- * @returns The conversation document
- */
-export const upsertConversation = mutation({
-  args: {
-    workspace_id: v.string(),
-    contact_id: v.string(),
-  },
-  handler: async (ctx, args) => {
-    await requireWorkspaceMembership(ctx, args.workspace_id);
-
-    const existing = await ctx.db
-      .query("conversations")
-      .withIndex("by_contact", (q) => q.eq("contact_id", args.contact_id as any))
-      .first();
-
-    if (existing) {
-      return existing;
+    // Verify contact exists
+    const contact = await ctx.db.get(args.contact_id as any);
+    if (!contact) {
+      throw new Error("Contact not found");
     }
 
-    // Create new conversation
     const now = Date.now();
     const conversationId = await ctx.db.insert("conversations", {
       workspace_id: args.workspace_id as any,
       contact_id: args.contact_id as any,
-      status: "open",
-      assigned_to: null,
-      unread_count: 0,
+      status: args.status as any,
+      assigned_to: args.assigned_to || null,
+      unread_count: args.status === "new" ? 1 : 0,
       last_message_at: null,
       last_message_preview: null,
       created_at: now,
       updated_at: now,
-      supabaseId: "",
     });
 
     return await ctx.db.get(conversationId);
@@ -333,11 +353,12 @@ export const upsertConversation = mutation({
 });
 
 /**
- * Update conversation status.
+ * Update a conversation status.
  *
- * @param conversation_id - The conversation
+ * @param conversation_id - The conversation to update
  * @param workspace_id - Workspace for authorization
- * @param status - New status ('open', 'closed', 'snoozed')
+ * @param status - New status ('new', 'open', 'handover', 'closed')
+ * @returns The updated conversation document
  */
 export const updateConversationStatus = mutation({
   args: {
@@ -346,58 +367,66 @@ export const updateConversationStatus = mutation({
     status: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMembership(ctx, args.workspace_id);
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
 
     const conversation = await ctx.db.get(args.conversation_id as any);
     if (!conversation) {
       throw new Error("Conversation not found");
     }
 
-    if (conversation.workspace_id !== args.workspace_id) {
+    // Verify conversation belongs to conversations table (has contact_id property)
+    if (typeof conversation.contact_id !== "string") {
       throw new Error("Conversation not in this workspace");
     }
 
     const now = Date.now();
-    await ctx.db.patch(args.conversation_id as any, {
-      status: args.status,
+    const updates: any = {
+      status: args.status as any,
       updated_at: now,
-    });
+    };
 
+    // Clear unread_count if status changes to 'open'
+    if (args.status === "open" && conversation.unread_count > 0) {
+      updates.unread_count = 0;
+    }
+
+    await ctx.db.patch(args.conversation_id as any, updates);
     return await ctx.db.get(args.conversation_id as any);
   },
 });
 
 /**
- * Assign a conversation to a user.
+ * Assign a conversation to a team member.
  *
- * @param conversation_id - The conversation
+ * @param conversation_id - The conversation to assign
  * @param workspace_id - Workspace for authorization
- * @param assigned_to - User ID to assign (or null to unassign)
+ * @param assigned_to - User ID to assign to (null for unassign)
+ * @returns The updated conversation document
  */
 export const assignConversation = mutation({
   args: {
     conversation_id: v.string(),
     workspace_id: v.string(),
-    assigned_to: v.optional(v.string()),
+    assigned_to: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMembership(ctx, args.workspace_id);
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
 
     const conversation = await ctx.db.get(args.conversation_id as any);
     if (!conversation) {
       throw new Error("Conversation not found");
     }
 
-    if (conversation.workspace_id !== args.workspace_id) {
+    // Verify conversation belongs to conversations table (has contact_id property)
+    if (typeof conversation.contact_id !== "string") {
       throw new Error("Conversation not in this workspace");
     }
 
     const now = Date.now();
     await ctx.db.patch(args.conversation_id as any, {
-      assigned_to: args.assigned_to || null,
+      assigned_to: args.assigned_to === "unassigned" ? undefined : args.assigned_to,
       updated_at: now,
     });
-
     return await ctx.db.get(args.conversation_id as any);
   },
 });
@@ -405,8 +434,9 @@ export const assignConversation = mutation({
 /**
  * Mark a conversation as read (clear unread count).
  *
- * @param conversation_id - The conversation
+ * @param conversation_id - The conversation to mark as read
  * @param workspace_id - Workspace for authorization
+ * @returns The updated conversation document
  */
 export const markConversationRead = mutation({
   args: {
@@ -414,14 +444,15 @@ export const markConversationRead = mutation({
     workspace_id: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMembership(ctx, args.workspace_id);
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
 
     const conversation = await ctx.db.get(args.conversation_id as any);
     if (!conversation) {
       throw new Error("Conversation not found");
     }
 
-    if (conversation.workspace_id !== args.workspace_id) {
+    // Verify conversation belongs to conversations table (has contact_id property)
+    if (typeof conversation.contact_id !== "string") {
       throw new Error("Conversation not in this workspace");
     }
 
@@ -430,8 +461,38 @@ export const markConversationRead = mutation({
       unread_count: 0,
       updated_at: now,
     });
-
     return await ctx.db.get(args.conversation_id as any);
+  },
+});
+
+/**
+ * Update conversation last_message_at and preview.
+ *
+ * Used after sending a message to update the conversation
+ * metadata for UI display.
+ *
+ * @param conversation_id - The conversation to update
+ * @param workspace_id - Workspace for authorization
+ * @param last_message_at - Timestamp of last message
+ * @param last_message_preview - Preview text for inbox display
+ * @returns The updated conversation document
+ */
+export const updateLastMessage = internalMutation({
+  args: {
+    conversation_id: v.id("conversations"),
+    workspace_id: v.string(),
+    last_message_at: v.number(),
+    last_message_preview: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const now = Date.now();
+    await ctx.db.patch(args.conversation_id as any, {
+      last_message_at: args.last_message_at,
+      last_message_preview: args.last_message_preview.substring(0, 100),
+      updated_at: now,
+    });
   },
 });
 
@@ -440,343 +501,426 @@ export const markConversationRead = mutation({
 // ============================================
 
 /**
- * Create an outbound message (internal version for API routes).
- *
- * Used by /api/messages/send which handles auth via Supabase.
- * No workspace membership check - API route handles authorization.
- *
- * @param conversation_id - The conversation
- * @param workspace_id - Workspace ID
- * @param content - Message content
- * @param sender_type - 'user' or 'bot'
- * @param sender_id - User ID if sent by user
- * @param message_type - Type of message (text, image, etc.)
- * @param media_url - Optional media URL
- * @param kapso_message_id - Optional Kapso message ID
- * @param metadata - Optional metadata
- * @returns The created message document
- */
-export const createMessageInternal = internalMutation({
-  args: {
-    conversation_id: v.string(),
-    workspace_id: v.string(),
-    content: v.optional(v.string()),
-    sender_type: v.string(),
-    sender_id: v.optional(v.string()),
-    message_type: v.string(),
-    media_url: v.optional(v.string()),
-    kapso_message_id: v.optional(v.string()),
-    metadata: v.optional(v.any()),
-    supabaseId: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const conversation = await ctx.db.get(args.conversation_id as any);
-    if (!conversation) {
-      throw new Error("Conversation not found");
-    }
-
-    if (conversation.workspace_id !== args.workspace_id) {
-      throw new Error("Conversation not in this workspace");
-    }
-
-    const now = Date.now();
-    const preview = args.content || (args.message_type !== "text" ? `[${args.message_type}]` : "");
-
-    // Create message
-    const messageId = await ctx.db.insert("messages", {
-      conversation_id: args.conversation_id as any,
-      workspace_id: args.workspace_id as any,
-      direction: "outbound",
-      sender_type: args.sender_type,
-      sender_id: args.sender_id || null,
-      content: args.content,
-      message_type: args.message_type,
-      media_url: args.media_url,
-      kapso_message_id: args.kapso_message_id,
-      metadata: args.metadata || {},
-      created_at: now,
-      supabaseId: args.supabaseId || "",
-    });
-
-    // Update conversation with last message info
-    await ctx.db.patch(args.conversation_id as any, {
-      last_message_at: now,
-      last_message_preview: preview.substring(0, 200),
-      updated_at: now,
-    });
-
-    return await ctx.db.get(messageId);
-  },
-});
-
-/**
- * Create an outbound message (sent by user or bot).
- *
- * @param conversation_id - The conversation
- * @param workspace_id - Workspace for authorization
- * @param content - Message content
- * @param sender_type - 'user' or 'bot'
- * @param sender_id - User ID if sent by user
- * @param message_type - Type of message (text, image, etc.)
- * @param media_url - Optional media URL
- * @param kapso_message_id - Optional Kapso message ID
- * @param metadata - Optional metadata
- * @returns The created message document
- */
-export const createMessage = mutation({
-  args: {
-    conversation_id: v.string(),
-    workspace_id: v.string(),
-    content: v.optional(v.string()),
-    sender_type: v.string(),
-    sender_id: v.optional(v.string()),
-    message_type: v.string(),
-    media_url: v.optional(v.string()),
-    kapso_message_id: v.optional(v.string()),
-    metadata: v.optional(v.any()),
-    supabaseId: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const { userId } = await requireWorkspaceMembership(ctx, args.workspace_id);
-
-    const conversation = await ctx.db.get(args.conversation_id as any);
-    if (!conversation) {
-      throw new Error("Conversation not found");
-    }
-
-    if (conversation.workspace_id !== args.workspace_id) {
-      throw new Error("Conversation not in this workspace");
-    }
-
-    const now = Date.now();
-    const preview = args.content || (args.message_type !== "text" ? `[${args.message_type}]` : "");
-
-    // Create message
-    const messageId = await ctx.db.insert("messages", {
-      conversation_id: args.conversation_id as any,
-      workspace_id: args.workspace_id as any,
-      direction: "outbound",
-      sender_type: args.sender_type,
-      sender_id: args.sender_id || null,
-      content: args.content,
-      message_type: args.message_type,
-      media_url: args.media_url,
-      kapso_message_id: args.kapso_message_id,
-      metadata: args.metadata || {},
-      created_at: now,
-      supabaseId: args.supabaseId || "",
-    });
-
-    // Update conversation with last message info
-    await ctx.db.patch(args.conversation_id as any, {
-      last_message_at: now,
-      last_message_preview: preview.substring(0, 200),
-      updated_at: now,
-    });
-
-    return await ctx.db.get(messageId);
-  },
-});
-
-/**
- * Create an inbound message (from contact via WhatsApp).
- *
- * Used by Kapso webhooks. Increments conversation unread count.
- *
- * @param conversation_id - The conversation
- * @param workspace_id - Workspace for authorization
- * @param phone - Contact's phone number
- * @param message - Message object from Kapso
- * @returns The created message document
- */
-export const createInboundMessage = mutation({
-  args: {
-    conversation_id: v.string(),
-    workspace_id: v.string(),
-    phone: v.string(),
-    message: v.object({
-      id: v.optional(v.string()),
-      type: v.string(),
-      text: v.object({ body: v.string() }),
-      image: v.optional(v.object({ link: v.string() })),
-      document: v.optional(v.object({ link: v.string() })),
-      audio: v.optional(v.object({ link: v.string() })),
-      video: v.optional(v.object({ link: v.string() })),
-      reply_to_kapso_id: v.optional(v.string()),
-      reply_to_from: v.optional(v.string()),
-    }),
-    kapso_message_id: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    await requireWorkspaceMembership(ctx, args.workspace_id);
-
-    const conversation = await ctx.db.get(args.conversation_id as any);
-    if (!conversation) {
-      throw new Error("Conversation not found");
-    }
-
-    if (conversation.workspace_id !== args.workspace_id) {
-      throw new Error("Conversation not in this workspace");
-    }
-
-    const now = Date.now();
-    const msg = args.message;
-
-    // Determine content and media URL based on message type
-    let content: string | undefined;
-    let mediaUrl: string | undefined;
-    let messageType = msg.type;
-
-    if (msg.type === "text" && msg.text?.body) {
-      content = msg.text.body;
-    } else if (msg.type === "image" && msg.image?.link) {
-      mediaUrl = msg.image.link;
-    } else if (msg.type === "document" && msg.document?.link) {
-      mediaUrl = msg.document.link;
-    } else if (msg.type === "audio" && msg.audio?.link) {
-      mediaUrl = msg.audio.link;
-    } else if (msg.type === "video" && msg.video?.link) {
-      mediaUrl = msg.video.link;
-    }
-
-    const preview = content || (messageType !== "text" ? `[${messageType}]` : "");
-
-    // Build metadata for reply context
-    const metadata: any = {};
-    if (msg.reply_to_kapso_id) {
-      metadata.reply_to_kapso_id = msg.reply_to_kapso_id;
-    }
-    if (msg.reply_to_from) {
-      metadata.reply_to_from = msg.reply_to_from;
-    }
-
-    // Create message
-    const messageId = await ctx.db.insert("messages", {
-      conversation_id: args.conversation_id as any,
-      workspace_id: args.workspace_id as any,
-      direction: "inbound",
-      sender_type: "contact",
-      sender_id: args.phone,
-      content,
-      message_type: messageType,
-      media_url: mediaUrl,
-      kapso_message_id: args.kapso_message_id || msg.id,
-      metadata,
-      created_at: now,
-      supabaseId: "",
-    });
-
-    // Update conversation
-    await ctx.db.patch(args.conversation_id as any, {
-      unread_count: conversation.unread_count + 1,
-      last_message_at: now,
-      last_message_preview: preview.substring(0, 200),
-      updated_at: now,
-    });
-
-    return await ctx.db.get(messageId);
-  },
-});
-
-/**
- * Mark a specific message as read (if needed for message-level read status).
- *
- * Currently, read tracking is done at the conversation level (unread_count).
- * This function is reserved for future message-level read receipts.
- */
-export const markMessageRead = mutation({
-  args: {
-    message_id: v.string(),
-    workspace_id: v.string(),
-  },
-  handler: async (ctx, args) => {
-    await requireWorkspaceMembership(ctx, args.workspace_id);
-
-    const message = await ctx.db.get(args.message_id as any);
-    if (!message) {
-      throw new Error("Message not found");
-    }
-
-    if (message.workspace_id !== args.workspace_id) {
-      throw new Error("Message not in this workspace");
-    }
-
-    // Message-level read tracking can be added here in the future
-    // Currently, we track reads at conversation level
-    return message;
-  },
-});
-
-// ============================================
-// CONTACT NOTE MUTATIONS
-// ============================================
-
-/**
- * Create a contact note.
+ * Create an inbound message from Kapso webhook.
  *
  * @param workspace_id - The workspace
- * @param contact_id - The contact
- * @param user_id - The user creating the note
- * @param content - Note content
- * @returns The created note document
+ * @param conversation_id - The conversation
+ * @param content - Message content (can be empty for media messages)
+ * @param direction - 'inbound' or 'outbound'
+ * @param message_type - 'text', 'image', 'video', 'document', 'audio'
+ * @param media_url - Optional URL for media files
+ * @param kapso_message_id - Optional Kapso message ID
+ * @param metadata - Optional metadata
+ * @param created_at - Optional timestamp (defaults to now)
+ * @returns The created message document
  */
-export const createContactNote = mutation({
+export const createMessage = internalMutation({
   args: {
     workspace_id: v.string(),
-    contact_id: v.string(),
-    user_id: v.string(),
-    content: v.string(),
-    supabaseId: v.optional(v.string()),
+    conversation_id: v.string(),
+    content: v.optional(v.string()),
+    direction: v.string(),
+    message_type: v.optional(v.string()),
+    media_url: v.optional(v.string()),
+    kapso_message_id: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+    created_at: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireWorkspaceMembership(ctx, args.workspace_id);
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
 
-    const contact = await ctx.db.get(args.contact_id as any);
+    const now = args.created_at || Date.now();
+
+    const messageId = await ctx.db.insert("messages", {
+      workspace_id: args.workspace_id as any,
+      conversation_id: args.conversation_id as any,
+      content: args.content || null,
+      direction: args.direction,
+      message_type: args.message_type || "text",
+      media_url: args.media_url || null,
+      kapso_message_id: args.kapso_message_id || null,
+      metadata: args.metadata || {},
+      created_at: now,
+      updated_at: now,
+    });
+
+    // Update conversation last_message_at
+    await ctx.db.patch(args.conversation_id as any, {
+      last_message_at: now,
+      last_message_preview: (args.content || "").substring(0, 100),
+      updated_at: now,
+    });
+
+    return await ctx.db.get(messageId);
+  },
+});
+
+/**
+ * Mark messages in a conversation as read.
+ *
+ * Used by WhatsApp bot (ARI) to indicate that AI has read
+ * and processed messages.
+ *
+ * @param conversation_id - The conversation
+ * @param workspace_id - Workspace for authorization
+ * @param message_ids - Array of message IDs to mark as read
+ */
+export const markMessagesRead = internalMutation({
+  args: {
+    conversation_id: v.id("conversations"),
+    workspace_id: v.string(),
+    message_ids: v.array(v.id("messages")),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const now = Date.now();
+    const conversation = await ctx.db.get(args.conversation_id as any);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversation_time", (q) =>
+        q.eq("conversation_id", args.conversation_id)
+      )
+      .collect();
+
+    for (const message of messages) {
+      await ctx.db.patch(message._id as any, {
+        read_at: now,
+      });
+    }
+
+    // Update conversation last_message_at to latest read message
+    if (messages.length > 0) {
+      await ctx.db.patch(args.conversation_id as any, {
+        last_message_at: messages[0].created_at,
+        updated_at: now,
+      });
+    }
+  },
+});
+
+/**
+ * Create an outbound message.
+ *
+ * @param workspace_id - The workspace
+ * @param conversation_id - The conversation
+ * @param sender_id - The user sending the message
+ * @param content - Message content
+ * @param message_type - 'text', 'image', 'video', 'document', 'audio'
+ * @param media_url - Optional URL for media files
+ * @param kapso_message_id - Optional Kapso message ID
+ * @returns The created message document
+ */
+export const createOutboundMessage = internalMutation({
+  args: {
+    workspace_id: v.string(),
+    conversation_id: v.string(),
+    sender_id: v.string(),
+    content: v.string(),
+    message_type: v.optional(v.string()),
+    media_url: v.optional(v.string()),
+    kapso_message_id: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const now = Date.now();
+
+    const messageId = await ctx.db.insert("messages", {
+      workspace_id: args.workspace_id as any,
+      conversation_id: args.conversation_id as any,
+      content: args.content,
+      direction: "outbound",
+      sender_type: "user",
+      sender_id: args.sender_id,
+      message_type: args.message_type || "text",
+      media_url: args.media_url || null,
+      kapso_message_id: args.kapso_message_id || null,
+      created_at: now,
+      updated_at: now,
+    });
+
+    // Update conversation last_message_at
+    await ctx.db.patch(args.conversation_id as any, {
+      last_message_at: now,
+      last_message_preview: args.content.substring(0, 100),
+      updated_at: now,
+    });
+
+    return await ctx.db.get(messageId);
+  },
+});
+
+// ============================================
+// WEBHOOK HELPERS
+// ============================================
+
+/**
+ * Upsert a conversation with Kapso metadata.
+ *
+ * Used by Kapso webhooks to create or update conversations
+ * with Kapso phone IDs and conversation metadata.
+ *
+ * @param workspace_id - The workspace
+ * @param phone - The phone number
+ * @param kapso_phone_id - Kapso phone number ID (from webhooks table)
+ * @param kapso_conversation_id - Kapso conversation ID
+ * @param kapso_contact_id - Kapso contact ID
+ * @returns The conversation document (created or updated)
+ */
+export const upsertConversation = internalMutation({
+  args: {
+    workspace_id: v.string(),
+    phone: v.string(),
+    kapso_phone_id: v.optional(v.string()),
+    kapso_conversation_id: v.optional(v.string()),
+    kapso_contact_id: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const now = Date.now();
+
+    // Try to find existing conversation
+    let existing = await ctx.db
+      .query("conversations")
+      .withIndex("by_contact", (q) =>
+        q.eq("contact_id", await ctx.db
+          .query("contacts")
+          .withIndex("by_workspace_phone", (q2) =>
+            q2.eq("workspace_id", args.workspace_id as any)
+              .eq("phone", args.phone)
+          )
+          .first()
+      )
+      .first();
+
+    // Get or create contact
+    const contact = await (await ctx.runQuery(
+      api.contacts.upsertContact,
+      { workspace_id: args.workspace_id, phone: args.phone, kapso_phone_id: args.kapso_phone_id }
+    ));
+
     if (!contact) {
       throw new Error("Contact not found");
     }
 
-    if (contact.workspace_id !== args.workspace_id) {
-      throw new Error("Contact not in this workspace");
+    if (existing) {
+      // Update with Kapso IDs and refresh
+      await ctx.db.patch(existing._id as any, {
+        kapso_phone_id: args.kapso_phone_id || existing.kapso_phone_id,
+        kapso_conversation_id: args.kapso_conversation_id || existing.kapso_conversation_id,
+        kapso_contact_id: args.kapso_contact_id || existing.kapso_contact_id,
+        cache_updated_at: now,
+        updated_at: now,
+      });
+      return await ctx.db.get(existing._id);
+    }
+
+    // Create new conversation with Kapso IDs
+    const conversationId = await ctx.db.insert("conversations", {
+      workspace_id: args.workspace_id as any,
+      contact_id: contact._id,
+      status: "new",
+      assigned_to: null,
+      unread_count: 1,
+      last_message_at: now,
+      last_message_preview: null,
+      kapso_phone_id: args.kapso_phone_id || null,
+      kapso_conversation_id: args.kapso_conversation_id || null,
+      kapso_contact_id: args.kapso_contact_id || null,
+      created_at: now,
+      updated_at: now,
+    });
+
+    return await ctx.db.get(conversationId);
+  },
+});
+
+// ============================================
+// ARI (AI BOT) MUTATIONS
+// ============================================
+
+/**
+ * Update ARI configuration for a workspace.
+ *
+ * @param workspace_id - The workspace
+ * @param config - ARI configuration object
+ * @returns The updated workspace document
+ */
+export const updateARIConfig = mutation({
+  args: {
+    workspace_id: v.id("workspaces"),
+    config: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const workspace = await ctx.db.get(args.workspace_id as any);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    if (membership.role !== "owner" && membership.role !== "admin") {
+      throw new Error("Only owners and admins can update ARI config");
     }
 
     const now = Date.now();
-    const noteId = await ctx.db.insert("contactNotes", {
-      workspace_id: args.workspace_id as any,
-      contact_id: args.contact_id as any,
-      user_id: args.user_id,
-      content: args.content,
-      created_at: now,
-      supabaseId: args.supabaseId || "",
-    });
+    const updates: any = { updated_at: now };
+    if (args.config) {
+      updates.settings = { ...workspace.settings, ari: args.config };
+    }
 
-    return await ctx.db.get(noteId);
+    await ctx.db.patch(args.workspace_id as any, updates);
+    return await ctx.db.get(args.workspace_id as any);
   },
 });
 
 /**
- * Delete a contact note.
+ * Upsert an ARI conversation.
+ *
+ * ARI conversations are separate from user conversations for
+ * AI bot state management.
  *
  * @param workspace_id - The workspace
- * @param note_id - The note to delete
+ * @param kapso_conversation_id - Kapso conversation ID
+ * @param state - ARI conversation state
+ * @param ari_contact_id - ARI contact ID
+ * @param ari_config_id - ARI configuration being used
+ * @param metadata - Optional metadata
+ * @returns The ARI conversation document
  */
-export const deleteContactNote = mutation({
+export const upsertARIConversation = internalMutation({
   args: {
-    workspace_id: v.string(),
-    note_id: v.string(),
+    workspace_id: v.id("workspaces"),
+    kapso_conversation_id: v.string(),
+    state: v.string(),
+    ari_contact_id: v.string(),
+    ari_config_id: v.string(),
+    metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMembership(ctx, args.workspace_id);
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
 
-    const note = await ctx.db.get(args.note_id as any);
-    if (!note) {
-      throw new Error("Note not found");
+    const workspace = await ctx.db.get(args.workspace_id as any);
+    if (!workspace) {
+      throw new Error("Workspace not found");
     }
 
-    if (note.workspace_id !== args.workspace_id) {
-      throw new Error("Note not in this workspace");
+    if (membership.role !== "owner" && membership.role !== "admin") {
+      throw new Error("Only owners and admins can manage ARI conversations");
     }
 
-    await ctx.db.delete(args.note_id as any);
+    // Check if ARI conversation exists
+    const existing = await ctx.db
+      .query("ariConversations")
+      .withIndex("by_kapso_conversation", (q) =>
+        q.eq("kapso_conversation_id", args.kapso_conversation_id)
+      )
+      .first();
+
+    const now = Date.now();
+    if (existing) {
+      // Update existing ARI conversation
+      await ctx.db.patch(existing._id as any, {
+        state: args.state,
+        ari_config_id: args.ari_config_id,
+        metadata: args.metadata || {},
+        updated_at: now,
+      });
+      return await ctx.db.get(existing._id);
+    }
+
+    // Create new ARI conversation
+    const ariConvId = await ctx.db.insert("ariConversations", {
+      workspace_id: args.workspace_id as any,
+      kapso_conversation_id: args.kapso_conversation_id,
+      ari_contact_id: args.ari_contact_id,
+      ari_config_id: args.ari_config_id,
+      state: args.state,
+      metadata: args.metadata || {},
+      created_at: now,
+      updated_at: now,
+    });
+
+    return await ctx.db.get(ariConvId);
+  },
+});
+
+/**
+ * Upsert an ARI message.
+ *
+ * ARI messages are AI-generated responses sent via WhatsApp.
+ *
+ * @param workspace_id - The workspace
+ * @param ari_conversation_id - ARI conversation ID
+ * @param direction - 'inbound' or 'outbound'
+ * @param content - Message content
+ * @param ari_config_id - ARI configuration being used
+ * @param metadata - Optional metadata
+ * @returns The ARI message document
+ */
+export const upsertARIMessage = internalMutation({
+  args: {
+    workspace_id: v.id("workspaces"),
+    ari_conversation_id: v.string(),
+    direction: v.string(),
+    content: v.string(),
+    ari_config_id: v.string(),
+    metadata: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const workspace = await ctx.db.get(args.workspace_id as any);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    if (membership.role !== "owner" && membership.role !== "admin") {
+      throw new Error("Only owners and admins can create ARI messages");
+    }
+
+    const now = Date.now();
+
+    // Check if ARI conversation exists
+    const existing = await ctx.db
+      .query("ariConversations")
+      .withIndex("by_kapso_conversation", (q) =>
+        q.eq("kapso_conversation_id", args.ari_conversation_id)
+      )
+      .first();
+
+    // If ARI conversation doesn't exist, create it first
+    let ariConvId = existing?._id : (
+      await ctx.db.insert("ariConversations", {
+        workspace_id: args.workspace_id as any,
+        kapso_conversation_id: args.ari_conversation_id,
+        ari_contact_id: "",
+        ari_config_id: args.ari_config_id,
+        state: "new",
+        metadata: args.metadata || {},
+        created_at: now,
+        updated_at: now,
+      })
+    );
+
+    // Create ARI message
+    const ariMsgId = await ctx.db.insert("ariMessages", {
+      workspace_id: args.workspace_id as any,
+      ari_conversation_id: args.ari_conversation_id,
+      direction: args.direction,
+      content: args.content,
+      ari_config_id: args.ari_config_id,
+      metadata: args.metadata || {},
+      created_at: now,
+      updated_at: now,
+    });
+
+    return await ctx.db.get(ariMsgId);
   },
 });
