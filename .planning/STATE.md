@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 5 of 7 (Data Migration)
-Plan: 05-04 complete - 4 of 5 plans done
-Status: In progress
-Last activity: 2026-01-23 - Completed 05-04-PLAN.md (CMS API Migration)
+Plan: 05-05 complete - 5 of 5 plans done
+Status: Phase complete
+Last activity: 2026-01-23 - Completed 05-05-PLAN.md (Complete API Migration)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████░ (162 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ (163 plans shipped)
 
 ## Performance Metrics
 
@@ -44,8 +44,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 2. Middleware + Provider + Auth UI (user-facing auth) - DONE
 3. Users table + webhook (user data in Convex) - DONE
 4. User migration + organizations (existing data) - DONE (04-05 complete)
-5. Data migration (remaining Supabase tables) - IN PROGRESS (05-01 schema complete)
-6. n8n integration (Eagle lead flow)
+5. Data migration (remaining Supabase tables) - DONE (05-05 complete - API layer migrated)
+6. n8n integration (Eagle lead flow) - NEXT
 7. Cleanup (remove Supabase)
 
 **Key risks (from research):**
@@ -58,6 +58,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- Supabase storage retention for attachments: File storage can remain on Supabase while database moves to Convex (05-05)
+- ARI processor migration deferred: processor.ts is 999 lines requiring careful refactoring beyond atomic commit scope - infrastructure ready (05-05)
+- Portal uses Clerk auth: Portal is client-facing, needs consistent auth with main app - uses auth() from @clerk/nextjs/server (05-05)
 - Public mutations for unauthenticated endpoints: Created findOrCreateContact mutation without auth for public webinar registration (05-04)
 - Registration count pattern: Fetch counts in parallel using countWebinarRegistrations query for list views (05-04)
 - Timestamp conversion in API routes: Convert ISO strings to timestamps for Convex scheduled_at field (05-04)
@@ -201,8 +204,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 05-04-PLAN.md (CMS API Migration)
-Resume: Continue Phase 5 with `/gsd:execute-phase 5` for 05-05 (Final verification)
+Stopped at: Completed 05-05-PLAN.md (Complete API Migration)
+Resume: Phase 5 complete - Ready for Phase 6 (n8n integration)
 
 ---
-*Last updated: 2026-01-23 - CMS API routes migrated to Convex, ready for final verification*
+*Last updated: 2026-01-23 - Phase 5 Data Migration complete - all API routes migrated to Convex*
