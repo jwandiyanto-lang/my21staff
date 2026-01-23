@@ -1,6 +1,8 @@
-# Convex files - managed separately
-convex/
-convex.json
+# Convex source files - managed separately
+convex/*.ts
+convex/*.tsx
+convex/*.js
+convex/*.json
 convex.config.ts
 
 # Environment files
@@ -12,3 +14,6 @@ convex.config.ts
 .vscode
 .idea
 *.log
+
+# Scripts (not needed in Vercel)
+scripts-temp
