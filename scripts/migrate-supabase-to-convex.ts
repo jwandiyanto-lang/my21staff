@@ -28,6 +28,8 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "../convex/_generated/api";
 import { config } from "dotenv";
 import { resolve } from "path";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
@@ -119,35 +121,20 @@ async function getContactPhone(
   return data.phone;
 }
 
-// Call Convex internal mutation via HTTP
+// Call Convex mutation via ConvexHttpClient
 async function callConvexMutation(
+  client: ConvexHttpClient,
   mutationName: string,
   args: any
 ): Promise<any> {
-  const url = `${CONVEX_URL}/api/mutation`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      path: `migrate:${mutationName}`,
-      args,
-      format: "json",
-    }),
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Convex mutation failed: ${response.status} ${text}`);
-  }
-
-  const result = await response.json();
-  return result.value;
+  const mutation = (api.migrate as any)[mutationName];
+  const result = await client.mutation(mutation, args);
+  return result;
 }
 
 // Migrate ARI Destinations
 async function migrateAriDestinations(
+  client: ConvexHttpClient,
   supabase: any,
   report: MigrationReport
 ): Promise<void> {
@@ -195,7 +182,7 @@ async function migrateAriDestinations(
       );
 
       // Call Convex mutation
-      const result = await callConvexMutation("bulkInsertAriDestinations", {
+      const result = await callConvexMutation(client, "bulkInsertAriDestinations", {
         records: convexRecords,
       });
 
@@ -213,7 +200,7 @@ async function migrateAriDestinations(
 }
 
 // Migrate ARI Payments
-async function migrateAriPayments(
+async function migrateAriPayments(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport
 ): Promise<void> {
@@ -276,7 +263,7 @@ async function migrateAriPayments(
       const validRecords = convexRecords.filter((r) => r !== null);
 
       if (validRecords.length > 0) {
-        const result = await callConvexMutation("bulkInsertAriPayments", {
+        const result = await callConvexMutation(client, "bulkInsertAriPayments", {
           records: validRecords,
         });
 
@@ -297,7 +284,7 @@ async function migrateAriPayments(
 }
 
 // Migrate ARI Appointments
-async function migrateAriAppointments(
+async function migrateAriAppointments(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport
 ): Promise<void> {
@@ -360,7 +347,7 @@ async function migrateAriAppointments(
       const validRecords = convexRecords.filter((r) => r !== null);
 
       if (validRecords.length > 0) {
-        const result = await callConvexMutation("bulkInsertAriAppointments", {
+        const result = await callConvexMutation(client, "bulkInsertAriAppointments", {
           records: validRecords,
         });
 
@@ -381,7 +368,7 @@ async function migrateAriAppointments(
 }
 
 // Migrate ARI AI Comparison
-async function migrateAriAiComparison(
+async function migrateAriAiComparison(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport
 ): Promise<void> {
@@ -428,7 +415,7 @@ async function migrateAriAiComparison(
         })
       );
 
-      const result = await callConvexMutation("bulkInsertAriAiComparison", {
+      const result = await callConvexMutation(client, "bulkInsertAriAiComparison", {
         records: convexRecords,
       });
 
@@ -446,7 +433,7 @@ async function migrateAriAiComparison(
 }
 
 // Migrate ARI Flow Stages
-async function migrateAriFlowStages(
+async function migrateAriFlowStages(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport
 ): Promise<void> {
@@ -489,7 +476,7 @@ async function migrateAriFlowStages(
         })
       );
 
-      const result = await callConvexMutation("bulkInsertAriFlowStages", {
+      const result = await callConvexMutation(client, "bulkInsertAriFlowStages", {
         records: convexRecords,
       });
 
@@ -507,7 +494,7 @@ async function migrateAriFlowStages(
 }
 
 // Migrate ARI Knowledge Categories
-async function migrateAriKnowledgeCategories(
+async function migrateAriKnowledgeCategories(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport
 ): Promise<Record<string, string>> {
@@ -549,7 +536,7 @@ async function migrateAriKnowledgeCategories(
         })
       );
 
-      const result = await callConvexMutation("bulkInsertAriKnowledgeCategories", {
+      const result = await callConvexMutation(client, "bulkInsertAriKnowledgeCategories", {
         records: convexRecords,
       });
 
@@ -569,7 +556,7 @@ async function migrateAriKnowledgeCategories(
 }
 
 // Migrate ARI Knowledge Entries
-async function migrateAriKnowledgeEntries(
+async function migrateAriKnowledgeEntries(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport,
   categoryMapping: Record<string, string>
@@ -611,7 +598,7 @@ async function migrateAriKnowledgeEntries(
         })
       );
 
-      const result = await callConvexMutation("bulkInsertAriKnowledgeEntries", {
+      const result = await callConvexMutation(client, "bulkInsertAriKnowledgeEntries", {
         records: convexRecords,
         categoryMapping,
       });
@@ -630,7 +617,7 @@ async function migrateAriKnowledgeEntries(
 }
 
 // Migrate ARI Scoring Config
-async function migrateAriScoringConfig(
+async function migrateAriScoringConfig(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport
 ): Promise<void> {
@@ -673,7 +660,7 @@ async function migrateAriScoringConfig(
         })
       );
 
-      const result = await callConvexMutation("bulkInsertAriScoringConfig", {
+      const result = await callConvexMutation(client, "bulkInsertAriScoringConfig", {
         records: convexRecords,
       });
 
@@ -691,7 +678,7 @@ async function migrateAriScoringConfig(
 }
 
 // Migrate Consultant Slots
-async function migrateConsultantSlots(
+async function migrateConsultantSlots(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport
 ): Promise<void> {
@@ -721,7 +708,7 @@ async function migrateConsultantSlots(
           const workspace_slug = await getWorkspaceSlug(supabase, r.workspace_id);
           return {
             workspace_slug: workspace_slug || "",
-            consultant_id: r.consultant_id,
+            consultant_id: r.consultant_id || undefined, // Convert null to undefined
             day_of_week: r.day_of_week,
             start_time: r.start_time,
             end_time: r.end_time,
@@ -736,7 +723,7 @@ async function migrateConsultantSlots(
         })
       );
 
-      const result = await callConvexMutation("bulkInsertConsultantSlots", {
+      const result = await callConvexMutation(client, "bulkInsertConsultantSlots", {
         records: convexRecords,
       });
 
@@ -754,7 +741,7 @@ async function migrateConsultantSlots(
 }
 
 // Migrate Articles
-async function migrateArticles(
+async function migrateArticles(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport
 ): Promise<void> {
@@ -798,7 +785,7 @@ async function migrateArticles(
         })
       );
 
-      const result = await callConvexMutation("bulkInsertArticles", {
+      const result = await callConvexMutation(client, "bulkInsertArticles", {
         records: convexRecords,
       });
 
@@ -816,7 +803,7 @@ async function migrateArticles(
 }
 
 // Migrate Webinars
-async function migrateWebinars(
+async function migrateWebinars(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport
 ): Promise<Record<string, string>> {
@@ -865,7 +852,7 @@ async function migrateWebinars(
         })
       );
 
-      const result = await callConvexMutation("bulkInsertWebinars", {
+      const result = await callConvexMutation(client, "bulkInsertWebinars", {
         records: convexRecords,
       });
 
@@ -885,7 +872,7 @@ async function migrateWebinars(
 }
 
 // Migrate Webinar Registrations
-async function migrateWebinarRegistrations(
+async function migrateWebinarRegistrations(client: ConvexHttpClient, 
   supabase: any,
   report: MigrationReport,
   webinarMapping: Record<string, string>
@@ -939,7 +926,7 @@ async function migrateWebinarRegistrations(
       const validRecords = convexRecords.filter((r) => r !== null);
 
       if (validRecords.length > 0) {
-        const result = await callConvexMutation("bulkInsertWebinarRegistrations", {
+        const result = await callConvexMutation(client, "bulkInsertWebinarRegistrations", {
           records: validRecords,
           webinarMapping,
         });
@@ -973,6 +960,9 @@ async function main() {
   const workspaceMapping = loadWorkspaceMapping();
   console.log(`Loaded workspace mapping: ${Object.keys(workspaceMapping).length} workspaces\n`);
 
+  // Initialize Convex client
+  const convex = new ConvexHttpClient(CONVEX_URL!);
+
   // Initialize Supabase client
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!);
 
@@ -983,23 +973,23 @@ async function main() {
   };
 
   // Execute migrations in order
-  await migrateAriDestinations(supabase, report);
-  await migrateAriPayments(supabase, report);
-  await migrateAriAppointments(supabase, report);
-  await migrateAriAiComparison(supabase, report);
-  await migrateAriFlowStages(supabase, report);
+  await migrateAriDestinations(convex, supabase, report);
+  await migrateAriPayments(convex, supabase, report);
+  await migrateAriAppointments(convex, supabase, report);
+  await migrateAriAiComparison(convex, supabase, report);
+  await migrateAriFlowStages(convex, supabase, report);
 
   // Categories must complete before entries (for mapping)
-  const categoryMapping = await migrateAriKnowledgeCategories(supabase, report);
-  await migrateAriKnowledgeEntries(supabase, report, categoryMapping);
+  const categoryMapping = await migrateAriKnowledgeCategories(convex, supabase, report);
+  await migrateAriKnowledgeEntries(convex, supabase, report, categoryMapping);
 
-  await migrateAriScoringConfig(supabase, report);
-  await migrateConsultantSlots(supabase, report);
-  await migrateArticles(supabase, report);
+  await migrateAriScoringConfig(convex, supabase, report);
+  await migrateConsultantSlots(convex, supabase, report);
+  await migrateArticles(convex, supabase, report);
 
   // Webinars must complete before registrations (for mapping)
-  const webinarMapping = await migrateWebinars(supabase, report);
-  await migrateWebinarRegistrations(supabase, report, webinarMapping);
+  const webinarMapping = await migrateWebinars(convex, supabase, report);
+  await migrateWebinarRegistrations(convex, supabase, report, webinarMapping);
 
   // Calculate duration
   const endTime = Date.now();

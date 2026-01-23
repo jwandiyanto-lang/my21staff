@@ -1,0 +1,98 @@
+{
+  "timestamp": "2026-01-23T18:59:22.623Z",
+  "tables": {
+    "ari_destinations": {
+      "table": "ari_destinations",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": []
+    },
+    "ari_payments": {
+      "table": "ari_payments",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": []
+    },
+    "ari_appointments": {
+      "table": "ari_appointments",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": []
+    },
+    "ari_ai_comparison": {
+      "table": "ari_ai_comparison",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": []
+    },
+    "ari_flow_stages": {
+      "table": "ari_flow_stages",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": []
+    },
+    "ari_knowledge_categories": {
+      "table": "ari_knowledge_categories",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": []
+    },
+    "ari_knowledge_entries": {
+      "table": "ari_knowledge_entries",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": []
+    },
+    "ari_scoring_config": {
+      "table": "ari_scoring_config",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": []
+    },
+    "consultant_slots": {
+      "table": "consultant_slots",
+      "source": 2,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": [
+        "fetch failed"
+      ]
+    },
+    "articles": {
+      "table": "articles",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": [
+        "Could not find the table 'public.articles' in the schema cache"
+      ]
+    },
+    "webinars": {
+      "table": "webinars",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": [
+        "Could not find the table 'public.webinars' in the schema cache"
+      ]
+    },
+    "webinar_registrations": {
+      "table": "webinar_registrations",
+      "source": 0,
+      "migrated": 0,
+      "skipped": 0,
+      "errors": [
+        "Could not find the table 'public.webinar_registrations' in the schema cache"
+      ]
+    }
+  },
+  "duration_seconds": 15
+}

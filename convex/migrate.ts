@@ -687,13 +687,11 @@ export const updateTicketStatusHistoryUserIds = mutation({
 // One-time data migration from Supabase to Convex
 // ============================================
 
-import { internalMutation } from "./_generated/server";
-
 /**
  * Bulk insert ARI destinations from Supabase.
  * @param records - Array of destination records with workspace_slug for lookup
  */
-export const bulkInsertAriDestinations = internalMutation({
+export const bulkInsertAriDestinations = mutation({
   args: {
     records: v.array(
       v.object({
@@ -747,7 +745,7 @@ export const bulkInsertAriDestinations = internalMutation({
  * Bulk insert ARI payments from Supabase.
  * @param records - Array of payment records with conversation lookup data
  */
-export const bulkInsertAriPayments = internalMutation({
+export const bulkInsertAriPayments = mutation({
   args: {
     records: v.array(
       v.object({
@@ -831,7 +829,7 @@ export const bulkInsertAriPayments = internalMutation({
  * Bulk insert ARI appointments from Supabase.
  * @param records - Array of appointment records with conversation lookup data
  */
-export const bulkInsertAriAppointments = internalMutation({
+export const bulkInsertAriAppointments = mutation({
   args: {
     records: v.array(
       v.object({
@@ -913,7 +911,7 @@ export const bulkInsertAriAppointments = internalMutation({
  * Bulk insert ARI AI comparison metrics from Supabase.
  * @param records - Array of comparison records
  */
-export const bulkInsertAriAiComparison = internalMutation({
+export const bulkInsertAriAiComparison = mutation({
   args: {
     records: v.array(
       v.object({
@@ -968,7 +966,7 @@ export const bulkInsertAriAiComparison = internalMutation({
  * Bulk insert ARI flow stages from Supabase.
  * @param records - Array of flow stage records
  */
-export const bulkInsertAriFlowStages = internalMutation({
+export const bulkInsertAriFlowStages = mutation({
   args: {
     records: v.array(
       v.object({
@@ -1019,7 +1017,7 @@ export const bulkInsertAriFlowStages = internalMutation({
  * Bulk insert ARI knowledge categories from Supabase.
  * @param records - Array of category records
  */
-export const bulkInsertAriKnowledgeCategories = internalMutation({
+export const bulkInsertAriKnowledgeCategories = mutation({
   args: {
     records: v.array(
       v.object({
@@ -1068,7 +1066,7 @@ export const bulkInsertAriKnowledgeCategories = internalMutation({
  * @param records - Array of entry records
  * @param categoryMapping - Map of Supabase category IDs to Convex IDs
  */
-export const bulkInsertAriKnowledgeEntries = internalMutation({
+export const bulkInsertAriKnowledgeEntries = mutation({
   args: {
     records: v.array(
       v.object({
@@ -1122,7 +1120,7 @@ export const bulkInsertAriKnowledgeEntries = internalMutation({
  * Bulk insert ARI scoring config from Supabase.
  * @param records - Array of config records
  */
-export const bulkInsertAriScoringConfig = internalMutation({
+export const bulkInsertAriScoringConfig = mutation({
   args: {
     records: v.array(
       v.object({
@@ -1173,7 +1171,7 @@ export const bulkInsertAriScoringConfig = internalMutation({
  * Bulk insert consultant slots from Supabase.
  * @param records - Array of slot records
  */
-export const bulkInsertConsultantSlots = internalMutation({
+export const bulkInsertConsultantSlots = mutation({
   args: {
     records: v.array(
       v.object({
@@ -1228,7 +1226,7 @@ export const bulkInsertConsultantSlots = internalMutation({
  * Bulk insert articles from Supabase.
  * @param records - Array of article records
  */
-export const bulkInsertArticles = internalMutation({
+export const bulkInsertArticles = mutation({
   args: {
     records: v.array(
       v.object({
@@ -1282,7 +1280,7 @@ export const bulkInsertArticles = internalMutation({
  * Bulk insert webinars from Supabase.
  * @param records - Array of webinar records
  */
-export const bulkInsertWebinars = internalMutation({
+export const bulkInsertWebinars = mutation({
   args: {
     records: v.array(
       v.object({
@@ -1346,7 +1344,7 @@ export const bulkInsertWebinars = internalMutation({
  * @param records - Array of registration records
  * @param webinarMapping - Map of Supabase webinar IDs to Convex IDs
  */
-export const bulkInsertWebinarRegistrations = internalMutation({
+export const bulkInsertWebinarRegistrations = mutation({
   args: {
     records: v.array(
       v.object({
