@@ -140,7 +140,10 @@ Plans:
 **Plans:** 1 plan in 1 wave
 
 Plans:
-- [ ] 04-01-PLAN.md — Document comparison metrics and make architecture decision
+- [x] 04-01-PLAN.md — Document comparison metrics and make architecture decision
+- [x] VERIFIED 2026-01-23
+
+**Decision:** Hybrid architecture (Supabase auth + Convex data) — 25.4x faster at P95 (37ms vs 926ms)
 
 ---
 
@@ -170,6 +173,8 @@ Plans:
 - [x] 05-06-PLAN.md — Update inbox to use Convex real-time subscriptions
 - [x] 05-07-PLAN.md — Deploy Convex and verify performance
 - [x] VERIFIED 2026-01-21, DEPLOYED 2026-01-22
+
+**Result:** Convex deployed to https://pleasant-antelope-109.convex.cloud, API routes migrated to use Convex queries
 
 ---
 
@@ -289,10 +294,10 @@ Full details: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 | v2.0 Production Ready | 6-22 | 38/38 | Complete | 2026-01-18 |
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
-| **v3.0 Performance & Speed** | 1-5 | 13/20 | Active | - |
+| **v3.0 Performance & Speed** | 1-5 | 21/21 | Complete | 2026-01-23 |
 
-**Total shipped:** 105 plans across 4 milestones
+**Total shipped:** 126 plans across 5 milestones
 
 ---
 
-*Last updated: 2026-01-22 — Convex deployed, API routes fixed to use public queries*
+*Last updated: 2026-01-23 — Phase 4 & 5 complete, v3.0 milestone complete*
