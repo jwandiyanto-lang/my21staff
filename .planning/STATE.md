@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 
 ## Current Position
 
-Phase: 3 of 7 (Users Table Webhook)
-Plan: 03-01 complete
-Status: In progress - 1 of 2 plans complete
-Last activity: 2026-01-23 — Completed 03-01-PLAN.md
+Phase: 3 of 7 (Users Table Webhook) - COMPLETE
+Plan: 03-02 complete
+Status: Phase 3 complete - 2 of 2 plans done
+Last activity: 2026-01-23 — Completed 03-02-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ███░░░░░░░ (151 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████░░░░░░ (152 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 151
+- Total plans completed: 152
 - Average duration: ~14 min
-- Total execution time: ~37.4 hours
+- Total execution time: ~37.6 hours
 
 **By Milestone:**
 
@@ -42,7 +42,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 **Critical path:**
 1. Clerk auth infrastructure (JWT validation for Convex) - DONE
 2. Middleware + Provider + Auth UI (user-facing auth) - DONE
-3. Users table + webhook (user data in Convex) - IN PROGRESS (1/2)
+3. Users table + webhook (user data in Convex) - DONE
 4. User migration + organizations (existing data)
 5. Data migration (remaining Supabase tables)
 6. n8n integration (Eagle lead flow)
@@ -58,6 +58,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- Convex HTTP endpoints use `.convex.site` domain (not `.convex.cloud`) (03-02)
+- Web Crypto API for svix signature verification (Convex doesn't support Node.js crypto) (03-02)
+- HTTP routes must be in `convex/http.ts` (Convex ignores `_internal/` for HTTP) (03-02)
 - Use internalMutation for webhook functions (not publicly accessible) (03-01)
 - Idempotent createUser handles webhook retries (03-01)
 - updateUser creates if missing (handles webhook ordering) (03-01)
@@ -65,8 +68,6 @@ Recent v3.1 decisions:
 - Clerk catch-all route pattern [[...sign-in]] for password reset and MFA flows (02-02)
 - Use Clerk appearance API for brand styling (white background, my21staff logo) (02-02)
 - Replace custom profile menus with Clerk UserButton (02-02)
-- Convex mutations co-located with queries in domain files (e.g., tickets.ts has both queries + mutations)
-- Use Id<'tickets'> casting for Convex types from string route params
 
 Recent v3.0 decisions affecting v3.1:
 - Convex migration (hybrid: Supabase auth + Convex data) — 25.4x faster (37ms vs 926ms P95)
@@ -80,8 +81,8 @@ Recent v3.0 decisions affecting v3.1:
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 03-01-PLAN.md
-Resume: `/gsd:execute-phase 3 --plan 02` to execute Plan 02 (Clerk webhook endpoint)
+Stopped at: Completed Phase 3
+Resume: `/gsd:execute-phase 4` to start Phase 4 (User Migration + Organizations)
 
 ---
-*Last updated: 2026-01-23 — Phase 3 Plan 01 complete*
+*Last updated: 2026-01-23 — Phase 3 complete*
