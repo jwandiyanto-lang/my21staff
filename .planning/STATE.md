@@ -9,22 +9,24 @@ See: .planning/PROJECT.md (updated 2026-01-20)
 
 ## Current Position
 
-Phase: 5 - Implementation
+Phase: 4 & 5 - Decision Gate & Implementation
 Status: Complete
-Last activity: 2026-01-22 — Convex deployed to https://pleasant-antelope-109.convex.cloud
+Last activity: 2026-01-23 — v3.0 milestone complete (Phase 04 decision gate + Phase 05 implementation)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ████████░░ (124 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ (126 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 121 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 16 in v3.0)
+- Total plans completed: 126 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 21 in v3.0)
 - v2.2 timeline: 1 day (Jan 20)
+- v3.0 timeline: 3 days (Jan 21-23)
 - Commits: 325 in v2.0, 282 in v2.1
 
 **Codebase:**
-- Lines: ~44,500 TypeScript
-- Phases completed: 35 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 6, v3.0: 7)
+- Lines: ~46,000 TypeScript
+- Phases completed: 40 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 6, v3.0: 5)
+- v3.0: 1 (instrumentation), 2 (optimization), 3 (convex spike), 4 (decision gate), 5 (implementation)
 
 ## Accumulated Context
 
@@ -77,6 +79,12 @@ Key v3.0 decisions:
 - **Proceed with Convex migration** — Convex API achieves 37ms P95, 25.4x faster than Supabase
 - Do NOT proceed with Supabase enhancement (IMPL-07 through IMPL-10)
 
+**New from Phase 4 Decision Gate:**
+- **Formal decision recorded** — Hybrid architecture (Supabase auth + Convex data)
+- Performance comparison: Convex 37ms P95 vs Supabase 926ms P95
+- Implementation path: IMPL-01 through IMPL-06 only
+- Decision documented in .planning/phases/04-decision-gate/04-DECISION.md
+
 **New from Phase 5 Implementation:**
 - Use v.optional(v.any()) for metadata fields (ARI scores, reply context, user preferences)
 - Snake_case naming in Convex to match Supabase for migration consistency
@@ -119,10 +127,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-21
-Stopped at: Completed 05-06 — Convex Real-time Subscriptions
+Last session: 2026-01-23
+Stopped at: Phase 04 Decision Gate complete, Phase 05 Implementation complete
 Resume file: None
-Next: 05-07 — Message Input & API
+Next: v3.0 milestone completion — audit or archive
 
 ## Deployment Info
 
@@ -149,4 +157,4 @@ Next: 05-07 — Message Input & API
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-21 — Phase 5 Implementation (05-04: Kapso Webhook HTTP Action) complete*
+*Last updated: 2026-01-23 — Phase 04 Decision Gate & Phase 05 Implementation complete, v3.0 milestone ready for archive*
