@@ -219,7 +219,7 @@ http.route({
       const userData = payload.data;
       clerkId = userData?.id;
 
-      console.log(`[Clerk Webhook] Processing ${eventType} for user ${clerkId}`);
+      console.log(`[Clerk Webhook] Processing ${eventType}`);
 
       // Handle user events
       switch (eventType) {
@@ -239,6 +239,60 @@ http.route({
           await ctx.runMutation(internal.users.deleteUser, {
             clerk_id: clerkId,
           });
+          break;
+
+        // Organization events
+        case "organization.created":
+          await ctx.runMutation(internal.organizations.createOrganization, {
+            clerk_org_id: userData.id,
+            name: userData.name,
+            slug: userData.slug,
+            workspace_id: userData.public_metadata?.convexWorkspaceId,
+          });
+          clerkId = userData.id; // For audit logging
+          break;
+
+        case "organization.updated":
+          await ctx.runMutation(internal.organizations.updateOrganization, {
+            clerk_org_id: userData.id,
+            name: userData.name,
+            slug: userData.slug,
+          });
+          clerkId = userData.id;
+          break;
+
+        case "organization.deleted":
+          await ctx.runMutation(internal.organizations.deleteOrganization, {
+            clerk_org_id: userData.id,
+          });
+          clerkId = userData.id;
+          break;
+
+        // Organization membership events
+        case "organizationMembership.created":
+          await ctx.runMutation(internal.organizations.addMember, {
+            clerk_org_id: userData.organization.id,
+            clerk_user_id: userData.public_user_data.user_id,
+            role: userData.role,
+          });
+          clerkId = userData.public_user_data.user_id;
+          break;
+
+        case "organizationMembership.updated":
+          await ctx.runMutation(internal.organizations.updateMemberRole, {
+            clerk_org_id: userData.organization.id,
+            clerk_user_id: userData.public_user_data.user_id,
+            role: userData.role,
+          });
+          clerkId = userData.public_user_data.user_id;
+          break;
+
+        case "organizationMembership.deleted":
+          await ctx.runMutation(internal.organizations.removeMember, {
+            clerk_org_id: userData.organization.id,
+            clerk_user_id: userData.public_user_data.user_id,
+          });
+          clerkId = userData.public_user_data.user_id;
           break;
 
         default:
