@@ -7,7 +7,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import type { KnowledgeCategoryInsert, KnowledgeEntryInsert } from '@/lib/ari/types'
 
@@ -24,32 +25,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
-
-    // Get categories ordered by display_order
-    const { data: categories, error: catError } = await supabase
-      .from('ari_knowledge_categories')
-      .select('*')
-      .eq('workspace_id', workspaceId)
-      .order('display_order', { ascending: true })
-      .order('created_at', { ascending: true })
-
-    if (catError) {
-      console.error('Failed to fetch categories:', catError)
-      return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 })
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
-    // Get entries ordered by created_at desc
-    const { data: entries, error: entryError } = await supabase
-      .from('ari_knowledge_entries')
-      .select('*')
-      .eq('workspace_id', workspaceId)
-      .order('created_at', { ascending: false })
-
-    if (entryError) {
-      console.error('Failed to fetch entries:', entryError)
-      return NextResponse.json({ error: 'Failed to fetch entries' }, { status: 500 })
-    }
+    // Get categories and entries from Convex
+    const [categories, entries] = await Promise.all([
+      fetchQuery(api.ari.getKnowledgeCategories, { workspace_id: workspace._id }),
+      fetchQuery(api.ari.getKnowledgeEntries, { workspace_id: workspace._id }),
+    ])
 
     return NextResponse.json({
       categories: categories || [],
@@ -70,8 +56,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
     const body = await request.json()
+
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
 
     // Type determines what we're creating
     if (body.type === 'category') {
@@ -81,40 +72,21 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }
 
       // Get max display_order for workspace
-      const { data: maxOrder } = await supabase
-        .from('ari_knowledge_categories')
-        .select('display_order')
-        .eq('workspace_id', workspaceId)
-        .order('display_order', { ascending: false })
-        .limit(1)
-        .single()
+      const existingCategories = await fetchQuery(api.ari.getKnowledgeCategories, {
+        workspace_id: workspace._id,
+      })
 
-      const nextOrder = (maxOrder?.display_order ?? -1) + 1
+      const nextOrder = existingCategories && existingCategories.length > 0
+        ? Math.max(...existingCategories.map(c => c.display_order)) + 1
+        : 0
 
-      const categoryData: KnowledgeCategoryInsert = {
-        workspace_id: workspaceId,
+      // Create category in Convex
+      const category = await fetchMutation(api.ari.createKnowledgeCategory, {
+        workspace_id: workspace._id,
         name: body.name.trim(),
-        description: body.description?.trim() || null,
+        description: body.description?.trim() || undefined,
         display_order: nextOrder,
-      }
-
-      const { data: category, error } = await supabase
-        .from('ari_knowledge_categories')
-        .insert(categoryData)
-        .select()
-        .single()
-
-      if (error) {
-        // Handle unique constraint violation
-        if (error.code === '23505') {
-          return NextResponse.json(
-            { error: 'Category with this name already exists' },
-            { status: 409 }
-          )
-        }
-        console.error('Failed to create category:', error)
-        return NextResponse.json({ error: 'Failed to create category' }, { status: 500 })
-      }
+      })
 
       return NextResponse.json({ category }, { status: 201 })
     } else if (body.type === 'entry') {
@@ -126,24 +98,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         return NextResponse.json({ error: 'Entry content is required' }, { status: 400 })
       }
 
-      const entryData: KnowledgeEntryInsert = {
-        workspace_id: workspaceId,
-        category_id: body.category_id || null,
+      // Create entry in Convex
+      const entry = await fetchMutation(api.ari.createKnowledgeEntry, {
+        workspace_id: workspace._id,
+        category_id: body.category_id || undefined,
         title: body.title.trim(),
         content: body.content.trim(),
         is_active: body.is_active ?? true,
-      }
-
-      const { data: entry, error } = await supabase
-        .from('ari_knowledge_entries')
-        .insert(entryData)
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Failed to create entry:', error)
-        return NextResponse.json({ error: 'Failed to create entry' }, { status: 500 })
-      }
+      })
 
       return NextResponse.json({ entry }, { status: 201 })
     } else {
@@ -167,44 +129,31 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
     const body = await request.json()
 
     if (!body.category_id) {
       return NextResponse.json({ error: 'category_id is required' }, { status: 400 })
     }
 
-    // Build update object
-    const updateData: Record<string, unknown> = {}
-    if (body.name !== undefined) updateData.name = body.name.trim()
-    if (body.description !== undefined) updateData.description = body.description?.trim() || null
-    if (body.display_order !== undefined) updateData.display_order = body.display_order
-
-    if (Object.keys(updateData).length === 0) {
+    // Check if there are fields to update
+    if (body.name === undefined && body.description === undefined && body.display_order === undefined) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
     }
 
-    const { data: category, error } = await supabase
-      .from('ari_knowledge_categories')
-      .update(updateData)
-      .eq('id', body.category_id)
-      .eq('workspace_id', workspaceId)
-      .select()
-      .single()
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Category not found' }, { status: 404 })
-      }
-      if (error.code === '23505') {
-        return NextResponse.json(
-          { error: 'Category with this name already exists' },
-          { status: 409 }
-        )
-      }
-      console.error('Failed to update category:', error)
-      return NextResponse.json({ error: 'Failed to update category' }, { status: 500 })
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
+
+    // Update category in Convex
+    const category = await fetchMutation(api.ari.updateKnowledgeCategory, {
+      category_id: body.category_id,
+      workspace_id: workspace._id,
+      name: body.name !== undefined ? body.name.trim() : undefined,
+      description: body.description !== undefined ? (body.description?.trim() || undefined) : undefined,
+      display_order: body.display_order,
+    })
 
     return NextResponse.json({ category })
   } catch (error) {
@@ -229,30 +178,28 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'categoryId query param is required' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
 
     // Get entry count before deleting (for info)
-    const { count } = await supabase
-      .from('ari_knowledge_entries')
-      .select('*', { count: 'exact', head: true })
-      .eq('category_id', categoryId)
-      .eq('workspace_id', workspaceId)
+    const entries = await fetchQuery(api.ari.getKnowledgeEntries, {
+      workspace_id: workspace._id,
+      category_id: categoryId,
+    })
+    const entryCount = entries?.length || 0
 
-    // Delete category (entries cascade automatically)
-    const { error } = await supabase
-      .from('ari_knowledge_categories')
-      .delete()
-      .eq('id', categoryId)
-      .eq('workspace_id', workspaceId)
-
-    if (error) {
-      console.error('Failed to delete category:', error)
-      return NextResponse.json({ error: 'Failed to delete category' }, { status: 500 })
-    }
+    // Delete category in Convex (entries must be unlinked first by UI or deleted separately)
+    await fetchMutation(api.ari.deleteKnowledgeCategory, {
+      category_id: categoryId,
+      workspace_id: workspace._id,
+    })
 
     return NextResponse.json({
       success: true,
-      entriesDeleted: count || 0,
+      entriesDeleted: entryCount,
     })
   } catch (error) {
     console.error('Error in knowledge DELETE:', error)

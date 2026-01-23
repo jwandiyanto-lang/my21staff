@@ -5,7 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import type { ConsultantSlotInsert } from '@/lib/ari/types'
 
@@ -22,20 +23,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
-
-    // Get slots ordered by day and time
-    const { data: slots, error } = await supabase
-      .from('consultant_slots')
-      .select('*')
-      .eq('workspace_id', workspaceId)
-      .order('day_of_week', { ascending: true })
-      .order('start_time', { ascending: true })
-
-    if (error) {
-      console.error('Failed to fetch slots:', error)
-      return NextResponse.json({ error: 'Failed to fetch slots' }, { status: 500 })
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
+
+    // Get slots from Convex
+    const slots = await fetchQuery(api.ari.getConsultantSlots, {
+      workspace_id: workspace._id,
+    })
 
     return NextResponse.json({ slots })
   } catch (error) {
@@ -53,7 +50,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
     const body = await request.json()
 
     // Validate required fields
@@ -72,9 +68,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const slotData: ConsultantSlotInsert = {
-      workspace_id: workspaceId,
-      consultant_id: body.consultant_id || null,
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    // Create slot in Convex
+    const slot = await fetchMutation(api.ari.createSlot, {
+      workspace_id: workspace._id,
+      consultant_id: body.consultant_id || undefined,
       day_of_week: body.day_of_week,
       start_time: body.start_time,
       end_time: body.end_time,
@@ -82,32 +85,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       booking_window_days: body.booking_window_days || 14,
       max_bookings_per_slot: body.max_bookings_per_slot || 1,
       is_active: body.is_active ?? true,
-    }
-
-    const { data: slot, error } = await supabase
-      .from('consultant_slots')
-      .insert(slotData)
-      .select()
-      .single()
-
-    if (error) {
-      // Handle unique constraint violation
-      if (error.code === '23505') {
-        return NextResponse.json(
-          { error: 'Slot already exists for this day and time' },
-          { status: 409 }
-        )
-      }
-      // Handle check constraint violation (time range)
-      if (error.code === '23514') {
-        return NextResponse.json(
-          { error: 'End time must be after start time' },
-          { status: 400 }
-        )
-      }
-      console.error('Failed to create slot:', error)
-      return NextResponse.json({ error: 'Failed to create slot' }, { status: 500 })
-    }
+    })
 
     return NextResponse.json({ slot }, { status: 201 })
   } catch (error) {

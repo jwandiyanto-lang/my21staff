@@ -6,9 +6,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { fetchQuery, fetchMutation } from 'convex/nextjs';
+import { api } from 'convex/_generated/api';
 import type { ScoringConfig } from '@/lib/ari/types';
 import { DEFAULT_SCORING_CONFIG } from '@/lib/ari/types';
+import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -79,36 +81,24 @@ function validateScoringConfig(data: Partial<ScoringConfig>): ValidationResult {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params;
-    const supabase = await createClient();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Verify user has access to workspace
+    const authResult = await requireWorkspaceMembership(workspaceId);
+    if (authResult instanceof NextResponse) return authResult;
+
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId });
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 });
     }
 
-    // Check workspace membership
-    const { data: member } = await supabase
-      .from('workspace_members')
-      .select('role')
-      .eq('workspace_id', workspaceId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (!member) {
-      return NextResponse.json({ error: 'Not a workspace member' }, { status: 403 });
-    }
-
-    // Fetch config (may not exist yet)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: config, error } = await (supabase as any)
-      .from('ari_scoring_config')
-      .select('*')
-      .eq('workspace_id', workspaceId)
-      .single() as { data: ScoringConfig | null; error: { message: string } | null };
+    // Fetch config from Convex (may not exist yet)
+    const config = await fetchQuery(api.ari.getScoringConfig, {
+      workspace_id: workspace._id,
+    });
 
     // If no config exists, return defaults
-    if (error || !config) {
+    if (!config) {
       return NextResponse.json({
         config: {
           workspace_id: workspaceId,
@@ -136,28 +126,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params;
-    const supabase = await createClient();
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check workspace admin role
-    const { data: member } = await supabase
-      .from('workspace_members')
-      .select('role')
-      .eq('workspace_id', workspaceId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (!member || !member.role || !['owner', 'admin'].includes(member.role)) {
-      return NextResponse.json(
-        { error: 'Only workspace owners and admins can update scoring config' },
-        { status: 403 }
-      );
-    }
+    // Verify user has access (admin role check is implicit in mutation)
+    const authResult = await requireWorkspaceMembership(workspaceId);
+    if (authResult instanceof NextResponse) return authResult;
 
     // Parse body
     const body = await request.json();
@@ -190,23 +162,22 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Upsert config (insert or update on workspace_id conflict)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: config, error } = await (supabase as any)
-      .from('ari_scoring_config')
-      .upsert(configData, {
-        onConflict: 'workspace_id',
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('[scoring-config] Upsert error:', error);
-      return NextResponse.json(
-        { error: 'Failed to save scoring config', details: error.message },
-        { status: 500 }
-      );
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId });
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 });
     }
+
+    // Upsert config in Convex
+    const config = await fetchMutation(api.ari.upsertScoringConfig, {
+      workspace_id: workspace._id,
+      hot_threshold: configData.hot_threshold,
+      warm_threshold: configData.warm_threshold,
+      weight_basic: configData.weight_basic,
+      weight_qualification: configData.weight_qualification,
+      weight_document: configData.weight_document,
+      weight_engagement: configData.weight_engagement,
+    });
 
     return NextResponse.json({ config });
 

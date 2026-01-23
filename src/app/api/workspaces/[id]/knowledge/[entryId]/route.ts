@@ -5,7 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import type { KnowledgeEntryUpdate } from '@/lib/ari/types'
 
@@ -22,35 +23,29 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
     const body = await request.json()
 
-    // Build update object with only provided fields
-    const updateData: KnowledgeEntryUpdate = {}
-    if (body.title !== undefined) updateData.title = body.title.trim()
-    if (body.content !== undefined) updateData.content = body.content.trim()
-    if (body.category_id !== undefined) updateData.category_id = body.category_id || null
-    if (body.is_active !== undefined) updateData.is_active = body.is_active
-
-    if (Object.keys(updateData).length === 0) {
+    // Check if there are fields to update
+    if (body.title === undefined && body.content === undefined &&
+        body.category_id === undefined && body.is_active === undefined) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
     }
 
-    const { data: entry, error } = await supabase
-      .from('ari_knowledge_entries')
-      .update(updateData)
-      .eq('id', entryId)
-      .eq('workspace_id', workspaceId)
-      .select()
-      .single()
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Entry not found' }, { status: 404 })
-      }
-      console.error('Failed to update entry:', error)
-      return NextResponse.json({ error: 'Failed to update entry' }, { status: 500 })
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
+
+    // Update entry in Convex
+    const entry = await fetchMutation(api.ari.updateKnowledgeEntry, {
+      entry_id: entryId,
+      workspace_id: workspace._id,
+      title: body.title !== undefined ? body.title.trim() : undefined,
+      content: body.content !== undefined ? body.content.trim() : undefined,
+      category_id: body.category_id !== undefined ? (body.category_id || undefined) : undefined,
+      is_active: body.is_active,
+    })
 
     return NextResponse.json({ entry })
   } catch (error) {
@@ -68,18 +63,17 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
-
-    const { error } = await supabase
-      .from('ari_knowledge_entries')
-      .delete()
-      .eq('id', entryId)
-      .eq('workspace_id', workspaceId)
-
-    if (error) {
-      console.error('Failed to delete entry:', error)
-      return NextResponse.json({ error: 'Failed to delete entry' }, { status: 500 })
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
+
+    // Delete entry in Convex
+    await fetchMutation(api.ari.deleteKnowledgeEntry, {
+      entry_id: entryId,
+      workspace_id: workspace._id,
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {
