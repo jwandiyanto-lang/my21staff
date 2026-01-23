@@ -58,6 +58,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- Public mutations for unauthenticated endpoints: Created findOrCreateContact mutation without auth for public webinar registration (05-04)
+- Registration count pattern: Fetch counts in parallel using countWebinarRegistrations query for list views (05-04)
+- Timestamp conversion in API routes: Convert ISO strings to timestamps for Convex scheduled_at field (05-04)
 - ARI Convex module: Single convex/ari.ts for all ARI operations (config, flow stages, knowledge, scoring, slots) (05-03)
 - Simplified flow stage delete: No automatic reordering on delete - UI handles batch updates (05-03)
 - Category delete behavior: Categories deletable, entries must be unlinked first (no cascade in Convex) (05-03)
@@ -198,8 +201,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 05-03-PLAN.md (ARI API Migration)
-Resume: Continue Phase 5 with `/gsd:execute-phase 5` for 05-04 (CMS API Migration)
+Stopped at: Completed 05-04-PLAN.md (CMS API Migration)
+Resume: Continue Phase 5 with `/gsd:execute-phase 5` for 05-05 (Final verification)
 
 ---
-*Last updated: 2026-01-23 - ARI admin APIs migrated to Convex, ready for CMS API migration*
+*Last updated: 2026-01-23 - CMS API routes migrated to Convex, ready for final verification*
