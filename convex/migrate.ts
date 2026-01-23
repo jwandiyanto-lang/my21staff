@@ -681,3 +681,726 @@ export const updateTicketStatusHistoryUserIds = mutation({
     return { updated };
   },
 });
+
+// ============================================
+// BULK DATA MIGRATION MUTATIONS
+// One-time data migration from Supabase to Convex
+// ============================================
+
+import { internalMutation } from "./_generated/server";
+
+/**
+ * Bulk insert ARI destinations from Supabase.
+ * @param records - Array of destination records with workspace_slug for lookup
+ */
+export const bulkInsertAriDestinations = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        country: v.string(),
+        city: v.optional(v.string()),
+        university_name: v.string(),
+        requirements: v.optional(v.any()),
+        programs: v.optional(v.array(v.string())),
+        is_promoted: v.boolean(),
+        priority: v.number(),
+        notes: v.optional(v.string()),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    for (const record of args.records) {
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+      await ctx.db.insert("ariDestinations", {
+        workspace_id: workspace._id,
+        country: record.country,
+        city: record.city,
+        university_name: record.university_name,
+        requirements: record.requirements,
+        programs: record.programs,
+        is_promoted: record.is_promoted,
+        priority: record.priority,
+        notes: record.notes,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+      });
+      inserted++;
+    }
+    return { inserted, skipped };
+  },
+});
+
+/**
+ * Bulk insert ARI payments from Supabase.
+ * @param records - Array of payment records with conversation lookup data
+ */
+export const bulkInsertAriPayments = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        contact_phone: v.string(),
+        amount: v.number(),
+        currency: v.string(),
+        payment_method: v.optional(v.string()),
+        gateway: v.string(),
+        gateway_transaction_id: v.optional(v.string()),
+        gateway_response: v.optional(v.any()),
+        status: v.string(),
+        expires_at: v.optional(v.number()),
+        paid_at: v.optional(v.number()),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    for (const record of args.records) {
+      // Look up workspace
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      // Look up contact by phone
+      const contact = await ctx.db
+        .query("contacts")
+        .withIndex("by_workspace_phone", (q) =>
+          q.eq("workspace_id", workspace._id).eq("phone", record.contact_phone)
+        )
+        .first();
+      if (!contact) {
+        skipped++;
+        continue;
+      }
+
+      // Look up ARI conversation
+      const ariConversation = await ctx.db
+        .query("ariConversations")
+        .withIndex("by_workspace_contact", (q) =>
+          q.eq("workspace_id", workspace._id).eq("contact_id", contact._id)
+        )
+        .first();
+      if (!ariConversation) {
+        skipped++;
+        continue;
+      }
+
+      await ctx.db.insert("ariPayments", {
+        ari_conversation_id: ariConversation._id,
+        workspace_id: workspace._id,
+        amount: record.amount,
+        currency: record.currency,
+        payment_method: record.payment_method,
+        gateway: record.gateway,
+        gateway_transaction_id: record.gateway_transaction_id,
+        gateway_response: record.gateway_response,
+        status: record.status,
+        expires_at: record.expires_at,
+        paid_at: record.paid_at,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+      });
+      inserted++;
+    }
+    return { inserted, skipped };
+  },
+});
+
+/**
+ * Bulk insert ARI appointments from Supabase.
+ * @param records - Array of appointment records with conversation lookup data
+ */
+export const bulkInsertAriAppointments = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        contact_phone: v.string(),
+        payment_supabase_id: v.optional(v.string()),
+        consultant_id: v.optional(v.string()),
+        scheduled_at: v.number(),
+        duration_minutes: v.number(),
+        meeting_link: v.optional(v.string()),
+        status: v.string(),
+        reminder_sent_at: v.optional(v.number()),
+        notes: v.optional(v.string()),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    for (const record of args.records) {
+      // Look up workspace
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      // Look up contact
+      const contact = await ctx.db
+        .query("contacts")
+        .withIndex("by_workspace_phone", (q) =>
+          q.eq("workspace_id", workspace._id).eq("phone", record.contact_phone)
+        )
+        .first();
+      if (!contact) {
+        skipped++;
+        continue;
+      }
+
+      // Look up ARI conversation
+      const ariConversation = await ctx.db
+        .query("ariConversations")
+        .withIndex("by_workspace_contact", (q) =>
+          q.eq("workspace_id", workspace._id).eq("contact_id", contact._id)
+        )
+        .first();
+      if (!ariConversation) {
+        skipped++;
+        continue;
+      }
+
+      // Note: payment_id lookup would need additional logic - skipping for now
+      await ctx.db.insert("ariAppointments", {
+        ari_conversation_id: ariConversation._id,
+        workspace_id: workspace._id,
+        consultant_id: record.consultant_id,
+        scheduled_at: record.scheduled_at,
+        duration_minutes: record.duration_minutes,
+        meeting_link: record.meeting_link,
+        status: record.status,
+        reminder_sent_at: record.reminder_sent_at,
+        notes: record.notes,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+      });
+      inserted++;
+    }
+    return { inserted, skipped };
+  },
+});
+
+/**
+ * Bulk insert ARI AI comparison metrics from Supabase.
+ * @param records - Array of comparison records
+ */
+export const bulkInsertAriAiComparison = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        ai_model: v.string(),
+        conversation_count: v.number(),
+        avg_response_time_ms: v.optional(v.number()),
+        total_tokens_used: v.number(),
+        conversion_count: v.number(),
+        satisfaction_score: v.optional(v.number()),
+        period_start: v.optional(v.number()),
+        period_end: v.optional(v.number()),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    for (const record of args.records) {
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      await ctx.db.insert("ariAiComparison", {
+        workspace_id: workspace._id,
+        ai_model: record.ai_model,
+        conversation_count: record.conversation_count,
+        avg_response_time_ms: record.avg_response_time_ms,
+        total_tokens_used: record.total_tokens_used,
+        conversion_count: record.conversion_count,
+        satisfaction_score: record.satisfaction_score,
+        period_start: record.period_start,
+        period_end: record.period_end,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+      });
+      inserted++;
+    }
+    return { inserted, skipped };
+  },
+});
+
+/**
+ * Bulk insert ARI flow stages from Supabase.
+ * @param records - Array of flow stage records
+ */
+export const bulkInsertAriFlowStages = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        name: v.string(),
+        goal: v.string(),
+        sample_script: v.optional(v.string()),
+        exit_criteria: v.optional(v.string()),
+        stage_order: v.number(),
+        is_active: v.boolean(),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    for (const record of args.records) {
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      await ctx.db.insert("ariFlowStages", {
+        workspace_id: workspace._id,
+        name: record.name,
+        goal: record.goal,
+        sample_script: record.sample_script,
+        exit_criteria: record.exit_criteria,
+        stage_order: record.stage_order,
+        is_active: record.is_active,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+      });
+      inserted++;
+    }
+    return { inserted, skipped };
+  },
+});
+
+/**
+ * Bulk insert ARI knowledge categories from Supabase.
+ * @param records - Array of category records
+ */
+export const bulkInsertAriKnowledgeCategories = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        name: v.string(),
+        description: v.optional(v.string()),
+        display_order: v.number(),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    const mapping: Record<string, string> = {}; // supabaseId -> convexId
+
+    for (const record of args.records) {
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      const id = await ctx.db.insert("ariKnowledgeCategories", {
+        workspace_id: workspace._id,
+        name: record.name,
+        description: record.description,
+        display_order: record.display_order,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+      });
+      mapping[record.supabaseId] = id;
+      inserted++;
+    }
+    return { inserted, skipped, mapping };
+  },
+});
+
+/**
+ * Bulk insert ARI knowledge entries from Supabase.
+ * @param records - Array of entry records
+ * @param categoryMapping - Map of Supabase category IDs to Convex IDs
+ */
+export const bulkInsertAriKnowledgeEntries = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        category_supabase_id: v.optional(v.string()),
+        title: v.string(),
+        content: v.string(),
+        is_active: v.boolean(),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+    categoryMapping: v.any(), // Map of supabaseId -> convexId
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    for (const record of args.records) {
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      // Look up category ID
+      let categoryId = undefined;
+      if (record.category_supabase_id && args.categoryMapping[record.category_supabase_id]) {
+        categoryId = args.categoryMapping[record.category_supabase_id];
+      }
+
+      await ctx.db.insert("ariKnowledgeEntries", {
+        workspace_id: workspace._id,
+        category_id: categoryId,
+        title: record.title,
+        content: record.content,
+        is_active: record.is_active,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+      });
+      inserted++;
+    }
+    return { inserted, skipped };
+  },
+});
+
+/**
+ * Bulk insert ARI scoring config from Supabase.
+ * @param records - Array of config records
+ */
+export const bulkInsertAriScoringConfig = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        hot_threshold: v.number(),
+        warm_threshold: v.number(),
+        weight_basic: v.number(),
+        weight_qualification: v.number(),
+        weight_document: v.number(),
+        weight_engagement: v.number(),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    for (const record of args.records) {
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      await ctx.db.insert("ariScoringConfig", {
+        workspace_id: workspace._id,
+        hot_threshold: record.hot_threshold,
+        warm_threshold: record.warm_threshold,
+        weight_basic: record.weight_basic,
+        weight_qualification: record.weight_qualification,
+        weight_document: record.weight_document,
+        weight_engagement: record.weight_engagement,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+      });
+      inserted++;
+    }
+    return { inserted, skipped };
+  },
+});
+
+/**
+ * Bulk insert consultant slots from Supabase.
+ * @param records - Array of slot records
+ */
+export const bulkInsertConsultantSlots = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        consultant_id: v.optional(v.string()),
+        day_of_week: v.number(),
+        start_time: v.string(),
+        end_time: v.string(),
+        duration_minutes: v.number(),
+        booking_window_days: v.number(),
+        max_bookings_per_slot: v.number(),
+        is_active: v.boolean(),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    for (const record of args.records) {
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      await ctx.db.insert("consultantSlots", {
+        workspace_id: workspace._id,
+        consultant_id: record.consultant_id,
+        day_of_week: record.day_of_week,
+        start_time: record.start_time,
+        end_time: record.end_time,
+        duration_minutes: record.duration_minutes,
+        booking_window_days: record.booking_window_days,
+        max_bookings_per_slot: record.max_bookings_per_slot,
+        is_active: record.is_active,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+      });
+      inserted++;
+    }
+    return { inserted, skipped };
+  },
+});
+
+/**
+ * Bulk insert articles from Supabase.
+ * @param records - Array of article records
+ */
+export const bulkInsertArticles = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        title: v.string(),
+        slug: v.string(),
+        excerpt: v.optional(v.string()),
+        content: v.optional(v.string()),
+        cover_image_url: v.optional(v.string()),
+        status: v.string(),
+        published_at: v.optional(v.number()),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    for (const record of args.records) {
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      await ctx.db.insert("articles", {
+        workspace_id: workspace._id,
+        title: record.title,
+        slug: record.slug,
+        excerpt: record.excerpt,
+        content: record.content,
+        cover_image_url: record.cover_image_url,
+        status: record.status,
+        published_at: record.published_at,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+        supabaseId: record.supabaseId,
+      });
+      inserted++;
+    }
+    return { inserted, skipped };
+  },
+});
+
+/**
+ * Bulk insert webinars from Supabase.
+ * @param records - Array of webinar records
+ */
+export const bulkInsertWebinars = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        title: v.string(),
+        slug: v.string(),
+        description: v.optional(v.string()),
+        cover_image_url: v.optional(v.string()),
+        scheduled_at: v.number(),
+        duration_minutes: v.number(),
+        meeting_url: v.optional(v.string()),
+        max_registrations: v.optional(v.number()),
+        status: v.string(),
+        published_at: v.optional(v.number()),
+        created_at: v.number(),
+        updated_at: v.number(),
+        supabaseId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    const mapping: Record<string, string> = {}; // supabaseId -> convexId
+
+    for (const record of args.records) {
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      const id = await ctx.db.insert("webinars", {
+        workspace_id: workspace._id,
+        title: record.title,
+        slug: record.slug,
+        description: record.description,
+        cover_image_url: record.cover_image_url,
+        scheduled_at: record.scheduled_at,
+        duration_minutes: record.duration_minutes,
+        meeting_url: record.meeting_url,
+        max_registrations: record.max_registrations,
+        status: record.status,
+        published_at: record.published_at,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+        supabaseId: record.supabaseId,
+      });
+      mapping[record.supabaseId] = id;
+      inserted++;
+    }
+    return { inserted, skipped, mapping };
+  },
+});
+
+/**
+ * Bulk insert webinar registrations from Supabase.
+ * @param records - Array of registration records
+ * @param webinarMapping - Map of Supabase webinar IDs to Convex IDs
+ */
+export const bulkInsertWebinarRegistrations = internalMutation({
+  args: {
+    records: v.array(
+      v.object({
+        workspace_slug: v.string(),
+        webinar_supabase_id: v.string(),
+        contact_phone: v.string(),
+        registered_at: v.number(),
+        attended: v.boolean(),
+        supabaseId: v.string(),
+      })
+    ),
+    webinarMapping: v.any(), // Map of supabaseId -> convexId
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let skipped = 0;
+    for (const record of args.records) {
+      const workspace = await ctx.db
+        .query("workspaces")
+        .filter((q) => q.eq(q.field("slug"), record.workspace_slug))
+        .first();
+      if (!workspace) {
+        skipped++;
+        continue;
+      }
+
+      // Look up webinar ID
+      const webinarId = args.webinarMapping[record.webinar_supabase_id];
+      if (!webinarId) {
+        skipped++;
+        continue;
+      }
+
+      // Look up contact
+      const contact = await ctx.db
+        .query("contacts")
+        .withIndex("by_workspace_phone", (q) =>
+          q.eq("workspace_id", workspace._id).eq("phone", record.contact_phone)
+        )
+        .first();
+      if (!contact) {
+        skipped++;
+        continue;
+      }
+
+      await ctx.db.insert("webinarRegistrations", {
+        webinar_id: webinarId,
+        contact_id: contact._id,
+        workspace_id: workspace._id,
+        registered_at: record.registered_at,
+        attended: record.attended,
+      });
+      inserted++;
+    }
+    return { inserted, skipped };
+  },
+});
