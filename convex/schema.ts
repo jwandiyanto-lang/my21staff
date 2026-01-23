@@ -212,4 +212,31 @@ export default defineSchema({
     created_at: v.number(),
   })
     .index("by_ticket_time", ["ticket_id", "created_at"]),
+
+  // ============================================
+  // USERS (Clerk-synced user data)
+  // ============================================
+  users: defineTable({
+    clerk_id: v.string(),           // Primary identifier from Clerk
+    workspace_id: v.optional(v.id("workspaces")), // Single workspace (optional for initial sync)
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_clerk_id", ["clerk_id"])
+    .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // WEBHOOK AUDIT (Debugging webhook events)
+  // ============================================
+  webhookAudit: defineTable({
+    event_type: v.string(),         // 'user.created', 'user.updated', 'user.deleted'
+    clerk_id: v.optional(v.string()),
+    payload: v.any(),               // Raw webhook payload (for debugging)
+    status: v.string(),             // 'success', 'error'
+    error_message: v.optional(v.string()),
+    processed_at: v.number(),
+  })
+    .index("by_event_type", ["event_type"])
+    .index("by_clerk_id", ["clerk_id"])
+    .index("by_processed_at", ["processed_at"]),
 });
