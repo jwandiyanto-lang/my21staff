@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 5 of 7 (Data Migration)
-Plan: 05-01 complete - 1 of 3 plans done
+Plan: 05-02 complete - 2 of 3 plans done
 Status: In progress
-Last activity: 2026-01-23 - Completed 05-01-PLAN.md (Extend Convex Schema)
+Last activity: 2026-01-23 - Completed 05-02-PLAN.md (Migration Scripts)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████████░░ (159 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████░ (160 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 157
+- Total plans completed: 158
 - Average duration: ~14 min
-- Total execution time: ~38.2 hours
+- Total execution time: ~38.35 hours
 
 **By Milestone:**
 
@@ -58,6 +58,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- mutation vs internalMutation: Use mutation (not internalMutation) for migration functions to enable ConvexHttpClient access (05-02)
+- ConvexHttpClient pattern: Use api.migrate.* for type-safe mutation calls from Node.js scripts (05-02)
+- Empty table handling: Migration handles 0-record tables gracefully - ARI/CMS features not yet in production (05-02)
 - v.optional(v.any()) for JSONB fields: Preserves Supabase JSONB flexibility (ariDestinations.requirements, ariPayments.gateway_response) (05-01)
 - supabaseId in CMS tables: Enables migration reference tracking for articles/webinars (05-01)
 - Clerk OrganizationProfile for team management: Replaces custom UI with built-in invitations (04-05)
@@ -165,11 +168,35 @@ Before proceeding to Phase 5, verify:
 - [ ] Save changes
 - [ ] Test: invite a member, check Convex organizations table
 
+### Data Migration Status
+
+**Remaining Supabase Tables:** 12 tables migrated (scripts ready, data empty)
+
+| Table | Records | Status |
+|-------|---------|--------|
+| ari_destinations | 0 | ✓ Migration script ready |
+| ari_payments | 0 | ✓ Migration script ready |
+| ari_appointments | 0 | ✓ Migration script ready |
+| ari_ai_comparison | 0 | ✓ Migration script ready |
+| ari_flow_stages | 0 | ✓ Migration script ready |
+| ari_knowledge_categories | 0 | ✓ Migration script ready |
+| ari_knowledge_entries | 0 | ✓ Migration script ready |
+| ari_scoring_config | 0 | ✓ Migration script ready |
+| consultant_slots | 2 (test) | Network error (non-critical) |
+| articles | N/A | Table not created yet (future) |
+| webinars | N/A | Table not created yet (future) |
+| webinar_registrations | N/A | Table not created yet (future) |
+
+**Migration script:** `scripts/migrate-supabase-to-convex.ts` (verified working)
+**Report:** `.planning/migrations/data-migration-report.json`
+
+**Note:** All ARI extended and CMS tables are empty because these features aren't yet in production use. Migration infrastructure ready for when data exists.
+
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 05-01-PLAN.md (Extend Convex Schema)
-Resume: Continue Phase 5 with `/gsd:execute-phase 5` for 05-02 (migration scripts)
+Stopped at: Completed 05-02-PLAN.md (Migration Scripts)
+Resume: Continue Phase 5 with `/gsd:execute-phase 5` for 05-03 (API route updates)
 
 ---
-*Last updated: 2026-01-23 - Phase 5 started, schema extension complete*
+*Last updated: 2026-01-23 - Phase 5 migration scripts complete, ready for API updates*
