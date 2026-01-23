@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 
 ## Current Position
 
-Phase: 3 of 7 (Users Table Webhook) - COMPLETE
-Plan: 03-02 complete
-Status: Phase 3 complete - 2 of 2 plans done
-Last activity: 2026-01-23 — Completed 03-02-PLAN.md
+Phase: 4 of 7 (User Migration + Organizations)
+Plan: 04-01 complete - 1 of 6 plans done
+Status: In progress
+Last activity: 2026-01-23 - Completed 04-01-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████░░░░░░ (152 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████░░░░░ (153 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 152
+- Total plans completed: 153
 - Average duration: ~14 min
-- Total execution time: ~37.6 hours
+- Total execution time: ~37.8 hours
 
 **By Milestone:**
 
@@ -43,7 +43,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 1. Clerk auth infrastructure (JWT validation for Convex) - DONE
 2. Middleware + Provider + Auth UI (user-facing auth) - DONE
 3. Users table + webhook (user data in Convex) - DONE
-4. User migration + organizations (existing data)
+4. User migration + organizations (existing data) - IN PROGRESS (04-01 done)
 5. Data migration (remaining Supabase tables)
 6. n8n integration (Eagle lead flow)
 7. Cleanup (remove Supabase)
@@ -58,6 +58,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- external_id for ID mapping: Set Supabase UUID as external_id in Clerk (04-01)
+- skip_password_requirement: Migrated users use Forgot Password flow (04-01)
+- Manual PATCH for existing OAuth users: Update external_id instead of failing (04-01)
 - Convex HTTP endpoints use `.convex.site` domain (not `.convex.cloud`) (03-02)
 - Web Crypto API for svix signature verification (Convex doesn't support Node.js crypto) (03-02)
 - HTTP routes must be in `convex/http.ts` (Convex ignores `_internal/` for HTTP) (03-02)
@@ -70,9 +73,20 @@ Recent v3.1 decisions:
 - Replace custom profile menus with Clerk UserButton (02-02)
 
 Recent v3.0 decisions affecting v3.1:
-- Convex migration (hybrid: Supabase auth + Convex data) — 25.4x faster (37ms vs 926ms P95)
+- Convex migration (hybrid: Supabase auth + Convex data) - 25.4x faster (37ms vs 926ms P95)
 - Use v.optional(v.any()) for metadata fields
 - Snake_case naming in Convex to match Supabase
+
+### User Migration Status
+
+**Migrated users:** 2/2 (100%)
+
+| Email | Supabase UUID | Clerk ID | Notes |
+|-------|---------------|----------|-------|
+| manjowan@gmail.com | e09597ff-4b0f-4e7b-b6c7-c74a47e9457e | user_38fLdL8Y1qHQIYQob1u1FtR9fEL | OAuth user updated |
+| jwandiyanto@gmail.com | d7012f0e-54a7-4013-9dfa-f63057040c08 | user_38fViPWAnLiNth62ZaAJj3PQDWU | Super-admin |
+
+**Mapping file:** `.planning/migrations/user-id-mapping.json`
 
 ### Blockers/Concerns
 
@@ -81,8 +95,8 @@ Recent v3.0 decisions affecting v3.1:
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed Phase 3
-Resume: `/gsd:execute-phase 4` to start Phase 4 (User Migration + Organizations)
+Stopped at: Completed 04-01-PLAN.md
+Resume: `/gsd:execute-phase 4` to continue Phase 4 (next: 04-02 Organizations)
 
 ---
-*Last updated: 2026-01-23 — Phase 3 complete*
+*Last updated: 2026-01-23 - Plan 04-01 complete*
