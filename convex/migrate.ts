@@ -9,7 +9,7 @@
  * for reference and potential dual-write implementation later.
  */
 
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 /**
@@ -270,5 +270,414 @@ export const migrateContactNotes = mutation({
       results.push({ supabaseId: note.id, convexId: id });
     }
     return results;
+  },
+});
+
+// ============================================
+// CORE TABLE USER ID MIGRATION QUERIES
+// List records for user ID migration
+// ============================================
+
+/**
+ * List all workspaces for user ID migration.
+ * Returns workspaces with their current owner_id field.
+ */
+export const listWorkspaces = query({
+  args: {},
+  handler: async (ctx) => {
+    const workspaces = await ctx.db.query("workspaces").collect();
+    return workspaces.map((w) => ({
+      _id: w._id,
+      name: w.name,
+      owner_id: w.owner_id,
+    }));
+  },
+});
+
+/**
+ * List all workspace members for user ID migration.
+ * Returns members with their current user_id field.
+ */
+export const listWorkspaceMembers = query({
+  args: {},
+  handler: async (ctx) => {
+    const members = await ctx.db.query("workspaceMembers").collect();
+    return members.map((m) => ({
+      _id: m._id,
+      workspace_id: m.workspace_id,
+      user_id: m.user_id,
+      role: m.role,
+    }));
+  },
+});
+
+/**
+ * List all contacts for user ID migration.
+ * Returns contacts with their current assigned_to field.
+ */
+export const listContacts = query({
+  args: {},
+  handler: async (ctx) => {
+    const contacts = await ctx.db.query("contacts").collect();
+    return contacts.map((c) => ({
+      _id: c._id,
+      workspace_id: c.workspace_id,
+      assigned_to: c.assigned_to,
+    }));
+  },
+});
+
+/**
+ * List all conversations for user ID migration.
+ * Returns conversations with their current assigned_to field.
+ */
+export const listConversations = query({
+  args: {},
+  handler: async (ctx) => {
+    const conversations = await ctx.db.query("conversations").collect();
+    return conversations.map((c) => ({
+      _id: c._id,
+      workspace_id: c.workspace_id,
+      assigned_to: c.assigned_to,
+    }));
+  },
+});
+
+/**
+ * List all messages for user ID migration.
+ * Returns messages with their current sender_id field.
+ */
+export const listMessages = query({
+  args: {},
+  handler: async (ctx) => {
+    const messages = await ctx.db.query("messages").collect();
+    return messages.map((m) => ({
+      _id: m._id,
+      workspace_id: m.workspace_id,
+      sender_id: m.sender_id,
+      sender_type: m.sender_type,
+    }));
+  },
+});
+
+/**
+ * List all contact notes for user ID migration.
+ * Returns notes with their current user_id field.
+ */
+export const listContactNotes = query({
+  args: {},
+  handler: async (ctx) => {
+    const notes = await ctx.db.query("contactNotes").collect();
+    return notes.map((n) => ({
+      _id: n._id,
+      workspace_id: n.workspace_id,
+      user_id: n.user_id,
+    }));
+  },
+});
+
+// ============================================
+// CORE TABLE USER ID MIGRATION MUTATIONS
+// Update user IDs from Supabase UUIDs to Clerk IDs
+// ============================================
+
+/**
+ * Update owner_id in workspaces table.
+ * @param updates - Array of { recordId, newOwnerId } to update
+ */
+export const updateWorkspaceOwnerIds = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        recordId: v.id("workspaces"),
+        newOwnerId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let updated = 0;
+    for (const update of args.updates) {
+      const workspace = await ctx.db.get(update.recordId);
+      if (workspace) {
+        await ctx.db.patch(update.recordId, { owner_id: update.newOwnerId });
+        updated++;
+      }
+    }
+    return { updated };
+  },
+});
+
+/**
+ * Update user_id in workspaceMembers table.
+ * @param updates - Array of { recordId, newUserId } to update
+ */
+export const updateWorkspaceMemberUserIds = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        recordId: v.id("workspaceMembers"),
+        newUserId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let updated = 0;
+    for (const update of args.updates) {
+      const member = await ctx.db.get(update.recordId);
+      if (member) {
+        await ctx.db.patch(update.recordId, { user_id: update.newUserId });
+        updated++;
+      }
+    }
+    return { updated };
+  },
+});
+
+/**
+ * Update assigned_to in contacts table.
+ * Only updates records where assigned_to has a value.
+ * @param updates - Array of { recordId, newAssignedTo } to update
+ */
+export const updateContactAssignedTo = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        recordId: v.id("contacts"),
+        newAssignedTo: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let updated = 0;
+    for (const update of args.updates) {
+      const contact = await ctx.db.get(update.recordId);
+      if (contact) {
+        await ctx.db.patch(update.recordId, { assigned_to: update.newAssignedTo });
+        updated++;
+      }
+    }
+    return { updated };
+  },
+});
+
+/**
+ * Update assigned_to in conversations table.
+ * Only updates records where assigned_to has a value.
+ * @param updates - Array of { recordId, newAssignedTo } to update
+ */
+export const updateConversationAssignedTo = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        recordId: v.id("conversations"),
+        newAssignedTo: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let updated = 0;
+    for (const update of args.updates) {
+      const conversation = await ctx.db.get(update.recordId);
+      if (conversation) {
+        await ctx.db.patch(update.recordId, { assigned_to: update.newAssignedTo });
+        updated++;
+      }
+    }
+    return { updated };
+  },
+});
+
+/**
+ * Update sender_id in messages table.
+ * Only updates records where sender_id has a value.
+ * @param updates - Array of { recordId, newSenderId } to update
+ */
+export const updateMessageSenderId = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        recordId: v.id("messages"),
+        newSenderId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let updated = 0;
+    for (const update of args.updates) {
+      const message = await ctx.db.get(update.recordId);
+      if (message) {
+        await ctx.db.patch(update.recordId, { sender_id: update.newSenderId });
+        updated++;
+      }
+    }
+    return { updated };
+  },
+});
+
+/**
+ * Update user_id in contactNotes table.
+ * @param updates - Array of { recordId, newUserId } to update
+ */
+export const updateContactNoteUserIds = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        recordId: v.id("contactNotes"),
+        newUserId: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let updated = 0;
+    for (const update of args.updates) {
+      const note = await ctx.db.get(update.recordId);
+      if (note) {
+        await ctx.db.patch(update.recordId, { user_id: update.newUserId });
+        updated++;
+      }
+    }
+    return { updated };
+  },
+});
+
+// ============================================
+// TICKET USER ID MIGRATION
+// ============================================
+
+/**
+ * List all tickets for user ID migration.
+ * Returns tickets with their current requester_id and assigned_to fields.
+ */
+export const listTickets = query({
+  args: {},
+  handler: async (ctx) => {
+    const tickets = await ctx.db.query("tickets").collect();
+    return tickets.map((t) => ({
+      _id: t._id,
+      requester_id: t.requester_id,
+      assigned_to: t.assigned_to,
+    }));
+  },
+});
+
+/**
+ * List all ticket comments for user ID migration.
+ * Returns comments with their current author_id field.
+ */
+export const listTicketComments = query({
+  args: {},
+  handler: async (ctx) => {
+    const comments = await ctx.db.query("ticketComments").collect();
+    return comments.map((c) => ({
+      _id: c._id,
+      author_id: c.author_id,
+    }));
+  },
+});
+
+/**
+ * List all ticket status history entries for user ID migration.
+ * Returns history entries with their current changed_by field.
+ */
+export const listTicketStatusHistory = query({
+  args: {},
+  handler: async (ctx) => {
+    const history = await ctx.db.query("ticketStatusHistory").collect();
+    return history.map((h) => ({
+      _id: h._id,
+      changed_by: h.changed_by,
+    }));
+  },
+});
+
+/**
+ * Update ticket user IDs (requester_id and assigned_to) from Supabase UUIDs to Clerk IDs.
+ *
+ * @param updates - Array of { _id, requester_id, assigned_to } with new Clerk IDs
+ * @returns Count of updated tickets
+ */
+export const updateTicketUserIds = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        _id: v.id("tickets"),
+        requester_id: v.string(),
+        assigned_to: v.optional(v.string()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let updated = 0;
+    for (const update of args.updates) {
+      const ticket = await ctx.db.get(update._id);
+      if (ticket) {
+        await ctx.db.patch(update._id, {
+          requester_id: update.requester_id,
+          assigned_to: update.assigned_to,
+        });
+        updated++;
+      }
+    }
+    return { updated };
+  },
+});
+
+/**
+ * Update ticket comment author IDs from Supabase UUIDs to Clerk IDs.
+ *
+ * @param updates - Array of { _id, author_id } with new Clerk IDs
+ * @returns Count of updated comments
+ */
+export const updateTicketCommentAuthorIds = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        _id: v.id("ticketComments"),
+        author_id: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let updated = 0;
+    for (const update of args.updates) {
+      const comment = await ctx.db.get(update._id);
+      if (comment) {
+        await ctx.db.patch(update._id, {
+          author_id: update.author_id,
+        });
+        updated++;
+      }
+    }
+    return { updated };
+  },
+});
+
+/**
+ * Update ticket status history changed_by IDs from Supabase UUIDs to Clerk IDs.
+ *
+ * @param updates - Array of { _id, changed_by } with new Clerk IDs
+ * @returns Count of updated history entries
+ */
+export const updateTicketStatusHistoryUserIds = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        _id: v.id("ticketStatusHistory"),
+        changed_by: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    let updated = 0;
+    for (const update of args.updates) {
+      const history = await ctx.db.get(update._id);
+      if (history) {
+        await ctx.db.patch(update._id, {
+          changed_by: update.changed_by,
+        });
+        updated++;
+      }
+    }
+    return { updated };
   },
 });
