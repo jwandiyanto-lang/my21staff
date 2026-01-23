@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
+import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import type { Article } from '@/types/database'
-
-function isDevMode(): boolean {
-  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
-}
-
-// Type assertion helper for articles table (until Supabase types are regenerated)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ArticleClient = any
 
 type RouteContext = {
   params: Promise<{ id: string }>
@@ -19,56 +13,37 @@ export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params
 
-    if (isDevMode()) {
-      // Dev mode: return mock not found (since we don't have real data)
+    // Fetch article from Convex
+    const article = await fetchQuery(api.cms.getArticle, {
+      articleId: id as any,
+    })
+
+    if (!article) {
       return NextResponse.json(
         { error: 'Article not found' },
         { status: 404 }
       )
     }
 
-    const supabase = await createClient()
+    // Get workspace to check slug for auth
+    const workspace = await fetchQuery(api.workspaces.getById, {
+      id: article.workspace_id,
+    })
 
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    if (!workspace) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Fetch article (using type assertion until types are regenerated)
-    const client = supabase as unknown as ArticleClient
-    const { data: article, error } = await client
-      .from('articles')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (error || !article) {
-      return NextResponse.json(
-        { error: 'Article not found' },
+        { error: 'Workspace not found' },
         { status: 404 }
       )
     }
 
-    // Check user has access to workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', article.workspace_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json(
-        { error: 'Not authorized to access this article' },
-        { status: 403 }
-      )
+    // Verify workspace membership
+    const authResult = await requireWorkspaceMembership(workspace.slug)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
 
-    return NextResponse.json(article as Article, {
+    return NextResponse.json(article, {
       headers: {
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
       },
@@ -89,101 +64,57 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const body = await request.json()
     const { title, slug, excerpt, content, cover_image_url, status } = body
 
-    if (isDevMode()) {
-      // Dev mode: return mock updated article
-      const now = new Date().toISOString()
-      const mockArticle: Article = {
-        id,
-        workspace_id: body.workspace_id || 'dev-workspace-001',
-        title: title?.trim() || 'Untitled',
-        slug: slug?.trim() || 'untitled',
-        excerpt: excerpt?.trim() || null,
-        content: content?.trim() || null,
-        cover_image_url: cover_image_url?.trim() || null,
-        status: status || 'draft',
-        published_at: status === 'published' ? now : null,
-        created_at: now,
-        updated_at: now,
-      }
-      return NextResponse.json(mockArticle)
-    }
+    // Fetch existing article to get workspace
+    const existingArticle = await fetchQuery(api.cms.getArticle, {
+      articleId: id as any,
+    })
 
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Fetch existing article (using type assertion until types are regenerated)
-    const client = supabase as unknown as ArticleClient
-    const { data: existingArticle, error: fetchError } = await client
-      .from('articles')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (fetchError || !existingArticle) {
+    if (!existingArticle) {
       return NextResponse.json(
         { error: 'Article not found' },
         { status: 404 }
       )
     }
 
-    // Check user has access to workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', existingArticle.workspace_id)
-      .eq('user_id', user.id)
-      .single()
+    // Get workspace to check slug for auth
+    const workspace = await fetchQuery(api.workspaces.getById, {
+      id: existingArticle.workspace_id,
+    })
 
-    if (!membership) {
+    if (!workspace) {
       return NextResponse.json(
-        { error: 'Not authorized to update this article' },
-        { status: 403 }
+        { error: 'Workspace not found' },
+        { status: 404 }
       )
     }
 
-    const now = new Date().toISOString()
-
-    // If status is changing to published and published_at is null, set it
-    let publishedAt = existingArticle.published_at
-    if (status === 'published' && !publishedAt) {
-      publishedAt = now
+    // Verify workspace membership
+    const authResult = await requireWorkspaceMembership(workspace.slug)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
 
-    const updateData = {
-      ...(title !== undefined && { title: title.trim() }),
-      ...(slug !== undefined && { slug: slug.trim() }),
-      ...(excerpt !== undefined && { excerpt: excerpt?.trim() || null }),
-      ...(content !== undefined && { content: content?.trim() || null }),
-      ...(cover_image_url !== undefined && { cover_image_url: cover_image_url?.trim() || null }),
-      ...(status !== undefined && { status }),
-      published_at: publishedAt,
-      updated_at: now,
-    }
+    // Build update object with only defined fields
+    const updates: any = {}
+    if (title !== undefined) updates.title = title.trim()
+    if (slug !== undefined) updates.slug = slug.trim()
+    if (excerpt !== undefined) updates.excerpt = excerpt?.trim() || undefined
+    if (content !== undefined) updates.content = content?.trim() || undefined
+    if (cover_image_url !== undefined) updates.cover_image_url = cover_image_url?.trim() || undefined
+    if (status !== undefined) updates.status = status
 
-    const { data: article, error } = await client
-      .from('articles')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single()
+    // Update article in Convex
+    await fetchMutation(api.cms.updateArticle, {
+      articleId: id as any,
+      ...updates,
+    })
 
-    if (error) {
-      console.error('Update article error:', error)
-      return NextResponse.json(
-        { error: 'Failed to update article' },
-        { status: 500 }
-      )
-    }
+    // Fetch updated article to return it
+    const article = await fetchQuery(api.cms.getArticle, {
+      articleId: id as any,
+    })
 
-    return NextResponse.json(article as Article)
+    return NextResponse.json(article)
   } catch (error) {
     console.error('PUT /api/articles/[id] error:', error)
     return NextResponse.json(
@@ -198,64 +129,40 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params
 
-    if (isDevMode()) {
-      // Dev mode: return mock success
-      return NextResponse.json({ success: true })
-    }
+    // Fetch existing article to get workspace
+    const existingArticle = await fetchQuery(api.cms.getArticle, {
+      articleId: id as any,
+    })
 
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Fetch existing article (using type assertion until types are regenerated)
-    const client = supabase as unknown as ArticleClient
-    const { data: existingArticle, error: fetchError } = await client
-      .from('articles')
-      .select('workspace_id')
-      .eq('id', id)
-      .single()
-
-    if (fetchError || !existingArticle) {
+    if (!existingArticle) {
       return NextResponse.json(
         { error: 'Article not found' },
         { status: 404 }
       )
     }
 
-    // Check user has access to workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', existingArticle.workspace_id)
-      .eq('user_id', user.id)
-      .single()
+    // Get workspace to check slug for auth
+    const workspace = await fetchQuery(api.workspaces.getById, {
+      id: existingArticle.workspace_id,
+    })
 
-    if (!membership) {
+    if (!workspace) {
       return NextResponse.json(
-        { error: 'Not authorized to delete this article' },
-        { status: 403 }
+        { error: 'Workspace not found' },
+        { status: 404 }
       )
     }
 
-    const { error } = await client
-      .from('articles')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      console.error('Delete article error:', error)
-      return NextResponse.json(
-        { error: 'Failed to delete article' },
-        { status: 500 }
-      )
+    // Verify workspace membership
+    const authResult = await requireWorkspaceMembership(workspace.slug)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+
+    // Delete article from Convex
+    await fetchMutation(api.cms.deleteArticle, {
+      articleId: id as any,
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

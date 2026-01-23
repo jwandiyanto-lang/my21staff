@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
+import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import type { Article } from '@/types/database'
-
-function isDevMode(): boolean {
-  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
-}
 
 function slugify(text: string): string {
   return text
@@ -15,75 +13,43 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-// Type assertion helper for articles table (until Supabase types are regenerated)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ArticleClient = any
-
 // GET /api/articles - List articles for a workspace
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const workspaceId = searchParams.get('workspace_id')
+    const workspaceSlug = searchParams.get('workspace_id')
 
-    if (!workspaceId) {
+    if (!workspaceSlug) {
       return NextResponse.json(
         { error: 'workspace_id is required' },
         { status: 400 }
       )
     }
 
-    if (isDevMode()) {
-      // Dev mode: return mock success
-      return NextResponse.json([])
+    // Verify workspace membership
+    const authResult = await requireWorkspaceMembership(workspaceSlug)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
 
-    const supabase = await createClient()
+    // Get workspace by slug
+    const workspace = await fetchQuery(api.workspaces.getBySlug, {
+      slug: workspaceSlug,
+    })
 
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    if (!workspace) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Workspace not found' },
+        { status: 404 }
       )
     }
 
-    // Check user has access to workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', workspaceId)
-      .eq('user_id', user.id)
-      .single()
+    // Fetch articles from Convex
+    const articles = await fetchQuery(api.cms.listArticles, {
+      workspaceId: workspace._id as any,
+    })
 
-    if (!membership) {
-      return NextResponse.json(
-        { error: 'Not authorized to access this workspace' },
-        { status: 403 }
-      )
-    }
-
-    // Fetch articles (using type assertion until types are regenerated)
-    const client = supabase as unknown as ArticleClient
-    const { data: articles, error } = await client
-      .from('articles')
-      .select(`
-        id, title, slug, excerpt, content,
-        cover_image_url, status, published_at,
-        created_at, updated_at
-      `)
-      .eq('workspace_id', workspaceId)
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Fetch articles error:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch articles' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json(articles as Article[])
+    return NextResponse.json(articles)
   } catch (error) {
     console.error('GET /api/articles error:', error)
     return NextResponse.json(
@@ -114,85 +80,44 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verify workspace membership
+    const authResult = await requireWorkspaceMembership(workspace_id)
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+
+    // Get workspace by slug
+    const workspace = await fetchQuery(api.workspaces.getBySlug, {
+      slug: workspace_id,
+    })
+
+    if (!workspace) {
+      return NextResponse.json(
+        { error: 'Workspace not found' },
+        { status: 404 }
+      )
+    }
+
     // Generate slug if not provided
     const finalSlug = slug?.trim() || slugify(title)
 
-    if (isDevMode()) {
-      // Dev mode: return mock created article
-      const now = new Date().toISOString()
-      const mockArticle: Article = {
-        id: `article-${Date.now()}`,
-        workspace_id,
-        title: title.trim(),
-        slug: finalSlug,
-        excerpt: excerpt?.trim() || null,
-        content: content?.trim() || null,
-        cover_image_url: cover_image_url?.trim() || null,
-        status: status || 'draft',
-        published_at: status === 'published' ? now : null,
-        created_at: now,
-        updated_at: now,
-      }
-      return NextResponse.json(mockArticle, { status: 201 })
-    }
-
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Check user has access to workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', workspace_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json(
-        { error: 'Not authorized to access this workspace' },
-        { status: 403 }
-      )
-    }
-
-    const now = new Date().toISOString()
-    const articleData = {
-      workspace_id,
+    // Create article in Convex
+    const articleId = await fetchMutation(api.cms.createArticle, {
+      workspaceId: workspace._id as any,
       title: title.trim(),
       slug: finalSlug,
-      excerpt: excerpt?.trim() || null,
-      content: content?.trim() || null,
-      cover_image_url: cover_image_url?.trim() || null,
+      excerpt: excerpt?.trim() || undefined,
+      content: content?.trim() || undefined,
+      cover_image_url: cover_image_url?.trim() || undefined,
       status: status || 'draft',
-      published_at: status === 'published' ? now : null,
-      created_at: now,
-      updated_at: now,
-    }
+    })
 
-    // Insert article (using type assertion until types are regenerated)
-    const client = supabase as unknown as ArticleClient
-    const { data: article, error } = await client
-      .from('articles')
-      .insert(articleData)
-      .select()
-      .single()
+    // Fetch created article to return it
+    const article = await fetchQuery(api.cms.getArticle, {
+      articleId: articleId as any,
+    })
 
-    if (error) {
-      console.error('Create article error:', error)
-      return NextResponse.json(
-        { error: 'Failed to create article' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json(article as Article, { status: 201 })
+    return NextResponse.json(article, { status: 201 })
   } catch (error) {
     console.error('POST /api/articles error:', error)
     return NextResponse.json(
