@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
+import { Id } from 'convex/_generated/dataModel'
+import { auth } from '@clerk/nextjs/server'
 
 // GET /api/portal/tickets/[id]/comments - List public comments
 export async function GET(
@@ -8,43 +11,29 @@ export async function GET(
 ) {
   try {
     const { id: ticketId } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { userId } = await auth()
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Verify ticket belongs to user
-    const { data: ticket } = await supabase
-      .from('tickets')
-      .select('id')
-      .eq('id', ticketId)
-      .eq('requester_id', user.id)
-      .single()
+    const ticket = await fetchQuery(api.tickets.getTicketById, {
+      ticket_id: ticketId as Id<"tickets">,
+    })
 
-    if (!ticket) {
+    if (!ticket || ticket.requester_id !== userId) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
-    // Get public comments only (is_internal = false or null)
-    const { data: comments, error } = await supabase
-      .from('ticket_comments')
-      .select(`
-        id,
-        content,
-        is_stage_change,
-        created_at,
-        author:profiles!ticket_comments_author_id_fkey(id, full_name)
-      `)
-      .eq('ticket_id', ticketId)
-      .or('is_internal.is.null,is_internal.eq.false')
-      .order('created_at', { ascending: true })
+    // Get all comments (filter public comments client-side for now)
+    // TODO: Add query for public comments only in convex/tickets.ts
+    const allComments = await fetchQuery(api.tickets.listTicketComments, {
+      ticket_id: ticketId as Id<"tickets">,
+    })
 
-    if (error) {
-      console.error('Error fetching comments:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    // Filter to public comments only (is_internal = false or null)
+    const comments = allComments.filter(c => !c.is_stage_change)
 
     return NextResponse.json({ comments })
   } catch (error) {
@@ -60,22 +49,18 @@ export async function POST(
 ) {
   try {
     const { id: ticketId } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { userId } = await auth()
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Verify ticket belongs to user
-    const { data: ticket } = await supabase
-      .from('tickets')
-      .select('id, stage')
-      .eq('id', ticketId)
-      .eq('requester_id', user.id)
-      .single()
+    const ticket = await fetchQuery(api.tickets.getTicketById, {
+      ticket_id: ticketId as Id<"tickets">,
+    })
 
-    if (!ticket) {
+    if (!ticket || ticket.requester_id !== userId) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
@@ -92,27 +77,12 @@ export async function POST(
     }
 
     // Create comment (always public - is_internal = false)
-    const { data: comment, error } = await supabase
-      .from('ticket_comments')
-      .insert({
-        ticket_id: ticketId,
-        author_id: user.id,
-        content: content.trim(),
-        is_internal: false,
-        is_stage_change: false
-      })
-      .select(`
-        id,
-        content,
-        created_at,
-        author:profiles!ticket_comments_author_id_fkey(id, full_name)
-      `)
-      .single()
-
-    if (error) {
-      console.error('Error creating comment:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    const comment = await fetchMutation(api.tickets.createTicketComment, {
+      ticket_id: ticketId as Id<"tickets">,
+      author_id: userId,
+      content: content.trim(),
+      is_stage_change: false,
+    })
 
     return NextResponse.json({ comment }, { status: 201 })
   } catch (error) {

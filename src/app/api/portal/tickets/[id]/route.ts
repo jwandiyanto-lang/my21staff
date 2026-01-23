@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
+import { Id } from 'convex/_generated/dataModel'
+import { auth } from '@clerk/nextjs/server'
 
 // GET /api/portal/tickets/[id] - Get ticket detail (client view)
 export async function GET(
@@ -8,36 +11,40 @@ export async function GET(
 ) {
   try {
     const { id: ticketId } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { userId } = await auth()
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get ticket - must be requester's own ticket
-    const { data: ticket, error } = await supabase
-      .from('tickets')
-      .select(`
-        id,
-        title,
-        description,
-        category,
-        priority,
-        stage,
-        created_at,
-        updated_at,
-        closed_at
-      `)
-      .eq('id', ticketId)
-      .eq('requester_id', user.id) // Client can only see own tickets
-      .single()
+    // Get ticket from Convex - must be requester's own ticket
+    const ticket = await fetchQuery(api.tickets.getTicketById, {
+      ticket_id: ticketId as Id<"tickets">,
+    })
 
-    if (error || !ticket) {
+    if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ ticket })
+    // Client can only see own tickets
+    if (ticket.requester_id !== userId) {
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
+    }
+
+    // Return only client-safe fields
+    const clientTicket = {
+      _id: ticket._id,
+      title: ticket.title,
+      description: ticket.description,
+      category: ticket.category,
+      priority: ticket.priority,
+      stage: ticket.stage,
+      created_at: ticket.created_at,
+      updated_at: ticket.updated_at,
+      closed_at: ticket.closed_at,
+    }
+
+    return NextResponse.json({ ticket: clientTicket })
   } catch (error) {
     console.error('GET /api/portal/tickets/[id] error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

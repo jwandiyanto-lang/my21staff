@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { api } from 'convex/_generated/api'
+import { auth } from '@clerk/nextjs/server'
 import { type TicketCategory, type TicketPriority } from '@/lib/tickets'
 import {
   withTiming,
@@ -9,9 +9,6 @@ import {
   logQuery,
   logQuerySummary,
 } from '@/lib/instrumentation/with-timing'
-
-// Hardcoded for debugging - my21staff workspace ID
-const ADMIN_WORKSPACE_ID = '0318fda5-22c4-419b-bdd8-04471b818d17'
 
 const VALID_CATEGORIES: TicketCategory[] = ['bug', 'feature', 'question']
 const VALID_PRIORITIES: TicketPriority[] = ['low', 'medium', 'high']
@@ -21,17 +18,16 @@ export async function GET() {
   const metrics = createRequestMetrics()
 
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { userId } = await auth()
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Client sees ONLY their own tickets (requester_id = auth.uid())
     let queryStart = performance.now()
     const tickets = await fetchQuery(api.tickets.listTicketsByRequester, {
-      requester_id: user.id,
+      requester_id: userId,
     })
     logQuery(metrics, 'convex.tickets.listTicketsByRequester', Math.round(performance.now() - queryStart))
 
@@ -49,23 +45,20 @@ export async function POST(request: NextRequest) {
   const metrics = createRequestMetrics()
 
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { userId } = await auth()
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get user's workspace membership from Supabase
+    // Get user's workspace membership from Convex
     let queryStart = performance.now()
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('workspace_id')
-      .eq('user_id', user.id)
-      .single()
-    logQuery(metrics, 'supabase.workspace_members', Math.round(performance.now() - queryStart))
+    const user = await fetchQuery(api.users.getUserById, {
+      clerkId: userId,
+    })
+    logQuery(metrics, 'convex.users.getUserById', Math.round(performance.now() - queryStart))
 
-    if (!membership) {
+    if (!user || !user.workspace_id) {
       return NextResponse.json({ error: 'No workspace found' }, { status: 400 })
     }
 
@@ -91,15 +84,20 @@ export async function POST(request: NextRequest) {
 
     // Create ticket via Convex mutation
     queryStart = performance.now()
-    const ticket = await fetchMutation(api.mutations.createTicket, {
-      workspace_id: membership.workspace_id,
-      requester_id: user.id,
+    const ticketId = await fetchMutation(api.tickets.createTicket, {
+      workspace_id: user.workspace_id as string,
+      requester_id: userId,
       title: title.trim(),
       description: description.trim(),
       category,
       priority,
     })
-    logQuery(metrics, 'convex.mutations.createTicket', Math.round(performance.now() - queryStart))
+    logQuery(metrics, 'convex.tickets.createTicket', Math.round(performance.now() - queryStart))
+
+    // Fetch created ticket to return it
+    const ticket = await fetchQuery(api.tickets.getTicketById, {
+      ticket_id: ticketId as any,
+    })
 
     logQuerySummary('/api/portal/tickets', metrics)
     return NextResponse.json({ ticket }, { status: 201 })
