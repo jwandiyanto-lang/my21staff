@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 4 of 7 (User Migration + Organizations)
-Plan: 04-04 complete - 5 of 6 plans done
-Status: In progress
-Last activity: 2026-01-23 - Completed 04-04-PLAN.md (Organization Webhooks)
+Plan: 04-05 complete - 6 of 6 plans done (code complete)
+Status: CODE COMPLETE - pending final verification
+Last activity: 2026-01-23 - Completed 04-05-PLAN.md (Team Management UI)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ███████░░░ (157 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████████░░ (158 plans shipped)
 
 ## Performance Metrics
 
@@ -58,6 +58,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- Clerk OrganizationProfile for team management: Replaces custom UI with built-in invitations (04-05)
+- Deferred verification: Team page + webhook testing combined at end of phase (04-05)
 - Deferred webhook config: Organization webhooks configured at end of phase, not blocking (04-04)
 - Eagle-only org approach: Only migrate Eagle Overseas due to Clerk free plan limit (04-02)
 - My21Staff workspace stays in Supabase: Not converted to org, can add after plan upgrade (04-02)
@@ -143,11 +145,29 @@ Recent v3.0 decisions affecting v3.1:
 3. Add events: organization.created, organization.updated, organization.deleted, organizationMembership.created, organizationMembership.updated, organizationMembership.deleted
 4. Save changes
 
+### Phase 4 Verification Checklist
+
+Before proceeding to Phase 5, verify:
+
+**Team Page (04-05):**
+- [ ] Start dev server: `npm run dev`
+- [ ] Navigate to /eagle-overseas/team
+- [ ] Member list shows organization members
+- [ ] Invite button works (opens Clerk modal)
+- [ ] Role management visible for owner
+
+**Organization Webhooks (04-04):**
+- [ ] Go to Clerk Dashboard -> Webhooks
+- [ ] Edit webhook: `pleasant-antelope-109.convex.site/webhook/clerk`
+- [ ] Add events: organization.created, organization.updated, organization.deleted, organizationMembership.created, organizationMembership.updated, organizationMembership.deleted
+- [ ] Save changes
+- [ ] Test: invite a member, check Convex organizations table
+
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 04-04-PLAN.md
-Resume: `/gsd:execute-phase 4` to continue Phase 4 (next: 04-05 Data Migration)
+Stopped at: Completed 04-05-PLAN.md (Phase 4 code complete)
+Resume: Run verification checklist above, then `/gsd:execute-phase 5` for Phase 5
 
 ---
-*Last updated: 2026-01-23 - Plan 04-04 complete*
+*Last updated: 2026-01-23 - Phase 4 code complete, pending verification*
