@@ -7,7 +7,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import { DEFAULT_FLOW_STAGES, type FlowStageInsert } from '@/lib/ari/types'
 
@@ -24,20 +25,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
-
-    // Get existing stages ordered by stage_order
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: stages, error } = await (supabase as any)
-      .from('ari_flow_stages')
-      .select('*')
-      .eq('workspace_id', workspaceId)
-      .order('stage_order', { ascending: true })
-
-    if (error) {
-      console.error('Failed to fetch flow stages:', error)
-      return NextResponse.json({ error: 'Failed to fetch stages' }, { status: 500 })
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
+
+    // Get existing stages from Convex
+    const stages = await fetchQuery(api.ari.getFlowStages, {
+      workspace_id: workspace._id,
+    })
 
     // If no stages exist, return defaults (not saved to DB)
     if (!stages || stages.length === 0) {
@@ -67,7 +64,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
     const body = await request.json()
 
     // Validate required fields
@@ -83,40 +79,31 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Name must be 100 characters or less' }, { status: 400 })
     }
 
-    // Get current max order
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existingStages } = await (supabase as any)
-      .from('ari_flow_stages')
-      .select('stage_order')
-      .eq('workspace_id', workspaceId)
-      .order('stage_order', { ascending: false })
-      .limit(1)
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    // Get current max order from existing stages
+    const existingStages = await fetchQuery(api.ari.getFlowStages, {
+      workspace_id: workspace._id,
+    })
 
     const nextOrder = existingStages && existingStages.length > 0
-      ? existingStages[0].stage_order + 1
+      ? Math.max(...existingStages.map(s => s.stage_order)) + 1
       : 0
 
-    const stageData: FlowStageInsert = {
-      workspace_id: workspaceId,
+    // Create stage in Convex
+    const stage = await fetchMutation(api.ari.createFlowStage, {
+      workspace_id: workspace._id,
       name: body.name.trim(),
       goal: body.goal.trim(),
-      sample_script: body.sample_script?.trim() || null,
-      exit_criteria: body.exit_criteria?.trim() || null,
+      sample_script: body.sample_script?.trim() || undefined,
+      exit_criteria: body.exit_criteria?.trim() || undefined,
       stage_order: nextOrder,
       is_active: body.is_active ?? true,
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: stage, error } = await (supabase as any)
-      .from('ari_flow_stages')
-      .insert(stageData)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Failed to create flow stage:', error)
-      return NextResponse.json({ error: 'Failed to create stage' }, { status: 500 })
-    }
+    })
 
     return NextResponse.json({ stage }, { status: 201 })
   } catch (error) {
@@ -134,8 +121,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
     const body = await request.json()
+
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
 
     // Check if this is a batch reorder request
     if (body.stages && Array.isArray(body.stages)) {
@@ -152,30 +144,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         }
       }
 
-      // Clear existing orders to avoid unique constraint violations during reorder
-      // We'll set them to negative values temporarily
-      for (let i = 0; i < updates.length; i++) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any)
-          .from('ari_flow_stages')
-          .update({ stage_order: -(i + 1000) })
-          .eq('id', updates[i].id)
-          .eq('workspace_id', workspaceId)
-      }
-
-      // Now set the correct orders
+      // Update each stage with new order
       for (const update of updates) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await (supabase as any)
-          .from('ari_flow_stages')
-          .update({ stage_order: update.stage_order })
-          .eq('id', update.id)
-          .eq('workspace_id', workspaceId)
-
-        if (error) {
-          console.error('Failed to reorder stage:', error)
-          return NextResponse.json({ error: 'Failed to reorder stages' }, { status: 500 })
-        }
+        await fetchMutation(api.ari.updateFlowStage, {
+          stage_id: update.id,
+          workspace_id: workspace._id,
+          stage_order: update.stage_order,
+        })
       }
 
       return NextResponse.json({ success: true })
@@ -194,27 +169,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Stage goal cannot be empty' }, { status: 400 })
     }
 
-    // Build update object
-    const updateData: Record<string, unknown> = {}
-    if (body.name !== undefined) updateData.name = body.name.trim()
-    if (body.goal !== undefined) updateData.goal = body.goal.trim()
-    if (body.sample_script !== undefined) updateData.sample_script = body.sample_script?.trim() || null
-    if (body.exit_criteria !== undefined) updateData.exit_criteria = body.exit_criteria?.trim() || null
-    if (body.is_active !== undefined) updateData.is_active = body.is_active
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: stage, error } = await (supabase as any)
-      .from('ari_flow_stages')
-      .update(updateData)
-      .eq('id', body.id)
-      .eq('workspace_id', workspaceId)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Failed to update flow stage:', error)
-      return NextResponse.json({ error: 'Failed to update stage' }, { status: 500 })
-    }
+    // Update stage in Convex
+    const stage = await fetchMutation(api.ari.updateFlowStage, {
+      stage_id: body.id,
+      workspace_id: workspace._id,
+      name: body.name !== undefined ? body.name.trim() : undefined,
+      goal: body.goal !== undefined ? body.goal.trim() : undefined,
+      sample_script: body.sample_script !== undefined ? (body.sample_script?.trim() || undefined) : undefined,
+      exit_criteria: body.exit_criteria !== undefined ? (body.exit_criteria?.trim() || undefined) : undefined,
+      is_active: body.is_active,
+    })
 
     return NextResponse.json({ stage })
   } catch (error) {
@@ -238,53 +202,20 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
-
-    // Get the stage being deleted to know its order
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: deletedStage, error: fetchError } = await (supabase as any)
-      .from('ari_flow_stages')
-      .select('stage_order')
-      .eq('id', stageId)
-      .eq('workspace_id', workspaceId)
-      .single()
-
-    if (fetchError || !deletedStage) {
-      return NextResponse.json({ error: 'Stage not found' }, { status: 404 })
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
-    // Delete the stage
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: deleteError } = await (supabase as any)
-      .from('ari_flow_stages')
-      .delete()
-      .eq('id', stageId)
-      .eq('workspace_id', workspaceId)
+    // Delete the stage in Convex
+    await fetchMutation(api.ari.deleteFlowStage, {
+      stage_id: stageId,
+      workspace_id: workspace._id,
+    })
 
-    if (deleteError) {
-      console.error('Failed to delete flow stage:', deleteError)
-      return NextResponse.json({ error: 'Failed to delete stage' }, { status: 500 })
-    }
-
-    // Reorder remaining stages to close the gap
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: remainingStages } = await (supabase as any)
-      .from('ari_flow_stages')
-      .select('id, stage_order')
-      .eq('workspace_id', workspaceId)
-      .gt('stage_order', deletedStage.stage_order)
-      .order('stage_order', { ascending: true })
-
-    if (remainingStages && remainingStages.length > 0) {
-      for (const stage of remainingStages) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any)
-          .from('ari_flow_stages')
-          .update({ stage_order: stage.stage_order - 1 })
-          .eq('id', stage.id)
-          .eq('workspace_id', workspaceId)
-      }
-    }
+    // Note: Reordering is now handled by the UI when needed via batch update
+    // No automatic reordering to avoid conflicts
 
     return NextResponse.json({ success: true })
   } catch (error) {

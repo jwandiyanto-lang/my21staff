@@ -5,7 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 
 // ARI Config insert type matching database schema
@@ -40,20 +41,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
-
-    // Get existing config
-    const { data: config, error } = await supabase
-      .from('ari_config')
-      .select('*')
-      .eq('workspace_id', workspaceId)
-      .single()
-
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 = no rows found (expected for new workspaces)
-      console.error('Failed to fetch ARI config:', error)
-      return NextResponse.json({ error: 'Failed to fetch config' }, { status: 500 })
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
+
+    // Get existing config from Convex
+    const config = await fetchQuery(api.ari.getAriConfig, {
+      workspace_id: workspace._id,
+    })
 
     // Return existing config or defaults
     if (config) {
@@ -82,7 +79,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
-    const supabase = await createClient()
     const body = await request.json()
 
     // Validate bot_name
@@ -152,30 +148,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       }
     }
 
-    // Build the config update with proper type
-    const configData: ARIConfigInsert = {
-      workspace_id: workspaceId,
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    // Upsert config in Convex
+    const config = await fetchMutation(api.ari.upsertAriConfig, {
+      workspace_id: workspace._id,
       bot_name: body.bot_name || DEFAULT_CONFIG.bot_name,
       greeting_style: DEFAULT_CONFIG.greeting_style,
       language: DEFAULT_CONFIG.language,
       tone: toneData,
-      community_link: body.community_link !== undefined ? (body.community_link || null) : null,
-    }
-
-    // Upsert: insert if not exists, update if exists
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: config, error } = await supabase
-      .from('ari_config')
-      .upsert(configData as any, {
-        onConflict: 'workspace_id',
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Failed to upsert ARI config:', error)
-      return NextResponse.json({ error: 'Failed to save config' }, { status: 500 })
-    }
+      community_link: body.community_link !== undefined ? (body.community_link || undefined) : undefined,
+    })
 
     return NextResponse.json({ config })
   } catch (error) {
