@@ -19,6 +19,7 @@ import type * as migrate from "../migrate.js";
 import type * as mutations from "../mutations.js";
 import type * as workspaceMembers from "../workspaceMembers.js";
 import type * as workspaces from "../workspaces.js";
+import type * as tickets from "../tickets.js";
 
 import type {
   ApiFromModules,
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   mutations: typeof mutations;
   workspaceMembers: typeof workspaceMembers;
   workspaces: typeof workspaces;
+  tickets: typeof tickets;
 }>;
 
 /**

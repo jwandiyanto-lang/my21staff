@@ -949,7 +949,7 @@ export const upsertARIMessage = internalMutation({
  * @param admin_workspace_id - Optional admin workspace ID for routing
  * @returns The created ticket document
  */
-export const createTicket = internalMutation({
+export const createTicket = mutation({
   args: {
     workspace_id: v.string(),
     requester_id: v.string(),

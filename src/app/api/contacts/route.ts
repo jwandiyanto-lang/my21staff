@@ -103,7 +103,7 @@ export async function DELETE(request: NextRequest) {
 
     // Delete contact via Convex mutation
     let mutStart = performance.now()
-    await fetchMutation(api.contacts.deleteContact, {
+    await fetchMutation(api.mutations.deleteContact, {
       contact_id: contactId,
       workspace_id: workspaceId,
     })
