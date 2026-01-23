@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { api } from 'convex/_generated/api'
+import { Id } from 'convex/_generated/dataModel'
 import { verifyReopenToken, type TicketStage } from '@/lib/tickets'
 import {
   withTiming,
@@ -39,7 +40,7 @@ export async function POST(
 
     // Fetch ticket from Convex
     let queryStart = performance.now()
-    const ticket = await fetchQuery(api.tickets.getTicketById, { ticket_id: ticketId })
+    const ticket = await fetchQuery(api.tickets.getTicketById, { ticket_id: ticketId as Id<"tickets"> })
     logQuery(metrics, 'convex.tickets.getTicketById', Math.round(performance.now() - queryStart))
 
     if (!ticket) {
@@ -85,7 +86,7 @@ export async function POST(
     if (!approved) {
       mutStart = performance.now()
       await fetchMutation(api.tickets.createTicketComment, {
-        ticket_id: ticketId,
+        ticket_id: ticketId as Id<"tickets">,
         author_id: user.id,
         content: `Rejected: skip request to "${pendingStage}" stage was declined.`,
         is_stage_change: true,

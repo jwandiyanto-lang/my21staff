@@ -4,6 +4,7 @@ import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import { requirePermission, hasPermission } from '@/lib/permissions/check'
 import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { api } from 'convex/_generated/api'
+import { Id } from 'convex/_generated/dataModel'
 import {
   canTransition,
   isSkipTransition,
@@ -48,7 +49,7 @@ export async function POST(
 
     // Fetch ticket from Convex
     let queryStart = performance.now()
-    const ticket = await fetchQuery(api.tickets.getTicketById, { ticket_id: ticketId })
+    const ticket = await fetchQuery(api.tickets.getTicketById, { ticket_id: ticketId as Id<"tickets"> })
     logQuery(metrics, 'convex.tickets.getTicketById', Math.round(performance.now() - queryStart))
 
     if (!ticket) {
@@ -109,7 +110,7 @@ export async function POST(
     if (comment && typeof comment === 'string' && comment.trim().length > 0 && !isSkip) {
       mutStart = performance.now()
       await fetchMutation(api.tickets.createTicketComment, {
-        ticket_id: ticketId,
+        ticket_id: ticketId as Id<"tickets">,
         author_id: user.id,
         content: comment.trim(),
         is_stage_change: true,

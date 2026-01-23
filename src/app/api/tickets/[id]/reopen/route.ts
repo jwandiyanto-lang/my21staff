@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { api } from 'convex/_generated/api'
+import { Id } from 'convex/_generated/dataModel'
 import { verifyReopenToken } from '@/lib/tickets'
 import {
   withTiming,
@@ -37,7 +38,7 @@ export async function POST(
 
     // Fetch ticket from Convex
     let queryStart = performance.now()
-    const ticket = await fetchQuery(api.tickets.getTicketById, { ticket_id: ticketId })
+    const ticket = await fetchQuery(api.tickets.getTicketById, { ticket_id: ticketId as Id<"tickets"> })
     logQuery(metrics, 'convex.tickets.getTicketById', Math.round(performance.now() - queryStart))
 
     if (!ticket) {
@@ -93,7 +94,7 @@ export async function POST(
     // Add system comment with reason
     mutStart = performance.now()
     await fetchMutation(api.tickets.createTicketComment, {
-      ticket_id: ticketId,
+      ticket_id: ticketId as Id<"tickets">,
       author_id: reopenedBy!,
       content: `Ticket reopened.\n\nReason: ${reason.trim()}`,
       is_stage_change: true,
