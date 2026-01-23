@@ -1,76 +1,100 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect, notFound } from 'next/navigation'
-import { TeamClient } from './team-client'
-import { type WorkspaceRole } from '@/lib/permissions/types'
+'use client'
 
-interface Props {
-  params: Promise<{ workspace: string }>
-}
+import { OrganizationProfile, useOrganization } from '@clerk/nextjs'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
+import { AlertCircle, Users } from 'lucide-react'
 
-export default async function TeamPage({ params }: Props) {
-  const { workspace: workspaceSlug } = await params
-  const supabase = await createClient()
+export default function TeamPage() {
+  const { organization, isLoaded } = useOrganization()
 
-  // Get current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
+  // Loading state
+  if (!isLoaded) {
+    return (
+      <div className="p-8 space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Card>
+          <CardContent className="p-8">
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  // Get workspace
-  const { data: workspace } = await supabase
-    .from('workspaces')
-    .select('id, name, slug')
-    .eq('slug', workspaceSlug)
-    .single()
+  // No organization - user is on a workspace without Clerk org
+  if (!organization) {
+    return (
+      <div className="p-8 space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Manajemen Tim</h1>
+          <p className="text-muted-foreground mt-1">
+            Kelola anggota tim dan akses mereka
+          </p>
+        </div>
 
-  if (!workspace) {
-    notFound()
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Workspace ini belum terhubung ke organisasi. Hubungi admin untuk setup.
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
   }
-
-  // Get current user's role in this workspace
-  const { data: currentMembership } = await supabase
-    .from('workspace_members')
-    .select('role')
-    .eq('workspace_id', workspace.id)
-    .eq('user_id', user.id)
-    .single()
-
-  const currentUserRole = (currentMembership?.role || 'member') as WorkspaceRole
-
-  // Get workspace members with their profiles
-  const { data: members } = await supabase
-    .from('workspace_members')
-    .select('id, user_id, role, created_at')
-    .eq('workspace_id', workspace.id)
-    .order('created_at', { ascending: true })
-
-  // Get profiles for each member
-  const memberIds = members?.map((m) => m.user_id).filter(Boolean) || []
-  const { data: profiles } =
-    memberIds.length > 0
-      ? await supabase
-          .from('profiles')
-          .select('id, email, full_name')
-          .in('id', memberIds)
-      : { data: [] }
-
-  // Combine members with their profiles
-  const membersWithProfiles = (members || []).map((member) => ({
-    ...member,
-    role: member.role || 'member',
-    created_at: member.created_at || new Date().toISOString(),
-    profiles: profiles?.find((p) => p.id === member.user_id) || null,
-  }))
 
   return (
-    <TeamClient
-      workspace={workspace}
-      members={membersWithProfiles}
-      currentUserRole={currentUserRole}
-    />
+    <div className="p-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Manajemen Tim</h1>
+          <p className="text-muted-foreground mt-1">
+            Kelola anggota tim dan akses mereka di {organization.name}
+          </p>
+        </div>
+      </div>
+
+      {/* Clerk OrganizationProfile handles:
+          - Member list with avatars
+          - Invite new members button
+          - Role management (admin/member)
+          - Remove members
+          - Pending invitations */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Anggota Tim
+          </CardTitle>
+          <CardDescription>
+            Undang anggota baru, kelola role, dan atur akses tim
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <OrganizationProfile
+            appearance={{
+              elements: {
+                rootBox: 'w-full',
+                card: 'shadow-none border-0 rounded-none',
+                navbar: 'hidden',
+                navbarMobileMenuRow: 'hidden',
+                pageScrollBox: 'p-6',
+                headerTitle: 'hidden',
+                headerSubtitle: 'hidden',
+              },
+            }}
+            routing="hash"
+          />
+        </CardContent>
+      </Card>
+    </div>
   )
 }
