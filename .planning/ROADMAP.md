@@ -74,12 +74,13 @@ Plans:
   3. Workspaces exist as Clerk organizations
   4. Team invitations work via Clerk organization invitations
   5. Role-based permissions (owner/admin/member) work with Clerk roles
-**Plans**: 5 plans
+**Plans**: 6 plans
 
 Plans:
 - [ ] 04-01-PLAN.md — Migrate Supabase users to Clerk with ID mapping
 - [ ] 04-02-PLAN.md — Convert workspaces to Clerk organizations
-- [ ] 04-03-PLAN.md — Update Convex tables with Clerk user IDs
+- [ ] 04-03-PLAN.md — Update core Convex tables with Clerk user IDs
+- [ ] 04-03b-PLAN.md — Update ticket Convex tables with Clerk user IDs
 - [ ] 04-04-PLAN.md — Organization webhooks and member sync
 - [ ] 04-05-PLAN.md — Team management UI with Clerk OrganizationProfile
 
@@ -264,10 +265,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
-| **v3.1 Full Convex + Clerk** | 1-7 | 9/TBD | In Progress | - |
+| **v3.1 Full Convex + Clerk** | 1-7 | 10/TBD | In Progress | - |
 
 **Total shipped:** 152 plans across 5 milestones
 
 ---
 
-*Last updated: 2026-01-23 — Phase 4 planned*
+*Last updated: 2026-01-23 — Phase 4 revised (split 04-03 into core + tickets)*
