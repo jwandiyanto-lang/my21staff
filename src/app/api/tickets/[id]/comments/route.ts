@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
+import { Id } from 'convex/_generated/dataModel'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
+import { auth } from '@clerk/nextjs/server'
 
 // GET /api/tickets/[id]/comments - List comments for ticket
 export async function GET(
@@ -10,39 +13,25 @@ export async function GET(
   try {
     const { id: ticketId } = await params
 
-    const supabase = await createClient()
+    // Fetch ticket from Convex to verify it exists and get workspace_id
+    const ticket = await fetchQuery(api.tickets.getTicketById, {
+      ticket_id: ticketId as Id<"tickets">,
+    })
 
-    // Fetch ticket first to verify it exists and get workspace_id
-    const { data: ticket, error: ticketError } = await supabase
-      .from('tickets')
-      .select('workspace_id')
-      .eq('id', ticketId)
-      .single()
-
-    if (ticketError || !ticket) {
+    if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
     // Verify workspace membership
-    const authResult = await requireWorkspaceMembership(ticket.workspace_id)
+    const authResult = await requireWorkspaceMembership(ticket.workspace_id as string)
     if (authResult instanceof NextResponse) {
       return authResult
     }
 
-    // Fetch comments with author info
-    const { data: comments, error: commentsError } = await supabase
-      .from('ticket_comments')
-      .select(`
-        *,
-        author:profiles!ticket_comments_author_id_fkey(id, full_name, email)
-      `)
-      .eq('ticket_id', ticketId)
-      .order('created_at', { ascending: true })
-
-    if (commentsError) {
-      console.error('Error fetching comments:', commentsError)
-      return NextResponse.json({ error: commentsError.message }, { status: 500 })
-    }
+    // Fetch comments from Convex
+    const comments = await fetchQuery(api.tickets.listTicketComments, {
+      ticket_id: ticketId as Id<"tickets">,
+    })
 
     return NextResponse.json({ comments })
   } catch (error) {
@@ -76,80 +65,37 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    // Fetch ticket from Convex to verify it exists and get workspace_id
+    const ticket = await fetchQuery(api.tickets.getTicketById, {
+      ticket_id: ticketId as Id<"tickets">,
+    })
 
-    // Fetch ticket first to verify it exists and get workspace_id and admin_workspace_id
-    const { data: ticket, error: ticketError } = await supabase
-      .from('tickets')
-      .select('workspace_id, admin_workspace_id')
-      .eq('id', ticketId)
-      .single()
-
-    if (ticketError || !ticket) {
+    if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
-    // Verify workspace membership - allow if member of workspace_id OR admin_workspace_id
-    let authResult = await requireWorkspaceMembership(ticket.workspace_id)
-    let userRole: string | null = null
-
-    if (authResult instanceof NextResponse && ticket.admin_workspace_id) {
-      // Try admin workspace if not member of source workspace
-      authResult = await requireWorkspaceMembership(ticket.admin_workspace_id)
-    }
-
+    // Verify workspace membership
+    const authResult = await requireWorkspaceMembership(ticket.workspace_id as string)
     if (authResult instanceof NextResponse) {
       return authResult
     }
 
-    // Get user's role to check if they can create internal comments
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('role')
-      .eq('workspace_id', ticket.workspace_id)
-      .eq('user_id', authResult.user.id)
-      .single()
-
-    userRole = membership?.role || null
-
-    // Also check admin workspace role if applicable
-    if (ticket.admin_workspace_id) {
-      const { data: adminMembership } = await supabase
-        .from('workspace_members')
-        .select('role')
-        .eq('workspace_id', ticket.admin_workspace_id)
-        .eq('user_id', authResult.user.id)
-        .single()
-
-      // Use the higher privilege role
-      if (adminMembership?.role === 'owner' || adminMembership?.role === 'admin') {
-        userRole = adminMembership.role
-      }
+    // Get Clerk user ID
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Only allow is_internal for owner/admin
-    const isInternal = is_internal && (userRole === 'owner' || userRole === 'admin')
+    const isInternal = is_internal && (authResult.role === 'owner' || authResult.role === 'admin')
 
-    // Create comment
-    const { data: comment, error: createError } = await supabase
-      .from('ticket_comments')
-      .insert({
-        ticket_id: ticketId,
-        author_id: authResult.user.id,
-        content: content.trim(),
-        is_stage_change: false,
-        is_internal: isInternal
-      })
-      .select(`
-        *,
-        author:profiles!ticket_comments_author_id_fkey(id, full_name, email)
-      `)
-      .single()
-
-    if (createError) {
-      console.error('Error creating comment:', createError)
-      return NextResponse.json({ error: createError.message }, { status: 500 })
-    }
+    // Create comment in Convex
+    const comment = await fetchMutation(api.tickets.createTicketComment, {
+      ticket_id: ticketId as Id<"tickets">,
+      author_id: userId,
+      content: content.trim(),
+      is_stage_change: false,
+    })
 
     return NextResponse.json({ comment }, { status: 201 })
   } catch (error) {

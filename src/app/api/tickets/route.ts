@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
+import { auth } from '@clerk/nextjs/server'
 import { type TicketCategory, type TicketPriority } from '@/lib/tickets'
 
 const VALID_CATEGORIES: TicketCategory[] = ['bug', 'feature', 'question']
@@ -23,28 +25,11 @@ export async function GET(request: NextRequest) {
       return authResult
     }
 
-    const supabase = await createClient()
-
-    let query = supabase
-      .from('tickets')
-      .select(`
-        *,
-        requester:profiles!tickets_requester_id_fkey(id, full_name, email),
-        assignee:profiles!tickets_assigned_to_fkey(id, full_name, email)
-      `)
-      .eq('workspace_id', workspaceId)
-      .order('created_at', { ascending: false })
-
-    if (stageFilter) {
-      query = query.eq('stage', stageFilter)
-    }
-
-    const { data: tickets, error } = await query
-
-    if (error) {
-      console.error('Error fetching tickets:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    // Fetch tickets from Convex
+    const tickets = await fetchQuery(api.tickets.listTickets, {
+      workspace_id: workspaceId,
+      stage: stageFilter || undefined,
+    })
 
     return NextResponse.json({ tickets })
   } catch (error) {
@@ -102,46 +87,26 @@ export async function POST(request: NextRequest) {
       return authResult
     }
 
-    const supabase = await createClient()
-
-    // Create ticket
-    const { data: ticket, error: createError } = await supabase
-      .from('tickets')
-      .insert({
-        workspace_id: workspaceId,
-        requester_id: authResult.user.id,
-        title: title.trim(),
-        description: description.trim(),
-        category,
-        priority,
-        stage: 'report'
-      })
-      .select(`
-        *,
-        requester:profiles!tickets_requester_id_fkey(id, full_name, email),
-        assignee:profiles!tickets_assigned_to_fkey(id, full_name, email)
-      `)
-      .single()
-
-    if (createError) {
-      console.error('Error creating ticket:', createError)
-      return NextResponse.json({ error: createError.message }, { status: 500 })
+    // Get Clerk user ID
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Add status history entry
-    const { error: historyError } = await supabase
-      .from('ticket_status_history')
-      .insert({
-        ticket_id: ticket.id,
-        changed_by: authResult.user.id,
-        to_stage: 'report',
-        reason: 'Ticket created'
-      })
+    // Create ticket in Convex
+    const ticketId = await fetchMutation(api.tickets.createTicket, {
+      workspace_id: workspaceId,
+      requester_id: userId,
+      title: title.trim(),
+      description: description.trim(),
+      category,
+      priority,
+    })
 
-    if (historyError) {
-      console.error('Error creating status history:', historyError)
-      // Non-fatal - ticket was created successfully
-    }
+    // Fetch created ticket to return it
+    const ticket = await fetchQuery(api.tickets.getTicketById, {
+      ticket_id: ticketId as any,
+    })
 
     return NextResponse.json({ ticket }, { status: 201 })
   } catch (error) {

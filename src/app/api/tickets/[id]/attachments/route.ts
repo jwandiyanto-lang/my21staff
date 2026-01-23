@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { fetchQuery } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
+import { Id } from 'convex/_generated/dataModel'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 
 const BUCKET_NAME = 'ticket-attachments'
@@ -13,21 +16,18 @@ export async function POST(
 ) {
   try {
     const { id: ticketId } = await params
-    const supabase = await createClient()
 
-    // Fetch ticket first to verify it exists and get workspace_id
-    const { data: ticket, error: ticketError } = await supabase
-      .from('tickets')
-      .select('id, workspace_id, admin_workspace_id, requester_id, assigned_to')
-      .eq('id', ticketId)
-      .single()
+    // Fetch ticket from Convex to verify it exists and get workspace_id
+    const ticket = await fetchQuery(api.tickets.getTicketById, {
+      ticket_id: ticketId as Id<"tickets">,
+    })
 
-    if (ticketError || !ticket) {
+    if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
     // Verify workspace membership (any member can upload)
-    const authResult = await requireWorkspaceMembership(ticket.workspace_id)
+    const authResult = await requireWorkspaceMembership(ticket.workspace_id as string)
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -56,7 +56,8 @@ export async function POST(
       )
     }
 
-    // Upload to storage
+    // Upload to Supabase storage (storage remains on Supabase)
+    const supabase = await createClient()
     const fileName = `${ticketId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     const arrayBuffer = await file.arrayBuffer()
 

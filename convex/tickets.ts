@@ -37,7 +37,7 @@ export const getTicketById = query({
  * @param assigned_to - Optional assigned user ID filter
  * @returns Array of ticket documents
  */
-export const listTickets = internalQuery({
+export const listTickets = query({
   args: {
     workspace_id: v.string(),
     stage: v.optional(v.string()),
@@ -375,6 +375,99 @@ export const reopenTicket = mutation({
       to_stage: "report",
       reason: "Ticket reopened",
       created_at: now,
+    });
+
+    return await ctx.db.get(args.ticket_id as any);
+  },
+});
+
+/**
+ * Create a new ticket.
+ *
+ * @param workspace_id - The workspace
+ * @param requester_id - User creating the ticket
+ * @param title - Ticket title
+ * @param description - Ticket description
+ * @param category - Ticket category ('bug', 'feature', 'question')
+ * @param priority - Ticket priority ('low', 'medium', 'high')
+ * @returns The created ticket ID
+ */
+export const createTicket = mutation({
+  args: {
+    workspace_id: v.string(),
+    requester_id: v.string(),
+    title: v.string(),
+    description: v.string(),
+    category: v.string(),
+    priority: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const now = Date.now();
+    const ticketId = await ctx.db.insert("tickets", {
+      workspace_id: args.workspace_id as any,
+      requester_id: args.requester_id,
+      assigned_to: null,
+      title: args.title,
+      description: args.description,
+      category: args.category,
+      priority: args.priority,
+      stage: "report",
+      pending_approval: false,
+      pending_stage: null,
+      approval_requested_at: null,
+      closed_at: null,
+      created_at: now,
+      updated_at: now,
+      supabaseId: null,
+    });
+
+    // Create initial status history
+    await ctx.db.insert("ticketStatusHistory", {
+      ticket_id: ticketId,
+      changed_by: args.requester_id,
+      from_stage: null,
+      to_stage: "report",
+      reason: "Ticket created",
+      created_at: now,
+    });
+
+    return ticketId;
+  },
+});
+
+/**
+ * Update ticket assignment.
+ *
+ * @param ticket_id - The ticket to update
+ * @param workspace_id - Workspace for authorization
+ * @param assigned_to - User to assign (null to unassign)
+ * @returns The updated ticket document
+ */
+export const updateTicketAssignment = mutation({
+  args: {
+    ticket_id: v.string(),
+    workspace_id: v.string(),
+    assigned_to: v.union(v.string(), v.null()),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const ticket = await ctx.db.get(args.ticket_id as any);
+    if (!ticket) {
+      throw new Error("Ticket not found");
+    }
+
+    // @ts-ignore - workspace_id is Id type
+    if (typeof ticket.workspace_id !== "string") {
+      throw new Error("Ticket not in this workspace");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.ticket_id as any, {
+      assigned_to: args.assigned_to,
+      updated_at: now,
     });
 
     return await ctx.db.get(args.ticket_id as any);

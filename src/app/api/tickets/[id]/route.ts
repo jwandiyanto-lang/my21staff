@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
+import { Id } from 'convex/_generated/dataModel'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import { requirePermission } from '@/lib/permissions/check'
 
@@ -11,25 +13,17 @@ export async function GET(
   try {
     const { id } = await params
 
-    const supabase = await createClient()
+    // Fetch ticket from Convex
+    const ticket = await fetchQuery(api.tickets.getTicketById, {
+      ticket_id: id as Id<"tickets">,
+    })
 
-    // Fetch ticket first to get workspace_id
-    const { data: ticket, error: ticketError } = await supabase
-      .from('tickets')
-      .select(`
-        *,
-        requester:profiles!tickets_requester_id_fkey(id, full_name, email),
-        assignee:profiles!tickets_assigned_to_fkey(id, full_name, email)
-      `)
-      .eq('id', id)
-      .single()
-
-    if (ticketError || !ticket) {
+    if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
     // Verify workspace membership
-    const authResult = await requireWorkspaceMembership(ticket.workspace_id)
+    const authResult = await requireWorkspaceMembership(ticket.workspace_id as string)
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -54,21 +48,17 @@ export async function PATCH(
     const body = await request.json()
     const { assigned_to } = body
 
-    const supabase = await createClient()
+    // Fetch ticket from Convex to get workspace_id
+    const existingTicket = await fetchQuery(api.tickets.getTicketById, {
+      ticket_id: id as Id<"tickets">,
+    })
 
-    // Fetch ticket first to get workspace_id
-    const { data: existingTicket, error: fetchError } = await supabase
-      .from('tickets')
-      .select('workspace_id')
-      .eq('id', id)
-      .single()
-
-    if (fetchError || !existingTicket) {
+    if (!existingTicket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
     // Verify workspace membership
-    const authResult = await requireWorkspaceMembership(existingTicket.workspace_id)
+    const authResult = await requireWorkspaceMembership(existingTicket.workspace_id as string)
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -83,12 +73,10 @@ export async function PATCH(
 
     // Validate assigned_to if provided (must be a valid workspace member)
     if (assigned_to !== undefined && assigned_to !== null) {
-      const { data: member } = await supabase
-        .from('workspace_members')
-        .select('id')
-        .eq('workspace_id', existingTicket.workspace_id)
-        .eq('user_id', assigned_to)
-        .single()
+      const member = await fetchQuery(api.workspaceMembers.getByUserAndWorkspace, {
+        userId: assigned_to,
+        workspaceId: existingTicket.workspace_id as any,
+      })
 
       if (!member) {
         return NextResponse.json(
@@ -98,22 +86,12 @@ export async function PATCH(
       }
     }
 
-    // Update ticket assignment
-    const { data: ticket, error: updateError } = await supabase
-      .from('tickets')
-      .update({ assigned_to: assigned_to || null })
-      .eq('id', id)
-      .select(`
-        *,
-        requester:profiles!tickets_requester_id_fkey(id, full_name, email),
-        assignee:profiles!tickets_assigned_to_fkey(id, full_name, email)
-      `)
-      .single()
-
-    if (updateError) {
-      console.error('Error updating ticket:', updateError)
-      return NextResponse.json({ error: updateError.message }, { status: 500 })
-    }
+    // Update ticket assignment via Convex
+    const ticket = await fetchMutation(api.tickets.updateTicketAssignment, {
+      ticket_id: id,
+      workspace_id: existingTicket.workspace_id as string,
+      assigned_to: assigned_to || null,
+    })
 
     return NextResponse.json({ ticket })
   } catch (error) {
