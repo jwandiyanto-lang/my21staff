@@ -31,7 +31,7 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 **Plans**: 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md — Clerk app + JWT template + Convex auth config
+- [x] 01-01-PLAN.md — Clerk app + JWT template + Convex auth config ✓
 
 ### Phase 2: Middleware + Provider + Auth UI
 **Goal**: Users can sign in/out using Clerk components with route protection working
