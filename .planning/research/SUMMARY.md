@@ -1,223 +1,172 @@
-# Research Summary: v3.0 Performance & Speed
+# Research Summary: v3.1 Full Convex + Clerk Migration
 
 **Project:** my21staff
-**Milestone:** v3.0 (major architecture decision)
-**Researched:** 2026-01-20
-**Confidence:** HIGH overall
-
----
+**Domain:** Auth provider migration + data consolidation
+**Researched:** 2026-01-23
+**Confidence:** HIGH
 
 ## Executive Summary
 
-Research across stack, features, architecture, and pitfalls reveals a **critical insight**:
+The v3.1 migration from Supabase to Clerk + Convex is a well-documented path with strong official support from both vendors. Clerk provides native Convex integration via JWT templates and `ConvexProviderWithClerk`, making the auth layer swap straightforward. The critical path is **user ID mapping**: Supabase UUIDs are embedded throughout the Convex schema (10+ tables reference `user_id`, `owner_id`, `assigned_to`), and Clerk assigns different IDs. Without a mapping strategy, workspace ownership, ticket assignments, and message attribution will break.
 
-**The 2-6 second response times are caused by fixable Supabase anti-patterns, not platform limitations.**
+The recommended approach is a 7-phase migration with auth infrastructure first, followed by user sync webhooks, then data migration, and finally Supabase removal. This order minimizes blast radius: auth can be tested before touching data, and Supabase remains available as fallback until verification is complete. The n8n webhook fix for Eagle can run in parallel with auth work since it has no dependency on Clerk.
 
-- `/api/contacts/by-phone` has 4 sequential queries
-- `/dashboard/page.tsx` runs 7-8 sequential queries
-- Missing composite indexes on hot paths
-- RLS policies use per-row subqueries
-- Active polling instead of real-time subscriptions
+Key risks center on **session termination** (unavoidable - all users will be logged out) and **double webhook migration** (both Kapso and n8n endpoints must move to Convex HTTP actions). Eagle must be notified in advance, and a 1-2 hour maintenance window should be scheduled. Password hashes may not transfer cleanly, so plan for password resets.
 
-**Recommendation: Optimize Supabase first (1-2 weeks), run Convex spike in parallel to validate, then make data-driven decision.**
+## Key Findings
 
-Migration cost is prohibitive: 4-8 weeks for 43k LOC codebase with multi-tenant RLS. Supabase optimization offers same performance gains in 1-2 weeks.
+### Recommended Stack
 
----
+The stack changes are minimal since Convex is already the primary data layer. Add `@clerk/nextjs@^6.36.8` for auth and `svix@^1.84.1` for webhook signature verification. The built-in `convex/react-clerk` integration handles the provider bridge.
 
-## Key Findings by Dimension
+**Core technologies:**
+- **@clerk/nextjs ^6.36.8**: Auth provider with Organizations feature mapping directly to workspaces
+- **svix ^1.84.1**: Clerk webhook signature verification (required for user sync)
+- **Convex auth.config.ts update**: Switch from Supabase JWT issuer to Clerk domain-based auth
 
-### Stack (STACK.md)
+**Do NOT add:**
+- `@clerk/clerk-react` (redundant - included in @clerk/nextjs)
+- `@clerk/themes` (use existing Shadcn styling)
+- Any new Supabase packages
 
-| Approach | P95 Latency | Effort | Recommendation |
-|----------|-------------|--------|----------------|
-| Current (unoptimized) | 6-9s | - | Unacceptable |
-| **Optimized Supabase** | 300-500ms | 1-2 weeks | **Primary path** |
-| Convex migration | 150-300ms | 4-8 weeks | High risk |
-| Hybrid | 250-400ms | 3-4 weeks | Adds complexity |
+### Expected Features
 
-**Critical optimizations identified:**
-1. Parallel queries with `Promise.all()` — 40-60% latency reduction
-2. Composite indexes — 50-100x for indexed queries
-3. Nested relations — 3-5x fewer queries
-4. RLS policy optimization — Variable (wrap `auth.uid()` in SELECT)
+**Must have (table stakes):**
+- Email/password authentication via Clerk components
+- Multi-tenant workspace isolation via Clerk Organizations
+- Team invitations with automatic email delivery (Clerk handles this)
+- Role-based permissions (owner/admin/member)
+- JWT validation for Convex queries/mutations
 
-### Features (FEATURES-PERFORMANCE.md)
+**Should have (competitive):**
+- Working password reset flow (currently broken with Supabase)
+- First-login password change via Clerk metadata
+- Pre-built UI components (`<SignIn />`, `<UserButton />`, `<OrganizationSwitcher />`)
 
-| Feature | Priority | Effort | Value |
-|---------|----------|--------|-------|
-| Vercel Speed Insights | P0 | 5 min | Immediate baseline |
-| API timing wrapper | P0 | 30 min | Database comparison |
-| Query instrumentation | P1 | 1 hour | Granular timing |
-| Custom dashboard | Skip | 2+ days | Use existing tools |
+**Defer (v2+):**
+- Custom Clerk email templates (use defaults for v3.1)
+- Social login (keep email/password only)
+- Custom permissions beyond role-based checks (requires Clerk B2B add-on at $100/month)
 
-**Table stakes for v3.0:**
-- Enable Vercel Speed Insights (free tier)
-- Add timing to `/api/contacts/by-phone`
-- Log query counts per request
+### Architecture Approach
 
-**Anti-features (skip):**
-- Custom analytics database
-- OpenTelemetry setup
-- Automated alerting
-- CI performance tests
+The target architecture eliminates Supabase entirely. Clerk manages identity and sessions, issuing JWTs that Convex validates. A Convex `users` table caches Clerk user data via webhooks for efficient queries. The Convex HTTP router handles three endpoints: Clerk user sync webhook, n8n lead webhook, and Kapso message webhook.
 
-### Architecture (ARCHITECTURE-HYBRID.md)
+**Major components:**
+1. **ClerkProvider + ConvexProviderWithClerk** - Client-side auth context (new `src/app/providers.tsx`)
+2. **clerkMiddleware** - Route protection replacing Supabase middleware
+3. **convex/http.ts** - HTTP action router for all external webhooks
+4. **users table** - Clerk user cache in Convex schema
 
-| Component | Supabase Role | Convex Role (if migrated) |
-|-----------|---------------|---------------------------|
-| Auth | Keep (JWT issuer) | Verify via JWKS |
-| User sessions | Keep | N/A |
-| Data layer | Migrate away | Primary |
-| Real-time | Replace | Built-in |
-| File storage | Keep | N/A |
+### Critical Pitfalls
 
-**Hybrid architecture is viable** — Convex officially supports Supabase JWT verification via Custom JWT provider.
+1. **Session termination is unavoidable** - All Supabase sessions terminate when auth switches. Schedule maintenance window with Eagle, pre-create Clerk accounts, force password resets.
 
-**Migration phases (if Convex wins):**
-1. Spike: Set up Convex + Supabase JWT (1-2 days)
-2. Core migration: contacts, conversations, messages (1-2 weeks)
-3. Complete migration: remaining tables (1-2 weeks)
-4. Cleanup: archive Supabase data (3-5 days)
+2. **User ID mapping breaks foreign keys** - Supabase UUIDs referenced in 10+ tables won't match Clerk IDs. Store Supabase UUID as `external_id` in Clerk, create mapping table, run migration to update all references.
 
-### Pitfalls (PITFALLS.md)
+3. **Double webhook migration** - Both Kapso (WhatsApp) and n8n (Eagle leads) must move to Convex HTTP actions. Missing either breaks production traffic. Document all webhook URLs before starting.
 
-| Priority | Pitfall | Prevention |
-|----------|---------|------------|
-| **P0** | Sequential queries not identified | Instrument every API route first |
-| **P0** | Data loss during migration | Dual-write + backup verification |
-| **P0** | Webhook failure during transition | Queue + fallback path |
-| **P1** | Convex spike without success criteria | Define: P95 < 500ms, webhook < 200ms |
-| **P1** | RLS overhead not measured | Compare admin vs user client |
-| **P1** | Missing composite indexes | Add before optimization comparison |
+4. **Middleware route matcher misconfiguration** - Easy to accidentally expose protected routes or block public ones. Test every route type: public pages, dashboard, API routes, webhooks.
 
-**Critical checklist before Convex spike:**
-- [ ] Baseline metrics established (P50, P95, P99)
-- [ ] Success criteria defined (specific latency targets)
-- [ ] Time-box set (max 3 days)
-- [ ] Hard problems identified (webhook handling, auth hybrid)
-
----
-
-## Confidence Assessment
-
-| Research Area | Confidence | Reason |
-|---------------|------------|--------|
-| Supabase optimization techniques | HIGH | Official docs, verified patterns |
-| Convex SDK patterns | HIGH | Official docs (docs.convex.dev) |
-| Convex + Supabase Auth hybrid | MEDIUM | Official docs, limited production examples |
-| Migration effort estimate | MEDIUM | Community reports |
-| Performance predictions | MEDIUM | Needs validation |
-
-**Open questions:**
-- Exact RLS policy impact (requires `EXPLAIN ANALYZE` on production)
-- Convex cold start latency vs Supabase
-- Webhook processing time in Convex actions
-
----
+5. **No rollback plan** - Keep Supabase active for 2 weeks post-migration. Document point-of-no-return. Test rollback procedure before production migration.
 
 ## Implications for Roadmap
 
-Based on research, recommended phase structure for v3.0:
+Based on research, suggested 7-phase structure:
 
-### Phase 1: Instrumentation & Baseline (1-2 days)
-**Goal:** Know what's actually slow before optimizing
+### Phase 1: Clerk Auth Infrastructure
+**Rationale:** Auth is the foundation. Nothing else works until JWT validation is in place.
+**Delivers:** Clerk application configured, JWT template created, Convex auth.config.ts updated
+**Addresses:** JWT token validation for Convex
+**Avoids:** Webhook authentication confusion (P2)
 
-- Enable Vercel Speed Insights
-- Add API timing to hot paths
-- Establish P50/P95/P99 baseline
-- Identify sequential query cascades
+### Phase 2: Middleware + Provider Migration
+**Rationale:** Route protection must work before any user-facing changes.
+**Delivers:** `clerkMiddleware` replacing Supabase, `providers.tsx` with ConvexProviderWithClerk
+**Addresses:** Session persistence, protected routes
+**Avoids:** Middleware breaks protected routes (P1)
 
-**Research notes:** Without baseline, can't prove optimization worked
+### Phase 3: Users Table + Clerk Webhook
+**Rationale:** User data must be in Convex before removing Supabase.
+**Delivers:** `users` table in Convex, `/clerk-webhook` HTTP action, user sync working
+**Addresses:** User data queries without hitting Clerk API rate limits
+**Avoids:** Real-time subscription breaks (P1)
 
-### Phase 2: Supabase Optimization (3-5 days)
-**Goal:** Apply quick wins, get to <1s response times
+### Phase 4: User Migration + ID Mapping
+**Rationale:** Existing data must reference valid user IDs.
+**Delivers:** All existing users imported to Clerk with `external_id`, mapping table created, references updated
+**Addresses:** Workspace ownership, ticket assignments, message attribution
+**Avoids:** User ID mismatch breaks foreign keys (P1)
 
-- Parallel queries with `Promise.all()`
-- Add composite indexes
-- Nested relations refactor
-- Column selection audit
-- RLS policy optimization
+### Phase 5: n8n Webhook Migration
+**Rationale:** Eagle's leads are broken now. Can run in parallel with auth work.
+**Delivers:** `/n8n-leads` HTTP action in Convex, n8n workflows updated
+**Addresses:** Eagle lead flow from Google Sheets
+**Avoids:** n8n webhook URLs still point to old endpoints (P0)
 
-**Research notes:** Expected 50-80% latency reduction
+### Phase 6: Remaining Supabase Tables
+**Rationale:** Move all data to Convex before removing Supabase.
+**Delivers:** 14 tables migrated (appointments, destinations, knowledge base, todos, etc.)
+**Addresses:** Complete data consolidation
+**Avoids:** Remaining tables not migrated (P0)
 
-### Phase 3: Convex Spike (2-3 days, time-boxed)
-**Goal:** Validate if Convex offers meaningful improvement over optimized Supabase
+### Phase 7: Supabase Removal + Verification
+**Rationale:** Clean removal only after full verification.
+**Delivers:** Supabase packages removed, env vars cleaned, documentation updated
+**Addresses:** Clean codebase with single data layer
+**Avoids:** No rollback plan (P0) - keep Supabase read-only until this phase completes
 
-- Set up Convex project + Supabase JWT
-- Convert `/api/contacts/by-phone` only
-- Benchmark side-by-side
-- Test webhook handling pattern
-- Document limitations found
+### Phase Ordering Rationale
 
-**Success criteria (must define before starting):**
-- P95 < 500ms (vs optimized Supabase baseline)
-- Webhook < 200ms
-- Auth hybrid works without session issues
+- **Phases 1-4 are sequential**: Each builds on the previous. Cannot migrate users until auth works, cannot update references until users exist.
+- **Phase 5 is independent**: n8n fix has no dependency on Clerk, can run parallel with Phases 2-4.
+- **Phase 6 requires Phase 4**: Data migration needs auth working to validate workspace access.
+- **Phase 7 is terminal**: Only execute after full verification with Eagle.
 
-### Phase 4: Decision Gate
-**Goal:** Data-driven choice based on spike results
+### Research Flags
 
-**If Convex wins decisively (>50% faster):**
-- Proceed to hybrid migration
-- Plan 2-3 week migration timeline
+**Phases likely needing deeper research during planning:**
+- **Phase 4 (User Migration):** Password hash compatibility needs testing. May require custom migration script or all users doing password reset.
+- **Phase 6 (Remaining Tables):** 14 tables with various schemas. Each may have edge cases.
 
-**If comparable or marginal difference:**
-- Keep Supabase
-- Apply remaining optimizations
-- Real-time subscriptions where needed
+**Phases with standard patterns (skip research-phase):**
+- **Phase 1 (Clerk Setup):** Well-documented Clerk + Convex integration
+- **Phase 2 (Middleware):** Standard clerkMiddleware pattern
+- **Phase 3 (Webhook):** Standard svix verification pattern
+- **Phase 5 (n8n):** Simple HTTP action, already proven with Kapso
 
-### Phase 5: Implementation (based on decision)
+## Confidence Assessment
 
-**Path A: Convex Migration**
-- Core tables: contacts, conversations, messages
-- Dual-write period for zero-downtime
-- Webhook handler migration
-- Remove Supabase data layer
+| Area | Confidence | Notes |
+|------|------------|-------|
+| Stack | HIGH | Official Clerk + Convex docs (2026-01), npm versions verified |
+| Features | HIGH | Direct feature mapping exists, Clerk Organizations = workspaces |
+| Architecture | HIGH | Official integration pattern, already proven in community |
+| Pitfalls | HIGH | Based on official migration guides + codebase analysis |
 
-**Path B: Supabase Enhancement**
-- Real-time subscriptions for inbox
-- Remove polling
-- Database functions for complex operations
-- Connection pooling tuning
+**Overall confidence:** HIGH
 
----
+### Gaps to Address
 
-## Research Flags for Phases
+- **Password hash compatibility:** Supabase bcrypt format may not import cleanly to Clerk. Test with single user before bulk import. Fallback: force password reset for all users.
+- **must_change_password flag:** Currently in `workspace_members` table. Needs migration to Clerk user metadata (`publicMetadata.needsOnboarding`).
+- **Custom permissions:** Current app uses 11 granular permissions. Clerk free tier only has role-based. Either simplify to roles or budget for B2B add-on.
 
-| Phase | Research Needed? | Reason |
-|-------|------------------|--------|
-| 1. Instrumentation | No | Standard patterns documented |
-| 2. Supabase Optimization | No | Official Supabase docs sufficient |
-| 3. Convex Spike | Maybe | Webhook handling may need exploration |
-| 4. Decision Gate | No | Data-driven decision |
-| 5. Implementation | Maybe | Migration patterns if Convex chosen |
+## Sources
 
----
+### Primary (HIGH confidence)
+- [Clerk + Convex Integration](https://clerk.com/docs/guides/development/integrations/databases/convex) - Updated 2026-01-14
+- [Convex Auth with Clerk](https://docs.convex.dev/auth/clerk) - Official pattern
+- [Clerk Webhooks Data Sync](https://clerk.com/blog/webhooks-data-sync-convex) - User sync to Convex
+- [@clerk/nextjs npm](https://www.npmjs.com/package/@clerk/nextjs) - v6.36.8 (2026-01-20)
 
-## Files Produced
+### Secondary (MEDIUM confidence)
+- [Clerk Migration Overview](https://clerk.com/docs/guides/development/migrating/overview) - Session termination confirmed
+- [Convex Migrations Guide](https://stack.convex.dev/intro-to-migrations) - Phased schema changes
 
-| File | Purpose |
-|------|---------|
-| `STACK.md` | Convex vs Supabase comparison with specific recommendations |
-| `FEATURES-PERFORMANCE.md` | Performance monitoring features (table stakes, anti-features) |
-| `ARCHITECTURE-HYBRID.md` | Hybrid Supabase Auth + Convex data architecture patterns |
-| `PITFALLS.md` | 20+ pitfalls with prevention strategies |
-| `SUMMARY.md` | This synthesis with roadmap implications |
-
----
-
-## Bottom Line
-
-**Speed above all** means:
-
-1. **Week 1:** Instrument, optimize Supabase (guaranteed 50-80% improvement)
-2. **Week 1 (parallel):** Convex spike (validates alternative)
-3. **End of Week 1:** Decision gate with real data
-4. **Week 2+:** Execute winning path
-
-Don't migrate to Convex based on excitement. Migrate based on data showing it's meaningfully faster than optimized Supabase for your specific workload.
+### Tertiary (LOW confidence)
+- [Supabase to Clerk Blog](https://felixvemmer.com/en/blog/migrate-user-authentication-supabase-clerk-dev) - Community migration, needs validation
 
 ---
-
-*Research complete. Ready for `/gsd:define-requirements` or direct to roadmap.*
+*Research completed: 2026-01-23*
+*Ready for roadmap: yes*

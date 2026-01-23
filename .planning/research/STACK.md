@@ -1,562 +1,458 @@
-# Stack Research: Performance Optimization (v3.0)
+# Stack Research: v3.1 Convex + Clerk Migration
 
 **Project:** my21staff
-**Researched:** 2026-01-20
-**Overall Confidence:** HIGH
-**Focus:** Convex vs Optimized Supabase for sub-500ms P95 latency
+**Researched:** 2026-01-23
+**Confidence:** HIGH (verified with official docs)
 
 ---
 
-## Executive Summary
+## Current Stack
 
-**Recommendation: Optimized Supabase, not Convex migration.**
+### Already in Place (Keep These)
 
-For a 43k-line production CRM with multi-tenant workspaces, Supabase Auth, and existing RLS policies, migrating to Convex would cost 4-8 weeks with high risk for marginal performance gains. The current 2-6 second response times stem from identifiable Supabase anti-patterns (sequential queries, missing indexes, `select('*')`) that can achieve sub-500ms P95 through optimization alone.
+| Package | Current Version | Purpose |
+|---------|-----------------|---------|
+| `convex` | 1.31.5 | Data layer, real-time subscriptions |
+| `@convex-dev/auth` | 0.0.90 | Auth utilities (will change usage pattern) |
+| `next` | 16.1.1 | App framework |
+| `react` | 19.2.3 | UI library |
+
+### To Remove
+
+| Package | Current Version | Reason |
+|---------|-----------------|--------|
+| `@supabase/ssr` | 0.8.0 | Replacing auth with Clerk |
+| `@supabase/supabase-js` | 2.90.1 | Replacing data with Convex |
+
+### Convex Schema (Already Migrated in v3.0)
+
+Tables already in Convex:
+- `workspaces`
+- `workspaceMembers`
+- `contacts`
+- `conversations`
+- `messages`
+- `contactNotes`
+- `ariConfig`
+- `ariConversations`
+- `ariMessages`
+- `tickets`
+- `ticketComments`
+- `ticketStatusHistory`
 
 ---
 
-## Current Architecture Analysis
+## Required Changes
 
-### Observed Anti-Patterns (from codebase review)
+### 1. ADD: Clerk Packages
 
-1. **Sequential Queries in Server Components**
-   - `/dashboard/page.tsx` executes 7-8 sequential queries
-   - Each query waits for prior query: auth check -> membership check -> profile -> workspace -> etc.
-   - Fix: Parallel execution with `Promise.all()` or consolidated queries
-
-2. **Over-fetching with `select('*')`**
-   - `/api/contacts/route.ts`: `.select('*')` returns all columns
-   - Network overhead and parsing time for unused fields
-   - Fix: Explicit column selection
-
-3. **Missing Nested Relations**
-   - Multiple queries to fetch related data (workspace -> members -> profiles)
-   - Could be single query with Supabase nested relations syntax
-   - Fix: Use `.select('*, members(*), profiles(*)')` pattern
-
-4. **Realtime as Invalidation Trigger**
-   - `use-conversations.ts` subscribes to changes, then invalidates TanStack Query cache
-   - This triggers a refetch (polling behavior with extra steps)
-   - Fix: Use realtime payload directly or optimistic updates
-
----
-
-## Convex
-
-### Why Convex
-
-- **Built-in Reactivity**: All queries automatically subscribe to changes. No polling, no manual cache invalidation. Real-time is the default, not an add-on.
-- **End-to-End Type Safety**: TypeScript types flow from database schema through queries to React components. No type generation step or runtime mismatches.
-- **Transactional Document Store**: Flexibility of documents with ACID guarantees. No N+1 queries because data access patterns are explicit in functions.
-- **Serverless Functions at Database Edge**: Backend logic runs in isolated environment within Convex, eliminating cold starts and network round-trips.
-
-### When Convex Wins
-
-| Scenario | Why Convex Excels |
-|----------|-------------------|
-| Greenfield real-time apps | Zero setup for live sync, collaboration features |
-| Chat/messaging products | Built for exactly this use case |
-| TypeScript-heavy teams | Unmatched DX with auto-generated types |
-| Rapid prototyping | Ship features in hours, not days |
-| Multiplayer/collaborative | Conflict-free state sync built-in |
-
-### Convex for Next.js 15
-
-**SDK Version:** `convex@1.31.5` (latest as of 2025-01)
-
-**Setup Pattern:**
-```typescript
-// src/app/ConvexClientProvider.tsx
-"use client";
-import { ConvexProvider, ConvexReactClient } from "convex/react";
-
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
-export default function ConvexClientProvider({ children }: { children: React.ReactNode }) {
-  return <ConvexProvider client={convex}>{children}</ConvexProvider>;
-}
-
-// src/app/layout.tsx
-import ConvexClientProvider from "./ConvexClientProvider";
-export default function RootLayout({ children }) {
-  return (
-    <html>
-      <body>
-        <ConvexClientProvider>{children}</ConvexClientProvider>
-      </body>
-    </html>
-  );
-}
+```bash
+npm install @clerk/nextjs@^6.36.8 svix@^1.84.1
 ```
 
-**Query Pattern:**
+| Package | Version | Purpose | Why This Version |
+|---------|---------|---------|------------------|
+| `@clerk/nextjs` | ^6.36.8 | Clerk integration for Next.js 15 | Current stable (published 2026-01-20), compatible with Next.js 15 + React 19 |
+| `svix` | ^1.84.1 | Webhook signature verification | Required for Clerk user sync webhooks |
+
+**DO NOT INSTALL:**
+- `@clerk/clerk-react` - Redundant, `@clerk/nextjs` includes all React components
+- `@clerk/backend` - Redundant, included in `@clerk/nextjs`
+- `@clerk/themes` - Use Shadcn styling instead
+
+### 2. UPDATE: Convex Auth Config
+
+Replace `convex/auth.config.ts`:
+
 ```typescript
-// convex/conversations.ts
-import { query } from "./_generated/server";
-import { v } from "convex/values";
-
-export const list = query({
-  args: { workspaceId: v.id("workspaces") },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("conversations")
-      .withIndex("by_workspace", (q) => q.eq("workspaceId", args.workspaceId))
-      .order("desc")
-      .take(50);
-  },
-});
-
-// React component
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-
-function ConversationList({ workspaceId }) {
-  const conversations = useQuery(api.conversations.list, { workspaceId });
-  // Automatically re-renders on database changes
-}
-```
-
-**Auth Integration with External Provider (Supabase Auth):**
-```typescript
-// convex/auth.config.ts
+// BEFORE (Supabase JWT):
 export default {
   providers: [
     {
       type: "customJwt",
-      applicationID: "my21staff",
-      issuer: "https://your-project.supabase.co/auth/v1",
-      jwks: "https://your-project.supabase.co/auth/v1/.well-known/jwks.json",
+      applicationID: process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1]?.split(".")[0] || "",
+      issuer: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1`,
+      jwks: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/.well-known/jwks.json`,
       algorithm: "RS256",
     },
   ],
-};
-```
+} satisfies AuthConfig;
 
-**Required JWT claims from Supabase Auth:**
-- Header: `kid`, `alg`, `typ`
-- Payload: `sub`, `iss`, `exp`, `iat` (recommended)
+// AFTER (Clerk JWT):
+import { AuthConfig } from "convex/server";
 
-### Convex Pricing (2025)
-
-| Resource | Free Tier | Pro ($25/dev/mo) |
-|----------|-----------|------------------|
-| Function calls | 1M/month | 25M/month |
-| Database storage | 0.5 GB | 50 GB |
-| Database bandwidth | 1 GB/month | 50 GB/month |
-| Query concurrency | 16 | 256+ |
-
-### Migration Complexity: Supabase to Convex
-
-**Estimated effort:** 4-8 weeks for 43k LOC codebase
-
-| Task | Effort | Risk |
-|------|--------|------|
-| Schema conversion (SQL -> document) | 1-2 weeks | Medium |
-| Rewrite queries as Convex functions | 2-3 weeks | High |
-| Auth migration (RLS -> Convex auth) | 1 week | High |
-| Real-time refactoring | 1 week | Low |
-| Testing and validation | 1-2 weeks | High |
-
-**Key risks:**
-- RLS policies must be reimplemented as Convex function logic
-- Multi-tenant isolation patterns differ significantly
-- Existing Supabase Storage/Auth dependencies
-- No rollback path once committed
-
----
-
-## Supabase Optimizations
-
-### Query Optimizations
-
-**1. Parallel Query Execution**
-
-Before (sequential):
-```typescript
-const { data: user } = await supabase.auth.getUser()
-const { data: membership } = await supabase.from('workspace_members').select('role')...
-const { data: profile } = await supabase.from('profiles').select('is_admin')...
-const { data: workspaces } = await supabase.from('workspaces').select('slug')...
-```
-
-After (parallel):
-```typescript
-const [
-  { data: { user } },
-  { data: membership },
-  { data: profile },
-  { data: workspaces }
-] = await Promise.all([
-  supabase.auth.getUser(),
-  supabase.from('workspace_members').select('role')...,
-  supabase.from('profiles').select('is_admin')...,
-  supabase.from('workspaces').select('slug')...
-])
-```
-
-**2. Nested Relations Syntax**
-
-Before (3 queries):
-```typescript
-const { data: workspace } = await supabase.from('workspaces').select('*').eq('id', id)
-const { data: members } = await supabase.from('workspace_members').select('*').eq('workspace_id', id)
-const { data: profiles } = await supabase.from('profiles').select('*').in('id', memberIds)
-```
-
-After (1 query):
-```typescript
-const { data: workspace } = await supabase
-  .from('workspaces')
-  .select(`
-    id,
-    name,
-    slug,
-    workspace_members (
-      id,
-      role,
-      user_id,
-      profiles:user_id (
-        id,
-        email,
-        full_name,
-        avatar_url
-      )
-    )
-  `)
-  .eq('id', id)
-  .single()
-```
-
-**Multi-foreign-key disambiguation:**
-```typescript
-// When a table has multiple FKs to the same table
-const { data } = await supabase.from('shifts').select(`
-  *,
-  start_scan:scans!scan_id_start (id, badge_scan_time),
-  end_scan:scans!scan_id_end (id, badge_scan_time)
-`)
-```
-
-**3. Explicit Column Selection**
-
-Before:
-```typescript
-.select('*')  // Returns 20+ columns
-```
-
-After:
-```typescript
-.select('id, name, phone, status, created_at')  // Only what's needed
-```
-
-**4. Database Functions (RPC) for Complex Operations**
-
-```sql
--- Create function for dashboard data
-CREATE OR REPLACE FUNCTION get_dashboard_data(p_user_id uuid)
-RETURNS json AS $$
-DECLARE
-  result json;
-BEGIN
-  SELECT json_build_object(
-    'profile', (SELECT row_to_json(p) FROM profiles p WHERE p.id = p_user_id),
-    'memberships', (SELECT json_agg(row_to_json(m)) FROM workspace_members m WHERE m.user_id = p_user_id),
-    'workspaces', (SELECT json_agg(row_to_json(w)) FROM workspaces w
-                   WHERE w.id IN (SELECT workspace_id FROM workspace_members WHERE user_id = p_user_id))
-  ) INTO result;
-  RETURN result;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-```
-
-Usage:
-```typescript
-const { data } = await supabase.rpc('get_dashboard_data', { p_user_id: user.id })
-```
-
-### Index Recommendations
-
-**Critical indexes for this codebase:**
-
-```sql
--- Contacts: Most queried table
-CREATE INDEX idx_contacts_workspace_created
-  ON contacts(workspace_id, created_at DESC);
-
-CREATE INDEX idx_contacts_workspace_phone
-  ON contacts(workspace_id, phone);
-
-CREATE INDEX idx_contacts_workspace_status
-  ON contacts(workspace_id, status);
-
--- Conversations: Real-time list
-CREATE INDEX idx_conversations_workspace_updated
-  ON conversations(workspace_id, updated_at DESC);
-
-CREATE INDEX idx_conversations_workspace_unread
-  ON conversations(workspace_id, unread_count)
-  WHERE unread_count > 0;  -- Partial index for active filter
-
--- Workspace members: Auth check on every request
-CREATE INDEX idx_workspace_members_user_workspace
-  ON workspace_members(user_id, workspace_id);
-
--- Messages: Conversation threads
-CREATE INDEX idx_messages_conversation_created
-  ON messages(conversation_id, created_at DESC);
-```
-
-**Index types for specific use cases:**
-
-| Index Type | Use Case | Benefit |
-|------------|----------|---------|
-| B-tree (default) | Equality, range queries | General purpose |
-| BRIN | `created_at` on append-only tables | 10x smaller than B-tree |
-| Partial | Filtered subsets (`WHERE unread > 0`) | Index only relevant rows |
-| Composite | Multi-column filters | Avoid multiple index lookups |
-
-**Use index_advisor:**
-```sql
--- In Supabase SQL Editor
-SELECT * FROM index_advisor('
-  SELECT * FROM contacts
-  WHERE workspace_id = $1
-  ORDER BY created_at DESC
-  LIMIT 25
-');
-```
-
-### RLS Performance Optimization
-
-**SLOW pattern (function called per row):**
-```sql
-CREATE POLICY "workspace_access" ON contacts
-  FOR SELECT USING (
-    workspace_id IN (
-      SELECT workspace_id FROM workspace_members
-      WHERE user_id = auth.uid()
-    )
-  );
-```
-
-**FAST pattern (wrapped in SELECT for optimizer caching):**
-```sql
-CREATE POLICY "workspace_access" ON contacts
-  FOR SELECT USING (
-    workspace_id IN (
-      (SELECT workspace_id FROM workspace_members
-       WHERE user_id = (SELECT auth.uid()))
-    )
-  );
-```
-
-**Additional RLS optimizations:**
-1. Add index on RLS filter columns: `CREATE INDEX idx_contacts_user ON contacts(user_id)`
-2. Use `TO authenticated` clause to skip RLS for anonymous users
-3. Add explicit client-side WHERE clauses alongside RLS policies
-4. Use SECURITY DEFINER functions for complex multi-table joins
-
-### Connection Pooling Configuration
-
-**For serverless (Vercel):**
-```
-# Use Supavisor transaction mode
-Connection string: postgres://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
-
-# Pool size recommendations by compute tier
-Small (1GB):  40% to pool = ~15 connections
-Medium (2GB): 60% to pool = ~30 connections
-Large (4GB):  80% to pool = ~60 connections
-```
-
-**Key settings:**
-- Use transaction mode (port 6543), not session mode
-- Don't use both PgBouncer and Supavisor simultaneously
-- Direct connections for long-lived sessions only
-
-### When Optimized Supabase is Enough
-
-| Scenario | Why Supabase Wins |
-|----------|-------------------|
-| Existing production app | No migration cost, proven stability |
-| Multi-tenant SaaS | RLS built for this use case |
-| Complex SQL queries | Full PostgreSQL power |
-| Self-hosting option | Zero vendor lock-in possible |
-| Team knows SQL | Lower learning curve |
-| Need SQL analytics | Direct psql access |
-
----
-
-## Hybrid Approach
-
-### Supabase Auth + Convex Data
-
-**How it works:**
-1. Keep Supabase Auth for authentication
-2. Migrate data layer to Convex
-3. Pass Supabase JWT to Convex for identity
-
-**Configuration:**
-```typescript
-// convex/auth.config.ts
 export default {
-  providers: [{
-    type: "customJwt",
-    applicationID: "my21staff", // Must match JWT aud claim
-    issuer: "https://[project].supabase.co/auth/v1",
-    jwks: "https://[project].supabase.co/auth/v1/.well-known/jwks.json",
-    algorithm: "RS256",
-  }],
-};
-
-// Client-side token bridging
-const { data: { session } } = await supabase.auth.getSession()
-const accessToken = session?.access_token
-// Pass to Convex client for authenticated requests
+  providers: [
+    {
+      domain: process.env.CLERK_JWT_ISSUER_DOMAIN!,
+      applicationID: "convex",
+    },
+  ],
+} satisfies AuthConfig;
 ```
 
-**Complexity estimate:** HIGH
+### 3. ADD: Convex Users Table
 
-| Challenge | Impact |
-|-----------|--------|
-| Two systems to maintain | Operational complexity doubles |
-| Session sync issues | Auth state can drift between systems |
-| RLS reimplementation | Security model must be rebuilt |
-| File storage migration | Supabase Storage != Convex Files |
+New schema addition for storing Clerk user data:
 
-**When to choose hybrid:**
-- Immediate need for reactive features (chat, presence)
-- Plan to fully migrate eventually
-- Team has capacity for dual-system maintenance
+```typescript
+// convex/schema.ts - ADD to existing schema
+users: defineTable({
+  clerkId: v.string(),          // Clerk user ID (user_xxx format)
+  email: v.string(),
+  name: v.optional(v.string()),
+  imageUrl: v.optional(v.string()),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_clerk_id", ["clerkId"])
+  .index("by_email", ["email"]),
+```
 
-**Recommendation for my21staff:** Avoid hybrid. Either commit to full Convex migration or optimize Supabase. Hybrid adds complexity without proportional benefit.
+**Why:** Clerk user data must be stored in Convex for:
+- Displaying user names/avatars across the app
+- Looking up other users (not just current user)
+- Avoiding rate limits on Clerk's backend API
 
----
+### 4. ADD: Remaining Supabase Tables to Convex
 
-## Performance Comparison
+Tables still in Supabase that need migration:
 
-### Expected Latency by Approach
+| Table | Priority | Notes |
+|-------|----------|-------|
+| `profiles` | HIGH | Replace with `users` table synced from Clerk |
+| `ari_appointments` | HIGH | Booking system for Eagle |
+| `consultant_slots` | HIGH | Scheduling availability |
+| `workspace_invitations` | HIGH | Team invite flow |
+| `user_todos` | MEDIUM | Task management |
+| `ari_knowledge_categories` | MEDIUM | Knowledge base structure |
+| `ari_knowledge_entries` | MEDIUM | Knowledge base content |
+| `knowledge_base` | MEDIUM | FAQ matching |
+| `ari_destinations` | MEDIUM | Eagle-specific university data |
+| `ari_payments` | LOW | Payment records (deferred feature) |
+| `ari_ai_comparison` | LOW | AI model analytics |
+| `flows` | LOW | Automation (future) |
+| `form_templates` | LOW | Forms (future) |
 
-| Approach | P50 Latency | P95 Latency | Effort |
-|----------|-------------|-------------|--------|
-| Current (unoptimized) | 2-3s | 6-9s | - |
-| Optimized Supabase | 100-200ms | 300-500ms | 1-2 weeks |
-| Convex migration | 50-100ms | 150-300ms | 4-8 weeks |
-| Hybrid | 100-150ms | 250-400ms | 3-4 weeks |
+### 5. REMOVE: Supabase Packages (After Migration)
 
-### Real-time Capabilities
-
-| Feature | Supabase Realtime | Convex |
-|---------|-------------------|--------|
-| Latency | <100ms typical | <50ms typical |
-| Setup | Manual subscription | Automatic |
-| Filtering | WAL-based, per-table | Query-level |
-| Concurrent connections | 10k+ | Scales with plan |
-| Cost model | Per message + connections | Included in function calls |
-
----
-
-## Recommendation
-
-### For my21staff: Optimize Supabase
-
-**Rationale:**
-1. **ROI Analysis**: 1-2 weeks of Supabase optimization vs 4-8 weeks of Convex migration
-2. **Risk Profile**: Production app with paying customers; migration risk is high
-3. **Root Cause**: Performance issues are fixable anti-patterns, not platform limitations
-4. **Real-time Already Working**: TanStack Query + Supabase Realtime provides adequate reactivity
-
-**Optimization Roadmap:**
-
-| Phase | Effort | Expected Impact |
-|-------|--------|-----------------|
-| 1. Parallel queries (Promise.all) | 2-3 days | 40-60% latency reduction |
-| 2. Add missing indexes | 1 day | 50-100x for specific queries |
-| 3. Nested relations refactor | 3-5 days | 3-5x fewer queries |
-| 4. Column selection audit | 1-2 days | 20-30% payload reduction |
-| 5. RLS policy optimization | 1-2 days | Variable (profile with EXPLAIN) |
-
-**Target Metrics:**
-- P95 latency: < 500ms (current: 2-6s)
-- Queries per page load: 1-2 (current: 4-8)
-- Database connections: Stable under load
-
-### When to Reconsider Convex
-
-Revisit if:
-- Building new features requiring true real-time collaboration (shared cursors, live editing)
-- Supabase optimization plateau (still > 1s after all fixes)
-- Greenfield product/module with no migration cost
-- Team composition changes (more TypeScript-native, less SQL experience)
+```bash
+npm uninstall @supabase/ssr @supabase/supabase-js
+```
 
 ---
 
-## Confidence Assessment
+## Environment Variables
 
-| Finding | Confidence | Basis |
-|---------|------------|-------|
-| Supabase optimization techniques | HIGH | Official docs, verified patterns |
-| Convex SDK patterns | HIGH | Official docs (docs.convex.dev) |
-| Convex + Supabase Auth integration | MEDIUM | Official docs, limited production examples |
-| Migration effort estimate | MEDIUM | Community reports, no direct experience |
-| Performance improvement predictions | MEDIUM | Standard PostgreSQL patterns, needs validation |
+### ADD (Clerk)
+
+```env
+# Clerk API Keys (from clerk.com dashboard)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_xxx  # or pk_test_xxx for dev
+CLERK_SECRET_KEY=sk_live_xxx                    # or sk_test_xxx for dev
+
+# Clerk JWT Issuer for Convex (from Clerk JWT template)
+CLERK_JWT_ISSUER_DOMAIN=https://your-clerk-instance.clerk.accounts.dev
+
+# Clerk Webhook Secret (from Clerk webhooks dashboard)
+CLERK_WEBHOOK_SECRET=whsec_xxx
+```
+
+### Convex Dashboard Environment Variables
+
+Add to Convex dashboard (Settings > Environment Variables):
+- `CLERK_JWT_ISSUER_DOMAIN` - Same as above
+- `CLERK_WEBHOOK_SECRET` - For webhook verification in HTTP actions
+
+### REMOVE (After migration complete)
+
+```env
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+```
+
+---
+
+## Integration Points
+
+### 1. Clerk + Convex Provider Setup
+
+Create `src/app/ConvexClientProvider.tsx`:
+
+```typescript
+"use client";
+
+import { ClerkProvider, useAuth } from "@clerk/nextjs";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
+import { ConvexReactClient } from "convex/react";
+
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+export function ConvexClientProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <ClerkProvider>
+      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+        {children}
+      </ConvexProviderWithClerk>
+    </ClerkProvider>
+  );
+}
+```
+
+**Key points:**
+- `ConvexProviderWithClerk` must be inside `ClerkProvider`
+- Uses `convex/react-clerk` (built into convex package)
+- Pass Clerk's `useAuth` hook to the provider
+
+### 2. Middleware Migration
+
+Replace Supabase middleware with Clerk:
+
+```typescript
+// src/middleware.ts
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/login(.*)",
+  "/signup(.*)",
+  "/pricing",
+  "/articles/(.*)",
+  "/webinars/(.*)",
+  "/api/webhook/(.*)",  // Webhooks must be public
+  "/api/leads",         // Public lead capture
+  "/portal/(.*)",       // Public support portal
+]);
+
+export default clerkMiddleware((auth, req) => {
+  if (!isPublicRoute(req)) {
+    auth.protect();
+  }
+});
+
+export const config = {
+  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+};
+```
+
+### 3. Clerk Webhook HTTP Action
+
+Add to Convex HTTP router (`convex/http.ts`):
+
+```typescript
+import { httpRouter } from "convex/server";
+import { httpAction } from "./_generated/server";
+import { Webhook } from "svix";
+import { internal } from "./_generated/api";
+
+const http = httpRouter();
+
+// Clerk webhook endpoint for user sync
+http.route({
+  path: "/clerk-users-webhook",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const webhookSecret = process.env.CLERK_WEBHOOK_SECRET!;
+
+    const svix = new Webhook(webhookSecret);
+    const headers = {
+      "svix-id": request.headers.get("svix-id")!,
+      "svix-timestamp": request.headers.get("svix-timestamp")!,
+      "svix-signature": request.headers.get("svix-signature")!,
+    };
+
+    const body = await request.text();
+
+    try {
+      const event = svix.verify(body, headers) as any;
+
+      switch (event.type) {
+        case "user.created":
+        case "user.updated":
+          await ctx.runMutation(internal.users.upsertFromClerk, {
+            clerkId: event.data.id,
+            email: event.data.email_addresses[0]?.email_address ?? "",
+            name: `${event.data.first_name || ""} ${event.data.last_name || ""}`.trim() || null,
+            imageUrl: event.data.image_url || null,
+          });
+          break;
+        case "user.deleted":
+          await ctx.runMutation(internal.users.deleteByClerkId, {
+            clerkId: event.data.id,
+          });
+          break;
+      }
+
+      return new Response(null, { status: 200 });
+    } catch (err) {
+      console.error("Webhook verification failed:", err);
+      return new Response("Webhook verification failed", { status: 400 });
+    }
+  }),
+});
+
+export default http;
+```
+
+### 4. Auth in Convex Functions
+
+Replace current auth pattern:
+
+```typescript
+// BEFORE (using @convex-dev/auth):
+import { getAuthUserId } from "@convex-dev/auth/server";
+const userId = await getAuthUserId(ctx);
+
+// AFTER (using ctx.auth directly with Clerk):
+const identity = await ctx.auth.getUserIdentity();
+if (!identity) throw new Error("Unauthorized");
+const clerkId = identity.subject; // This is the Clerk user ID
+```
+
+### 5. User ID Migration Strategy
+
+**Critical consideration:** Current schema uses Supabase UUIDs for `user_id` fields (format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`). Clerk uses different IDs (format: `user_xxxxxxxxxxxxxx`).
+
+**Recommended approach: Use Clerk IDs directly**
+
+1. Add new `clerk_user_id` field to affected tables
+2. Update all new records to use Clerk IDs
+3. Migrate existing records with mapping
+4. Remove old `user_id` field
+
+**Tables with user_id references:**
+- `workspaces.owner_id`
+- `workspaceMembers.user_id`
+- `contacts.assigned_to`
+- `conversations.assigned_to`
+- `messages.sender_id`
+- `contactNotes.user_id`
+- `tickets.requester_id`, `tickets.assigned_to`
+- `ticketComments.author_id`
+- `ticketStatusHistory.changed_by`
+
+### 6. n8n Webhook to Convex HTTP Action
+
+For Eagle leads from n8n:
+
+```typescript
+// convex/http.ts - ADD route
+http.route({
+  path: "/n8n-lead",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    // Verify webhook secret (simple token-based)
+    const authHeader = request.headers.get("Authorization");
+    const expectedToken = process.env.N8N_WEBHOOK_SECRET;
+
+    if (authHeader !== `Bearer ${expectedToken}`) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+
+    const body = await request.json();
+
+    // Create contact in Convex
+    await ctx.runMutation(internal.contacts.createFromWebhook, {
+      workspaceId: body.workspace_id,
+      phone: body.phone,
+      name: body.name,
+      email: body.email,
+      source: "n8n",
+      metadata: body.metadata || {},
+    });
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }),
+});
+```
+
+---
+
+## Not Adding (And Why)
+
+| Package | Why Not |
+|---------|---------|
+| `@clerk/clerk-react` | Redundant - `@clerk/nextjs` includes all React components |
+| `@clerk/backend` | Redundant - `@clerk/nextjs` includes backend utilities |
+| `@clerk/themes` | Not needed - use Shadcn styling for consistency |
+| `@auth/core` | Wrong library - we're using Clerk, not Auth.js |
+| Any Supabase package | Removing Supabase entirely |
+| `@convex-dev/auth` | Keep but change usage - built-in `ctx.auth` is sufficient for Clerk |
+
+---
+
+## Installation Commands
+
+### Phase 1: Add Clerk (before removing Supabase)
+
+```bash
+npm install @clerk/nextjs@^6.36.8 svix@^1.84.1
+```
+
+### Phase 2: Remove Supabase (after migration complete)
+
+```bash
+npm uninstall @supabase/ssr @supabase/supabase-js
+```
+
+---
+
+## Clerk Dashboard Setup
+
+### 1. Create Clerk Application
+
+1. Go to clerk.com and create new application
+2. Choose "Next.js" as framework
+3. Enable authentication methods:
+   - Email + Password (required)
+   - Optional: Google OAuth for convenience
+
+### 2. Create JWT Template for Convex
+
+1. Navigate to JWT Templates in Clerk dashboard
+2. Click "New Template" > Select "Convex"
+3. **DO NOT rename the template** - must stay as "convex"
+4. Copy the Issuer URL (this is `CLERK_JWT_ISSUER_DOMAIN`)
+
+### 3. Create Webhook Endpoint
+
+1. Navigate to Webhooks in Clerk dashboard
+2. Add endpoint URL: `https://intent-otter-212.convex.site/clerk-users-webhook`
+3. Select events:
+   - `user.created`
+   - `user.updated`
+   - `user.deleted`
+4. Copy signing secret (this is `CLERK_WEBHOOK_SECRET`)
+
+---
+
+## Migration Sequence
+
+1. Install Clerk packages (can run alongside Supabase temporarily)
+2. Add `users` table to Convex schema
+3. Set up Clerk webhook in Convex HTTP router
+4. Update `ConvexClientProvider` to use `ClerkProvider` + `ConvexProviderWithClerk`
+5. Update `middleware.ts` to use `clerkMiddleware`
+6. Update `convex/auth.config.ts` for Clerk JWT
+7. Migrate remaining Supabase tables to Convex schema
+8. Update all Convex function auth checks (use `ctx.auth.getUserIdentity()`)
+9. Update user ID references across all tables
+10. Migrate existing users (script or manual)
+11. Test all auth flows
+12. Remove Supabase packages and environment variables
 
 ---
 
 ## Sources
 
-### Convex
-- [Convex Next.js App Router Docs](https://docs.convex.dev/client/nextjs/app-router/)
-- [Convex Custom JWT Auth](https://docs.convex.dev/auth/advanced/custom-jwt)
-- [Convex Pricing](https://www.convex.dev/pricing)
-- [convex npm package](https://www.npmjs.com/package/convex)
-- [Convex vs Supabase Comparison](https://www.convex.dev/compare/supabase)
-- [Next.js Quickstart](https://docs.convex.dev/quickstart/nextjs)
-- [Server Rendering Guide](https://docs.convex.dev/client/nextjs/app-router/server-rendering)
-
-### Supabase
-- [Query Optimization](https://supabase.com/docs/guides/database/query-optimization)
-- [Joins and Nested Relations](https://supabase.com/docs/guides/database/joins-and-nesting)
-- [RLS Performance Best Practices](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv)
-- [Connection Management](https://supabase.com/docs/guides/database/connection-management)
-- [Index Advisor](https://supabase.com/docs/guides/database/extensions/index_advisor)
-- [Realtime Benchmarks](https://supabase.com/docs/guides/realtime/benchmarks)
-- [Performance Tuning](https://supabase.com/docs/guides/platform/performance)
-
-### Comparisons
-- [Convex vs Supabase 2025 - Makers' Den](https://makersden.io/blog/convex-vs-supabase-2025)
-- [Supabase vs Convex for Next.js SaaS](https://www.nextbuild.co/blog/supabase-vs-convex-best-baas-for-next-js-saas)
-- [Migrating from Postgres to Convex](https://stack.convex.dev/migrate-data-postgres-to-convex)
-- [Convex vs Supabase Comparison 2026](https://openalternative.co/compare/convex/vs/supabase)
-
-### Performance Issues
-- [LATERAL JOIN Performance Issue - PostgREST #3938](https://github.com/PostgREST/postgrest/issues/3938)
-- [Supabase Realtime Real-World Experience](https://medium.com/@saravananshanmugam/what-weve-learned-using-supabase-real-time-subscriptions-in-our-browser-extension-d82126c236a1)
-
----
-
-## Roadmap Implications
-
-Based on this research, the v3.0 performance milestone should:
-
-1. **Phase 1: Quick Wins (Days 1-3)**
-   - Parallel query execution with Promise.all
-   - Add critical indexes identified above
-   - Expected: 50-70% latency reduction
-
-2. **Phase 2: Query Consolidation (Days 4-7)**
-   - Refactor to nested relations syntax
-   - Explicit column selection audit
-   - Expected: 3-5x fewer database round-trips
-
-3. **Phase 3: Advanced Optimization (Days 8-10)**
-   - RLS policy optimization (wrap auth functions)
-   - Database functions for complex operations
-   - Connection pooling tuning
-
-4. **Phase 4: Validation (Days 11-14)**
-   - Performance benchmarking
-   - P95 latency verification
-   - Load testing
-
-**Do NOT proceed with Convex migration** unless Phase 3 fails to achieve sub-500ms P95.
+- [Clerk + Convex Integration (Clerk Docs)](https://clerk.com/docs/guides/development/integrations/databases/convex) - Updated 2026-01-14
+- [Convex + Clerk Guide (Convex Docs)](https://docs.convex.dev/auth/clerk)
+- [Storing Users in Convex (Convex Docs)](https://docs.convex.dev/auth/database-auth)
+- [Clerk Webhooks Data Sync](https://clerk.com/blog/webhooks-data-sync-convex)
+- [@clerk/nextjs npm](https://www.npmjs.com/package/@clerk/nextjs) - v6.36.8 (published 2026-01-20)
+- [convex npm](https://www.npmjs.com/package/convex) - v1.31.5 (published 2026-01-20)
+- [svix npm](https://www.npmjs.com/package/svix) - v1.84.1 (published 2026-01-05)

@@ -1,657 +1,737 @@
-# Architecture Research: Email, Ticketing, and Roles Integration
+# Architecture Research: v3.1 Full Convex + Clerk Migration
 
-**Domain:** WhatsApp CRM SaaS - v2.1 Feature Integration
-**Researched:** 2026-01-18
-**Confidence:** HIGH (based on existing codebase patterns + official Supabase documentation)
+**Project:** my21staff
+**Researched:** 2026-01-23
+**Overall confidence:** HIGH (based on official Clerk and Convex documentation)
 
-## Executive Summary
+---
 
-The v2.1 features (email templates, support ticketing, workspace roles) integrate naturally with the existing multi-tenant architecture. The codebase already has the foundational patterns: workspace-scoped RLS, role-based membership (`owner`, `admin`, `member`), and a working email infrastructure (nodemailer via Hostinger SMTP). The key architectural decisions are:
+## Current Architecture
 
-1. **Email Templates**: Store in database (not filesystem) for admin editability, use React Email for rendering
-2. **Support Ticketing**: Standard ticket lifecycle with comments, following the existing `contact_notes` pattern
-3. **Workspace Roles**: Extend existing `workspace_members.role` with permission checks, not JWT claims (simpler for this scale)
-
-## Email System Integration
-
-### Current State Analysis
-
-The codebase already has email infrastructure in `/src/lib/email/transporter.ts`:
-- Nodemailer with Hostinger SMTP (`smtp.hostinger.com:465`)
-- One template type: invitation emails
-- HTML templates hardcoded in TypeScript
-
-### Data Model
-
-**Option A: Database-Stored Templates (Recommended)**
-
-```sql
--- Migration: 20_email_templates.sql
-CREATE TABLE email_templates (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
-  -- NULL workspace_id = system default templates
-  template_type VARCHAR(50) NOT NULL,
-  -- 'invitation', 'welcome', 'password_reset', 'ticket_created', 'ticket_updated'
-  subject VARCHAR(255) NOT NULL,
-  html_content TEXT NOT NULL,
-  text_content TEXT, -- Plain text fallback
-  variables JSONB DEFAULT '[]', -- Available template variables
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(workspace_id, template_type)
-);
-
-CREATE INDEX idx_email_templates_workspace ON email_templates(workspace_id);
-CREATE INDEX idx_email_templates_type ON email_templates(template_type);
-
--- Enable RLS
-ALTER TABLE email_templates ENABLE ROW LEVEL SECURITY;
-
--- Workspace admins can manage their templates
-CREATE POLICY "Admins can manage templates" ON email_templates
-  FOR ALL USING (
-    workspace_id IS NULL OR -- System templates readable by all
-    workspace_id IN (
-      SELECT workspace_id FROM workspace_members
-      WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
-    )
-  );
-```
-
-**Template Types:**
-| Type | Use Case | Variables |
-|------|----------|-----------|
-| `invitation` | Team member invite | `{{inviterName}}`, `{{workspaceName}}`, `{{inviteLink}}` |
-| `welcome` | Post-signup welcome | `{{userName}}`, `{{workspaceName}}` |
-| `password_reset` | Password recovery | `{{resetLink}}`, `{{expiryHours}}` |
-| `ticket_created` | Support ticket opened | `{{ticketId}}`, `{{ticketTitle}}`, `{{ticketUrl}}` |
-| `ticket_updated` | Ticket status change | `{{ticketId}}`, `{{oldStatus}}`, `{{newStatus}}`, `{{ticketUrl}}` |
-
-### API Pattern
-
-**Extend existing email infrastructure:**
+### System Overview
 
 ```
-src/lib/email/
-  transporter.ts      # Existing SMTP config
-  templates.ts        # NEW: Template fetching + variable substitution
-  send.ts             # NEW: Unified send function
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CURRENT HYBRID STATE                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   ┌──────────────┐     ┌──────────────┐     ┌──────────────────────────┐   │
+│   │   Browser    │────▶│   Next.js    │────▶│      Supabase Auth       │   │
+│   │   Client     │     │   App Router │     │  (JWT, sessions, users)  │   │
+│   └──────────────┘     └──────────────┘     └──────────────────────────┘   │
+│          │                    │                         │                   │
+│          │                    │                         ▼                   │
+│          │                    │              ┌──────────────────────────┐   │
+│          │                    │              │    Supabase PostgreSQL   │   │
+│          │                    │              │  ┌────────────────────┐  │   │
+│          │                    │              │  │ workspace_members  │  │   │
+│          │                    │              │  │ workspace_invites  │  │   │
+│          │                    │              │  │ profiles           │  │   │
+│          │                    │              │  │ ARI tables (7)     │  │   │
+│          │                    │              │  │ tickets (3)        │  │   │
+│          │                    │              │  │ knowledge_base     │  │   │
+│          │                    │              │  │ flows              │  │   │
+│          │                    │              │  │ consultant_slots   │  │   │
+│          │                    │              │  │ articles/webinars  │  │   │
+│          │                    │              │  └────────────────────┘  │   │
+│          │                    │              └──────────────────────────┘   │
+│          │                    │                                             │
+│          ▼                    ▼                                             │
+│   ┌──────────────────────────────────────────────────────────────────────┐ │
+│   │                         Convex Cloud                                  │ │
+│   │   ┌─────────────┐    ┌─────────────┐    ┌─────────────────────────┐  │ │
+│   │   │   Schema    │    │   Queries   │    │     HTTP Actions        │  │ │
+│   │   │ (contacts,  │    │ (real-time  │    │ (Kapso webhooks)        │  │ │
+│   │   │  messages,  │    │  subscrip)  │    │                         │  │ │
+│   │   │  convs)     │    │             │    │                         │  │ │
+│   │   └─────────────┘    └─────────────┘    └─────────────────────────┘  │ │
+│   │                                                                       │ │
+│   │   Auth: Supabase JWT verification via auth.config.ts                 │ │
+│   └──────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│   ┌──────────────┐                         ┌─────────────────────────────┐  │
+│   │   n8n        │─── (BROKEN) ──────────▶│ Supabase contacts table     │  │
+│   │   Automation │     Google Sheets       │ (Eagle leads not syncing)   │  │
+│   └──────────────┘                         └─────────────────────────────┘  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Template Rendering Flow:**
+### Current Auth Flow (Supabase)
+
+1. User visits protected route
+2. Next.js middleware checks Supabase session via `createServerClient`
+3. JWT validated server-side, user redirected if not authenticated
+4. Convex auth.config.ts verifies Supabase JWT for Convex function calls
+5. `getAuthUserId(ctx)` returns Supabase user UUID in Convex functions
+
+### Current Data Distribution
+
+**In Convex (migrated in v3.0):**
+- `contacts` (leads)
+- `conversations`
+- `messages`
+- `contactNotes`
+- `workspaces` (partial)
+- `workspaceMembers` (partial)
+- `ariConfig`
+- `ariConversations`
+- `ariMessages`
+- `tickets`
+- `ticketComments`
+- `ticketStatusHistory`
+
+**Still in Supabase (needs migration):**
+- `ari_ai_comparison` - AI model performance tracking
+- `ari_appointments` - Consultation bookings
+- `ari_destinations` - Study abroad destinations
+- `ari_knowledge_categories` - Knowledge base categories
+- `ari_knowledge_entries` - Knowledge base content
+- `ari_payments` - Payment records (deferred feature)
+- `consultant_slots` - Booking slot availability
+- `flows` - Automation workflows
+- `form_templates` - Dynamic form schemas
+- `user_todos` - User task management
+- `articles` - CMS content
+- `webinars` - Webinar management
+- `profiles` - User profiles (linked to Supabase auth.users)
+- `workspace_invitations` - Team invite system
+
+---
+
+## Target Architecture
+
+### Clerk + Convex Full Stack
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           TARGET STATE: v3.1                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   ┌──────────────┐     ┌──────────────────────────────────────────────────┐ │
+│   │   Browser    │────▶│                  Clerk                           │ │
+│   │   Client     │     │  ┌─────────────┐   ┌─────────────────────────┐  │ │
+│   └──────────────┘     │  │ ClerkProvider│   │    Clerk Dashboard      │  │ │
+│          │             │  │ + Middleware │   │  - User management      │  │ │
+│          │             │  │              │   │  - SSO (optional)       │  │ │
+│          │             │  └─────────────┘   │  - Webhooks to Convex    │  │ │
+│          │             │                     └─────────────────────────┘  │ │
+│          │             └──────────────────────────────────────────────────┘ │
+│          │                         │                                        │
+│          │                         │ JWT (Clerk issues, Convex validates)   │
+│          ▼                         ▼                                        │
+│   ┌──────────────────────────────────────────────────────────────────────┐ │
+│   │                         Convex Cloud                                  │ │
+│   │                                                                       │ │
+│   │   ┌─────────────┐    ┌─────────────┐    ┌─────────────────────────┐  │ │
+│   │   │   Schema    │    │   Queries   │    │     HTTP Actions        │  │ │
+│   │   │ (ALL data)  │    │ (real-time) │    │ - Kapso webhook         │  │ │
+│   │   │             │    │             │    │ - n8n lead sync         │  │ │
+│   │   │ users       │    │             │    │ - Clerk user webhook    │  │ │
+│   │   │ workspaces  │    │             │    │                         │  │ │
+│   │   │ contacts    │    │             │    │                         │  │ │
+│   │   │ messages    │    │             │    │                         │  │ │
+│   │   │ ARI tables  │    │             │    │                         │  │ │
+│   │   │ tickets     │    │             │    │                         │  │ │
+│   │   │ CMS content │    │             │    │                         │  │ │
+│   │   └─────────────┘    └─────────────┘    └─────────────────────────┘  │ │
+│   │                                                                       │ │
+│   │   Auth: Clerk JWT verification via auth.config.ts (domain-based)     │ │
+│   └──────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│   ┌──────────────┐                         ┌─────────────────────────────┐  │
+│   │   n8n        │────────────────────────▶│ Convex HTTP Action          │  │
+│   │   Automation │     Google Sheets       │ POST /n8n-leads             │  │
+│   └──────────────┘                         └─────────────────────────────┘  │
+│                                                                              │
+│   Supabase: REMOVED (no longer needed)                                      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Target Auth Flow (Clerk + Convex)
+
+1. User visits protected route
+2. Clerk middleware (`clerkMiddleware`) validates session
+3. ClerkProvider provides auth context to app
+4. `ConvexProviderWithClerk` passes Clerk JWT to Convex
+5. Convex validates JWT using Clerk JWKS endpoint
+6. `ctx.auth.getUserIdentity()` returns Clerk user info in Convex functions
+
+---
+
+## Integration Points
+
+### 1. Clerk + Convex Auth Integration
+
+**Configuration needed:**
+
 ```typescript
-// src/lib/email/templates.ts
-export async function getEmailTemplate(
-  type: TemplateType,
-  workspaceId?: string
-): Promise<EmailTemplate> {
-  const supabase = createApiAdminClient()
+// convex/auth.config.ts
+import { AuthConfig } from "convex/server";
 
-  // Try workspace-specific first, fall back to system default
-  const { data } = await supabase
-    .from('email_templates')
-    .select('*')
-    .or(`workspace_id.eq.${workspaceId},workspace_id.is.null`)
-    .eq('template_type', type)
-    .eq('is_active', true)
-    .order('workspace_id', { ascending: false, nullsLast: true })
-    .limit(1)
-    .single()
-
-  return data
-}
-
-export function renderTemplate(
-  template: EmailTemplate,
-  variables: Record<string, string>
-): string {
-  let html = template.html_content
-  for (const [key, value] of Object.entries(variables)) {
-    html = html.replace(new RegExp(`{{${key}}}`, 'g'), value)
-  }
-  return html
-}
+export default {
+  providers: [
+    {
+      domain: process.env.CLERK_JWT_ISSUER_DOMAIN!, // e.g., "https://your-clerk-domain.clerk.accounts.dev"
+      applicationID: "convex", // MUST be "convex" for Clerk JWT template
+    },
+  ],
+} satisfies AuthConfig;
 ```
 
-### Template Storage Recommendation
+**Clerk Dashboard setup:**
+1. Create JWT template named "convex"
+2. Copy Issuer URL to `CLERK_JWT_ISSUER_DOMAIN`
+3. Set up webhook for user sync (user.created, user.updated, user.deleted)
 
-**Database over filesystem because:**
-1. Admins can edit templates without code deployment
-2. Workspace-specific customization possible
-3. Consistent with existing data patterns
-4. Auditable (updated_at tracking)
+**Provider hierarchy (Next.js App Router):**
 
-**Seed system defaults via migration:**
-```sql
--- Seed default templates
-INSERT INTO email_templates (workspace_id, template_type, subject, html_content, variables)
-VALUES
-(NULL, 'invitation', 'Anda diundang ke {{workspaceName}}',
- '<div>...invitation HTML...</div>',
- '["inviterName", "workspaceName", "inviteLink"]'),
-(NULL, 'welcome', 'Selamat datang di my21staff',
- '<div>...welcome HTML...</div>',
- '["userName", "workspaceName"]');
-```
+```tsx
+// src/app/providers.tsx (new Client Component)
+"use client";
+import { ClerkProvider, useAuth } from "@clerk/nextjs";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
+import { ConvexReactClient } from "convex/react";
 
-### Alternative: React Email (Future Enhancement)
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-For more complex templates, consider React Email + Resend:
-```typescript
-// src/emails/invitation.tsx
-import { Html, Button, Text } from '@react-email/components'
-
-export function InvitationEmail({ inviterName, workspaceName, inviteLink }) {
+export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <Html>
-      <Text>{inviterName} mengundang Anda ke {workspaceName}</Text>
-      <Button href={inviteLink}>Terima Undangan</Button>
-    </Html>
-  )
+    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}>
+      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+        {children}
+      </ConvexProviderWithClerk>
+    </ClerkProvider>
+  );
 }
 ```
 
-**Not recommended for v2.1** - adds complexity without clear benefit at current scale. Database templates with variable substitution are sufficient.
+### 2. n8n Webhook Integration
 
-## Support Ticketing Integration
+**Current state:** n8n pushes to Supabase `contacts` table (broken)
 
-### Data Model
-
-Following the pattern from `contact_notes`, create a comprehensive ticketing system:
-
-```sql
--- Migration: 21_support_tickets.sql
-
--- Ticket status enum
-CREATE TYPE ticket_status AS ENUM (
-  'open',        -- Initial: Ticket created
-  'in_progress', -- Custom: Being worked on
-  'waiting',     -- Custom: Awaiting user response
-  'resolved',    -- Final precursor: Issue addressed
-  'closed'       -- Final: Ticket complete
-);
-
--- Ticket priority enum
-CREATE TYPE ticket_priority AS ENUM ('low', 'medium', 'high', 'urgent');
-
--- Ticket category enum (customizable per use case)
-CREATE TYPE ticket_category AS ENUM (
-  'bug',           -- Something broken
-  'feature',       -- Feature request
-  'question',      -- How-to question
-  'account',       -- Account/billing issue
-  'integration'    -- WhatsApp/Kapso integration
-);
-
--- Support tickets table
-CREATE TABLE support_tickets (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
-  ticket_number SERIAL, -- Human-readable ticket ID
-  title VARCHAR(255) NOT NULL,
-  description TEXT NOT NULL,
-  status ticket_status DEFAULT 'open',
-  priority ticket_priority DEFAULT 'medium',
-  category ticket_category,
-
-  -- Submitter
-  submitted_by UUID NOT NULL REFERENCES auth.users(id),
-  submitted_by_email VARCHAR(255), -- Denormalized for display
-
-  -- Assignment
-  assigned_to UUID REFERENCES auth.users(id),
-
-  -- Resolution
-  resolution TEXT,
-  resolved_at TIMESTAMPTZ,
-  resolved_by UUID REFERENCES auth.users(id),
-
-  -- Metadata
-  metadata JSONB DEFAULT '{}',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_tickets_workspace ON support_tickets(workspace_id);
-CREATE INDEX idx_tickets_status ON support_tickets(status);
-CREATE INDEX idx_tickets_submitted_by ON support_tickets(submitted_by);
-CREATE INDEX idx_tickets_assigned_to ON support_tickets(assigned_to);
-CREATE INDEX idx_tickets_created ON support_tickets(created_at DESC);
-
--- Ticket comments (discussion thread)
-CREATE TABLE ticket_comments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  ticket_id UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
-  author_id UUID NOT NULL REFERENCES auth.users(id),
-  content TEXT NOT NULL,
-  is_internal BOOLEAN DEFAULT false, -- Internal notes vs public reply
-  attachments JSONB DEFAULT '[]', -- [{url, name, type}]
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_comments_ticket ON ticket_comments(ticket_id);
-CREATE INDEX idx_comments_created ON ticket_comments(created_at);
-
--- Ticket status history (audit trail)
-CREATE TABLE ticket_status_history (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  ticket_id UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
-  old_status ticket_status,
-  new_status ticket_status NOT NULL,
-  changed_by UUID NOT NULL REFERENCES auth.users(id),
-  reason TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_status_history_ticket ON ticket_status_history(ticket_id);
-
--- Enable RLS
-ALTER TABLE support_tickets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ticket_comments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ticket_status_history ENABLE ROW LEVEL SECURITY;
-```
-
-### RLS Considerations
-
-**Who can see what tickets:**
-
-```sql
--- Users can view tickets they submitted
-CREATE POLICY "Users can view own tickets" ON support_tickets
-  FOR SELECT USING (submitted_by = auth.uid());
-
--- Workspace admins can view all workspace tickets
-CREATE POLICY "Admins can view workspace tickets" ON support_tickets
-  FOR SELECT USING (
-    workspace_id IN (
-      SELECT workspace_id FROM workspace_members
-      WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
-    )
-  );
-
--- Platform admins (is_admin in profiles) can view all tickets
-CREATE POLICY "Platform admins can view all tickets" ON support_tickets
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
-  );
-
--- Users can create tickets in their workspaces
-CREATE POLICY "Members can create tickets" ON support_tickets
-  FOR INSERT WITH CHECK (
-    workspace_id IN (
-      SELECT workspace_id FROM workspace_members WHERE user_id = auth.uid()
-    )
-  );
-
--- Only admins and assignees can update tickets
-CREATE POLICY "Admins and assignees can update tickets" ON support_tickets
-  FOR UPDATE USING (
-    assigned_to = auth.uid() OR
-    workspace_id IN (
-      SELECT workspace_id FROM workspace_members
-      WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
-    ) OR
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
-  );
-```
-
-**Comments RLS:**
-
-```sql
--- Anyone who can view ticket can view comments (non-internal)
-CREATE POLICY "Users can view public comments" ON ticket_comments
-  FOR SELECT USING (
-    is_internal = false AND
-    ticket_id IN (SELECT id FROM support_tickets) -- RLS on tickets filters
-  );
-
--- Only admins can view internal comments
-CREATE POLICY "Admins can view internal comments" ON ticket_comments
-  FOR SELECT USING (
-    is_internal = true AND
-    EXISTS (
-      SELECT 1 FROM support_tickets t
-      JOIN workspace_members wm ON t.workspace_id = wm.workspace_id
-      WHERE t.id = ticket_comments.ticket_id
-      AND wm.user_id = auth.uid()
-      AND wm.role IN ('owner', 'admin')
-    )
-  );
-
--- Ticket participants can add comments
-CREATE POLICY "Participants can add comments" ON ticket_comments
-  FOR INSERT WITH CHECK (
-    author_id = auth.uid() AND
-    ticket_id IN (SELECT id FROM support_tickets)
-  );
-```
-
-### API Pattern
-
-**CRUD Operations:**
-
-```
-src/app/api/tickets/
-  route.ts                    # GET list, POST create
-  [id]/
-    route.ts                  # GET single, PATCH update
-    comments/
-      route.ts                # GET/POST comments
-    status/
-      route.ts                # PATCH status change (with history)
-```
-
-**Status Transitions (State Machine):**
+**Target state:** n8n pushes to Convex HTTP Action
 
 ```typescript
-// src/lib/ticket/status.ts
-const VALID_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
-  'open': ['in_progress', 'waiting', 'closed'],
-  'in_progress': ['waiting', 'resolved', 'open'],
-  'waiting': ['in_progress', 'resolved', 'closed'],
-  'resolved': ['closed', 'open'], // Can reopen if issue recurs
-  'closed': ['open'], // Reopen only
-}
+// convex/http.ts
+import { httpRouter } from "convex/server";
+import { httpAction } from "./_generated/server";
+import { internal } from "./_generated/api";
 
-export function canTransition(from: TicketStatus, to: TicketStatus): boolean {
-  return VALID_TRANSITIONS[from]?.includes(to) ?? false
-}
+const http = httpRouter();
+
+http.route({
+  path: "/n8n-leads",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    // Validate shared secret
+    const authHeader = request.headers.get("Authorization");
+    if (authHeader !== `Bearer ${process.env.N8N_WEBHOOK_SECRET}`) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+
+    const data = await request.json();
+
+    // Call internal mutation to create contact
+    await ctx.runMutation(internal.contacts.createFromWebhook, {
+      workspace_id: data.workspace_id,
+      name: data.name,
+      phone: data.phone,
+      email: data.email,
+      lead_score: data.lead_score,
+      metadata: data.metadata,
+      source: "google_form",
+    });
+
+    return new Response("OK", { status: 200 });
+  }),
+});
+
+export default http;
 ```
 
-### Ticket Workflow (Report -> Discuss -> Outcome -> Implementation)
+**n8n configuration change:**
+- Old URL: `https://supabase.co/rest/v1/contacts`
+- New URL: `https://intent-otter-212.convex.site/n8n-leads`
+- Auth: Bearer token (shared secret)
 
-Map the desired workflow to statuses:
+### 3. Clerk User Sync Webhook
 
-| Stage | Status | Description |
-|-------|--------|-------------|
-| **Report** | `open` | User submits ticket with title, description, category |
-| **Discuss** | `in_progress` | Admin reviews, asks clarifying questions via comments |
-| **Waiting** | `waiting` | Awaiting user response or external dependency |
-| **Outcome** | `resolved` | Solution determined, documented in resolution field |
-| **Implementation** | `closed` | Solution applied, ticket archived |
-
-## Workspace Roles Integration
-
-### Current State Analysis
-
-The codebase already has roles in `workspace_members`:
-```sql
-role VARCHAR(50) DEFAULT 'member' -- 'owner', 'admin', 'member'
-```
-
-RLS policies in migration 12 already check for `role IN ('owner', 'admin')`.
-
-### Data Model Enhancement
-
-**Option A: Keep Simple (Recommended for v2.1)**
-
-The current role column is sufficient. Add a permissions lookup in application code:
+**Purpose:** Keep Convex `users` table in sync with Clerk
 
 ```typescript
-// src/lib/auth/permissions.ts
-export const ROLE_PERMISSIONS = {
-  owner: [
-    'workspace.delete',
-    'workspace.settings',
-    'members.invite',
-    'members.remove',
-    'members.change_role',
-    'tickets.manage_all',
-    'templates.manage',
-    'contacts.delete',
-    // ... all permissions
-  ],
-  admin: [
-    'members.invite',
-    'members.remove',
-    'tickets.manage_all',
-    'templates.manage',
-    'contacts.delete',
-    // ... most permissions
-  ],
-  member: [
-    'contacts.view',
-    'contacts.edit',
-    'tickets.create',
-    'tickets.view_own',
-    'messages.send',
-    // ... basic permissions
-  ],
-} as const
+// convex/http.ts (add to existing router)
+http.route({
+  path: "/clerk-webhook",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    // Verify Clerk webhook signature using Svix
+    const svixId = request.headers.get("svix-id");
+    const svixTimestamp = request.headers.get("svix-timestamp");
+    const svixSignature = request.headers.get("svix-signature");
 
-export function hasPermission(
-  role: 'owner' | 'admin' | 'member',
-  permission: string
-): boolean {
-  return ROLE_PERMISSIONS[role].includes(permission)
-}
+    // Validate signature (implementation needed)
+
+    const payload = await request.json();
+    const eventType = payload.type;
+
+    switch (eventType) {
+      case "user.created":
+        await ctx.runMutation(internal.users.create, {
+          clerkId: payload.data.id,
+          email: payload.data.email_addresses[0]?.email_address,
+          name: `${payload.data.first_name} ${payload.data.last_name}`.trim(),
+        });
+        break;
+      case "user.updated":
+        await ctx.runMutation(internal.users.update, {
+          clerkId: payload.data.id,
+          email: payload.data.email_addresses[0]?.email_address,
+          name: `${payload.data.first_name} ${payload.data.last_name}`.trim(),
+        });
+        break;
+      case "user.deleted":
+        await ctx.runMutation(internal.users.delete, {
+          clerkId: payload.data.id,
+        });
+        break;
+    }
+
+    return new Response("OK", { status: 200 });
+  }),
+});
 ```
 
-**Option B: Database Permissions Table (Future)**
+### 4. Middleware Migration
 
-Only if permission granularity is needed:
-```sql
--- Future: Fine-grained permissions
-CREATE TABLE role_permissions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
-  role VARCHAR(50) NOT NULL,
-  permission VARCHAR(100) NOT NULL,
-  UNIQUE(workspace_id, role, permission)
-);
+**From Supabase:**
+```typescript
+// Current: src/middleware.ts
+const supabase = createServerClient(url, key, { cookies });
+const { data: { user } } = await supabase.auth.getUser();
 ```
 
-### Permission Enforcement
+**To Clerk:**
+```typescript
+// New: src/middleware.ts
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-**API Level (Primary):**
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/(.*)/inbox(.*)",
+  "/(.*)/database(.*)",
+  // ... all protected routes
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  const { userId, redirectToSignIn } = await auth();
+  if (!userId && isProtectedRoute(req)) {
+    return redirectToSignIn();
+  }
+});
+
+export const config = {
+  matcher: ["/((?!_next|.*\\..*).*)", "/(api|trpc)(.*)"],
+};
+```
+
+---
+
+## Component Changes
+
+### New Components Required
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `Providers` | `src/app/providers.tsx` | Client component wrapping ClerkProvider + ConvexProviderWithClerk |
+| `convex/http.ts` | `convex/http.ts` | HTTP router for webhooks (n8n, Clerk) |
+| `users` table | `convex/schema.ts` | User profile storage (synced from Clerk) |
+
+### Modified Components
+
+| Component | Change |
+|-----------|--------|
+| `src/middleware.ts` | Replace Supabase middleware with Clerk middleware |
+| `src/app/layout.tsx` | Wrap with new `Providers` component |
+| `convex/auth.config.ts` | Change from Supabase JWT to Clerk JWT |
+| `convex/lib/auth.ts` | Use `ctx.auth.getUserIdentity()` instead of `getAuthUserId()` |
+| All API routes using Supabase auth | Replace with Clerk auth helpers |
+| All components using `createClient()` for auth | Replace with Clerk hooks |
+
+### Components to Remove
+
+| Component | Reason |
+|-----------|--------|
+| `src/lib/supabase/server.ts` | No longer needed (Clerk handles auth) |
+| `src/lib/supabase/client.ts` | No longer needed |
+| `src/lib/supabase/config.ts` | No longer needed |
+| Supabase env vars | Remove SUPABASE_URL, SUPABASE_ANON_KEY, SERVICE_ROLE_KEY |
+
+### Schema Additions (Convex)
 
 ```typescript
-// src/lib/auth/workspace-auth.ts - Extend existing function
-export async function requireWorkspaceRole(
-  workspaceId: string,
-  requiredRoles: ('owner' | 'admin' | 'member')[]
-): Promise<AuthResult | NextResponse> {
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+// convex/schema.ts additions
 
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+// Users table (synced from Clerk)
+users: defineTable({
+  clerkId: v.string(),
+  email: v.string(),
+  name: v.optional(v.string()),
+  avatarUrl: v.optional(v.string()),
+  isAdmin: v.boolean(),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_clerk_id", ["clerkId"])
+  .index("by_email", ["email"]),
+
+// Additional ARI tables
+ariAppointments: defineTable({
+  workspace_id: v.id("workspaces"),
+  ari_conversation_id: v.id("ariConversations"),
+  consultant_id: v.optional(v.string()),
+  scheduled_at: v.number(),
+  duration_minutes: v.number(),
+  status: v.string(), // 'scheduled', 'completed', 'cancelled', 'no_show'
+  meeting_link: v.optional(v.string()),
+  notes: v.optional(v.string()),
+  reminder_sent_at: v.optional(v.number()),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_workspace", ["workspace_id"])
+  .index("by_conversation", ["ari_conversation_id"]),
+
+ariDestinations: defineTable({
+  workspace_id: v.id("workspaces"),
+  country: v.string(),
+  city: v.optional(v.string()),
+  university_name: v.string(),
+  programs: v.optional(v.array(v.string())),
+  requirements: v.optional(v.any()),
+  is_promoted: v.boolean(),
+  priority: v.number(),
+  notes: v.optional(v.string()),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_workspace", ["workspace_id"])
+  .index("by_country", ["workspace_id", "country"]),
+
+ariKnowledgeCategories: defineTable({
+  workspace_id: v.id("workspaces"),
+  name: v.string(),
+  description: v.optional(v.string()),
+  display_order: v.number(),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_workspace", ["workspace_id"]),
+
+ariKnowledgeEntries: defineTable({
+  workspace_id: v.id("workspaces"),
+  category_id: v.optional(v.id("ariKnowledgeCategories")),
+  title: v.string(),
+  content: v.string(),
+  is_active: v.boolean(),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_workspace", ["workspace_id"])
+  .index("by_category", ["category_id"]),
+
+consultantSlots: defineTable({
+  workspace_id: v.id("workspaces"),
+  consultant_id: v.optional(v.string()),
+  day_of_week: v.number(), // 0-6 (Sunday-Saturday)
+  start_time: v.string(), // "09:00"
+  end_time: v.string(), // "10:00"
+  duration_minutes: v.number(),
+  is_active: v.boolean(),
+  max_bookings_per_slot: v.number(),
+  booking_window_days: v.number(),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_workspace", ["workspace_id"])
+  .index("by_day", ["workspace_id", "day_of_week"]),
+
+// CMS tables
+articles: defineTable({
+  workspace_id: v.id("workspaces"),
+  title: v.string(),
+  slug: v.string(),
+  excerpt: v.optional(v.string()),
+  content: v.optional(v.string()),
+  cover_image_url: v.optional(v.string()),
+  status: v.string(), // 'draft', 'published'
+  published_at: v.optional(v.number()),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_workspace", ["workspace_id"])
+  .index("by_slug", ["workspace_id", "slug"]),
+
+webinars: defineTable({
+  workspace_id: v.id("workspaces"),
+  title: v.string(),
+  slug: v.string(),
+  description: v.optional(v.string()),
+  cover_image_url: v.optional(v.string()),
+  scheduled_at: v.number(),
+  duration_minutes: v.number(),
+  meeting_url: v.optional(v.string()),
+  max_registrations: v.optional(v.number()),
+  status: v.string(), // 'draft', 'published', 'completed', 'cancelled'
+  published_at: v.optional(v.number()),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_workspace", ["workspace_id"])
+  .index("by_slug", ["workspace_id", "slug"]),
+
+// Other tables
+userTodos: defineTable({
+  workspace_id: v.id("workspaces"),
+  user_id: v.string(),
+  title: v.string(),
+  description: v.optional(v.string()),
+  due_date: v.optional(v.number()),
+  priority: v.string(), // 'low', 'medium', 'high'
+  status: v.string(), // 'pending', 'completed'
+  completed_at: v.optional(v.number()),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_user", ["workspace_id", "user_id"])
+  .index("by_status", ["workspace_id", "status"]),
+
+workspaceInvitations: defineTable({
+  workspace_id: v.id("workspaces"),
+  email: v.string(),
+  name: v.optional(v.string()),
+  role: v.string(), // 'admin', 'member'
+  token: v.string(),
+  invited_by: v.string(),
+  status: v.string(), // 'pending', 'accepted', 'expired'
+  expires_at: v.number(),
+  accepted_at: v.optional(v.number()),
+  created_at: v.number(),
+  updated_at: v.number(),
+})
+  .index("by_workspace", ["workspace_id"])
+  .index("by_token", ["token"])
+  .index("by_email", ["email"]),
+```
+
+---
+
+## Suggested Phase Order
+
+Based on dependency analysis and risk assessment:
+
+### Phase 1: Clerk Auth Setup (Foundation)
+
+**Rationale:** Auth is the foundation. Everything else depends on it working correctly.
+
+**Tasks:**
+1. Create Clerk account, configure application
+2. Set up JWT template named "convex"
+3. Update `convex/auth.config.ts` for Clerk
+4. Create `src/app/providers.tsx` with ConvexProviderWithClerk
+5. Update `src/app/layout.tsx` to use Providers
+6. Deploy Convex with new auth config
+
+**Critical path:** Must complete before any other work.
+
+**Risk:** Low - well-documented integration pattern.
+
+### Phase 2: Middleware Migration
+
+**Rationale:** Route protection must work before UI changes.
+
+**Tasks:**
+1. Install `@clerk/nextjs`
+2. Replace `src/middleware.ts` with Clerk middleware
+3. Configure protected route patterns
+4. Test all route protection scenarios
+5. Handle `must_change_password` flow (migrate to Clerk user metadata or separate table)
+
+**Dependencies:** Phase 1 complete.
+
+**Risk:** Medium - need to handle the `must_change_password` flag that currently lives in `workspace_members`.
+
+### Phase 3: Users Table + Clerk Webhook
+
+**Rationale:** User data must be in Convex before we can remove Supabase auth.
+
+**Tasks:**
+1. Add `users` table to Convex schema
+2. Create Clerk webhook HTTP action (`/clerk-webhook`)
+3. Configure webhook in Clerk dashboard
+4. Migrate existing Supabase users to Convex
+5. Update all user lookups to use Convex `users` table
+
+**Dependencies:** Phase 1 complete.
+
+**Risk:** Medium - need careful user migration to preserve workspace memberships.
+
+### Phase 4: Convex Auth Helpers Migration
+
+**Rationale:** Internal auth functions must use new Clerk identity.
+
+**Tasks:**
+1. Update `convex/lib/auth.ts` to use `ctx.auth.getUserIdentity()`
+2. Update all mutations/queries that check user identity
+3. Map Clerk user ID to workspace membership
+4. Test all workspace-scoped operations
+
+**Dependencies:** Phase 3 complete (users table exists).
+
+**Risk:** Low - straightforward code changes.
+
+### Phase 5: n8n Webhook Migration (Critical for Eagle)
+
+**Rationale:** Eagle's lead flow is broken. This restores it.
+
+**Tasks:**
+1. Create `convex/http.ts` with n8n endpoint
+2. Implement `/n8n-leads` HTTP action
+3. Add shared secret validation
+4. Update n8n workflow to point to Convex URL
+5. Test end-to-end: Google Form -> n8n -> Convex -> CRM
+
+**Dependencies:** None (can run in parallel with Phase 2-4).
+
+**Risk:** Low - simple webhook pattern, already done for Kapso.
+
+### Phase 6: Remaining Tables Migration
+
+**Rationale:** Move all remaining data to Convex.
+
+**Tasks:**
+1. Add remaining tables to Convex schema (see schema additions above)
+2. Create migrations for each table category:
+   - ARI tables (appointments, destinations, knowledge)
+   - CMS tables (articles, webinars)
+   - Utility tables (todos, invitations, slots)
+3. Update API routes to use Convex
+4. Test each feature area
+
+**Dependencies:** Phase 4 complete (auth working in Convex).
+
+**Risk:** Medium - many tables, many API routes to update.
+
+### Phase 7: Supabase Removal
+
+**Rationale:** Clean up after migration complete.
+
+**Tasks:**
+1. Remove Supabase client code (`src/lib/supabase/*`)
+2. Remove Supabase environment variables
+3. Remove `@supabase/*` packages from dependencies
+4. Update documentation
+5. Final testing of all features
+
+**Dependencies:** All previous phases complete.
+
+**Risk:** Low - just cleanup if everything else works.
+
+---
+
+## Data Migration Strategy
+
+### User Migration (Critical)
+
+**Problem:** Supabase user IDs (UUIDs) are referenced throughout the system in:
+- `workspace_members.user_id`
+- `contacts.assigned_to`
+- `tickets.requester_id`, `assigned_to`
+- `contact_notes.user_id`
+- Various `created_by`, `updated_by` fields
+
+**Strategy:**
+1. Create Convex `users` table with both `clerkId` and legacy `supabaseId`
+2. Import existing users with their Supabase UUIDs preserved
+3. When user signs in with Clerk for first time, link Clerk ID to existing record
+4. Gradually update references to use Clerk ID (optional - can keep using Supabase ID as internal ID)
+
+**Migration script pattern:**
+```typescript
+// One-time migration mutation
+export const migrateUsers = internalMutation({
+  handler: async (ctx) => {
+    // Fetch from Supabase (one-time, via HTTP action)
+    // Insert into Convex users table
+    // Preserve supabaseId for backward compatibility
   }
-
-  const { data: membership } = await supabase
-    .from('workspace_members')
-    .select('role')
-    .eq('workspace_id', workspaceId)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!membership || !requiredRoles.includes(membership.role)) {
-    return NextResponse.json(
-      { error: 'Insufficient permissions' },
-      { status: 403 }
-    )
-  }
-
-  return {
-    user: { id: user.id, email: user.email || '' },
-    workspaceId,
-    role: membership.role
-  }
-}
+});
 ```
 
-**RLS Level (Defense in Depth):**
+### Table Migration (Standard Pattern)
 
-RLS policies already enforce role checks. The application-level check provides better error messages.
+For each table:
+1. Add table to Convex schema
+2. Create internal mutation for bulk insert
+3. Run migration (fetch from Supabase, insert to Convex)
+4. Update API routes to read from Convex
+5. Verify data integrity
+6. Remove Supabase queries
 
-### Migration Strategy
+---
 
-**For existing data:**
+## Risk Assessment
 
-```sql
--- Migration: 22_ensure_workspace_owners.sql
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| User ID mapping errors | HIGH | Keep supabaseId in users table, validate all references |
+| Downtime during migration | HIGH | Use feature flags, migrate in phases, keep Supabase running until verified |
+| n8n webhook failure | MEDIUM | Test thoroughly before switching, keep old endpoint as fallback |
+| Clerk free tier limits | LOW | Free tier has 10,000 MAU, well above current usage |
+| Performance regression | LOW | Convex already validated 25x faster in v3.0 |
 
--- Ensure every workspace has exactly one owner in workspace_members
-INSERT INTO workspace_members (workspace_id, user_id, role)
-SELECT w.id, w.owner_id, 'owner'
-FROM workspaces w
-WHERE NOT EXISTS (
-  SELECT 1 FROM workspace_members wm
-  WHERE wm.workspace_id = w.id AND wm.user_id = w.owner_id
-)
-ON CONFLICT (workspace_id, user_id)
-DO UPDATE SET role = 'owner';
+---
 
--- Update existing owner_id members to have 'owner' role
-UPDATE workspace_members wm
-SET role = 'owner'
-FROM workspaces w
-WHERE wm.workspace_id = w.id
-AND wm.user_id = w.owner_id
-AND wm.role != 'owner';
+## Environment Variables
+
+### Remove (Supabase)
+```
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_ENV
 ```
 
-## Component Boundaries
-
+### Add (Clerk)
 ```
-                    +------------------+
-                    |   Next.js App    |
-                    +------------------+
-                           |
-         +-----------------+------------------+
-         |                 |                  |
-    +---------+      +---------+        +---------+
-    |  Pages  |      |   API   |        |  Email  |
-    | (React) |      | Routes  |        | Worker  |
-    +---------+      +---------+        +---------+
-         |                 |                  |
-         |    +------------+-----------+      |
-         |    |                        |      |
-         v    v                        v      v
-    +------------+              +--------------+
-    | Supabase   |              |    SMTP      |
-    | (Postgres) |              | (Hostinger)  |
-    +------------+              +--------------+
-         |
-         +-- workspaces
-         +-- workspace_members (roles)
-         +-- contacts
-         +-- support_tickets (NEW)
-         +-- ticket_comments (NEW)
-         +-- email_templates (NEW)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+CLERK_SECRET_KEY
+CLERK_JWT_ISSUER_DOMAIN
+CLERK_WEBHOOK_SECRET
 ```
 
-**Component Communication:**
-
-| Component | Talks To | Protocol |
-|-----------|----------|----------|
-| Pages | API Routes | HTTP (fetch) |
-| API Routes | Supabase | PostgreSQL (supabase-js) |
-| API Routes | SMTP | nodemailer |
-| Kapso Webhook | API Routes | HTTP POST |
-| Email Worker | SMTP | nodemailer |
-
-**Data Flow for Ticket Creation:**
-
+### Keep (Convex)
 ```
-1. User submits form (React)
-   ↓
-2. POST /api/tickets (API Route)
-   ↓
-3. Validate user membership + role (workspace-auth)
-   ↓
-4. Insert into support_tickets (Supabase + RLS)
-   ↓
-5. Insert into ticket_status_history (Supabase)
-   ↓
-6. Fetch email template (Supabase)
-   ↓
-7. Render + send email (nodemailer)
-   ↓
-8. Return ticket ID (Response)
+NEXT_PUBLIC_CONVEX_URL
+CONVEX_DEPLOY_KEY (for CI/CD)
 ```
 
-## Build Order
+### Add (n8n)
+```
+N8N_WEBHOOK_SECRET
+```
 
-Based on dependencies:
-
-### Phase 1: Email Templates Foundation
-**Rationale:** Required by tickets for notifications. Can be tested with existing invitation flow.
-
-1. Create `email_templates` table migration
-2. Seed default templates (invitation, welcome)
-3. Create `/src/lib/email/templates.ts` for fetching + rendering
-4. Refactor existing `sendInvitationEmail` to use templates
-5. Test with existing invitation flow
-
-### Phase 2: Workspace Roles Enhancement
-**Rationale:** Needed for ticket management permissions. Already partially implemented.
-
-1. Create permissions utility (`/src/lib/auth/permissions.ts`)
-2. Extend `requireWorkspaceMembership` to `requireWorkspaceRole`
-3. Add role display to settings page
-4. Add role change capability (owner only)
-5. Run migration to ensure owner consistency
-
-### Phase 3: Support Ticketing Core
-**Rationale:** Depends on roles for permissions, email for notifications.
-
-1. Create ticket tables migration
-2. Create ticket API routes (CRUD)
-3. Create ticket list page
-4. Create ticket detail page with comments
-5. Add status transition logic
-
-### Phase 4: Ticket Notifications
-**Rationale:** Depends on tickets + email templates.
-
-1. Add `ticket_created` and `ticket_updated` templates
-2. Hook email sending into ticket create/update
-3. Add notification preferences (optional)
-
-## RLS Security Checklist
-
-- [x] **Email Templates:** Workspace-scoped with admin-only write access; system templates (NULL workspace_id) readable by all
-- [x] **Support Tickets:** Users see own tickets; admins see all workspace tickets; platform admins see everything
-- [x] **Ticket Comments:** Public comments visible to ticket participants; internal comments admin-only
-- [x] **Status History:** Append-only (no update/delete policies); visible to ticket viewers
-- [x] **Role Changes:** Only owners can change member roles (enforced at API level)
-- [x] **Workspace Deletion:** CASCADE deletes all related tickets, templates, members
-
-## Anti-Patterns to Avoid
-
-### 1. JWT Claims for Roles (Avoid)
-**Why:** At this scale (single workspace per user session), JWT claims add complexity without benefit. The existing per-request role lookup is sufficient and always current.
-
-### 2. Separate Permissions Table (Avoid for v2.1)
-**Why:** Three roles (owner/admin/member) with hardcoded permissions is simpler and sufficient. Add granular permissions only if business requires it.
-
-### 3. Filesystem Email Templates (Avoid)
-**Why:** Requires code deployment to update templates. Database storage allows admin editing.
-
-### 4. Complex State Machines (Avoid)
-**Why:** Five statuses with simple transitions cover the workflow. XState or similar is overkill.
+---
 
 ## Sources
 
-**Official Documentation:**
-- [Supabase Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
-- [Supabase Custom Claims & RBAC](https://supabase.com/docs/guides/database/postgres/custom-claims-and-role-based-access-control-rbac)
-- [Supabase Email Templates](https://supabase.com/docs/guides/auth/auth-email-templates)
-- [Supabase Custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp)
-
-**Patterns & Best Practices:**
-- [Resend with Next.js](https://resend.com/docs/send-with-nextjs)
-- [React Email Templates](https://react.email/)
-- [Supabase Multi-Tenant RBAC Template](https://github.com/point-source/supabase-tenant-rbac)
-
-**Ticketing Workflow:**
-- [Jira Workflow Best Practices](https://www.herocoders.com/blog/jira-workflows-guide)
-- [Ticket Status Guide](https://www.zluri.com/blog/ticket-statuses)
-- [Support Ticket Workflow Templates](https://unito.io/blog/build-support-ticket-workflow/)
+- [Clerk + Convex Integration Docs](https://clerk.com/docs/guides/development/integrations/databases/convex) - Last updated Jan 14, 2026
+- [Convex Auth with Clerk](https://docs.convex.dev/auth/clerk) - Official Convex docs
+- [Clerk Webhooks with Convex](https://clerk.com/blog/webhooks-data-sync-convex) - User sync pattern
+- [Authentication Best Practices](https://stack.convex.dev/authentication-best-practices-convex-clerk-and-nextjs) - Next.js patterns
+- [Convex HTTP Actions](https://docs.convex.dev/functions/http-actions) - Webhook implementation
 
 ---
-*Last updated: 2026-01-18*
+
+*Last updated: 2026-01-23*
