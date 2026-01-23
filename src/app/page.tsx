@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { LoginModal } from "@/components/auth/login-modal";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import {
   NavBar,
@@ -24,18 +22,13 @@ const inter = Inter({
 });
 
 export default function Home() {
-  const [loginOpen, setLoginOpen] = useState(false);
-
   return (
     <div
       className={`${plusJakartaSans.variable} ${inter.variable} bg-white text-[#2D2A26] antialiased`}
       style={{ fontFamily: "var(--font-inter)" }}
     >
-      {/* Login Modal */}
-      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
-
       {/* Navigation */}
-      <NavBar onLoginClick={() => setLoginOpen(true)} />
+      <NavBar />
 
       <main>
         {/* 1. Hero Section (Off White) */}
