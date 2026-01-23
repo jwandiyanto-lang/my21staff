@@ -2,31 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-01-20)
+See: .planning/PROJECT.md (updated 2026-01-23)
 
-**Core value:** Sub-500ms P95 response times — a CRM that feels instant
-**Current focus:** v3.0 Performance & Speed
+**Core value:** The system that lets you grow
+**Current focus:** v3.1 Planning
 
 ## Current Position
 
-Phase: 4 & 5 - Decision Gate & Implementation
-Status: Complete
-Last activity: 2026-01-23 — v3.0 milestone complete (Phase 04 decision gate + Phase 05 implementation)
+Phase: Not started
+Plan: Not started
+Status: Ready for next milestone
+Last activity: 2026-01-23 — v3.0 milestone complete
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ (126 plans shipped)
-
-## Performance Metrics
-
-**Velocity:**
-- Total plans completed: 126 (14 in v1.0 + 38 in v2.0 + 30 in v2.1 + 23 in v2.2 + 21 in v3.0)
-- v2.2 timeline: 1 day (Jan 20)
-- v3.0 timeline: 3 days (Jan 21-23)
-- Commits: 325 in v2.0, 282 in v2.1
-
-**Codebase:**
-- Lines: ~46,000 TypeScript
-- Phases completed: 40 total (v1.0: 5, v2.0: 16, v2.1: 9, v2.2: 6, v3.0: 5)
-- v3.0: 1 (instrumentation), 2 (optimization), 3 (convex spike), 4 (decision gate), 5 (implementation)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ (147 plans shipped)
 
 ## Accumulated Context
 
@@ -36,7 +24,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 **v2.0 (Phases 6-22):** Kapso Live, Landing, AI, Deployment, Admin, Lead Polish, Security, Dashboard, Settings
 **v2.1 (Phases 1-9):** Brand, Email, Roles, Support, Central Hub, Security Page, Landing Redesign, Performance, Kapso Bot
 **v2.2 (Phases 1-6):** Database/Inbox, ARI Core, Scoring, Scheduling, Admin
-**v3.0 (Phases 1-7):** Instrumentation, Supabase Optimization, Convex Spike, Decision Gate, Schema, Mutations/Queries
+**v3.0 (Phases 1-5):** Instrumentation, Supabase Optimization, Convex Spike, Decision Gate, Implementation
 
 ### v3.0 Performance Context
 
@@ -55,13 +43,24 @@ Progress: v1.0 ██████████ | v2.0 █████████
 **Phase 3 (Convex Spike) Results:**
 - Convex API P50: 23ms, P95: 37ms — **25.4x faster** than Supabase
 - Convex meets < 500ms target with significant margin
-- Recommendation: Proceed with Convex migration
+
+**Phase 4 (Decision Gate) Result:**
+- **Decision:** Hybrid architecture (Supabase auth + Convex data)
+- **Rationale:** 25.4x faster at P95 (37ms vs 926ms)
+
+**Phase 5 (Implementation) Result:**
+- Convex deployed to https://intent-otter-212.convex.cloud
+- API routes migrated to use Convex queries/mutations
+- Real-time subscriptions working
+- **Webhook POST handler added** — code complete, deployment pending (Vercel environment)
+- **Kapso URL update pending** — manual step after deployment confirmed
 
 **Target outcomes:**
 - Page load time < 2 seconds (P95)
 - API response time < 500ms (P95)
 - Query count per page < 5 queries
 - Real-time updates without polling
+- Crisp webhooks and smooth database operations
 
 ### Decisions
 
@@ -74,18 +73,7 @@ Key v3.0 decisions:
 - Data-driven decision gate before implementation
 - Hybrid architecture viable (Supabase auth + Convex data)
 - Manual baseline capture: wait 24-48 hours for production traffic before filling metrics
-
-**New from Phase 3 verification:**
-- **Proceed with Convex migration** — Convex API achieves 37ms P95, 25.4x faster than Supabase
-- Do NOT proceed with Supabase enhancement (IMPL-07 through IMPL-10)
-
-**New from Phase 4 Decision Gate:**
-- **Formal decision recorded** — Hybrid architecture (Supabase auth + Convex data)
-- Performance comparison: Convex 37ms P95 vs Supabase 926ms P95
-- Implementation path: IMPL-01 through IMPL-06 only
-- Decision documented in .planning/phases/04-decision-gate/04-DECISION.md
-
-**New from Phase 5 Implementation:**
+- Convex migration (hybrid: Supabase auth + Convex data) — 25.4x faster (37ms vs 926ms P95)
 - Use v.optional(v.any()) for metadata fields (ARI scores, reply context, user preferences)
 - Snake_case naming in Convex to match Supabase for migration consistency
 - by_assigned index for contact assignment filtering
@@ -97,46 +85,31 @@ Key v3.0 decisions:
 - Assignment filter supports 'unassigned' special value alongside user_id
 - Active count calculated from filtered results instead of separate query call
 - Parallel contact fetching via Promise.all for efficient rendering
-
-**New from Phase 5 Plan 04 (Kapso Webhook):**
-- Use ctx.scheduler.runAfter for async webhook processing to prevent Kapso retries
-- Store meta_access_token in workspaces table for Kapso API calls
-- Create separate ARI tables (ariConfig, ariConversations, ariMessages) for AI bot state
-- Support both Sea-Lion (local Ollama) and Grok as AI model fallback
-- Merge HTTP routers via http.route() pattern for modularity
-- Use HMAC-SHA256 for Kapso webhook signature verification
-- PII masking in logs for privacy (phone numbers masked)
-
-**New from Phase 5 Plan 06 (Convex Real-time):**
-- Convex useQuery automatically subscribes to data changes - no manual subscription management needed
-- Keep Supabase for auth-only operations (profiles, workspace_members, ari_* tables)
-- Transform Convex timestamps (numbers) to ISO strings for existing UI compatibility
-- @ts-ignore used for Convex function names until types are generated by dev server
+- Webhook POST handler with HMAC-SHA256 signature verification
 
 ### Deferred Issues
 
-- Forgot password email uses Supabase email, not Resend (P1)
+- Forgot password email uses Supabase email (not Resend)
 - Resend/delete invitation auth bug
 - In-memory rate limiting won't scale multi-instance
-- Payment integration (Midtrans) -> v3.1
-- AI model selection UI -> v3.1
+- Webhook POST deployment — code complete, requires Vercel deploy push
+- Kapso webhook URL update — manual step after deployment confirmed
+- Legacy Next.js webhook route cleanup — after verification complete
+- ARI integration still uses Supabase for config queries — to be migrated after webhook fix
+- Payment integration (Midtrans) — v3.1
+- AI model selection UI — v3.1
 
 ### Blockers/Concerns
 
 None.
-
-## Session Continuity
-
-Last session: 2026-01-23
-Stopped at: Phase 04 Decision Gate complete, Phase 05 Implementation complete
-Resume file: None
-Next: v3.0 milestone completion — audit or archive
 
 ## Deployment Info
 
 **Production URL:** https://my21staff.com
 **Vercel CLI:** Installed and linked
 **Supabase Project:** my21staff (tcpqqublnkphuwhhwizx)
+
+**Convex Project:** intent-otter-212 (https://intent-otter-212.convex.cloud)
 
 **Environment Variables (Vercel):**
 - NEXT_PUBLIC_SUPABASE_URL
@@ -145,16 +118,15 @@ Next: v3.0 milestone completion — audit or archive
 - NEXT_PUBLIC_PRICING_WORKSPACE_ID
 - ENCRYPTION_KEY
 - GROK_API_KEY (needed for ARI)
-
-**Convex Project:** intent-otter-212 (https://intent-otter-212.convex.cloud)
+- CONVEX_DEPLOY_KEY (stored in Vercel, not local)
 
 **Workspaces:**
 - My21Staff: `0318fda5-22c4-419b-bdd8-04471b818d17` (for pricing form leads)
-- Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (first paying client, ARI pilot)
+- Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (first paying client)
 
 **AI Models:**
 - Sea-Lion: http://100.113.96.25:11434 (Ollama, via Tailscale)
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-23 — Phase 04 Decision Gate & Phase 05 Implementation complete, v3.0 milestone ready for archive*
+*Last updated: 2026-01-23 — v3.0 milestone complete, ready for v3.1 planning*

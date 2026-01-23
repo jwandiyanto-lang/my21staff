@@ -10,25 +10,6 @@ WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-t
 
 The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
-## Current Milestone: v3.0 Performance & Speed
-
-**Goal:** Achieve sub-500ms P95 response times through Convex spike evaluation and potential hybrid migration (Supabase auth + Convex data).
-
-**Target outcomes:**
-- Page load time < 2 seconds (P95)
-- API response time < 500ms (P95)
-- Query count per page < 5 queries
-- Real-time updates without polling
-- Crisp webhooks and smooth database operations
-
-**Approach:**
-1. Convex spike — convert `/api/contacts/by-phone` to Convex, compare performance
-2. If Convex wins decisively: hybrid migration (keep Supabase auth, use Convex for data)
-3. If comparable: apply Supabase optimizations (nested queries, indexes, column selection)
-4. End state: Production CRM that's "crystal clear" and snappy
-
-**Current problem:** 2-6 second response times (sometimes 9+ seconds) despite matching Vercel + Supabase regions.
-
 ## Previous State (v2.2)
 
 **Production URL:** https://my21staff.com (Vercel)
@@ -49,7 +30,7 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - Security info page, landing page redesign
 - TanStack Query caching, Kapso bot setup
 
-**Tech Stack:**
+**Tech Stack (v2.x):**
 - ~43,000 lines TypeScript
 - Next.js 15 + React 19
 - Supabase (PostgreSQL + Auth + RLS)
@@ -57,6 +38,29 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - Kapso API for WhatsApp
 - Resend for transactional email
 - TanStack Query v5 for client caching
+
+## Current State (v3.0 Shipped)
+
+**Production URL:** https://my21staff.com (Vercel)
+
+**Convex Deployment:** https://intent-otter-212.convex.cloud
+
+**Shipped in v3.0:**
+- Performance baseline with Vercel Speed Insights and API timing wrappers
+- Supabase optimization with composite indexes, parallel queries, explicit column selection
+- Convex spike validating 25.4x speedup (37ms vs 926ms P95)
+- Data-driven decision to proceed with hybrid architecture (Supabase auth + Convex data)
+- Full Convex implementation: schema, mutations, queries, HTTP actions, real-time subscriptions
+
+**Tech Stack (v3.0):**
+- ~196,000 lines TypeScript
+- Next.js 15 + React 19
+- Supabase (Auth only) + Convex (Data layer)
+- Shadcn/ui + Tailwind CSS
+- Kapso API for WhatsApp
+- Resend for transactional email
+- TanStack Query v5 for client caching
+- Convex for real-time subscriptions and data queries
 
 ## Requirements
 
@@ -84,26 +88,29 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - ✓ **Landing Page Redesign** — Mobile-friendly, conversion-focused — v2.1
 - ✓ **Performance Optimization** — TanStack Query caching, loading skeletons — v2.1
 - ✓ **WhatsApp Bot Setup** — Eagle's number via Kapso, Ari persona — v2.1
+- ✓ **ARI database infrastructure** — 7 tables with workspace-scoped RLS — v2.2
+- ✓ **Multi-LLM AI system** — Grok + Sea-Lion with deterministic A/B testing — v2.2
+- ✓ **Lead scoring engine** — 0-100 with category breakdown: basic, qualification, documents, engagement — v2.2
+- ✓ **Automated lead routing** — hot → consultation, warm → nurture, cold → community — v2.2
+- ✓ **Consultation booking flow** — Indonesian day/time parsing and slot management — v2.2
+- ✓ **Admin configuration UI** — "Your Intern" page with 5 tabs: Persona, Flow, Database, Scoring, Slots — v2.2
+- ✓ **Performance baseline** — Vercel Speed Insights, API timing wrappers — v3.0
+- ✓ **Supabase optimization** — Composite indexes, parallel queries, explicit column selection — v3.0
+- ✓ **Convex spike** — 25.4x speedup validation (37ms vs 926ms P95) — v3.0
+- ✓ **Decision gate** — Data-driven hybrid architecture decision — v3.0
+- ✓ **Convex migration** — Schema, mutations, queries, HTTP actions, real-time subscriptions deployed — v3.0
 
 ### Active
 
-**Performance & Speed (v3.0):**
-- [x] Convex spike — convert `/api/contacts/by-phone` and compare performance
-- [x] Decision gate — compare Convex vs optimized Supabase response times
-- [x] Convex migration: hybrid architecture (Supabase auth + Convex data layer)
-- [x] Complete Convex schema with all Supabase fields
-- [x] Create Convex mutations and query functions
-- [x] Implement Kapso webhook HTTP action
-- [x] Update Next.js API routes to use Convex
-- [x] Update inbox to use Convex real-time subscriptions
-- [x] Deploy Convex and verify performance
-- [ ] Production performance monitoring (Web Vitals dashboard)
-- [ ] Target: sub-500ms P95 response times (met in spike: 37ms P95)
+**v3.1 Planning (next milestone):**
+- Payment Integration (Midtrans)
+- AI Model Selection UI
+- Support ticketing (migrated to Convex)
 
 ### Out of Scope
 
-- Payment Integration (Midtrans) — deferred to v3.1, focus on speed first
-- AI Model Selection UI — deferred to v3.1
+- Payment Integration (Midtrans) — v3.1 focus was speed, now next
+- AI Model Selection UI — v3.1 focus was speed, now next
 - Visual workflow builder — future version
 - WhatsApp template messages (24h rule) — requires Meta approval process
 - Self-service onboarding — manual for now
@@ -128,15 +135,18 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - Forgot password still uses Supabase email (not Resend)
 - Resend/delete invitation has auth bug
 - In-memory rate limiting won't scale multi-instance
+- Webhook POST deployment — code complete, requires Vercel deploy push
+- Kapso webhook URL update — manual step after deployment confirmed
+- Legacy Next.js webhook route cleanup — after verification complete
 
 ## Constraints
 
-- **Tech Stack**: Next.js 15 + React 19 + TypeScript, Supabase (Auth) + potentially Convex (data), Shadcn/ui, Tailwind CSS
+- **Tech Stack**: Next.js 15 + React 19 + TypeScript, Supabase (Auth) + Convex (Data), Shadcn/ui, Tailwind CSS
 - **Design System**: CRM uses cool green palette, Landing uses sage/orange (Plus Jakarta Sans + Inter)
 - **Integration**: Kapso API for WhatsApp, Resend for email
 - **AI Models**: Grok API + Sea-Lion (Ollama at 100.113.96.25:11434)
-- **Deployment**: Vercel (single instance)
-- **Performance**: Must achieve sub-500ms P95 response times
+- **Deployment**: Vercel (single instance) + Convex Cloud
+- **Performance**: Convex achieves 37ms P95, 25.4x faster than Supabase
 
 ## Key Decisions
 
@@ -160,7 +170,7 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | TanStack Query for caching | Stale-while-revalidate for instant navigation | ✓ Good — v2.1 perf |
 | 4-stage ticket workflow | Trust-building with clear progress | ✓ Good — v2.1 feature |
 | Central support hub | All client tickets → my21staff workspace | ✓ Good — v2.1 feature |
-| Convex migration (hybrid: Supabase auth + Convex data) | 25.4x faster (37ms vs 926ms P95) | ✓ Good — proceed with IMPL-01 through IMPL-06 |
+| Convex migration (hybrid: Supabase auth + Convex data) | 25.4x faster (37ms vs 926ms P95) | ✓ Good — v3.0 achievement |
 
 ---
-*Last updated: 2026-01-20 after v3.0 milestone initialized*
+*Last updated: 2026-01-23 after v3.0 milestone completion*

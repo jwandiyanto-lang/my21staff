@@ -1,5 +1,32 @@
 # Project Milestones: my21staff
 
+## v3.0 Performance & Speed (Shipped: 2026-01-23)
+
+**Delivered:** Hybrid architecture migration (Supabase auth + Convex data) achieving 25.4x performance improvement at P95 (37ms vs 926ms).
+
+**Phases completed:** 1-5 (21 plans total)
+
+**Key accomplishments:**
+
+- Performance baseline established with Vercel Speed Insights and API timing wrappers
+- Supabase optimization with composite indexes, parallel queries, explicit column selection (P95: 926ms)
+- Convex spike validated 25.4x speedup over Supabase (P95: 37ms)
+- Data-driven decision to proceed with hybrid architecture (Supabase auth + Convex data)
+- Full Convex implementation: schema, mutations, queries, HTTP actions, real-time subscriptions deployed
+
+**Stats:**
+
+- 107 files changed, 15,146 insertions, 1,296 deletions
+- ~196,000 lines of TypeScript
+- 5 phases, 21 plans
+- 3 days (Jan 21 → Jan 23, 2026)
+
+**Git range:** `8b0e22` → `8041e22`
+
+**What's next:** v3.1 — Payment integration, AI model selection UI
+
+---
+
 ## v2.2 ARI & User Flow (Shipped: 2026-01-20)
 
 **Delivered:** AI WhatsApp assistant (ARI) that handles lead qualification, scoring, consultation booking, and handoff — from social media leads to booked consultations.
@@ -128,3 +155,5 @@
 **What's next:** Planning v1.1 enhancements (TBD)
 
 ---
+
+*Total shipped:* 147 plans across 6 milestones

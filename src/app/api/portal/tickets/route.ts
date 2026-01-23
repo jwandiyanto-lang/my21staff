@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     // Create ticket via Convex mutation
     queryStart = performance.now()
-    const ticket = await fetchMutation(api.tickets.createTicket, {
+    const ticket = await fetchMutation(api.mutations.createTicket, {
       workspace_id: membership.workspace_id,
       requester_id: user.id,
       title: title.trim(),
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       category,
       priority,
     })
-    logQuery(metrics, 'convex.tickets.createTicket', Math.round(performance.now() - queryStart))
+    logQuery(metrics, 'convex.mutations.createTicket', Math.round(performance.now() - queryStart))
 
     logQuerySummary('/api/portal/tickets', metrics)
     return NextResponse.json({ ticket }, { status: 201 })
