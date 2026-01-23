@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.1 Planning
+**Current focus:** v3.1 Full Convex + Clerk
 
 ## Current Position
 
-Phase: Not started
-Plan: Not started
-Status: Ready for next milestone
-Last activity: 2026-01-23 — v3.0 milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-01-23 — Milestone v3.1 started
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ (147 plans shipped)
 
@@ -129,4 +129,4 @@ None.
 - Grok: API access available (requires GROK_API_KEY)
 
 ---
-*Last updated: 2026-01-23 — v3.0 milestone complete, ready for v3.1 planning*
+*Last updated: 2026-01-23 — Milestone v3.1 started, researching*

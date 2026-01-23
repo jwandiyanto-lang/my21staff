@@ -102,15 +102,15 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 ### Active
 
-**v3.1 Planning (next milestone):**
-- Payment Integration (Midtrans)
-- AI Model Selection UI
-- Support ticketing (migrated to Convex)
+**v3.1 Full Convex + Clerk:**
+- [ ] Complete Supabase → Convex migration (all remaining tables)
+- [ ] Replace Supabase auth with Clerk
+- [ ] Fix n8n → CRM integration for Eagle leads
 
 ### Out of Scope
 
-- Payment Integration (Midtrans) — v3.1 focus was speed, now next
-- AI Model Selection UI — v3.1 focus was speed, now next
+- Payment Integration (Midtrans) — deferred to v3.2
+- AI Model Selection UI — deferred to v3.2
 - Visual workflow builder — future version
 - WhatsApp template messages (24h rule) — requires Meta approval process
 - Self-service onboarding — manual for now
@@ -172,5 +172,14 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | Central support hub | All client tickets → my21staff workspace | ✓ Good — v2.1 feature |
 | Convex migration (hybrid: Supabase auth + Convex data) | 25.4x faster (37ms vs 926ms P95) | ✓ Good — v3.0 achievement |
 
+## Current Milestone: v3.1 Full Convex + Clerk
+
+**Goal:** Complete the migration to Convex + Clerk, removing Supabase entirely from the stack and restoring Eagle's n8n lead flow.
+
+**Target features:**
+- Complete Supabase → Convex data migration (ARI tables, support tickets, all remaining)
+- Replace Supabase auth with Clerk (free tier)
+- Fix n8n webhook integration for Eagle Overseas leads
+
 ---
-*Last updated: 2026-01-23 after v3.0 milestone completion*
+*Last updated: 2026-01-23 after v3.1 milestone started*
