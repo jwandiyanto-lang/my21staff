@@ -28,10 +28,10 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
   2. JWT template configured with Convex issuer claim
   3. Convex auth.config.ts validates Clerk JWTs
   4. Test mutation succeeds with Clerk-issued token
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 01-01: TBD
+- [ ] 01-01-PLAN.md — Clerk app + JWT template + Convex auth config
 
 ### Phase 2: Middleware + Provider + Auth UI
 **Goal**: Users can sign in/out using Clerk components with route protection working
@@ -264,4 +264,4 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 ---
 
-*Last updated: 2026-01-23 — v3.1 roadmap created*
+*Last updated: 2026-01-23 — Phase 1 planned*
