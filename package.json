@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "CONVEX_DISABLE_TS=1 next build && npx convex deploy",
-    "deploy": "next build && npx convex deploy",
+    "build": "next build",
+    "deploy": "node scripts/deploy-convex.js",
     "start": "next start",
     "lint": "eslint",
     "analyze": "ANALYZE=true next build --webpack",
