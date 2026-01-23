@@ -9,24 +9,24 @@ Requirements for Full Convex + Clerk migration. Remove Supabase entirely.
 
 ### Auth Infrastructure
 
-- [ ] **AUTH-01**: Clerk application configured with JWT template for Convex
-- [ ] **AUTH-02**: Convex auth.config.ts updated for Clerk JWT validation
-- [ ] **AUTH-03**: ConvexProviderWithClerk replaces Supabase provider
-- [ ] **AUTH-04**: clerkMiddleware replaces Supabase middleware for route protection
+- [x] **AUTH-01**: Clerk application configured with JWT template for Convex
+- [x] **AUTH-02**: Convex auth.config.ts updated for Clerk JWT validation
+- [x] **AUTH-03**: ConvexProviderWithClerk replaces Supabase provider
+- [x] **AUTH-04**: clerkMiddleware replaces Supabase middleware for route protection
 
 ### User Migration
 
-- [ ] **USER-01**: Users table in Convex with Clerk ID as primary identifier
-- [ ] **USER-02**: Clerk webhook syncs user creation/updates to Convex
+- [x] **USER-01**: Users table in Convex with Clerk ID as primary identifier
+- [x] **USER-02**: Clerk webhook syncs user creation/updates to Convex
 - [ ] **USER-03**: Existing Supabase users imported to Clerk with password hashes
 - [ ] **USER-04**: User ID mapping preserves data relationships (Supabase UUID → Clerk ID)
 
 ### Auth UI
 
-- [ ] **UI-01**: Clerk SignIn component replaces custom login form
-- [ ] **UI-02**: Clerk SignUp component replaces custom signup form
-- [ ] **UI-03**: Clerk UserButton replaces custom profile menu
-- [ ] **UI-04**: Password reset works via Clerk (fixes broken Supabase flow)
+- [x] **UI-01**: Clerk SignIn component replaces custom login form
+- [x] **UI-02**: Clerk SignUp component replaces custom signup form
+- [x] **UI-03**: Clerk UserButton replaces custom profile menu
+- [x] **UI-04**: Password reset works via Clerk (fixes broken Supabase flow)
 
 ### Organization/Workspace
 
@@ -81,16 +81,16 @@ Deferred to v3.2 or later.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | 1 | Pending |
-| AUTH-02 | 1 | Pending |
-| AUTH-03 | 2 | Pending |
-| AUTH-04 | 2 | Pending |
-| UI-01 | 2 | Pending |
-| UI-02 | 2 | Pending |
-| UI-03 | 2 | Pending |
-| UI-04 | 2 | Pending |
-| USER-01 | 3 | Pending |
-| USER-02 | 3 | Pending |
+| AUTH-01 | 1 | Complete |
+| AUTH-02 | 1 | Complete |
+| AUTH-03 | 2 | Complete |
+| AUTH-04 | 2 | Complete |
+| UI-01 | 2 | Complete |
+| UI-02 | 2 | Complete |
+| UI-03 | 2 | Complete |
+| UI-04 | 2 | Complete |
+| USER-01 | 3 | Complete |
+| USER-02 | 3 | Complete |
 | USER-03 | 4 | Pending |
 | USER-04 | 4 | Pending |
 | ORG-01 | 4 | Pending |

@@ -61,8 +61,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Users table schema + CRUD mutations
-- [ ] 03-02-PLAN.md — Clerk webhook HTTP action + Dashboard config
+- [x] 03-01-PLAN.md — Users table schema + CRUD mutations ✓
+- [x] 03-02-PLAN.md — Clerk webhook HTTP action + Dashboard config ✓
 
 ### Phase 4: User Migration + Organizations
 **Goal**: Existing users migrated to Clerk with workspaces as organizations
