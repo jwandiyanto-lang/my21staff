@@ -266,4 +266,223 @@ export default defineSchema({
   })
     .index("by_org_user", ["organization_id", "clerk_user_id"])
     .index("by_user", ["clerk_user_id"]),
+
+  // ============================================
+  // ARI DESTINATIONS (University knowledge base)
+  // ============================================
+  ariDestinations: defineTable({
+    workspace_id: v.id("workspaces"),
+    country: v.string(),
+    city: v.optional(v.string()),
+    university_name: v.string(),
+    requirements: v.optional(v.any()), // JSONB: { ielts_min, gpa_min, budget_min, budget_max, deadline }
+    programs: v.optional(v.array(v.string())),
+    is_promoted: v.boolean(),
+    priority: v.number(),
+    notes: v.optional(v.string()),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_country", ["workspace_id", "country"]),
+
+  // ============================================
+  // ARI PAYMENTS (Payment records)
+  // ============================================
+  ariPayments: defineTable({
+    ari_conversation_id: v.id("ariConversations"),
+    workspace_id: v.id("workspaces"),
+    amount: v.number(),
+    currency: v.string(), // Default: 'IDR'
+    payment_method: v.optional(v.string()),
+    gateway: v.string(), // Default: 'midtrans'
+    gateway_transaction_id: v.optional(v.string()),
+    gateway_response: v.optional(v.any()),
+    status: v.string(), // 'pending', 'success', 'failed', 'expired', 'refunded'
+    expires_at: v.optional(v.number()),
+    paid_at: v.optional(v.number()),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_conversation", ["ari_conversation_id"])
+    .index("by_status", ["workspace_id", "status"]),
+
+  // ============================================
+  // ARI APPOINTMENTS (Consultation scheduling)
+  // ============================================
+  ariAppointments: defineTable({
+    ari_conversation_id: v.id("ariConversations"),
+    workspace_id: v.id("workspaces"),
+    payment_id: v.optional(v.id("ariPayments")),
+    consultant_id: v.optional(v.string()), // Clerk user ID
+    scheduled_at: v.number(),
+    duration_minutes: v.number(), // Default: 60
+    meeting_link: v.optional(v.string()),
+    status: v.string(), // 'scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'
+    reminder_sent_at: v.optional(v.number()),
+    notes: v.optional(v.string()),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_conversation", ["ari_conversation_id"])
+    .index("by_consultant", ["workspace_id", "consultant_id"]),
+
+  // ============================================
+  // ARI AI COMPARISON (A/B testing metrics)
+  // ============================================
+  ariAiComparison: defineTable({
+    workspace_id: v.id("workspaces"),
+    ai_model: v.string(),
+    conversation_count: v.number(),
+    avg_response_time_ms: v.optional(v.number()),
+    total_tokens_used: v.number(),
+    conversion_count: v.number(),
+    satisfaction_score: v.optional(v.number()),
+    period_start: v.optional(v.number()),
+    period_end: v.optional(v.number()),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace_model", ["workspace_id", "ai_model"]),
+
+  // ============================================
+  // ARI FLOW STAGES (Custom conversation stages)
+  // ============================================
+  ariFlowStages: defineTable({
+    workspace_id: v.id("workspaces"),
+    name: v.string(),
+    goal: v.string(),
+    sample_script: v.optional(v.string()),
+    exit_criteria: v.optional(v.string()),
+    stage_order: v.number(),
+    is_active: v.boolean(),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_order", ["workspace_id", "stage_order"]),
+
+  // ============================================
+  // ARI KNOWLEDGE CATEGORIES (Knowledge base categories)
+  // ============================================
+  ariKnowledgeCategories: defineTable({
+    workspace_id: v.id("workspaces"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    display_order: v.number(),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_order", ["workspace_id", "display_order"]),
+
+  // ============================================
+  // ARI KNOWLEDGE ENTRIES (Knowledge base entries)
+  // ============================================
+  ariKnowledgeEntries: defineTable({
+    workspace_id: v.id("workspaces"),
+    category_id: v.optional(v.id("ariKnowledgeCategories")),
+    title: v.string(),
+    content: v.string(),
+    is_active: v.boolean(),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_category", ["category_id"]),
+
+  // ============================================
+  // ARI SCORING CONFIG (Scoring thresholds)
+  // ============================================
+  ariScoringConfig: defineTable({
+    workspace_id: v.id("workspaces"),
+    hot_threshold: v.number(), // Default: 70
+    warm_threshold: v.number(), // Default: 40
+    weight_basic: v.number(), // Default: 25
+    weight_qualification: v.number(), // Default: 35
+    weight_document: v.number(), // Default: 30
+    weight_engagement: v.number(), // Default: 10
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // CONSULTANT SLOTS (Booking availability)
+  // ============================================
+  consultantSlots: defineTable({
+    workspace_id: v.id("workspaces"),
+    consultant_id: v.optional(v.string()), // Clerk user ID
+    day_of_week: v.number(), // 0-6 (Sunday-Saturday)
+    start_time: v.string(), // HH:MM format
+    end_time: v.string(), // HH:MM format
+    duration_minutes: v.number(), // Default: 60
+    booking_window_days: v.number(), // Default: 14
+    max_bookings_per_slot: v.number(), // Default: 1
+    is_active: v.boolean(),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_day", ["workspace_id", "day_of_week"]),
+
+  // ============================================
+  // ARTICLES (CMS articles)
+  // ============================================
+  articles: defineTable({
+    workspace_id: v.id("workspaces"),
+    title: v.string(),
+    slug: v.string(),
+    excerpt: v.optional(v.string()),
+    content: v.optional(v.string()),
+    cover_image_url: v.optional(v.string()),
+    status: v.string(), // 'draft', 'published'
+    published_at: v.optional(v.number()),
+    created_at: v.number(),
+    updated_at: v.number(),
+    supabaseId: v.optional(v.string()), // For migration reference
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_slug", ["workspace_id", "slug"])
+    .index("by_status", ["workspace_id", "status"]),
+
+  // ============================================
+  // WEBINARS (CMS webinars)
+  // ============================================
+  webinars: defineTable({
+    workspace_id: v.id("workspaces"),
+    title: v.string(),
+    slug: v.string(),
+    description: v.optional(v.string()),
+    cover_image_url: v.optional(v.string()),
+    scheduled_at: v.number(),
+    duration_minutes: v.number(), // Default: 60
+    meeting_url: v.optional(v.string()),
+    max_registrations: v.optional(v.number()),
+    status: v.string(), // 'draft', 'published', 'completed', 'cancelled'
+    published_at: v.optional(v.number()),
+    created_at: v.number(),
+    updated_at: v.number(),
+    supabaseId: v.optional(v.string()), // For migration reference
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_slug", ["workspace_id", "slug"])
+    .index("by_status", ["workspace_id", "status"])
+    .index("by_scheduled", ["workspace_id", "scheduled_at"]),
+
+  // ============================================
+  // WEBINAR REGISTRATIONS (Registration records)
+  // ============================================
+  webinarRegistrations: defineTable({
+    webinar_id: v.id("webinars"),
+    contact_id: v.id("contacts"),
+    workspace_id: v.id("workspaces"),
+    registered_at: v.number(),
+    attended: v.boolean(),
+  })
+    .index("by_webinar", ["webinar_id"])
+    .index("by_contact", ["contact_id"])
+    .index("by_workspace", ["workspace_id"]),
 });
