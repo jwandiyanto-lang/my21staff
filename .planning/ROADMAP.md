@@ -43,10 +43,11 @@ Plans:
   3. User profile menu uses Clerk UserButton
   4. Password reset works via Clerk (fixes broken Supabase flow)
   5. Protected routes redirect to sign-in when unauthenticated
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — Clerk infrastructure (packages, providers, middleware)
+- [ ] 02-02-PLAN.md — Auth UI pages (sign-in, sign-up, UserButton)
 
 ### Phase 3: Users Table + Clerk Webhook
 **Goal**: User data synced to Convex via Clerk webhook for efficient queries
@@ -258,10 +259,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
-| **v3.1 Full Convex + Clerk** | 1-7 | 0/TBD | In Progress | - |
+| **v3.1 Full Convex + Clerk** | 1-7 | 1/TBD | In Progress | - |
 
-**Total shipped:** 147 plans across 5 milestones
+**Total shipped:** 148 plans across 5 milestones
 
 ---
 
-*Last updated: 2026-01-23 — Phase 1 planned*
+*Last updated: 2026-01-23 — Phase 2 planned*
