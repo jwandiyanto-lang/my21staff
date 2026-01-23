@@ -7,6 +7,7 @@
 
 // @ts-nocheck - Schema types mismatch with generated Convex types
 import { query, internalQuery } from "./_generated/server";
+import { v } from "convex/values";
 
 // ============================================
 // TICKET QUERIES

@@ -1,12 +1,12 @@
-# Convex source files - managed separately
-# Keep _generated files for TypeScript types
-convex/_generated/api.d.ts
-convex/_generated/server.d.ts
-# Exclude other Convex files
+# Convex source files - exclude from Vercel (deployed separately)
+# Note: convex/_generated/ is NOT ignored - needed for TypeScript types
 convex/*.ts
 convex/*.tsx
 convex/*.js
 convex/*.json
+convex/http/
+convex/lib/
+convex/_internal/
 convex.config.ts
 
 # Environment files
