@@ -229,7 +229,7 @@ export default defineSchema({
   // WEBHOOK AUDIT (Debugging webhook events)
   // ============================================
   webhookAudit: defineTable({
-    event_type: v.string(),         // 'user.created', 'user.updated', 'user.deleted'
+    event_type: v.string(),         // 'user.created', 'user.updated', 'user.deleted', 'organization.*'
     clerk_id: v.optional(v.string()),
     payload: v.any(),               // Raw webhook payload (for debugging)
     status: v.string(),             // 'success', 'error'
@@ -239,4 +239,31 @@ export default defineSchema({
     .index("by_event_type", ["event_type"])
     .index("by_clerk_id", ["clerk_id"])
     .index("by_processed_at", ["processed_at"]),
+
+  // ============================================
+  // ORGANIZATIONS (Clerk-synced organizations)
+  // ============================================
+  organizations: defineTable({
+    clerk_org_id: v.string(),          // Clerk organization ID
+    workspace_id: v.optional(v.id("workspaces")),   // Link to existing workspace (from migration)
+    name: v.string(),
+    slug: v.string(),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_clerk_org_id", ["clerk_org_id"])
+    .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // ORGANIZATION MEMBERS (Clerk-synced membership)
+  // ============================================
+  organizationMembers: defineTable({
+    organization_id: v.id("organizations"),
+    clerk_user_id: v.string(),          // Clerk user ID
+    role: v.string(),                   // 'org:admin', 'org:member' (Clerk roles)
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_org_user", ["organization_id", "clerk_user_id"])
+    .index("by_user", ["clerk_user_id"]),
 });
