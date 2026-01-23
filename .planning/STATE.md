@@ -92,10 +92,9 @@ Key v3.0 decisions:
 - Forgot password email uses Supabase email (not Resend)
 - Resend/delete invitation auth bug
 - In-memory rate limiting won't scale multi-instance
-- Webhook POST deployment — code complete, requires Vercel deploy push
-- Kapso webhook URL update — manual step after deployment confirmed
+- Kapso webhook URL update — manual step to update Kapso dashboard
 - Legacy Next.js webhook route cleanup — after verification complete
-- ARI integration still uses Supabase for config queries — to be migrated after webhook fix
+- ARI integration still uses Supabase for config queries — to be migrated
 - Payment integration (Midtrans) — v3.1
 - AI model selection UI — v3.1
 
@@ -109,16 +108,17 @@ None.
 **Vercel CLI:** Installed and linked
 **Supabase Project:** my21staff (tcpqqublnkphuwhhwizx)
 
-**Convex Project:** intent-otter-212 (https://intent-otter-212.convex.cloud)
+**Convex Project:** pleasant-antelope-109 (https://pleasant-antelope-109.convex.cloud)
 
 **Environment Variables (Vercel):**
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
 - SUPABASE_SERVICE_ROLE_KEY
+- NEXT_PUBLIC_CONVEX_URL (https://pleasant-antelope-109.convex.cloud)
+- CONVEX_DEPLOY_KEY
 - NEXT_PUBLIC_PRICING_WORKSPACE_ID
 - ENCRYPTION_KEY
 - GROK_API_KEY (needed for ARI)
-- CONVEX_DEPLOY_KEY (stored in Vercel, not local)
 
 **Workspaces:**
 - My21Staff: `0318fda5-22c4-419b-bdd8-04471b818d17` (for pricing form leads)
