@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 4 of 7 (User Migration + Organizations)
-Plan: 04-01 complete - 1 of 6 plans done
+Plan: 04-02 complete - 2 of 6 plans done
 Status: In progress
-Last activity: 2026-01-23 - Completed 04-01-PLAN.md
+Last activity: 2026-01-23 - Completed 04-02-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████░░░░░ (153 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████░░░░░ (154 plans shipped)
 
 ## Performance Metrics
 
@@ -58,6 +58,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- Eagle-only org approach: Only migrate Eagle Overseas due to Clerk free plan limit (04-02)
+- My21Staff workspace stays in Supabase: Not converted to org, can add after plan upgrade (04-02)
 - external_id for ID mapping: Set Supabase UUID as external_id in Clerk (04-01)
 - skip_password_requirement: Migrated users use Forgot Password flow (04-01)
 - Manual PATCH for existing OAuth users: Update external_id instead of failing (04-01)
@@ -88,6 +90,17 @@ Recent v3.0 decisions affecting v3.1:
 
 **Mapping file:** `.planning/migrations/user-id-mapping.json`
 
+### Organization Migration Status
+
+**Migrated orgs:** 1/2 (eagle-only per user decision)
+
+| Workspace | Supabase ID | Clerk Org ID | Status |
+|-----------|-------------|--------------|--------|
+| Eagle Overseas | 25de3c4e-b9ca-4aff-9639-b35668f0a48a | org_38fXP0PN0rgNQ2coi1KsqozLJYb | Migrated |
+| My21Staff | 0318fda5-22c4-419b-bdd8-04471b818d17 | N/A | Not migrated (free plan limit) |
+
+**Mapping file:** `.planning/migrations/workspace-org-mapping.json`
+
 ### Blockers/Concerns
 
 **Convex CLI Bug:** `npx convex deploy` incorrectly reports env var not set (despite `env list` confirming it). Workaround: use Convex Dashboard to deploy or wait for CLI fix. Dev deployment works correctly.
@@ -95,8 +108,8 @@ Recent v3.0 decisions affecting v3.1:
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 04-01-PLAN.md
-Resume: `/gsd:execute-phase 4` to continue Phase 4 (next: 04-02 Organizations)
+Stopped at: Completed 04-02-PLAN.md
+Resume: `/gsd:execute-phase 4` to continue Phase 4 (next: 04-03 Data Migration)
 
 ---
-*Last updated: 2026-01-23 - Plan 04-01 complete*
+*Last updated: 2026-01-23 - Plan 04-02 complete*
