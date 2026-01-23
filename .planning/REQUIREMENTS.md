@@ -81,38 +81,38 @@ Deferred to v3.2 or later.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 6 | Pending |
-| AUTH-02 | Phase 6 | Pending |
-| AUTH-03 | Phase 7 | Pending |
-| AUTH-04 | Phase 7 | Pending |
-| UI-01 | Phase 7 | Pending |
-| UI-02 | Phase 7 | Pending |
-| UI-03 | Phase 7 | Pending |
-| UI-04 | Phase 7 | Pending |
-| USER-01 | Phase 8 | Pending |
-| USER-02 | Phase 8 | Pending |
-| USER-03 | Phase 9 | Pending |
-| USER-04 | Phase 9 | Pending |
-| ORG-01 | Phase 9 | Pending |
-| ORG-02 | Phase 9 | Pending |
-| ORG-03 | Phase 9 | Pending |
-| DATA-01 | Phase 10 | Pending |
-| DATA-02 | Phase 10 | Pending |
-| DATA-03 | Phase 10 | Pending |
-| DATA-04 | Phase 10 | Pending |
-| DATA-05 | Phase 10 | Pending |
-| N8N-01 | Phase 11 | Pending |
-| N8N-02 | Phase 11 | Pending |
-| N8N-03 | Phase 11 | Pending |
-| CLEAN-01 | Phase 12 | Pending |
-| CLEAN-02 | Phase 12 | Pending |
-| CLEAN-03 | Phase 12 | Pending |
+| AUTH-01 | 1 | Pending |
+| AUTH-02 | 1 | Pending |
+| AUTH-03 | 2 | Pending |
+| AUTH-04 | 2 | Pending |
+| UI-01 | 2 | Pending |
+| UI-02 | 2 | Pending |
+| UI-03 | 2 | Pending |
+| UI-04 | 2 | Pending |
+| USER-01 | 3 | Pending |
+| USER-02 | 3 | Pending |
+| USER-03 | 4 | Pending |
+| USER-04 | 4 | Pending |
+| ORG-01 | 4 | Pending |
+| ORG-02 | 4 | Pending |
+| ORG-03 | 4 | Pending |
+| DATA-01 | 5 | Pending |
+| DATA-02 | 5 | Pending |
+| DATA-03 | 5 | Pending |
+| DATA-04 | 5 | Pending |
+| DATA-05 | 5 | Pending |
+| N8N-01 | 6 | Pending |
+| N8N-02 | 6 | Pending |
+| N8N-03 | 6 | Pending |
+| CLEAN-01 | 7 | Pending |
+| CLEAN-02 | 7 | Pending |
+| CLEAN-03 | 7 | Pending |
 
 **Coverage:**
 - v3.1 requirements: 26 total
 - Mapped to phases: 26
-- Unmapped: 0
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-01-23*
-*Last updated: 2026-01-23 — Traceability updated for Phases 6-12*
+*Last updated: 2026-01-23 — Phases renumbered 1-7*

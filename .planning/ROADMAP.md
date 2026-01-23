@@ -11,7 +11,7 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 - v2.1 Client Launch Ready — Phases 1-9 (shipped 2026-01-20)
 - v2.2 ARI & User Flow — Phases 1-6 (shipped 2026-01-20)
 - v3.0 Performance & Speed — Phases 1-5 (shipped 2026-01-23)
-- **v3.1 Full Convex + Clerk** — Phases 6-12 (in progress)
+- **v3.1 Full Convex + Clerk** — Phases 1-7 (in progress)
 
 ---
 
@@ -19,7 +19,7 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 
 **Milestone Goal:** Complete the migration to Convex + Clerk, removing Supabase entirely from the stack and restoring Eagle's n8n lead flow.
 
-### Phase 6: Clerk Auth Infrastructure
+### Phase 1: Clerk Auth Infrastructure
 **Goal**: Clerk application configured with JWT template for Convex validation
 **Depends on**: v3.0 complete (Convex already deployed)
 **Requirements**: AUTH-01, AUTH-02
@@ -31,11 +31,11 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 **Plans**: TBD
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 01-01: TBD
 
-### Phase 7: Middleware + Provider + Auth UI
+### Phase 2: Middleware + Provider + Auth UI
 **Goal**: Users can sign in/out using Clerk components with route protection working
-**Depends on**: Phase 6
+**Depends on**: Phase 1
 **Requirements**: AUTH-03, AUTH-04, UI-01, UI-02, UI-03, UI-04
 **Success Criteria** (what must be TRUE):
   1. User can sign in with Clerk SignIn component
@@ -46,11 +46,11 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 07-01: TBD
+- [ ] 02-01: TBD
 
-### Phase 8: Users Table + Clerk Webhook
+### Phase 3: Users Table + Clerk Webhook
 **Goal**: User data synced to Convex via Clerk webhook for efficient queries
-**Depends on**: Phase 7
+**Depends on**: Phase 2
 **Requirements**: USER-01, USER-02
 **Success Criteria** (what must be TRUE):
   1. Users table exists in Convex with Clerk ID as primary identifier
@@ -60,11 +60,11 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 08-01: TBD
+- [ ] 03-01: TBD
 
-### Phase 9: User Migration + Organizations
+### Phase 4: User Migration + Organizations
 **Goal**: Existing users migrated to Clerk with workspaces as organizations
-**Depends on**: Phase 8
+**Depends on**: Phase 3
 **Requirements**: USER-03, USER-04, ORG-01, ORG-02, ORG-03
 **Success Criteria** (what must be TRUE):
   1. All existing Supabase users exist in Clerk (with external_id mapping)
@@ -75,11 +75,11 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 09-01: TBD
+- [ ] 04-01: TBD
 
-### Phase 10: Data Migration
+### Phase 5: Data Migration
 **Goal**: All remaining Supabase tables migrated to Convex
-**Depends on**: Phase 9
+**Depends on**: Phase 4
 **Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05
 **Success Criteria** (what must be TRUE):
   1. ARI tables migrated (config, sessions, scores, slots, etc.)
@@ -90,11 +90,11 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 10-01: TBD
+- [ ] 05-01: TBD
 
-### Phase 11: n8n Integration
+### Phase 6: n8n Integration
 **Goal**: Eagle's lead flow from Google Sheets works via Convex webhook
-**Depends on**: Phase 10 (data layer complete)
+**Depends on**: Phase 5 (data layer complete)
 **Requirements**: N8N-01, N8N-02, N8N-03
 **Success Criteria** (what must be TRUE):
   1. Convex HTTP action exists at /n8n-leads endpoint
@@ -103,11 +103,11 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 11-01: TBD
+- [ ] 06-01: TBD
 
-### Phase 12: Cleanup + Verification
+### Phase 7: Cleanup + Verification
 **Goal**: Supabase removed entirely, clean single-backend architecture
-**Depends on**: Phase 11
+**Depends on**: Phase 6
 **Requirements**: CLEAN-01, CLEAN-02, CLEAN-03
 **Success Criteria** (what must be TRUE):
   1. No Supabase client code remains in codebase
@@ -117,7 +117,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 07-01: TBD
 
 ---
 
@@ -258,7 +258,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
-| **v3.1 Full Convex + Clerk** | 6-12 | 0/TBD | In Progress | - |
+| **v3.1 Full Convex + Clerk** | 1-7 | 0/TBD | In Progress | - |
 
 **Total shipped:** 147 plans across 5 milestones
 
