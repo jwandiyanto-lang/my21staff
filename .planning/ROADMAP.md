@@ -46,8 +46,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Clerk infrastructure (packages, providers, middleware)
-- [ ] 02-02-PLAN.md — Auth UI pages (sign-in, sign-up, UserButton)
+- [x] 02-01-PLAN.md — Clerk infrastructure (packages, providers, middleware) ✓
+- [x] 02-02-PLAN.md — Auth UI pages (sign-in, sign-up, UserButton) ✓
 
 ### Phase 3: Users Table + Clerk Webhook
 **Goal**: User data synced to Convex via Clerk webhook for efficient queries
@@ -58,10 +58,11 @@ Plans:
   2. Clerk webhook syncs user.created events to Convex
   3. Clerk webhook syncs user.updated events to Convex
   4. User queries work without hitting Clerk API
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Users table schema + CRUD mutations
+- [ ] 03-02-PLAN.md — Clerk webhook HTTP action + Dashboard config
 
 ### Phase 4: User Migration + Organizations
 **Goal**: Existing users migrated to Clerk with workspaces as organizations
@@ -259,10 +260,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
-| **v3.1 Full Convex + Clerk** | 1-7 | 1/TBD | In Progress | - |
+| **v3.1 Full Convex + Clerk** | 1-7 | 3/TBD | In Progress | - |
 
-**Total shipped:** 148 plans across 5 milestones
+**Total shipped:** 150 plans across 5 milestones
 
 ---
 
-*Last updated: 2026-01-23 — Phase 2 planned*
+*Last updated: 2026-01-23 — Phase 3 planned*
