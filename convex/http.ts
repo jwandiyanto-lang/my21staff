@@ -47,7 +47,7 @@ http.route({
       console.log("[Kapso Webhook] Received payload (masked):", maskedPayload.substring(0, 500));
 
       // Schedule async processing
-      await ctx.scheduler.runAfter(0, api.kapso.processWebhook, {
+      await ctx.scheduler.runAfter(0, internal.kapso.processWebhook, {
         payload: payload,
         receivedAt: Date.now(),
       });
@@ -138,7 +138,7 @@ async function verifySvixSignature(
   // Import the key for HMAC-SHA256
   const key = await crypto.subtle.importKey(
     "raw",
-    secretBytes,
+    secretBytes.buffer as ArrayBuffer,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"]
