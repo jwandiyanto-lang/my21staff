@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 2 of 7 (Middleware Provider Auth UI)
-Plan: 02-01 complete
-Status: In progress - 1 of 3 plans complete
-Last activity: 2026-01-23 — Completed 02-01-PLAN.md
+Plan: 02-02 complete
+Status: In progress - 2 of 3 plans complete
+Last activity: 2026-01-23 — Completed 02-02-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██░░░░░░░░ (149 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██░░░░░░░░ (150 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 149
+- Total plans completed: 150
 - Average duration: ~14 min
-- Total execution time: ~37.2 hours
+- Total execution time: ~37.4 hours
 
 **By Milestone:**
 
@@ -59,6 +59,9 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
 - ClerkProvider -> ConvexProviderWithClerk -> QueryClientProvider hierarchy (02-01)
+- Clerk catch-all route pattern [[...sign-in]] for password reset and MFA flows (02-02)
+- Use Clerk appearance API for brand styling (white background, my21staff logo) (02-02)
+- Replace custom profile menus with Clerk UserButton (02-02)
 - Convex mutations co-located with queries in domain files (e.g., tickets.ts has both queries + mutations)
 - Use Id<'tickets'> casting for Convex types from string route params
 
@@ -74,8 +77,8 @@ Recent v3.0 decisions affecting v3.1:
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 02-01-PLAN.md
-Resume: `/gsd:execute-phase 2 --plan 02` to execute Plan 02 (Clerk auth pages)
+Stopped at: Completed 02-02-PLAN.md
+Resume: `/gsd:execute-phase 2 --plan 03` to execute Plan 03 (Users table + webhook)
 
 ---
-*Last updated: 2026-01-23 — Phase 2 Plan 01 complete*
+*Last updated: 2026-01-23 — Phase 2 Plan 02 complete*
