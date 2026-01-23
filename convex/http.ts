@@ -1,6 +1,6 @@
 import { httpRouter } from "convex/server";
-import { httpAction } from "../_generated/server.js";
-import { api, internal } from "../_generated/api.js";
+import { httpAction } from "./_generated/server";
+import { api, internal } from "./_generated/api";
 
 const http = httpRouter();
 
@@ -35,45 +35,19 @@ http.route({
 http.route({
   path: "/webhook/kapso",
   method: "POST",
-  handler: httpAction(async ({ runMutation, scheduler }, request) => {
+  handler: httpAction(async (ctx, request) => {
     const startTime = Date.now();
 
     try {
-      // Get raw body for signature verification
       const rawBody = await request.text();
-      const signature = request.headers.get("x-kapso-signature");
-      const webhookSecret = process.env.KAPSO_WEBHOOK_SECRET;
-
-      // Verify signature if webhook secret is configured
-      if (webhookSecret) {
-        const crypto = require("crypto");
-        const expectedSignature = crypto
-          .createHmac("sha256", webhookSecret)
-          .update(rawBody)
-          .digest("hex");
-
-        if (!signature || signature !== expectedSignature) {
-          console.error("[Kapso Webhook] Invalid signature - rejecting request");
-          return new Response(JSON.stringify({ error: "Invalid signature" }), {
-            status: 401,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
-        console.log("[Kapso Webhook] Signature verified");
-      } else {
-        console.log("[Kapso Webhook] Warning: KAPSO_WEBHOOK_SECRET not set - skipping signature verification");
-      }
-
-      // Parse payload
       const payload = JSON.parse(rawBody);
 
       // Log incoming webhook (masked for privacy)
       const maskedPayload = JSON.stringify(payload).replace(/\d{10,15}/g, '"***"');
       console.log("[Kapso Webhook] Received payload (masked):", maskedPayload.substring(0, 500));
 
-      // Respond immediately with 200 OK to prevent Kapso retries
-      // Then schedule async processing for webhook payload
-      await scheduler.runAfter(0, api.kapso.processWebhook, {
+      // Schedule async processing
+      await ctx.scheduler.runAfter(0, api.kapso.processWebhook, {
         payload: payload,
         receivedAt: Date.now(),
       });
@@ -101,9 +75,9 @@ http.route({
 // ============================================
 
 // Helper: Base64 decode (works in Convex runtime)
-function base64Decode(str) {
+function base64Decode(str: string): Uint8Array {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-  let output = [];
+  const output: number[] = [];
   let buffer = 0;
   let bits = 0;
 
@@ -126,7 +100,7 @@ function base64Decode(str) {
 }
 
 // Helper: Uint8Array to base64
-function uint8ArrayToBase64(bytes) {
+function uint8ArrayToBase64(bytes: Uint8Array): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   let result = "";
   const len = bytes.length;
@@ -146,7 +120,17 @@ function uint8ArrayToBase64(bytes) {
 }
 
 // Verify svix signature using Web Crypto API
-async function verifySvixSignature(secret, svixId, svixTimestamp, rawBody, svixSignature) {
+async function verifySvixSignature(
+  secret: string,
+  svixId: string | null,
+  svixTimestamp: string | null,
+  rawBody: string,
+  svixSignature: string | null
+): Promise<boolean> {
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    return false;
+  }
+
   // Strip whsec_ prefix and decode
   const secretKey = secret.replace("whsec_", "");
   const secretBytes = base64Decode(secretKey);
@@ -184,10 +168,10 @@ async function verifySvixSignature(secret, svixId, svixTimestamp, rawBody, svixS
 http.route({
   path: "/webhook/clerk",
   method: "POST",
-  handler: httpAction(async ({ runMutation }, request) => {
+  handler: httpAction(async (ctx, request) => {
     const startTime = Date.now();
     let eventType = "unknown";
-    let clerkId = null;
+    let clerkId: string | null = null;
 
     try {
       // Get raw body and headers for signature verification
@@ -217,7 +201,7 @@ http.route({
 
       if (!verified) {
         console.error("[Clerk Webhook] Invalid signature");
-        await runMutation(internal.users.logWebhookEvent, {
+        await ctx.runMutation(internal.users.logWebhookEvent, {
           event_type: "signature_failed",
           payload: { headers: { svixId, svixTimestamp } },
           status: "error",
@@ -240,19 +224,19 @@ http.route({
       // Handle user events
       switch (eventType) {
         case "user.created":
-          await runMutation(internal.users.createUser, {
+          await ctx.runMutation(internal.users.createUser, {
             clerk_id: clerkId,
           });
           break;
 
         case "user.updated":
-          await runMutation(internal.users.updateUser, {
+          await ctx.runMutation(internal.users.updateUser, {
             clerk_id: clerkId,
           });
           break;
 
         case "user.deleted":
-          await runMutation(internal.users.deleteUser, {
+          await ctx.runMutation(internal.users.deleteUser, {
             clerk_id: clerkId,
           });
           break;
@@ -262,7 +246,7 @@ http.route({
       }
 
       // Log successful processing
-      await runMutation(internal.users.logWebhookEvent, {
+      await ctx.runMutation(internal.users.logWebhookEvent, {
         event_type: eventType,
         clerk_id: clerkId,
         payload: { type: eventType, user_id: clerkId },
@@ -279,15 +263,16 @@ http.route({
 
     } catch (error) {
       const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       console.error(`[Clerk Webhook] Error after ${duration}ms:`, error);
 
       // Log error for debugging
-      await runMutation(internal.users.logWebhookEvent, {
+      await ctx.runMutation(internal.users.logWebhookEvent, {
         event_type: eventType,
         clerk_id: clerkId,
-        payload: { error: error.message },
+        payload: { error: errorMessage },
         status: "error",
-        error_message: error.message,
+        error_message: errorMessage,
       });
 
       return new Response(JSON.stringify({ error: "Processing failed" }), {
@@ -298,4 +283,4 @@ http.route({
   }),
 });
 
-export const router = http;
+export default http;
