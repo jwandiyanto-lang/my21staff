@@ -1,14 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { fetchMutation, fetchQuery } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
+import { type TicketCategory, type TicketPriority } from '@/lib/tickets'
+import {
+  withTiming,
+  createRequestMetrics,
+  logQuery,
+  logQuerySummary,
+} from '@/lib/instrumentation/with-timing'
+
 // Hardcoded for debugging - my21staff workspace ID
 const ADMIN_WORKSPACE_ID = '0318fda5-22c4-419b-bdd8-04471b818d17'
-import { type TicketCategory, type TicketPriority } from '@/lib/tickets'
 
 const VALID_CATEGORIES: TicketCategory[] = ['bug', 'feature', 'question']
 const VALID_PRIORITIES: TicketPriority[] = ['low', 'medium', 'high']
 
 // GET /api/portal/tickets - List client's own tickets
 export async function GET() {
+  const metrics = createRequestMetrics()
+
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -18,36 +29,25 @@ export async function GET() {
     }
 
     // Client sees ONLY their own tickets (requester_id = auth.uid())
-    const { data: tickets, error } = await supabase
-      .from('tickets')
-      .select(`
-        id,
-        title,
-        description,
-        category,
-        priority,
-        stage,
-        created_at,
-        updated_at,
-        closed_at
-      `)
-      .eq('requester_id', user.id)
-      .order('created_at', { ascending: false })
+    let queryStart = performance.now()
+    const tickets = await fetchQuery(api.tickets.listTicketsByRequester, {
+      requester_id: user.id,
+    })
+    logQuery(metrics, 'convex.tickets.listTicketsByRequester', Math.round(performance.now() - queryStart))
 
-    if (error) {
-      console.error('Error fetching tickets:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
+    logQuerySummary('/api/portal/tickets', metrics)
     return NextResponse.json({ tickets })
   } catch (error) {
     console.error('GET /api/portal/tickets error:', error)
+    logQuerySummary('/api/portal/tickets', metrics)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 // POST /api/portal/tickets - Create ticket routed to admin workspace
 export async function POST(request: NextRequest) {
+  const metrics = createRequestMetrics()
+
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -56,12 +56,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get user's workspace membership
+    // Get user's workspace membership from Supabase
+    let queryStart = performance.now()
     const { data: membership } = await supabase
       .from('workspace_members')
       .select('workspace_id')
       .eq('user_id', user.id)
       .single()
+    logQuery(metrics, 'supabase.workspace_members', Math.round(performance.now() - queryStart))
 
     if (!membership) {
       return NextResponse.json({ error: 'No workspace found' }, { status: 400 })
@@ -87,44 +89,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Priority must be one of: ${VALID_PRIORITIES.join(', ')}` }, { status: 400 })
     }
 
-    // Create ticket routed to admin workspace
-    const insertData = {
+    // Create ticket via Convex mutation
+    queryStart = performance.now()
+    const ticket = await fetchMutation(api.tickets.createTicket, {
       workspace_id: membership.workspace_id,
-      admin_workspace_id: ADMIN_WORKSPACE_ID,
       requester_id: user.id,
       title: title.trim(),
       description: description.trim(),
       category,
       priority,
-      stage: 'report'
-    }
-
-    console.log('Portal ticket insert data:', JSON.stringify(insertData))
-
-    const { data: ticket, error: createError } = await supabase
-      .from('tickets')
-      .insert(insertData)
-      .select('id, title, category, priority, stage, created_at, admin_workspace_id')
-      .single()
-
-    console.log('Portal ticket created:', JSON.stringify(ticket))
-
-    if (createError) {
-      console.error('Error creating ticket:', createError)
-      return NextResponse.json({ error: createError.message }, { status: 500 })
-    }
-
-    // Add initial status history
-    await supabase.from('ticket_status_history').insert({
-      ticket_id: ticket.id,
-      changed_by: user.id,
-      to_stage: 'report',
-      reason: 'Ticket created via portal'
     })
+    logQuery(metrics, 'convex.tickets.createTicket', Math.round(performance.now() - queryStart))
 
+    logQuerySummary('/api/portal/tickets', metrics)
     return NextResponse.json({ ticket }, { status: 201 })
   } catch (error) {
     console.error('POST /api/portal/tickets error:', error)
+    logQuerySummary('/api/portal/tickets', metrics)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+// Export wrapped handlers with timing instrumentation
+export const GET_TIMED = withTiming('/api/portal/tickets', GET)
+export const POST_TIMED = withTiming('/api/portal/tickets', POST)

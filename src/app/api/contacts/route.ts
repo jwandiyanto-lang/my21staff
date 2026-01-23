@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchMutation, fetchQuery } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import { requirePermission } from '@/lib/permissions/check'
+import {
+  withTiming,
+  createRequestMetrics,
+  logQuery,
+  logQuerySummary,
+} from '@/lib/instrumentation/with-timing'
 
 function isDevMode(): boolean {
   return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
@@ -9,6 +16,8 @@ function isDevMode(): boolean {
 
 // GET /api/contacts - Get paginated contacts for a workspace
 export async function GET(request: NextRequest) {
+  const metrics = createRequestMetrics()
+
   try {
     const { searchParams } = new URL(request.url)
     const workspaceId = searchParams.get('workspace')
@@ -24,35 +33,39 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ contacts: [] })
     }
 
-    // Verify membership
+    // Verify membership via Supabase
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) {
       return authResult
     }
 
-    const supabase = await createClient()
+    // Fetch contacts from Convex (client-side filtering for search/tags)
+    let queryStart = performance.now()
+    const workspace = await fetchQuery(api.workspaces.getById, {
+      id: workspaceId as any,
+    })
+    logQuery(metrics, 'convex.workspaces.getById', Math.round(performance.now() - queryStart))
 
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-
-    const { data: contacts, error } = await supabase
-      .from('contacts')
-      .select(`
-        id, name, phone, email, lead_status, lead_score, tags,
-        assigned_to, created_at, updated_at, metadata
-      `)
-      .eq('workspace_id', workspaceId)
-      .order('created_at', { ascending: false })
-      .range(from, to)
-
-    if (error) {
-      console.error('Error fetching contacts:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ contacts })
+    // Get all contacts for this workspace
+    // @ts-ignore - workspace_id is Id type
+    const contacts = await fetchQuery(api.contacts.listByWorkspace, {
+      workspace_id: workspace._id as any,
+    })
+
+    // Apply pagination
+    const from = (page - 1) * limit
+    const to = from + limit
+    const paginatedContacts = contacts.slice(from, to)
+
+    logQuerySummary('/api/contacts', metrics)
+    return NextResponse.json({ contacts: paginatedContacts })
   } catch (error) {
     console.error('GET /api/contacts error:', error)
+    logQuerySummary('/api/contacts', metrics)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -62,6 +75,8 @@ export async function GET(request: NextRequest) {
 
 // DELETE /api/contacts?id=xxx&workspace=yyy - Delete a contact (owner only)
 export async function DELETE(request: NextRequest) {
+  const metrics = createRequestMetrics()
+
   try {
     const { searchParams } = new URL(request.url)
     const contactId = searchParams.get('id')
@@ -74,7 +89,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Verify membership and get role
+    // Verify membership and get role via Supabase
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
@@ -86,37 +101,26 @@ export async function DELETE(request: NextRequest) {
     )
     if (permError) return permError
 
-    const supabase = await createClient()
+    // Delete contact via Convex mutation
+    let mutStart = performance.now()
+    await fetchMutation(api.contacts.deleteContact, {
+      contact_id: contactId,
+      workspace_id: workspaceId,
+    })
+    logQuery(metrics, 'convex.contacts.deleteContact', Math.round(performance.now() - mutStart))
 
-    // Verify contact belongs to this workspace
-    const { data: contact } = await supabase
-      .from('contacts')
-      .select('id')
-      .eq('id', contactId)
-      .eq('workspace_id', workspaceId)
-      .single()
-
-    if (!contact) {
-      return NextResponse.json({ error: 'Contact not found' }, { status: 404 })
-    }
-
-    // Delete the contact
-    const { error } = await supabase
-      .from('contacts')
-      .delete()
-      .eq('id', contactId)
-
-    if (error) {
-      console.error('Error deleting contact:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
+    logQuerySummary('/api/contacts', metrics)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('DELETE /api/contacts error:', error)
+    logQuerySummary('/api/contacts', metrics)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
   }
 }
+
+// Export wrapped handlers with timing instrumentation
+export const GET_TIMED = withTiming('/api/contacts', GET)
+export const DELETE_TIMED = withTiming('/api/contacts', DELETE)

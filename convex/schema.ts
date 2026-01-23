@@ -161,4 +161,55 @@ export default defineSchema({
   })
     .index("by_conversation_time", ["ari_conversation_id", "created_at"])
     .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // TICKETS (Support ticketing system)
+  // ============================================
+  tickets: defineTable({
+    workspace_id: v.id("workspaces"),
+    requester_id: v.string(), // Supabase user UUID
+    assigned_to: v.optional(v.string()), // Supabase user UUID of assigned member
+    title: v.string(),
+    description: v.string(),
+    category: v.string(), // 'bug', 'feature', 'question'
+    priority: v.string(), // 'low', 'medium', 'high'
+    stage: v.string(), // 'report', 'discuss', 'outcome', 'implementation', 'closed'
+    pending_approval: v.optional(v.boolean()), // For stage skip approval flow
+    pending_stage: v.optional(v.string()), // The stage awaiting approval
+    approval_requested_at: v.optional(v.number()),
+    reopen_token: v.optional(v.string()), // Token for anonymous reopen via email
+    closed_at: v.optional(v.number()),
+    created_at: v.number(),
+    updated_at: v.number(),
+    supabaseId: v.string(),
+  })
+    .index("by_workspace_stage", ["workspace_id", "stage"])
+    .index("by_workspace", ["workspace_id"])
+    .index("by_requester", ["requester_id"])
+    .index("by_assigned", ["assigned_to"]),
+
+  // ============================================
+  // TICKET COMMENTS (Discussion on tickets)
+  // ============================================
+  ticketComments: defineTable({
+    ticket_id: v.id("tickets"),
+    author_id: v.string(), // Supabase user UUID
+    content: v.string(),
+    is_stage_change: v.optional(v.boolean()), // True if comment is auto-generated for stage change
+    created_at: v.number(),
+  })
+    .index("by_ticket_time", ["ticket_id", "created_at"]),
+
+  // ============================================
+  // TICKET STATUS HISTORY (Audit trail)
+  // ============================================
+  ticketStatusHistory: defineTable({
+    ticket_id: v.id("tickets"),
+    changed_by: v.string(), // Supabase user UUID
+    from_stage: v.optional(v.string()),
+    to_stage: v.string(),
+    reason: v.optional(v.string()),
+    created_at: v.number(),
+  })
+    .index("by_ticket_time", ["ticket_id", "created_at"]),
 });
