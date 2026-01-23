@@ -620,3 +620,199 @@ export const deleteSlot = mutation({
     return { success: true };
   },
 });
+
+// ============================================
+// ARI CONVERSATIONS
+// ============================================
+
+/**
+ * Get ARI conversation by contact.
+ */
+export const getConversationByContact = query({
+  args: {
+    workspace_id: v.string(),
+    contact_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db
+      .query("ariConversations")
+      .withIndex("by_contact", (q) =>
+        q.eq("workspace_id", args.workspace_id as any).eq("contact_id", args.contact_id as any)
+      )
+      .first();
+
+    return conversation;
+  },
+});
+
+/**
+ * Create or update ARI conversation.
+ */
+export const upsertConversation = mutation({
+  args: {
+    workspace_id: v.string(),
+    contact_id: v.string(),
+    current_state: v.string(),
+    context: v.optional(v.any()),
+    last_message_at: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("ariConversations")
+      .withIndex("by_contact", (q) =>
+        q.eq("workspace_id", args.workspace_id as any).eq("contact_id", args.contact_id as any)
+      )
+      .first();
+
+    const now = Date.now();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        current_state: args.current_state,
+        context: args.context,
+        last_message_at: args.last_message_at || now,
+        updated_at: now,
+      });
+      return await ctx.db.get(existing._id);
+    } else {
+      const conversationId = await ctx.db.insert("ariConversations", {
+        workspace_id: args.workspace_id as any,
+        contact_id: args.contact_id as any,
+        current_state: args.current_state,
+        context: args.context || {},
+        last_message_at: args.last_message_at || now,
+        created_at: now,
+        updated_at: now,
+        supabaseId: null,
+      });
+      return await ctx.db.get(conversationId);
+    }
+  },
+});
+
+/**
+ * Update conversation state.
+ */
+export const updateConversationState = mutation({
+  args: {
+    conversation_id: v.string(),
+    current_state: v.string(),
+    context: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    await ctx.db.patch(args.conversation_id as any, {
+      current_state: args.current_state,
+      context: args.context,
+      last_message_at: now,
+      updated_at: now,
+    });
+    return await ctx.db.get(args.conversation_id as any);
+  },
+});
+
+// ============================================
+// ARI MESSAGES
+// ============================================
+
+/**
+ * Create ARI message.
+ */
+export const createMessage = mutation({
+  args: {
+    conversation_id: v.string(),
+    sender_type: v.string(),
+    content: v.string(),
+    metadata: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const messageId = await ctx.db.insert("ariMessages", {
+      conversation_id: args.conversation_id as any,
+      sender_type: args.sender_type,
+      content: args.content,
+      metadata: args.metadata || {},
+      created_at: now,
+      supabaseId: null,
+    });
+    return await ctx.db.get(messageId);
+  },
+});
+
+/**
+ * Get messages for a conversation.
+ */
+export const getConversationMessages = query({
+  args: {
+    conversation_id: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    let q = ctx.db
+      .query("ariMessages")
+      .withIndex("by_conversation_time", (q) =>
+        q.eq("conversation_id", args.conversation_id as any)
+      )
+      .order("desc");
+
+    if (args.limit) {
+      const messages = await q.take(args.limit);
+      return messages.reverse(); // Return oldest first
+    }
+
+    const messages = await q.collect();
+    return messages.reverse();
+  },
+});
+
+// ============================================
+// ARI APPOINTMENTS
+// ============================================
+
+/**
+ * Create appointment (handoff).
+ */
+export const createAppointment = mutation({
+  args: {
+    conversation_id: v.string(),
+    workspace_id: v.string(),
+    contact_id: v.string(),
+    slot_id: v.string(),
+    consultant_name: v.string(),
+    scheduled_at: v.number(),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const appointmentId = await ctx.db.insert("ariAppointments", {
+      conversation_id: args.conversation_id as any,
+      workspace_id: args.workspace_id as any,
+      contact_id: args.contact_id as any,
+      slot_id: args.slot_id as any,
+      consultant_name: args.consultant_name,
+      scheduled_at: args.scheduled_at,
+      status: "scheduled",
+      notes: args.notes || null,
+      created_at: now,
+      updated_at: now,
+      supabaseId: null,
+    });
+    return await ctx.db.get(appointmentId);
+  },
+});
+
+/**
+ * Get appointments for contact.
+ */
+export const getContactAppointments = query({
+  args: {
+    contact_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("ariAppointments")
+      .withIndex("by_contact", (q) => q.eq("contact_id", args.contact_id as any))
+      .order("desc")
+      .collect();
+  },
+});
