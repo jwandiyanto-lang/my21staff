@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 4 of 7 (User Migration + Organizations)
-Plan: 04-03 complete - 4 of 6 plans done
+Plan: 04-04 complete - 5 of 6 plans done
 Status: In progress
-Last activity: 2026-01-23 - Completed 04-03-PLAN.md (Core Table User ID Migration)
+Last activity: 2026-01-23 - Completed 04-04-PLAN.md (Organization Webhooks)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████░░░░ (156 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ███████░░░ (157 plans shipped)
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- Deferred webhook config: Organization webhooks configured at end of phase, not blocking (04-04)
 - Eagle-only org approach: Only migrate Eagle Overseas due to Clerk free plan limit (04-02)
 - My21Staff workspace stays in Supabase: Not converted to org, can add after plan upgrade (04-02)
 - external_id for ID mapping: Set Supabase UUID as external_id in Clerk (04-01)
@@ -134,11 +135,19 @@ Recent v3.0 decisions affecting v3.1:
 **Migration script:** `scripts/update-convex-user-ids.ts` (verified working)
 **Report:** `.planning/migrations/user-id-update-report-core.json`
 
+### Pending User Setup
+
+**Clerk Dashboard - Organization Webhooks (deferred from 04-04):**
+1. Go to Clerk Dashboard -> Webhooks
+2. Edit webhook: pleasant-antelope-109.convex.site/webhook/clerk
+3. Add events: organization.created, organization.updated, organization.deleted, organizationMembership.created, organizationMembership.updated, organizationMembership.deleted
+4. Save changes
+
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 04-03-PLAN.md
-Resume: `/gsd:execute-phase 4` to continue Phase 4 (next: 04-04 Data Migration)
+Stopped at: Completed 04-04-PLAN.md
+Resume: `/gsd:execute-phase 4` to continue Phase 4 (next: 04-05 Data Migration)
 
 ---
-*Last updated: 2026-01-23 - Plan 04-03 complete*
+*Last updated: 2026-01-23 - Plan 04-04 complete*
