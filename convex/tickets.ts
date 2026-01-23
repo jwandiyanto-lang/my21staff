@@ -18,12 +18,12 @@ import { query, internalQuery } from "./_generated/server";
  * @param ticket_id - The ticket ID to fetch
  * @returns The ticket document or null
  */
-export const getTicketById = internalQuery({
+export const getTicketById = query({
   args: {
     ticket_id: v.id("tickets"),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.ticket_id as any);
+    return await ctx.db.get(args.ticket_id);
   },
 });
 
@@ -69,7 +69,7 @@ export const listTickets = internalQuery({
  * @param requester_id - The user ID
  * @returns Array of ticket documents for this requester
  */
-export const listTicketsByRequester = internalQuery({
+export const listTicketsByRequester = query({
   args: {
     requester_id: v.string(),
   },
@@ -94,7 +94,7 @@ export const listTicketsByRequester = internalQuery({
  * @param ticket_id - The ticket
  * @returns Array of comment documents
  */
-export const listTicketComments = internalQuery({
+export const listTicketComments = query({
   args: {
     ticket_id: v.id("tickets"),
   },
@@ -119,7 +119,7 @@ export const listTicketComments = internalQuery({
  * @param ticket_id - The ticket
  * @returns Array of history documents
  */
-export const getTicketStatusHistory = internalQuery({
+export const getTicketStatusHistory = query({
   args: {
     ticket_id: v.id("tickets"),
   },

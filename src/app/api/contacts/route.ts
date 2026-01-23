@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     // Fetch contacts from Convex (client-side filtering for search/tags)
     let queryStart = performance.now()
     const workspace = await fetchQuery(api.workspaces.getById, {
-      id: workspaceId as any,
+      id: workspaceId,
     })
     logQuery(metrics, 'convex.workspaces.getById', Math.round(performance.now() - queryStart))
 

@@ -18,12 +18,12 @@ import { v } from "convex/values";
  * @param workspace_id - The workspace ID to look up
  * @returns Workspace document with settings or null if not found
  */
-export const getById = internalQuery({
+export const getById = query({
   args: {
-    workspace_id: v.string(),
+    id: v.string(),
   },
   handler: async (ctx, args) => {
-    const workspace = await ctx.db.get(args.workspace_id as any);
+    const workspace = await ctx.db.get(args.id as any);
     return workspace;
   },
 });
