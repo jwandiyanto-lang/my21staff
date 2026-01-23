@@ -390,3 +390,80 @@ export const countWebinarRegistrations = query({
     return registrations.length;
   },
 });
+
+// ============================================
+// PUBLIC MUTATIONS (for public webinar registration)
+// ============================================
+
+/**
+ * Find or create contact by phone (PUBLIC - for webinar registration).
+ *
+ * This is used by the public webinar registration endpoint.
+ * No authentication required.
+ *
+ * @param workspaceId - The workspace ID
+ * @param phone - The phone number
+ * @param name - Contact name
+ * @param email - Optional email
+ * @returns Contact ID (existing or newly created)
+ */
+export const findOrCreateContact = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    phone: v.string(),
+    name: v.string(),
+    email: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Check if contact exists
+    const existing = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace_phone", (q) =>
+        q.eq("workspace_id", args.workspaceId).eq("phone", args.phone)
+      )
+      .first();
+
+    if (existing) {
+      // Update name/email if they were empty
+      const updates: any = {};
+      if (!existing.name && args.name) {
+        updates.name = args.name;
+      }
+      if (!existing.email && args.email) {
+        updates.email = args.email;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await ctx.db.patch(existing._id, {
+          ...updates,
+          updated_at: Date.now(),
+        });
+      }
+
+      return existing._id;
+    }
+
+    // Create new contact
+    const now = Date.now();
+    const contactId = await ctx.db.insert("contacts", {
+      workspace_id: args.workspaceId,
+      phone: args.phone,
+      phone_normalized: args.phone, // Simple normalization for now
+      name: args.name,
+      kapso_name: undefined,
+      email: args.email,
+      lead_score: 50, // Default score for webinar registrations
+      lead_status: "new",
+      tags: ["webinar-lead"],
+      assigned_to: undefined,
+      source: "webinar_registration",
+      metadata: {},
+      cache_updated_at: undefined,
+      created_at: now,
+      updated_at: now,
+      supabaseId: "", // No Supabase ID for new contacts
+    });
+
+    return contactId;
+  },
+});

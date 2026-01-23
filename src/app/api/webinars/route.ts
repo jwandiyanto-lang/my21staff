@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
+import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import type { Webinar } from '@/types/database'
-
-function isDevMode(): boolean {
-  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
-}
 
 function slugify(text: string): string {
   return text
@@ -15,10 +13,6 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-// Type assertion helper for webinars table (until Supabase types are regenerated)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type WebinarClient = any
-
 // Extended type with registration count
 interface WebinarWithCount extends Webinar {
   registration_count: number
@@ -28,112 +22,52 @@ interface WebinarWithCount extends Webinar {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const workspaceId = searchParams.get('workspace_id')
+    const workspaceSlug = searchParams.get('workspace_id')
 
-    if (!workspaceId) {
+    if (!workspaceSlug) {
       return NextResponse.json(
         { error: 'workspace_id is required' },
         { status: 400 }
       )
     }
 
-    if (isDevMode()) {
-      // Dev mode: return mock webinars with registration counts
-      const mockWebinars: WebinarWithCount[] = [
-        {
-          id: 'webinar-1',
-          workspace_id: workspaceId,
-          title: 'Study in Australia Info Session',
-          slug: 'study-australia-info',
-          description: 'Learn about studying in Australia, visa requirements, and scholarship opportunities.',
-          cover_image_url: null,
-          scheduled_at: '2026-01-25T14:00:00Z',
-          duration_minutes: 60,
-          meeting_url: 'https://zoom.us/j/example',
-          max_registrations: 100,
-          status: 'published',
-          published_at: '2026-01-14T10:00:00Z',
-          created_at: '2026-01-13T10:00:00Z',
-          updated_at: '2026-01-14T10:00:00Z',
-          registration_count: 12,
-        },
-        {
-          id: 'webinar-2',
-          workspace_id: workspaceId,
-          title: 'UK University Application Workshop',
-          slug: 'uk-application-workshop',
-          description: 'Hands-on workshop for applying to UK universities through UCAS.',
-          cover_image_url: null,
-          scheduled_at: '2026-02-01T15:00:00Z',
-          duration_minutes: 90,
-          meeting_url: null,
-          max_registrations: 50,
-          status: 'draft',
-          published_at: null,
-          created_at: '2026-01-14T10:00:00Z',
-          updated_at: '2026-01-14T10:00:00Z',
-          registration_count: 0,
-        },
-      ]
-      return NextResponse.json(mockWebinars)
+    // Verify workspace membership
+    const authResult = await requireWorkspaceMembership(workspaceSlug)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
 
-    const supabase = await createClient()
+    // Get workspace by slug
+    const workspace = await fetchQuery(api.workspaces.getBySlug, {
+      slug: workspaceSlug,
+    })
 
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    if (!workspace) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Workspace not found' },
+        { status: 404 }
       )
     }
 
-    // Check user has access to workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', workspaceId)
-      .eq('user_id', user.id)
-      .single()
+    // Fetch webinars from Convex
+    const webinars = await fetchQuery(api.cms.listWebinars, {
+      workspaceId: workspace._id as any,
+    })
 
-    if (!membership) {
-      return NextResponse.json(
-        { error: 'Not authorized to access this workspace' },
-        { status: 403 }
-      )
-    }
+    // Fetch registration counts for each webinar in parallel
+    const webinarsWithCounts = await Promise.all(
+      webinars.map(async (webinar: any) => {
+        const count = await fetchQuery(api.cms.countWebinarRegistrations, {
+          webinarId: webinar._id as any,
+        })
+        return {
+          ...webinar,
+          registration_count: count,
+        }
+      })
+    )
 
-    // Fetch webinars with registration counts using a left join
-    const client = supabase as unknown as WebinarClient
-    const { data: webinars, error } = await client
-      .from('webinars')
-      .select(`
-        id, title, slug, description, cover_image_url,
-        scheduled_at, duration_minutes, meeting_url,
-        max_registrations, status, published_at,
-        created_at, updated_at,
-        webinar_registrations (count)
-      `)
-      .eq('workspace_id', workspaceId)
-      .order('scheduled_at', { ascending: false })
-
-    if (error) {
-      console.error('Fetch webinars error:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch webinars' },
-        { status: 500 }
-      )
-    }
-
-    // Transform the response to include registration_count as a flat field
-    const webinarsWithCount: WebinarWithCount[] = webinars.map((w: { webinar_registrations: { count: number }[] } & Webinar) => ({
-      ...w,
-      registration_count: w.webinar_registrations?.[0]?.count ?? 0,
-      webinar_registrations: undefined, // Remove the nested object
-    }))
-
-    return NextResponse.json(webinarsWithCount)
+    return NextResponse.json(webinarsWithCounts)
   } catch (error) {
     console.error('GET /api/webinars error:', error)
     return NextResponse.json(
@@ -182,91 +116,52 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verify workspace membership
+    const authResult = await requireWorkspaceMembership(workspace_id)
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+
+    // Get workspace by slug
+    const workspace = await fetchQuery(api.workspaces.getBySlug, {
+      slug: workspace_id,
+    })
+
+    if (!workspace) {
+      return NextResponse.json(
+        { error: 'Workspace not found' },
+        { status: 404 }
+      )
+    }
+
     // Generate slug if not provided
     const finalSlug = slug?.trim() || slugify(title)
 
-    if (isDevMode()) {
-      // Dev mode: return mock created webinar
-      const now = new Date().toISOString()
-      const mockWebinar: Webinar = {
-        id: `webinar-${Date.now()}`,
-        workspace_id,
-        title: title.trim(),
-        slug: finalSlug,
-        description: description?.trim() || null,
-        cover_image_url: cover_image_url?.trim() || null,
-        scheduled_at,
-        duration_minutes: duration_minutes || 60,
-        meeting_url: meeting_url?.trim() || null,
-        max_registrations: max_registrations || null,
-        status: status || 'draft',
-        published_at: status === 'published' ? now : null,
-        created_at: now,
-        updated_at: now,
-      }
-      return NextResponse.json(mockWebinar, { status: 201 })
-    }
+    // Convert ISO string to timestamp if needed
+    const scheduledTimestamp = typeof scheduled_at === 'string'
+      ? new Date(scheduled_at).getTime()
+      : scheduled_at
 
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Check user has access to workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', workspace_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json(
-        { error: 'Not authorized to access this workspace' },
-        { status: 403 }
-      )
-    }
-
-    const now = new Date().toISOString()
-    const webinarData = {
-      workspace_id,
+    // Create webinar in Convex
+    const webinarId = await fetchMutation(api.cms.createWebinar, {
+      workspaceId: workspace._id as any,
       title: title.trim(),
       slug: finalSlug,
-      description: description?.trim() || null,
-      cover_image_url: cover_image_url?.trim() || null,
-      scheduled_at,
+      description: description?.trim() || undefined,
+      cover_image_url: cover_image_url?.trim() || undefined,
+      scheduled_at: scheduledTimestamp,
       duration_minutes: duration_minutes || 60,
-      meeting_url: meeting_url?.trim() || null,
-      max_registrations: max_registrations || null,
+      meeting_url: meeting_url?.trim() || undefined,
+      max_registrations: max_registrations || undefined,
       status: status || 'draft',
-      published_at: status === 'published' ? now : null,
-      created_at: now,
-      updated_at: now,
-    }
+    })
 
-    // Insert webinar
-    const client = supabase as unknown as WebinarClient
-    const { data: webinar, error } = await client
-      .from('webinars')
-      .insert(webinarData)
-      .select()
-      .single()
+    // Fetch created webinar to return it
+    const webinar = await fetchQuery(api.cms.getWebinar, {
+      webinarId: webinarId as any,
+    })
 
-    if (error) {
-      console.error('Create webinar error:', error)
-      return NextResponse.json(
-        { error: 'Failed to create webinar' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json(webinar as Webinar, { status: 201 })
+    return NextResponse.json(webinar, { status: 201 })
   } catch (error) {
     console.error('POST /api/webinars error:', error)
     return NextResponse.json(

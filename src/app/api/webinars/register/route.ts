@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import { rateLimit } from '@/lib/rate-limit'
-
-function isDevMode(): boolean {
-  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
-}
-
-// Type assertion helper (until Supabase types are regenerated)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type DatabaseClient = any
 
 /**
  * POST /api/webinars/register
@@ -53,40 +46,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Normalize phone number - remove spaces and ensure it starts with +
+    // Normalize phone number - remove spaces
     const normalizedPhone = phone.trim().replace(/\s+/g, '')
 
-    if (isDevMode()) {
-      // Dev mode: return mock success
-      const now = new Date().toISOString()
-      return NextResponse.json({
-        success: true,
-        registration_id: `reg-${Date.now()}`,
-        contact_id: `contact-${Date.now()}`,
-        is_new_contact: true,
-        message: 'Registration successful (dev mode)',
-        created_at: now,
-      }, { status: 201 })
-    }
-
-    const supabase = await createClient()
-    const client = supabase as unknown as DatabaseClient
-
     // Step 1: Validate webinar exists and is published
-    const { data: webinar, error: webinarError } = await client
-      .from('webinars')
-      .select(`
-        id,
-        workspace_id,
-        status,
-        max_registrations,
-        scheduled_at,
-        webinar_registrations (count)
-      `)
-      .eq('id', webinar_id)
-      .single()
+    const webinar = await fetchQuery(api.cms.getWebinar, {
+      webinarId: webinar_id as any,
+    })
 
-    if (webinarError || !webinar) {
+    if (!webinar) {
       return NextResponse.json(
         { error: 'Webinar not found' },
         { status: 404 }
@@ -101,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if webinar is in the past
-    if (new Date(webinar.scheduled_at) < new Date()) {
+    if (webinar.scheduled_at < Date.now()) {
       return NextResponse.json(
         { error: 'This webinar has already ended' },
         { status: 400 }
@@ -112,126 +80,47 @@ export async function POST(request: NextRequest) {
     const actualWorkspaceId = workspace_id || webinar.workspace_id
 
     // Step 2: Check registration limit
-    const currentRegistrations = webinar.webinar_registrations?.[0]?.count ?? 0
-    if (webinar.max_registrations && currentRegistrations >= webinar.max_registrations) {
-      return NextResponse.json(
-        { error: 'This webinar is at full capacity' },
-        { status: 400 }
-      )
-    }
-
-    // Step 3: Check if contact exists by phone in workspace
-    const { data: existingContact } = await supabase
-      .from('contacts')
-      .select('id, name, email')
-      .eq('workspace_id', actualWorkspaceId)
-      .eq('phone', normalizedPhone)
-      .single()
-
-    let contactId: string
-    let isNewContact = false
-
-    if (existingContact) {
-      // Contact exists - use existing contact_id
-      contactId = existingContact.id
-
-      // Optionally update name/email if they were empty
-      const updates: Record<string, string> = {}
-      if (!existingContact.name && name.trim()) {
-        updates.name = name.trim()
-      }
-      if (!existingContact.email && email?.trim()) {
-        updates.email = email.trim()
-      }
-
-      if (Object.keys(updates).length > 0) {
-        await supabase
-          .from('contacts')
-          .update({
-            ...updates,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', contactId)
-      }
-    } else {
-      // Create new contact - THIS IS THE LEAD GENERATION!
-      const now = new Date().toISOString()
-      const { data: newContact, error: contactError } = await supabase
-        .from('contacts')
-        .insert({
-          workspace_id: actualWorkspaceId,
-          phone: normalizedPhone,
-          name: name.trim(),
-          email: email?.trim() || null,
-          lead_score: 50, // Default score for webinar registrations
-          lead_status: 'new',
-          tags: ['webinar-lead'],
-          metadata: {
-            source: 'webinar_registration',
-            webinar_id: webinar_id,
-          },
-          created_at: now,
-          updated_at: now,
-        })
-        .select('id')
-        .single()
-
-      if (contactError || !newContact) {
-        console.error('Create contact error:', contactError)
+    if (webinar.max_registrations) {
+      const currentRegistrations = await fetchQuery(api.cms.countWebinarRegistrations, {
+        webinarId: webinar_id as any,
+      })
+      if (currentRegistrations >= webinar.max_registrations) {
         return NextResponse.json(
-          { error: 'Failed to create contact' },
-          { status: 500 }
+          { error: 'This webinar is at full capacity' },
+          { status: 400 }
         )
       }
-
-      contactId = newContact.id
-      isNewContact = true
     }
 
-    // Step 4: Check if already registered for this webinar
-    const { data: existingRegistration } = await client
-      .from('webinar_registrations')
-      .select('id')
-      .eq('webinar_id', webinar_id)
-      .eq('contact_id', contactId)
-      .single()
+    // Step 3: Find or create contact (PUBLIC mutation - no auth required)
+    const contactId = await fetchMutation(api.cms.findOrCreateContact, {
+      workspaceId: actualWorkspaceId as any,
+      phone: normalizedPhone,
+      name: name.trim(),
+      email: email?.trim() || undefined,
+    })
 
-    if (existingRegistration) {
-      return NextResponse.json(
-        { error: 'You are already registered for this webinar' },
-        { status: 400 }
-      )
-    }
+    // Check if this was a new contact (for response)
+    const contact = await fetchQuery(api.contacts.getByPhone, {
+      phone: normalizedPhone,
+      workspace_id: actualWorkspaceId,
+    })
+    const isNewContact = contact ? (Date.now() - contact.created_at < 1000) : false
 
-    // Step 5: Create webinar_registration record
-    const now = new Date().toISOString()
-    const { data: registration, error: regError } = await client
-      .from('webinar_registrations')
-      .insert({
-        webinar_id: webinar_id,
-        contact_id: contactId,
-        workspace_id: actualWorkspaceId,
-        registered_at: now,
-        attended: false,
-      })
-      .select('id')
-      .single()
-
-    if (regError || !registration) {
-      console.error('Create registration error:', regError)
-      return NextResponse.json(
-        { error: 'Failed to create registration' },
-        { status: 500 }
-      )
-    }
+    // Step 4 & 5: Register for webinar (checks for duplicates internally)
+    const registrationId = await fetchMutation(api.cms.registerForWebinar, {
+      webinarId: webinar_id as any,
+      contactId: contactId as any,
+      workspaceId: actualWorkspaceId as any,
+    })
 
     return NextResponse.json({
       success: true,
-      registration_id: registration.id,
+      registration_id: registrationId,
       contact_id: contactId,
       is_new_contact: isNewContact,
       message: 'Registration successful',
-      created_at: now,
+      created_at: new Date().toISOString(),
     }, { status: 201 })
   } catch (error) {
     console.error('POST /api/webinars/register error:', error)
