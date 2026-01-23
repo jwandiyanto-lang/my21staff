@@ -64,7 +64,7 @@ Plans:
 - [x] 03-01-PLAN.md — Users table schema + CRUD mutations ✓
 - [x] 03-02-PLAN.md — Clerk webhook HTTP action + Dashboard config ✓
 
-### Phase 4: User Migration + Organizations
+### Phase 4: User Migration + Organizations - CODE COMPLETE
 **Goal**: Existing users migrated to Clerk with workspaces as organizations
 **Depends on**: Phase 3
 **Requirements**: USER-03, USER-04, ORG-01, ORG-02, ORG-03
@@ -77,12 +77,16 @@ Plans:
 **Plans**: 6 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Migrate Supabase users to Clerk with ID mapping
-- [ ] 04-02-PLAN.md — Convert workspaces to Clerk organizations
-- [ ] 04-03-PLAN.md — Update core Convex tables with Clerk user IDs
-- [ ] 04-03b-PLAN.md — Update ticket Convex tables with Clerk user IDs
-- [ ] 04-04-PLAN.md — Organization webhooks and member sync
-- [ ] 04-05-PLAN.md — Team management UI with Clerk OrganizationProfile
+- [x] 04-01-PLAN.md — Migrate Supabase users to Clerk with ID mapping ✓
+- [x] 04-02-PLAN.md — Convert workspaces to Clerk organizations ✓
+- [x] 04-03-PLAN.md — Update core Convex tables with Clerk user IDs ✓
+- [x] 04-03b-PLAN.md — Update ticket Convex tables with Clerk user IDs ✓
+- [x] 04-04-PLAN.md — Organization webhooks and member sync ✓
+- [x] 04-05-PLAN.md — Team management UI with Clerk OrganizationProfile ✓
+
+**Pending Setup (before verification):**
+- Configure organization webhook events in Clerk Dashboard
+- Test team page at /eagle-overseas/team
 
 ### Phase 5: Data Migration
 **Goal**: All remaining Supabase tables migrated to Convex
