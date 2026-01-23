@@ -89,7 +89,7 @@ Plans:
 - Test team page at /eagle-overseas/team
 
 ### Phase 5: Data Migration
-**Goal**: All remaining Supabase tables migrated to Convex
+**Goal**: All remaining Supabase tables migrated to Convex, all API routes updated
 **Depends on**: Phase 4
 **Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05
 **Success Criteria** (what must be TRUE):
@@ -98,10 +98,14 @@ Plans:
   3. CMS tables migrated (articles, webinars)
   4. Utility tables migrated (profiles, appointments)
   5. All API routes use Convex instead of Supabase
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — Convex schema extension (12 new tables)
+- [ ] 05-02-PLAN.md — Migration scripts + data transfer
+- [ ] 05-03-PLAN.md — ARI API routes update
+- [ ] 05-04-PLAN.md — CMS API routes update (articles, webinars)
+- [ ] 05-05-PLAN.md — Tickets + ARI processor final migration
 
 ### Phase 6: n8n Integration
 **Goal**: Eagle's lead flow from Google Sheets works via Convex webhook
@@ -251,7 +255,7 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 **Key accomplishments:**
 - Lead database with form submissions, status badges, filters, detail sheet
 - Two-panel inbox with message history from Kapso
-- Send messages via Kapso API with optimistic UI
+- Send messages via Convex API with optimistic UI
 - Website manager CMS with articles, webinars, public pages
 
 Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
@@ -269,10 +273,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
-| **v3.1 Full Convex + Clerk** | 1-7 | 10/TBD | In Progress | - |
+| **v3.1 Full Convex + Clerk** | 1-7 | 15/TBD | In Progress | - |
 
 **Total shipped:** 152 plans across 5 milestones
 
 ---
 
-*Last updated: 2026-01-23 — Phase 4 revised (split 04-03 into core + tickets)*
+*Last updated: 2026-01-23 — Phase 5 planned (5 plans)*
