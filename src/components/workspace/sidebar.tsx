@@ -8,12 +8,12 @@ import {
   Users,
   MessageCircle,
   Settings,
-  User,
   ChevronLeft,
   ChevronRight,
   Headphones,
   BookOpen,
 } from 'lucide-react'
+import { UserButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
 import { WorkspaceSwitcher } from './workspace-switcher'
 import { createClient } from '@/lib/supabase/client'
@@ -213,15 +213,26 @@ export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSideba
       <div className={cn('p-2', collapsed ? 'px-2' : 'p-4')}>
         {collapsed ? (
           <div className="flex justify-center p-2">
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-              <User className="w-5 h-5 text-white/70" />
-            </div>
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: 'w-10 h-10',
+                },
+              }}
+              afterSignOutUrl="/"
+            />
           </div>
         ) : (
           <div className="flex items-center gap-3 p-3 bg-white/10 rounded-2xl border border-white/10">
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-              <User className="w-5 h-5 text-white/70" />
-            </div>
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: 'w-10 h-10',
+                },
+              }}
+              afterSignOutUrl="/"
+              showName={false}
+            />
             <div className="overflow-hidden">
               <p className="text-sm font-bold text-white truncate">{workspace.name}</p>
               <p className="text-[10px] text-white/50 font-mono uppercase tracking-tighter">
