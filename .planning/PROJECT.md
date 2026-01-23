@@ -88,14 +88,17 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 ### Active
 
 **Performance & Speed (v3.0):**
-- [ ] Convex spike — convert `/api/contacts/by-phone` and compare performance
-- [ ] Decision gate — compare Convex vs optimized Supabase response times
-- [ ] If Convex wins: hybrid migration (Supabase auth + Convex data layer)
-- [ ] If comparable: Supabase optimizations (nested queries, indexes, column selection)
-- [ ] Performance monitoring (request timing, query logging, Web Vitals)
-- [ ] Database indexes for hot paths (conversations, messages, contacts)
-- [ ] Replace polling with real-time subscriptions
-- [ ] Target: sub-500ms P95 response times
+- [x] Convex spike — convert `/api/contacts/by-phone` and compare performance
+- [x] Decision gate — compare Convex vs optimized Supabase response times
+- [x] Convex migration: hybrid architecture (Supabase auth + Convex data layer)
+- [x] Complete Convex schema with all Supabase fields
+- [x] Create Convex mutations and query functions
+- [x] Implement Kapso webhook HTTP action
+- [x] Update Next.js API routes to use Convex
+- [x] Update inbox to use Convex real-time subscriptions
+- [x] Deploy Convex and verify performance
+- [ ] Production performance monitoring (Web Vitals dashboard)
+- [ ] Target: sub-500ms P95 response times (met in spike: 37ms P95)
 
 ### Out of Scope
 
@@ -157,6 +160,7 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | TanStack Query for caching | Stale-while-revalidate for instant navigation | ✓ Good — v2.1 perf |
 | 4-stage ticket workflow | Trust-building with clear progress | ✓ Good — v2.1 feature |
 | Central support hub | All client tickets → my21staff workspace | ✓ Good — v2.1 feature |
+| Convex migration (hybrid: Supabase auth + Convex data) | 25.4x faster (37ms vs 926ms P95) | ✓ Good — proceed with IMPL-01 through IMPL-06 |
 
 ---
 *Last updated: 2026-01-20 after v3.0 milestone initialized*
