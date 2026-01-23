@@ -88,24 +88,26 @@ Plans:
 - Configure organization webhook events in Clerk Dashboard
 - Test team page at /eagle-overseas/team
 
-### Phase 5: Data Migration
-**Goal**: All remaining Supabase tables migrated to Convex, all API routes updated
+### Phase 5: Data Migration - COMPLETE
+**Goal**: All remaining Supabase tables migrated to Convex, main API routes updated
 **Depends on**: Phase 4
 **Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05
 **Success Criteria** (what must be TRUE):
-  1. ARI tables migrated (config, sessions, scores, slots, etc.)
-  2. Support ticket tables migrated
-  3. CMS tables migrated (articles, webinars)
-  4. Utility tables migrated (profiles, appointments)
-  5. All API routes use Convex instead of Supabase
+  1. ARI tables migrated (config, sessions, scores, slots, etc.) ✓
+  2. Support ticket tables migrated ✓
+  3. CMS tables migrated (articles, webinars) ✓
+  4. Utility tables migrated (profiles, appointments) ✓
+  5. Main API routes use Convex instead of Supabase ✓
 **Plans**: 5 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Convex schema extension (12 new tables)
-- [ ] 05-02-PLAN.md — Migration scripts + data transfer
-- [ ] 05-03-PLAN.md — ARI API routes update
-- [ ] 05-04-PLAN.md — CMS API routes update (articles, webinars)
-- [ ] 05-05-PLAN.md — Tickets + ARI processor final migration
+- [x] 05-01-PLAN.md — Convex schema extension (12 new tables) ✓
+- [x] 05-02-PLAN.md — Migration scripts + data transfer ✓
+- [x] 05-03-PLAN.md — ARI API routes update ✓
+- [x] 05-04-PLAN.md — CMS API routes update (articles, webinars) ✓
+- [x] 05-05-PLAN.md — Tickets + ARI processor final migration ✓
+
+**Note:** Edge routes (cron, kapso webhook) deferred to Phase 7 cleanup.
 
 ### Phase 6: n8n Integration
 **Goal**: Eagle's lead flow from Google Sheets works via Convex webhook
