@@ -7,10 +7,10 @@ export default function SignUpPage() {
       {/* Navigation - matches landing page */}
       <nav className="px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-2xl font-black tracking-tight">
-            <span className="text-gray-900">my</span>
-            <span className="text-[#2D4B3E]">21</span>
-            <span className="text-gray-900">staff</span>
+          <Link href="/" className="text-xl font-extrabold tracking-[-0.02em]">
+            <span className="text-[#2D2A26]">my</span>
+            <span className="text-[#F7931A]">21</span>
+            <span className="text-[#2D2A26]">staff</span>
           </Link>
         </div>
       </nav>
