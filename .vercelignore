@@ -1,4 +1,8 @@
 # Convex source files - managed separately
+# Keep _generated files for TypeScript types
+convex/_generated/api.d.ts
+convex/_generated/server.d.ts
+# Exclude other Convex files
 convex/*.ts
 convex/*.tsx
 convex/*.js
