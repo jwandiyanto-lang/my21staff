@@ -19,7 +19,7 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 
 **Milestone Goal:** Complete the migration to Convex + Clerk, removing Supabase entirely from the stack and restoring Eagle's n8n lead flow.
 
-### Phase 1: Clerk Auth Infrastructure
+### Phase 1: Clerk Auth Infrastructure - COMPLETE
 **Goal**: Clerk application configured with JWT template for Convex validation
 **Depends on**: v3.0 complete (Convex already deployed)
 **Requirements**: AUTH-01, AUTH-02
@@ -33,7 +33,7 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 Plans:
 - [x] 01-01-PLAN.md — Clerk app + JWT template + Convex auth config ✓
 
-### Phase 2: Middleware + Provider + Auth UI
+### Phase 2: Middleware + Provider + Auth UI - COMPLETE
 **Goal**: Users can sign in/out using Clerk components with route protection working
 **Depends on**: Phase 1
 **Requirements**: AUTH-03, AUTH-04, UI-01, UI-02, UI-03, UI-04
@@ -49,7 +49,7 @@ Plans:
 - [x] 02-01-PLAN.md — Clerk infrastructure (packages, providers, middleware) ✓
 - [x] 02-02-PLAN.md — Auth UI pages (sign-in, sign-up, UserButton) ✓
 
-### Phase 3: Users Table + Clerk Webhook
+### Phase 3: Users Table + Clerk Webhook - COMPLETE
 **Goal**: User data synced to Convex via Clerk webhook for efficient queries
 **Depends on**: Phase 2
 **Requirements**: USER-01, USER-02
@@ -74,10 +74,14 @@ Plans:
   3. Workspaces exist as Clerk organizations
   4. Team invitations work via Clerk organization invitations
   5. Role-based permissions (owner/admin/member) work with Clerk roles
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Migrate Supabase users to Clerk with ID mapping
+- [ ] 04-02-PLAN.md — Convert workspaces to Clerk organizations
+- [ ] 04-03-PLAN.md — Update Convex tables with Clerk user IDs
+- [ ] 04-04-PLAN.md — Organization webhooks and member sync
+- [ ] 04-05-PLAN.md — Team management UI with Clerk OrganizationProfile
 
 ### Phase 5: Data Migration
 **Goal**: All remaining Supabase tables migrated to Convex
@@ -260,10 +264,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
-| **v3.1 Full Convex + Clerk** | 1-7 | 3/TBD | In Progress | - |
+| **v3.1 Full Convex + Clerk** | 1-7 | 9/TBD | In Progress | - |
 
-**Total shipped:** 150 plans across 5 milestones
+**Total shipped:** 152 plans across 5 milestones
 
 ---
 
-*Last updated: 2026-01-23 — Phase 3 planned*
+*Last updated: 2026-01-23 — Phase 4 planned*
