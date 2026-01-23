@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 
 ## Current Position
 
-Phase: 1 of 7 (Clerk Auth Infrastructure) ✓
-Plan: 01-01 complete
-Status: Phase 1 complete, ready for Phase 2
-Last activity: 2026-01-23 — Phase 1 executed
+Phase: 2 of 7 (Middleware Provider Auth UI)
+Plan: 02-01 complete
+Status: In progress - 1 of 3 plans complete
+Last activity: 2026-01-23 — Completed 02-01-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █░░░░░░░░░ (148 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██░░░░░░░░ (149 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 147
-- Average duration: ~15 min
-- Total execution time: ~37 hours
+- Total plans completed: 149
+- Average duration: ~14 min
+- Total execution time: ~37.2 hours
 
 **By Milestone:**
 
@@ -57,6 +57,11 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 All decisions logged in PROJECT.md Key Decisions table.
 
+Recent v3.1 decisions:
+- ClerkProvider -> ConvexProviderWithClerk -> QueryClientProvider hierarchy (02-01)
+- Convex mutations co-located with queries in domain files (e.g., tickets.ts has both queries + mutations)
+- Use Id<'tickets'> casting for Convex types from string route params
+
 Recent v3.0 decisions affecting v3.1:
 - Convex migration (hybrid: Supabase auth + Convex data) — 25.4x faster (37ms vs 926ms P95)
 - Use v.optional(v.any()) for metadata fields
@@ -69,8 +74,8 @@ Recent v3.0 decisions affecting v3.1:
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Phase 1 complete
-Resume: `/gsd:plan-phase 2` to begin Phase 2 planning
+Stopped at: Completed 02-01-PLAN.md
+Resume: `/gsd:execute-phase 2 --plan 02` to execute Plan 02 (Clerk auth pages)
 
 ---
-*Last updated: 2026-01-23 — Phase 1 complete*
+*Last updated: 2026-01-23 — Phase 2 Plan 01 complete*
