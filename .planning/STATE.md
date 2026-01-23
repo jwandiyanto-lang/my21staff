@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 
 ## Current Position
 
-Phase: 4 of 7 (User Migration + Organizations)
-Plan: 04-05 complete - 6 of 6 plans done (code complete)
-Status: CODE COMPLETE - pending final verification
-Last activity: 2026-01-23 - Completed 04-05-PLAN.md (Team Management UI)
+Phase: 5 of 7 (Data Migration)
+Plan: 05-01 complete - 1 of 3 plans done
+Status: In progress
+Last activity: 2026-01-23 - Completed 05-01-PLAN.md (Extend Convex Schema)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████████░░ (158 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████████░░ (159 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 156
+- Total plans completed: 157
 - Average duration: ~14 min
-- Total execution time: ~38.1 hours
+- Total execution time: ~38.2 hours
 
 **By Milestone:**
 
@@ -43,8 +43,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 1. Clerk auth infrastructure (JWT validation for Convex) - DONE
 2. Middleware + Provider + Auth UI (user-facing auth) - DONE
 3. Users table + webhook (user data in Convex) - DONE
-4. User migration + organizations (existing data) - IN PROGRESS (04-01 done)
-5. Data migration (remaining Supabase tables)
+4. User migration + organizations (existing data) - DONE (04-05 complete)
+5. Data migration (remaining Supabase tables) - IN PROGRESS (05-01 schema complete)
 6. n8n integration (Eagle lead flow)
 7. Cleanup (remove Supabase)
 
@@ -58,6 +58,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- v.optional(v.any()) for JSONB fields: Preserves Supabase JSONB flexibility (ariDestinations.requirements, ariPayments.gateway_response) (05-01)
+- supabaseId in CMS tables: Enables migration reference tracking for articles/webinars (05-01)
 - Clerk OrganizationProfile for team management: Replaces custom UI with built-in invitations (04-05)
 - Deferred verification: Team page + webhook testing combined at end of phase (04-05)
 - Deferred webhook config: Organization webhooks configured at end of phase, not blocking (04-04)
@@ -166,8 +168,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 04-05-PLAN.md (Phase 4 code complete)
-Resume: Run verification checklist above, then `/gsd:execute-phase 5` for Phase 5
+Stopped at: Completed 05-01-PLAN.md (Extend Convex Schema)
+Resume: Continue Phase 5 with `/gsd:execute-phase 5` for 05-02 (migration scripts)
 
 ---
-*Last updated: 2026-01-23 - Phase 4 code complete, pending verification*
+*Last updated: 2026-01-23 - Phase 5 started, schema extension complete*
