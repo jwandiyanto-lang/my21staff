@@ -10,6 +10,24 @@ import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
 /**
+ * Get workspace member by ID.
+ *
+ * Used by API routes to fetch member details for deletion or updates.
+ *
+ * @param id - The workspaceMembers ID to fetch
+ * @returns Membership document or null if not found
+ */
+export const getById = query({
+  args: {
+    id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const member = await ctx.db.get(args.id as any);
+    return member;
+  },
+});
+
+/**
  * Get workspace membership for a specific user.
  *
  * Used to verify membership and get role.

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import { requirePermission } from '@/lib/permissions/check'
 import { type WorkspaceRole } from '@/lib/permissions/types'
 import { sendRoleChangeEmail } from '@/lib/email/send'
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -11,6 +15,11 @@ interface RouteParams {
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { id: memberId } = await params
     const { role: newRole } = await request.json()
 
@@ -22,14 +31,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const supabase = await createClient()
-
     // Get the membership to change
-    const { data: targetMember } = await supabase
-      .from('workspace_members')
-      .select('id, workspace_id, user_id, role')
-      .eq('id', memberId)
-      .single()
+    const targetMember = await convex.query(api.workspaceMembers.getById, {
+      id: memberId
+    }) as {
+      _id: string
+      workspace_id: string
+      user_id: string
+      role: string
+    } | null
 
     if (!targetMember) {
       return NextResponse.json({ error: 'Anggota tidak ditemukan' }, { status: 404 })
@@ -59,48 +69,40 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: true, role: newRole })
     }
 
-    // Update the role
-    const { error: updateError } = await supabase
-      .from('workspace_members')
-      .update({ role: newRole })
-      .eq('id', memberId)
+    // Update the role via Convex
+    await convex.mutation(api.workspaces.updateMemberRole, {
+      member_id: memberId,
+      role: newRole
+    })
 
-    if (updateError) {
-      console.error('Failed to update role:', updateError)
-      return NextResponse.json(
-        { error: 'Gagal mengubah role' },
-        { status: 500 }
-      )
-    }
+    // Get user from Clerk for email notification
+    const { clerkClient } = await import('@clerk/nextjs/server')
+    const clerk = await clerkClient()
 
-    // Get user email for notification
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('email, full_name')
-      .eq('id', targetMember.user_id)
-      .single()
+    try {
+      const user = await clerk.users.getUser(targetMember.user_id)
+      const workspace = await convex.query(api.workspaces.getById, {
+        id: targetMember.workspace_id
+      }) as { name?: string } | null
 
-    // Get workspace name for email
-    const { data: workspace } = await supabase
-      .from('workspaces')
-      .select('name')
-      .eq('id', targetMember.workspace_id)
-      .single()
-
-    // Send notification email (don't fail the request if email fails)
-    if (profile?.email) {
-      try {
-        await sendRoleChangeEmail({
-          to: profile.email,
-          userName: profile.full_name || profile.email,
-          workspaceName: workspace?.name || 'workspace Anda',
-          oldRole: targetMember.role as WorkspaceRole,
-          newRole: newRole as WorkspaceRole,
-        })
-      } catch (emailError) {
-        console.error('Failed to send role change email:', emailError)
-        // Continue - role was changed successfully
+      // Send notification email (don't fail the request if email fails)
+      if (user.primaryEmailAddress?.emailAddress) {
+        try {
+          await sendRoleChangeEmail({
+            to: user.primaryEmailAddress.emailAddress,
+            userName: user.fullName || user.primaryEmailAddress.emailAddress,
+            workspaceName: workspace?.name || 'workspace Anda',
+            oldRole: targetMember.role as WorkspaceRole,
+            newRole: newRole as WorkspaceRole,
+          })
+        } catch (emailError) {
+          console.error('Failed to send role change email:', emailError)
+          // Continue - role was changed successfully
+        }
       }
+    } catch (userError) {
+      console.error('Failed to get user for email notification:', userError)
+      // Continue - role was changed successfully
     }
 
     return NextResponse.json({ success: true, role: newRole })
