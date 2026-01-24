@@ -32,13 +32,15 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
   5. Contact Database page works with all Google Sheets leads
   6. Contact detail modal with 4 tabs (Profile, Documents, Conversations, Notes)
   7. n8n sync verified (all Google Sheets leads appear)
-**Plans**: 4 plans
+  8. Merge functionality for duplicate contacts
+**Plans**: 5 plans
 
 Plans:
 - [ ] 01-01-PLAN.md — Delete Supabase files + update navigation
 - [ ] 01-02-PLAN.md — Migrate layout and sidebar to Convex
 - [ ] 01-03-PLAN.md — Contact detail dialog with 4 tabs
 - [ ] 01-04-PLAN.md — Verify n8n sync
+- [ ] 01-05-PLAN.md — Contact merge functionality
 
 ### Phase 2: Inbox (WhatsApp)
 **Goal**: WhatsApp messaging via Kapso, seamless real-time
@@ -350,10 +352,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
 | v3.1 Convex + Clerk API Layer | 1-7 | 23/25 | Complete (partial) | 2026-01-24 |
-| **v3.2 CRM Core Fresh** | 1-5 | 4/? | Phase 1 planned | - |
+| **v3.2 CRM Core Fresh** | 1-5 | 5/? | Phase 1 planned | - |
 
 **Total shipped:** 187 plans across 6 milestones
 
 ---
 
-*Last updated: 2026-01-24 — v3.2 Phase 1 planned (4 plans)*
+*Last updated: 2026-01-24 — v3.2 Phase 1 planned (5 plans)*
