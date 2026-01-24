@@ -113,7 +113,24 @@ async function getOrCreateARIConversation(
     })
 
     if (existing) {
-      return existing as any as ARIConversation
+      // Map Convex object to ARIConversation (with type assertion for Convex-specific fields)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const conv = existing as any
+      return {
+        id: conv._id,
+        workspace_id: conv.workspace_id,
+        contact_id: conv.contact_id,
+        state: conv.state || 'greeting',
+        context: conv.context || {},
+        lead_score: conv.lead_score,
+        lead_temperature: conv.lead_temperature,
+        ai_model: conv.ai_model,
+        handoff_at: conv.handoff_at ? new Date(conv.handoff_at).toISOString() : null,
+        handoff_reason: conv.handoff_reason,
+        created_at: new Date(conv.created_at).toISOString(),
+        // Keep as number internally for Convex compatibility
+        updated_at: conv.updated_at,
+      } as ARIConversation
     }
 
     // Create new conversation if not exists
@@ -124,7 +141,25 @@ async function getOrCreateARIConversation(
       context: {} as ARIContext,
     })
 
-    return created as any as ARIConversation
+    if (!created) return null
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const conv = created as any
+    return {
+      id: conv._id,
+      workspace_id: conv.workspace_id,
+      contact_id: conv.contact_id,
+      state: conv.state || 'greeting',
+      context: conv.context || {},
+      lead_score: conv.lead_score,
+      lead_temperature: conv.lead_temperature,
+      ai_model: conv.ai_model,
+      handoff_at: conv.handoff_at ? new Date(conv.handoff_at).toISOString() : null,
+      handoff_reason: conv.handoff_reason,
+      created_at: new Date(conv.created_at).toISOString(),
+      // Keep as number internally for Convex compatibility
+      updated_at: conv.updated_at,
+    } as ARIConversation
   } catch (error) {
     console.error('[ARI] Failed to get/create conversation:', error)
     return null
@@ -229,28 +264,19 @@ async function logMessage(
  * Count messages in current state for auto-handoff detection
  */
 async function countMessagesInState(
-  supabase: SupabaseClient,
   ariConversationId: string,
-  stateChangedAt: string | null
+  stateChangedAt: number | null
 ): Promise<number> {
-  // If we don't have a state change timestamp, count all messages
-  const query = supabase
-    .from('ari_messages')
-    .select('id', { count: 'exact', head: true })
-    .eq('ari_conversation_id', ariConversationId);
-
-  if (stateChangedAt) {
-    query.gte('created_at', stateChangedAt);
+  try {
+    const count = await convex.query(api.ari.countMessagesInState, {
+      conversation_id: ariConversationId,
+      state_changed_at: stateChangedAt || undefined,
+    })
+    return count || 0
+  } catch (error) {
+    console.error('[ARI] Failed to count messages:', error)
+    return 0
   }
-
-  const { count, error } = await query;
-
-  if (error) {
-    console.error('[ARI] Failed to count messages:', error);
-    return 0;
-  }
-
-  return count || 0;
 }
 
 // ===========================================
@@ -301,7 +327,8 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
     const recentMessages = await getRecentMessages(conversation.id);
 
     // 5. Extract form answers from contact metadata
-    const formAnswers = extractFormAnswers(contact.metadata);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const formAnswers = extractFormAnswers((contact as any).metadata);
 
     // 5b. Process document response if in qualifying state with pending question
     const conversationContext = conversation.context as ARIContext & {
@@ -334,10 +361,10 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
           documents: newDocs,
           pendingDocumentQuestion: null, // Clear pending
         } as any;
-        await supabase
-          .from('ari_conversations')
-          .update({ context: updatedContext })
-          .eq('id', conversation.id);
+        await convex.mutation(api.ari.updateConversation, {
+          conversation_id: conversation.id,
+          context: updatedContext,
+        });
 
         // Update local context for prompt building
         conversationContext.documents = newDocs;
@@ -369,7 +396,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
     if (detection.isQuestion) {
       // Use detected country, or fall back to form answer
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const metadataFormAnswers = (contact.metadata as any)?.form_answers;
+      const metadataFormAnswers = ((contact as any).metadata as any)?.form_answers;
       const targetCountry = detection.country ||
         formAnswers.country ||
         (metadataFormAnswers?.country as string | undefined);
@@ -382,23 +409,20 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
 
     // 6. Check for auto-handoff (stuck in same state too long)
     const messageCount = await countMessagesInState(
-      supabase,
       conversation.id,
-      conversation.updated_at
+      conversation.updated_at as any as number
     );
 
     if (shouldAutoHandoff(conversation.state, messageCount)) {
       console.log(`[ARI] Auto-handoff triggered: ${messageCount} messages in ${conversation.state}`);
 
       // Update to handoff state
-      await supabase
-        .from('ari_conversations')
-        .update({
-          state: 'handoff' as ARIState,
-          handoff_at: new Date().toISOString(),
-          handoff_reason: 'auto_handoff_stuck',
-        })
-        .eq('id', conversation.id);
+      await convex.mutation(api.ari.updateConversation, {
+        conversation_id: conversation.id,
+        state: 'handoff' as ARIState,
+        handoff_at: Date.now(),
+        handoff_reason: 'auto_handoff_stuck',
+      });
 
       // Log user message
       await logMessage({
@@ -434,9 +458,11 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
     // 7. Build context for AI
     const promptContext: PromptContext = {
       contact: {
-        name: contact.name,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        name: (contact as any).name,
         formAnswers,
-        leadScore: contact.lead_score || conversation.lead_score,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        leadScore: (contact as any).lead_score || conversation.lead_score,
       },
       conversation: {
         state: conversation.state,
@@ -533,26 +559,22 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
         score_reasons: reasons,
       };
 
-      await supabase
-        .from('ari_conversations')
-        .update({
-          lead_score: calculatedScore,
-          lead_temperature: temperature,
-          context: updatedContext,
-        })
-        .eq('id', conversation.id);
+      await convex.mutation(api.ari.updateConversation, {
+        conversation_id: conversation.id,
+        lead_score: calculatedScore,
+        lead_temperature: temperature,
+        context: updatedContext,
+      });
 
       console.log(`[ARI] Score updated: ${conversation.lead_score} -> ${calculatedScore} (${temperature})`);
     }
 
     // 12d. Sync score to contacts table for CRM visibility
-    await supabase
-      .from('contacts')
-      .update({
-        lead_score: calculatedScore,
-        lead_status: temperatureToLeadStatus(temperature),
-      })
-      .eq('id', contactId);
+    await convex.mutation(api.contacts.updateContact, {
+      contact_id: contactId,
+      lead_score: calculatedScore,
+      lead_status: temperatureToLeadStatus(temperature),
+    });
 
     // 12e. Execute routing action if ready
     if (routing.readyForRouting) {
@@ -584,17 +606,15 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
           score_reasons: reasons,
         };
 
-        await supabase
-          .from('ari_conversations')
-          .update({
-            state: 'handoff' as ARIState,
-            handoff_at: new Date().toISOString(),
-            handoff_reason: routing.action === 'handoff_hot' ? 'hot_lead' : 'cold_lead_community_sent',
-            lead_score: calculatedScore,
-            lead_temperature: temperature,
-            context: handoffContext,
-          })
-          .eq('id', conversation.id);
+        await convex.mutation(api.ari.updateConversation, {
+          conversation_id: conversation.id,
+          state: 'handoff' as ARIState,
+          handoff_at: Date.now(),
+          handoff_reason: routing.action === 'handoff_hot' ? 'hot_lead' : 'cold_lead_community_sent',
+          lead_score: calculatedScore,
+          lead_temperature: temperature,
+          context: handoffContext,
+        });
 
         // Send handoff message
         const handoffMessage = routing.action === 'handoff_hot'
@@ -668,20 +688,22 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
 
             // Update conversation context
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await supabase
-              .from('ari_conversations')
-              .update({ context: schedCtx as any, state: 'scheduling' })
-              .eq('id', conversation.id);
+            await convex.mutation(api.ari.updateConversation, {
+              conversation_id: conversation.id,
+              context: schedCtx as any,
+              state: 'scheduling',
+            });
           } else {
             // No slots for that day - reload available days
             const allSlots = await getAvailableSlots(workspaceId);
             schedCtx.available_days_summary = formatAvailableDays(allSlots);
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await supabase
-              .from('ari_conversations')
-              .update({ context: schedCtx as any, state: 'scheduling' })
-              .eq('id', conversation.id);
+            await convex.mutation(api.ari.updateConversation, {
+              conversation_id: conversation.id,
+              context: schedCtx as any,
+              state: 'scheduling',
+            });
           }
         } else if (!schedCtx.available_days_summary) {
           // First time - load available days
@@ -690,10 +712,11 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
           schedCtx.available_days_summary = formatAvailableDays(allSlots);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await supabase
-            .from('ari_conversations')
-            .update({ context: schedCtx as any, state: 'scheduling' })
-            .eq('id', conversation.id);
+          await convex.mutation(api.ari.updateConversation, {
+            conversation_id: conversation.id,
+            context: schedCtx as any,
+            state: 'scheduling',
+          });
         }
       }
 
@@ -707,10 +730,10 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
           schedCtx.selected_slot = schedCtx.available_slots[selection];
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await supabase
-            .from('ari_conversations')
-            .update({ context: schedCtx as any })
-            .eq('id', conversation.id);
+          await convex.mutation(api.ari.updateConversation, {
+            conversation_id: conversation.id,
+            context: schedCtx as any,
+          });
         }
       }
 
@@ -743,15 +766,13 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
 
             // Update to handoff state
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await supabase
-              .from('ari_conversations')
-              .update({
-                state: 'handoff' as ARIState,
-                context: schedCtx as any,
-                handoff_at: new Date().toISOString(),
-                handoff_reason: 'appointment_booked',
-              })
-              .eq('id', conversation.id);
+            await convex.mutation(api.ari.updateConversation, {
+              conversation_id: conversation.id,
+              state: 'handoff' as ARIState,
+              context: schedCtx as any,
+              handoff_at: Date.now(),
+              handoff_reason: 'appointment_booked',
+            });
 
             // Execute handoff: update contact notes, tags, lead status, notify consultant
             // Note: consultant_id is set on the appointment from the slot lookup in scheduling.ts
@@ -803,22 +824,18 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
 
     // 13. Update conversation state and AI model
     if (nextState !== conversation.state || conversation.ai_model !== model) {
-      await supabase
-        .from('ari_conversations')
-        .update({
-          state: nextState,
-          ai_model: model,
-          last_ai_message_at: new Date().toISOString(),
-        })
-        .eq('id', conversation.id);
+      await convex.mutation(api.ari.updateConversation, {
+        conversation_id: conversation.id,
+        state: nextState,
+        ai_model: model,
+        last_ai_message_at: Date.now(),
+      });
     } else {
       // Just update last message timestamp
-      await supabase
-        .from('ari_conversations')
-        .update({
-          last_ai_message_at: new Date().toISOString(),
-        })
-        .eq('id', conversation.id);
+      await convex.mutation(api.ari.updateConversation, {
+        conversation_id: conversation.id,
+        last_ai_message_at: Date.now(),
+      });
     }
 
     // 14. Send response via Kapso
@@ -900,21 +917,21 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
 /**
  * Check if ARI is enabled for a workspace
  *
- * @param supabase - Supabase client
  * @param workspaceId - Workspace ID
  * @returns true if ARI is enabled (has ari_config)
  */
 export async function isARIEnabledForWorkspace(
-  supabase: SupabaseClient,
   workspaceId: string
 ): Promise<boolean> {
-  const { data } = await supabase
-    .from('ari_config')
-    .select('id')
-    .eq('workspace_id', workspaceId)
-    .single();
-
-  return !!data;
+  try {
+    const hasConfig = await convex.query(api.ari.hasAriConfig, {
+      workspace_id: workspaceId,
+    })
+    return hasConfig
+  } catch (error) {
+    console.error('[ARI] Failed to check if enabled:', error)
+    return false
+  }
 }
 
 /**

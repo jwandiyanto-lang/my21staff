@@ -689,7 +689,7 @@ export const upsertConversation = mutation({
 
     if (existing) {
       await ctx.db.patch(existing._id, {
-        current_state: args.current_state,
+        state: args.current_state,
         context: args.context,
         last_message_at: args.last_message_at || now,
         updated_at: now,
@@ -699,7 +699,7 @@ export const upsertConversation = mutation({
       const conversationId = await ctx.db.insert("ariConversations", {
         workspace_id: args.workspace_id as any,
         contact_id: args.contact_id as any,
-        current_state: args.current_state,
+        state: args.current_state,
         context: args.context || {},
         last_message_at: args.last_message_at || now,
         created_at: now,
@@ -745,6 +745,8 @@ export const updateConversation = mutation({
     lead_temperature: v.optional(v.string()),
     handoff_at: v.optional(v.number()),
     handoff_reason: v.optional(v.string()),
+    ai_model: v.optional(v.string()),
+    last_ai_message_at: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const conversation = await ctx.db.get(args.conversation_id as any);
@@ -761,6 +763,8 @@ export const updateConversation = mutation({
     if (args.lead_temperature !== undefined) updates.lead_temperature = args.lead_temperature;
     if (args.handoff_at !== undefined) updates.handoff_at = args.handoff_at;
     if (args.handoff_reason !== undefined) updates.handoff_reason = args.handoff_reason;
+    if (args.ai_model !== undefined) updates.ai_model = args.ai_model;
+    if (args.last_ai_message_at !== undefined) updates.last_ai_message_at = args.last_ai_message_at;
 
     await ctx.db.patch(args.conversation_id as any, updates);
     return await ctx.db.get(args.conversation_id as any);
@@ -818,6 +822,33 @@ export const getConversationMessages = query({
 
     const messages = await q.collect();
     return messages.reverse();
+  },
+});
+
+/**
+ * Count messages in current state for auto-handoff detection.
+ * If state_changed_at is provided, counts messages since that timestamp.
+ */
+export const countMessagesInState = query({
+  args: {
+    conversation_id: v.string(),
+    state_changed_at: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const messages = await ctx.db
+      .query("ariMessages")
+      .withIndex("by_conversation_time", (q) =>
+        q.eq("conversation_id", args.conversation_id as any)
+      )
+      .collect();
+
+    if (args.state_changed_at) {
+      // Count messages since state change
+      return messages.filter(m => m.created_at >= args.state_changed_at!).length;
+    }
+
+    // Count all messages
+    return messages.length;
   },
 });
 

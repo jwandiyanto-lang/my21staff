@@ -7,7 +7,7 @@
  */
 
 // @ts-nocheck - Schema types mismatch with generated Convex types
-import { query, internalQuery } from "./_generated/server";
+import { query, internalQuery, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireWorkspaceMembership } from "./lib/auth";
 
@@ -448,5 +448,30 @@ export const getNotes = query({
       .take(100);
 
     return notes;
+  },
+});
+
+/**
+ * Update contact fields (no auth - webhook processing).
+ * Used by ARI processor to update lead scores and status.
+ */
+export const updateContact = mutation({
+  args: {
+    contact_id: v.string(),
+    lead_score: v.optional(v.number()),
+    lead_status: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const contact = await ctx.db.get(args.contact_id as any);
+    if (!contact) {
+      throw new Error("Contact not found");
+    }
+
+    const updates: any = { updated_at: Date.now() };
+    if (args.lead_score !== undefined) updates.lead_score = args.lead_score;
+    if (args.lead_status !== undefined) updates.lead_status = args.lead_status;
+
+    await ctx.db.patch(args.contact_id as any, updates);
+    return await ctx.db.get(args.contact_id as any);
   },
 });
