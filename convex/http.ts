@@ -102,14 +102,14 @@ http.route({
         });
       }
 
-      // Call createLead mutation
+      // Call createLead mutation (convert null to undefined for optional fields)
       const result = await ctx.runMutation(api.n8n.createLead, {
         workspace_id: workspace._id,
-        name: payload.name,
+        name: payload.name || "Unknown",
         phone: payload.phone,
-        email: payload.email,
-        lead_score: payload.lead_score,
-        metadata: payload.metadata,
+        email: payload.email || undefined,
+        lead_score: payload.lead_score || 0,
+        metadata: payload.metadata || undefined,
       });
 
       const duration = Date.now() - startTime;

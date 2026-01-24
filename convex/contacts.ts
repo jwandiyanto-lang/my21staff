@@ -11,6 +11,21 @@ import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { requireWorkspaceMembership } from "./lib/auth";
 
+// DEBUG: Temporary function to check contacts without auth
+export const debugListAll = query({
+  args: {},
+  handler: async (ctx) => {
+    const contacts = await ctx.db.query("contacts").take(10);
+    return contacts.map(c => ({
+      id: c._id,
+      workspace_id: c.workspace_id,
+      name: c.name,
+      phone: c.phone?.substring(0, 8) + "***",
+      source: c.source,
+    }));
+  },
+});
+
 /**
  * Internal version of getContextByPhone for API routes that handle their own auth.
  *

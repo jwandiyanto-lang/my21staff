@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { fetchQuery } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import { DatabaseClient } from './database-client'
 import { MOCK_WORKSPACE, isDevMode } from '@/lib/mock-data'
 
@@ -23,17 +24,14 @@ export default async function DatabasePage({ params }: DatabasePageProps) {
     )
   }
 
-  // Production: validate workspace exists
-  const supabase = await createClient()
-  const { data: workspace, error } = await supabase
-    .from('workspaces')
-    .select('id, name, slug')
-    .eq('slug', workspaceSlug)
-    .single()
+  // Production: validate workspace exists via Convex
+  const workspace = await fetchQuery(api.workspaces.getBySlug, {
+    slug: workspaceSlug,
+  })
 
-  if (error || !workspace) {
+  if (!workspace) {
     notFound()
   }
 
-  return <DatabaseClient workspace={workspace} />
+  return <DatabaseClient workspace={{ id: workspace._id, name: workspace.name, slug: workspace.slug }} />
 }

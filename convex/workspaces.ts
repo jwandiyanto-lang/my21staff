@@ -6,7 +6,7 @@
  */
 
 // @ts-nocheck - Schema types mismatch with generated Convex types
-import { query, internalQuery } from "./_generated/server";
+import { query, internalQuery, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 /**
@@ -89,5 +89,37 @@ export const getIdBySlug = internalQuery({
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .first();
     return workspace?._id || null;
+  },
+});
+
+/**
+ * Create a new workspace.
+ *
+ * Used for initial setup or migration.
+ *
+ * @param name - Workspace display name
+ * @param slug - Workspace slug for URL routing
+ * @param owner_id - Owner user ID (Clerk user ID)
+ * @param kapso_phone_id - Optional Kapso phone ID for WhatsApp
+ * @returns Created workspace ID
+ */
+export const create = mutation({
+  args: {
+    name: v.string(),
+    slug: v.string(),
+    owner_id: v.string(),
+    kapso_phone_id: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    return await ctx.db.insert("workspaces", {
+      name: args.name,
+      slug: args.slug,
+      owner_id: args.owner_id,
+      kapso_phone_id: args.kapso_phone_id,
+      settings: {},
+      created_at: now,
+      updated_at: now,
+    });
   },
 });
