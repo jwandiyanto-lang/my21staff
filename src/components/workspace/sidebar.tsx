@@ -1,22 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboard,
   Users,
-  MessageCircle,
   Settings,
   ChevronLeft,
   ChevronRight,
-  Headphones,
-  BookOpen,
 } from 'lucide-react'
 import { UserButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
 import { WorkspaceSwitcher } from './workspace-switcher'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 
 interface WorkspaceSidebarProps {
@@ -30,33 +25,13 @@ interface WorkspaceSidebarProps {
 
 const operationsNav = [
   {
-    title: 'Dashboard',
-    icon: LayoutDashboard,
-    href: '',
-  },
-  {
     title: 'Lead Management',
     icon: Users,
     href: '/database',
   },
-  {
-    title: 'Conversations',
-    icon: MessageCircle,
-    href: '/inbox',
-  },
-  {
-    title: 'Support',
-    icon: Headphones,
-    href: '/support',
-  },
 ]
 
 const adminNav = [
-  {
-    title: 'Your Intern',
-    icon: BookOpen,
-    href: '/knowledge-base',
-  },
   {
     title: 'Settings',
     icon: Settings,
@@ -66,33 +41,8 @@ const adminNav = [
 
 export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSidebarProps) {
   const pathname = usePathname()
-  const [unreadCount, setUnreadCount] = useState(0)
+  const unreadCount = 0 // Disabled until inbox is rebuilt with Convex
   const [collapsed, setCollapsed] = useState(false)
-
-  // Fetch unread conversation count
-  useEffect(() => {
-    async function fetchUnreadCount() {
-      if (!workspace.id) return
-
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('conversations')
-        .select('unread_count')
-        .eq('workspace_id', workspace.id)
-        .gt('unread_count', 0)
-
-      if (!error && data) {
-        const total = data.reduce((sum, conv) => sum + (conv.unread_count || 0), 0)
-        setUnreadCount(total)
-      }
-    }
-
-    fetchUnreadCount()
-
-    // Poll every 30 seconds for new messages
-    const interval = setInterval(fetchUnreadCount, 30000)
-    return () => clearInterval(interval)
-  }, [workspace.id])
 
   const isActive = (href: string) => {
     const fullHref = `/${workspace.slug}${href}`
