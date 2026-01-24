@@ -123,3 +123,119 @@ export const create = mutation({
     });
   },
 });
+
+/**
+ * Get workspace membership for a specific user.
+ *
+ * Used by workspace-auth helper to verify user has access to workspace.
+ *
+ * @param workspace_id - The workspace ID to check
+ * @param user_id - The user ID (Clerk user ID) to check
+ * @returns Membership document or null if not found
+ */
+export const getMembership = query({
+  args: {
+    workspace_id: v.string(),
+    user_id: v.string()
+  },
+  handler: async (ctx, { workspace_id, user_id }) => {
+    return await ctx.db
+      .query("workspaceMembers")
+      .withIndex("by_workspace_user", q =>
+        q.eq("workspace_id", workspace_id).eq("user_id", user_id)
+      )
+      .first();
+  },
+});
+
+/**
+ * Update workspace settings.
+ *
+ * Used by settings API routes to update workspace configuration.
+ *
+ * @param workspace_id - The workspace ID to update
+ * @param updates - Fields to update (name, settings, etc.)
+ * @returns Success status
+ */
+export const updateSettings = mutation({
+  args: {
+    workspace_id: v.string(),
+    name: v.optional(v.string()),
+    settings: v.optional(v.any()),
+    kapso_phone_id: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { workspace_id, ...updates } = args;
+
+    const workspace = await ctx.db.get(workspace_id as any);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    await ctx.db.patch(workspace_id as any, {
+      ...updates,
+      updated_at: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * List all workspaces (admin only).
+ *
+ * Used by super-admin routes to view all client workspaces.
+ *
+ * @returns Array of all workspaces
+ */
+export const listAll = query({
+  args: {},
+  handler: async (ctx) => {
+    const workspaces = await ctx.db.query("workspaces").collect();
+    return workspaces;
+  },
+});
+
+/**
+ * Remove a member from workspace.
+ *
+ * Used by member management API routes.
+ *
+ * @param member_id - The workspaceMembers ID to remove
+ * @returns Success status
+ */
+export const removeMember = mutation({
+  args: { member_id: v.string() },
+  handler: async (ctx, { member_id }) => {
+    const member = await ctx.db.get(member_id as any);
+    if (!member) {
+      throw new Error("Member not found");
+    }
+    await ctx.db.delete(member_id as any);
+    return { success: true };
+  },
+});
+
+/**
+ * Update member role in workspace.
+ *
+ * Used by role management API routes.
+ *
+ * @param member_id - The workspaceMembers ID to update
+ * @param role - New role (owner, admin, member)
+ * @returns Success status
+ */
+export const updateMemberRole = mutation({
+  args: { member_id: v.string(), role: v.string() },
+  handler: async (ctx, { member_id, role }) => {
+    const member = await ctx.db.get(member_id as any);
+    if (!member) {
+      throw new Error("Member not found");
+    }
+    if (!['owner', 'admin', 'member'].includes(role)) {
+      throw new Error("Invalid role");
+    }
+    await ctx.db.patch(member_id as any, { role, updated_at: Date.now() });
+    return { success: true };
+  },
+});
