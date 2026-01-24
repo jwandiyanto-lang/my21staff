@@ -1,8 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { isDevMode } from '@/lib/mock-data'
+import { useState, useEffect, useCallback } from 'react'
 
 interface TypingState {
   phone: string
@@ -10,8 +8,11 @@ interface TypingState {
 }
 
 /**
- * Hook for managing typing indicators via Supabase Broadcast
- * Uses ephemeral broadcast channel - no database storage
+ * Hook for managing typing indicators.
+ *
+ * NOTE: Typing indicators are currently stubbed out as they require
+ * a dedicated real-time infrastructure in Convex that doesn't exist yet.
+ * This is a nice-to-have feature that can be implemented later.
  *
  * @param workspaceId - Workspace to subscribe to
  * @returns Map of phone -> timestamp for typing contacts
@@ -19,7 +20,6 @@ interface TypingState {
 export function useTypingIndicator(workspaceId: string) {
   // Map of phone number -> last typing timestamp
   const [typingContacts, setTypingContacts] = useState<Map<string, number>>(new Map())
-  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
 
   // Clear stale typing indicators (older than 5 seconds)
   useEffect(() => {
@@ -43,46 +43,19 @@ export function useTypingIndicator(workspaceId: string) {
     return () => clearInterval(interval)
   }, [])
 
-  // Subscribe to typing broadcast channel
-  useEffect(() => {
-    if (isDevMode() || !workspaceId) return
-
-    const supabase = createClient()
-    const channel = supabase.channel(`typing:${workspaceId}`)
-
-    channel
-      .on('broadcast', { event: 'typing' }, (payload) => {
-        const { phone, isTyping } = payload.payload as { phone: string; isTyping: boolean }
-
-        setTypingContacts((prev) => {
-          const updated = new Map(prev)
-          if (isTyping) {
-            updated.set(phone, Date.now())
-          } else {
-            updated.delete(phone)
-          }
-          return updated
-        })
-      })
-      .subscribe()
-
-    channelRef.current = channel
-
-    return () => {
-      supabase.removeChannel(channel)
-      channelRef.current = null
-    }
-  }, [workspaceId])
-
-  // Broadcast typing event (for when we type - optional)
+  // Broadcast typing event (stubbed - no backend implementation)
   const broadcastTyping = useCallback(
     async (phone: string, isTyping: boolean) => {
-      if (!channelRef.current) return
-
-      await channelRef.current.send({
-        type: 'broadcast',
-        event: 'typing',
-        payload: { phone, isTyping },
+      // TODO: Implement with Convex real-time when needed
+      // For now, just update local state
+      setTypingContacts((prev) => {
+        const updated = new Map(prev)
+        if (isTyping) {
+          updated.set(phone, Date.now())
+        } else {
+          updated.delete(phone)
+        }
+        return updated
       })
     },
     []
@@ -104,4 +77,3 @@ export function useTypingIndicator(workspaceId: string) {
     broadcastTyping,
   }
 }
-

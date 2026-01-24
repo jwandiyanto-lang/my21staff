@@ -1,71 +1,64 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
-import type { WorkspaceMember, Profile } from '@/types/database'
-import { isDevMode, MOCK_TEAM_MEMBERS } from '@/lib/mock-data'
+import { useQuery } from 'convex/react'
+import { api } from '@/../convex/_generated/api'
+import { useAuth } from '@clerk/nextjs'
 
-export type TeamMember = WorkspaceMember & { profile: Profile | null }
+export interface TeamMember {
+  user_id: string
+  role: string
+  created_at: number
+}
 
 interface WorkspaceSettingsResponse {
   teamMembers: TeamMember[]
   contactTags: string[]
 }
 
-export function useWorkspaceSettings(workspaceId: string) {
-  return useQuery({
-    queryKey: ['workspace-settings', workspaceId],
-    queryFn: async (): Promise<WorkspaceSettingsResponse> => {
-      if (isDevMode()) {
-        return {
-          teamMembers: MOCK_TEAM_MEMBERS,
-          contactTags: ['Community', '1on1'],
-        }
-      }
+export function useWorkspaceSettings(workspaceId: string | null) {
+  const { userId } = useAuth()
 
-      const supabase = createClient()
+  // Fetch workspace data
+  const workspace = useQuery(
+    api.workspaces.getById,
+    workspaceId ? { id: workspaceId } : 'skip'
+  )
 
-      // Fetch workspace settings
-      const { data: workspace } = await supabase
-        .from('workspaces')
-        .select('settings')
-        .eq('id', workspaceId)
-        .single()
+  // Fetch team members
+  const members = useQuery(
+    api.workspaceMembers.listByWorkspace,
+    workspaceId ? { workspace_id: workspaceId } : 'skip'
+  )
 
-      // Fetch team members
-      const { data: members } = await supabase
-        .from('workspace_members')
-        .select('*, profile:profiles(*)')
-        .eq('workspace_id', workspaceId)
+  const isLoading = workspace === undefined || members === undefined
 
-      // Get current user to ensure they're in list
-      const { data: { user } } = await supabase.auth.getUser()
+  if (isLoading || !workspace || !members) {
+    return {
+      settings: undefined,
+      isLoading,
+    }
+  }
 
-      let teamMembers = (members || []) as unknown as TeamMember[]
+  // Extract contact tags from workspace settings
+  const contactTags = (workspace.settings as Record<string, unknown>)?.contact_tags as string[] || ['Community', '1on1']
 
-      if (user && !teamMembers.some(m => m.user_id === user.id)) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single()
+  // Ensure current user is in the team members list
+  let teamMembers = members as TeamMember[]
+  if (userId && !teamMembers.some(m => m.user_id === userId)) {
+    teamMembers = [{
+      user_id: userId,
+      role: 'owner',
+      created_at: Date.now(),
+    }, ...teamMembers]
+  }
 
-        if (profile) {
-          teamMembers = [{
-            id: `current-${user.id}`,
-            workspace_id: workspaceId,
-            user_id: user.id,
-            role: 'owner',
-            created_at: new Date().toISOString(),
-            profile,
-          } as TeamMember, ...teamMembers]
-        }
-      }
+  const settings: WorkspaceSettingsResponse = {
+    teamMembers,
+    contactTags,
+  }
 
-      const contactTags = (workspace?.settings as Record<string, unknown>)?.contact_tags as string[] || ['Community', '1on1']
-
-      return { teamMembers, contactTags }
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes - settings change rarely
-  })
+  return {
+    settings,
+    isLoading: false,
+  }
 }
