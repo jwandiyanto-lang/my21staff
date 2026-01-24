@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { fetchQuery } from 'convex/nextjs'
-import { api } from 'convex/_generated/api'
-import { Id } from 'convex/_generated/dataModel'
-import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
+import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
+import { Id } from '@/../convex/_generated/dataModel'
+import { uploadTicketAttachment } from '@/lib/storage/ticket-attachments'
 
-const BUCKET_NAME = 'ticket-attachments'
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 // POST /api/tickets/[id]/attachments - Upload attachment
 export async function POST(
@@ -15,21 +13,20 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { id: ticketId } = await params
 
     // Fetch ticket from Convex to verify it exists and get workspace_id
-    const ticket = await fetchQuery(api.tickets.getTicketById, {
+    const ticket = await convex.query(api.tickets.getTicketById, {
       ticket_id: ticketId as Id<"tickets">,
     })
 
     if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
-    }
-
-    // Verify workspace membership (any member can upload)
-    const authResult = await requireWorkspaceMembership(ticket.workspace_id as string)
-    if (authResult instanceof NextResponse) {
-      return authResult
     }
 
     // Parse form data
@@ -40,51 +37,13 @@ export async function POST(
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    // Validate file type
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Only images are allowed (JPEG, PNG, GIF, WebP)' },
-        { status: 400 }
-      )
-    }
+    // Upload to Convex storage using helper function
+    const result = await uploadTicketAttachment(ticketId, file)
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: 'File too large (max 10MB)' },
-        { status: 400 }
-      )
-    }
-
-    // Upload to Supabase storage (storage remains on Supabase)
-    const supabase = await createClient()
-    const fileName = `${ticketId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
-    const arrayBuffer = await file.arrayBuffer()
-
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from(BUCKET_NAME)
-      .upload(fileName, arrayBuffer, {
-        contentType: file.type,
-        upsert: false
-      })
-
-    if (uploadError) {
-      console.error('Upload error:', uploadError)
-      return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
-    }
-
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(uploadData.path)
-
-    return NextResponse.json({
-      url: publicUrl,
-      path: uploadData.path,
-      size: file.size
-    })
+    return NextResponse.json(result)
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Internal server error'
     console.error('POST /api/tickets/[id]/attachments error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: 400 })
   }
 }

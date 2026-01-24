@@ -1,12 +1,15 @@
-import { createClient } from '@/lib/supabase/client'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
+import { Id } from '@/../convex/_generated/dataModel'
 
-const BUCKET_NAME = 'ticket-attachments'
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 export interface UploadResult {
   url: string
-  path: string
+  storageId: string
   size: number
 }
 
@@ -22,45 +25,46 @@ export async function uploadTicketAttachment(
     throw new Error('File size must be under 5MB')
   }
 
-  const supabase = createClient()
-  const fileName = `${ticketId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+  // Get upload URL from Convex
+  const uploadUrl = await convex.mutation(api.storage.generateUploadUrl, {})
 
-  const { data, error } = await supabase.storage
-    .from(BUCKET_NAME)
-    .upload(fileName, file, {
-      contentType: file.type,
-      upsert: false
-    })
+  // Upload file to Convex storage
+  const result = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': file.type },
+    body: file,
+  })
 
-  if (error) throw error
+  if (!result.ok) {
+    throw new Error('Failed to upload file')
+  }
 
-  // Get public URL (bucket is private but we have RLS)
-  const { data: { publicUrl } } = supabase.storage
-    .from(BUCKET_NAME)
-    .getPublicUrl(data.path)
+  const { storageId } = await result.json()
+
+  // Get serving URL
+  const url = await convex.query(api.storage.getUrl, {
+    storageId: storageId as Id<"_storage">,
+  })
 
   return {
-    url: publicUrl,
-    path: data.path,
-    size: file.size
+    url: url || '',
+    storageId,
+    size: file.size,
   }
 }
 
-export async function deleteTicketAttachment(path: string): Promise<void> {
-  const supabase = createClient()
-  const { error } = await supabase.storage
-    .from(BUCKET_NAME)
-    .remove([path])
-  if (error) throw error
+export async function deleteTicketAttachment(storageId: string): Promise<void> {
+  await convex.mutation(api.storage.deleteById, {
+    storageId: storageId as Id<"_storage">,
+  })
 }
 
-export function getAttachmentUrl(path: string): string {
-  const supabase = createClient()
-  const { data: { publicUrl } } = supabase.storage
-    .from(BUCKET_NAME)
-    .getPublicUrl(path)
-  return publicUrl
+export async function getAttachmentUrl(storageId: string): Promise<string> {
+  const url = await convex.query(api.storage.getUrl, {
+    storageId: storageId as Id<"_storage">,
+  })
+  return url || ''
 }
 
 // Constants for external validation
-export { BUCKET_NAME, MAX_FILE_SIZE, ALLOWED_TYPES }
+export { MAX_FILE_SIZE, ALLOWED_TYPES }
