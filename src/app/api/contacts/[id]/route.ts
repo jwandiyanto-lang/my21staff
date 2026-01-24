@@ -1,34 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createApiAdminClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
+import { fetchMutation, fetchQuery } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
 import { validateBody } from '@/lib/validations'
 import { updateContactSchema } from '@/lib/validations/contact'
 import type { Contact } from '@/types/database'
-
-// Helper to check workspace access (uses admin client to bypass RLS)
-async function hasWorkspaceAccess(userId: string, workspaceId: string): Promise<boolean> {
-  const adminClient = createApiAdminClient()
-
-  // Check workspace_members table
-  const { data: membership } = await adminClient
-    .from('workspace_members')
-    .select('id')
-    .eq('workspace_id', workspaceId)
-    .eq('user_id', userId)
-    .single()
-
-  if (membership) return true
-
-  // Also check if user owns/created the workspace (fallback)
-  const { data: workspace } = await adminClient
-    .from('workspaces')
-    .select('id')
-    .eq('id', workspaceId)
-    .single()
-
-  // If workspace exists and user is authenticated, allow access
-  // (This is a permissive fallback for single-user workspaces)
-  return !!workspace
-}
 
 function isDevMode(): boolean {
   return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
@@ -75,82 +51,31 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json(mockContact)
     }
 
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Verify authentication via Clerk
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    // Fetch existing contact
-    const { data: existingContact, error: fetchError } = await supabase
-      .from('contacts')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (fetchError || !existingContact) {
-      return NextResponse.json(
-        { error: 'Contact not found' },
-        { status: 404 }
-      )
-    }
-
-    // Check user has access to workspace
-    const hasAccess = await hasWorkspaceAccess(user.id, existingContact.workspace_id)
-    if (!hasAccess) {
-      return NextResponse.json(
-        { error: 'Not authorized to update this contact' },
-        { status: 403 }
-      )
-    }
-
-    const now = new Date().toISOString()
 
     // Build update object with only provided fields
-    const updateData: Record<string, unknown> = {
-      updated_at: now,
-    }
+    const updates: Record<string, unknown> = {}
 
-    if (lead_status !== undefined) {
-      updateData.lead_status = lead_status
-    }
-    if (lead_score !== undefined) {
-      updateData.lead_score = Number(lead_score)
-    }
-    if (tags !== undefined) {
-      updateData.tags = tags
-    }
-    if (name !== undefined) {
-      updateData.name = name?.trim() || null
-    }
-    if (email !== undefined) {
-      updateData.email = email?.trim() || null
-    }
-    if (phone !== undefined) {
-      updateData.phone = phone?.trim() || null
-    }
-    if (assigned_to !== undefined) {
-      updateData.assigned_to = assigned_to || null
-    }
+    if (lead_status !== undefined) updates.lead_status = lead_status
+    if (lead_score !== undefined) updates.lead_score = Number(lead_score)
+    if (tags !== undefined) updates.tags = tags
+    if (name !== undefined) updates.name = name?.trim() || null
+    if (email !== undefined) updates.email = email?.trim() || null
+    if (phone !== undefined) updates.phone = phone?.trim() || null
+    if (assigned_to !== undefined) updates.assigned_to = assigned_to || null
 
-    const { data: contact, error } = await supabase
-      .from('contacts')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single()
+    // Update contact via Convex (internal mutation - API handles auth)
+    const contact = await fetchMutation(api.mutations.updateContactInternal, {
+      contact_id: id,
+      updates,
+    })
 
-    if (error) {
-      console.error('Update contact error:', error)
-      return NextResponse.json(
-        { error: 'Failed to update contact' },
-        { status: 500 }
-      )
+    if (!contact) {
+      return NextResponse.json({ error: 'Contact not found' }, { status: 404 })
     }
 
     return NextResponse.json(contact)
@@ -194,38 +119,19 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return NextResponse.json(mockContact)
     }
 
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Verify authentication via Clerk
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch contact
-    const { data: contact, error: fetchError } = await supabase
-      .from('contacts')
-      .select('*')
-      .eq('id', id)
-      .single()
+    // Fetch contact from Convex
+    const contact = await fetchQuery(api.contacts.getByIdInternal, {
+      contact_id: id,
+    })
 
-    if (fetchError || !contact) {
-      return NextResponse.json(
-        { error: 'Contact not found' },
-        { status: 404 }
-      )
-    }
-
-    // Check user has access to workspace
-    const hasAccess = await hasWorkspaceAccess(user.id, contact.workspace_id)
-    if (!hasAccess) {
-      return NextResponse.json(
-        { error: 'Not authorized to access this contact' },
-        { status: 403 }
-      )
+    if (!contact) {
+      return NextResponse.json({ error: 'Contact not found' }, { status: 404 })
     }
 
     return NextResponse.json(contact)
@@ -248,78 +154,25 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: true })
     }
 
-    const supabase = await createClient()
-    const adminClient = createApiAdminClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Verify authentication via Clerk
+    const { userId, orgRole } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch contact to verify it exists and get workspace_id
-    const { data: contact, error: fetchError } = await adminClient
-      .from('contacts')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (fetchError || !contact) {
+    // Check permission - delete requires owner/admin
+    if (orgRole !== 'org:admin') {
       return NextResponse.json(
-        { error: 'Contact not found' },
-        { status: 404 }
-      )
-    }
-
-    // Check user has access to workspace
-    const hasAccess = await hasWorkspaceAccess(user.id, contact.workspace_id)
-    if (!hasAccess) {
-      return NextResponse.json(
-        { error: 'Not authorized to delete this contact' },
+        { error: 'Only workspace owners can delete contacts' },
         { status: 403 }
       )
     }
 
-    // Delete associated conversations first (this will cascade to messages due to FK)
-    const { error: convDeleteError } = await adminClient
-      .from('conversations')
-      .delete()
-      .eq('contact_id', id)
+    // Delete contact via Convex (cascades to conversations, messages, notes)
+    await fetchMutation(api.mutations.deleteContactCascade, {
+      contact_id: id,
+    })
 
-    if (convDeleteError) {
-      console.error('Error deleting conversations:', convDeleteError)
-      // Continue anyway - we'll try to delete the contact
-    }
-
-    // Delete contact notes
-    const { error: notesDeleteError } = await adminClient
-      .from('contact_notes')
-      .delete()
-      .eq('contact_id', id)
-
-    if (notesDeleteError) {
-      console.error('Error deleting contact notes:', notesDeleteError)
-      // Continue anyway
-    }
-
-    // Delete the contact
-    const { error: deleteError } = await adminClient
-      .from('contacts')
-      .delete()
-      .eq('id', id)
-
-    if (deleteError) {
-      console.error('Error deleting contact:', deleteError)
-      return NextResponse.json(
-        { error: 'Failed to delete contact' },
-        { status: 500 }
-      )
-    }
-
-    console.log(`[Delete] Successfully deleted contact ${id}`)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('DELETE /api/contacts/[id] error:', error)

@@ -180,6 +180,92 @@ export const deleteContact = mutation({
 });
 
 /**
+ * Update a contact - internal version for API routes that handle auth via Clerk.
+ * No workspace membership check - API route handles authorization.
+ *
+ * @param contact_id - The contact to update
+ * @param updates - Object with fields to update
+ * @returns The updated contact document
+ */
+export const updateContactInternal = mutation({
+  args: {
+    contact_id: v.string(),
+    updates: v.any(),
+  },
+  handler: async (ctx, args) => {
+    const contact = await ctx.db.get(args.contact_id as any);
+    if (!contact) {
+      return null;
+    }
+
+    const now = Date.now();
+    const updateData: any = { updated_at: now };
+
+    // Copy over provided fields
+    if (args.updates.name !== undefined) updateData.name = args.updates.name;
+    if (args.updates.email !== undefined) updateData.email = args.updates.email;
+    if (args.updates.phone !== undefined) updateData.phone = args.updates.phone;
+    if (args.updates.lead_status !== undefined) updateData.lead_status = args.updates.lead_status;
+    if (args.updates.lead_score !== undefined) updateData.lead_score = args.updates.lead_score;
+    if (args.updates.tags !== undefined) updateData.tags = args.updates.tags;
+    if (args.updates.assigned_to !== undefined) updateData.assigned_to = args.updates.assigned_to;
+
+    await ctx.db.patch(args.contact_id as any, updateData);
+    return await ctx.db.get(args.contact_id as any);
+  },
+});
+
+/**
+ * Delete a contact and all related data - internal version for API routes.
+ * Cascades to: conversations, messages, contact notes
+ * No workspace membership check - API route handles authorization.
+ *
+ * @param contact_id - The contact to delete
+ */
+export const deleteContactCascade = mutation({
+  args: {
+    contact_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const contact = await ctx.db.get(args.contact_id as any);
+    if (!contact) {
+      throw new Error("Contact not found");
+    }
+
+    // Delete related conversations and their messages
+    const conversations = await ctx.db
+      .query("conversations")
+      .withIndex("by_contact", (q) => q.eq("contact_id", args.contact_id as any))
+      .collect();
+
+    for (const conv of conversations) {
+      // Delete messages for this conversation
+      const messages = await ctx.db
+        .query("messages")
+        .withIndex("by_conversation", (q) => q.eq("conversation_id", conv._id))
+        .collect();
+      for (const msg of messages) {
+        await ctx.db.delete(msg._id);
+      }
+      // Delete the conversation
+      await ctx.db.delete(conv._id);
+    }
+
+    // Delete contact notes
+    const notes = await ctx.db
+      .query("contactNotes")
+      .withIndex("by_contact", (q) => q.eq("contact_id", args.contact_id as any))
+      .collect();
+    for (const note of notes) {
+      await ctx.db.delete(note._id);
+    }
+
+    // Delete the contact
+    await ctx.db.delete(args.contact_id as any);
+  },
+});
+
+/**
  * Create a contact note.
  *
  * @param workspace_id - The workspace
