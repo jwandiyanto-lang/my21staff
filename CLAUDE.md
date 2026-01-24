@@ -68,15 +68,18 @@ Kapso API for WhatsApp
 
 ## Git & Deployment
 
-**DO NOT auto-push to GitHub.** Each push triggers a Vercel deployment (costs money).
+**🚫 VERCEL DEPLOYMENT BLOCKED - BILLING FREEZE 🚫**
 
+- **NEVER push to GitHub** - triggers Vercel deployment
+- **NEVER deploy to Vercel** - billing is too high
+- Keep all work **LOCAL ONLY** (localhost:3000)
 - Make atomic commits locally as normal
-- **Never push automatically** after commits
-- User will say "push" or push manually when ready to deploy
+- User will create a fresh Vercel project when ready
 
 ```bash
-# When user says "push":
-git push origin master
+# BLOCKED - DO NOT RUN:
+git push origin master   # ← NO
+vercel deploy            # ← NO
 ```
 
 ---
