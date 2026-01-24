@@ -6,8 +6,11 @@
  * and notifies the assigned consultant.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '@/../convex/_generated/api';
 import type { ARIMessage, LeadTemperature, ScoreBreakdown } from './types';
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 // ===========================================
 // Type Definitions
@@ -155,7 +158,6 @@ export function getConsultationTag(consultationType: 'consultation' | 'community
  * 6. Create notification for consultant
  */
 export async function executeHandoff(
-  supabase: SupabaseClient,
   params: HandoffParams
 ): Promise<HandoffResult> {
   const {
@@ -169,27 +171,28 @@ export async function executeHandoff(
 
   try {
     // 1. Get ARI conversation with messages
-    const { data: ariConv, error: convError } = await supabase
-      .from('ari_conversations')
-      .select('*, ari_messages(*)')
-      .eq('id', ariConversationId)
-      .single();
+    const ariConv = await convex.query(api.ari.getConversationWithMessages, {
+      conversation_id: ariConversationId,
+    });
 
-    if (convError || !ariConv) {
-      console.error('[Handoff] Failed to get conversation:', convError);
+    if (!ariConv) {
+      console.error('[Handoff] Failed to get conversation');
       return { success: false, error: 'Conversation not found' };
     }
 
-    // 2. Get contact for existing notes
-    const { data: contact } = await supabase
-      .from('contacts')
-      .select('notes, tags, metadata')
-      .eq('id', contactId)
-      .single();
+    // 2. Get contact for existing tags
+    const contact = await convex.query(api.contacts.getByIdInternal, {
+      contact_id: contactId,
+    });
+
+    if (!contact) {
+      console.error('[Handoff] Failed to get contact');
+      return { success: false, error: 'Contact not found' };
+    }
 
     // 3. Generate summary
     const summary = generateConversationSummary(
-      ariConv.ari_messages || [],
+      ariConv.messages || [],
       {
         lead_data: ariConv.context?.lead_data,
         score_breakdown: ariConv.context?.score_breakdown,
@@ -198,62 +201,37 @@ export async function executeHandoff(
       }
     );
 
-    // 4. Build updated notes
-    const timestamp = new Date().toLocaleString('id-ID', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    });
-    const existingNotes = contact?.notes || '';
-    const newNotes = existingNotes
-      ? `${existingNotes}\n\n---\n[ARI Summary - ${timestamp}]\n${summary}`
-      : `[ARI Summary - ${timestamp}]\n${summary}`;
-
-    // 5. Build updated tags
-    const existingTags = contact?.tags || [];
+    // 4. Build updated tags
+    const existingTags = contact.tags || [];
     const consultationTag = getConsultationTag(consultationType);
     const newTags = existingTags.includes(consultationTag)
       ? existingTags
       : [...existingTags, consultationTag];
 
-    // 6. Get appointment date for due_date
-    let dueDate: string | null = null;
-    if (appointmentId) {
-      const { data: appointment } = await supabase
-        .from('ari_appointments')
-        .select('scheduled_at')
-        .eq('id', appointmentId)
-        .single();
-
-      if (appointment) {
-        dueDate = appointment.scheduled_at.split('T')[0]; // YYYY-MM-DD
-      }
-    }
-
-    // 7. Update contact
-    const updateData: Record<string, unknown> = {
-      notes: newNotes,
+    // 5. Update contact
+    await convex.mutation(api.mutations.updateContactForHandoff, {
+      contact_id: contactId,
       tags: newTags,
       lead_status: 'hot_lead',
-      updated_at: new Date().toISOString(),
-    };
+    });
 
-    if (dueDate) {
-      updateData.due_date = dueDate;
-    }
+    // 6. Create contact note with summary
+    const timestamp = new Date().toLocaleString('id-ID', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
+    const noteContent = `[ARI Summary - ${timestamp}]\n${summary}`;
 
-    const { error: updateError } = await supabase
-      .from('contacts')
-      .update(updateData)
-      .eq('id', contactId);
+    await convex.mutation(api.mutations.createContactNoteForHandoff, {
+      workspace_id: workspaceId,
+      contact_id: contactId,
+      user_id: consultantId || 'system',
+      content: noteContent,
+    });
 
-    if (updateError) {
-      console.error('[Handoff] Failed to update contact:', updateError);
-      return { success: false, error: 'Failed to update contact' };
-    }
-
-    // 8. Create notification for consultant (if assigned)
+    // 7. Create notification for consultant (if assigned)
     if (consultantId) {
-      await createConsultantNotification(supabase, {
+      await createConsultantNotification({
         workspaceId,
         consultantId,
         contactId,
@@ -287,34 +265,26 @@ interface NotificationParams {
 /**
  * Create in-app notification for consultant
  *
- * Uses workspace_notifications table (or creates if not exists).
- * Falls back to storing in a notifications array in workspace_members.settings.
+ * Stores notifications in workspace_members.settings JSONB array.
  */
 async function createConsultantNotification(
-  supabase: SupabaseClient,
   params: NotificationParams
 ): Promise<void> {
   const { workspaceId, consultantId, contactId, appointmentId, summary } = params;
 
   // Get contact name for notification
-  const { data: contact } = await supabase
-    .from('contacts')
-    .select('name')
-    .eq('id', contactId)
-    .single();
+  const contact = await convex.query(api.contacts.getByIdInternal, {
+    contact_id: contactId,
+  });
 
   const contactName = contact?.name || 'New lead';
 
-  // Try to create notification in workspace_members settings
-  // This is a simple approach - store notifications in JSONB array
-  const { data: member } = await supabase
-    .from('workspace_members')
-    .select('settings')
-    .eq('workspace_id', workspaceId)
-    .eq('user_id', consultantId)
-    .single();
+  // Get current member settings
+  const settings = (await convex.query(api.mutations.getWorkspaceMemberSettings, {
+    workspace_id: workspaceId,
+    user_id: consultantId,
+  })) || {};
 
-  const settings = (member?.settings || {}) as Record<string, unknown>;
   const notifications = (settings.notifications || []) as Array<Record<string, unknown>>;
 
   // Add new notification
@@ -332,13 +302,11 @@ async function createConsultantNotification(
   // Keep only last 50 notifications
   const trimmedNotifications = notifications.slice(0, 50);
 
-  await supabase
-    .from('workspace_members')
-    .update({
-      settings: { ...settings, notifications: trimmedNotifications },
-    })
-    .eq('workspace_id', workspaceId)
-    .eq('user_id', consultantId);
+  await convex.mutation(api.mutations.updateWorkspaceMemberSettings, {
+    workspace_id: workspaceId,
+    user_id: consultantId,
+    settings: { ...settings, notifications: trimmedNotifications },
+  });
 
   console.log(`[Handoff] Created notification for consultant ${consultantId}`);
 }

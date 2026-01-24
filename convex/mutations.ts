@@ -1939,3 +1939,114 @@ export const updateConversationWebhook = mutation({
     return await ctx.db.get(args.conversation_id as any);
   },
 });
+
+// ============================================
+// ARI HANDOFF MUTATIONS
+// ============================================
+
+/**
+ * Update contact for handoff (webhook version, no auth).
+ * Updates tags and lead_status for a contact being handed off to a consultant.
+ */
+export const updateContactForHandoff = mutation({
+  args: {
+    contact_id: v.string(),
+    tags: v.array(v.string()),
+    lead_status: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const contact = await ctx.db.get(args.contact_id as any);
+    if (!contact) {
+      throw new Error("Contact not found");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.contact_id as any, {
+      tags: args.tags,
+      lead_status: args.lead_status,
+      updated_at: now,
+    });
+
+    return await ctx.db.get(args.contact_id as any);
+  },
+});
+
+/**
+ * Create contact note for handoff summary.
+ */
+export const createContactNoteForHandoff = mutation({
+  args: {
+    workspace_id: v.string(),
+    contact_id: v.string(),
+    user_id: v.string(),
+    content: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    const noteId = await ctx.db.insert("contactNotes", {
+      workspace_id: args.workspace_id as any,
+      contact_id: args.contact_id as any,
+      user_id: args.user_id,
+      content: args.content,
+      created_at: now,
+      updated_at: now,
+      supabaseId: crypto.randomUUID(), // Generate for compatibility
+    });
+
+    return await ctx.db.get(noteId);
+  },
+});
+
+/**
+ * Get workspace member settings (for notifications).
+ */
+export const getWorkspaceMemberSettings = query({
+  args: {
+    workspace_id: v.string(),
+    user_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const member = await ctx.db
+      .query("workspaceMembers")
+      .withIndex("by_workspace_user", (q) =>
+        q.eq("workspace_id", args.workspace_id as any).eq("user_id", args.user_id)
+      )
+      .first();
+
+    if (!member) {
+      return null;
+    }
+
+    return member.settings;
+  },
+});
+
+/**
+ * Update workspace member settings (for notifications).
+ */
+export const updateWorkspaceMemberSettings = mutation({
+  args: {
+    workspace_id: v.string(),
+    user_id: v.string(),
+    settings: v.any(),
+  },
+  handler: async (ctx, args) => {
+    const member = await ctx.db
+      .query("workspaceMembers")
+      .withIndex("by_workspace_user", (q) =>
+        q.eq("workspace_id", args.workspace_id as any).eq("user_id", args.user_id)
+      )
+      .first();
+
+    if (!member) {
+      throw new Error("Workspace member not found");
+    }
+
+    await ctx.db.patch(member._id, {
+      settings: args.settings,
+    });
+
+    return await ctx.db.get(member._id);
+  },
+});

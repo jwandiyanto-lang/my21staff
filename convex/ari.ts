@@ -786,6 +786,39 @@ export const getConversationMessages = query({
   },
 });
 
+/**
+ * Get conversation with messages (for handoff).
+ * No auth - used by webhook processing.
+ */
+export const getConversationWithMessages = query({
+  args: {
+    conversation_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db
+      .query("ariConversations")
+      .withIndex("by_supabaseId", (q) => q.eq("supabaseId", args.conversation_id))
+      .first();
+
+    if (!conversation) {
+      return null;
+    }
+
+    const messages = await ctx.db
+      .query("ariMessages")
+      .withIndex("by_conversation_time", (q) =>
+        q.eq("conversation_id", conversation._id as any)
+      )
+      .order("asc")
+      .collect();
+
+    return {
+      ...conversation,
+      messages,
+    };
+  },
+});
+
 // ============================================
 // ARI APPOINTMENTS
 // ============================================
