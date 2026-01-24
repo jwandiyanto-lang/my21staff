@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 7 of 7 (Cleanup + Verification)
-Plan: 07-01b complete - 4 of 6 plans done
+Plan: 07-02 complete - 4 of 6 plans done
 Status: In progress
-Last activity: 2026-01-24 - Completed 07-01b-PLAN.md (Workspace auth + invitation cleanup)
+Last activity: 2026-01-24 - Completed 07-02-PLAN.md (Workspace & member management migration)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████████░░ (162 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████████░░ (163 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 162
+- Total plans completed: 163
 - Average duration: ~14 min
-- Total execution time: ~39.43 hours
+- Total execution time: ~39.60 hours
 
 **By Milestone:**
 
@@ -58,6 +58,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- Preserved business logic in routes: Permission checks and validation stay in API routes during Convex migration, not moved to mutations (07-02)
+- Clerk user creation for admin: Admin client creation uses Clerk createUser instead of Supabase admin auth (07-02)
+- Type assertions for Convex queries: Added type casts to handle TypeScript union type inference from query results (07-02)
 - Notes export N+1 pattern: Notes export fetches contacts first, then notes per contact - no workspace index on contactNotes (07-03)
 - Public pricing form mutation: upsertPricingFormContact has no auth check - pricing form is public-facing endpoint (07-03)
 - Convex contact mutations: Created dedicated upsertContactForImport and mergeContacts mutations for cleaner separation vs reusing createContact (07-03)
@@ -214,8 +217,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 07-03-PLAN.md (Contact management API migration)
-Resume: Phase 7 in progress - 3/6 plans done (07-01a, 07-01b, 07-03) - Next: 07-02, 07-04, 07-05, 07-06
+Stopped at: Completed 07-02-PLAN.md (Workspace & member management migration)
+Resume: Phase 7 in progress - 4/6 plans done (07-01a, 07-01b, 07-02, 07-03) - Next: 07-04, 07-05, 07-06
 
 ---
-*Last updated: 2026-01-24 - Phase 7 in progress - Contact management routes migrated to Convex*
+*Last updated: 2026-01-24 - Phase 7 in progress - Workspace & member management routes migrated to Convex*
