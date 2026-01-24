@@ -131,10 +131,17 @@ Plans:
   2. Supabase environment variables removed from Vercel
   3. @supabase packages removed from package.json
   4. Full app verification passes (auth, data, webhooks all working)
-**Plans**: TBD
+**Plans**: 8 plans
 
 Plans:
-- [ ] 07-01: TBD
+- [ ] 07-01-PLAN.md — Remove Supabase auth infrastructure
+- [ ] 07-02-PLAN.md — Migrate workspace/member routes
+- [ ] 07-03-PLAN.md — Migrate contact management routes
+- [ ] 07-04-PLAN.md — Migrate message and ticket routes + storage
+- [ ] 07-05-PLAN.md — Migrate real-time queries and utilities
+- [ ] 07-06-PLAN.md — Migrate Kapso webhook and ARI system
+- [ ] 07-07-PLAN.md — Delete Supabase files and packages
+- [ ] 07-08-PLAN.md — End-to-end verification
 
 ---
 
@@ -275,10 +282,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
-| **v3.1 Full Convex + Clerk** | 1-7 | 17/TBD | In Progress | - |
+| **v3.1 Full Convex + Clerk** | 1-7 | 25/25 | In Progress | - |
 
-**Total shipped:** 153 plans across 5 milestones
+**Total shipped:** 164 plans across 5 milestones
 
 ---
 
-*Last updated: 2026-01-24 — Phase 6 complete (n8n integration)*
+*Last updated: 2026-01-24 — Phase 7 planned (8 plans in 4 waves)*
