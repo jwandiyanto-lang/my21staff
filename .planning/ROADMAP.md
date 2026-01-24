@@ -93,7 +93,11 @@ Plans:
   1. Workspace settings editable
   2. Team member list works (via Clerk)
   3. Integration settings accessible
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Settings page server component + team link
+- [ ] 04-02-PLAN.md — Human verification checkpoint
 
 ### Phase 5: Polish + Deploy
 **Goal**: Final verification and production deployment
@@ -377,10 +381,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
 | v3.1 Convex + Clerk API Layer | 1-7 | 23/25 | Complete (partial) | 2026-01-24 |
-| **v3.2 CRM Core Fresh** | 1-5 | 13/? | Phase 3 complete | - |
+| **v3.2 CRM Core Fresh** | 1-5 | 15/? | Phase 4 planned | - |
 
 **Total shipped:** 199 plans across 6 milestones
 
 ---
 
-*Last updated: 2026-01-24 — v3.2 Phase 3 complete (4 plans), Phase 4 next*
+*Last updated: 2026-01-24 — v3.2 Phase 4 planned (2 plans)*
