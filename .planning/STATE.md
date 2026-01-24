@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 
 ## Current Position
 
-Phase: 6 of 7 (n8n Integration)
-Plan: 06-01 complete - 1 of 1 plans done
-Status: Phase complete
-Last activity: 2026-01-24 - Completed 06-01-PLAN.md (n8n webhook endpoint + workflow update)
+Phase: 7 of 7 (Cleanup + Verification)
+Plan: 07-05 complete - 5 of 6 plans done
+Status: In progress
+Last activity: 2026-01-24 - Completed 07-05-PLAN.md (Real-time queries and dashboard utilities)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ (164 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ (165 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 158
+- Total plans completed: 159
 - Average duration: ~14 min
-- Total execution time: ~38.35 hours
+- Total execution time: ~38.42 hours
 
 **By Milestone:**
 
@@ -58,6 +58,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- Typing indicators deferred: Stubbed out local-only implementation - requires dedicated Convex real-time table (nice-to-have feature) (07-05)
+- ConvexHttpClient for server actions: Server actions use ConvexHttpClient (not React hooks) for Convex mutations (07-05)
 - intent-otter-212 deployment URL: n8n webhook uses intent-otter-212.convex.site (not pleasant-antelope) (06-01)
 - JSON.stringify for n8n body: n8n HTTP Request uses JSON.stringify($json) to send full payload (06-01)
 - Supabase storage retention for attachments: File storage can remain on Supabase while database moves to Convex (05-05)
@@ -206,8 +208,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 06-01-PLAN.md (n8n webhook endpoint + workflow update)
-Resume: Phase 6 complete - Ready for Phase 7 (Cleanup + Verification)
+Stopped at: Completed 07-05-PLAN.md (Real-time queries and dashboard utilities)
+Resume: Phase 7 in progress - 5/6 plans done - Next: 07-06 (Final Supabase cleanup)
 
 ---
-*Last updated: 2026-01-24 - Phase 6 n8n Integration complete - Eagle's lead flow working via Convex*
+*Last updated: 2026-01-24 - Phase 7 Cleanup in progress - Real-time queries and utilities migrated to Convex*
