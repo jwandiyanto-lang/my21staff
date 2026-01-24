@@ -53,21 +53,22 @@ Plans:
 Plans:
 - [x] 01-04-PLAN.md — Verify n8n sync (webhook verified, count check deferred)
 
-### Phase 2: Inbox (WhatsApp)
+### Phase 2: Inbox (WhatsApp) — COMPLETE (deferred verification)
 **Goal**: WhatsApp messaging via Kapso, seamless real-time
 **Depends on**: Phase 1
 **Success Criteria** (what must be TRUE):
-  1. Conversation list shows all chats
-  2. Message thread displays history
-  3. Send message works via Kapso
-  4. Real-time updates via Convex subscriptions
-**Plans**: 4 plans
+  1. ✓ Conversation list shows all chats
+  2. ✓ Message thread displays history
+  3. ✓ Send message works via Kapso
+  4. ✓ Real-time updates via Convex subscriptions
+  5. ⏸ Human verification deferred (combined with Phase 1 testing later)
+**Plans**: 4/4 complete
 
 Plans:
-- [ ] 02-01-PLAN.md — Conversation list with filters
-- [ ] 02-02-PLAN.md — Message thread with date separators
-- [ ] 02-03-PLAN.md — Send message via Kapso
-- [ ] 02-04-PLAN.md — Human verification checkpoint
+- [x] 02-01-PLAN.md — Conversation list with filters ✓
+- [x] 02-02-PLAN.md — Message thread with date separators ✓
+- [x] 02-03-PLAN.md — Send message via Kapso ✓
+- [x] 02-04-PLAN.md — Human verification checkpoint (deferred)
 
 ### Phase 3: Dashboard
 **Goal**: Workspace overview with stats and activity
@@ -369,10 +370,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
 | v3.1 Convex + Clerk API Layer | 1-7 | 23/25 | Complete (partial) | 2026-01-24 |
-| **v3.2 CRM Core Fresh** | 1-5 | 9/? | Phase 2 planned | - |
+| **v3.2 CRM Core Fresh** | 1-5 | 13/? | Phase 2 complete | - |
 
-**Total shipped:** 191 plans across 6 milestones
+**Total shipped:** 195 plans across 6 milestones
 
 ---
 
-*Last updated: 2026-01-24 — v3.2 Phase 2 planned (4 plans)*
+*Last updated: 2026-01-24 — v3.2 Phase 2 complete (4 plans, verification deferred)*
