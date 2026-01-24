@@ -26,7 +26,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, UserPlus, Mail, Trash2, Users, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, RefreshCw } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -83,25 +83,6 @@ interface ImportPreview {
   allValidated: ValidatedRow[]
 }
 
-interface TeamMember {
-  id: string
-  role: string
-  created_at: string
-  profiles: {
-    id: string
-    email: string | null
-    full_name: string | null
-  } | null
-}
-
-interface Invitation {
-  id: string
-  email: string
-  status: string
-  created_at: string
-  expires_at: string
-}
-
 interface SettingsClientProps {
   workspace: {
     id: string
@@ -110,8 +91,6 @@ interface SettingsClientProps {
     kapso_phone_id: string | null
     settings: WorkspaceSettings | null
   }
-  members: TeamMember[]
-  invitations: Invitation[]
 }
 
 // Default quick replies
@@ -123,22 +102,12 @@ const DEFAULT_QUICK_REPLIES: QuickReply[] = [
   { id: '5', label: 'Schedule', text: 'Apakah Anda bersedia untuk jadwalkan panggilan? Mohon informasikan waktu yang tersedia.' },
 ]
 
-export function SettingsClient({ workspace, members, invitations }: SettingsClientProps) {
+export function SettingsClient({ workspace }: SettingsClientProps) {
   // WhatsApp settings state
   const [phoneId, setPhoneId] = useState(workspace.kapso_phone_id || '')
   const [apiKey, setApiKey] = useState(workspace.settings?.kapso_api_key || '')
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-
-  // Team invite state
-  const [isInviteSheetOpen, setIsInviteSheetOpen] = useState(false)
-  const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: 'member' })
-  const [isInviting, setIsInviting] = useState(false)
-  const [localInvitations, setLocalInvitations] = useState<Invitation[]>(invitations)
-  const [localMembers, setLocalMembers] = useState<TeamMember[]>(members)
-  const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null)
-  const [deletingInvitationId, setDeletingInvitationId] = useState<string | null>(null)
-  const [resendingInvitationId, setResendingInvitationId] = useState<string | null>(null)
 
   // Quick replies state
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>(
@@ -191,114 +160,6 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
       console.error('Failed to save settings:', error)
     } finally {
       setIsSaving(false)
-    }
-  }
-
-  const handleInvite = async () => {
-    if (!inviteForm.email.trim() || !inviteForm.name.trim()) {
-      alert('Name and email are required')
-      return
-    }
-
-    setIsInviting(true)
-    try {
-      const res = await fetch('/api/invitations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: inviteForm.email.trim(),
-          name: inviteForm.name.trim(),
-          role: inviteForm.role,
-          workspaceId: workspace.id,
-        }),
-      })
-
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to send invitation')
-      }
-
-      const data = await res.json()
-
-      // Add to local state
-      setLocalInvitations(prev => [{
-        id: data.invitation.id,
-        email: data.invitation.email,
-        status: data.invitation.status,
-        created_at: new Date().toISOString(),
-        expires_at: data.invitation.expires_at,
-      }, ...prev])
-
-      setInviteForm({ name: '', email: '', role: 'member' })
-      setIsInviteSheetOpen(false)
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to invite')
-    } finally {
-      setIsInviting(false)
-    }
-  }
-
-  const handleDeleteMember = async (memberId: string) => {
-    if (!confirm('Are you sure you want to remove this team member?')) return
-
-    setDeletingMemberId(memberId)
-    try {
-      const res = await fetch(`/api/workspace-members/${memberId}`, {
-        method: 'DELETE',
-      })
-
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to remove member')
-      }
-
-      setLocalMembers(prev => prev.filter(m => m.id !== memberId))
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to remove member')
-    } finally {
-      setDeletingMemberId(null)
-    }
-  }
-
-  const handleDeleteInvitation = async (invitationId: string) => {
-    if (!confirm('Are you sure you want to cancel this invitation?')) return
-
-    setDeletingInvitationId(invitationId)
-    try {
-      const res = await fetch(`/api/invitations/${invitationId}`, {
-        method: 'DELETE',
-      })
-
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to cancel invitation')
-      }
-
-      setLocalInvitations(prev => prev.filter(i => i.id !== invitationId))
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to cancel invitation')
-    } finally {
-      setDeletingInvitationId(null)
-    }
-  }
-
-  const handleResendInvitation = async (invitationId: string) => {
-    setResendingInvitationId(invitationId)
-    try {
-      const res = await fetch(`/api/invitations/${invitationId}`, {
-        method: 'POST',
-      })
-
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to resend invitation')
-      }
-
-      alert('Invitation resent successfully!')
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to resend invitation')
-    } finally {
-      setResendingInvitationId(null)
     }
   }
 
@@ -498,13 +359,6 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
           <TabsTrigger value="data" className="gap-2">
             <FileSpreadsheet className="h-4 w-4" />
             Data
-          </TabsTrigger>
-          <TabsTrigger value="team" className="gap-2">
-            <Users className="h-4 w-4" />
-            Team
-            <Badge variant="secondary" className="ml-1 text-xs">
-              {localMembers.length}
-            </Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -1003,227 +857,6 @@ export function SettingsClient({ workspace, members, invitations }: SettingsClie
               )}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Team Tab */}
-        <TabsContent value="team" className="space-y-6">
-          {/* Invite Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Invite Team Member</CardTitle>
-              <CardDescription>
-                Add a new member to your workspace
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Dialog open={isInviteSheetOpen} onOpenChange={setIsInviteSheetOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Invite Member
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Invite Team Member</DialogTitle>
-                    <DialogDescription>
-                      Send an invitation email to add a new member
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="invite-name">Full Name</Label>
-                      <Input
-                        id="invite-name"
-                        placeholder="John Doe"
-                        value={inviteForm.name}
-                        onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="invite-email">Email</Label>
-                      <Input
-                        id="invite-email"
-                        type="email"
-                        placeholder="john@company.com"
-                        value={inviteForm.email}
-                        onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="invite-role">Role</Label>
-                      <Select
-                        value={inviteForm.role}
-                        onValueChange={(value) => setInviteForm({ ...inviteForm, role: value })}
-                      >
-                        <SelectTrigger id="invite-role">
-                          <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="member">Member</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      onClick={handleInvite}
-                      disabled={isInviting || !inviteForm.email.trim() || !inviteForm.name.trim()}
-                      className="w-full"
-                    >
-                      {isInviting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="mr-2 h-4 w-4" />
-                          Send Invitation
-                        </>
-                      )}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </CardContent>
-          </Card>
-
-          {/* Team Members Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Team Members</CardTitle>
-              <CardDescription>
-                {localMembers.length} member{localMembers.length !== 1 ? 's' : ''} in this workspace
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {localMembers.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                        No team members yet. Invite someone to get started.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    localMembers.map((member) => (
-                      <TableRow key={member.id}>
-                        <TableCell className="font-medium">
-                          {member.profiles?.full_name || 'Unnamed'}
-                        </TableCell>
-                        <TableCell>{member.profiles?.email || '-'}</TableCell>
-                        <TableCell>
-                          <Badge variant={member.role === 'owner' ? 'default' : 'secondary'}>
-                            {member.role}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {formatDistanceToNow(new Date(member.created_at), { addSuffix: true })}
-                        </TableCell>
-                        <TableCell>
-                          {member.role !== 'owner' && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleDeleteMember(member.id)}
-                              disabled={deletingMemberId === member.id}
-                            >
-                              {deletingMemberId === member.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                              )}
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          {/* Pending Invitations */}
-          {localInvitations.length > 0 && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle className="text-lg">Pending Invitations</CardTitle>
-                <CardDescription>
-                  {localInvitations.length} pending invitation{localInvitations.length !== 1 ? 's' : ''}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Sent</TableHead>
-                      <TableHead>Expires</TableHead>
-                      <TableHead className="w-[100px]">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {localInvitations.map((inv) => (
-                      <TableRow key={inv.id}>
-                        <TableCell className="font-medium">{inv.email}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {formatDistanceToNow(new Date(inv.created_at), { addSuffix: true })}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {formatDistanceToNow(new Date(inv.expires_at), { addSuffix: true })}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleResendInvitation(inv.id)}
-                              disabled={resendingInvitationId === inv.id}
-                              title="Resend invitation"
-                            >
-                              {resendingInvitationId === inv.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <RefreshCw className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                              )}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleDeleteInvitation(inv.id)}
-                              disabled={deletingInvitationId === inv.id}
-                              title="Cancel invitation"
-                            >
-                              {deletingInvitationId === inv.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                              )}
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
       </Tabs>
     </div>

@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 7 of 7 (Cleanup + Verification)
-Plan: 07-05 complete - 5 of 6 plans done
+Plan: 07-04 complete - 4 of 6 plans done
 Status: In progress
-Last activity: 2026-01-24 - Completed 07-05-PLAN.md (Real-time queries and dashboard utilities)
+Last activity: 2026-01-24 - Completed 07-04-PLAN.md (Message and ticket routes to Convex)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ (165 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ███████░░░ (166 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 159
+- Total plans completed: 160
 - Average duration: ~14 min
-- Total execution time: ~38.42 hours
+- Total execution time: ~38.87 hours
 
 **By Milestone:**
 
@@ -58,6 +58,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- createOutboundMessage visibility: Changed from internalMutation to mutation for API route access while maintaining auth (07-04)
+- Ticket attachments to Convex storage: Migrated ticket attachments to Convex file storage, chat media remains on Supabase temporarily (07-04)
 - Typing indicators deferred: Stubbed out local-only implementation - requires dedicated Convex real-time table (nice-to-have feature) (07-05)
 - ConvexHttpClient for server actions: Server actions use ConvexHttpClient (not React hooks) for Convex mutations (07-05)
 - intent-otter-212 deployment URL: n8n webhook uses intent-otter-212.convex.site (not pleasant-antelope) (06-01)
@@ -208,8 +210,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 07-05-PLAN.md (Real-time queries and dashboard utilities)
-Resume: Phase 7 in progress - 5/6 plans done - Next: 07-06 (Final Supabase cleanup)
+Stopped at: Completed 07-04-PLAN.md (Message and ticket routes to Convex)
+Resume: Phase 7 in progress - 4/6 plans done - Next: 07-05 or 07-06
 
 ---
 *Last updated: 2026-01-24 - Phase 7 Cleanup in progress - Real-time queries and utilities migrated to Convex*
