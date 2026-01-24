@@ -29,6 +29,22 @@ export const getById = query({
 });
 
 /**
+ * Get a workspace by ID (internal version for API routes).
+ *
+ * Used by /api/messages/send to get workspace with Kapso credentials.
+ * No workspace membership check - API route handles authorization.
+ */
+export const getByIdInternal = query({
+  args: {
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspace_id as any);
+    return workspace;
+  },
+});
+
+/**
  * Get a workspace by slug.
  *
  * Used for routing (e.g., my21staff.com/[slug]/dashboard).
