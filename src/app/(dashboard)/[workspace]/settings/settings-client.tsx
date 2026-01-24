@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -26,7 +27,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, Users } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -329,11 +330,19 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
 
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage your workspace settings and team
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your workspace settings and team
+          </p>
+        </div>
+        <Link href={`/${workspace.slug}/team`}>
+          <Button variant="outline">
+            <Users className="h-4 w-4 mr-2" />
+            Kelola Tim
+          </Button>
+        </Link>
       </div>
 
       <Tabs defaultValue="integrations" className="space-y-6">
