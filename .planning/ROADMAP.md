@@ -12,7 +12,61 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 - v2.2 ARI & User Flow — Phases 1-6 (shipped 2026-01-20)
 - v3.0 Performance & Speed — Phases 1-5 (shipped 2026-01-23)
 - v3.1 Convex + Clerk API Layer — Phases 1-7 (shipped 2026-01-24, partial)
-- **v3.2 TBD** — Next milestone (planning needed)
+- **v3.2 CRM Core Fresh** — Phases 1-5 (in progress)
+
+---
+
+## v3.2 CRM Core Fresh (In Progress)
+
+**Milestone Goal:** Delete Supabase entirely and rebuild core CRM features fresh with Convex. Seamless WhatsApp integration via Kapso.
+
+### Phase 1: Supabase Deletion + Navigation Cleanup
+**Goal**: Remove all Supabase code, hide broken pages from navigation
+**Depends on**: v3.1 complete
+**Success Criteria** (what must be TRUE):
+  1. Supabase lib files deleted (server.ts, client.ts, middleware.ts)
+  2. @supabase packages removed from package.json
+  3. Broken pages hidden from sidebar navigation
+  4. App builds and runs (broken pages just not accessible)
+**Plans**: TBD
+
+### Phase 2: Contact Database
+**Goal**: Contact management rebuilt fresh with Convex
+**Depends on**: Phase 1
+**Success Criteria** (what must be TRUE):
+  1. Contact list page works (view, search, filter)
+  2. Contact detail sheet works (view, edit)
+  3. Contact creation works
+  4. Tags and status management work
+**Plans**: TBD
+
+### Phase 3: Inbox (WhatsApp)
+**Goal**: WhatsApp messaging via Kapso, seamless real-time
+**Depends on**: Phase 2
+**Success Criteria** (what must be TRUE):
+  1. Conversation list shows all chats
+  2. Message thread displays history
+  3. Send message works via Kapso
+  4. Real-time updates via Convex subscriptions
+**Plans**: TBD
+
+### Phase 4: Dashboard
+**Goal**: Workspace overview with stats and activity
+**Depends on**: Phase 3
+**Success Criteria** (what must be TRUE):
+  1. Dashboard shows contact/conversation counts
+  2. Recent activity feed works
+  3. Quick actions available
+**Plans**: TBD
+
+### Phase 5: Settings
+**Goal**: Workspace configuration and team management
+**Depends on**: Phase 4
+**Success Criteria** (what must be TRUE):
+  1. Workspace settings editable
+  2. Team member list works (via Clerk)
+  3. Integration settings accessible
+**Plans**: TBD
 
 ---
 
@@ -287,7 +341,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
 | v3.1 Convex + Clerk API Layer | 1-7 | 23/25 | Complete (partial) | 2026-01-24 |
-| **v3.2 TBD** | - | - | Planning | - |
+| **v3.2 CRM Core Fresh** | 1-5 | 0/? | In Progress | - |
 
 **Total shipped:** 187 plans across 6 milestones
 

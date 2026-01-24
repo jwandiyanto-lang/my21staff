@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.2 (planning needed)
+**Current focus:** v3.2 CRM Core Fresh
 
 ## Current Position
 
-Milestone: v3.2 (planning needed)
-Phase: None (new milestone)
-Status: Ready for `/gsd:new-milestone`
-Last activity: 2026-01-24 - v3.1 closed (API layer complete, Supabase dormant)
+Milestone: v3.2 CRM Core Fresh
+Phase: 1 of 5 (Supabase Deletion + Navigation Cleanup)
+Status: Ready for `/gsd:plan-phase 1`
+Last activity: 2026-01-24 - v3.2 roadmap created
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ (187 plans shipped)
 
@@ -138,25 +138,17 @@ Recent v3.0 decisions affecting v3.1:
 
 **Convex CLI Bug:** `npx convex deploy` incorrectly reports env var not set (despite `env list` confirming it). Workaround: use Convex Dashboard to deploy or wait for CLI fix. Dev deployment works correctly.
 
-### Deferred Work (Supabase Dormant Strategy)
+### v3.2 Strategy: Clean Slate
 
-**Decision:** v3.1 closed with Supabase dormant — 24 page components still use Supabase directly. Will migrate feature-by-feature in future milestones rather than big-bang migration.
+**Decision:** Delete Supabase entirely. Hide broken pages from navigation. Rebuild CRM features fresh with Convex.
 
-**Files still using Supabase (migrate when touching feature):**
+**Pages to hide until rebuilt:**
+- Dashboard pages (workspace, inbox, database, settings, support, knowledge-base, integrations, website)
+- Portal pages (support)
+- Admin pages (clients)
+- Public pages (webinars, articles)
 
-| Category | Count | Files |
-|----------|-------|-------|
-| Dashboard pages | 10 | workspace page, inbox, database, settings, support, knowledge-base, integrations, website, dashboard, admin clients |
-| Layouts | 3 | dashboard layout, admin layout, portal layout |
-| Portal pages | 2 | portal support, portal support detail |
-| Client components | 6 | sidebar, workspace-switcher, inbox-client, message-thread, appointment-card, login-modal |
-| Public pages | 3 | webinar page, article page, contact-detail-sheet |
-
-**Migration pattern when touching:**
-- Server components: Replace `createClient()` with `ConvexHttpClient` or `useQuery`
-- Client components: Replace Supabase hooks with `useQuery`/`useMutation` from Convex
-
-**Full list:** See `.planning/phases/07-cleanup-verification/07-07-SUMMARY.md`
+**Reference:** `.planning/phases/07-cleanup-verification/07-07-SUMMARY.md`
 
 ### Ticket Migration Status
 
@@ -240,8 +232,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: v3.1 closed — user decision to defer Supabase removal
-Resume: `/gsd:new-milestone` to plan v3.2
+Stopped at: v3.2 roadmap created
+Resume: `/gsd:plan-phase 1` to plan Supabase deletion
 
 ---
-*Last updated: 2026-01-24 - v3.1 shipped (partial), ready for v3.2 planning*
+*Last updated: 2026-01-24 - v3.2 CRM Core Fresh roadmap created*
