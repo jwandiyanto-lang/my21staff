@@ -1,16 +1,24 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import { safeEncrypt } from '@/lib/crypto'
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { id: workspaceId } = await params
     const body = await request.json()
-    const supabase = await createClient()
 
     // Verify workspace access
     const authResult = await requireWorkspaceMembership(workspaceId)
@@ -25,11 +33,9 @@ export async function PATCH(
 
     if (body.settings !== undefined) {
       // Merge with existing settings
-      const { data: existing } = await supabase
-        .from('workspaces')
-        .select('settings')
-        .eq('id', workspaceId)
-        .single()
+      const existing = await convex.query(api.workspaces.getById, {
+        id: workspaceId
+      }) as { settings?: Record<string, unknown> } | null
 
       const existingSettings = (existing?.settings as Record<string, unknown>) || {}
       const newSettings = { ...body.settings }
@@ -45,19 +51,11 @@ export async function PATCH(
       }
     }
 
-    // Update workspace
-    const { error } = await supabase
-      .from('workspaces')
-      .update(updates)
-      .eq('id', workspaceId)
-
-    if (error) {
-      console.error('Error updating workspace settings:', error)
-      return NextResponse.json(
-        { error: 'Failed to update settings' },
-        { status: 500 }
-      )
-    }
+    // Update workspace via Convex
+    await convex.mutation(api.workspaces.updateSettings, {
+      workspace_id: workspaceId,
+      ...updates
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

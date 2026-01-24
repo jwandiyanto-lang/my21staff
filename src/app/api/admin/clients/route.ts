@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
 
-function generateTempPassword(): string {
-  // Generate a readable temporary password
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
-  let password = 'Welcome'
-  for (let i = 0; i < 4; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return password + '!'
-}
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+
+// Super admin check
+const SUPER_ADMIN_IDS = ['user_38fViPWAnLiNth62ZaAJj3PQDWU'] // jwandiyanto@gmail.com
 
 function generateSlug(name: string): string {
   return name
@@ -19,36 +16,29 @@ function generateSlug(name: string): string {
     .substring(0, 50)
 }
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   try {
-    const supabase = await createClient()
-    const adminSupabase = createAdminClient()
-
-    // Check if user is authenticated and is admin
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const { userId } = await auth()
+    if (!userId || !SUPER_ADMIN_IDS.includes(userId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check admin status
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('role')
-      .eq('user_id', user.id)
-      .in('role', ['owner', 'admin'])
-      .limit(1)
-      .single()
+    const workspaces = await convex.query(api.workspaces.listAll, {})
+    return NextResponse.json(workspaces)
+  } catch (error) {
+    console.error('List clients error:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch clients' },
+      { status: 500 }
+    )
+  }
+}
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single()
-
-    const isAdmin = !!membership || profile?.is_admin
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+export async function POST(request: Request) {
+  try {
+    const { userId } = await auth()
+    if (!userId || !SUPER_ADMIN_IDS.includes(userId)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Parse request body
@@ -62,105 +52,70 @@ export async function POST(request: Request) {
       )
     }
 
-    // Generate temp password and slug
-    const tempPassword = generateTempPassword()
+    // Generate slug
     const baseSlug = generateSlug(businessName)
 
     // Check if slug exists and make unique if needed
     let slug = baseSlug
     let counter = 1
     while (true) {
-      const { data: existing } = await supabase
-        .from('workspaces')
-        .select('id')
-        .eq('slug', slug)
-        .single()
+      const existing = await convex.query(api.workspaces.getBySlug, {
+        slug: slug
+      })
 
       if (!existing) break
       slug = `${baseSlug}-${counter}`
       counter++
     }
 
-    // Create user with admin client (bypasses RLS)
-    const { data: newUser, error: createUserError } = await adminSupabase.auth.admin.createUser({
-      email,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: {
-        full_name: fullName,
-      },
-    })
+    // Create user in Clerk first
+    const { clerkClient } = await import('@clerk/nextjs/server')
+    const clerk = await clerkClient()
 
-    if (createUserError || !newUser.user) {
-      console.error('Create user error:', createUserError)
-      return NextResponse.json(
-        { error: createUserError?.message || 'Failed to create user' },
-        { status: 500 }
-      )
+    // Generate a temporary password
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
+    let tempPassword = 'Welcome'
+    for (let i = 0; i < 4; i++) {
+      tempPassword += chars.charAt(Math.floor(Math.random() * chars.length))
     }
+    tempPassword += '!'
 
-    // Create workspace (using admin client owner_id as the creating admin)
-    const { data: workspace, error: workspaceError } = await adminSupabase
-      .from('workspaces')
-      .insert({
+    try {
+      const newUser = await clerk.users.createUser({
+        emailAddress: [email],
+        password: tempPassword,
+        firstName: fullName.split(' ')[0],
+        lastName: fullName.split(' ').slice(1).join(' ') || undefined,
+        skipPasswordRequirement: false,
+      })
+
+      // Create workspace in Convex
+      const workspaceId = await convex.mutation(api.workspaces.create, {
         name: businessName,
         slug,
-        owner_id: newUser.user.id, // The client is the owner of their workspace
+        owner_id: newUser.id,
       })
-      .select('id, name, slug')
-      .single()
 
-    if (workspaceError || !workspace) {
-      // Rollback: delete the user we just created
-      await adminSupabase.auth.admin.deleteUser(newUser.user.id)
-      console.error('Create workspace error:', workspaceError)
+      // Note: Workspace membership is handled by Clerk organization webhooks
+      // In the current transition, we create a workspace but the full org integration
+      // will be completed in a future phase
+
+      return NextResponse.json({
+        email,
+        password: tempPassword,
+        workspace: {
+          id: workspaceId,
+          name: businessName,
+          slug,
+        },
+      })
+    } catch (clerkError: any) {
+      console.error('Create user error:', clerkError)
       return NextResponse.json(
-        { error: workspaceError?.message || 'Failed to create workspace' },
+        { error: clerkError?.message || 'Failed to create user' },
         { status: 500 }
       )
     }
-
-    // Add user to workspace_members with must_change_password = true
-    const { error: memberError } = await adminSupabase
-      .from('workspace_members')
-      .insert({
-        workspace_id: workspace.id,
-        user_id: newUser.user.id,
-        role: 'member', // Client is a member, not owner/admin of the platform
-        must_change_password: true,
-      })
-
-    if (memberError) {
-      // Rollback: delete workspace and user
-      await adminSupabase.from('workspaces').delete().eq('id', workspace.id)
-      await adminSupabase.auth.admin.deleteUser(newUser.user.id)
-      console.error('Create member error:', memberError)
-      return NextResponse.json(
-        { error: memberError?.message || 'Failed to add user to workspace' },
-        { status: 500 }
-      )
-    }
-
-    // Also add the admin as owner of this new workspace (so they can manage it)
-    await adminSupabase
-      .from('workspace_members')
-      .insert({
-        workspace_id: workspace.id,
-        user_id: user.id, // Current admin user
-        role: 'owner',
-        must_change_password: false,
-      })
-      .single()
-
-    return NextResponse.json({
-      email,
-      password: tempPassword,
-      workspace: {
-        id: workspace.id,
-        name: workspace.name,
-        slug: workspace.slug,
-      },
-    })
   } catch (error) {
     console.error('Create client error:', error)
     return NextResponse.json(
