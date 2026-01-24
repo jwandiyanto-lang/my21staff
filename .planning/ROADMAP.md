@@ -20,29 +20,29 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 
 **Milestone Goal:** Delete Supabase entirely and rebuild core CRM features fresh with Convex. Seamless WhatsApp integration via Kapso.
 
-### Phase 1: Supabase Deletion + Navigation Cleanup
-**Goal**: Remove all Supabase code, hide broken pages from navigation
+### Phase 1: Supabase Deletion + Database Foundation
+**Goal**: Remove all Supabase code, DELETE broken page files, rebuild Contact Database fresh with Convex
 **Depends on**: v3.1 complete
+**Merged scope**: Original Phase 1 (cleanup) + Phase 2 (database) combined per user decision
 **Success Criteria** (what must be TRUE):
   1. Supabase lib files deleted (server.ts, client.ts, middleware.ts)
   2. @supabase packages removed from package.json
-  3. Broken pages hidden from sidebar navigation
-  4. App builds and runs (broken pages just not accessible)
-**Plans**: TBD
+  3. Broken pages DELETED from codebase (not just hidden)
+  4. App builds and runs
+  5. Contact Database page works with all Google Sheets leads
+  6. Contact detail modal with 4 tabs (Profile, Documents, Conversations, Notes)
+  7. n8n sync verified (all Google Sheets leads appear)
+**Plans**: 4 plans
 
-### Phase 2: Contact Database
-**Goal**: Contact management rebuilt fresh with Convex
-**Depends on**: Phase 1
-**Success Criteria** (what must be TRUE):
-  1. Contact list page works (view, search, filter)
-  2. Contact detail sheet works (view, edit)
-  3. Contact creation works
-  4. Tags and status management work
-**Plans**: TBD
+Plans:
+- [ ] 01-01-PLAN.md — Delete Supabase files + update navigation
+- [ ] 01-02-PLAN.md — Migrate layout and sidebar to Convex
+- [ ] 01-03-PLAN.md — Contact detail dialog with 4 tabs
+- [ ] 01-04-PLAN.md — Verify n8n sync
 
-### Phase 3: Inbox (WhatsApp)
+### Phase 2: Inbox (WhatsApp)
 **Goal**: WhatsApp messaging via Kapso, seamless real-time
-**Depends on**: Phase 2
+**Depends on**: Phase 1
 **Success Criteria** (what must be TRUE):
   1. Conversation list shows all chats
   2. Message thread displays history
@@ -50,22 +50,31 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
   4. Real-time updates via Convex subscriptions
 **Plans**: TBD
 
-### Phase 4: Dashboard
+### Phase 3: Dashboard
 **Goal**: Workspace overview with stats and activity
-**Depends on**: Phase 3
+**Depends on**: Phase 2
 **Success Criteria** (what must be TRUE):
   1. Dashboard shows contact/conversation counts
   2. Recent activity feed works
   3. Quick actions available
 **Plans**: TBD
 
-### Phase 5: Settings
+### Phase 4: Settings
 **Goal**: Workspace configuration and team management
-**Depends on**: Phase 4
+**Depends on**: Phase 3
 **Success Criteria** (what must be TRUE):
   1. Workspace settings editable
   2. Team member list works (via Clerk)
   3. Integration settings accessible
+**Plans**: TBD
+
+### Phase 5: Polish + Deploy
+**Goal**: Final verification and production deployment
+**Depends on**: Phase 4
+**Success Criteria** (what must be TRUE):
+  1. All CRM features verified working
+  2. Production deployment successful
+  3. Environment variables cleaned up
 **Plans**: TBD
 
 ---
@@ -341,10 +350,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
 | v3.1 Convex + Clerk API Layer | 1-7 | 23/25 | Complete (partial) | 2026-01-24 |
-| **v3.2 CRM Core Fresh** | 1-5 | 0/? | In Progress | - |
+| **v3.2 CRM Core Fresh** | 1-5 | 4/? | Phase 1 planned | - |
 
 **Total shipped:** 187 plans across 6 milestones
 
 ---
 
-*Last updated: 2026-01-24 — v3.1 shipped (partial), v3.2 planning needed*
+*Last updated: 2026-01-24 — v3.2 Phase 1 planned (4 plans)*
