@@ -12,34 +12,33 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { keepContactId, mergeContactId, activePhone, activeEmail, workspaceId } = await request.json()
+    const { primaryId, secondaryId, fields } = await request.json()
 
-    if (!keepContactId || !mergeContactId || !workspaceId) {
+    if (!primaryId || !secondaryId || !fields) {
       return NextResponse.json(
-        { error: 'keepContactId, mergeContactId, and workspaceId are required' },
+        { error: 'primaryId, secondaryId, and fields are required' },
         { status: 400 }
       )
     }
 
-    if (keepContactId === mergeContactId) {
+    if (primaryId === secondaryId) {
       return NextResponse.json(
         { error: 'Cannot merge a contact into itself' },
         { status: 400 }
       )
     }
 
-    const mergedContact = await convex.mutation(api.mutations.mergeContacts, {
-      workspace_id: workspaceId,
-      primary_id: keepContactId,
-      secondary_id: mergeContactId,
-      active_phone: activePhone || undefined,
-      active_email: activeEmail || undefined,
+    const mergedContact = await convex.mutation(api.contacts.mergeContacts, {
+      primaryId: primaryId as any,
+      secondaryId: secondaryId as any,
+      mergedFields: fields,
+      mergedBy: userId,
     })
 
     return NextResponse.json({
       success: true,
       contact: mergedContact,
-      deletedContactId: mergeContactId
+      deletedContactId: secondaryId
     })
   } catch (error) {
     console.error('Merge error:', error)

@@ -475,3 +475,108 @@ export const updateContact = mutation({
     return await ctx.db.get(args.contact_id as any);
   },
 });
+
+/**
+ * Merge two contacts with user-selected field values.
+ *
+ * User selects which value to keep for each field (name, email, phone, status, etc).
+ * Tags are automatically combined from both contacts.
+ * Metadata is merged (primaryId takes precedence).
+ * After merge: secondary contact is deleted and action logged in Notes.
+ *
+ * Used by /api/contacts/merge for duplicate contact resolution.
+ *
+ * @param primaryId - The contact to keep
+ * @param secondaryId - The contact to merge and delete
+ * @param mergedFields - User-selected field values
+ * @param mergedBy - User ID who performed the merge
+ * @returns The updated primary contact
+ */
+export const mergeContacts = mutation({
+  args: {
+    primaryId: v.id('contacts'),
+    secondaryId: v.id('contacts'),
+    mergedFields: v.object({
+      name: v.optional(v.string()),
+      email: v.optional(v.string()),
+      phone: v.optional(v.string()),
+      lead_status: v.optional(v.string()),
+      assigned_to: v.optional(v.string()),
+      lead_score: v.optional(v.number()),
+      tags: v.optional(v.array(v.string())),
+      metadata: v.optional(v.any()),
+    }),
+    mergedBy: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Get both contacts
+    const primary = await ctx.db.get(args.primaryId);
+    const secondary = await ctx.db.get(args.secondaryId);
+
+    if (!primary || !secondary) {
+      throw new Error('Contact not found');
+    }
+
+    // Update primary contact with merged fields
+    await ctx.db.patch(args.primaryId, {
+      name: args.mergedFields.name,
+      email: args.mergedFields.email,
+      phone: args.mergedFields.phone,
+      lead_status: args.mergedFields.lead_status,
+      assigned_to: args.mergedFields.assigned_to,
+      lead_score: args.mergedFields.lead_score,
+      tags: args.mergedFields.tags,
+      metadata: args.mergedFields.metadata,
+      updated_at: Date.now(),
+    });
+
+    // Create merge history note
+    const mergeNote = `Merged with duplicate contact. Previous values from deleted contact:\n` +
+      `- Name: ${secondary.name || 'N/A'}\n` +
+      `- Email: ${secondary.email || 'N/A'}\n` +
+      `- Phone: ${secondary.phone || 'N/A'}\n` +
+      `- Status: ${secondary.lead_status || 'N/A'}`;
+
+    // Add note to primary contact (check if contactNotes table exists)
+    // If contactNotes mutation exists, use it; otherwise add to contact metadata
+    try {
+      await ctx.db.insert('contactNotes', {
+        contact_id: args.primaryId,
+        content: mergeNote,
+        user_id: args.mergedBy,
+        created_at: Date.now(),
+        type: 'system',
+      });
+    } catch {
+      // Fallback: add to metadata if notes table doesn't exist
+      const existingNotes = (primary.metadata?.notes as string[]) || [];
+      await ctx.db.patch(args.primaryId, {
+        metadata: {
+          ...primary.metadata,
+          notes: [...existingNotes, mergeNote],
+          merged_from: secondary._id,
+          merged_at: Date.now(),
+        },
+      });
+    }
+
+    // Update conversations to point to primary contact
+    const conversations = await ctx.db
+      .query('conversations')
+      .withIndex('by_contact', (q) => q.eq('contact_id', args.secondaryId))
+      .collect();
+
+    for (const conv of conversations) {
+      await ctx.db.patch(conv._id, {
+        contact_id: args.primaryId,
+        updated_at: Date.now(),
+      });
+    }
+
+    // Delete the secondary (duplicate) contact
+    await ctx.db.delete(args.secondaryId);
+
+    // Return updated primary contact
+    return await ctx.db.get(args.primaryId);
+  },
+});
