@@ -86,18 +86,19 @@ Plans:
 - [x] 03-03-PLAN.md — Activity feed and onboarding checklist ✓
 - [x] 03-04-PLAN.md — Human verification checkpoint (deferred)
 
-### Phase 4: Settings
+### Phase 4: Settings — COMPLETE (deferred verification)
 **Goal**: Workspace configuration and team management
 **Depends on**: Phase 3
 **Success Criteria** (what must be TRUE):
-  1. Workspace settings editable
-  2. Team member list works (via Clerk)
-  3. Integration settings accessible
-**Plans**: 2 plans
+  1. ✓ Workspace settings editable
+  2. ✓ Team member list works (via Clerk)
+  3. ✓ Integration settings accessible
+  4. ⏸ Human verification deferred (combined with Phase 1-3 batch testing)
+**Plans**: 2/2 complete
 
 Plans:
-- [ ] 04-01-PLAN.md — Settings page server component + team link
-- [ ] 04-02-PLAN.md — Human verification checkpoint
+- [x] 04-01-PLAN.md — Settings page server component + team link ✓
+- [x] 04-02-PLAN.md — Human verification checkpoint (deferred)
 
 ### Phase 5: Polish + Deploy
 **Goal**: Final verification and production deployment

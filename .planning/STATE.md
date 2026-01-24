@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Milestone: v3.2 CRM Core Fresh
-Phase: 4 (Settings) - 1/1 plan complete
-Status: Phase 4 complete
-Last activity: 2026-01-24 - Completed 04-01-PLAN.md (Settings page)
+Phase: 4 COMPLETE (2/2 plans, verification deferred)
+Status: Ready to deploy and verify Phases 1-4
+Last activity: 2026-01-24 - Phase 4 complete, UI translated to English, consolidated verification checklist created
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ███████░░░ (200 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ████████░░ (201 plans shipped)
 
 ## Performance Metrics
 
@@ -58,6 +58,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.2 decisions:
+- App UI language changed to English: Updated CLAUDE.md and all Indonesian UI text translated to English across inbox, dashboard, settings, contact components (04-02)
+- Phase 4 human verification deferred: All verification consolidated into single deployment testing session covering Phases 1-4 (04-02)
 - Settings type cast for Convex data: Cast workspace.settings to WorkspaceSettings interface for type safety (04-01)
 - Phase 3 human verification deferred: User chose to combine dashboard testing with Phase 1-2 batch verification (03-04)
 - Onboarding auto-hide: Checklist returns null when all steps complete, not manually dismissable (03-03)
@@ -265,8 +267,18 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Phase 4 complete (04-01 settings page)
-Resume: Ready for Phase 5 or human verification
+Stopped at: Phase 4 complete (all verification deferred)
+Resume: Deploy and run consolidated verification checklist
+
+## Consolidated Verification
+
+All human verification for Phases 1-4 consolidated into single checklist:
+`.planning/phases/04-settings/VERIFICATION-CHECKLIST.md`
+
+**Next steps:**
+1. Push to deploy: `git push origin master`
+2. Run verification checklist at https://my21staff.vercel.app
+3. Report issues for Phase 5 gap closure or continue to Phase 5 planning
 
 ---
-*Last updated: 2026-01-24 - Phase 4 complete (1 plan)*
+*Last updated: 2026-01-24 - Phase 4 complete (2 plans), consolidated verification ready*
