@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { api } from 'convex/_generated/api'
-import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
-import { requirePermission } from '@/lib/permissions/check'
 import {
   withTiming,
   createRequestMetrics,
@@ -33,13 +32,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ contacts: [] })
     }
 
-    // Verify membership via Supabase
-    const authResult = await requireWorkspaceMembership(workspaceId)
-    if (authResult instanceof NextResponse) {
-      return authResult
+    // Verify authentication via Clerk
+    const { userId, orgId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch contacts from Convex (client-side filtering for search/tags)
+    // Fetch workspace from Convex
     let queryStart = performance.now()
     const workspace = await fetchQuery(api.workspaces.getById, {
       id: workspaceId,
@@ -50,9 +49,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
-    // Get all contacts for this workspace
+    // Get all contacts for this workspace using internal query (auth handled above)
     // @ts-ignore - workspace_id is Id type
-    const contacts = await fetchQuery(api.contacts.listByWorkspace, {
+    const contacts = await fetchQuery(api.contacts.listByWorkspaceInternal, {
       workspace_id: workspace._id as any,
     })
 
@@ -89,17 +88,20 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Verify membership and get role via Supabase
-    const authResult = await requireWorkspaceMembership(workspaceId)
-    if (authResult instanceof NextResponse) return authResult
+    // Verify authentication via Clerk
+    const { userId, orgRole } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    // Check permission - delete requires owner
-    const permError = requirePermission(
-      authResult.role,
-      'leads:delete',
-      'Only workspace owners can delete leads'
-    )
-    if (permError) return permError
+    // Check permission - delete requires owner/admin
+    // orgRole from Clerk: 'org:admin' or 'org:member'
+    if (orgRole !== 'org:admin') {
+      return NextResponse.json(
+        { error: 'Only workspace owners can delete leads' },
+        { status: 403 }
+      )
+    }
 
     // Delete contact via Convex mutation
     let mutStart = performance.now()

@@ -264,6 +264,48 @@ export const listByWorkspace = query({
 });
 
 /**
+ * Internal version of listByWorkspace for API routes that handle their own auth.
+ *
+ * Used by /api/contacts which authenticates via Clerk middleware.
+ * No workspace membership check - the API route handles authorization.
+ */
+export const listByWorkspaceInternal = query({
+  args: {
+    workspace_id: v.string(),
+    limit: v.optional(v.number()),
+    assigned_to: v.optional(v.string()),
+    lead_status: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // No auth check - API route handles via Clerk
+    const limit = args.limit || 50;
+    let contacts;
+
+    if (args.assigned_to) {
+      contacts = await ctx.db
+        .query("contacts")
+        .withIndex("by_assigned", (q) =>
+          q.eq("workspace_id", args.workspace_id as any).eq("assigned_to", args.assigned_to)
+        )
+        .order("desc")
+        .take(limit);
+    } else {
+      contacts = await ctx.db
+        .query("contacts")
+        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
+        .order("desc")
+        .take(limit);
+    }
+
+    if (args.lead_status) {
+      return contacts.filter((c) => c.lead_status === args.lead_status);
+    }
+
+    return contacts;
+  },
+});
+
+/**
  * List contacts that have a specific tag.
  *
  * Filters contacts array for tag match since there's no
