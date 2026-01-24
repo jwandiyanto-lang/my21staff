@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 7 of 7 (Cleanup + Verification)
-Plan: 07-06 partially complete - 6 of 9 plans done (07-06 partial: webhook complete, ARI partial)
-Status: In progress
-Last activity: 2026-01-24 - Completed 07-06-PLAN.md (Kapso webhook + ARI processor partial migration)
+Plan: 07-07 BLOCKED - 8 of 9 plans done (07-07 blocked: 24 files still use Supabase)
+Status: Gap closure needed
+Last activity: 2026-01-24 - 07-07 blocked (Supabase deletion requires migrating 24 client components)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████████░░ (164 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████░ (165 plans shipped)
 
 ## Performance Metrics
 
@@ -138,7 +138,13 @@ Recent v3.0 decisions affecting v3.1:
 
 **Convex CLI Bug:** `npx convex deploy` incorrectly reports env var not set (despite `env list` confirming it). Workaround: use Convex Dashboard to deploy or wait for CLI fix. Dev deployment works correctly.
 
-**ARI Supporting Files Migration:** Three files (handoff.ts, scheduling.ts, knowledge-base.ts) still use Supabase with ~32 references total. These must be migrated together as they're tightly coupled to processor.ts. Required Convex functions likely exist in convex/ari.ts but need verification.
+**CRITICAL - 24 Client Components Still Use Supabase:** Plan 07-07 blocked because dashboard/portal page components were never migrated. API routes are on Convex, but server/client components still use Supabase directly. See `.planning/phases/07-cleanup-verification/07-07-SUMMARY.md` for full list.
+
+Files needing migration:
+- 18 server components (dashboard pages, portal pages, public pages)
+- 6 client components (sidebar, workspace-switcher, inbox-client, message-thread, appointment-card, login-modal)
+
+**ARI Supporting Files:** Completed in 07-06. All ARI files (processor.ts, handoff.ts, scheduling.ts, knowledge-base.ts) now use Convex.
 
 ### Ticket Migration Status
 
@@ -222,8 +228,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 07-02-PLAN.md (Workspace & member management migration)
-Resume: Phase 7 in progress - 4/6 plans done (07-01a, 07-01b, 07-02, 07-03) - Next: 07-04, 07-05, 07-06
+Stopped at: 07-07 blocked - Supabase deletion requires migrating 24 client components
+Resume: Gap closure needed - create 07-07a plan to migrate remaining components, then re-attempt 07-07 and 07-08
 
 ---
-*Last updated: 2026-01-24 - Phase 7 in progress - Workspace & member management routes migrated to Convex*
+*Last updated: 2026-01-24 - Phase 7 blocked at 07-07 - 24 client components still use Supabase*
