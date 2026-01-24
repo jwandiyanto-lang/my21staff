@@ -426,3 +426,27 @@ export const searchByPhoneOrName = query({
     return filtered;
   },
 });
+
+/**
+ * Get notes for a contact.
+ *
+ * Used by /api/contacts/[id]/notes to fetch contact notes.
+ * No auth check - API route handles authorization.
+ *
+ * @param contact_id - The contact ID
+ * @returns Array of notes for the contact
+ */
+export const getNotes = query({
+  args: {
+    contact_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const notes = await ctx.db
+      .query("contactNotes")
+      .withIndex("by_contact", (q) => q.eq("contact_id", args.contact_id as any))
+      .order("desc")
+      .take(100);
+
+    return notes;
+  },
+});

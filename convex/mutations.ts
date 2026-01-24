@@ -474,6 +474,180 @@ export const upsertContactForImport = mutation({
   },
 });
 
+/**
+ * Merge two contacts.
+ *
+ * Used by /api/contacts/merge to combine duplicate contacts.
+ * Merges metadata, tags, updates conversations to point to primary contact,
+ * and deletes the secondary contact.
+ *
+ * @param workspace_id - The workspace for authorization
+ * @param primary_id - The contact to keep
+ * @param secondary_id - The contact to merge and delete
+ * @param active_phone - User-selected phone number
+ * @param active_email - User-selected email address
+ * @returns The merged contact document
+ */
+export const mergeContacts = mutation({
+  args: {
+    workspace_id: v.string(),
+    primary_id: v.string(),
+    secondary_id: v.string(),
+    active_phone: v.optional(v.string()),
+    active_email: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    // Get both contacts
+    const primary = await ctx.db.get(args.primary_id as any);
+    const secondary = await ctx.db.get(args.secondary_id as any);
+
+    if (!primary || !secondary) {
+      throw new Error("Contact not found");
+    }
+
+    // Merge metadata
+    const primaryMetadata = (primary.metadata as Record<string, unknown>) || {};
+    const secondaryMetadata = (secondary.metadata as Record<string, unknown>) || {};
+    const combinedMetadata = {
+      ...secondaryMetadata,
+      ...primaryMetadata,
+      merged_from: [
+        ...((primaryMetadata.merged_from as string[]) || []),
+        args.secondary_id,
+      ],
+      merged_phone: [
+        ...((primaryMetadata.merged_phone as string[]) || []),
+        secondary.phone,
+      ],
+      merged_at: new Date().toISOString(),
+    };
+
+    // Merge tags
+    const primaryTags = primary.tags || [];
+    const secondaryTags = secondary.tags || [];
+    const combinedTags = [...new Set([...primaryTags, ...secondaryTags])];
+
+    const now = Date.now();
+
+    // Update primary contact
+    await ctx.db.patch(args.primary_id as any, {
+      name: primary.name || secondary.name,
+      email: args.active_email !== undefined ? args.active_email : (primary.email || secondary.email),
+      phone: args.active_phone || primary.phone,
+      lead_score: Math.max(primary.lead_score || 0, secondary.lead_score || 0),
+      lead_status: primary.lead_status !== 'new' ? primary.lead_status : secondary.lead_status,
+      tags: combinedTags,
+      metadata: combinedMetadata,
+      updated_at: now,
+    });
+
+    // Update conversations to point to primary contact
+    const conversations = await ctx.db
+      .query("conversations")
+      .withIndex("by_contact", (q) => q.eq("contact_id", args.secondary_id as any))
+      .collect();
+
+    for (const conv of conversations) {
+      await ctx.db.patch(conv._id, {
+        contact_id: args.primary_id as any,
+        updated_at: now,
+      });
+    }
+
+    // Delete secondary contact
+    await ctx.db.delete(args.secondary_id as any);
+
+    return await ctx.db.get(args.primary_id as any);
+  },
+});
+
+/**
+ * Upsert contact from pricing form (public mutation, no auth).
+ *
+ * Used by /api/leads for pricing form submissions.
+ * Creates or updates contacts in my21staff workspace.
+ *
+ * @param workspace_id - The workspace (my21staff)
+ * @param phone - Phone number
+ * @param name - Contact name
+ * @param metadata - Form data (jenis_bisnis, etc.)
+ * @param tags - Tags array
+ * @returns The contact document with isNew flag
+ */
+export const upsertPricingFormContact = mutation({
+  args: {
+    workspace_id: v.string(),
+    phone: v.string(),
+    name: v.string(),
+    metadata: v.optional(v.any()),
+    tags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    // No auth check - public endpoint for pricing form
+    const phoneNormalized = normalizePhone(args.phone);
+
+    // Try to find existing contact
+    const existing = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace_phone", (q) =>
+        q.eq("workspace_id", args.workspace_id as any).eq("phone", args.phone)
+      )
+      .first();
+
+    const now = Date.now();
+
+    if (existing) {
+      // Update existing contact - merge tags and metadata
+      const existingTags = existing.tags || [];
+      const mergedTags = [...new Set([...existingTags, ...(args.tags || [])])];
+      const existingMetadata = (existing.metadata as Record<string, unknown>) || {};
+      const mergedMetadata = {
+        ...existingMetadata,
+        ...(args.metadata || {}),
+        updated_from_pricing_form: new Date().toISOString(),
+      };
+
+      await ctx.db.patch(existing._id, {
+        name: args.name,
+        tags: mergedTags,
+        metadata: mergedMetadata,
+        updated_at: now,
+      });
+
+      const updated = await ctx.db.get(existing._id);
+      return { contact: updated, isNew: false };
+    }
+
+    // Create new contact
+    const contactId = await ctx.db.insert("contacts", {
+      workspace_id: args.workspace_id as any,
+      phone: args.phone,
+      phone_normalized: phoneNormalized,
+      name: args.name,
+      kapso_name: null,
+      email: null,
+      lead_score: 0,
+      lead_status: "new",
+      tags: args.tags || [],
+      assigned_to: null,
+      source: "pricing_form",
+      metadata: {
+        ...(args.metadata || {}),
+        created_from_pricing_form: new Date().toISOString(),
+      },
+      cache_updated_at: null,
+      created_at: now,
+      updated_at: now,
+      supabaseId: "",
+    });
+
+    const contact = await ctx.db.get(contactId);
+    return { contact, isNew: true };
+  },
+});
+
 // ============================================
 // CONVERSATION MUTATIONS
 // ============================================

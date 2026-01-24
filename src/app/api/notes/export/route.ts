@@ -1,9 +1,16 @@
-import { NextRequest } from 'next/server'
-import Papa from 'papaparse'
-import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 export async function GET(request: NextRequest) {
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { searchParams } = new URL(request.url)
   const workspaceId = searchParams.get('workspace')
 
@@ -11,55 +18,58 @@ export async function GET(request: NextRequest) {
     return new Response('Missing workspace parameter', { status: 400 })
   }
 
-  // Verify workspace membership
-  const authResult = await requireWorkspaceMembership(workspaceId)
-  if (authResult instanceof Response) {
-    return authResult
-  }
+  try {
+    // Get all contacts for workspace first
+    const contacts = await convex.query(api.contacts.listByWorkspaceInternal, {
+      workspace_id: workspaceId
+    })
 
-  const supabase = await createClient()
+    // Get notes for each contact
+    const allNotes: Array<{
+      contact_name: string
+      contact_phone: string
+      content: string
+      created_at: string
+    }> = []
 
-  // Fetch all notes with contact names
-  const { data: notes, error } = await supabase
-    .from('contact_notes')
-    .select(`
-      content,
-      note_type,
-      due_date,
-      completed_at,
-      created_at,
-      contacts!inner(name, phone)
-    `)
-    .eq('workspace_id', workspaceId)
-    .order('created_at', { ascending: false })
+    for (const contact of contacts) {
+      const notes = await convex.query(api.contacts.getNotes, { contact_id: contact._id })
 
-  if (error) {
-    console.error('Error fetching notes:', error)
-    return new Response('Failed to fetch notes', { status: 500 })
-  }
-
-  // Transform data for CSV
-  const csvData = (notes || []).map(note => {
-    const contact = note.contacts as unknown as { name: string | null; phone: string }
-    return {
-      contact_name: contact.name || contact.phone,
-      contact_phone: contact.phone,
-      content: note.content,
-      note_type: note.note_type,
-      due_date: note.due_date || '',
-      completed_at: note.completed_at || '',
-      created_at: note.created_at,
+      for (const note of notes) {
+        allNotes.push({
+          contact_name: contact.name || contact.phone || '',
+          contact_phone: contact.phone || '',
+          content: note.content,
+          created_at: new Date(note.created_at).toISOString(),
+        })
+      }
     }
-  })
 
-  // Generate CSV
-  const csv = Papa.unparse(csvData)
-  const timestamp = Date.now()
+    // Convert to CSV
+    const headers = ['contact_name', 'contact_phone', 'content', 'created_at']
+    const csvRows = [headers.join(',')]
 
-  return new Response(csv, {
-    headers: {
-      'Content-Type': 'text/csv',
-      'Content-Disposition': `attachment; filename="notes-${timestamp}.csv"`,
-    },
-  })
+    for (const note of allNotes) {
+      const row = [
+        note.contact_name,
+        note.contact_phone,
+        note.content,
+        note.created_at
+      ].map(v => `"${v.replace(/"/g, '""')}"`)
+      csvRows.push(row.join(','))
+    }
+
+    const csv = csvRows.join('\n')
+    const timestamp = Date.now()
+
+    return new Response(csv, {
+      headers: {
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename="notes-${timestamp}.csv"`,
+      },
+    })
+  } catch (error) {
+    console.error('Export error:', error)
+    return NextResponse.json({ error: 'Failed to export notes' }, { status: 500 })
+  }
 }
