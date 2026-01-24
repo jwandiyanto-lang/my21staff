@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 7 of 7 (Cleanup + Verification)
-Plan: 07-02 complete - 4 of 6 plans done
+Plan: 07-06 partially complete - 6 of 9 plans done (07-06 partial: webhook complete, ARI partial)
 Status: In progress
-Last activity: 2026-01-24 - Completed 07-02-PLAN.md (Workspace & member management migration)
+Last activity: 2026-01-24 - Completed 07-06-PLAN.md (Kapso webhook + ARI processor partial migration)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████████░░ (163 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ████████░░ (164 plans shipped)
 
 ## Performance Metrics
 
@@ -58,6 +58,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- Webhook batch mutations without auth: Kapso webhook mutations skip workspace membership checks since signature already validated (07-06)
+- ARI partial migration acceptable: Completed processor core functions, deferred supporting files to next plan due to interdependencies (07-06)
+- Centralized credential query: getKapsoCredentials query in workspaces module used by both webhook and ARI (07-06)
 - Preserved business logic in routes: Permission checks and validation stay in API routes during Convex migration, not moved to mutations (07-02)
 - Clerk user creation for admin: Admin client creation uses Clerk createUser instead of Supabase admin auth (07-02)
 - Type assertions for Convex queries: Added type casts to handle TypeScript union type inference from query results (07-02)
@@ -134,6 +137,8 @@ Recent v3.0 decisions affecting v3.1:
 ### Blockers/Concerns
 
 **Convex CLI Bug:** `npx convex deploy` incorrectly reports env var not set (despite `env list` confirming it). Workaround: use Convex Dashboard to deploy or wait for CLI fix. Dev deployment works correctly.
+
+**ARI Supporting Files Migration:** Three files (handoff.ts, scheduling.ts, knowledge-base.ts) still use Supabase with ~32 references total. These must be migrated together as they're tightly coupled to processor.ts. Required Convex functions likely exist in convex/ari.ts but need verification.
 
 ### Ticket Migration Status
 
