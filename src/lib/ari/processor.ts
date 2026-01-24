@@ -6,7 +6,8 @@
  * generate contextual responses.
  */
 
-import { createApiAdminClient } from '@/lib/supabase/server';
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
 import { sendMessage, type KapsoCredentials } from '@/lib/kapso/client';
 import {
   buildSystemPrompt,
@@ -49,7 +50,8 @@ import type {
   ARITone,
   AIModelType,
 } from './types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 // ===========================================
 // Type Definitions
@@ -95,123 +97,108 @@ const DEFAULT_CONFIG: Omit<ARIConfig, 'id' | 'workspace_id' | 'created_at' | 'up
 /**
  * Get or create ARI conversation for a contact
  *
- * @param supabase - Supabase client with service role
  * @param workspaceId - Workspace ID
  * @param contactId - Contact ID
  * @returns ARI conversation record
  */
 async function getOrCreateARIConversation(
-  supabase: SupabaseClient,
   workspaceId: string,
   contactId: string
 ): Promise<ARIConversation | null> {
-  // Try to get existing conversation
-  const { data: existing, error: selectError } = await supabase
-    .from('ari_conversations')
-    .select('*')
-    .eq('workspace_id', workspaceId)
-    .eq('contact_id', contactId)
-    .single();
+  try {
+    // Try to get existing conversation
+    const existing = await convex.query(api.ari.getConversationByContact, {
+      workspace_id: workspaceId,
+      contact_id: contactId,
+    })
 
-  if (existing && !selectError) {
-    return existing as ARIConversation;
-  }
-
-  // Create new conversation if not exists
-  if (selectError?.code === 'PGRST116') {
-    // Not found - create new
-    const { data: created, error: insertError } = await supabase
-      .from('ari_conversations')
-      .insert({
-        workspace_id: workspaceId,
-        contact_id: contactId,
-        state: 'greeting' as ARIState,
-        lead_score: 0,
-        context: {} as ARIContext,
-      })
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error('[ARI] Failed to create conversation:', insertError);
-      return null;
+    if (existing) {
+      return existing as any as ARIConversation
     }
 
-    return created as ARIConversation;
-  }
+    // Create new conversation if not exists
+    const created = await convex.mutation(api.ari.upsertConversation, {
+      workspace_id: workspaceId,
+      contact_id: contactId,
+      current_state: 'greeting' as ARIState,
+      context: {} as ARIContext,
+    })
 
-  // Some other error
-  console.error('[ARI] Failed to get conversation:', selectError);
-  return null;
+    return created as any as ARIConversation
+  } catch (error) {
+    console.error('[ARI] Failed to get/create conversation:', error)
+    return null
+  }
 }
 
 /**
  * Get ARI configuration for a workspace
  *
- * @param supabase - Supabase client
  * @param workspaceId - Workspace ID
  * @returns ARI config (or defaults if not found)
  */
 async function getARIConfig(
-  supabase: SupabaseClient,
   workspaceId: string
 ): Promise<ARIConfig> {
-  const { data, error } = await supabase
-    .from('ari_config')
-    .select('*')
-    .eq('workspace_id', workspaceId)
-    .single();
+  try {
+    const data = await convex.query(api.ari.getAriConfig, {
+      workspace_id: workspaceId,
+    })
 
-  if (error || !data) {
-    // Return default config with placeholder IDs
+    if (!data) {
+      // Return default config with placeholder IDs
+      return {
+        id: 'default',
+        workspace_id: workspaceId,
+        ...DEFAULT_CONFIG,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+    }
+
+    return data as any as ARIConfig
+  } catch (error) {
+    console.error('[ARI] Failed to get config:', error)
+    // Return default config on error
     return {
       id: 'default',
       workspace_id: workspaceId,
       ...DEFAULT_CONFIG,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    };
+    }
   }
-
-  return data as ARIConfig;
 }
 
 /**
  * Get recent ARI messages for a conversation
  *
- * @param supabase - Supabase client
  * @param ariConversationId - ARI conversation ID
  * @param limit - Max messages to retrieve (default: 10)
  * @returns Array of ARI messages
  */
 async function getRecentMessages(
-  supabase: SupabaseClient,
   ariConversationId: string,
   limit: number = 10
 ): Promise<ARIMessage[]> {
-  const { data, error } = await supabase
-    .from('ari_messages')
-    .select('*')
-    .eq('ari_conversation_id', ariConversationId)
-    .order('created_at', { ascending: true })
-    .limit(limit * 2) // Get more to ensure we have enough after filtering
-    ;
+  try {
+    const messages = await convex.query(api.ari.getConversationMessages, {
+      conversation_id: ariConversationId,
+      limit: limit * 2, // Get more to ensure we have enough after filtering
+    })
 
-  if (error) {
-    console.error('[ARI] Failed to get messages:', error);
-    return [];
+    // Take last N messages (they're already ordered oldest first from Convex)
+    return (messages || []).slice(-limit) as any as ARIMessage[]
+  } catch (error) {
+    console.error('[ARI] Failed to get messages:', error)
+    return []
   }
-
-  // Take last N messages
-  const messages = data as ARIMessage[];
-  return messages.slice(-limit);
 }
 
 /**
- * Log a message to ari_messages table
+ * Log a message to ARI messages table
  */
 async function logMessage(
-  supabase: SupabaseClient,
   params: {
     ariConversationId: string;
     workspaceId: string;
@@ -222,19 +209,19 @@ async function logMessage(
     responseTimeMs?: number | null;
   }
 ): Promise<void> {
-  const { error } = await supabase.from('ari_messages').insert({
-    ari_conversation_id: params.ariConversationId,
-    workspace_id: params.workspaceId,
-    role: params.role,
-    content: params.content,
-    ai_model: params.aiModel || null,
-    tokens_used: params.tokensUsed || null,
-    response_time_ms: params.responseTimeMs || null,
-    metadata: {},
-  });
-
-  if (error) {
-    console.error('[ARI] Failed to log message:', error);
+  try {
+    await convex.mutation(api.ari.createMessage, {
+      conversation_id: params.ariConversationId,
+      sender_type: params.role,
+      content: params.content,
+      metadata: {
+        ai_model: params.aiModel || null,
+        tokens_used: params.tokensUsed || null,
+        response_time_ms: params.responseTimeMs || null,
+      },
+    })
+  } catch (error) {
+    console.error('[ARI] Failed to log message:', error)
   }
 }
 
@@ -291,31 +278,27 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
   console.log(`[ARI] Processing message for contact ${contactId} in workspace ${workspaceId}`);
 
   try {
-    const supabase = createApiAdminClient();
-
     // 1. Get or create ARI conversation
-    const conversation = await getOrCreateARIConversation(supabase, workspaceId, contactId);
+    const conversation = await getOrCreateARIConversation(workspaceId, contactId);
     if (!conversation) {
       return { success: false, error: 'Failed to get/create conversation' };
     }
 
     // 2. Get contact data with form answers
-    const { data: contact, error: contactError } = await supabase
-      .from('contacts')
-      .select('id, name, email, phone, metadata, lead_score')
-      .eq('id', contactId)
-      .single();
+    const contact = await convex.query(api.contacts.getByIdInternal, {
+      contact_id: contactId,
+    })
 
-    if (contactError || !contact) {
-      console.error('[ARI] Failed to get contact:', contactError);
+    if (!contact) {
+      console.error('[ARI] Failed to get contact');
       return { success: false, error: 'Contact not found' };
     }
 
     // 3. Get ARI config
-    const config = await getARIConfig(supabase, workspaceId);
+    const config = await getARIConfig(workspaceId);
 
     // 4. Get recent messages
-    const recentMessages = await getRecentMessages(supabase, conversation.id);
+    const recentMessages = await getRecentMessages(conversation.id);
 
     // 5. Extract form answers from contact metadata
     const formAnswers = extractFormAnswers(contact.metadata);
@@ -418,7 +401,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
         .eq('id', conversation.id);
 
       // Log user message
-      await logMessage(supabase, {
+      await logMessage({
         ariConversationId: conversation.id,
         workspaceId,
         role: 'user',
@@ -428,7 +411,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
       // Send handoff message
       const handoffMessage = 'Terima kasih sudah menunggu. Konsultan kami akan segera menghubungi kamu untuk membantu lebih lanjut.';
 
-      await logMessage(supabase, {
+      await logMessage({
         ariConversationId: conversation.id,
         workspaceId,
         role: 'assistant',
@@ -504,7 +487,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
     const responseTime = Date.now() - startTime;
 
     // 10. Log user message
-    await logMessage(supabase, {
+    await logMessage({
       ariConversationId: conversation.id,
       workspaceId,
       role: 'user',
@@ -512,7 +495,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
     });
 
     // 11. Log AI response
-    await logMessage(supabase, {
+    await logMessage({
       ariConversationId: conversation.id,
       workspaceId,
       role: 'assistant',
@@ -580,7 +563,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
           console.log('[ARI] Sent community link to cold lead');
 
           // Log community message
-          await logMessage(supabase, {
+          await logMessage({
             ariConversationId: conversation.id,
             workspaceId,
             role: 'assistant',
@@ -618,7 +601,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
           ? 'Terima kasih sudah berbagi info yang lengkap. Konsultan kami akan segera menghubungi kamu untuk mendiskusikan pilihan yang cocok.'
           : 'Konsultan kami akan follow up nanti ya kak. Kalau ada pertanyaan, langsung chat di grup aja.';
 
-        await logMessage(supabase, {
+        await logMessage({
           ariConversationId: conversation.id,
           workspaceId,
           role: 'assistant',
@@ -801,7 +784,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
             });
             await sendMessage(kapsoCredentials, contactPhone, confirmMsg);
 
-            await logMessage(supabase, {
+            await logMessage({
               ariConversationId: conversation.id,
               workspaceId,
               role: 'assistant',
@@ -872,24 +855,21 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
 
       // Log the failed attempt if we have a conversation
       try {
-        const supabase = createApiAdminClient();
-        const { data: conv } = await supabase
-          .from('ari_conversations')
-          .select('id')
-          .eq('workspace_id', workspaceId)
-          .eq('contact_id', contactId)
-          .single();
+        const conv = await convex.query(api.ari.getConversationByContact, {
+          workspace_id: workspaceId,
+          contact_id: contactId,
+        })
 
         if (conv) {
-          await logMessage(supabase, {
-            ariConversationId: conv.id,
+          await logMessage({
+            ariConversationId: conv._id,
             workspaceId,
             role: 'user',
             content: userMessage,
           });
 
-          await logMessage(supabase, {
-            ariConversationId: conv.id,
+          await logMessage({
+            ariConversationId: conv._id,
             workspaceId,
             role: 'system',
             content: `Error: ${errorMessage}. Sent fallback message.`,
@@ -954,17 +934,13 @@ export async function triggerARIGreeting(
   contactPhone: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createApiAdminClient();
-
     // Get workspace Kapso credentials
     // Note: API key is stored in meta_access_token (encrypted)
-    const { data: workspace, error: wsError } = await supabase
-      .from('workspaces')
-      .select('meta_access_token, kapso_phone_id')
-      .eq('id', workspaceId)
-      .single();
+    const workspace = await convex.query(api.workspaces.getKapsoCredentials, {
+      workspace_id: workspaceId,
+    })
 
-    if (wsError || !workspace) {
+    if (!workspace) {
       return { success: false, error: 'Workspace not found' };
     }
 
