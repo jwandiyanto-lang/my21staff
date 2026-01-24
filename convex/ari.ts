@@ -899,6 +899,31 @@ export const getUpcomingAppointments = query({
 });
 
 /**
+ * Get appointments for a workspace in a time window (for scheduling).
+ * No auth - used by webhook processing.
+ */
+export const getWorkspaceAppointments = query({
+  args: {
+    workspace_id: v.string(),
+    from: v.number(),
+    to: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const allAppointments = await ctx.db
+      .query("ariAppointments")
+      .collect();
+
+    return allAppointments.filter(apt =>
+      apt.workspace_id === args.workspace_id &&
+      apt.scheduled_at >= args.from &&
+      apt.scheduled_at <= args.to &&
+      apt.status !== "cancelled" &&
+      apt.status !== "no_show"
+    );
+  },
+});
+
+/**
  * Mark appointment reminder as sent.
  */
 export const markReminderSent = mutation({

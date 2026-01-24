@@ -6,8 +6,11 @@
  * times for specific dates, respecting existing bookings.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '@/../convex/_generated/api';
 import type { ConsultantSlot, AvailableSlot, ARIAppointment } from './types';
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 // ===========================================
 // Indonesian Day Names
@@ -46,24 +49,28 @@ export function getIndonesianDayName(dayOfWeek: number): string {
 /**
  * Get available slots for a workspace within the booking window
  *
- * @param supabase - Supabase client
  * @param workspaceId - Workspace ID
  * @param daysAhead - How many days ahead to look (default from slot config)
  * @returns Array of available slots
  */
 export async function getAvailableSlots(
-  supabase: SupabaseClient,
   workspaceId: string,
   daysAhead: number = 14
 ): Promise<AvailableSlot[]> {
   // Get active slot patterns
-  const { data: slotPatterns, error: slotsError } = await supabase
-    .from('consultant_slots')
-    .select('*')
-    .eq('workspace_id', workspaceId)
-    .eq('is_active', true);
+  const slotPatterns = await convex.query(api.ari.getConsultantSlots, {
+    workspace_id: workspaceId,
+  });
 
-  if (slotsError || !slotPatterns?.length) {
+  if (!slotPatterns?.length) {
+    console.log('[Scheduling] No active slots found');
+    return [];
+  }
+
+  // Filter active slots
+  const activeSlots = slotPatterns.filter((s: any) => s.is_active);
+
+  if (!activeSlots.length) {
     console.log('[Scheduling] No active slots found');
     return [];
   }
@@ -73,17 +80,15 @@ export async function getAvailableSlots(
   const windowEnd = new Date();
   windowEnd.setDate(windowEnd.getDate() + daysAhead);
 
-  const { data: existingAppointments } = await supabase
-    .from('ari_appointments')
-    .select('scheduled_at, status')
-    .eq('workspace_id', workspaceId)
-    .gte('scheduled_at', now.toISOString())
-    .lte('scheduled_at', windowEnd.toISOString())
-    .not('status', 'in', '("cancelled","no_show")');
+  const existingAppointments = await convex.query(api.ari.getWorkspaceAppointments, {
+    workspace_id: workspaceId,
+    from: now.getTime(),
+    to: windowEnd.getTime(),
+  });
 
   // Build set of booked times for quick lookup
   const bookedTimes = new Set(
-    (existingAppointments || []).map(a => a.scheduled_at)
+    existingAppointments.map(a => new Date(a.scheduled_at).toISOString())
   );
 
   // Generate available slots for each day in window
@@ -98,8 +103,8 @@ export async function getAvailableSlots(
     const dateStr = date.toISOString().split('T')[0];
 
     // Find slot patterns for this day
-    const daySlots = slotPatterns.filter(
-      (s: ConsultantSlot) => s.day_of_week === dayOfWeek
+    const daySlots = activeSlots.filter(
+      (s: any) => s.day_of_week === dayOfWeek
     );
 
     for (const slot of daySlots) {
@@ -142,12 +147,11 @@ export async function getAvailableSlots(
  * Get available slots for a specific day of week
  */
 export async function getSlotsForDay(
-  supabase: SupabaseClient,
   workspaceId: string,
   dayOfWeek: number,
   daysAhead: number = 14
 ): Promise<AvailableSlot[]> {
-  const allSlots = await getAvailableSlots(supabase, workspaceId, daysAhead);
+  const allSlots = await getAvailableSlots(workspaceId, daysAhead);
   return allSlots.filter(s => s.day_of_week === dayOfWeek);
 }
 
@@ -222,7 +226,6 @@ export function formatAvailableDays(slots: AvailableSlot[]): string {
  * Book an appointment for a contact
  */
 export async function bookAppointment(
-  supabase: SupabaseClient,
   params: {
     workspaceId: string;
     ariConversationId: string;
@@ -239,27 +242,23 @@ export async function bookAppointment(
   scheduledAt.setHours(hour, min, 0, 0);
 
   // Insert appointment
-  const { data: appointment, error } = await supabase
-    .from('ari_appointments')
-    .insert({
+  try {
+    const appointment = await convex.mutation(api.ari.createAppointment, {
       workspace_id: workspaceId,
       ari_conversation_id: ariConversationId,
       consultant_id: consultantId || slot.consultant_id || null,
-      scheduled_at: scheduledAt.toISOString(),
+      scheduled_at: scheduledAt.getTime(),
       duration_minutes: slot.duration_minutes,
       status: 'scheduled',
       notes: notes || null,
-    })
-    .select()
-    .single();
+    });
 
-  if (error) {
+    console.log(`[Scheduling] Booked appointment ${appointment._id} for ${scheduledAt.toISOString()}`);
+    return appointment as any as ARIAppointment;
+  } catch (error) {
     console.error('[Scheduling] Failed to book appointment:', error);
     return null;
   }
-
-  console.log(`[Scheduling] Booked appointment ${appointment.id} for ${scheduledAt.toISOString()}`);
-  return appointment as ARIAppointment;
 }
 
 /**
