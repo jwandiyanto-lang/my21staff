@@ -816,3 +816,47 @@ export const getContactAppointments = query({
       .collect();
   },
 });
+
+/**
+ * Get upcoming appointments for reminder cron.
+ *
+ * Returns appointments scheduled in the specified time window
+ * that haven't had reminders sent yet.
+ */
+export const getUpcomingAppointments = query({
+  args: {
+    from: v.number(),
+    to: v.number(),
+  },
+  handler: async (ctx, args) => {
+    // Get all appointments and filter in memory
+    // (Convex doesn't support range queries on non-indexed fields)
+    const allAppointments = await ctx.db
+      .query("ariAppointments")
+      .collect();
+
+    return allAppointments.filter(apt =>
+      apt.scheduled_at >= args.from &&
+      apt.scheduled_at <= args.to &&
+      !apt.reminder_sent_at &&
+      (apt.status === "scheduled" || apt.status === "confirmed")
+    );
+  },
+});
+
+/**
+ * Mark appointment reminder as sent.
+ */
+export const markReminderSent = mutation({
+  args: {
+    appointment_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    await ctx.db.patch(args.appointment_id as any, {
+      reminder_sent_at: now,
+      status: "confirmed",
+      updated_at: now,
+    });
+  },
+});

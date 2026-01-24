@@ -397,6 +397,83 @@ export const upsertContact = internalMutation({
   },
 });
 
+/**
+ * Upsert a contact for CSV import (public mutation).
+ *
+ * Used by /api/contacts/import for bulk contact imports.
+ * If contact exists by phone, updates fields. If not, creates new contact.
+ *
+ * @param workspace_id - The workspace
+ * @param phone - The phone number (original format)
+ * @param phone_normalized - Normalized phone for matching
+ * @param name - Optional contact name
+ * @param email - Optional email
+ * @param lead_status - Lead status
+ * @param tags - Tags array
+ * @returns The contact document (existing or newly created)
+ */
+export const upsertContactForImport = mutation({
+  args: {
+    workspace_id: v.string(),
+    phone: v.string(),
+    phone_normalized: v.string(),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    lead_status: v.optional(v.string()),
+    lead_score: v.optional(v.number()),
+    tags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    // Try to find existing contact by phone
+    const existing = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace_phone", (q) =>
+        q.eq("workspace_id", args.workspace_id as any).eq("phone", args.phone)
+      )
+      .first();
+
+    const now = Date.now();
+
+    if (existing) {
+      // Update existing contact with new data
+      const updates: any = { updated_at: now };
+
+      if (args.name) updates.name = args.name;
+      if (args.email) updates.email = args.email;
+      if (args.lead_status) updates.lead_status = args.lead_status;
+      if (args.lead_score !== undefined) updates.lead_score = args.lead_score;
+      if (args.tags && args.tags.length > 0) updates.tags = args.tags;
+
+      await ctx.db.patch(existing._id, updates);
+      return await ctx.db.get(existing._id);
+    }
+
+    // Create new contact
+    const contactId = await ctx.db.insert("contacts", {
+      workspace_id: args.workspace_id as any,
+      phone: args.phone,
+      phone_normalized: args.phone_normalized,
+      name: args.name || null,
+      kapso_name: null,
+      email: args.email || null,
+      lead_score: args.lead_score || 0,
+      lead_status: args.lead_status || "new",
+      tags: args.tags || [],
+      assigned_to: null,
+      source: "import",
+      metadata: {},
+      cache_updated_at: null,
+      created_at: now,
+      updated_at: now,
+      supabaseId: "",
+    });
+
+    return await ctx.db.get(contactId);
+  },
+});
+
 // ============================================
 // CONVERSATION MUTATIONS
 // ============================================
@@ -706,7 +783,7 @@ export const markMessagesRead = internalMutation({
  * @param kapso_message_id - Optional Kapso message ID
  * @returns The created message document
  */
-export const createOutboundMessage = internalMutation({
+export const createOutboundMessage = mutation({
   args: {
     workspace_id: v.string(),
     conversation_id: v.string(),
@@ -1390,5 +1467,80 @@ export const reopenTicket = mutation({
     });
 
     return await ctx.db.get(args.ticket_id as any);
+  },
+});
+
+// ============================================
+// CONTACT NOTE TASK COMPLETION
+// ============================================
+
+/**
+ * Complete a contact note task.
+ *
+ * @param note_id - The note to mark as completed
+ * @param workspace_id - Workspace for authorization
+ */
+export const completeContactNote = mutation({
+  args: {
+    note_id: v.string(),
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const note = await ctx.db.get(args.note_id as any);
+    if (!note || note.workspace_id !== args.workspace_id) {
+      throw new Error("Note not found");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.note_id as any, {
+      completed_at: now,
+    });
+
+    return await ctx.db.get(args.note_id as any);
+  },
+});
+
+/**
+ * Complete a contact note task with a follow-up.
+ *
+ * @param note_id - The note to mark as completed
+ * @param followup_text - Text for the follow-up note
+ * @param workspace_id - Workspace for authorization
+ */
+export const completeContactNoteWithFollowup = mutation({
+  args: {
+    note_id: v.string(),
+    followup_text: v.string(),
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    // Get original note
+    const note = await ctx.db.get(args.note_id as any);
+    if (!note || note.workspace_id !== args.workspace_id) {
+      throw new Error("Note not found");
+    }
+
+    const now = Date.now();
+
+    // Mark original as completed
+    await ctx.db.patch(args.note_id as any, {
+      completed_at: now,
+    });
+
+    // Create follow-up note
+    const followupId = await ctx.db.insert("contactNotes", {
+      workspace_id: args.workspace_id as any,
+      contact_id: note.contact_id,
+      user_id: userId,
+      content: `Follow-up: ${args.followup_text}`,
+      created_at: now,
+      supabaseId: "",
+    });
+
+    return await ctx.db.get(followupId);
   },
 });

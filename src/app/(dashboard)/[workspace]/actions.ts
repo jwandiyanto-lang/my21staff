@@ -1,22 +1,27 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
 import { revalidatePath } from 'next/cache'
 
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+
 export async function completeTask(noteId: string, workspaceSlug: string) {
-  const supabase = await createClient()
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
 
-  // Verify user has access
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+  // Get workspace ID from slug
+  const workspace = await convex.query(api.workspaces.getBySlug, {
+    slug: workspaceSlug,
+  })
+  if (!workspace) throw new Error('Workspace not found')
 
-  // Update the note with completed_at timestamp
-  const { error } = await supabase
-    .from('contact_notes')
-    .update({ completed_at: new Date().toISOString() })
-    .eq('id', noteId)
-
-  if (error) throw new Error(error.message)
+  // Complete the task
+  await convex.mutation(api.mutations.completeContactNote, {
+    note_id: noteId,
+    workspace_id: workspace._id,
+  })
 
   revalidatePath(`/${workspaceSlug}`)
 }
@@ -26,40 +31,21 @@ export async function completeTaskWithFollowup(
   followupText: string,
   workspaceSlug: string
 ) {
-  const supabase = await createClient()
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
 
-  // Verify user has access
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+  // Get workspace ID from slug
+  const workspace = await convex.query(api.workspaces.getBySlug, {
+    slug: workspaceSlug,
+  })
+  if (!workspace) throw new Error('Workspace not found')
 
-  // Get the original note to find contact_id and workspace_id
-  const { data: originalNote, error: fetchError } = await supabase
-    .from('contact_notes')
-    .select('contact_id, workspace_id')
-    .eq('id', noteId)
-    .single()
-
-  if (fetchError || !originalNote) throw new Error('Note not found')
-
-  // Mark original note as completed
-  const { error: updateError } = await supabase
-    .from('contact_notes')
-    .update({ completed_at: new Date().toISOString() })
-    .eq('id', noteId)
-
-  if (updateError) throw new Error(updateError.message)
-
-  // Create follow-up note
-  const { error: insertError } = await supabase
-    .from('contact_notes')
-    .insert({
-      contact_id: originalNote.contact_id,
-      workspace_id: originalNote.workspace_id,
-      content: `Follow-up: ${followupText}`,
-      author_id: user.id,
-    })
-
-  if (insertError) throw new Error(insertError.message)
+  // Complete task with follow-up
+  await convex.mutation(api.mutations.completeContactNoteWithFollowup, {
+    note_id: noteId,
+    followup_text: followupText,
+    workspace_id: workspace._id,
+  })
 
   revalidatePath(`/${workspaceSlug}`)
   revalidatePath(`/${workspaceSlug}/database`)
