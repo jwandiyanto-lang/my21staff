@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Phase: 7 of 7 (Cleanup + Verification)
-Plan: 07-04 complete - 4 of 6 plans done
+Plan: 07-01a complete - 1 of 6 plans done
 Status: In progress
-Last activity: 2026-01-24 - Completed 07-04-PLAN.md (Message and ticket routes to Convex)
+Last activity: 2026-01-24 - Completed 07-01a-PLAN.md (Delete Supabase auth routes)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ███████░░░ (166 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ███████░░░ (159 plans shipped)
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- Legacy Supabase auth pages deleted: signup and change-password pages were orphaned dead code with broken references - safely deleted (no incoming links) (07-01a)
 - createOutboundMessage visibility: Changed from internalMutation to mutation for API route access while maintaining auth (07-04)
 - Ticket attachments to Convex storage: Migrated ticket attachments to Convex file storage, chat media remains on Supabase temporarily (07-04)
 - Typing indicators deferred: Stubbed out local-only implementation - requires dedicated Convex real-time table (nice-to-have feature) (07-05)
@@ -210,8 +211,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 07-04-PLAN.md (Message and ticket routes to Convex)
-Resume: Phase 7 in progress - 4/6 plans done - Next: 07-05 or 07-06
+Stopped at: Completed 07-01a-PLAN.md (Delete Supabase auth routes)
+Resume: Phase 7 in progress - 1/6 plans done - Next: 07-01b (Supabase utilities cleanup)
 
 ---
-*Last updated: 2026-01-24 - Phase 7 Cleanup in progress - Real-time queries and utilities migrated to Convex*
+*Last updated: 2026-01-24 - Phase 7 Cleanup started - Supabase auth routes deleted*
