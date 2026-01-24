@@ -11,17 +11,18 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 
 Milestone: v3.2 CRM Core Fresh
 Phase: 1 of 5 (Supabase Deletion + Navigation Cleanup)
-Status: Ready for `/gsd:plan-phase 1`
-Last activity: 2026-01-24 - v3.2 roadmap created
+Plan: 1 of 3 in phase
+Status: In progress
+Last activity: 2026-01-24 - Completed v3.2-01-01-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ (187 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ▒▒▒▒▒▒▒▒▒▒ (188 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 163
+- Total plans completed: 164
 - Average duration: ~14 min
-- Total execution time: ~39.60 hours
+- Total execution time: ~39.65 hours
 
 **By Milestone:**
 
@@ -56,6 +57,10 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
+
+Recent v3.2 decisions:
+- Keep Settings in sidebar despite being non-functional: Settings link remains in sidebar to be redirected to team page in Plan 02 (v3.2-01)
+- Four files still have Supabase imports: layout.tsx (deferred to Plan 02), contact-detail-sheet.tsx, workspace-switcher.tsx, send-media route - not deleted as they weren't in the plan's deletion list (v3.2-01)
 
 Recent v3.1 decisions:
 - Webhook batch mutations without auth: Kapso webhook mutations skip workspace membership checks since signature already validated (07-06)
@@ -232,8 +237,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: v3.2 roadmap created
-Resume: `/gsd:plan-phase 1` to plan Supabase deletion
+Stopped at: Completed v3.2-01-01-PLAN.md
+Resume: `/gsd:execute-phase` to continue with Plan 02 (Workspace Layout Migration)
 
 ---
-*Last updated: 2026-01-24 - v3.2 CRM Core Fresh roadmap created*
+*Last updated: 2026-01-24 - Completed v3.2-01-01 (Supabase deletion)*
