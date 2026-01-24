@@ -20,27 +20,38 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 
 **Milestone Goal:** Delete Supabase entirely and rebuild core CRM features fresh with Convex. Seamless WhatsApp integration via Kapso.
 
-### Phase 1: Supabase Deletion + Database Foundation
+### Phase 1: Supabase Deletion + Database Foundation — COMPLETE
 **Goal**: Remove all Supabase code, DELETE broken page files, rebuild Contact Database fresh with Convex
 **Depends on**: v3.1 complete
 **Merged scope**: Original Phase 1 (cleanup) + Phase 2 (database) combined per user decision
 **Success Criteria** (what must be TRUE):
-  1. Supabase lib files deleted (server.ts, client.ts, middleware.ts)
-  2. @supabase packages removed from package.json
-  3. Broken pages DELETED from codebase (not just hidden)
-  4. App builds and runs
-  5. Contact Database page works with all Google Sheets leads
-  6. Contact detail modal with 4 tabs (Profile, Documents, Conversations, Notes)
-  7. n8n sync verified (all Google Sheets leads appear)
-  8. Merge functionality for duplicate contacts
-**Plans**: 5 plans
+  1. ✓ Supabase lib files deleted (server.ts, client.ts, middleware.ts)
+  2. ✓ @supabase packages removed from package.json
+  3. ✓ Broken pages DELETED from codebase (not just hidden)
+  4. ✓ App builds and runs
+  5. ✓ Contact Database page works
+  6. ✓ Contact detail modal with 4 tabs (Profile, Documents, Conversations, Notes)
+  7. → n8n sync verification moved to Phase 1.2
+  8. ✓ Merge functionality for duplicate contacts
+**Plans**: 4/4 complete (1 moved to Phase 1.2)
 
 Plans:
-- [ ] 01-01-PLAN.md — Delete Supabase files + update navigation
-- [ ] 01-02-PLAN.md — Migrate layout and sidebar to Convex
-- [ ] 01-03-PLAN.md — Contact detail dialog with 4 tabs
-- [ ] 01-04-PLAN.md — Verify n8n sync
-- [ ] 01-05-PLAN.md — Contact merge functionality
+- [x] 01-01-PLAN.md — Delete Supabase files + update navigation ✓
+- [x] 01-02-PLAN.md — Migrate layout and sidebar to Convex ✓
+- [x] 01-03-PLAN.md — Contact detail dialog with 4 tabs ✓
+- [x] 01-05-PLAN.md — Contact merge functionality ✓
+
+### Phase 1.2: n8n Sync Verification
+**Goal**: Verify n8n sync brings all Google Sheets leads into Contact Database
+**Depends on**: Phase 1
+**Success Criteria** (what must be TRUE):
+  1. All Google Sheets leads appear in Contact Database (count matches within 5%)
+  2. n8n webhook creates contacts in Convex
+  3. Incremental sync works (only new leads added)
+**Plans**: 1 plan
+
+Plans:
+- [ ] 01-04-PLAN.md — Verify n8n sync (checkpoint: human verification)
 
 ### Phase 2: Inbox (WhatsApp)
 **Goal**: WhatsApp messaging via Kapso, seamless real-time
