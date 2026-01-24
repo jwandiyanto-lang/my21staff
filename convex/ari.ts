@@ -35,6 +35,27 @@ export const getAriConfig = query({
 });
 
 /**
+ * Check if workspace has ARI enabled (webhook version).
+ * No auth check - webhook validates signature.
+ *
+ * @param workspace_id - The workspace ID
+ * @returns True if ARI config exists, false otherwise
+ */
+export const hasAriConfig = query({
+  args: {
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const config = await ctx.db
+      .query("ariConfig")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
+      .first();
+
+    return !!config;
+  },
+});
+
+/**
  * Upsert ARI config (create or update).
  */
 export const upsertAriConfig = mutation({

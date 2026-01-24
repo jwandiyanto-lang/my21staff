@@ -65,6 +65,21 @@ Kapso API for WhatsApp
 
 ---
 
+## Git & Deployment
+
+**DO NOT auto-push to GitHub.** Each push triggers a Vercel deployment (costs money).
+
+- Make atomic commits locally as normal
+- **Never push automatically** after commits
+- User will say "push" or push manually when ready to deploy
+
+```bash
+# When user says "push":
+git push origin master
+```
+
+---
+
 ## Language
 
 | Context | Language |

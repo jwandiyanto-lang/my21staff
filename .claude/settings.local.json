@@ -53,7 +53,15 @@
       "Bash(npx convex codegen:*)",
       "Bash(npm run benchmark)",
       "Bash(node:*)",
-      "Bash(CONVEX_DEPLOYMENT=intent-otter-212 npx convex deploy:*)"
+      "Bash(CONVEX_DEPLOYMENT=intent-otter-212 npx convex deploy:*)",
+      "Bash(npm view:*)",
+      "Bash(for week in 2026-W02 2026-W03 2026-W04)",
+      "Bash(do for f in \"$week\"/*.md)",
+      "Bash(do echo \"$week: $f\")",
+      "Bash(done:*)",
+      "Bash(for:*)",
+      "Bash(do:*)",
+      "Bash(echo:*)"
     ]
   }
 }

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { waitUntil } from '@vercel/functions'
-import { createApiAdminClient } from '@/lib/supabase/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
 import { verifyKapsoSignature } from '@/lib/kapso/verify-signature'
 import { normalizePhone } from '@/lib/phone/normalize'
 import { processWithARI } from '@/lib/ari/processor'
 import { safeDecrypt } from '@/lib/crypto'
 import type { Json } from '@/types/database'
-import type { SupabaseClient } from '@supabase/supabase-js'
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 // PII masking helper for safe logging
 function maskPayload(payload: unknown): string {
@@ -19,7 +21,7 @@ function maskPayload(payload: unknown): string {
 
 // Types for batch processing
 interface Contact {
-  id: string
+  _id: string
   phone: string
   phone_normalized?: string
   name: string | null
@@ -28,7 +30,7 @@ interface Contact {
 }
 
 interface Conversation {
-  id: string
+  _id: string
   contact_id: string
   workspace_id: string
   unread_count: number
@@ -139,7 +141,6 @@ export async function POST(request: NextRequest) {
 // Async processor - runs after 200 response is sent
 async function processWebhookAsync(payload: MetaWebhookPayload): Promise<void> {
   const startTime = Date.now()
-  const supabase = createApiAdminClient()
 
   try {
     // Collect all messages grouped by workspace
@@ -154,18 +155,16 @@ async function processWebhookAsync(payload: MetaWebhookPayload): Promise<void> {
         if (!phoneNumberId) continue
 
         // Find workspace by kapso_phone_id
-        const { data: workspaceData } = await supabase
-          .from('workspaces')
-          .select('id, kapso_phone_id')
-          .eq('kapso_phone_id', phoneNumberId)
-          .single()
+        const workspace = await convex.query(api.workspaces.getByKapsoPhoneIdWebhook, {
+          kapso_phone_id: phoneNumberId
+        })
 
-        if (!workspaceData) {
+        if (!workspace) {
           console.log(`[Webhook] No workspace for phone_number_id: ${phoneNumberId}`)
           continue
         }
 
-        const workspaceId = workspaceData.id
+        const workspaceId = workspace._id
         const contacts = value.contacts || []
         const messages = value.messages || []
 
@@ -191,7 +190,7 @@ async function processWebhookAsync(payload: MetaWebhookPayload): Promise<void> {
     // Process each workspace's messages with batching
     let totalMessages = 0
     for (const [workspaceId, messagesData] of workspaceMessages) {
-      await processWorkspaceMessages(supabase, workspaceId, messagesData)
+      await processWorkspaceMessages(workspaceId, messagesData)
       totalMessages += messagesData.length
     }
 
@@ -206,7 +205,6 @@ async function processWebhookAsync(payload: MetaWebhookPayload): Promise<void> {
 
 // Process all messages for a single workspace with batched operations
 async function processWorkspaceMessages(
-  supabase: SupabaseClient,
   workspaceId: string,
   messagesData: MessageData[]
 ): Promise<void> {
@@ -223,31 +221,54 @@ async function processWorkspaceMessages(
 
   console.log(`[Webhook] Processing ${messagesData.length} messages for workspace ${workspaceId}, phones: ${phoneNumbers.length}`)
 
-  // Batch 1: Get or create all contacts
-  const contactMap = await getOrCreateContactsBatch(supabase, workspaceId, phoneNumbers, phoneToName)
+  // Step 1: Get or create all contacts
+  const contactMap = new Map<string, Contact>()
+  for (const phone of phoneNumbers) {
+    const phoneNormalized = normalizePhone(phone) || phone
+    const kapsoName = phoneToName.get(phone) || undefined
 
-  // Batch 2: Get or create all conversations
-  const conversationMap = await getOrCreateConversationsBatch(supabase, workspaceId, contactMap)
+    const contact = await convex.mutation(api.mutations.findOrCreateContactWebhook, {
+      workspace_id: workspaceId,
+      phone,
+      phone_normalized: phoneNormalized,
+      kapso_name: kapsoName,
+    })
 
-  // Filter out duplicate messages
-  const kapsoMessageIds = messagesData.map(m => m.message.id)
-  const { data: existingMessages } = await supabase
-    .from('messages')
-    .select('kapso_message_id')
-    .in('kapso_message_id', kapsoMessageIds)
+    contactMap.set(phone, contact)
+  }
 
-  const existingIds = new Set((existingMessages || []).map(m => m.kapso_message_id))
-  const newMessages = messagesData.filter(m => !existingIds.has(m.message.id))
+  // Step 2: Get or create all conversations
+  const conversationMap = new Map<string, Conversation>()
+  for (const [phone, contact] of contactMap) {
+    const conversation = await convex.mutation(api.mutations.findOrCreateConversationWebhook, {
+      workspace_id: workspaceId,
+      contact_id: contact._id,
+    })
+
+    conversationMap.set(phone, conversation)
+  }
+
+  // Step 3: Filter out duplicate messages and insert new ones
+  const newMessages: MessageData[] = []
+  for (const messageData of messagesData) {
+    const exists = await convex.query(api.mutations.messageExistsByKapsoId, {
+      kapso_message_id: messageData.message.id
+    })
+
+    if (!exists) {
+      newMessages.push(messageData)
+    }
+  }
 
   if (newMessages.length === 0) {
     console.log(`[Webhook] All ${messagesData.length} messages already exist, skipping`)
     return
   }
 
-  // Batch 3: Insert all new messages at once
-  const messageInserts = newMessages.map(({ phone, message }) => {
+  // Step 4: Insert all new messages
+  for (const { phone, message } of newMessages) {
     const conversation = conversationMap.get(phone)
-    if (!conversation) return null
+    if (!conversation) continue
 
     // Extract message content based on type
     let messageContent = ''
@@ -280,36 +301,24 @@ async function processWorkspaceMessages(
       messageMetadata.reply_to_from = message.context.from
     }
 
-    return {
-      conversation_id: conversation.id,
+    await convex.mutation(api.mutations.createInboundMessageWebhook, {
       workspace_id: workspaceId,
-      direction: 'inbound' as const,
-      sender_type: 'contact' as const,
+      conversation_id: conversation._id,
       content: messageContent,
       message_type: messageType,
       kapso_message_id: message.id,
-      ...(Object.keys(messageMetadata).length > 0 ? { metadata: messageMetadata } : {}),
-    }
-  }).filter((m): m is NonNullable<typeof m> => m !== null)
-
-  if (messageInserts.length > 0) {
-    const { error: insertError } = await supabase
-      .from('messages')
-      .insert(messageInserts)
-
-    if (insertError) {
-      console.error('[Webhook] Batch message insert error:', insertError)
-    }
+      metadata: Object.keys(messageMetadata).length > 0 ? messageMetadata : undefined,
+    })
   }
 
-  // Batch 4: Update conversation metadata
+  // Step 5: Update conversation metadata
   // Group by conversation to get correct unread counts
   const conversationUpdates = new Map<string, { phone: string; count: number; lastPreview: string }>()
   for (const { phone, message } of newMessages) {
     const conversation = conversationMap.get(phone)
     if (!conversation) continue
 
-    const existing = conversationUpdates.get(conversation.id) || {
+    const existing = conversationUpdates.get(conversation._id) || {
       phone,
       count: 0,
       lastPreview: '',
@@ -317,25 +326,19 @@ async function processWorkspaceMessages(
     existing.count++
     // Use last message as preview
     existing.lastPreview = (message.text?.body || '[media]').substring(0, 100)
-    conversationUpdates.set(conversation.id, existing)
+    conversationUpdates.set(conversation._id, existing)
   }
 
-  // Update each conversation (can't batch these easily due to different values)
+  // Update each conversation
   for (const [conversationId, update] of conversationUpdates) {
-    const conversation = conversationMap.get(update.phone)
-    const currentUnread = conversation?.unread_count || 0
-
-    await supabase
-      .from('conversations')
-      .update({
-        last_message_at: new Date().toISOString(),
-        last_message_preview: update.lastPreview,
-        unread_count: currentUnread + update.count,
-      })
-      .eq('id', conversationId)
+    await convex.mutation(api.mutations.updateConversationWebhook, {
+      conversation_id: conversationId,
+      increment_unread: update.count,
+      last_message_preview: update.lastPreview,
+    })
   }
 
-  console.log(`[Webhook] Saved ${messageInserts.length} messages, updated ${conversationUpdates.size} conversations`)
+  console.log(`[Webhook] Saved ${newMessages.length} messages, updated ${conversationUpdates.size} conversations`)
 
   // === ARI PROCESSING ===
   // Process with ARI for each new text message
@@ -347,29 +350,36 @@ async function processWorkspaceMessages(
     if (!contact) continue
 
     // Check if workspace has ARI enabled (has ari_config)
-    const { data: ariConfig } = await supabase
-      .from('ari_config')
-      .select('id')
-      .eq('workspace_id', workspaceId)
-      .single()
+    const hasAri = await convex.query(api.ari.hasAriConfig, {
+      workspace_id: workspaceId
+    })
 
-    if (!ariConfig) continue // No ARI for this workspace
+    if (!hasAri) continue // No ARI for this workspace
 
     // Get Kapso credentials
-    const credentials = await getKapsoCredentials(supabase, workspaceId)
-    if (!credentials) continue
+    const credentials = await convex.query(api.workspaces.getKapsoCredentials, {
+      workspace_id: workspaceId
+    })
+
+    if (!credentials || !credentials.meta_access_token || !credentials.kapso_phone_id) continue
 
     // Get message content - only process text messages
     const messageContent = messageData.message.text?.body || ''
     if (!messageContent) continue // Skip non-text messages for now
 
+    // Decrypt API key (safeDecrypt handles unencrypted values gracefully)
+    const apiKey = safeDecrypt(credentials.meta_access_token)
+
     // Process with ARI - collect promise to await later
     const ariPromise = processWithARI({
       workspaceId,
-      contactId: contact.id,
+      contactId: contact._id,
       contactPhone: messageData.phone,
       userMessage: messageContent,
-      kapsoCredentials: credentials,
+      kapsoCredentials: {
+        apiKey,
+        phoneId: credentials.kapso_phone_id,
+      },
     }).catch(err => {
       console.error('[Webhook] ARI processing error:', err)
     })
@@ -399,181 +409,4 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ status: 'Webhook endpoint ready' })
-}
-
-// Helper: Get decrypted Kapso credentials for a workspace
-async function getKapsoCredentials(
-  supabase: SupabaseClient,
-  workspaceId: string
-): Promise<{ apiKey: string; phoneId: string } | null> {
-  const { data: workspace, error } = await supabase
-    .from('workspaces')
-    .select('meta_access_token, kapso_phone_id')
-    .eq('id', workspaceId)
-    .single()
-
-  if (error || !workspace) {
-    console.error('[Webhook] Failed to get workspace credentials:', error)
-    return null
-  }
-
-  if (!workspace.meta_access_token || !workspace.kapso_phone_id) {
-    return null
-  }
-
-  try {
-    // Decrypt API key (safeDecrypt handles unencrypted values gracefully)
-    const apiKey = safeDecrypt(workspace.meta_access_token)
-    return {
-      apiKey,
-      phoneId: workspace.kapso_phone_id,
-    }
-  } catch (err) {
-    console.error('[Webhook] Failed to decrypt Kapso credentials:', err)
-    return null
-  }
-}
-
-// Batch helper: Get or create contacts for multiple phone numbers
-async function getOrCreateContactsBatch(
-  supabase: SupabaseClient,
-  workspaceId: string,
-  phones: string[],
-  phoneToName: Map<string, string | null>
-): Promise<Map<string, Contact>> {
-  const contactMap = new Map<string, Contact>()
-
-  // Normalize all phone numbers for matching
-  const normalizedPhones = phones.map(p => normalizePhone(p) || p)
-  const phoneToNormalized = new Map<string, string>()
-  phones.forEach((p, i) => phoneToNormalized.set(p, normalizedPhones[i]))
-
-  // Get unique normalized phones for query
-  const uniqueNormalizedPhones = [...new Set(normalizedPhones)]
-
-  // Get existing contacts by normalized phone
-  const { data: existingContacts } = await supabase
-    .from('contacts')
-    .select('id, phone, phone_normalized, name, kapso_name, workspace_id')
-    .eq('workspace_id', workspaceId)
-    .in('phone_normalized', uniqueNormalizedPhones)
-
-  for (const contact of existingContacts || []) {
-    // Map back to original phone for lookup
-    const originalPhone = phones.find(p =>
-      (normalizePhone(p) || p) === contact.phone_normalized
-    )
-    if (originalPhone) {
-      contactMap.set(originalPhone, contact as Contact)
-    }
-
-    // Update kapso_name and cache_updated_at if we have new data
-    const kapsoName = phoneToName.get(originalPhone || '')
-    if (kapsoName && kapsoName !== contact.kapso_name) {
-      await supabase
-        .from('contacts')
-        .update({
-          kapso_name: kapsoName,
-          cache_updated_at: new Date().toISOString(),
-          // Also update name if contact doesn't have one set
-          ...(contact.name ? {} : { name: kapsoName })
-        })
-        .eq('id', contact.id)
-    }
-  }
-
-  // Create missing contacts with normalized phone
-  const missingPhones = phones.filter(p => !contactMap.has(p))
-  if (missingPhones.length > 0) {
-    const newContacts = missingPhones.map(phone => {
-      const normalized = normalizePhone(phone) || phone
-      const kapsoName = phoneToName.get(phone) || null
-      return {
-        workspace_id: workspaceId,
-        phone,
-        phone_normalized: normalized,
-        name: kapsoName, // Use Kapso name as initial name
-        kapso_name: kapsoName,
-        cache_updated_at: new Date().toISOString(),
-        lead_status: 'new',
-        lead_score: 0,
-      }
-    })
-
-    const { data: createdContacts, error } = await supabase
-      .from('contacts')
-      .insert(newContacts)
-      .select('id, phone, phone_normalized, name, kapso_name, workspace_id')
-
-    if (error) {
-      console.error('[Webhook] Batch contact create error:', error)
-    }
-
-    for (const contact of createdContacts || []) {
-      contactMap.set(contact.phone, contact as Contact)
-    }
-  }
-
-  return contactMap
-}
-
-// Batch helper: Get or create conversations for multiple contacts
-async function getOrCreateConversationsBatch(
-  supabase: SupabaseClient,
-  workspaceId: string,
-  contactMap: Map<string, Contact>
-): Promise<Map<string, Conversation>> {
-  const conversationMap = new Map<string, Conversation>()
-  const contactIds = Array.from(contactMap.values()).map(c => c.id)
-
-  // Get existing conversations in one query
-  const { data: existingConversations } = await supabase
-    .from('conversations')
-    .select('id, contact_id, workspace_id, unread_count')
-    .eq('workspace_id', workspaceId)
-    .in('contact_id', contactIds)
-
-  // Map contact_id back to phone for lookup
-  const contactIdToPhone = new Map<string, string>()
-  for (const [phone, contact] of contactMap) {
-    contactIdToPhone.set(contact.id, phone)
-  }
-
-  for (const conv of existingConversations || []) {
-    const phone = contactIdToPhone.get(conv.contact_id)
-    if (phone) {
-      conversationMap.set(phone, conv as Conversation)
-    }
-  }
-
-  // Create missing conversations in batch
-  const missingContacts = Array.from(contactMap.entries())
-    .filter(([phone]) => !conversationMap.has(phone))
-
-  if (missingContacts.length > 0) {
-    const newConversations = missingContacts.map(([, contact]) => ({
-      workspace_id: workspaceId,
-      contact_id: contact.id,
-      status: 'open',
-      unread_count: 0,
-    }))
-
-    const { data: createdConversations, error } = await supabase
-      .from('conversations')
-      .insert(newConversations)
-      .select('id, contact_id, workspace_id, unread_count')
-
-    if (error) {
-      console.error('[Webhook] Batch conversation create error:', error)
-    }
-
-    for (const conv of createdConversations || []) {
-      const phone = contactIdToPhone.get(conv.contact_id)
-      if (phone) {
-        conversationMap.set(phone, conv as Conversation)
-      }
-    }
-  }
-
-  return conversationMap
 }

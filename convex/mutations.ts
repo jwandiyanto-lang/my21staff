@@ -14,7 +14,7 @@
 
 // @ts-nocheck - Schema types mismatch with generated Convex types
 // Temporarily disabled for Vercel deployment - will be fixed in follow-up
-import { mutation, internalMutation } from "./_generated/server";
+import { mutation, internalMutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { requireWorkspaceMembership } from "./lib/auth";
 
@@ -1716,5 +1716,226 @@ export const completeContactNoteWithFollowup = mutation({
     });
 
     return await ctx.db.get(followupId);
+  },
+});
+
+// ============================================
+// WEBHOOK BATCH MUTATIONS (for Kapso webhook)
+// ============================================
+
+/**
+ * Find or create contact by phone (webhook version).
+ *
+ * Used by Kapso webhook to get/create contacts efficiently.
+ * No auth check - webhook validates signature.
+ *
+ * @param workspace_id - The workspace
+ * @param phone - Original phone number from WhatsApp
+ * @param phone_normalized - Normalized phone for matching
+ * @param kapso_name - WhatsApp profile name
+ * @returns The contact document (existing or newly created)
+ */
+export const findOrCreateContactWebhook = mutation({
+  args: {
+    workspace_id: v.string(),
+    phone: v.string(),
+    phone_normalized: v.string(),
+    kapso_name: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Try to find existing contact by normalized phone
+    const existing = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace_phone", (q) =>
+        q.eq("workspace_id", args.workspace_id as any).eq("phone_normalized", args.phone_normalized)
+      )
+      .first();
+
+    const now = Date.now();
+
+    if (existing) {
+      // Update kapso_name if we have new data
+      if (args.kapso_name && args.kapso_name !== existing.kapso_name) {
+        await ctx.db.patch(existing._id, {
+          kapso_name: args.kapso_name,
+          cache_updated_at: now,
+          // Also update name if contact doesn't have one set
+          ...(existing.name ? {} : { name: args.kapso_name }),
+          updated_at: now,
+        });
+      }
+      return await ctx.db.get(existing._id);
+    }
+
+    // Create new contact
+    const contactId = await ctx.db.insert("contacts", {
+      workspace_id: args.workspace_id as any,
+      phone: args.phone,
+      phone_normalized: args.phone_normalized,
+      name: args.kapso_name || null,
+      kapso_name: args.kapso_name || null,
+      email: null,
+      lead_score: 0,
+      lead_status: "new",
+      tags: [],
+      assigned_to: null,
+      source: "whatsapp",
+      metadata: {},
+      cache_updated_at: now,
+      created_at: now,
+      updated_at: now,
+      supabaseId: "",
+    });
+
+    return await ctx.db.get(contactId);
+  },
+});
+
+/**
+ * Find or create conversation by contact (webhook version).
+ *
+ * Used by Kapso webhook to get/create conversations efficiently.
+ * No auth check - webhook validates signature.
+ *
+ * @param workspace_id - The workspace
+ * @param contact_id - The contact ID
+ * @returns The conversation document (existing or newly created)
+ */
+export const findOrCreateConversationWebhook = mutation({
+  args: {
+    workspace_id: v.string(),
+    contact_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Try to find existing conversation
+    const existing = await ctx.db
+      .query("conversations")
+      .withIndex("by_contact", (q) => q.eq("contact_id", args.contact_id as any))
+      .first();
+
+    if (existing) {
+      return existing;
+    }
+
+    // Create new conversation
+    const now = Date.now();
+    const conversationId = await ctx.db.insert("conversations", {
+      workspace_id: args.workspace_id as any,
+      contact_id: args.contact_id as any,
+      status: "open",
+      assigned_to: null,
+      unread_count: 0,
+      last_message_at: null,
+      last_message_preview: null,
+      created_at: now,
+      updated_at: now,
+    });
+
+    return await ctx.db.get(conversationId);
+  },
+});
+
+/**
+ * Check if message exists by kapso_message_id (webhook version).
+ *
+ * Used by Kapso webhook to detect duplicate messages.
+ * No auth check - webhook validates signature.
+ *
+ * @param kapso_message_id - The Kapso message ID to check
+ * @returns True if message exists, false otherwise
+ */
+export const messageExistsByKapsoId = query({
+  args: {
+    kapso_message_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("messages")
+      .withIndex("by_kapso_id", (q) => q.eq("kapso_message_id", args.kapso_message_id))
+      .first();
+
+    return !!existing;
+  },
+});
+
+/**
+ * Create inbound message (webhook version).
+ *
+ * Used by Kapso webhook to insert messages.
+ * No auth check - webhook validates signature.
+ *
+ * @param workspace_id - The workspace
+ * @param conversation_id - The conversation
+ * @param content - Message content
+ * @param message_type - Message type (text, image, video, etc.)
+ * @param kapso_message_id - Kapso message ID for deduplication
+ * @param metadata - Optional metadata (reply context, etc.)
+ * @returns The created message document
+ */
+export const createInboundMessageWebhook = mutation({
+  args: {
+    workspace_id: v.string(),
+    conversation_id: v.string(),
+    content: v.string(),
+    message_type: v.string(),
+    kapso_message_id: v.string(),
+    metadata: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    const messageId = await ctx.db.insert("messages", {
+      workspace_id: args.workspace_id as any,
+      conversation_id: args.conversation_id as any,
+      content: args.content,
+      direction: "inbound",
+      sender_type: "contact",
+      sender_id: null,
+      message_type: args.message_type,
+      media_url: null,
+      kapso_message_id: args.kapso_message_id,
+      metadata: args.metadata || {},
+      created_at: now,
+      updated_at: now,
+    });
+
+    return await ctx.db.get(messageId);
+  },
+});
+
+/**
+ * Update conversation after new message (webhook version).
+ *
+ * Updates unread count and last message preview.
+ * No auth check - webhook validates signature.
+ *
+ * @param conversation_id - The conversation to update
+ * @param increment_unread - Number to add to unread count
+ * @param last_message_preview - Preview text
+ * @returns The updated conversation document
+ */
+export const updateConversationWebhook = mutation({
+  args: {
+    conversation_id: v.string(),
+    increment_unread: v.number(),
+    last_message_preview: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversation_id as any);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    const now = Date.now();
+    const currentUnread = conversation.unread_count || 0;
+
+    await ctx.db.patch(args.conversation_id as any, {
+      last_message_at: now,
+      last_message_preview: args.last_message_preview.substring(0, 100),
+      unread_count: currentUnread + args.increment_unread,
+      updated_at: now,
+    });
+
+    return await ctx.db.get(args.conversation_id as any);
   },
 });

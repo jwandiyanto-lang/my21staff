@@ -130,10 +130,10 @@ async function fetchWorkspaces(): Promise<SupabaseWorkspace[]> {
   return data || [];
 }
 
-// Check if organization exists by slug
-async function checkOrgBySlug(slug: string): Promise<ClerkOrganization | null> {
+// Check if organization exists by name (slug feature not enabled)
+async function checkOrgByName(name: string): Promise<ClerkOrganization | null> {
   const response = await fetch(
-    `${CLERK_API_BASE}/organizations?slug=${encodeURIComponent(slug)}`,
+    `${CLERK_API_BASE}/organizations?query=${encodeURIComponent(name)}`,
     {
       method: "GET",
       headers: {
@@ -149,8 +149,9 @@ async function checkOrgBySlug(slug: string): Promise<ClerkOrganization | null> {
   }
 
   const result = await response.json();
-  // Response is { data: [], total_count: 0 } or { data: [org], total_count: 1 }
-  return result.data?.length > 0 ? result.data[0] : null;
+  // Check for exact name match (query is fuzzy search)
+  const exactMatch = result.data?.find((org: ClerkOrganization) => org.name === name);
+  return exactMatch || null;
 }
 
 // Create organization in Clerk
@@ -158,19 +159,22 @@ async function createClerkOrganization(
   workspace: SupabaseWorkspace,
   jonathanClerkId: string
 ): Promise<MigrationResult> {
-  // Organization name format: "[Business Name] - my21staff"
-  const orgName = `${workspace.name} - my21staff`;
+  // Organization name format: "[Business Name] - 21"
+  const orgName = `${workspace.name} - 21`;
 
   // Public metadata includes Supabase workspace ID for migration reference
+  // Note: Include original workspace slug for reference (org slugs not enabled in Clerk)
   const publicMetadata = {
     supabaseWorkspaceId: workspace.id,
     supabaseOwnerId: workspace.owner_id,
     workspaceType: workspace.workspace_type,
+    originalWorkspaceSlug: workspace.slug,
   };
 
+  // Note: slug parameter removed - Clerk organization slugs feature not enabled
+  // Clerk will auto-generate slugs based on the organization name
   const body = {
     name: orgName,
-    slug: workspace.slug,
     created_by: jonathanClerkId,
     public_metadata: publicMetadata,
   };
@@ -214,8 +218,9 @@ async function migrateWorkspace(
   jonathanClerkId: string
 ): Promise<MigrationResult> {
   try {
-    // Check if org already exists by slug
-    const existingOrg = await checkOrgBySlug(workspace.slug);
+    // Check if org already exists by name (slug feature not enabled in Clerk)
+    const orgName = `${workspace.name} - 21`;
+    const existingOrg = await checkOrgByName(orgName);
 
     if (existingOrg) {
       console.log(`  [SKIP] ${workspace.name} - organization already exists (${existingOrg.id})`);
@@ -314,7 +319,7 @@ async function runMigration(): Promise<void> {
   console.log("Workspaces to migrate:");
   console.log("-".repeat(70));
   for (const ws of workspaces) {
-    const orgName = `${ws.name} - my21staff`;
+    const orgName = `${ws.name} - 21`;
     console.log(`  ${ws.name} (${ws.id})`);
     console.log(`    Slug: ${ws.slug}`);
     console.log(`    Type: ${ws.workspace_type}`);

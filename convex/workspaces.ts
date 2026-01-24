@@ -50,7 +50,7 @@ export const getBySlug = query({
 });
 
 /**
- * Get a workspace by Kapso phone ID.
+ * Get a workspace by Kapso phone ID (internal version).
  *
  * Used by Kapso webhook handler to identify the workspace
  * for an incoming message.
@@ -59,6 +59,28 @@ export const getBySlug = query({
  * @returns Workspace document or null if not found
  */
 export const getByKapsoPhoneId = internalQuery({
+  args: {
+    kapso_phone_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db
+      .query("workspaces")
+      .filter((q) => q.eq(q.field("kapso_phone_id"), args.kapso_phone_id))
+      .first();
+    return workspace;
+  },
+});
+
+/**
+ * Get a workspace by Kapso phone ID (webhook version).
+ *
+ * Used by Kapso webhook handler to identify the workspace
+ * for an incoming message. No auth check - webhook validates signature.
+ *
+ * @param kapso_phone_id - The Kapso phone_number_id to look up
+ * @returns Workspace document or null if not found
+ */
+export const getByKapsoPhoneIdWebhook = query({
   args: {
     kapso_phone_id: v.string(),
   },
@@ -237,5 +259,34 @@ export const updateMemberRole = mutation({
     }
     await ctx.db.patch(member_id as any, { role, updated_at: Date.now() });
     return { success: true };
+  },
+});
+
+/**
+ * Get Kapso credentials for a workspace (webhook version).
+ *
+ * Used by Kapso webhook and ARI processor to send messages.
+ * No auth check - webhook validates signature.
+ *
+ * Returns meta_access_token and kapso_phone_id for message sending.
+ *
+ * @param workspace_id - The workspace ID
+ * @returns Object with meta_access_token and kapso_phone_id, or null
+ */
+export const getKapsoCredentials = query({
+  args: {
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspace_id as any);
+    if (!workspace) {
+      return null;
+    }
+
+    // Return only the fields needed for Kapso API calls
+    return {
+      meta_access_token: workspace.meta_access_token || null,
+      kapso_phone_id: workspace.kapso_phone_id || null,
+    };
   },
 });
