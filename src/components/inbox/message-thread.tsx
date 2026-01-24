@@ -20,6 +20,7 @@ import { getInitials } from '@/lib/utils'
 import { format } from 'date-fns'
 import { MessageBubble } from './message-bubble'
 import { DateSeparator } from './date-separator'
+import { ComposeInput } from './compose-input'
 
 interface Contact {
   name?: string
@@ -122,12 +123,11 @@ export function MessageThread({ conversationId, workspaceId, contact }: MessageT
         )}
       </div>
 
-      {/* Compose area placeholder - will be filled in Plan 03 */}
-      <div className="p-4 border-t bg-background">
-        <p className="text-sm text-muted-foreground text-center">
-          Area komposisi pesan (tersedia di Plan 03)
-        </p>
-      </div>
+      {/* Compose area */}
+      <ComposeInput
+        workspaceId={workspaceId}
+        conversationId={conversationId}
+      />
     </div>
   )
 }
