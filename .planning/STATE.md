@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 
 Milestone: v3.2 CRM Core Fresh
 Phase: 1 of 5 (Supabase Deletion + Navigation Cleanup)
-Plan: 5 of 8 in phase (Wave 3 complete)
-Status: In progress
-Last activity: 2026-01-24 - Completed v3.2-01-05-PLAN.md
+Plan: 3 of 3 in phase
+Status: Phase complete
+Last activity: 2026-01-24 - Completed v3.2-01-03-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 █▒▒▒▒▒▒▒▒▒ (190 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 █▒▒▒▒▒▒▒▒▒ (191 plans shipped)
 
 ## Performance Metrics
 
@@ -59,6 +59,10 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.2 decisions:
+- Contact detail as Dialog not Sheet: User requested modal dialog instead of sliding sheet for better centered focus (v3.2-01-03)
+- 4-tab contact organization: Contact details organized into Profile (editable), Documents (placeholder), Conversations (placeholder), Notes (functional) tabs (v3.2-01-03)
+- Inline editing pattern: Profile fields use onChange/onBlur for immediate save without explicit save button (v3.2-01-03)
+- Notes via API routes: Notes use ConvexHttpClient in API routes instead of direct Convex React hooks (v3.2-01-03)
 - User field-by-field merge selection: Contact merge requires user to explicitly select each field value (name, email, phone, status, assignee, score) - no auto-selection per CONTEXT.md (v3.2-01-05)
 - Tags auto-combined in merge: Tags from both contacts automatically merged into Set, shown as preview to user (v3.2-01-05)
 - System notes for merge audit: Merge history logged in contactNotes table with type='system' for audit trail (v3.2-01-05)
@@ -244,8 +248,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed v3.2-01-05-PLAN.md (Wave 3 complete)
-Resume: `/gsd:execute-phase` to continue with Wave 4 plans
+Stopped at: Completed v3.2-01-03-PLAN.md (Phase v3.2-01 complete)
+Resume: Phase v3.2-01 complete - ready for next phase
 
 ---
-*Last updated: 2026-01-24 - Completed v3.2-01-05 (Contact merge functionality)*
+*Last updated: 2026-01-24 - Completed v3.2-01-03 (Contact detail dialog with 4 tabs)*
