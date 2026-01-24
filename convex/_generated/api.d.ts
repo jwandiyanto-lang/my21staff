@@ -11,6 +11,7 @@
 import type * as _internal_webhook from "../_internal/webhook.js";
 import type * as ari from "../ari.js";
 import type * as cms from "../cms.js";
+import type * as contactNotes from "../contactNotes.js";
 import type * as contacts from "../contacts.js";
 import type * as conversations from "../conversations.js";
 import type * as http from "../http.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   "_internal/webhook": typeof _internal_webhook;
   ari: typeof ari;
   cms: typeof cms;
+  contactNotes: typeof contactNotes;
   contacts: typeof contacts;
   conversations: typeof conversations;
   http: typeof http;

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { ConvexHttpClient } from 'convex/browser'
-import { api } from '@/../convex/_generated/api'
+import { api } from 'convex/_generated/api'
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
-// GET notes for a contact
+/**
+ * GET /api/contacts/[id]/notes - Get notes for a contact
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,18 +17,27 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { id: contactId } = await params
-
   try {
-    const notes = await convex.query(api.contacts.getNotes, { contact_id: contactId })
+    const { id } = await params
+
+    // Fetch notes from Convex
+    const notes = await convex.query(api.contactNotes.getByContact, {
+      contact_id: id as any,
+    })
+
     return NextResponse.json({ notes })
   } catch (error) {
-    console.error('Error fetching notes:', error)
-    return NextResponse.json({ error: 'Failed to fetch notes' }, { status: 500 })
+    console.error('GET /api/contacts/[id]/notes error:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch notes' },
+      { status: 500 }
+    )
   }
 }
 
-// POST a new note
+/**
+ * POST /api/contacts/[id]/notes - Create a note for a contact
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -36,31 +47,30 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { id: contactId } = await params
-
   try {
-    const { content, workspaceId } = await request.json()
+    const { id } = await params
+    const body = await request.json()
 
-    if (!content?.trim()) {
-      return NextResponse.json({ error: 'Note content is required' }, { status: 400 })
+    if (!body.content || !body.content.trim()) {
+      return NextResponse.json(
+        { error: 'Note content is required' },
+        { status: 400 }
+      )
     }
 
-    if (!workspaceId) {
-      return NextResponse.json({ error: 'workspaceId is required' }, { status: 400 })
-    }
-
-    const note = await convex.mutation(api.mutations.createContactNote, {
-      workspace_id: workspaceId,
-      contact_id: contactId,
+    // Create note in Convex
+    const note = await convex.mutation(api.contactNotes.create, {
+      contact_id: id as any,
+      content: body.content.trim(),
       user_id: userId,
-      content: content.trim(),
+      due_date: body.due_date ? new Date(body.due_date).getTime() : undefined,
     })
 
     return NextResponse.json({ note })
   } catch (error) {
-    console.error('Error creating note:', error)
+    console.error('POST /api/contacts/[id]/notes error:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create note' },
+      { error: 'Failed to create note' },
       { status: 500 }
     )
   }
