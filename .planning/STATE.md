@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 
 Milestone: v3.2 CRM Core Fresh
 Phase: 1 of 5 (Supabase Deletion + Navigation Cleanup)
-Plan: 2 of 3 in phase
+Plan: 5 of 8 in phase (Wave 3 complete)
 Status: In progress
-Last activity: 2026-01-24 - Completed v3.2-01-02-PLAN.md
+Last activity: 2026-01-24 - Completed v3.2-01-05-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 █▒▒▒▒▒▒▒▒▒ (189 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 █▒▒▒▒▒▒▒▒▒ (190 plans shipped)
 
 ## Performance Metrics
 
@@ -59,6 +59,10 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.2 decisions:
+- User field-by-field merge selection: Contact merge requires user to explicitly select each field value (name, email, phone, status, assignee, score) - no auto-selection per CONTEXT.md (v3.2-01-05)
+- Tags auto-combined in merge: Tags from both contacts automatically merged into Set, shown as preview to user (v3.2-01-05)
+- System notes for merge audit: Merge history logged in contactNotes table with type='system' for audit trail (v3.2-01-05)
+- Conversation reassignment on merge: All conversations from secondary contact reassigned to primary before deletion (v3.2-01-05)
 - Stubbed contact detail sheet and media uploads: Complex Supabase-dependent features deferred to Phase 2 CRM rebuild - stubbed with "temporarily unavailable" UI (v3.2-01-02)
 - Scripts excluded from TypeScript build: Migration scripts with Supabase imports excluded from compilation but still runnable via ts-node (v3.2-01-02)
 - Workspace switcher simplified to display-only: Multi-workspace switching deferred until rebuilt with Convex (v3.2-01-02)
@@ -240,8 +244,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed v3.2-01-02-PLAN.md
-Resume: `/gsd:execute-phase` to continue with Plan 03
+Stopped at: Completed v3.2-01-05-PLAN.md (Wave 3 complete)
+Resume: `/gsd:execute-phase` to continue with Wave 4 plans
 
 ---
-*Last updated: 2026-01-24 - Completed v3.2-01-02 (Workspace layout migration)*
+*Last updated: 2026-01-24 - Completed v3.2-01-05 (Contact merge functionality)*
