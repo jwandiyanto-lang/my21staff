@@ -83,7 +83,7 @@ export function ActivityFeed({ workspaceId, workspaceSlug }: ActivityFeedProps) 
                       <span>•</span>
                     </>
                   )}
-                  <span>{formatDistanceWIB(activity.created_at, { addSuffix: true })}</span>
+                  <span>{formatDistanceWIB(new Date(activity.created_at), { addSuffix: true })}</span>
                 </div>
               </div>
             </div>

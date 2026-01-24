@@ -14,6 +14,7 @@ import type * as cms from "../cms.js";
 import type * as contactNotes from "../contactNotes.js";
 import type * as contacts from "../contacts.js";
 import type * as conversations from "../conversations.js";
+import type * as dashboard from "../dashboard.js";
 import type * as http from "../http.js";
 import type * as http_kapso from "../http/kapso.js";
 import type * as kapso from "../kapso.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   contactNotes: typeof contactNotes;
   contacts: typeof contacts;
   conversations: typeof conversations;
+  dashboard: typeof dashboard;
   http: typeof http;
   "http/kapso": typeof http_kapso;
   kapso: typeof kapso;

@@ -40,11 +40,14 @@ async function postHandler(request: NextRequest) {
 
     // 3. Get conversation and contact
     let queryStart = performance.now()
-    const conversation = await fetchQuery(
+    const conversationResult = await fetchQuery(
       api.conversations.getByIdInternal,
       { conversation_id }
     )
     logQuery(metrics, 'convex.conversations.getByIdInternal', Math.round(performance.now() - queryStart))
+
+    // Type assertion - getByIdInternal returns conversation type
+    const conversation = conversationResult as { contact_id: string } | null
 
     if (!conversation) {
       return NextResponse.json(
@@ -54,11 +57,14 @@ async function postHandler(request: NextRequest) {
     }
 
     queryStart = performance.now()
-    const contact = await fetchQuery(
+    const contactResult = await fetchQuery(
       api.contacts.getByIdInternal,
       { contact_id: conversation.contact_id }
     )
     logQuery(metrics, 'convex.contacts.getByIdInternal', Math.round(performance.now() - queryStart))
+
+    // Type assertion - getByIdInternal returns contact type
+    const contact = contactResult as { phone: string } | null
 
     if (!contact) {
       return NextResponse.json(
@@ -69,11 +75,14 @@ async function postHandler(request: NextRequest) {
 
     // 4. Get workspace with Kapso credentials
     queryStart = performance.now()
-    const workspace = await fetchQuery(
+    const workspaceResult = await fetchQuery(
       api.workspaces.getByIdInternal,
       { workspace_id }
     )
     logQuery(metrics, 'convex.workspaces.getByIdInternal', Math.round(performance.now() - queryStart))
+
+    // Type assertion - getByIdInternal returns workspace type
+    const workspace = workspaceResult as { kapso_phone_id?: string; meta_access_token?: string } | null
 
     if (!workspace || !workspace.kapso_phone_id || !workspace.meta_access_token) {
       return NextResponse.json(

@@ -16,7 +16,7 @@ import { requireWorkspaceMembership } from "./lib/auth";
  * Used by /api/messages/send to get conversation details.
  * No workspace membership check - API route handles authorization.
  */
-export const getByIdInternal = internalQuery({
+export const getByIdInternal = query({
   args: {
     conversation_id: v.string(),
   },
