@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     // Get workspace to check slug for auth
     const workspace = await fetchQuery(api.workspaces.getById, {
       id: article.workspace_id,
-    })
+    }) as { slug: string } | null
 
     if (!workspace) {
       return NextResponse.json(
@@ -79,7 +79,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     // Get workspace to check slug for auth
     const workspace = await fetchQuery(api.workspaces.getById, {
       id: existingArticle.workspace_id,
-    })
+    }) as { slug: string } | null
 
     if (!workspace) {
       return NextResponse.json(
@@ -144,7 +144,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     // Get workspace to check slug for auth
     const workspace = await fetchQuery(api.workspaces.getById, {
       id: existingArticle.workspace_id,
-    })
+    }) as { slug: string } | null
 
     if (!workspace) {
       return NextResponse.json(

@@ -22,7 +22,7 @@ export async function requireWorkspaceMembership(
   }
 
   // Get user from Convex
-  const user = await convex.query(api.users.getByClerkId, { clerkId: userId })
+  const user = await convex.query(api.users.getUserByClerkId, { clerk_id: userId })
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 401 })
   }
@@ -41,7 +41,7 @@ export async function requireWorkspaceMembership(
   }
 
   return {
-    user: { id: userId, email: user.email || '' },
+    user: { id: userId, email: '' }, // Email not stored in Convex, get from Clerk if needed
     workspaceId,
     role: member.role as WorkspaceRole
   }

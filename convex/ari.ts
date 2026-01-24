@@ -667,6 +667,20 @@ export const getConversationByContact = query({
 });
 
 /**
+ * Get ARI conversation by ID (webhook version).
+ * No auth check - used by cron/webhook processing.
+ */
+export const getConversationById = query({
+  args: {
+    conversation_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversation_id as any);
+    return conversation;
+  },
+});
+
+/**
  * Create or update ARI conversation.
  */
 export const upsertConversation = mutation({
@@ -891,31 +905,29 @@ export const getConversationWithMessages = query({
 
 /**
  * Create appointment (handoff).
+ * Schema: ari_conversation_id, workspace_id, consultant_id, scheduled_at, duration_minutes, status, notes
  */
 export const createAppointment = mutation({
   args: {
-    conversation_id: v.string(),
+    ari_conversation_id: v.string(),
     workspace_id: v.string(),
-    contact_id: v.string(),
-    slot_id: v.string(),
-    consultant_name: v.string(),
+    consultant_id: v.optional(v.string()),
     scheduled_at: v.number(),
+    duration_minutes: v.number(),
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
     const appointmentId = await ctx.db.insert("ariAppointments", {
-      conversation_id: args.conversation_id as any,
+      ari_conversation_id: args.ari_conversation_id as any,
       workspace_id: args.workspace_id as any,
-      contact_id: args.contact_id as any,
-      slot_id: args.slot_id as any,
-      consultant_name: args.consultant_name,
+      consultant_id: args.consultant_id || undefined,
       scheduled_at: args.scheduled_at,
+      duration_minutes: args.duration_minutes,
       status: "scheduled",
-      notes: args.notes || null,
+      notes: args.notes || undefined,
       created_at: now,
       updated_at: now,
-      supabaseId: null,
     });
     return await ctx.db.get(appointmentId);
   },

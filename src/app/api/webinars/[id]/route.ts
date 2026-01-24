@@ -8,9 +8,11 @@ type RouteContext = {
   params: Promise<{ id: string }>
 }
 
-// Extended type with registration count
-interface WebinarWithCount extends Webinar {
+// Extended type with registration count (using partial Webinar to allow Convex's _id instead of id)
+interface WebinarWithCount {
+  _id: string
   registration_count: number
+  [key: string]: unknown
 }
 
 // GET /api/webinars/[id] - Get a single webinar with registration count
@@ -33,7 +35,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     // Get workspace to check slug for auth
     const workspace = await fetchQuery(api.workspaces.getById, {
       id: webinar.workspace_id,
-    })
+    }) as { slug: string } | null
 
     if (!workspace) {
       return NextResponse.json(
@@ -100,7 +102,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     // Get workspace to check slug for auth
     const workspace = await fetchQuery(api.workspaces.getById, {
       id: existingWebinar.workspace_id,
-    })
+    }) as { slug: string } | null
 
     if (!workspace) {
       return NextResponse.json(
@@ -173,7 +175,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     // Get workspace to check slug for auth
     const workspace = await fetchQuery(api.workspaces.getById, {
       id: existingWebinar.workspace_id,
-    })
+    }) as { slug: string } | null
 
     if (!workspace) {
       return NextResponse.json(

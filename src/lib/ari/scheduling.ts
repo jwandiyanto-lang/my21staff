@@ -127,7 +127,7 @@ export async function getAvailableSlots(
           end_time: slot.end_time as string,
           duration_minutes: slot.duration_minutes,
           consultant_id: slot.consultant_id,
-          slot_id: slot.id,
+          slot_id: slot._id as string,  // Convex uses _id
           booked: false,
         });
       }
@@ -246,14 +246,13 @@ export async function bookAppointment(
     const appointment = await convex.mutation(api.ari.createAppointment, {
       workspace_id: workspaceId,
       ari_conversation_id: ariConversationId,
-      consultant_id: consultantId || slot.consultant_id || null,
+      consultant_id: consultantId || slot.consultant_id || undefined,
       scheduled_at: scheduledAt.getTime(),
       duration_minutes: slot.duration_minutes,
-      status: 'scheduled',
-      notes: notes || null,
+      notes: notes || undefined,
     });
 
-    console.log(`[Scheduling] Booked appointment ${appointment._id} for ${scheduledAt.toISOString()}`);
+    console.log(`[Scheduling] Booked appointment ${(appointment as any)?._id} for ${scheduledAt.toISOString()}`);
     return appointment as any as ARIAppointment;
   } catch (error) {
     console.error('[Scheduling] Failed to book appointment:', error);

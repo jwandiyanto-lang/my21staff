@@ -105,3 +105,77 @@ export const checkMembership = internalQuery({
     return membership;
   },
 });
+
+/**
+ * List all workspace members with their user profile data.
+ *
+ * Joins workspaceMembers with users table to provide profile info.
+ * Used by UI components that display team member names.
+ *
+ * @param workspace_id - The workspace to list members for
+ * @returns Array of workspace members with joined user profile data
+ */
+export const listByWorkspaceWithUsers = query({
+  args: {
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const members = await ctx.db
+      .query("workspaceMembers")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+      .collect();
+
+    // Join with users table to get profile data
+    const membersWithUsers = await Promise.all(
+      members.map(async (m) => {
+        // Look up user by Clerk ID (user_id in members is Clerk ID)
+        const user = await ctx.db
+          .query("users")
+          .withIndex("by_clerk_id", (q) => q.eq("clerkId", m.user_id))
+          .first();
+
+        return {
+          _id: m._id,
+          user_id: m.user_id,
+          workspace_id: m.workspace_id,
+          role: m.role,
+          created_at: m.created_at,
+          user: user
+            ? {
+                name: user.name || null,
+                email: user.email || null,
+              }
+            : null,
+        };
+      })
+    );
+
+    return membersWithUsers;
+  },
+});
+
+/**
+ * Get workspace member by user ID and workspace ID (public version).
+ *
+ * Used by API routes to validate workspace membership
+ * (e.g., when assigning a ticket to a user).
+ *
+ * @param userId - The user ID (Clerk ID) to check
+ * @param workspaceId - The workspace to check membership in
+ * @returns Membership document or null if not found
+ */
+export const getByUserAndWorkspace = query({
+  args: {
+    userId: v.string(),
+    workspaceId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const membership = await ctx.db
+      .query("workspaceMembers")
+      .withIndex("by_user_workspace", (q) =>
+        q.eq("user_id", args.userId).eq("workspace_id", args.workspaceId)
+      )
+      .first();
+    return membership;
+  },
+});

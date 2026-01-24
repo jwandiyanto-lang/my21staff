@@ -183,7 +183,7 @@ export async function executeHandoff(
     // 2. Get contact for existing tags
     const contact = await convex.query(api.contacts.getByIdInternal, {
       contact_id: contactId,
-    });
+    }) as { tags?: string[]; _id: string } | null;
 
     if (!contact) {
       console.error('[Handoff] Failed to get contact');
@@ -192,11 +192,11 @@ export async function executeHandoff(
 
     // 3. Generate summary
     const summary = generateConversationSummary(
-      ariConv.messages || [],
+      ariConv.messages as ARIMessage[] || [],
       {
         lead_data: ariConv.context?.lead_data,
         score_breakdown: ariConv.context?.score_breakdown,
-        lead_temperature: ariConv.lead_temperature,
+        lead_temperature: ariConv.lead_temperature as LeadTemperature,
         form_answers: ariConv.context?.form_answers,
       }
     );
@@ -275,7 +275,7 @@ async function createConsultantNotification(
   // Get contact name for notification
   const contact = await convex.query(api.contacts.getByIdInternal, {
     contact_id: contactId,
-  });
+  }) as { name?: string } | null;
 
   const contactName = contact?.name || 'New lead';
 

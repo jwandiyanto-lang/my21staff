@@ -194,18 +194,19 @@ export interface ARIConversation {
   updated_at: string;
 }
 
-/** ARI message log (ari_messages table) */
+/** ARI message log (ari_messages table / Convex ariMessages) */
 export interface ARIMessage {
-  id: string;
+  id?: string;           // Supabase ID (legacy)
+  _id?: string;          // Convex ID
   ari_conversation_id: string;
   workspace_id: string;
-  role: 'assistant' | 'user' | 'system';
+  role: string;          // 'assistant' | 'user' | 'system' (string for Convex compatibility)
   content: string;
-  ai_model: AIModelType | null;
-  tokens_used: number | null;
-  response_time_ms: number | null;
-  metadata: Record<string, unknown>;
-  created_at: string;
+  ai_model?: AIModelType | string | null;
+  tokens_used?: number | null;
+  response_time_ms?: number | null;
+  metadata?: Record<string, unknown>;
+  created_at: string | number;  // Convex uses number timestamps
 }
 
 /** ARI payment record (ari_payments table) */

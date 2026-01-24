@@ -77,7 +77,8 @@ export async function POST(request: NextRequest) {
 
     // Get contact phone
     const contact = await convex.query(api.contacts.getById, {
-      id: (conversation as any).contact_id,
+      contact_id: (conversation as any).contact_id,
+      workspace_id: (workspace as any)._id,
     })
 
     if (!contact) {

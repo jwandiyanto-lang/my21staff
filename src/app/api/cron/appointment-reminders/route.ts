@@ -47,11 +47,21 @@ export async function GET(request: Request) {
 
     for (const apt of appointments || []) {
       try {
-        // Get related data: contact, workspace, conversation
+        // Get conversation to get contact_id (appointment links to conversation, not directly to contact)
+        const conversation = await convex.query(api.ari.getConversationById, {
+          conversation_id: apt.ari_conversation_id as string,
+        }) as { contact_id: string; workspace_id: string } | null;
+
+        if (!conversation) {
+          console.log(`[Cron] Skipping ${apt._id} - conversation not found`);
+          continue;
+        }
+
+        // Get related data: contact, workspace
         const [contact, workspace] = await Promise.all([
-          convex.query(api.contacts.getByIdInternal, { contact_id: apt.contact_id as string }),
+          convex.query(api.contacts.getByIdInternal, { contact_id: conversation.contact_id }),
           convex.query(api.workspaces.getById, { id: apt.workspace_id as string }),
-        ]);
+        ]) as [{ phone: string } | null, { meta_access_token: string; kapso_phone_id: string } | null];
 
         if (!contact?.phone || !workspace?.meta_access_token) {
           console.log(`[Cron] Skipping ${apt._id} - missing phone or credentials`);

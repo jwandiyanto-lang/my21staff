@@ -19,12 +19,12 @@ function maskPayload(payload: unknown): string {
     .replace(/"wa_id":\s*"\d+"/g, '"wa_id":"***"')
 }
 
-// Types for batch processing
+// Types for batch processing (aligned with Convex schema where name is optional)
 interface Contact {
   _id: string
   phone: string
   phone_normalized?: string
-  name: string | null
+  name?: string
   kapso_name?: string | null
   workspace_id: string
 }

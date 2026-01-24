@@ -53,10 +53,10 @@ export async function POST(request: NextRequest) {
 
     // Get user's workspace membership from Convex
     let queryStart = performance.now()
-    const user = await fetchQuery(api.users.getUserById, {
-      clerkId: userId,
+    const user = await fetchQuery(api.users.getUserByClerkId, {
+      clerk_id: userId,
     })
-    logQuery(metrics, 'convex.users.getUserById', Math.round(performance.now() - queryStart))
+    logQuery(metrics, 'convex.users.getUserByClerkId', Math.round(performance.now() - queryStart))
 
     if (!user || !user.workspace_id) {
       return NextResponse.json({ error: 'No workspace found' }, { status: 400 })

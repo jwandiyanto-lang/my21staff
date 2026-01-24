@@ -2,13 +2,13 @@
 
 import { useQuery } from 'convex/react'
 import { api } from '@/../convex/_generated/api'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 
-export interface TeamMember {
-  user_id: string
-  role: string
-  created_at: number
-}
+// Import the exact types expected by consumer components
+import type { WorkspaceMember, Profile } from '@/types/database'
+
+// Re-export the same shape consumers expect
+export type TeamMember = WorkspaceMember & { profile: Profile | null }
 
 interface WorkspaceSettingsResponse {
   teamMembers: TeamMember[]
@@ -17,6 +17,7 @@ interface WorkspaceSettingsResponse {
 
 export function useWorkspaceSettings(workspaceId: string | null) {
   const { userId } = useAuth()
+  const { user } = useUser()
 
   // Fetch workspace data
   const workspace = useQuery(
@@ -24,9 +25,9 @@ export function useWorkspaceSettings(workspaceId: string | null) {
     workspaceId ? { id: workspaceId } : 'skip'
   )
 
-  // Fetch team members
+  // Fetch team members with user data
   const members = useQuery(
-    api.workspaceMembers.listByWorkspace,
+    api.workspaceMembers.listByWorkspaceWithUsers,
     workspaceId ? { workspace_id: workspaceId } : 'skip'
   )
 
@@ -34,31 +35,64 @@ export function useWorkspaceSettings(workspaceId: string | null) {
 
   if (isLoading || !workspace || !members) {
     return {
-      settings: undefined,
+      data: undefined,
       isLoading,
     }
   }
 
   // Extract contact tags from workspace settings
-  const contactTags = (workspace.settings as Record<string, unknown>)?.contact_tags as string[] || ['Community', '1on1']
+  const contactTags = ((workspace as { settings?: Record<string, unknown> }).settings)?.contact_tags as string[] || ['Community', '1on1']
+
+  // Map Convex members to expected TeamMember structure
+  const teamMembers: TeamMember[] = members.map((m: Record<string, unknown>) => {
+    const userObj = m.user as Record<string, unknown> | null
+    return {
+      id: m._id as string,
+      user_id: m.user_id as string,
+      workspace_id: m.workspace_id as string,
+      role: m.role as string,
+      must_change_password: false,
+      settings: null,
+      created_at: new Date(m.created_at as number).toISOString(),
+      profile: userObj ? {
+        id: m.user_id as string,
+        full_name: userObj.name as string || null,
+        email: userObj.email as string || null,
+        avatar_url: null,
+        created_at: null,
+        is_admin: null,
+        updated_at: null,
+      } : null,
+    }
+  })
 
   // Ensure current user is in the team members list
-  let teamMembers = members as TeamMember[]
   if (userId && !teamMembers.some(m => m.user_id === userId)) {
-    teamMembers = [{
+    teamMembers.unshift({
+      id: `temp-${userId}`,
       user_id: userId,
+      workspace_id: workspaceId || '',
       role: 'owner',
-      created_at: Date.now(),
-    }, ...teamMembers]
-  }
-
-  const settings: WorkspaceSettingsResponse = {
-    teamMembers,
-    contactTags,
+      must_change_password: false,
+      settings: null,
+      created_at: new Date().toISOString(),
+      profile: user ? {
+        id: userId,
+        full_name: user.fullName || null,
+        email: user.primaryEmailAddress?.emailAddress || null,
+        avatar_url: user.imageUrl || null,
+        created_at: null,
+        is_admin: null,
+        updated_at: null,
+      } : null,
+    })
   }
 
   return {
-    settings,
+    data: {
+      teamMembers,
+      contactTags,
+    },
     isLoading: false,
   }
 }
