@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Milestone: v3.2 CRM Core Fresh
-Phase: 1 COMPLETE (4 plans), 1.2 COMPLETE (deferred verification)
-Status: Ready for `/gsd:plan-phase 2`
-Last activity: 2026-01-24 - Phase 1.2 complete (webhook verified, count check deferred)
+Phase: 2 IN PROGRESS (1 of 3 plans complete)
+Status: In progress - executing Phase 2 (Inbox)
+Last activity: 2026-01-24 - Completed 02-01-PLAN.md (inbox structure)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ██░░░░░░░░ (191 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ███░░░░░░░ (192 plans shipped)
 
 ## Performance Metrics
 
@@ -58,6 +58,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.2 decisions:
+- WhatsApp-style timestamp formatting: Relative time (<24h), day name (<7d), date (older) using date-fns with Indonesian locale (02-01)
+- Tag display strategy: Show first 2 tags with +N badge for remaining tags to prevent UI overflow (02-01)
+- Indonesian filter labels: Status filters use Indonesian labels (Semua, Baru, Hangat, Dingin, Terjual, Hilang) per app language requirement (02-01)
 - n8n sync verification deferred: Webhook verified working, lead count check deferred to batch deployment at end of v3.2 (v3.2-01-04)
 - Contact detail as Dialog not Sheet: User requested modal dialog instead of sliding sheet for better centered focus (v3.2-01-03)
 - 4-tab contact organization: Contact details organized into Profile (editable), Documents (placeholder), Conversations (placeholder), Notes (functional) tabs (v3.2-01-03)
@@ -248,8 +251,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed v3.2-01-04-PLAN.md (Phase 1.2 complete, verification deferred)
-Resume: Ready for Phase 2 (Inbox)
+Stopped at: Completed 02-01-PLAN.md (Phase 2 Plan 1 - inbox structure)
+Resume: Ready for 02-02 (message thread display)
 
 ---
-*Last updated: 2026-01-24 - Completed v3.2-01-04 (n8n sync - webhook verified, count check deferred to deployment)*
+*Last updated: 2026-01-24 - Completed 02-01 (inbox page structure and conversation list)*
