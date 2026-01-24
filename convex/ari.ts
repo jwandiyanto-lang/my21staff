@@ -732,6 +732,41 @@ export const updateConversationState = mutation({
   },
 });
 
+/**
+ * Update ARI conversation (webhook version, no auth).
+ * Flexible update for processor.ts usage.
+ */
+export const updateConversation = mutation({
+  args: {
+    conversation_id: v.string(),
+    state: v.optional(v.string()),
+    context: v.optional(v.any()),
+    lead_score: v.optional(v.number()),
+    lead_temperature: v.optional(v.string()),
+    handoff_at: v.optional(v.number()),
+    handoff_reason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversation_id as any);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    const now = Date.now();
+    const updates: any = { updated_at: now };
+
+    if (args.state !== undefined) updates.state = args.state;
+    if (args.context !== undefined) updates.context = args.context;
+    if (args.lead_score !== undefined) updates.lead_score = args.lead_score;
+    if (args.lead_temperature !== undefined) updates.lead_temperature = args.lead_temperature;
+    if (args.handoff_at !== undefined) updates.handoff_at = args.handoff_at;
+    if (args.handoff_reason !== undefined) updates.handoff_reason = args.handoff_reason;
+
+    await ctx.db.patch(args.conversation_id as any, updates);
+    return await ctx.db.get(args.conversation_id as any);
+  },
+});
+
 // ============================================
 // ARI MESSAGES
 // ============================================

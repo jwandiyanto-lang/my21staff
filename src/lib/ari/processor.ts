@@ -375,7 +375,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
         (metadataFormAnswers?.country as string | undefined);
 
       if (targetCountry) {
-        destinations = await getDestinationsForCountry(supabase, workspaceId, targetCountry);
+        destinations = await getDestinationsForCountry(workspaceId, targetCountry);
         console.log(`[ARI] Fetched ${destinations.length} destinations for ${targetCountry}`);
       }
     }
@@ -653,7 +653,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
 
         if (dayPref !== null) {
           // User specified a day - get slots for that day
-          const daySlots = await getSlotsForDay(supabase, workspaceId, dayPref);
+          const daySlots = await getSlotsForDay(workspaceId, dayPref);
 
           if (daySlots.length > 0) {
             schedCtx.scheduling_step = 'showing_slots';
@@ -674,7 +674,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
               .eq('id', conversation.id);
           } else {
             // No slots for that day - reload available days
-            const allSlots = await getAvailableSlots(supabase, workspaceId);
+            const allSlots = await getAvailableSlots(workspaceId);
             schedCtx.available_days_summary = formatAvailableDays(allSlots);
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -685,7 +685,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
           }
         } else if (!schedCtx.available_days_summary) {
           // First time - load available days
-          const allSlots = await getAvailableSlots(supabase, workspaceId);
+          const allSlots = await getAvailableSlots(workspaceId);
           schedCtx.scheduling_step = 'asking_day';
           schedCtx.available_days_summary = formatAvailableDays(allSlots);
 
@@ -721,7 +721,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
         if (isConfirm) {
           // Book the appointment
           const slot = schedCtx.selected_slot;
-          const appointment = await bookAppointment(supabase, {
+          const appointment = await bookAppointment({
             workspaceId,
             ariConversationId: conversation.id,
             slot: {
@@ -755,7 +755,7 @@ export async function processWithARI(params: ProcessParams): Promise<ProcessResu
 
             // Execute handoff: update contact notes, tags, lead status, notify consultant
             // Note: consultant_id is set on the appointment from the slot lookup in scheduling.ts
-            const handoffResult = await executeHandoff(supabase, {
+            const handoffResult = await executeHandoff({
               workspaceId,
               contactId,
               ariConversationId: conversation.id,
