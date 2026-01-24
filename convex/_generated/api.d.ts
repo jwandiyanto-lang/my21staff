@@ -20,6 +20,7 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as messages from "../messages.js";
 import type * as migrate from "../migrate.js";
 import type * as mutations from "../mutations.js";
+import type * as n8n from "../n8n.js";
 import type * as organizations from "../organizations.js";
 import type * as testAuth from "../testAuth.js";
 import type * as tickets from "../tickets.js";
@@ -46,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   messages: typeof messages;
   migrate: typeof migrate;
   mutations: typeof mutations;
+  n8n: typeof n8n;
   organizations: typeof organizations;
   testAuth: typeof testAuth;
   tickets: typeof tickets;

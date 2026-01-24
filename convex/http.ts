@@ -71,6 +71,71 @@ http.route({
 });
 
 // ============================================
+// n8n Webhook: Lead creation from Google Forms
+// ============================================
+
+http.route({
+  path: "/webhook/n8n",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const startTime = Date.now();
+
+    try {
+      const rawBody = await request.text();
+      const payload = JSON.parse(rawBody);
+
+      console.log("[n8n Webhook] Received lead data:", {
+        name: payload.name,
+        phone: payload.phone?.substring(0, 6) + "***", // Mask phone for privacy
+      });
+
+      // Resolve workspace by slug (hardcoded for Eagle Overseas)
+      const workspace = await ctx.runQuery(api.workspaces.getBySlug, {
+        slug: "eagle-overseas",
+      });
+
+      if (!workspace) {
+        console.error("[n8n Webhook] Workspace 'eagle-overseas' not found");
+        return new Response(JSON.stringify({ error: "Workspace not found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      // Call createLead mutation
+      const result = await ctx.runMutation(api.n8n.createLead, {
+        workspace_id: workspace._id,
+        name: payload.name,
+        phone: payload.phone,
+        email: payload.email,
+        lead_score: payload.lead_score,
+        metadata: payload.metadata,
+      });
+
+      const duration = Date.now() - startTime;
+      console.log(`[n8n Webhook] Processed lead in ${duration}ms:`, result);
+
+      return new Response(JSON.stringify(result), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error(`[n8n Webhook] Error after ${duration}ms:`, error);
+
+      return new Response(JSON.stringify({
+        success: false,
+        error: errorMessage
+      }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  }),
+});
+
+// ============================================
 // Clerk Webhook: User sync events
 // ============================================
 
