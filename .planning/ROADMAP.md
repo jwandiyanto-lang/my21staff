@@ -71,13 +71,19 @@ Plans:
 - [x] 02-04-PLAN.md — Human verification checkpoint (deferred)
 
 ### Phase 3: Dashboard
-**Goal**: Workspace overview with stats and activity
+**Goal**: Workspace overview with stats, activity feed, and quick actions
 **Depends on**: Phase 2
 **Success Criteria** (what must be TRUE):
   1. Dashboard shows contact/conversation counts
   2. Recent activity feed works
   3. Quick actions available
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Convex dashboard queries (getStats, listActivity)
+- [ ] 03-02-PLAN.md — Dashboard page with stats cards and quick actions
+- [ ] 03-03-PLAN.md — Activity feed and onboarding checklist
+- [ ] 03-04-PLAN.md — Human verification checkpoint
 
 ### Phase 4: Settings
 **Goal**: Workspace configuration and team management
@@ -370,10 +376,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
 | v3.1 Convex + Clerk API Layer | 1-7 | 23/25 | Complete (partial) | 2026-01-24 |
-| **v3.2 CRM Core Fresh** | 1-5 | 13/? | Phase 2 complete | - |
+| **v3.2 CRM Core Fresh** | 1-5 | 17/? | Phase 3 planned | - |
 
 **Total shipped:** 195 plans across 6 milestones
 
 ---
 
-*Last updated: 2026-01-24 — v3.2 Phase 2 complete (4 plans, verification deferred)*
+*Last updated: 2026-01-24 — v3.2 Phase 3 planned (4 plans)*
