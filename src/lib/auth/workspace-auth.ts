@@ -1,6 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
 import { type WorkspaceRole } from '@/lib/permissions/types'
 import { NextResponse } from 'next/server'
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 export interface AuthResult {
   user: { id: string; email: string }
@@ -11,24 +15,25 @@ export interface AuthResult {
 export async function requireWorkspaceMembership(
   workspaceId: string
 ): Promise<AuthResult | NextResponse> {
-  const supabase = await createClient()
+  const { userId } = await auth()
 
-  // Get current user
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-  if (authError || !user) {
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Verify workspace membership and get role
-  const { data: membership } = await supabase
-    .from('workspace_members')
-    .select('id, role')
-    .eq('workspace_id', workspaceId)
-    .eq('user_id', user.id)
-    .single()
+  // Get user from Convex
+  const user = await convex.query(api.users.getByClerkId, { clerkId: userId })
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 401 })
+  }
 
-  if (!membership) {
+  // Check workspace membership via Convex
+  const member = await convex.query(api.workspaces.getMembership, {
+    workspace_id: workspaceId,
+    user_id: userId,
+  })
+
+  if (!member) {
     return NextResponse.json(
       { error: 'Not authorized to access this workspace' },
       { status: 403 }
@@ -36,8 +41,8 @@ export async function requireWorkspaceMembership(
   }
 
   return {
-    user: { id: user.id, email: user.email || '' },
+    user: { id: userId, email: user.email || '' },
     workspaceId,
-    role: membership.role as WorkspaceRole
+    role: member.role as WorkspaceRole
   }
 }
