@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.1 Full Convex + Clerk
+**Current focus:** v3.2 (planning needed)
 
 ## Current Position
 
-Phase: 7 of 7 (Cleanup + Verification)
-Plan: 07-07 BLOCKED - 8 of 9 plans done (07-07 blocked: 24 files still use Supabase)
-Status: Gap closure needed
-Last activity: 2026-01-24 - 07-07 blocked (Supabase deletion requires migrating 24 client components)
+Milestone: v3.2 (planning needed)
+Phase: None (new milestone)
+Status: Ready for `/gsd:new-milestone`
+Last activity: 2026-01-24 - v3.1 closed (API layer complete, Supabase dormant)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████░ (165 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ (187 plans shipped)
 
 ## Performance Metrics
 
@@ -138,13 +138,25 @@ Recent v3.0 decisions affecting v3.1:
 
 **Convex CLI Bug:** `npx convex deploy` incorrectly reports env var not set (despite `env list` confirming it). Workaround: use Convex Dashboard to deploy or wait for CLI fix. Dev deployment works correctly.
 
-**CRITICAL - 24 Client Components Still Use Supabase:** Plan 07-07 blocked because dashboard/portal page components were never migrated. API routes are on Convex, but server/client components still use Supabase directly. See `.planning/phases/07-cleanup-verification/07-07-SUMMARY.md` for full list.
+### Deferred Work (Supabase Dormant Strategy)
 
-Files needing migration:
-- 18 server components (dashboard pages, portal pages, public pages)
-- 6 client components (sidebar, workspace-switcher, inbox-client, message-thread, appointment-card, login-modal)
+**Decision:** v3.1 closed with Supabase dormant — 24 page components still use Supabase directly. Will migrate feature-by-feature in future milestones rather than big-bang migration.
 
-**ARI Supporting Files:** Completed in 07-06. All ARI files (processor.ts, handoff.ts, scheduling.ts, knowledge-base.ts) now use Convex.
+**Files still using Supabase (migrate when touching feature):**
+
+| Category | Count | Files |
+|----------|-------|-------|
+| Dashboard pages | 10 | workspace page, inbox, database, settings, support, knowledge-base, integrations, website, dashboard, admin clients |
+| Layouts | 3 | dashboard layout, admin layout, portal layout |
+| Portal pages | 2 | portal support, portal support detail |
+| Client components | 6 | sidebar, workspace-switcher, inbox-client, message-thread, appointment-card, login-modal |
+| Public pages | 3 | webinar page, article page, contact-detail-sheet |
+
+**Migration pattern when touching:**
+- Server components: Replace `createClient()` with `ConvexHttpClient` or `useQuery`
+- Client components: Replace Supabase hooks with `useQuery`/`useMutation` from Convex
+
+**Full list:** See `.planning/phases/07-cleanup-verification/07-07-SUMMARY.md`
 
 ### Ticket Migration Status
 
@@ -228,8 +240,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: 07-07 blocked - Supabase deletion requires migrating 24 client components
-Resume: Gap closure needed - create 07-07a plan to migrate remaining components, then re-attempt 07-07 and 07-08
+Stopped at: v3.1 closed — user decision to defer Supabase removal
+Resume: `/gsd:new-milestone` to plan v3.2
 
 ---
-*Last updated: 2026-01-24 - Phase 7 blocked at 07-07 - 24 client components still use Supabase*
+*Last updated: 2026-01-24 - v3.1 shipped (partial), ready for v3.2 planning*

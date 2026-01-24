@@ -11,13 +11,16 @@ WhatsApp CRM SaaS for Indonesian small businesses — education consultants and 
 - v2.1 Client Launch Ready — Phases 1-9 (shipped 2026-01-20)
 - v2.2 ARI & User Flow — Phases 1-6 (shipped 2026-01-20)
 - v3.0 Performance & Speed — Phases 1-5 (shipped 2026-01-23)
-- **v3.1 Full Convex + Clerk** — Phases 1-7 (in progress)
+- v3.1 Convex + Clerk API Layer — Phases 1-7 (shipped 2026-01-24, partial)
+- **v3.2 TBD** — Next milestone (planning needed)
 
 ---
 
-## v3.1 Full Convex + Clerk (In Progress)
+## v3.1 Convex + Clerk API Layer (Shipped 2026-01-24)
 
-**Milestone Goal:** Complete the migration to Convex + Clerk, removing Supabase entirely from the stack and restoring Eagle's n8n lead flow.
+**Milestone Goal:** Migrate API layer to Convex + Clerk. Restore Eagle's n8n lead flow. (Supabase removal deferred — page components still use Supabase)
+
+**Outcome:** API routes use Convex. Auth uses Clerk. Page components remain on Supabase (dormant migration).
 
 ### Phase 1: Clerk Auth Infrastructure - COMPLETE
 **Goal**: Clerk application configured with JWT template for Convex validation
@@ -122,26 +125,27 @@ Plans:
 Plans:
 - [x] 06-01-PLAN.md — n8n webhook endpoint + workflow update ✓
 
-### Phase 7: Cleanup + Verification
+### Phase 7: Cleanup + Verification - PARTIAL (API Layer Complete)
 **Goal**: Supabase removed entirely, clean single-backend architecture
 **Depends on**: Phase 6
 **Requirements**: CLEAN-01, CLEAN-02, CLEAN-03
+**Status**: API routes migrated. Page components deferred to v3.2.
 **Success Criteria** (what must be TRUE):
-  1. No Supabase client code remains in codebase
-  2. Supabase environment variables removed from Vercel
-  3. @supabase packages removed from package.json
-  4. Full app verification passes (auth, data, webhooks all working)
-**Plans**: 8 plans
+  1. ~~No Supabase client code remains in codebase~~ DEFERRED
+  2. ~~Supabase environment variables removed from Vercel~~ DEFERRED
+  3. ~~@supabase packages removed from package.json~~ DEFERRED
+  4. ~~Full app verification passes (auth, data, webhooks all working)~~ DEFERRED
+**Plans**: 6/8 complete, 2 deferred
 
 Plans:
-- [ ] 07-01-PLAN.md — Remove Supabase auth infrastructure
-- [ ] 07-02-PLAN.md — Migrate workspace/member routes
-- [ ] 07-03-PLAN.md — Migrate contact management routes
-- [ ] 07-04-PLAN.md — Migrate message and ticket routes + storage
-- [ ] 07-05-PLAN.md — Migrate real-time queries and utilities
-- [ ] 07-06-PLAN.md — Migrate Kapso webhook and ARI system
-- [ ] 07-07-PLAN.md — Delete Supabase files and packages
-- [ ] 07-08-PLAN.md — End-to-end verification
+- [x] 07-01-PLAN.md — Remove Supabase auth infrastructure ✓
+- [x] 07-02-PLAN.md — Migrate workspace/member routes ✓
+- [x] 07-03-PLAN.md — Migrate contact management routes ✓
+- [x] 07-04-PLAN.md — Migrate message and ticket routes + storage ✓
+- [x] 07-05-PLAN.md — Migrate real-time queries and utilities ✓
+- [x] 07-06-PLAN.md — Migrate Kapso webhook and ARI system ✓
+- [~] 07-07-PLAN.md — Delete Supabase files and packages → DEFERRED (24 page components still use Supabase)
+- [~] 07-08-PLAN.md — End-to-end verification → DEFERRED
 
 ---
 
@@ -282,10 +286,11 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
-| **v3.1 Full Convex + Clerk** | 1-7 | 25/25 | In Progress | - |
+| v3.1 Convex + Clerk API Layer | 1-7 | 23/25 | Complete (partial) | 2026-01-24 |
+| **v3.2 TBD** | - | - | Planning | - |
 
-**Total shipped:** 164 plans across 5 milestones
+**Total shipped:** 187 plans across 6 milestones
 
 ---
 
-*Last updated: 2026-01-24 — Phase 7 planned (8 plans in 4 waves)*
+*Last updated: 2026-01-24 — v3.1 shipped (partial), v3.2 planning needed*
