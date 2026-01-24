@@ -783,14 +783,14 @@ export function InfoSidebar({
       <Dialog open={isNoteDialogOpen} onOpenChange={setIsNoteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tambah Catatan</DialogTitle>
+            <DialogTitle>Add Note</DialogTitle>
             <DialogDescription>
-              Tambah catatan untuk {contact.name || contact.phone}
+              Add a note for {contact.name || contact.phone}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Textarea
-              placeholder="Tulis catatan..."
+              placeholder="Write a note..."
               value={newNoteContent}
               onChange={(e) => setNewNoteContent(e.target.value)}
               rows={3}
@@ -825,7 +825,7 @@ export function InfoSidebar({
                         className="w-full text-xs text-muted-foreground"
                         onClick={() => setNewNoteDueDate(undefined)}
                       >
-                        Hapus due date
+                        Clear due date
                       </Button>
                     </div>
                   )}
@@ -835,7 +835,7 @@ export function InfoSidebar({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsNoteDialogOpen(false)}>
-              Batal
+              Cancel
             </Button>
             <Button
               onClick={handleAddNote}
@@ -844,7 +844,7 @@ export function InfoSidebar({
               {isAddingNote ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
-              Simpan
+              Save
             </Button>
           </DialogFooter>
         </DialogContent>

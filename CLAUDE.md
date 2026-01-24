@@ -49,7 +49,8 @@ S
 
 ```
 Next.js 15 + React 19 + TypeScript
-Supabase (PostgreSQL + Auth + RLS)
+Convex (database + real-time)
+Clerk (auth + organizations)
 Shadcn/ui + Tailwind CSS
 Kapso API for WhatsApp
 ```
@@ -85,7 +86,7 @@ git push origin master
 | Context | Language |
 |---------|----------|
 | Code & docs | English |
-| App UI | Bahasa Indonesia |
+| App UI | English |
 
 ---
 

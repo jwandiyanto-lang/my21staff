@@ -340,7 +340,7 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
         <Link href={`/${workspace.slug}/team`}>
           <Button variant="outline">
             <Users className="h-4 w-4 mr-2" />
-            Kelola Tim
+            Manage Team
           </Button>
         </Link>
       </div>

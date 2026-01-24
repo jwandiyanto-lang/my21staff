@@ -27,12 +27,12 @@ export function StatsCards({ stats, timeFilter, onTimeFilterChange }: StatsCards
     <div className="space-y-4">
       {/* Header with time filter */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Statistik</h2>
+        <h2 className="text-lg font-medium">Statistics</h2>
         <Tabs value={timeFilter} onValueChange={(v) => onTimeFilterChange(v as any)}>
           <TabsList>
-            <TabsTrigger value="week">7 Hari</TabsTrigger>
-            <TabsTrigger value="month">30 Hari</TabsTrigger>
-            <TabsTrigger value="all">Semua</TabsTrigger>
+            <TabsTrigger value="week">7 Days</TabsTrigger>
+            <TabsTrigger value="month">30 Days</TabsTrigger>
+            <TabsTrigger value="all">All</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -40,12 +40,12 @@ export function StatsCards({ stats, timeFilter, onTimeFilterChange }: StatsCards
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Kontak"
+          title="Total Contacts"
           value={stats.totalContacts}
           icon={<Users className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
-          title="Percakapan"
+          title="Conversations"
           value={stats.totalConversations}
           icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />}
         />

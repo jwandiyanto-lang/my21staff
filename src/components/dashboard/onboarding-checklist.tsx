@@ -22,22 +22,22 @@ type Stats = {
 const steps = [
   {
     id: 'connect',
-    title: 'Hubungkan WhatsApp',
-    description: 'Integrasikan nomor WhatsApp bisnis Anda',
+    title: 'Connect WhatsApp',
+    description: 'Integrate your WhatsApp Business number',
     check: (s: Stats) => s.hasKapsoConnected,
     href: (slug: string) => `/${slug}/team`,
   },
   {
     id: 'contacts',
-    title: 'Tambah Kontak',
-    description: 'Impor atau tambah kontak pertama Anda',
+    title: 'Add Contacts',
+    description: 'Import or add your first contacts',
     check: (s: Stats) => s.hasContacts,
     href: (slug: string) => `/${slug}/database`,
   },
   {
     id: 'conversation',
-    title: 'Mulai Percakapan',
-    description: 'Kirim pesan pertama ke kontak',
+    title: 'Start Conversation',
+    description: 'Send your first message to a contact',
     check: (s: Stats) => s.hasConversations,
     href: (slug: string) => `/${slug}/inbox`,
   },
@@ -56,9 +56,9 @@ export function OnboardingChecklist({ workspaceSlug, stats }: OnboardingChecklis
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Mulai dengan my21staff</CardTitle>
+        <CardTitle>Get Started with my21staff</CardTitle>
         <CardDescription>
-          Selesaikan langkah-langkah berikut untuk memulai ({completedCount}/{steps.length})
+          Complete the following steps to get started ({completedCount}/{steps.length})
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">

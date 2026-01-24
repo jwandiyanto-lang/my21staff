@@ -2,12 +2,10 @@
  * Date separator for message groups.
  *
  * Displays a centered pill with formatted date label.
- * Shows "Hari Ini" (Today), "Kemarin" (Yesterday), or formatted date
- * like "15 Januari 2026" in Indonesian locale.
+ * Shows "Today", "Yesterday", or formatted date like "January 15, 2026".
  */
 
 import { format, isToday, isYesterday, parseISO } from 'date-fns'
-import { id } from 'date-fns/locale'
 
 interface DateSeparatorProps {
   date: string // yyyy-MM-dd format
@@ -18,11 +16,11 @@ export function DateSeparator({ date }: DateSeparatorProps) {
 
   let label: string
   if (isToday(dateObj)) {
-    label = 'Hari Ini'
+    label = 'Today'
   } else if (isYesterday(dateObj)) {
-    label = 'Kemarin'
+    label = 'Yesterday'
   } else {
-    label = format(dateObj, 'd MMMM yyyy', { locale: id })
+    label = format(dateObj, 'MMMM d, yyyy')
   }
 
   return (

@@ -13,14 +13,14 @@ export function QuickActions({ workspaceSlug }: QuickActionsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Aksi Cepat</CardTitle>
+        <CardTitle className="text-lg font-medium">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-3">
           <Button variant="outline" size="sm" asChild>
             <Link href={`/${workspaceSlug}/database?action=add`}>
               <Plus className="h-4 w-4 mr-2" />
-              Tambah Kontak
+              Add Contact
             </Link>
           </Button>
           <Button variant="outline" size="sm" asChild>

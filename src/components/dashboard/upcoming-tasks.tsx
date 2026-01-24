@@ -116,17 +116,17 @@ export function UpcomingTasks({ tasks: initialTasks, contactMap, workspaceSlug }
       <Dialog open={!!completingTask} onOpenChange={(open) => !open && setCompletingTask(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Selesaikan Tugas</DialogTitle>
+            <DialogTitle>Complete Task</DialogTitle>
             <DialogDescription>
               {completingTask?.content}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <label className="text-sm font-medium mb-2 block">
-              Apa tindakan yang dilakukan?
+              What action was taken?
             </label>
             <Textarea
-              placeholder="Contoh: Sudah telepon, akan follow up minggu depan..."
+              placeholder="Example: Called the lead, will follow up next week..."
               value={followupText}
               onChange={(e) => setFollowupText(e.target.value)}
               rows={3}
@@ -134,7 +134,7 @@ export function UpcomingTasks({ tasks: initialTasks, contactMap, workspaceSlug }
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCompletingTask(null)}>
-              Batal
+              Cancel
             </Button>
             <Button
               onClick={handleComplete}
@@ -143,7 +143,7 @@ export function UpcomingTasks({ tasks: initialTasks, contactMap, workspaceSlug }
               {loading === completingTask?.id ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
-              Selesai
+              Complete
             </Button>
           </DialogFooter>
         </DialogContent>

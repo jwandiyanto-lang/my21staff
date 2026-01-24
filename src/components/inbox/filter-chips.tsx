@@ -3,13 +3,13 @@
 import { Badge } from '@/components/ui/badge'
 
 const STATUS_OPTIONS = [
-  { value: 'all', label: 'Semua' },
-  { value: 'new', label: 'Baru' },
+  { value: 'all', label: 'All' },
+  { value: 'new', label: 'New' },
   { value: 'hot', label: 'Hot' },
-  { value: 'warm', label: 'Hangat' },
-  { value: 'cold', label: 'Dingin' },
-  { value: 'converted', label: 'Terjual' },
-  { value: 'lost', label: 'Hilang' },
+  { value: 'warm', label: 'Warm' },
+  { value: 'cold', label: 'Cold' },
+  { value: 'converted', label: 'Converted' },
+  { value: 'lost', label: 'Lost' },
 ]
 
 interface FilterChipsProps {
