@@ -114,13 +114,13 @@ Plans:
 **Depends on**: Phase 5 (data layer complete)
 **Requirements**: N8N-01, N8N-02, N8N-03
 **Success Criteria** (what must be TRUE):
-  1. Convex HTTP action exists at /n8n-leads endpoint
+  1. Convex HTTP action exists at /webhook/n8n endpoint
   2. n8n workflow configured to use new Convex webhook URL
   3. Test lead from Google Sheets appears in Eagle's CRM
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md — n8n webhook endpoint + workflow update
 
 ### Phase 7: Cleanup + Verification
 **Goal**: Supabase removed entirely, clean single-backend architecture
@@ -275,10 +275,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.1 Client Launch Ready | 1-9 | 30/30 | Complete | 2026-01-20 |
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
-| **v3.1 Full Convex + Clerk** | 1-7 | 15/TBD | In Progress | - |
+| **v3.1 Full Convex + Clerk** | 1-7 | 16/TBD | In Progress | - |
 
 **Total shipped:** 152 plans across 5 milestones
 
 ---
 
-*Last updated: 2026-01-23 — Phase 5 planned (5 plans)*
+*Last updated: 2026-01-24 — Phase 6 planned (1 plan)*
