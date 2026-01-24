@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Milestone: v3.2 CRM Core Fresh
-Phase: 2 IN PROGRESS (2 of 3 plans complete)
-Status: In progress - executing Phase 2 (Inbox)
-Last activity: 2026-01-24 - Completed 02-02-PLAN.md (message thread with bubbles)
+Phase: 2 COMPLETE (3 of 3 plans complete)
+Status: Phase 2 (Inbox) complete
+Last activity: 2026-01-24 - Completed 02-03-PLAN.md (message send with Kapso)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ███░░░░░░░ (193 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ████░░░░░░ (194 plans shipped)
 
 ## Performance Metrics
 
@@ -58,6 +58,10 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.2 decisions:
+- Clerk auth in API routes: Message send API uses Clerk auth() instead of CRM_API_KEY for user authentication (02-03)
+- Encrypted credential management: Decrypt workspace.meta_access_token for Kapso API key using crypto.ts decrypt() (02-03)
+- Keyboard shortcuts for compose: Enter sends message, Shift+Enter adds new line (standard messaging pattern) (02-03)
+- getByIdInternal pattern: Added workspace query following existing pattern in conversations/contacts for API route access (02-03)
 - WhatsApp-style timestamp formatting: Relative time (<24h), day name (<7d), date (older) using date-fns with Indonesian locale (02-01)
 - Tag display strategy: Show first 2 tags with +N badge for remaining tags to prevent UI overflow (02-01)
 - Indonesian filter labels: Status filters use Indonesian labels (Semua, Baru, Hangat, Dingin, Terjual, Hilang) per app language requirement (02-01)
@@ -251,8 +255,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 02-02-PLAN.md (Phase 2 Plan 2 - message thread)
-Resume: Ready for 02-03 (message composition)
+Stopped at: Completed 02-03-PLAN.md (Phase 2 Plan 3 - message send)
+Resume: Phase 2 complete - ready for Phase 3 (next phase planning needed)
 
 ---
-*Last updated: 2026-01-24 - Completed 02-02 (message thread with auto-scroll, date separators, read receipts)*
+*Last updated: 2026-01-24 - Completed 02-03 (message send with Kapso integration, Phase 2 complete)*
