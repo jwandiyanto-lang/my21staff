@@ -5,8 +5,11 @@
  * Provides destination lookup, matching, and formatting for AI prompts.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '@/../convex/_generated/api';
 import type { ARIDestination } from './types';
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 // ===========================================
 // Type Definitions
@@ -111,19 +114,17 @@ function normalizeCountry(input: string): string {
  * Returns destinations ordered by promotion status and priority.
  * Promoted destinations appear first.
  *
- * @param supabase - Supabase client
  * @param workspaceId - Workspace ID
  * @param country - Country name (case-insensitive, handles common variations)
  * @returns Array of destinations
  *
  * @example
  * ```ts
- * const destinations = await getDestinationsForCountry(supabase, workspaceId, 'UK');
+ * const destinations = await getDestinationsForCountry(workspaceId, 'UK');
  * // Returns all UK universities, promoted first
  * ```
  */
 export async function getDestinationsForCountry(
-  supabase: SupabaseClient,
   workspaceId: string,
   country?: string | null
 ): Promise<Destination[]> {
@@ -133,20 +134,26 @@ export async function getDestinationsForCountry(
 
   const normalizedCountry = normalizeCountry(country);
 
-  const { data, error } = await supabase
-    .from('ari_destinations')
-    .select('id, country, city, university_name, requirements, programs, is_promoted, notes')
-    .eq('workspace_id', workspaceId)
-    .ilike('country', normalizedCountry)
-    .order('is_promoted', { ascending: false })
-    .order('priority', { ascending: false });
+  try {
+    const destinations = await convex.query(api.ari.getDestinationsByCountry, {
+      workspace_id: workspaceId,
+      country: normalizedCountry,
+    });
 
-  if (error) {
+    return destinations.map((d: any) => ({
+      id: d._id,
+      country: d.country,
+      city: d.city || null,
+      university_name: d.university_name,
+      requirements: d.requirements || {},
+      programs: d.programs || [],
+      is_promoted: d.is_promoted,
+      notes: d.notes || null,
+    }));
+  } catch (error) {
     console.error('[ARI KB] Failed to get destinations:', error);
     return [];
   }
-
-  return (data || []) as Destination[];
 }
 
 /**
@@ -158,14 +165,13 @@ export async function getDestinationsForCountry(
  * - Minimum IELTS score (user's score)
  * - Program interest (ILIKE search)
  *
- * @param supabase - Supabase client
  * @param workspaceId - Workspace ID
  * @param criteria - Search criteria object
  * @returns Matching destinations
  *
  * @example
  * ```ts
- * const matches = await findMatchingDestinations(supabase, workspaceId, {
+ * const matches = await findMatchingDestinations(workspaceId, {
  *   country: 'Australia',
  *   maxBudget: 50000000,
  *   minIelts: 6.0,
@@ -173,55 +179,71 @@ export async function getDestinationsForCountry(
  * ```
  */
 export async function findMatchingDestinations(
-  supabase: SupabaseClient,
   workspaceId: string,
   criteria: SearchCriteria
 ): Promise<Destination[]> {
-  let query = supabase
-    .from('ari_destinations')
-    .select('id, country, city, university_name, requirements, programs, is_promoted, notes')
-    .eq('workspace_id', workspaceId);
+  try {
+    // Get destinations based on country if specified, otherwise get all
+    let rawDestinations: any[];
+    if (criteria.country) {
+      const normalizedCountry = normalizeCountry(criteria.country);
+      rawDestinations = await convex.query(api.ari.getDestinationsByCountry, {
+        workspace_id: workspaceId,
+        country: normalizedCountry,
+      });
+    } else {
+      rawDestinations = await convex.query(api.ari.getDestinations, {
+        workspace_id: workspaceId,
+      });
+    }
 
-  // Filter by country
-  if (criteria.country) {
-    const normalizedCountry = normalizeCountry(criteria.country);
-    query = query.ilike('country', normalizedCountry);
-  }
+    // Convert to Destination type
+    let destinations: Destination[] = rawDestinations.map((d: any) => ({
+      id: d._id,
+      country: d.country,
+      city: d.city || null,
+      university_name: d.university_name,
+      requirements: d.requirements || {},
+      programs: d.programs || [],
+      is_promoted: d.is_promoted,
+      notes: d.notes || null,
+    }));
 
-  // Filter by budget (user's max budget >= university's minimum)
-  // We filter by budget_max to find universities within user's range
-  if (criteria.maxBudget !== undefined) {
-    query = query.lte('requirements->budget_min', criteria.maxBudget);
-  }
+    // Filter by budget (user's max budget >= university's minimum)
+    if (criteria.maxBudget !== undefined) {
+      destinations = destinations.filter(d =>
+        !d.requirements.budget_min || d.requirements.budget_min <= criteria.maxBudget!
+      );
+    }
 
-  // Filter by IELTS (user's score >= university's minimum)
-  if (criteria.minIelts !== undefined) {
-    query = query.lte('requirements->ielts_min', criteria.minIelts);
-  }
+    // Filter by IELTS (user's score >= university's minimum)
+    if (criteria.minIelts !== undefined) {
+      destinations = destinations.filter(d =>
+        !d.requirements.ielts_min || d.requirements.ielts_min <= criteria.minIelts!
+      );
+    }
 
-  // Order by promoted first, then priority
-  query = query
-    .order('is_promoted', { ascending: false })
-    .order('priority', { ascending: false });
+    // Filter by program if specified
+    if (criteria.program) {
+      const programLower = criteria.program.toLowerCase();
+      destinations = destinations.filter(dest =>
+        dest.programs.some(p => p.toLowerCase().includes(programLower))
+      );
+    }
 
-  const { data, error } = await query;
+    // Sort by promoted first, then by priority (already sorted by query but ensure it)
+    destinations.sort((a, b) => {
+      if (a.is_promoted !== b.is_promoted) {
+        return a.is_promoted ? -1 : 1;
+      }
+      return 0; // Priority already handled by Convex query
+    });
 
-  if (error) {
+    return destinations;
+  } catch (error) {
     console.error('[ARI KB] Failed to find matching destinations:', error);
     return [];
   }
-
-  // Filter by program if specified (done in JS since arrays)
-  let results = (data || []) as Destination[];
-
-  if (criteria.program) {
-    const programLower = criteria.program.toLowerCase();
-    results = results.filter(dest =>
-      dest.programs.some(p => p.toLowerCase().includes(programLower))
-    );
-  }
-
-  return results;
 }
 
 /**
@@ -229,30 +251,34 @@ export async function findMatchingDestinations(
  *
  * Returns top promoted destinations that the business wants to highlight.
  *
- * @param supabase - Supabase client
  * @param workspaceId - Workspace ID
  * @param limit - Maximum destinations to return (default: 3)
  * @returns Array of promoted destinations
  */
 export async function getPromotedDestinations(
-  supabase: SupabaseClient,
   workspaceId: string,
   limit: number = 3
 ): Promise<Destination[]> {
-  const { data, error } = await supabase
-    .from('ari_destinations')
-    .select('id, country, city, university_name, requirements, programs, is_promoted, notes')
-    .eq('workspace_id', workspaceId)
-    .eq('is_promoted', true)
-    .order('priority', { ascending: false })
-    .limit(limit);
+  try {
+    const rawDestinations = await convex.query(api.ari.getPromotedDestinations, {
+      workspace_id: workspaceId,
+      limit,
+    });
 
-  if (error) {
+    return rawDestinations.map((d: any) => ({
+      id: d._id,
+      country: d.country,
+      city: d.city || null,
+      university_name: d.university_name,
+      requirements: d.requirements || {},
+      programs: d.programs || [],
+      is_promoted: d.is_promoted,
+      notes: d.notes || null,
+    }));
+  } catch (error) {
     console.error('[ARI KB] Failed to get promoted destinations:', error);
     return [];
   }
-
-  return (data || []) as Destination[];
 }
 
 // ===========================================

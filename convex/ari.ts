@@ -939,3 +939,75 @@ export const markReminderSent = mutation({
     });
   },
 });
+
+// ============================================
+// ARI DESTINATIONS (KNOWLEDGE BASE)
+// ============================================
+
+/**
+ * Get all destinations for a workspace.
+ * No auth - used by webhook processing.
+ */
+export const getDestinations = query({
+  args: {
+    workspace_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const destinations = await ctx.db
+      .query("ariDestinations")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
+      .collect();
+
+    return destinations;
+  },
+});
+
+/**
+ * Get destinations for a specific country.
+ * No auth - used by webhook processing.
+ */
+export const getDestinationsByCountry = query({
+  args: {
+    workspace_id: v.string(),
+    country: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const destinations = await ctx.db
+      .query("ariDestinations")
+      .withIndex("by_workspace_country", (q) =>
+        q.eq("workspace_id", args.workspace_id as any).eq("country", args.country)
+      )
+      .collect();
+
+    // Sort by promoted and priority
+    return destinations.sort((a, b) => {
+      if (a.is_promoted !== b.is_promoted) {
+        return a.is_promoted ? -1 : 1;
+      }
+      return b.priority - a.priority;
+    });
+  },
+});
+
+/**
+ * Get promoted destinations for a workspace.
+ * No auth - used by webhook processing.
+ */
+export const getPromotedDestinations = query({
+  args: {
+    workspace_id: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const allDestinations = await ctx.db
+      .query("ariDestinations")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
+      .collect();
+
+    const promoted = allDestinations
+      .filter(d => d.is_promoted)
+      .sort((a, b) => b.priority - a.priority);
+
+    return args.limit ? promoted.slice(0, args.limit) : promoted;
+  },
+});
