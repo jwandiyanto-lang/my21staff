@@ -18,8 +18,8 @@ Requirements for Full Convex + Clerk migration. Remove Supabase entirely.
 
 - [x] **USER-01**: Users table in Convex with Clerk ID as primary identifier
 - [x] **USER-02**: Clerk webhook syncs user creation/updates to Convex
-- [ ] **USER-03**: Existing Supabase users imported to Clerk with password hashes
-- [ ] **USER-04**: User ID mapping preserves data relationships (Supabase UUID → Clerk ID)
+- [x] **USER-03**: Existing Supabase users imported to Clerk with password hashes
+- [x] **USER-04**: User ID mapping preserves data relationships (Supabase UUID → Clerk ID)
 
 ### Auth UI
 
@@ -30,23 +30,23 @@ Requirements for Full Convex + Clerk migration. Remove Supabase entirely.
 
 ### Organization/Workspace
 
-- [ ] **ORG-01**: Clerk organizations created for existing workspaces
-- [ ] **ORG-02**: Clerk organization invitations replace custom invitation system
-- [ ] **ORG-03**: Role-based permissions work with Clerk organization roles
+- [x] **ORG-01**: Clerk organizations created for existing workspaces
+- [x] **ORG-02**: Clerk organization invitations replace custom invitation system
+- [x] **ORG-03**: Role-based permissions work with Clerk organization roles
 
 ### Data Migration
 
-- [ ] **DATA-01**: ARI tables migrated to Convex (7 tables: config, sessions, scores, slots, etc.)
-- [ ] **DATA-02**: Support ticket tables migrated to Convex
-- [ ] **DATA-03**: CMS tables migrated to Convex (articles, webinars)
-- [ ] **DATA-04**: Utility tables migrated to Convex (profiles, appointments)
-- [ ] **DATA-05**: All API routes updated to use Convex instead of Supabase
+- [x] **DATA-01**: ARI tables migrated to Convex (7 tables: config, sessions, scores, slots, etc.)
+- [x] **DATA-02**: Support ticket tables migrated to Convex
+- [x] **DATA-03**: CMS tables migrated to Convex (articles, webinars)
+- [x] **DATA-04**: Utility tables migrated to Convex (profiles, appointments)
+- [x] **DATA-05**: All API routes updated to use Convex instead of Supabase
 
 ### n8n Integration
 
-- [ ] **N8N-01**: Convex HTTP action created for n8n lead webhook
-- [ ] **N8N-02**: n8n workflow updated to use new Convex webhook URL
-- [ ] **N8N-03**: Eagle Overseas lead flow verified working
+- [x] **N8N-01**: Convex HTTP action created for n8n lead webhook
+- [x] **N8N-02**: n8n workflow updated to use new Convex webhook URL
+- [x] **N8N-03**: Eagle Overseas lead flow verified working
 
 ### Cleanup
 
@@ -91,19 +91,19 @@ Deferred to v3.2 or later.
 | UI-04 | 2 | Complete |
 | USER-01 | 3 | Complete |
 | USER-02 | 3 | Complete |
-| USER-03 | 4 | Pending |
-| USER-04 | 4 | Pending |
-| ORG-01 | 4 | Pending |
-| ORG-02 | 4 | Pending |
-| ORG-03 | 4 | Pending |
-| DATA-01 | 5 | Pending |
-| DATA-02 | 5 | Pending |
-| DATA-03 | 5 | Pending |
-| DATA-04 | 5 | Pending |
-| DATA-05 | 5 | Pending |
-| N8N-01 | 6 | Pending |
-| N8N-02 | 6 | Pending |
-| N8N-03 | 6 | Pending |
+| USER-03 | 4 | Complete |
+| USER-04 | 4 | Complete |
+| ORG-01 | 4 | Complete |
+| ORG-02 | 4 | Complete |
+| ORG-03 | 4 | Complete |
+| DATA-01 | 5 | Complete |
+| DATA-02 | 5 | Complete |
+| DATA-03 | 5 | Complete |
+| DATA-04 | 5 | Complete |
+| DATA-05 | 5 | Complete |
+| N8N-01 | 6 | Complete |
+| N8N-02 | 6 | Complete |
+| N8N-03 | 6 | Complete |
 | CLEAN-01 | 7 | Pending |
 | CLEAN-02 | 7 | Pending |
 | CLEAN-03 | 7 | Pending |
@@ -115,4 +115,4 @@ Deferred to v3.2 or later.
 
 ---
 *Requirements defined: 2026-01-23*
-*Last updated: 2026-01-23 — Phases renumbered 1-7*
+*Last updated: 2026-01-24 — Phase 6 n8n Integration complete*

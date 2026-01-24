@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 
 ## Current Position
 
-Phase: 5 of 7 (Data Migration)
-Plan: 05-05 complete - 5 of 5 plans done
+Phase: 6 of 7 (n8n Integration)
+Plan: 06-01 complete - 1 of 1 plans done
 Status: Phase complete
-Last activity: 2026-01-23 - Completed 05-05-PLAN.md (Complete API Migration)
+Last activity: 2026-01-24 - Completed 06-01-PLAN.md (n8n webhook endpoint + workflow update)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ (163 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ (164 plans shipped)
 
 ## Performance Metrics
 
@@ -45,8 +45,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 3. Users table + webhook (user data in Convex) - DONE
 4. User migration + organizations (existing data) - DONE (04-05 complete)
 5. Data migration (remaining Supabase tables) - DONE (05-05 complete - API layer migrated)
-6. n8n integration (Eagle lead flow) - NEXT
-7. Cleanup (remove Supabase)
+6. n8n integration (Eagle lead flow) - DONE (06-01 complete - webhook + workflow verified)
+7. Cleanup (remove Supabase) - NEXT
 
 **Key risks (from research):**
 - Session termination unavoidable (all users logged out)
@@ -58,6 +58,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.1 decisions:
+- intent-otter-212 deployment URL: n8n webhook uses intent-otter-212.convex.site (not pleasant-antelope) (06-01)
+- JSON.stringify for n8n body: n8n HTTP Request uses JSON.stringify($json) to send full payload (06-01)
 - Supabase storage retention for attachments: File storage can remain on Supabase while database moves to Convex (05-05)
 - ARI processor migration deferred: processor.ts is 999 lines requiring careful refactoring beyond atomic commit scope - infrastructure ready (05-05)
 - Portal uses Clerk auth: Portal is client-facing, needs consistent auth with main app - uses auth() from @clerk/nextjs/server (05-05)
@@ -203,9 +205,9 @@ Before proceeding to Phase 5, verify:
 
 ## Session Continuity
 
-Last session: 2026-01-23
-Stopped at: Completed 05-05-PLAN.md (Complete API Migration)
-Resume: Phase 5 complete - Ready for Phase 6 (n8n integration)
+Last session: 2026-01-24
+Stopped at: Completed 06-01-PLAN.md (n8n webhook endpoint + workflow update)
+Resume: Phase 6 complete - Ready for Phase 7 (Cleanup + Verification)
 
 ---
-*Last updated: 2026-01-23 - Phase 5 Data Migration complete - all API routes migrated to Convex*
+*Last updated: 2026-01-24 - Phase 6 n8n Integration complete - Eagle's lead flow working via Convex*
