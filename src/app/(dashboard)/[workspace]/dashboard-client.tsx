@@ -6,6 +6,8 @@ import { api } from 'convex/_generated/api'
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton'
 import { StatsCards } from '@/components/dashboard/stats-cards'
 import { QuickActions } from '@/components/dashboard/quick-actions'
+import { ActivityFeed } from '@/components/dashboard/activity-feed'
+import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist'
 import type { Id } from 'convex/_generated/dataModel'
 
 interface DashboardClientProps {
@@ -25,6 +27,9 @@ export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientP
     return <DashboardSkeleton />
   }
 
+  // Check if workspace is onboarded
+  const isOnboarded = stats.hasContacts && stats.hasConversations && stats.hasKapsoConnected
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -42,10 +47,15 @@ export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientP
       {/* Quick Actions */}
       <QuickActions workspaceSlug={workspaceSlug} />
 
-      {/* Activity Feed - Placeholder for Plan 03 */}
-      <div className="border border-dashed border-muted-foreground/25 rounded-lg p-8 text-center text-muted-foreground">
-        <p>Activity feed akan ditambahkan di Plan 03</p>
-      </div>
+      {/* Onboarding Checklist (for new workspaces) */}
+      {!isOnboarded && (
+        <OnboardingChecklist workspaceSlug={workspaceSlug} stats={stats} />
+      )}
+
+      {/* Activity Feed (for active workspaces) */}
+      {isOnboarded && (
+        <ActivityFeed workspaceId={workspaceId} workspaceSlug={workspaceSlug} />
+      )}
     </div>
   )
 }
