@@ -81,3 +81,65 @@ export const getStats = query({
     };
   },
 });
+
+/**
+ * List recent workspace activity with pagination.
+ *
+ * Returns paginated contact notes with associated contact information.
+ * Notes are ordered by most recent first. For v3.2, activity feed shows
+ * only notes - form fills and chat summaries deferred to future iteration.
+ *
+ * @param workspace_id - The workspace to get activity for
+ * @param paginationOpts - Convex pagination options
+ * @returns Paginated activity feed with contact details
+ */
+export const listActivity = query({
+  args: {
+    workspace_id: v.string(),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    // Query contactNotes with pagination
+    const result = await ctx.db
+      .query("contactNotes")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    // Get unique contact IDs from notes
+    const contactIds = [...new Set(result.page.map((note) => note.contact_id))];
+
+    // Fetch contacts in parallel
+    const contacts = await Promise.all(
+      contactIds.map((id) => ctx.db.get(id))
+    );
+
+    // Create contact lookup map
+    const contactMap = new Map();
+    contacts.forEach((contact) => {
+      if (contact) {
+        contactMap.set(contact._id, contact);
+      }
+    });
+
+    // Map notes to activity items with contact info
+    const activities = result.page.map((note) => {
+      const contact = contactMap.get(note.contact_id);
+      return {
+        ...note,
+        type: 'note' as const,
+        contact: contact
+          ? {
+              name: contact.name,
+              phone: contact.phone,
+            }
+          : null,
+      };
+    });
+
+    return {
+      ...result,
+      page: activities,
+    };
+  },
+});
