@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback, useEffect } from 'react'
 import { DataTable } from '@/components/ui/data-table'
 import { createColumns } from './columns'
 import { ContactDetailSheet } from './contact-detail-sheet'
+import { MergeContactsDialog } from './merge-contacts-dialog'
 import { TableSkeleton } from '@/components/skeletons/table-skeleton'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { Button } from '@/components/ui/button'
@@ -94,6 +95,9 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [mergeMode, setMergeMode] = useState(false)
+  const [selectedForMerge, setSelectedForMerge] = useState<Contact[]>([])
+  const [showMergeDialog, setShowMergeDialog] = useState(false)
 
   // TanStack Query for contacts with pagination
   const { data: contactsData, isLoading: isLoadingContacts, isFetching } = useContacts(workspace.id, currentPage)
@@ -278,8 +282,21 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   }, [contacts, activeStatus, selectedTags, assignedTo])
 
   const handleRowClick = (contact: Contact) => {
-    setSelectedContact(contact)
-    setIsDetailOpen(true)
+    if (mergeMode) {
+      setSelectedForMerge(prev => {
+        const isSelected = prev.some(c => c.id === contact.id)
+        if (isSelected) {
+          return prev.filter(c => c.id !== contact.id)
+        } else if (prev.length < 2) {
+          return [...prev, contact]
+        }
+        return prev
+      })
+    } else {
+      // Normal behavior - open detail dialog
+      setSelectedContact(contact)
+      setIsDetailOpen(true)
+    }
   }
 
   // Show skeleton only on initial load (not page transitions)
@@ -297,6 +314,32 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
             {totalCount} contact{totalCount !== 1 ? 's' : ''}
             {filteredContacts.length !== contacts.length && ` (${filteredContacts.length} shown after filter)`}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={mergeMode ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => {
+              if (mergeMode) {
+                // Cancel merge mode
+                setMergeMode(false)
+                setSelectedForMerge([])
+              } else {
+                setMergeMode(true)
+              }
+            }}
+          >
+            {mergeMode ? 'Cancel Merge' : 'Merge Duplicates'}
+          </Button>
+
+          {mergeMode && selectedForMerge.length === 2 && (
+            <Button
+              size="sm"
+              onClick={() => setShowMergeDialog(true)}
+            >
+              Merge Selected ({selectedForMerge.length})
+            </Button>
+          )}
         </div>
       </div>
 
@@ -508,6 +551,18 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
         )}
       </div>
 
+      {/* Merge Mode Instructions */}
+      {mergeMode && (
+        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <p className="text-sm text-blue-900 dark:text-blue-100">
+            <strong>Merge Mode:</strong> Select 2 contacts to merge.
+            {selectedForMerge.length === 0 && ' Click on any contact to start.'}
+            {selectedForMerge.length === 1 && ' Select 1 more contact to merge.'}
+            {selectedForMerge.length === 2 && ' Click "Merge Selected" to continue.'}
+          </p>
+        </div>
+      )}
+
       {/* Data Table */}
       <DataTable
         columns={columns}
@@ -619,6 +674,20 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Merge Contacts Dialog */}
+      {showMergeDialog && selectedForMerge.length === 2 && (
+        <MergeContactsDialog
+          contact1={selectedForMerge[0] as Contact}
+          contact2={selectedForMerge[1] as Contact}
+          open={showMergeDialog}
+          onOpenChange={setShowMergeDialog}
+          onMergeComplete={() => {
+            setMergeMode(false)
+            setSelectedForMerge([])
+          }}
+        />
+      )}
     </div>
   )
 }

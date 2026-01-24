@@ -13,18 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-
-interface Contact {
-  id: string
-  name?: string
-  email?: string
-  phone?: string
-  lead_status?: string
-  tags?: string[]
-  assigned_to?: string
-  lead_score?: number
-  metadata?: Record<string, any>
-}
+import type { Contact } from '@/types/database'
 
 interface MergeContactsDialogProps {
   contact1: Contact
@@ -97,7 +86,9 @@ export function MergeContactsDialog({
     mergedFields.tags = [...new Set([...(contact1.tags || []), ...(contact2.tags || [])])]
 
     // Merge metadata (combine both, contact1 takes precedence)
-    mergedFields.metadata = { ...(contact2.metadata || {}), ...(contact1.metadata || {}) }
+    const metadata1 = contact1.metadata && typeof contact1.metadata === 'object' ? contact1.metadata as Record<string, any> : {}
+    const metadata2 = contact2.metadata && typeof contact2.metadata === 'object' ? contact2.metadata as Record<string, any> : {}
+    mergedFields.metadata = { ...metadata2, ...metadata1 }
 
     mergeMutation.mutate({
       primaryId: contact1.id,
