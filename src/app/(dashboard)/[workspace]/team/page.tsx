@@ -35,16 +35,16 @@ export default function TeamPage() {
     return (
       <div className="p-8 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Manajemen Tim</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Team Management</h1>
           <p className="text-muted-foreground mt-1">
-            Kelola anggota tim dan akses mereka
+            Manage team members and their access
           </p>
         </div>
 
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Workspace ini belum terhubung ke organisasi. Hubungi admin untuk setup.
+            This workspace is not connected to an organization. Contact admin for setup.
           </AlertDescription>
         </Alert>
       </div>
@@ -55,9 +55,9 @@ export default function TeamPage() {
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Manajemen Tim</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Team Management</h1>
           <p className="text-muted-foreground mt-1">
-            Kelola anggota tim dan akses mereka di {organization.name}
+            Manage team members and their access in {organization.name}
           </p>
         </div>
       </div>

@@ -25,7 +25,7 @@ interface PermissionButtonProps extends ButtonProps {
 export function PermissionButton({
   permission,
   userRole,
-  tooltipMessage = 'Hubungi pemilik workspace untuk akses ini',
+  tooltipMessage = 'Contact workspace owner for access',
   children,
   onClick,
   disabled,

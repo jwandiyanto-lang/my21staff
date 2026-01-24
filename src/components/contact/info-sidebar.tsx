@@ -333,18 +333,18 @@ export function InfoSidebar({
       })
 
       if (response.ok) {
-        toast.success('Catatan ditambahkan')
+        toast.success('Note added')
         setNewNoteContent('')
         setNewNoteDueDate(undefined)
         setIsNoteDialogOpen(false)
         startTransition(() => router.refresh())
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Gagal menambah catatan')
+        toast.error(error.error || 'Failed to add note')
       }
     } catch (error) {
       console.error('Error adding note:', error)
-      toast.error('Gagal menambah catatan')
+      toast.error('Failed to add note')
     } finally {
       setIsAddingNote(false)
     }

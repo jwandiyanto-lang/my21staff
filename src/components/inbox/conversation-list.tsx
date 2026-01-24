@@ -66,7 +66,7 @@ export function ConversationList({
       <div className="flex-1 overflow-y-auto">
         {conversations.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            <p>Tidak ada percakapan</p>
+            <p>No conversations</p>
           </div>
         ) : (
           conversations.map((conversation) => (

@@ -16,10 +16,10 @@ export function EmptyState() {
         </div>
         <div className="space-y-2">
           <h3 className="text-lg font-medium text-foreground">
-            Pilih percakapan
+            Select a conversation
           </h3>
           <p className="text-sm text-muted-foreground max-w-sm">
-            Pilih percakapan untuk mulai mengobrol dan melihat riwayat pesan
+            Select a conversation to start chatting and view message history
           </p>
         </div>
       </div>

@@ -96,11 +96,11 @@ interface SettingsClientProps {
 
 // Default quick replies
 const DEFAULT_QUICK_REPLIES: QuickReply[] = [
-  { id: '1', label: 'Greeting', text: 'Halo! Terima kasih sudah menghubungi kami. Ada yang bisa kami bantu?' },
-  { id: '2', label: 'Follow Up', text: 'Halo, kami ingin follow up mengenai percakapan kita sebelumnya. Apakah ada pertanyaan yang bisa kami bantu?' },
-  { id: '3', label: 'Thank You', text: 'Terima kasih banyak! Jika ada pertanyaan lain, jangan ragu untuk menghubungi kami kembali.' },
-  { id: '4', label: 'Busy', text: 'Terima kasih sudah menghubungi. Saat ini kami sedang sibuk, akan kami balas secepatnya.' },
-  { id: '5', label: 'Schedule', text: 'Apakah Anda bersedia untuk jadwalkan panggilan? Mohon informasikan waktu yang tersedia.' },
+  { id: '1', label: 'Greeting', text: 'Hello! Thank you for contacting us. How can we help you?' },
+  { id: '2', label: 'Follow Up', text: 'Hello, we wanted to follow up on our previous conversation. Do you have any questions we can help with?' },
+  { id: '3', label: 'Thank You', text: 'Thank you so much! If you have any other questions, feel free to reach out to us again.' },
+  { id: '4', label: 'Busy', text: 'Thank you for reaching out. We are currently busy but will get back to you as soon as possible.' },
+  { id: '5', label: 'Schedule', text: 'Would you be available to schedule a call? Please let us know your available times.' },
 ]
 
 export function SettingsClient({ workspace }: SettingsClientProps) {

@@ -44,7 +44,7 @@ export function ComposeInput({ workspaceId, conversationId, disabled }: ComposeI
       setContent('')
     } catch (error) {
       console.error('Send error:', error)
-      toast.error('Gagal mengirim pesan')
+      toast.error('Failed to send message')
     } finally {
       setIsSending(false)
     }

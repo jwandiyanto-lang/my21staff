@@ -89,12 +89,12 @@ export function ScoreBreakdown({ score, breakdown, reasons, showDetails = true }
           {isExpanded ? (
             <>
               <ChevronUp className="h-3 w-3" />
-              Sembunyikan detail
+              Hide details
             </>
           ) : (
             <>
               <ChevronDown className="h-3 w-3" />
-              Lihat detail skor
+              View score details
             </>
           )}
         </button>

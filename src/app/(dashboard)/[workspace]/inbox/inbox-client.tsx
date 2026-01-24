@@ -49,9 +49,9 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
       <div className="flex-1 bg-[#f0f2f5] flex items-center justify-center">
         <div className="text-center text-muted-foreground">
           {selectedConversationId ? (
-            <p>Message thread akan dimuat di sini</p>
+            <p>Loading message thread...</p>
           ) : (
-            <p>Pilih percakapan untuk melihat pesan</p>
+            <p>Select a conversation to view messages</p>
           )}
         </div>
       </div>
