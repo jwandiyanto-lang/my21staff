@@ -1,10 +1,16 @@
-import { NextRequest } from 'next/server'
-import Papa from 'papaparse'
-import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
-import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/permissions/check'
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 export async function GET(request: NextRequest) {
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { searchParams } = new URL(request.url)
   const workspaceId = searchParams.get('workspace')
 
@@ -12,54 +18,40 @@ export async function GET(request: NextRequest) {
     return new Response('Missing workspace parameter', { status: 400 })
   }
 
-  // Verify workspace membership
-  const authResult = await requireWorkspaceMembership(workspaceId)
-  if (authResult instanceof Response) {
-    return authResult
+  try {
+    const contacts = await convex.query(api.contacts.listByWorkspaceInternal, {
+      workspace_id: workspaceId
+    })
+
+    // Convert to CSV
+    const headers = ['name', 'phone', 'email', 'lead_status', 'lead_score', 'tags', 'assigned_to', 'created_at']
+    const csvRows = [headers.join(',')]
+
+    for (const contact of contacts) {
+      const row = [
+        contact.name || '',
+        contact.phone || '',
+        contact.email || '',
+        contact.lead_status || 'new',
+        contact.lead_score?.toString() || '0',
+        (contact.tags || []).join(';'),
+        contact.assigned_to || '',
+        new Date(contact.created_at).toISOString()
+      ].map(v => `"${v.replace(/"/g, '""')}"`)
+      csvRows.push(row.join(','))
+    }
+
+    const csv = csvRows.join('\n')
+    const timestamp = Date.now()
+
+    return new Response(csv, {
+      headers: {
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename="contacts-${timestamp}.csv"`,
+      },
+    })
+  } catch (error) {
+    console.error('Export error:', error)
+    return NextResponse.json({ error: 'Failed to export contacts' }, { status: 500 })
   }
-
-  // Check export permission - owners and admins only
-  const permError = requirePermission(
-    authResult.role,
-    'leads:export',
-    'Only workspace owners and admins can export data'
-  )
-  if (permError) return permError
-
-  const supabase = await createClient()
-
-  // Fetch all contacts for the workspace
-  const { data: contacts, error } = await supabase
-    .from('contacts')
-    .select('name, phone, email, lead_status, lead_score, tags, assigned_to, created_at')
-    .eq('workspace_id', workspaceId)
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error('Error fetching contacts:', error)
-    return new Response('Failed to fetch contacts', { status: 500 })
-  }
-
-  // Transform data for CSV (convert tags array to comma-separated string)
-  const csvData = (contacts || []).map(contact => ({
-    name: contact.name || '',
-    phone: contact.phone,
-    email: contact.email || '',
-    lead_status: contact.lead_status,
-    lead_score: contact.lead_score,
-    tags: (contact.tags || []).join(', '),
-    assigned_to: contact.assigned_to || '',
-    created_at: contact.created_at,
-  }))
-
-  // Generate CSV
-  const csv = Papa.unparse(csvData)
-  const timestamp = Date.now()
-
-  return new Response(csv, {
-    headers: {
-      'Content-Type': 'text/csv',
-      'Content-Disposition': `attachment; filename="contacts-${timestamp}.csv"`,
-    },
-  })
 }
