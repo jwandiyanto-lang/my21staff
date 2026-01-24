@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
 import { sendMediaMessage } from '@/lib/kapso/client'
 import type { KapsoCredentials } from '@/lib/kapso/client'
-import type { Conversation, Contact, Workspace } from '@/types/database'
-import { rateLimitByUser } from '@/lib/rate-limit'
 import { safeDecrypt } from '@/lib/crypto'
 
-interface WorkspaceSettings {
-  kapso_api_key?: string
-}
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 type MediaType = 'image' | 'video' | 'document' | 'audio'
 
@@ -25,15 +23,21 @@ function isDevMode(): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const conversationId = formData.get('conversationId') as string
+    const workspaceId = formData.get('workspaceId') as string
     const caption = formData.get('caption') as string | null
 
     // Validate input
-    if (!file || !conversationId) {
+    if (!file || !conversationId || !workspaceId) {
       return NextResponse.json(
-        { error: 'Missing required fields: file and conversationId' },
+        { error: 'Missing required fields: file, conversationId, and workspaceId' },
         { status: 400 }
       )
     }
@@ -46,87 +50,49 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    // Get conversation from Convex
+    const conversation = await convex.query(api.conversations.getById, {
+      conversation_id: conversationId,
+      workspace_id: workspaceId,
+    })
 
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Rate limit: 10 media messages per minute per user
-    const rateLimitResponse = rateLimitByUser(user.id, 'messages/send-media', { limit: 10, windowMs: 60 * 1000 })
-    if (rateLimitResponse) return rateLimitResponse
-
-    // Fetch conversation to get workspace_id and contact_id
-    const { data: conversationData, error: convError } = await supabase
-      .from('conversations')
-      .select('id, workspace_id, contact_id')
-      .eq('id', conversationId)
-      .single()
-
-    if (convError || !conversationData) {
+    if (!conversation) {
       return NextResponse.json(
         { error: 'Conversation not found' },
         { status: 404 }
       )
     }
 
-    const conversation = conversationData as Pick<Conversation, 'id' | 'workspace_id' | 'contact_id'>
+    // Get workspace to get Kapso credentials
+    const workspace = await convex.query(api.workspaces.getById, {
+      id: (conversation as any).workspace_id,
+    })
 
-    // Check user has access to this workspace
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', conversation.workspace_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json(
-        { error: 'Not authorized to access this conversation' },
-        { status: 403 }
-      )
-    }
-
-    // Fetch contact phone
-    const { data: contactData, error: contactError } = await supabase
-      .from('contacts')
-      .select('phone')
-      .eq('id', conversation.contact_id)
-      .single()
-
-    if (contactError || !contactData) {
-      return NextResponse.json(
-        { error: 'Contact not found' },
-        { status: 404 }
-      )
-    }
-
-    const contact = contactData as Pick<Contact, 'phone'>
-
-    // Fetch workspace for Kapso credentials
-    const { data: workspaceData, error: wsError } = await supabase
-      .from('workspaces')
-      .select('kapso_phone_id, settings')
-      .eq('id', conversation.workspace_id)
-      .single()
-
-    if (wsError || !workspaceData) {
+    if (!workspace) {
       return NextResponse.json(
         { error: 'Workspace not found' },
         { status: 404 }
       )
     }
 
-    const workspace = workspaceData as Pick<Workspace, 'kapso_phone_id' | 'settings'>
+    // Get contact phone
+    const contact = await convex.query(api.contacts.getById, {
+      id: (conversation as any).contact_id,
+    })
 
-    // Upload file to Supabase Storage
+    if (!contact) {
+      return NextResponse.json(
+        { error: 'Contact not found' },
+        { status: 404 }
+      )
+    }
+
+    // Upload file to Supabase Storage (file storage remains on Supabase for now)
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
+
     const fileExt = file.name.split('.').pop()
-    const fileName = `${conversation.workspace_id}/${conversationId}/${Date.now()}.${fileExt}`
+    const fileName = `${(workspace as any)._id}/${conversationId}/${Date.now()}.${fileExt}`
     const arrayBuffer = await file.arrayBuffer()
     const buffer = new Uint8Array(arrayBuffer)
 
@@ -152,7 +118,7 @@ export async function POST(request: NextRequest) {
 
     const mediaUrl = urlData.publicUrl
     const mediaType = getMediaType(file.type)
-    const contactPhone = contact.phone
+    const contactPhone = (contact as any).phone
     let kapsoMessageId: string | null = null
 
     // Send via Kapso (unless dev mode)
@@ -160,9 +126,9 @@ export async function POST(request: NextRequest) {
       kapsoMessageId = `mock-media-${Date.now()}`
       console.log(`[DEV MODE] Skipping Kapso media send. Mock ID: ${kapsoMessageId}`)
     } else {
-      const settings = workspace.settings as WorkspaceSettings | null
+      const settings = (workspace as any).settings as { kapso_api_key?: string } | null
       const encryptedKey = settings?.kapso_api_key
-      const phoneId = workspace.kapso_phone_id
+      const phoneId = (workspace as any).kapso_phone_id
 
       if (!encryptedKey || !phoneId) {
         return NextResponse.json(
@@ -171,7 +137,7 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Decrypt API key (handles both encrypted and legacy plain-text keys)
+      // Decrypt API key
       const apiKey = safeDecrypt(encryptedKey)
       const credentials: KapsoCredentials = { apiKey, phoneId }
 
@@ -194,46 +160,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Insert message to database
-    const now = new Date().toISOString()
-    const { data: message, error: insertError } = await supabase
-      .from('messages')
-      .insert({
-        conversation_id: conversationId,
-        workspace_id: conversation.workspace_id,
-        direction: 'outbound',
-        sender_type: 'user',
-        sender_id: user.id,
-        content: caption?.trim() || null,
-        message_type: mediaType,
-        media_url: mediaUrl,
-        kapso_message_id: kapsoMessageId,
-        metadata: { filename: file.name, size: file.size, mimeType: file.type },
-        created_at: now,
-      })
-      .select()
-      .single()
+    // Create message in Convex
+    const messageId = await convex.mutation(api.mutations.createOutboundMessage, {
+      workspace_id: workspaceId,
+      conversation_id: conversationId,
+      sender_id: userId,
+      content: caption?.trim() || `[${mediaType}]`,
+      message_type: mediaType,
+      media_url: mediaUrl,
+      kapso_message_id: kapsoMessageId,
+    })
 
-    if (insertError || !message) {
-      console.error('Message insert error:', insertError)
-      return NextResponse.json(
-        { error: 'Failed to save message' },
-        { status: 500 }
-      )
-    }
-
-    // Update conversation last_message_at and preview
-    const preview = caption?.trim() || `[${mediaType}]`
-    await supabase
-      .from('conversations')
-      .update({
-        last_message_at: now,
-        last_message_preview: preview.substring(0, 100),
-        updated_at: now,
-      })
-      .eq('id', conversationId)
-
-    return NextResponse.json({ message })
+    return NextResponse.json({
+      success: true,
+      messageId,
+    })
   } catch (error) {
     console.error('Send media error:', error)
     return NextResponse.json(

@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { fetchMutation, fetchQuery } from 'convex/nextjs'
-import { api } from 'convex/_generated/api'
-import { Id } from 'convex/_generated/dataModel'
+import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
+import { Id } from '@/../convex/_generated/dataModel'
 import { verifyReopenToken } from '@/lib/tickets'
-import {
-  withTiming,
-  createRequestMetrics,
-  logQuery,
-  logQuerySummary,
-} from '@/lib/instrumentation/with-timing'
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 // POST /api/tickets/[id]/reopen - Reopen a closed ticket
 // Supports two modes:
@@ -19,8 +15,6 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const metrics = createRequestMetrics()
-
   try {
     const { id: ticketId } = await params
     const body = await request.json()
@@ -34,12 +28,10 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
-
     // Fetch ticket from Convex
-    let queryStart = performance.now()
-    const ticket = await fetchQuery(api.tickets.getTicketById, { ticket_id: ticketId as Id<"tickets"> })
-    logQuery(metrics, 'convex.tickets.getTicketById', Math.round(performance.now() - queryStart))
+    const ticket = await convex.query(api.tickets.getTicketById, {
+      ticket_id: ticketId as Id<"tickets">,
+    })
 
     if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
@@ -67,11 +59,10 @@ export async function POST(
 
     // Option 2: Authenticated requester
     if (!authorized) {
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (user && user.id === ticket.requester_id) {
+      const { userId } = await auth()
+      if (userId && userId === ticket.requester_id) {
         authorized = true
-        reopenedBy = user.id
+        reopenedBy = userId
       }
     }
 
@@ -83,35 +74,26 @@ export async function POST(
     }
 
     // Reopen ticket via Convex mutation
-    let mutStart = performance.now()
-    const result = await fetchMutation(api.tickets.reopenTicket, {
+    await convex.mutation(api.tickets.reopenTicket, {
       ticket_id: ticketId,
       workspace_id: ticket.workspace_id as string,
       user_id: reopenedBy!,
     })
-    logQuery(metrics, 'convex.tickets.reopenTicket', Math.round(performance.now() - mutStart))
 
     // Add system comment with reason
-    mutStart = performance.now()
-    await fetchMutation(api.tickets.createTicketComment, {
+    await convex.mutation(api.tickets.createTicketComment, {
       ticket_id: ticketId as Id<"tickets">,
       author_id: reopenedBy!,
       content: `Ticket reopened.\n\nReason: ${reason.trim()}`,
       is_stage_change: true,
     })
-    logQuery(metrics, 'convex.tickets.createTicketComment', Math.round(performance.now() - mutStart))
 
-    logQuerySummary('/api/tickets/[id]/reopen', metrics)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('POST /api/tickets/[id]/reopen error:', error)
-    logQuerySummary('/api/tickets/[id]/reopen', metrics)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
   }
 }
-
-// Export wrapped handler with timing instrumentation
-export const POST_TIMED = withTiming('/api/tickets/[id]/reopen', POST)
