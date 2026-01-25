@@ -5,6 +5,15 @@ import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { ConversationList } from '@/components/inbox/conversation-list'
 import { InboxSkeleton } from '@/components/skeletons/inbox-skeleton'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button'
+import { Filter } from 'lucide-react'
+import { LEAD_STATUS_CONFIG, LEAD_STATUSES } from '@/lib/lead-status'
 import type { Id } from 'convex/_generated/dataModel'
 
 interface InboxClientProps {
