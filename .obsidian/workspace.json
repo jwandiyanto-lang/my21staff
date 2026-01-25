@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "planning/phases/01-brand-guidelines/01-02-SUMMARY.md",
+                "file": "planning/milestones/v2.0-ROADMAP.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "01-02-SUMMARY"
+              "title": "v2.0-ROADMAP"
             }
           }
         ]
@@ -183,8 +183,26 @@
       "bases:Create new base": false
     }
   },
-  "active": "ccbd897c4fb28da1",
+  "active": "600c2f6ee49ae613",
   "lastOpenFiles": [
+    "planning/milestones/v1.0-ROADMAP.md",
+    "planning/phases/01-brand-guidelines/01-02-SUMMARY.md",
+    "planning/phases/04.2-inbox-rework/CONTEXT.md",
+    "planning/phases/04.2-inbox-rework",
+    "src/app/api/contacts/[id]/messages/route.ts",
+    "src/app/api/contacts/[id]/messages",
+    "planning/phases/04.1-ui-revert/04.1-UAT.md",
+    "planning/phases/04.1-ui-revert/04.1-VERIFICATION.md",
+    "planning/phases/04.1-ui-revert/04.1-03-SUMMARY.md",
+    "planning/STATE.md.tmp.1432895.1769317890439",
+    "planning/phases/04.1-ui-revert/04.1-04-SUMMARY.md",
+    "src/app/(dashboard)/[workspace]/database/contact-detail-sheet.tsx.tmp.1432895.1769317730858",
+    "src/app/(dashboard)/[workspace]/database/contact-detail-sheet.tsx.tmp.1432895.1769317720926",
+    "planning/STATE.md.tmp.1432895.1769317541869",
+    "planning/phases/04.1-ui-revert/04.1-01-SUMMARY.md",
+    "planning/phases/04.1-ui-revert/04.1-02-SUMMARY.md",
+    "tsconfig.tsbuildinfo",
+    "src/components/inbox/conversation-list.tsx.tmp.1432895.1769317321811",
     "planning/phases/04.1-ui-revert/04-PLAN.md",
     "planning/phases/04.1-ui-revert/03-PLAN.md",
     "planning/phases/04.1-ui-revert/02-PLAN.md",
@@ -194,8 +212,6 @@
     "planning/quick/001-fix-dark-layout-brand-colors/001-SUMMARY.md",
     "business/brand/docs/DESIGN-PRINCIPLES.md",
     "planning/quick/001-fix-dark-layout-brand-colors/001-PLAN.md",
-    "planning/quick/001-fix-dark-layout-brand-colors",
-    "planning/quick",
     "planning/phases/01-brand-guidelines/01-02-PLAN.md",
     "planning/phases/01-brand-guidelines/01-01-SUMMARY.md",
     "planning/phases/01-brand-guidelines/01-01-PLAN.md",
@@ -205,22 +221,6 @@
     "business/clients/eagle/eagle-user-flow.md",
     "business/clients/eagle/eagle-overseas.md",
     "business/clients/eagle/eagle-n8n-integration.md",
-    "business/clients/eagle/eagle-ari-journey.md",
-    "business/clients/eagle",
-    "planning/phases-v2.0-archive/21-lead-polish-performance/21-direct-form-telegram/21-RESEARCH.md",
-    "planning/phases-v2.0-archive/22-settings-data-management/22-UAT.md",
-    "planning/phases-v2.0-archive/22-settings-data-management/22-RESEARCH.md",
-    "planning/phases-v2.0-archive/22-settings-data-management/22-04-UAT.md",
-    "planning/phases-v2.0-archive/22-settings-data-management/22-04-SUMMARY.md",
-    "planning/phases-v2.0-archive/22-settings-data-management/22-04-PLAN.md",
-    "planning/phases-v2.0-archive/22-settings-data-management/22-03-UAT.md",
-    "planning/phases-v2.0-archive/22-settings-data-management/22-03-SUMMARY.md",
-    "planning/phases-v2.0-archive/21-lead-polish-performance/21-direct-form-telegram",
-    "planning/phases-v2.0-archive/22-settings-data-management",
-    "planning/phases-v2.0-archive/21-lead-polish-performance",
-    "planning/phases-v2.0-archive/20-dashboard-notes",
-    "planning/phases-v2.0-archive/19-performance-security",
-    "planning/phases-v2.0-archive/18-kapso-bot-setup",
     "node_modules/istanbul-reports/lib/html-spa/assets/sort-arrow-sprite.png",
     "node_modules/istanbul-reports/lib/html/assets/sort-arrow-sprite.png",
     "node_modules/istanbul-reports/lib/html/assets/favicon.png",
