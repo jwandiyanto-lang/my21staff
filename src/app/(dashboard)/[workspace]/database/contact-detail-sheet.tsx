@@ -27,8 +27,8 @@ interface ContactDetailSheetProps {
 }
 
 /**
- * Contact Detail Sheet - 4-tab interface for contact management
- * Tabs: Profile, Documents, Conversations, Notes
+ * Contact Detail Sheet - 3-tab interface for contact management
+ * Tabs: Details, Messages, Activity
  */
 export function ContactDetailSheet({
   contact,
@@ -138,8 +138,8 @@ export function ContactDetailSheet({
           </TabsList>
 
           <div className="flex-1 overflow-auto mt-4">
-            {/* Profile Tab */}
-            <TabsContent value="profile" className="m-0 space-y-4">
+            {/* Details Tab */}
+            <TabsContent value="details" className="m-0 space-y-4">
               <div className="space-y-3">
                 <div>
                   <Label htmlFor="name" className="text-xs text-muted-foreground">
@@ -253,26 +253,16 @@ export function ContactDetailSheet({
               </div>
             </TabsContent>
 
-            {/* Documents Tab */}
-            <TabsContent value="documents" className="m-0">
+            {/* Messages Tab */}
+            <TabsContent value="messages" className="m-0">
               <div className="text-sm text-muted-foreground p-8 text-center">
-                <p>No documents yet</p>
-                <p className="text-xs mt-2">Documents feature coming soon</p>
+                <p>Message history will appear here</p>
+                <p className="text-xs mt-2">Connect to inbox in Plan 03</p>
               </div>
             </TabsContent>
 
-            {/* Conversations Tab */}
-            <TabsContent value="conversations" className="m-0">
-              <div className="text-sm text-muted-foreground p-8 text-center">
-                <p>Conversations will appear here</p>
-                <p className="text-xs mt-2">
-                  Inbox integration will be rebuilt in next phase
-                </p>
-              </div>
-            </TabsContent>
-
-            {/* Notes Tab */}
-            <TabsContent value="notes" className="m-0 space-y-4">
+            {/* Activity Tab */}
+            <TabsContent value="activity" className="m-0 space-y-4">
               {/* Add note form */}
               <form onSubmit={handleAddNote} className="space-y-2">
                 <Textarea
