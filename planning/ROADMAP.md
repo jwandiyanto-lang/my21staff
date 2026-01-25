@@ -6,7 +6,7 @@ Take my21staff from development to production with Eagle Overseas Education as t
 
 ## Milestones
 
-- 📋 **v3.3 Go Live** - Phases 1-7 (in progress)
+- **v3.3 Go Live** - Phases 1-7 (in progress)
 
 ## Phases
 
@@ -35,7 +35,7 @@ Take my21staff from development to production with Eagle Overseas Education as t
 **Plans:** 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md — Create Vercel project, configure env vars, verify deployment
+- [x] 01-01-PLAN.md — Create Vercel project, configure env vars, verify deployment
 
 ### Phase 2: Kapso Integration
 
@@ -51,8 +51,12 @@ Plans:
   3. Message history syncs to Convex database
   4. Webhook signature verification working
 
+**Plans:** 3 plans
+
 Plans:
-- [ ] TBD during planning
+- [ ] 02-01-PLAN.md — Configure Eagle workspace Kapso credentials
+- [ ] 02-02-PLAN.md — Create ARI configuration for Eagle workspace
+- [ ] 02-03-PLAN.md — End-to-end verification of webhook, messaging, and inbox
 
 ### Phase 3: AI System
 
@@ -101,7 +105,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. n8n webhook successfully delivers lead data to production Convex endpoint
   2. Lead appears in Contact Database with all fields populated correctly
-  3. Lead status updates work (new → qualified → consultation/community)
+  3. Lead status updates work (new -> qualified -> consultation/community)
 
 Plans:
 - [ ] TBD during planning
@@ -144,13 +148,13 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 (Phase 5 and 6 can run in parallel after Phase 1)
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Deployment | 1/1 | Complete | 2026-01-25 |
-| 2. Kapso Integration | 0/TBD | Not started | - |
+| 2. Kapso Integration | 0/3 | Planning complete | - |
 | 3. AI System | 0/TBD | Not started | - |
 | 4. Bot Workflow | 0/TBD | Not started | - |
 | 5. Lead Flow | 0/TBD | Not started | - |
