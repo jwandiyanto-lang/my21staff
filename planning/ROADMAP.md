@@ -32,14 +32,10 @@ Take my21staff from development to production with Eagle Overseas Education as t
 
 **Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04
 
-**Success Criteria** (what must be TRUE):
-  1. User can access my21staff at production URL
-  2. Eagle team can log in with Clerk authentication
-  3. Convex data loads correctly in production UI
-  4. Environment variables configured for all services
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD during planning
+- [ ] 01-01-PLAN.md — Create Vercel project, configure env vars, verify deployment
 
 ### Phase 2: Kapso Integration
 
@@ -153,7 +149,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Deployment | 0/TBD | Not started | - |
+| 1. Deployment | 0/1 | Planned | - |
 | 2. Kapso Integration | 0/TBD | Not started | - |
 | 3. AI System | 0/TBD | Not started | - |
 | 4. Bot Workflow | 0/TBD | Not started | - |
