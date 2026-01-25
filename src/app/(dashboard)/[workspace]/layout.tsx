@@ -1,23 +1,18 @@
 import { notFound, redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/../convex/_generated/api'
 import { WorkspaceSidebar } from '@/components/workspace/sidebar'
 import { MOCK_WORKSPACE, isDevMode } from '@/lib/mock-data'
 
-// Direct fetch to Convex API (more reliable in server components)
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+
 async function getWorkspaceBySlug(slug: string) {
-  const url = process.env.NEXT_PUBLIC_CONVEX_URL!
-  const response = await fetch(`${url}/api/query`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      path: 'workspaces:getBySlug',
-      args: { slug },
-    }),
-    cache: 'no-store',
-  })
-  if (!response.ok) return null
-  const data = await response.json()
-  return data.value
+  try {
+    return await convex.query(api.workspaces.getBySlug, { slug })
+  } catch {
+    return null
+  }
 }
 
 interface WorkspaceLayoutProps {
