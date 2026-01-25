@@ -1,0 +1,166 @@
+# Roadmap: my21staff v3.3 Go Live
+
+## Overview
+
+Take my21staff from development to production with Eagle Overseas Education as the first paying client. This milestone focuses on deployment, Kapso WhatsApp integration, dual-AI system (Mouth + Brain), bot qualification workflow, lead sync, pricing updates, and end-to-end verification.
+
+## Milestones
+
+- 📋 **v3.3 Go Live** - Phases 1-7 (in progress)
+
+## Phases
+
+**Phase Numbering:**
+- Integer phases (1, 2, 3): Planned milestone work
+- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+
+- [ ] **Phase 1: Deployment** - Fresh Vercel project with production environment
+- [ ] **Phase 2: Kapso Integration** - WhatsApp webhook and messaging
+- [ ] **Phase 3: AI System** - Dual-bot architecture (Mouth + Brain)
+- [ ] **Phase 4: Bot Workflow** - Eagle qualification flow
+- [ ] **Phase 5: Lead Flow** - n8n to Convex production verification
+- [ ] **Phase 6: Pricing Page** - Economics-based pricing update
+- [ ] **Phase 7: UI Verification** - End-to-end testing with real workflows
+
+## Phase Details
+
+### Phase 1: Deployment
+
+**Goal**: Production environment is live and accessible with all integrations configured
+
+**Depends on**: Nothing (first phase)
+
+**Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04
+
+**Success Criteria** (what must be TRUE):
+  1. User can access my21staff at production URL
+  2. Eagle team can log in with Clerk authentication
+  3. Convex data loads correctly in production UI
+  4. Environment variables configured for all services
+
+Plans:
+- [ ] TBD during planning
+
+### Phase 2: Kapso Integration
+
+**Goal**: WhatsApp messages flow through Kapso webhook and bot can respond
+
+**Depends on**: Phase 1
+
+**Requirements**: KAPSO-01, KAPSO-02, KAPSO-03, KAPSO-04
+
+**Success Criteria** (what must be TRUE):
+  1. Kapso webhook receives WhatsApp messages in production
+  2. Bot sends replies back via Kapso API
+  3. Message history syncs to Convex database
+  4. Webhook signature verification working
+
+Plans:
+- [ ] TBD during planning
+
+### Phase 3: AI System
+
+**Goal**: Dual-AI architecture working — "The Mouth" for conversations, "The Brain" for analysis
+
+**Depends on**: Phase 2
+
+**Requirements**: AI-01, AI-02, AI-03, AI-04
+
+**Success Criteria** (what must be TRUE):
+  1. "The Mouth" (Sea-Lion) handles greetings, FAQ, qualification conversations
+  2. "The Brain" (Claude) analyzes leads — scoring, CRM updates, smart decisions
+  3. Conversation context passed between Mouth and Brain
+  4. Usage tracking shows chat energy vs brain power consumption
+
+Plans:
+- [ ] TBD during planning
+
+### Phase 4: Bot Workflow
+
+**Goal**: WhatsApp bot greets new leads, qualifies them with questions, and routes to community or consultation
+
+**Depends on**: Phase 3
+
+**Requirements**: BOT-01, BOT-02, BOT-03, BOT-04, BOT-05, BOT-06
+
+**Success Criteria** (what must be TRUE):
+  1. Incoming WhatsApp message receives greeting from bot
+  2. Bot asks qualification questions (destination, documents, English level)
+  3. Bot answers common FAQs about Eagle services
+  4. Qualified lead receives Community link (free path)
+  5. Hot lead can request 1-on-1 Consultation
+  6. Human receives notification when consultation is requested
+
+Plans:
+- [ ] TBD during planning
+
+### Phase 5: Lead Flow
+
+**Goal**: Leads flow from n8n webhook into Convex CRM with correct data and status tracking
+
+**Depends on**: Phase 1
+
+**Requirements**: LEAD-01, LEAD-02, LEAD-03
+
+**Success Criteria** (what must be TRUE):
+  1. n8n webhook successfully delivers lead data to production Convex endpoint
+  2. Lead appears in Contact Database with all fields populated correctly
+  3. Lead status updates work (new → qualified → consultation/community)
+
+Plans:
+- [ ] TBD during planning
+
+### Phase 6: Pricing Page
+
+**Goal**: Landing page pricing reflects $497 startup + $97/$297 monthly plans with staff evolution narrative
+
+**Depends on**: Nothing (independent update)
+
+**Requirements**: PRICE-01, PRICE-02, PRICE-03, PRICE-04
+
+**Success Criteria** (what must be TRUE):
+  1. Landing page shows Startup Package at $497
+  2. Landing page shows Digital Receptionist plan at $97/mo
+  3. Landing page shows Digital Pro plan at $297/mo
+  4. Pricing copy uses "Staff Evolution" narrative from economics document
+
+Plans:
+- [ ] TBD during planning
+
+### Phase 7: UI Verification
+
+**Goal**: All core UI features work correctly in production with real data and mobile devices
+
+**Depends on**: Phase 4, Phase 5
+
+**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05
+
+**Success Criteria** (what must be TRUE):
+  1. WhatsApp Inbox displays conversations from Kapso with correct filters
+  2. Contact Database shows leads with working status and tag filters
+  3. Dashboard stats update in real-time when new leads arrive
+  4. Settings page allows team management via Clerk
+  5. Key pages (Inbox, Contacts, Dashboard) work correctly on mobile devices
+
+Plans:
+- [ ] TBD during planning
+
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+(Phase 5 and 6 can run in parallel after Phase 1)
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Deployment | 0/TBD | Not started | - |
+| 2. Kapso Integration | 0/TBD | Not started | - |
+| 3. AI System | 0/TBD | Not started | - |
+| 4. Bot Workflow | 0/TBD | Not started | - |
+| 5. Lead Flow | 0/TBD | Not started | - |
+| 6. Pricing Page | 0/TBD | Not started | - |
+| 7. UI Verification | 0/TBD | Not started | - |
+
+---
+*Created: 2026-01-25*
+*Last updated: 2026-01-25*

@@ -5,15 +5,15 @@
 See: planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.3 Go Live — Eagle as first paying client
+**Current focus:** v3.3 Go Live — Phase 1: Deployment
 
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-01-25 — Milestone v3.3 started
+Phase: 1 of 7 (Deployment)
+Plan: Ready to plan
+Status: Roadmap created
+Last activity: 2026-01-25 — Roadmap created (7 phases, 30 requirements)
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ░░░░░░░░░░ (193 plans shipped)
 
@@ -21,7 +21,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 **Velocity:**
 - Total plans completed: 193
-- Milestones shipped: 8
+- Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
 
@@ -34,6 +34,23 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.0 | 21 | 3 |
 | v3.1 | 23 | 1 |
 | v3.2 | 23 | 2 |
+| v3.3 | 0 | In progress |
+
+## v3.3 Roadmap Summary
+
+**7 Phases, 30 Requirements:**
+
+| Phase | Goal | Requirements |
+|-------|------|--------------|
+| 1. Deployment | Fresh Vercel + production env | 4 (DEPLOY-01 to 04) |
+| 2. Kapso Integration | WhatsApp webhook + messaging | 4 (KAPSO-01 to 04) |
+| 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) |
+| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) |
+| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) |
+| 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) |
+| 7. UI Verification | E2E testing | 5 (UI-01 to 05) |
+
+**Coverage:** 30/30 requirements mapped (100%)
 
 ## v3.3 Milestone Context
 
@@ -54,20 +71,27 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ## Blocking Issues
 
-**Resolved:** Fresh Vercel project approach chosen (avoid billing issues on old project)
+None. Fresh Vercel project approach chosen to avoid billing issues.
 
 ## Accumulated Context
 
+**Key Facts:**
 - v3.2 codebase is production-ready (~45,500 lines TypeScript)
 - Convex deployment active: https://intent-otter-212.convex.cloud
 - ARI system with lead scoring/booking flow available
-- Economics document saved to business/brainstorm/ECONOMICS.md
+- Economics document: business/brainstorm/ECONOMICS.md
+
+**Recent Decisions:**
+- Phase numbering starts at 1 for new milestone (not continuing from Phase 5)
+- 7 phases: Deployment → Kapso → AI System → Bot Workflow → Lead Flow → Pricing → UI Verification
+- Dual-AI architecture: "The Mouth" (Sea-Lion) + "The Brain" (Claude)
+- No research needed (deployment/verification work, not new features)
 
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Defining requirements for v3.3
-Resume: Continue with requirements definition
+Stopped at: Roadmap creation complete
+Resume: Next step is `/gsd:plan-phase 1`
 
 ---
-*Last updated: 2026-01-25 — v3.3 milestone started*
+*Last updated: 2026-01-25 — v3.3 roadmap created*

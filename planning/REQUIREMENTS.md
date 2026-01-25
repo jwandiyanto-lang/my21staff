@@ -14,6 +14,20 @@ Requirements for production launch with Eagle. Each maps to roadmap phases.
 - [ ] **DEPLOY-03**: Domain configured (my21staff.com or production subdomain)
 - [ ] **DEPLOY-04**: Kapso webhook URL updated to production endpoint
 
+### Kapso Integration
+
+- [ ] **KAPSO-01**: Kapso webhook receives WhatsApp messages
+- [ ] **KAPSO-02**: Bot sends replies back via Kapso API
+- [ ] **KAPSO-03**: Message history syncs to Convex
+- [ ] **KAPSO-04**: Webhook verification working in production
+
+### AI System (Dual-Bot Architecture)
+
+- [ ] **AI-01**: "The Mouth" (Sea-Lion/Gemini) handles conversations — greetings, FAQ, qualification
+- [ ] **AI-02**: "The Brain" (Claude) analyzes data — lead scoring, CRM updates, smart decisions
+- [ ] **AI-03**: Conversation context passed between Mouth and Brain
+- [ ] **AI-04**: Usage tracking for AI costs (chat energy vs brain power)
+
 ### Bot Workflow
 
 - [ ] **BOT-01**: Bot greets incoming WhatsApp messages
@@ -86,28 +100,36 @@ Deferred to after first client is live and generating revenue.
 | DEPLOY-02 | Phase 1 | Pending |
 | DEPLOY-03 | Phase 1 | Pending |
 | DEPLOY-04 | Phase 1 | Pending |
-| BOT-01 | Phase 2 | Pending |
-| BOT-02 | Phase 2 | Pending |
-| BOT-03 | Phase 2 | Pending |
-| BOT-04 | Phase 2 | Pending |
-| BOT-05 | Phase 2 | Pending |
-| BOT-06 | Phase 2 | Pending |
-| LEAD-01 | Phase 3 | Pending |
-| LEAD-02 | Phase 3 | Pending |
-| LEAD-03 | Phase 3 | Pending |
-| PRICE-01 | Phase 4 | Pending |
-| PRICE-02 | Phase 4 | Pending |
-| PRICE-03 | Phase 4 | Pending |
-| PRICE-04 | Phase 4 | Pending |
-| UI-01 | Phase 5 | Pending |
-| UI-02 | Phase 5 | Pending |
-| UI-03 | Phase 5 | Pending |
-| UI-04 | Phase 5 | Pending |
-| UI-05 | Phase 5 | Pending |
+| KAPSO-01 | Phase 2 | Pending |
+| KAPSO-02 | Phase 2 | Pending |
+| KAPSO-03 | Phase 2 | Pending |
+| KAPSO-04 | Phase 2 | Pending |
+| AI-01 | Phase 3 | Pending |
+| AI-02 | Phase 3 | Pending |
+| AI-03 | Phase 3 | Pending |
+| AI-04 | Phase 3 | Pending |
+| BOT-01 | Phase 4 | Pending |
+| BOT-02 | Phase 4 | Pending |
+| BOT-03 | Phase 4 | Pending |
+| BOT-04 | Phase 4 | Pending |
+| BOT-05 | Phase 4 | Pending |
+| BOT-06 | Phase 4 | Pending |
+| LEAD-01 | Phase 5 | Pending |
+| LEAD-02 | Phase 5 | Pending |
+| LEAD-03 | Phase 5 | Pending |
+| PRICE-01 | Phase 6 | Pending |
+| PRICE-02 | Phase 6 | Pending |
+| PRICE-03 | Phase 6 | Pending |
+| PRICE-04 | Phase 6 | Pending |
+| UI-01 | Phase 7 | Pending |
+| UI-02 | Phase 7 | Pending |
+| UI-03 | Phase 7 | Pending |
+| UI-04 | Phase 7 | Pending |
+| UI-05 | Phase 7 | Pending |
 
 **Coverage:**
-- v3.3 requirements: 22 total
-- Mapped to phases: 22
+- v3.3 requirements: 30 total
+- Mapped to phases: 30
 - Unmapped: 0 ✓
 
 ---
