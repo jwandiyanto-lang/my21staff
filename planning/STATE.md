@@ -11,16 +11,16 @@ See: planning/PROJECT.md (updated 2026-01-25)
 
 Milestone: v3.3 Go Live
 Phase: 3 of 7 (AI System)
-Plan: 2 of 4 complete
-Status: Plan 03-02 complete
-Last activity: 2026-01-25 — Completed 03-02 The Mouth (Sea-Lion/Grok conversational AI)
+Plan: 3 of 4 complete
+Status: Plan 03-03 complete
+Last activity: 2026-01-25 — Completed 03-03 The Brain (Grok analytical AI)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████░░░░░ (200 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████░░░░ (201 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 198
+- Total plans completed: 201
 - Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
@@ -34,7 +34,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.0 | 21 | 3 |
 | v3.1 | 23 | 1 |
 | v3.2 | 23 | 2 |
-| v3.3 | 6 | In progress |
+| v3.3 | 7 | In progress |
 
 ## v3.3 Roadmap Summary
 
@@ -45,7 +45,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 1. Deployment | Fresh Vercel + production env | 4 (DEPLOY-01 to 04) | ✓ Complete |
 | 2. Kapso Integration | WhatsApp webhook + messaging | 4 (KAPSO-01 to 04) | ✓ Complete |
 | 2.1 UI Documentation | Document UI/buttons | N/A (inserted) | ✓ Complete |
-| 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | Plan 2/4 complete |
+| 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | Plan 3/4 complete |
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | Not started |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
@@ -95,6 +95,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Sea-Lion primary (free, local), Grok fallback (paid API) for The Mouth
 - 10-message context window for Mouth (speed), 20 for Brain (analysis)
 - Indonesian default language with English support
+- Brain uses grok-beta model (~$5 per million tokens)
+- JSON extraction handles Grok markdown wrapping via regex
+- Cost queries filter by date range in memory after index lookup
 
 **Known Issues for Phase 3:**
 - ARI not enabled log: workspace ID mismatch between kapso lookup and ARI config
@@ -103,16 +106,16 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 03-02-PLAN.md
-Resume: Next plan is 03-03 (The Brain implementation)
+Stopped at: Completed 03-03-PLAN.md
+Resume: Next plan is 03-04 (Integration testing)
 
 **Phase 3 Progress:**
 - 03-01 ✓ AI Foundation (aiUsage table, Grok API verified, workspace issue documented)
 - 03-02 ✓ The Mouth (Sea-Lion/Grok conversational AI) - convex/ai/context.ts, convex/ai/mouth.ts
-- 03-03 Pending - The Brain (Grok analytical AI)
+- 03-03 ✓ The Brain (Grok analytical AI) - convex/ai/brain.ts, convex/ai/cost-tracker.ts
 - 03-04 Pending - Integration testing
 
 **Note:** Workspace linkage must be fixed in Convex dashboard before AI responses work in production.
 
 ---
-*Last updated: 2026-01-25 — Plan 03-02 complete, The Mouth ready for integration*
+*Last updated: 2026-01-25 — Plan 03-03 complete, Brain ready for integration*
