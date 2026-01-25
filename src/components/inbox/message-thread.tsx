@@ -16,13 +16,15 @@ import { useQuery } from 'convex/react'
 import { api } from '@/../convex/_generated/api'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getInitials } from '@/lib/utils'
+import { getInitials, cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import { MessageBubble } from './message-bubble'
 import { DateSeparator } from './date-separator'
 import { ComposeInput } from './compose-input'
+import { Bot, User, Loader2 } from 'lucide-react'
 
 interface Contact {
   name?: string
@@ -35,13 +37,44 @@ interface MessageThreadProps {
   conversationId: string
   workspaceId: string
   contact: Contact
+  conversationStatus?: string
+  onStatusChange?: () => void
 }
 
-export function MessageThread({ conversationId, workspaceId, contact }: MessageThreadProps) {
+export function MessageThread({
+  conversationId,
+  workspaceId,
+  contact,
+  conversationStatus = 'open',
+  onStatusChange,
+}: MessageThreadProps) {
   const messages = useQuery(api.messages.listByConversationAsc, {
     conversation_id: conversationId,
     workspace_id: workspaceId,
   })
+
+  // Handover toggle state
+  const [isToggling, setIsToggling] = useState(false)
+  const isAiActive = conversationStatus !== 'handover'
+
+  // Handle AI/Human handover toggle
+  const handleHandoverToggle = async () => {
+    setIsToggling(true)
+    try {
+      const res = await fetch(`/api/conversations/${conversationId}/handover`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ai_paused: isAiActive }) // Toggle current state
+      })
+      if (res.ok) {
+        onStatusChange?.()
+      }
+    } catch (error) {
+      console.error('Handover toggle failed:', error)
+    } finally {
+      setIsToggling(false)
+    }
+  }
 
   const containerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -105,6 +138,28 @@ export function MessageThread({ conversationId, workspaceId, contact }: MessageT
             {contact.name && contact.phone}
           </p>
         </div>
+        {/* AI/Human handover toggle */}
+        <Button
+          variant={isAiActive ? "default" : "outline"}
+          size="sm"
+          onClick={handleHandoverToggle}
+          disabled={isToggling}
+          className={cn(
+            "text-xs shrink-0",
+            isAiActive
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-orange-500 hover:bg-orange-600 text-white border-orange-500"
+          )}
+        >
+          {isToggling ? (
+            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+          ) : isAiActive ? (
+            <Bot className="h-3 w-3 mr-1" />
+          ) : (
+            <User className="h-3 w-3 mr-1" />
+          )}
+          {isAiActive ? "ARI Active" : "Manual"}
+        </Button>
       </div>
 
       {/* Messages area */}

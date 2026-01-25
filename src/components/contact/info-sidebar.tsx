@@ -32,7 +32,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Phone, Mail, Calendar as CalendarIcon, User, Loader2, Tag, Pencil, Check, X, Clock } from 'lucide-react'
+import { Phone, Mail, Calendar as CalendarIcon, User, Loader2, Tag, Pencil, Check, X, Clock, GitMerge } from 'lucide-react'
 import { ScoreBreakdown } from './score-breakdown'
 import { format, formatDistanceToNow } from 'date-fns'
 import { formatWIB, DATE_FORMATS } from '@/lib/utils/timezone'
@@ -54,6 +54,7 @@ interface InfoSidebarProps {
   conversationId?: string
   onContactUpdate?: (contactId: string, updates: Partial<Contact>) => void
   onAssignmentChange?: (userId: string | null) => void
+  onMergeClick?: () => void
   ariScoreData?: {
     score: number;
     breakdown?: {
@@ -102,6 +103,7 @@ export function InfoSidebar({
   conversationId,
   onContactUpdate,
   onAssignmentChange,
+  onMergeClick,
   ariScoreData,
 }: InfoSidebarProps) {
   const router = useRouter()
@@ -411,6 +413,17 @@ export function InfoSidebar({
             + Add note
           </Button>
         </div>
+        {onMergeClick && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-2 text-xs"
+            onClick={onMergeClick}
+          >
+            <GitMerge className="h-3 w-3 mr-1" />
+            Merge with...
+          </Button>
+        )}
       </div>
 
       <ScrollArea className="flex-1">

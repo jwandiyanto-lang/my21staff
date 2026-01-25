@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useQuery } from 'convex/react'
+import { useState, useMemo, useCallback } from 'react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -15,13 +15,30 @@ import { Filter, MessageSquare, Mail, MailOpen, ChevronDown, Tag } from 'lucide-
 import { Badge } from '@/components/ui/badge'
 import { ConversationList } from '@/components/inbox/conversation-list'
 import { MessageThread } from '@/components/inbox/message-thread'
+import { InfoSidebar } from '@/components/contact/info-sidebar'
+import { MergeContactsDialog } from '@/app/(dashboard)/[workspace]/database/merge-contacts-dialog'
 import { InboxSkeleton } from '@/components/skeletons/inbox-skeleton'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
 import type { Id } from 'convex/_generated/dataModel'
+import type { Contact } from '@/types/database'
 
 interface InboxClientProps {
   workspaceId: Id<'workspaces'>
+}
+
+interface ConversationContact {
+  _id: Id<'contacts'>
+  name?: string
+  kapso_name?: string
+  phone: string
+  email?: string
+  lead_status?: string
+  lead_score?: number
+  tags?: string[]
+  assigned_to?: string
+  metadata?: Record<string, unknown>
+  created_at?: number
 }
 
 interface Conversation {
@@ -31,14 +48,8 @@ interface Conversation {
   unread_count: number
   last_message_at?: number
   last_message_preview?: string
-  contact: {
-    _id: Id<'contacts'>
-    name?: string
-    kapso_name?: string
-    phone: string
-    lead_status?: string
-    tags?: string[]
-  } | null
+  assigned_to?: string
+  contact: ConversationContact | null
 }
 
 /**
@@ -74,6 +85,7 @@ function MessageThreadWrapper({
         phone: contact.phone,
         lead_status: contact.lead_status,
       }}
+      conversationStatus={conversation?.status || 'open'}
     />
   )
 }
@@ -84,6 +96,8 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
   const [viewMode, setViewMode] = useState<'active' | 'all'>('active')
   const [tagFilter, setTagFilter] = useState<string[]>([])
+  const [showMergeDialog, setShowMergeDialog] = useState(false)
+  const [mergeTargetContact, setMergeTargetContact] = useState<Contact | null>(null)
 
   const data = useQuery(api.conversations.listWithFilters, {
     workspace_id: workspaceId as any,
@@ -141,6 +155,65 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
         : [...prev, tag]
     )
   }
+
+  // Get the selected conversation and contact
+  const selectedConversation = useMemo(() => {
+    if (!selectedConversationId || !filteredConversations) return null
+    return filteredConversations.find((c) => c._id === selectedConversationId) || null
+  }, [selectedConversationId, filteredConversations])
+
+  const selectedContact = selectedConversation?.contact
+
+  // Get messages count for selected conversation
+  const messagesCount = useMemo(() => {
+    // We don't have direct access to messages count here, so return 0 for now
+    // The MessageThread component fetches its own messages
+    return 0
+  }, [])
+
+  // Convert Convex contact to Contact type for InfoSidebar
+  const contactForSidebar = useMemo(() => {
+    if (!selectedContact) return null
+    return {
+      id: String(selectedContact._id),
+      workspace_id: String(workspaceId),
+      phone: selectedContact.phone,
+      name: selectedContact.name || null,
+      kapso_name: selectedContact.kapso_name,
+      email: selectedContact.email || null,
+      lead_status: selectedContact.lead_status || null,
+      lead_score: selectedContact.lead_score ?? null,
+      tags: selectedContact.tags || null,
+      assigned_to: selectedContact.assigned_to || null,
+      metadata: selectedContact.metadata || null,
+      created_at: selectedContact.created_at ? new Date(selectedContact.created_at).toISOString() : null,
+      updated_at: null,
+      phone_normalized: null,
+      kapso_is_online: null,
+      kapso_last_seen: null,
+      kapso_profile_pic: null,
+      cache_updated_at: null,
+    } as Contact
+  }, [selectedContact, workspaceId])
+
+  // Handle contact updates from InfoSidebar
+  const handleContactUpdate = useCallback((contactId: string, updates: Partial<Contact>) => {
+    // Updates are handled via API calls in InfoSidebar
+    // The Convex query will automatically refresh
+  }, [])
+
+  // Handle assignment change
+  const handleAssignmentChange = useCallback((userId: string | null) => {
+    // Handled via API calls in InfoSidebar
+  }, [])
+
+  // Handle opening merge dialog
+  const handleOpenMergeDialog = useCallback(() => {
+    if (contactForSidebar) {
+      setMergeTargetContact(contactForSidebar)
+      setShowMergeDialog(true)
+    }
+  }, [contactForSidebar])
 
   if (data === undefined) {
     return <InboxSkeleton />
@@ -326,8 +399,8 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
         />
       </div>
 
-      {/* Right area - Message thread */}
-      <div className="flex-1 flex flex-col bg-muted/30">
+      {/* Center area - Message thread */}
+      <div className="flex-1 flex flex-col bg-muted/30 min-w-0">
         {selectedConversationId ? (
           <MessageThreadWrapper
             conversationId={selectedConversationId}
@@ -346,6 +419,39 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
           </div>
         )}
       </div>
+
+      {/* Right sidebar - Contact info */}
+      {selectedConversationId && contactForSidebar && (
+        <InfoSidebar
+          contact={contactForSidebar}
+          messagesCount={messagesCount}
+          lastActivity={selectedConversation?.last_message_at
+            ? new Date(selectedConversation.last_message_at).toISOString()
+            : null}
+          conversationStatus={selectedConversation?.status || 'open'}
+          contactTags={contactTags}
+          teamMembers={[]}
+          assignedTo={selectedConversation?.assigned_to}
+          conversationId={String(selectedConversationId)}
+          onContactUpdate={handleContactUpdate}
+          onAssignmentChange={handleAssignmentChange}
+          onMergeClick={handleOpenMergeDialog}
+        />
+      )}
+
+      {/* Merge contacts dialog */}
+      {showMergeDialog && mergeTargetContact && (
+        <MergeContactsDialog
+          contact1={mergeTargetContact}
+          contact2={mergeTargetContact} // User selects second contact in dialog
+          open={showMergeDialog}
+          onOpenChange={setShowMergeDialog}
+          onMergeComplete={() => {
+            setShowMergeDialog(false)
+            setMergeTargetContact(null)
+          }}
+        />
+      )}
     </div>
   )
 }

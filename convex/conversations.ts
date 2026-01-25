@@ -6,7 +6,7 @@
  */
 
 // @ts-nocheck - Schema types mismatch with generated Convex types
-import { query, internalQuery } from "./_generated/server";
+import { query, internalQuery, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireWorkspaceMembership } from "./lib/auth";
 
@@ -146,6 +146,46 @@ export const listWithFiltersInternal = query({
       })),
       tags: Array.from(tagSet).sort(),
     };
+  },
+});
+
+/**
+ * Update conversation status (no auth - API handles via Clerk).
+ *
+ * Used by /api/conversations/[id]/handover to toggle AI/human mode.
+ * Status values: 'new', 'open', 'handover', 'closed'
+ *
+ * When status is 'handover', ARI bot will not auto-respond.
+ * When status is 'open', ARI bot will respond normally.
+ *
+ * @param id - The conversation ID
+ * @param status - New status value
+ * @returns The updated conversation document
+ */
+export const updateConversationStatus = mutation({
+  args: {
+    id: v.string(),
+    status: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.id as any);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    const now = Date.now();
+    const updates: any = {
+      status: args.status,
+      updated_at: now,
+    };
+
+    // Clear unread_count if status changes to 'open'
+    if (args.status === "open" && conversation.unread_count > 0) {
+      updates.unread_count = 0;
+    }
+
+    await ctx.db.patch(args.id as any, updates);
+    return await ctx.db.get(args.id as any);
   },
 });
 
