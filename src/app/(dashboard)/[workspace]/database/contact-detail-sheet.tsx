@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useTransition, useRef } from 'react'
 import { format } from 'date-fns'
 import { formatWIB, formatDistanceWIB, DATE_FORMATS } from '@/lib/utils/timezone'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   Sheet,
@@ -33,7 +32,6 @@ import {
   Mail,
   Calendar as CalendarIcon,
   Tag,
-  ArrowRight,
   Loader2,
   X,
   Plus,
@@ -122,11 +120,9 @@ export function ContactDetailSheet({
   const [localStatus, setLocalStatus] = useState<LeadStatus>(contact?.lead_status as LeadStatus || 'prospect')
   const [localScore, setLocalScore] = useState(contact?.lead_score ?? 0)
   const [localTags, setLocalTags] = useState<string[]>(contact?.tags || [])
-  const [localAssignedTo, setLocalAssignedTo] = useState<string | null>(contact?.assigned_to || null)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [isUpdatingScore, setIsUpdatingScore] = useState(false)
   const [isUpdatingTags, setIsUpdatingTags] = useState(false)
-  const [isUpdatingAssignment, setIsUpdatingAssignment] = useState(false)
 
   // Editable contact info
   const [localName, setLocalName] = useState(contact?.name || '')
@@ -160,7 +156,6 @@ export function ContactDetailSheet({
       setLocalStatus(contact.lead_status as LeadStatus)
       setLocalScore(contact.lead_score)
       setLocalTags(contact.tags || [])
-      setLocalAssignedTo(contact.assigned_to || null)
       setLocalName(contact.name || '')
       setLocalPhone(contact.phone || '')
       setLocalEmail(contact.email || '')
@@ -292,41 +287,6 @@ export function ContactDetailSheet({
       console.error('Error updating tags:', error)
     } finally {
       setIsUpdatingTags(false)
-    }
-  }
-
-  // Assignment handler
-  const handleAssignmentChange = async (userId: string) => {
-    if (!contact) return
-
-    const newAssignedTo = userId === 'unassigned' ? null : userId
-    const previousAssigned = localAssignedTo
-
-    setLocalAssignedTo(newAssignedTo)
-    setIsUpdatingAssignment(true)
-
-    try {
-      const response = await fetch(`/api/contacts/${contact.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assigned_to: newAssignedTo }),
-      })
-
-      if (!response.ok) {
-        setLocalAssignedTo(previousAssigned)
-        toast.error('Failed to update assignment')
-      } else {
-        toast.success('Assignment updated')
-        startTransition(() => {
-          router.refresh()
-        })
-      }
-    } catch (error) {
-      setLocalAssignedTo(previousAssigned)
-      console.error('Error updating assignment:', error)
-      toast.error('Failed to update assignment')
-    } finally {
-      setIsUpdatingAssignment(false)
     }
   }
 
@@ -1089,39 +1049,6 @@ export function ContactDetailSheet({
 
                 <Separator />
 
-                {/* Assigned To */}
-                {teamMembers.length > 0 && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                        Assigned To
-                      </h3>
-                      {isUpdatingAssignment && (
-                        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                      )}
-                    </div>
-                    <Select
-                      value={localAssignedTo || 'unassigned'}
-                      onValueChange={handleAssignmentChange}
-                      disabled={isUpdatingAssignment}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select team member" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {teamMembers.map((member) => (
-                          <SelectItem key={member.user_id} value={member.user_id}>
-                            {member.profile?.full_name || member.profile?.email || 'Unknown'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {teamMembers.length > 0 && <Separator />}
-
                 {/* Tags */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -1522,14 +1449,7 @@ export function ContactDetailSheet({
         </Tabs>
 
         {/* Footer */}
-        <div className="p-4 border-t space-y-2">
-          <Button asChild className="w-full">
-            <Link href={`/${workspace.slug}/inbox?contact=${contact.id}`}>
-              Open in Inbox
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-
+        <div className="p-4 border-t">
           {/* Delete Contact */}
           <AlertDialog>
             <AlertDialogTrigger asChild>

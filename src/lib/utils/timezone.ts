@@ -5,33 +5,41 @@ const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
 
 /**
  * Convert a UTC date to WIB timezone
+ * Handles Date objects, ISO strings, and numeric timestamps (Convex)
  */
-export function toWIB(date: Date | string): Date {
-  const d = typeof date === 'string' ? new Date(date) : date
+export function toWIB(date: Date | string | number): Date {
+  let d: Date
+  if (typeof date === 'number') {
+    d = new Date(date)
+  } else if (typeof date === 'string') {
+    d = new Date(date)
+  } else {
+    d = date
+  }
   return new Date(d.getTime() + WIB_OFFSET_MS)
 }
 
 /**
  * Format a date in WIB timezone
- * @param date - Date to format (assumed UTC)
+ * @param date - Date to format (assumed UTC) - accepts Date, string, or number (timestamp)
  * @param formatStr - date-fns format string (default: 'MMM d, HH:mm')
  */
-export function formatWIB(date: Date | string, formatStr: string = 'MMM d, HH:mm'): string {
+export function formatWIB(date: Date | string | number, formatStr: string = 'MMM d, HH:mm'): string {
   return format(toWIB(date), formatStr)
 }
 
 /**
  * Format relative time in WIB
- * @param date - Date to format (assumed UTC)
+ * @param date - Date to format (assumed UTC) - accepts Date, string, or number (timestamp)
  */
-export function formatDistanceWIB(date: Date | string, options?: { addSuffix?: boolean }): string {
+export function formatDistanceWIB(date: Date | string | number, options?: { addSuffix?: boolean }): string {
   return formatDistanceToNow(toWIB(date), options)
 }
 
 /**
  * Check if date is today in WIB timezone
  */
-export function isTodayWIB(date: Date | string): boolean {
+export function isTodayWIB(date: Date | string | number): boolean {
   const wibDate = toWIB(date)
   const now = toWIB(new Date())
   return wibDate.toDateString() === now.toDateString()
