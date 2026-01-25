@@ -9,6 +9,11 @@
  */
 
 import type * as _internal_webhook from "../_internal/webhook.js";
+import type * as admin from "../admin.js";
+import type * as ai_brain from "../ai/brain.js";
+import type * as ai_context from "../ai/context.js";
+import type * as ai_costTracker from "../ai/costTracker.js";
+import type * as ai_mouth from "../ai/mouth.js";
 import type * as ari from "../ari.js";
 import type * as cms from "../cms.js";
 import type * as contactNotes from "../contactNotes.js";
@@ -39,6 +44,11 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "_internal/webhook": typeof _internal_webhook;
+  admin: typeof admin;
+  "ai/brain": typeof ai_brain;
+  "ai/context": typeof ai_context;
+  "ai/costTracker": typeof ai_costTracker;
+  "ai/mouth": typeof ai_mouth;
   ari: typeof ari;
   cms: typeof cms;
   contactNotes: typeof contactNotes;

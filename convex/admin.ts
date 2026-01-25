@@ -2,8 +2,9 @@
  * Admin utilities for one-off operations.
  */
 
-import { mutation } from "./_generated/server";
+import { mutation, query, internalAction, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 
 /**
  * Create ariConfig for a workspace.
@@ -30,5 +31,329 @@ export const createAriConfig = mutation({
     });
 
     return { id, message: "ariConfig created successfully" };
+  },
+});
+
+// ============================================
+// DIAGNOSTIC QUERIES
+// ============================================
+
+/**
+ * List all workspaces with their Kapso config.
+ */
+export const listWorkspaces = query({
+  args: {},
+  handler: async (ctx) => {
+    const workspaces = await ctx.db.query("workspaces").collect();
+    return workspaces.map((w) => ({
+      _id: w._id,
+      name: w.name,
+      kapso_phone_id: w.kapso_phone_id,
+      has_meta_token: !!w.meta_access_token,
+    }));
+  },
+});
+
+/**
+ * List all ariConfigs with their workspace linkage.
+ */
+export const listAriConfigs = query({
+  args: {},
+  handler: async (ctx) => {
+    const configs = await ctx.db.query("ariConfig").collect();
+    const results = [];
+
+    for (const config of configs) {
+      const workspace = await ctx.db.get(config.workspace_id);
+      results.push({
+        _id: config._id,
+        workspace_id: config.workspace_id,
+        workspace_name: workspace?.name || "NOT FOUND",
+        workspace_has_kapso: workspace ? !!workspace.kapso_phone_id : false,
+        bot_name: config.bot_name,
+        language: config.language,
+      });
+    }
+
+    return results;
+  },
+});
+
+/**
+ * Fix ariConfig workspace linkage.
+ * Updates the workspace_id to the correct workspace (the one with Kapso credentials).
+ */
+export const fixAriConfigWorkspace = mutation({
+  args: {
+    ariConfigId: v.id("ariConfig"),
+    correctWorkspaceId: v.id("workspaces"),
+  },
+  handler: async (ctx, args) => {
+    // Verify workspace exists and has Kapso
+    const workspace = await ctx.db.get(args.correctWorkspaceId);
+    if (!workspace) {
+      throw new Error(`Workspace ${args.correctWorkspaceId} not found`);
+    }
+    if (!workspace.kapso_phone_id) {
+      throw new Error(`Workspace ${args.correctWorkspaceId} has no kapso_phone_id`);
+    }
+
+    // Update ariConfig
+    await ctx.db.patch(args.ariConfigId, {
+      workspace_id: args.correctWorkspaceId,
+      updated_at: Date.now(),
+    });
+
+    return {
+      message: "ariConfig workspace_id updated successfully",
+      workspace_name: workspace.name,
+      kapso_phone_id: workspace.kapso_phone_id,
+    };
+  },
+});
+
+/**
+ * Prepare test data for ARI processing.
+ * Returns workspace and contact IDs for the test action.
+ */
+export const prepareAriTest = internalMutation({
+  args: {
+    testMessage: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // 1. Find workspace with Kapso
+    const workspace = await ctx.db
+      .query("workspaces")
+      .filter((q) => q.neq(q.field("kapso_phone_id"), undefined))
+      .first();
+
+    if (!workspace) {
+      return { error: "No workspace with kapso_phone_id found" };
+    }
+
+    // 2. Check ariConfig
+    const ariConfig = await ctx.db
+      .query("ariConfig")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", workspace._id))
+      .first();
+
+    if (!ariConfig) {
+      return { error: "No ariConfig found for workspace" };
+    }
+
+    // 3. Find or create a test contact
+    let contact = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace_phone", (q) =>
+        q.eq("workspace_id", workspace._id).eq("phone", "6281234567890")
+      )
+      .first();
+
+    if (!contact) {
+      const now = Date.now();
+      const contactId = await ctx.db.insert("contacts", {
+        workspace_id: workspace._id,
+        phone: "6281234567890",
+        phone_normalized: "6281234567890",
+        name: "Test User",
+        lead_score: 0,
+        lead_status: "new",
+        tags: [],
+        source: "test",
+        metadata: {},
+        cache_updated_at: now,
+        created_at: now,
+        updated_at: now,
+        supabaseId: "",
+      });
+      contact = await ctx.db.get(contactId);
+    }
+
+    if (!contact) {
+      return { error: "Failed to create test contact" };
+    }
+
+    return {
+      workspace_id: workspace._id,
+      workspace_name: workspace.name,
+      contact_id: contact._id,
+      contact_phone: contact.phone,
+      contact_name: contact.name,
+      has_meta_token: !!workspace.meta_access_token,
+    };
+  },
+});
+
+/**
+ * Test ARI processing manually (action version).
+ * This simulates what happens when a WhatsApp message arrives.
+ */
+export const testAriProcessing = internalAction({
+  args: {
+    testMessage: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const testMsg = args.testMessage || "Halo, saya mau tanya tentang kuliah di Australia";
+
+    // 1. Prepare test data via mutation
+    const testData = await ctx.runMutation(internal.admin.prepareAriTest, {
+      testMessage: testMsg,
+    });
+
+    if ("error" in testData) {
+      return testData;
+    }
+
+    // 2. Run ARI processing
+    try {
+      await ctx.runAction(internal.kapso.processARI, {
+        workspace_id: testData.workspace_id,
+        contact_id: testData.contact_id,
+        contact_phone: testData.contact_phone,
+        user_message: testMsg,
+        kapso_message_id: `test_${Date.now()}`,
+      });
+      return {
+        success: true,
+        message: "ARI processing completed",
+        workspace: testData.workspace_name,
+        contact: testData.contact_name,
+        test_message: testMsg,
+        has_meta_token: testData.has_meta_token,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: String(error),
+        workspace: testData.workspace_name,
+        contact: testData.contact_name,
+      };
+    }
+  },
+});
+
+/**
+ * Public wrapper to run ARI test (schedules the internal action).
+ */
+export const runAriTest = mutation({
+  args: {
+    testMessage: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Schedule the internal action
+    await ctx.scheduler.runAfter(0, internal.admin.testAriProcessing, {
+      testMessage: args.testMessage,
+    });
+    return { scheduled: true, message: "ARI test scheduled. Check activity in 10 seconds." };
+  },
+});
+
+/**
+ * Test Grok API directly.
+ */
+export const testGrokApi = internalAction({
+  args: {},
+  handler: async () => {
+    const grokApiKey = process.env.GROK_API_KEY;
+
+    if (!grokApiKey) {
+      return { error: "GROK_API_KEY not found in environment" };
+    }
+
+    console.log(`[Test] GROK_API_KEY present: ${grokApiKey.substring(0, 10)}...`);
+
+    try {
+      const response = await fetch("https://api.x.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${grokApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "grok-beta",
+          messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: "Say hello in Indonesian." },
+          ],
+          max_tokens: 50,
+          temperature: 0.5,
+        }),
+      });
+
+      const responseText = await response.text();
+      console.log(`[Test] Grok response status: ${response.status}`);
+      console.log(`[Test] Grok response body: ${responseText.substring(0, 200)}`);
+
+      if (!response.ok) {
+        return {
+          error: `Grok API error: ${response.status}`,
+          body: responseText.substring(0, 500),
+        };
+      }
+
+      const data = JSON.parse(responseText);
+      return {
+        success: true,
+        model: data.model,
+        content: data.choices?.[0]?.message?.content || "No content",
+        tokens: data.usage?.total_tokens || 0,
+      };
+    } catch (error) {
+      return { error: `Fetch error: ${error}` };
+    }
+  },
+});
+
+/**
+ * Public wrapper for Grok test.
+ */
+export const runGrokTest = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await ctx.scheduler.runAfter(0, internal.admin.testGrokApi, {});
+    return { scheduled: true };
+  },
+});
+
+/**
+ * Diagnostic: Check recent messages and ARI state.
+ */
+export const checkRecentActivity = query({
+  args: {},
+  handler: async (ctx) => {
+    // Get recent messages (last 10)
+    const messages = await ctx.db
+      .query("messages")
+      .order("desc")
+      .take(10);
+
+    // Get recent ariMessages (last 10)
+    const ariMessages = await ctx.db
+      .query("ariMessages")
+      .order("desc")
+      .take(10);
+
+    // Get ariConversations
+    const ariConversations = await ctx.db
+      .query("ariConversations")
+      .collect();
+
+    // Get aiUsage (last 10)
+    const aiUsage = await ctx.db
+      .query("aiUsage")
+      .order("desc")
+      .take(10);
+
+    return {
+      messages_count: messages.length,
+      recent_messages: messages.map((m) => ({
+        direction: m.direction,
+        content: m.content?.substring(0, 50),
+        created_at: new Date(m.created_at).toISOString(),
+      })),
+      ari_messages_count: ariMessages.length,
+      ari_conversations_count: ariConversations.length,
+      ai_usage_count: aiUsage.length,
+    };
   },
 });

@@ -12,7 +12,7 @@
  */
 
 // @ts-nocheck - Schema types mismatch with generated Convex types
-import { mutation, internalMutation } from "./_generated/server";
+import { mutation, internalMutation, internalAction } from "./_generated/server";
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import type {
@@ -387,9 +387,8 @@ async function processWorkspaceMessages(
       continue;
     }
 
-    // Schedule ARI processing
-    // @ts-ignore - processARI exists but types aren't synced
-    await ctx.scheduler.runAfter(0, api.kapso.processARI as any, {
+    // Schedule ARI processing (processARI is an internalMutation)
+    await ctx.scheduler.runAfter(0, internal.kapso.processARI, {
       workspace_id: workspaceId,
       contact_id: contact._id,
       contact_phone: phone,
@@ -412,244 +411,116 @@ async function processWorkspaceMessages(
 /**
  * Process ARI for a single message.
  *
- * This is a scheduled action that can make external API calls
- * to Kapso and AI models. It:
- * 1. Gets workspace and contact info
- * 2. Gets ARI configuration
- * 3. Builds context from recent messages
- * 4. Calls AI to generate response
- * 5. Sends response via Kapso API
- * 6. Logs both user message and AI response
+ * This is an internalAction that can make external API calls
+ * to Kapso and AI models. It uses helper mutations for database operations.
  *
- * @param workspace_id - The workspace ID
- * @param contact_id - The contact ID
- * @param contact_phone - Contact's phone number
- * @param user_message - The user's text message
- * @param kapso_message_id - Original Kapso message ID
+ * Flow:
+ * 1. Get context (workspace, config, contact, conversation, messages) via mutation
+ * 2. Call The Mouth (action) for AI response
+ * 3. Save response (messages, usage) via mutation
+ * 4. Send via Kapso API (HTTP call)
+ * 5. Log outbound message via mutation
+ * 6. Schedule The Brain (action) for async analysis
  */
-export const processARI = internalMutation({
+export const processARI = internalAction({
   args: {
-    workspace_id: v.string(),
-    contact_id: v.string(),
+    workspace_id: v.id("workspaces"),
+    contact_id: v.id("contacts"),
     contact_phone: v.string(),
     user_message: v.string(),
     kapso_message_id: v.string(),
   },
   handler: async (ctx, args) => {
-    const {
-      workspace_id,
-      contact_id,
-      contact_phone,
-      user_message,
-      kapso_message_id,
-    } = args;
+    const { workspace_id, contact_id, contact_phone, user_message } = args;
     const startTime = Date.now();
 
-    console.log(
-      `[ARI] Processing message for contact ${contact_id} in workspace ${workspace_id}`
-    );
+    console.log(`[ARI] Processing message for contact ${contact_id} in workspace ${workspace_id}`);
 
-    // Get workspace (for Kapso credentials)
-    const workspace = await ctx.db.get(workspace_id as any);
-    if (!workspace) {
-      console.error(`[ARI] Workspace not found: ${workspace_id}`);
-      return;
-    }
-
-    // @ts-ignore - workspace may be different type in union
-    if (!workspace || !(workspace as any).meta_access_token || !(workspace as any).kapso_phone_id) {
-      console.log(`[ARI] No Kapso credentials configured for workspace`);
-      return;
-    }
-
-    // Get ARI configuration
-    // @ts-ignore - workspace_id type
-    const ariConfig = await ctx.db
-      .query("ariConfig")
-      .withIndex("by_workspace", (q: any) => q.eq("workspace_id", workspace_id))
-      .first();
-
-    if (!ariConfig) {
-      console.log(`[ARI] ARI not enabled for workspace ${workspace_id}`);
-      return;
-    }
-
-    // Get contact information
-    const contact = await ctx.db.get(contact_id as any);
-    if (!contact) {
-      console.error(`[ARI] Contact not found: ${contact_id}`);
-      return;
-    }
-
-    // Get or create ARI conversation
-    // @ts-ignore - ariConversations types not synced
-    let ariConversation = await ctx.db
-      .query("ariConversations" as any)
-      .withIndex("by_workspace_contact", (q: any) =>
-        q.eq("workspace_id", workspace_id).eq("contact_id", contact_id)
-      )
-      .first();
-
-    if (!ariConversation) {
-      const now = Date.now();
-      // @ts-ignore - ariConversations types not synced
-      const ariConvId = await ctx.db.insert("ariConversations" as any, {
-        workspace_id,
-        contact_id,
-        state: "greeting",
-        lead_score: 0,
-        created_at: now,
-        updated_at: now,
-        supabaseId: "",
-      });
-      ariConversation = await ctx.db.get(ariConvId as any);
-    }
-
-    if (!ariConversation) {
-      console.error("[ARI] Failed to create ARI conversation");
-      return;
-    }
-
-    // Get recent ARI messages for context
-    // @ts-ignore - ariMessages and q types not synced
-    const recentMessages = await ctx.db
-      .query("ariMessages" as any)
-      .withIndex("by_conversation_time", (q: any) =>
-        q.eq("ari_conversation_id", (ariConversation as any)._id)
-      )
-      .order("desc")
-      .take(20);
-
-    // Reverse to get chronological order
-    const messageHistory = recentMessages.reverse();
-
-    // ============================================
-    // 1. THE MOUTH: Generate immediate response
-    // ============================================
-    const mouthResponse = await ctx.runAction(internal.ai.mouth.generateMouthResponse, {
-      conversationHistory: messageHistory.map((m: any) => ({
-        role: m.role,
-        content: m.content,
-      })),
-      userMessage: user_message,
-      botName: ariConfig.bot_name,
-      contactName: contact?.name || contact?.kapso_name || undefined,
-      language: ariConfig.language,
+    // 1. Get context from database
+    console.log(`[ARI] Step 1: Getting context...`);
+    const context = await ctx.runMutation(internal.kapso.getAriContext, {
+      workspace_id,
+      contact_id,
     });
+
+    if ("error" in context) {
+      console.log(`[ARI] Context error: ${context.error}`);
+      return;
+    }
+    console.log(`[ARI] Context loaded: conversation=${context.ariConversationId}, ${context.messageHistory.length} messages`);
+
+    // 2. Call The Mouth for AI response
+    console.log(`[ARI] Step 2: Calling The Mouth...`);
+    let mouthResponse;
+    try {
+      mouthResponse = await ctx.runAction(internal.ai.mouth.generateMouthResponse, {
+        conversationHistory: context.messageHistory,
+        userMessage: user_message,
+        botName: context.ariConfig.bot_name,
+        contactName: context.contact.name || context.contact.kapso_name || undefined,
+        language: context.ariConfig.language,
+      });
+    } catch (mouthError) {
+      console.error(`[ARI] Mouth error: ${mouthError}`);
+      // Use fallback response
+      mouthResponse = {
+        content: context.ariConfig.language === "en"
+          ? "Thank you for contacting us. Our consultant will help you shortly."
+          : "Terima kasih sudah menghubungi kami. Konsultan kami akan segera membantu.",
+        model: "fallback" as const,
+        tokens: 0,
+        responseTimeMs: 0,
+      };
+    }
 
     const responseTime = Date.now() - startTime;
+    console.log(`[ARI] Mouth response: model=${mouthResponse.model}, tokens=${mouthResponse.tokens}, content="${mouthResponse.content.substring(0, 50)}..."`);
 
-    // 2. Log Mouth usage (skip for fallback - no actual AI call)
-    if (mouthResponse.model !== "fallback") {
-      await ctx.db.insert("aiUsage", {
-        workspace_id: workspace_id as any,
-        conversation_id: ariConversation._id,
-        model: mouthResponse.model,
-        ai_type: "mouth",
-        input_tokens: mouthResponse.tokens,
-        output_tokens: 0, // Mouth doesn't track output separately
-        cost_usd: mouthResponse.model === "grok-beta"
-          ? mouthResponse.tokens * (5 / 1_000_000) // Grok: ~$5/M tokens
-          : 0, // Sea-Lion: free (local)
-        created_at: Date.now(),
-      });
-    }
-
-    // Log user message
-    // @ts-ignore - ariMessages types not synced
-    await ctx.db.insert("ariMessages" as any, {
-      ari_conversation_id: (ariConversation as any)._id,
+    // 3. Save response to database
+    console.log(`[ARI] Step 3: Saving response...`);
+    await ctx.runMutation(internal.kapso.saveAriResponse, {
       workspace_id,
-      role: "user",
-      content: user_message,
-      created_at: Date.now(),
-    });
-
-    // Log AI response
-    // @ts-ignore - ariMessages types not synced
-    await ctx.db.insert("ariMessages" as any, {
-      ari_conversation_id: (ariConversation as any)._id,
-      workspace_id: workspace_id as any,
-      role: "assistant",
-      content: mouthResponse.content,
+      contact_id,
+      ariConversationId: context.ariConversationId,
+      user_message,
+      ai_response: mouthResponse.content,
       ai_model: mouthResponse.model,
-      tokens_used: mouthResponse.tokens,
+      tokens: mouthResponse.tokens,
       response_time_ms: responseTime,
-      created_at: Date.now(),
     });
 
-    // Update ARI conversation
-    await ctx.db.patch(ariConversation._id, {
-      last_ai_message_at: Date.now(),
-      updated_at: Date.now(),
-    });
-
-    // Send response via Kapso API
-    // @ts-ignore - workspace optional access
+    // 4. Send response via Kapso API
     const kapsoMessageId = await sendKapsoMessage(
-      (workspace as any).meta_access_token,
-      (workspace as any).kapso_phone_id,
+      context.workspace.meta_access_token,
+      context.workspace.kapso_phone_id,
       contact_phone,
       mouthResponse.content
     );
 
-    // Create outbound message record
-    // @ts-ignore - conversation optional access
-    const conversation = await ctx.db
-      .query("conversations")
-      .withIndex("by_contact", (q: any) => q.eq("contact_id", contact_id))
-      .first();
+    // 5. Log outbound message
+    await ctx.runMutation(internal.kapso.logOutboundMessage, {
+      workspace_id,
+      contact_id,
+      content: mouthResponse.content,
+      ai_model: mouthResponse.model,
+      response_time_ms: responseTime,
+      kapso_message_id: kapsoMessageId,
+    });
 
-    if (conversation) {
-      // @ts-ignore - messages types not synced
-      await ctx.db.insert("messages" as any, {
-        conversation_id: (conversation as any)._id,
-        workspace_id,
-        direction: "outbound",
-        sender_type: "bot",
-        sender_id: "ari",
-        content: mouthResponse.content,
-        message_type: "text",
-        kapso_message_id: kapsoMessageId,
-        metadata: {
-          ari_model: mouthResponse.model,
-          response_time_ms: responseTime,
-        },
-        created_at: Date.now(),
-        supabaseId: "",
-      });
+    console.log(`[ARI] Response sent in ${responseTime}ms (${mouthResponse.model})`);
 
-      // Update conversation last message
-      // @ts-ignore - conversation optional access
-      await ctx.db.patch((conversation as any)._id, {
-        last_message_at: Date.now(),
-        last_message_preview: mouthResponse.content.substring(0, 200),
-        updated_at: Date.now(),
-      });
-    }
-
-    console.log(
-      `[ARI] Response sent in ${responseTime}ms (${mouthResponse.model})`
-    );
-
-    // ============================================
-    // 3. THE BRAIN: Schedule async analysis (after response sent)
-    // This runs after the user already received the Mouth's response
-    // ============================================
+    // 6. Schedule The Brain for async analysis
     ctx.scheduler.runAfter(1000, internal.ai.brain.analyzeConversation, {
-      workspaceId: workspace_id as any,
-      contactId: contact_id as any,
-      ariConversationId: ariConversation._id,
+      workspaceId: workspace_id,
+      contactId: contact_id,
+      ariConversationId: context.ariConversationId,
       recentMessages: [
-        ...messageHistory.map((m: any) => ({
-          role: m.role,
-          content: m.content,
-        })),
+        ...context.messageHistory,
         { role: "user", content: user_message },
         { role: "assistant", content: mouthResponse.content },
       ],
-      contactName: contact?.name || contact?.kapso_name || undefined,
-      currentScore: (contact as any)?.lead_score || 0,
+      contactName: context.contact.name || context.contact.kapso_name || undefined,
+      currentScore: context.contact.lead_score || 0,
     });
 
     console.log(`[ARI] Scheduled Brain analysis for conversation`);
@@ -697,3 +568,208 @@ async function sendKapsoMessage(
 
   return undefined;
 }
+
+// ============================================
+// Helper Mutations for ARI Processing
+// (Used by processARI action for database operations)
+// ============================================
+
+/**
+ * Get ARI context - workspace, config, contact, conversation, messages.
+ */
+export const getAriContext = internalMutation({
+  args: {
+    workspace_id: v.id("workspaces"),
+    contact_id: v.id("contacts"),
+  },
+  handler: async (ctx, args) => {
+    // Get workspace
+    const workspace = await ctx.db.get(args.workspace_id);
+    if (!workspace || !workspace.meta_access_token || !workspace.kapso_phone_id) {
+      return { error: "No Kapso credentials" };
+    }
+
+    // Get ARI config
+    const ariConfig = await ctx.db
+      .query("ariConfig")
+      .withIndex("by_workspace", (q: any) => q.eq("workspace_id", args.workspace_id))
+      .first();
+    if (!ariConfig) {
+      return { error: "ARI not enabled" };
+    }
+
+    // Get contact
+    const contact = await ctx.db.get(args.contact_id);
+    if (!contact) {
+      return { error: "Contact not found" };
+    }
+
+    // Get or create ARI conversation
+    let ariConversation = await ctx.db
+      .query("ariConversations" as any)
+      .withIndex("by_workspace_contact", (q: any) =>
+        q.eq("workspace_id", args.workspace_id).eq("contact_id", args.contact_id)
+      )
+      .first();
+
+    if (!ariConversation) {
+      const now = Date.now();
+      const ariConvId = await ctx.db.insert("ariConversations" as any, {
+        workspace_id: args.workspace_id,
+        contact_id: args.contact_id,
+        state: "greeting",
+        lead_score: 0,
+        created_at: now,
+        updated_at: now,
+        supabaseId: "",
+      });
+      ariConversation = await ctx.db.get(ariConvId as any);
+    }
+
+    if (!ariConversation) {
+      return { error: "Failed to create ARI conversation" };
+    }
+
+    // Get recent messages
+    const recentMessages = await ctx.db
+      .query("ariMessages" as any)
+      .withIndex("by_conversation_time", (q: any) =>
+        q.eq("ari_conversation_id", ariConversation._id)
+      )
+      .order("desc")
+      .take(20);
+
+    return {
+      workspace: {
+        meta_access_token: workspace.meta_access_token,
+        kapso_phone_id: workspace.kapso_phone_id,
+      },
+      ariConfig: {
+        bot_name: ariConfig.bot_name,
+        language: ariConfig.language,
+      },
+      contact: {
+        name: contact.name,
+        kapso_name: contact.kapso_name,
+        lead_score: contact.lead_score,
+      },
+      ariConversationId: ariConversation._id,
+      messageHistory: recentMessages.reverse().map((m: any) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    };
+  },
+});
+
+/**
+ * Save ARI response - log messages and usage.
+ */
+export const saveAriResponse = internalMutation({
+  args: {
+    workspace_id: v.id("workspaces"),
+    contact_id: v.id("contacts"),
+    ariConversationId: v.id("ariConversations"),
+    user_message: v.string(),
+    ai_response: v.string(),
+    ai_model: v.string(),
+    tokens: v.number(),
+    response_time_ms: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Log user message
+    await ctx.db.insert("ariMessages" as any, {
+      ari_conversation_id: args.ariConversationId,
+      workspace_id: args.workspace_id,
+      role: "user",
+      content: args.user_message,
+      created_at: now,
+    });
+
+    // Log AI response
+    await ctx.db.insert("ariMessages" as any, {
+      ari_conversation_id: args.ariConversationId,
+      workspace_id: args.workspace_id,
+      role: "assistant",
+      content: args.ai_response,
+      ai_model: args.ai_model,
+      tokens_used: args.tokens,
+      response_time_ms: args.response_time_ms,
+      created_at: now,
+    });
+
+    // Log Mouth usage (skip for fallback)
+    if (args.ai_model !== "fallback") {
+      await ctx.db.insert("aiUsage", {
+        workspace_id: args.workspace_id,
+        conversation_id: args.ariConversationId,
+        model: args.ai_model,
+        ai_type: "mouth",
+        input_tokens: args.tokens,
+        output_tokens: 0,
+        cost_usd: args.ai_model === "grok-beta"
+          ? args.tokens * (5 / 1_000_000)
+          : 0,
+        created_at: now,
+      });
+    }
+
+    // Update ARI conversation
+    await ctx.db.patch(args.ariConversationId, {
+      last_ai_message_at: now,
+      updated_at: now,
+    });
+  },
+});
+
+/**
+ * Log outbound message to messages table.
+ */
+export const logOutboundMessage = internalMutation({
+  args: {
+    workspace_id: v.id("workspaces"),
+    contact_id: v.id("contacts"),
+    content: v.string(),
+    ai_model: v.string(),
+    response_time_ms: v.number(),
+    kapso_message_id: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Find conversation
+    const conversation = await ctx.db
+      .query("conversations")
+      .withIndex("by_contact", (q: any) => q.eq("contact_id", args.contact_id))
+      .first();
+
+    if (!conversation) return;
+
+    const now = Date.now();
+
+    // Create outbound message
+    await ctx.db.insert("messages" as any, {
+      conversation_id: conversation._id,
+      workspace_id: args.workspace_id,
+      direction: "outbound",
+      sender_type: "bot",
+      sender_id: "ari",
+      content: args.content,
+      message_type: "text",
+      kapso_message_id: args.kapso_message_id,
+      metadata: {
+        ari_model: args.ai_model,
+        response_time_ms: args.response_time_ms,
+      },
+      created_at: now,
+      supabaseId: "",
+    });
+
+    // Update conversation
+    await ctx.db.patch(conversation._id, {
+      last_message_at: now,
+      last_message_preview: args.content.substring(0, 200),
+      updated_at: now,
+    });
+  },
+});
