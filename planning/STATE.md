@@ -5,22 +5,22 @@
 See: planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.3 Go Live — Phase 2: Kapso Integration
+**Current focus:** v3.3 Go Live — Phase 3: AI System
 
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: 2.1 of 7 (UI Documentation — INSERTED)
-Plan: In progress
-Status: Phase 2 paused at 02-03 verification (needs deployment)
-Last activity: 2026-01-25 — Phase 2 plans 01-02 complete, 02-03 awaiting deployment
+Phase: 3 of 7 (AI System)
+Plan: Ready to plan
+Status: Phases 1, 2, 2.1 complete
+Last activity: 2026-01-25 — Phase 2 Kapso Integration complete (webhook working, inbox showing messages)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██░░░░░░░░ (195 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ███░░░░░░░ (198 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 193
+- Total plans completed: 198
 - Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
@@ -34,21 +34,22 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.0 | 21 | 3 |
 | v3.1 | 23 | 1 |
 | v3.2 | 23 | 2 |
-| v3.3 | 0 | In progress |
+| v3.3 | 5 | In progress |
 
 ## v3.3 Roadmap Summary
 
 **7 Phases, 30 Requirements:**
 
-| Phase | Goal | Requirements |
-|-------|------|--------------|
-| 1. Deployment | Fresh Vercel + production env | 4 (DEPLOY-01 to 04) |
-| 2. Kapso Integration | WhatsApp webhook + messaging | 4 (KAPSO-01 to 04) |
-| 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) |
-| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) |
-| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) |
-| 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) |
-| 7. UI Verification | E2E testing | 5 (UI-01 to 05) |
+| Phase | Goal | Requirements | Status |
+|-------|------|--------------|--------|
+| 1. Deployment | Fresh Vercel + production env | 4 (DEPLOY-01 to 04) | ✓ Complete |
+| 2. Kapso Integration | WhatsApp webhook + messaging | 4 (KAPSO-01 to 04) | ✓ Complete |
+| 2.1 UI Documentation | Document UI/buttons | N/A (inserted) | ✓ Complete |
+| 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | Not started |
+| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | Not started |
+| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
+| 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
+| 7. UI Verification | E2E testing | 5 (UI-01 to 05) | Not started |
 
 **Coverage:** 30/30 requirements mapped (100%)
 
@@ -71,38 +72,38 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ## Blocking Issues
 
-**Vercel Deployment Blocked (Billing Freeze)**
-- Cannot deploy new code to production
-- my21staff.com has old code without Kapso integration
-- Phase 2 verification requires deployment
-- Workaround: Document UI (Phase 2.1) while waiting
+None. Vercel deployment unblocked.
 
 ## Accumulated Context
 
 **Key Facts:**
-- v3.2 codebase is production-ready (~45,500 lines TypeScript)
-- Convex deployment active: https://intent-otter-212.convex.cloud
-- ARI system with lead scoring/booking flow available
-- Economics document: business/brainstorm/ECONOMICS.md
+- v3.3 production deployed at my21staff.com
+- Convex deployment: https://intent-otter-212.convex.cloud
+- Kapso webhook working, messages appear in inbox
+- ARI system needs workspace linkage fix (different workspace IDs)
 
 **Recent Decisions:**
-- Phase numbering starts at 1 for new milestone (not continuing from Phase 5)
-- 7 phases: Deployment → Kapso → AI System → Bot Workflow → Lead Flow → Pricing → UI Verification
+- Phase numbering starts at 1 for new milestone
 - Dual-AI architecture: "The Mouth" (Sea-Lion) + "The Brain" (Claude)
-- No research needed (deployment/verification work, not new features)
+- Use `undefined` instead of `null` for optional Convex fields
+- Use `withIndex` instead of `filter` callbacks in Convex queries
+
+**Known Issues for Phase 3:**
+- ARI not enabled log: workspace ID mismatch between kapso lookup and ARI config
+- Need to verify workspace linkage before AI responses work
 
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Phase 2.1 UI Documentation
-Resume: Complete UI docs, then deploy when billing resolved
+Stopped at: Phase 2 complete
+Resume: `/gsd:plan-phase 3` for AI System
 
-**Phase 2 Checkpoint:**
-- 02-01 ✓ Kapso credentials mutation
+**Phase 2 Completion:**
+- 02-01 ✓ Kapso credentials mutation + webhook verification
 - 02-02 ✓ Eagle ARI config
-- 02-03 ⏸ Paused at verification (see 02-03-CHECKPOINT.md)
-- Credentials configured: kapso_phone_id=930016923526449
-- Test message sent, visible in Kapso, awaiting deployment to verify in my21staff
+- 02-03 ✓ End-to-end verification (messages in inbox)
+- Deployed to production: my21staff.com
+- Fixed: null→undefined, filter→withIndex
 
 ---
-*Last updated: 2026-01-25 — Phase 2.1 inserted, Phase 2 paused*
+*Last updated: 2026-01-25 — Phase 2 complete, ready for Phase 3*

@@ -15,8 +15,8 @@ Take my21staff from development to production with Eagle Overseas Education as t
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Deployment** - Fresh Vercel project with production environment
-- [ ] **Phase 2: Kapso Integration** - WhatsApp webhook and messaging (paused at verification)
-- [ ] **Phase 2.1: UI Documentation** - INSERTED: Document UI/buttons before deployment
+- [x] **Phase 2: Kapso Integration** - WhatsApp webhook and messaging
+- [x] **Phase 2.1: UI Documentation** - INSERTED: Document UI/buttons before deployment
 - [ ] **Phase 3: AI System** - Dual-bot architecture (Mouth + Brain)
 - [ ] **Phase 4: Bot Workflow** - Eagle qualification flow
 - [ ] **Phase 5: Lead Flow** - n8n to Convex production verification
@@ -155,7 +155,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Deployment | 1/1 | Complete | 2026-01-25 |
-| 2. Kapso Integration | 0/3 | Planning complete | - |
+| 2. Kapso Integration | 3/3 | Complete | 2026-01-25 |
 | 3. AI System | 0/TBD | Not started | - |
 | 4. Bot Workflow | 0/TBD | Not started | - |
 | 5. Lead Flow | 0/TBD | Not started | - |
