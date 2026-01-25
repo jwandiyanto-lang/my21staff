@@ -18,7 +18,7 @@ Take my21staff from development to production with Eagle Overseas Education as t
 - [x] **Phase 2: Kapso Integration** - WhatsApp webhook and messaging
 - [x] **Phase 2.1: UI Documentation** - INSERTED: Document UI/buttons before deployment
 - [x] **Phase 3: AI System** - Dual-bot architecture (Mouth + Brain)
-- [ ] **Phase 3.1: Inbox Enhancement** - INSERTED: Profile sidebar, AI/Human handover, merge
+- [x] **Phase 3.1: Inbox Enhancement** - INSERTED: Profile sidebar, AI/Human handover, merge
 - [ ] **Phase 4: Bot Workflow** - Eagle qualification flow
 - [ ] **Phase 5: Lead Flow** - n8n to Convex production verification
 - [ ] **Phase 6: Pricing Page** - Economics-based pricing update
@@ -98,7 +98,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 03.1-01-PLAN.md — Profile sidebar, handover toggle, merge integration
+- [x] 03.1-01-PLAN.md — Profile sidebar, handover toggle, merge integration
 
 ### Phase 4: Bot Workflow
 
@@ -181,7 +181,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 1. Deployment | 1/1 | Complete | 2026-01-25 |
 | 2. Kapso Integration | 3/3 | Complete | 2026-01-25 |
 | 3. AI System | 4/4 | Complete | 2026-01-25 |
-| 3.1 Inbox Enhancement | 0/1 | Planned | - |
+| 3.1 Inbox Enhancement | 1/1 | Complete | 2026-01-25 |
 | 4. Bot Workflow | 0/TBD | Not started | - |
 | 5. Lead Flow | 0/TBD | Not started | - |
 | 6. Pricing Page | 0/TBD | Not started | - |
