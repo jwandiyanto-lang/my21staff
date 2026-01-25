@@ -10,10 +10,10 @@ See: planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Milestone: v3.2 CRM Core Fresh
-Phase: 5 POLISH + DEPLOY — IN PROGRESS
-Plan: 05-01 Complete / Next: 05-02
-Status: ngrok tunnel setup complete - ready for webhook testing
-Last activity: 2026-01-25 - Installed ngrok and created tunnel startup script
+Phase: 5 POLISH + DEPLOY — COMPLETE
+Plan: 05-03 Complete / Phase 5 Complete
+Status: v3.2 CRM production-ready, blocked by Vercel billing freeze
+Last activity: 2026-01-25 - Completed environment cleanup and deployment documentation
 
 ### UI Revert Decision (2026-01-25)
 
@@ -28,14 +28,14 @@ Last activity: 2026-01-25 - Installed ngrok and created tunnel startup script
 
 **Reference:** Original v2.0 code available in git history before commit `ab336cd`
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 █████████░ | v5.0 ███░░░░░░░ (170/204 plans completed)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ██████████ | v5.0 ███░░░░░░░ (171/204 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 169
+- Total plans completed: 171
 - Average duration: ~14 min
-- Total execution time: ~39.95 hours
+- Total execution time: ~40.00 hours
 
 **By Milestone:**
 
@@ -72,6 +72,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.2 decisions:
+- Environment variables grouped by service: .env.example organized into logical groups (Convex, Clerk, Kapso, etc.) with clear documentation and generation instructions (05-03)
+- Webhook testing deferred to production: ngrok connectivity issues prevented local testing, acceptable to test after deployment (05-02)
 - MessageThread wiring via wrapper: MessageThreadWrapper extracts contact from conversation list for props (04.1-03)
 - Messages tab with Convex queries: Contact detail Messages tab connected to real conversation history via getByContactId and listByConversation queries (04.1-04)
 - Activity timeline with icons: Notes displayed with StickyNote icons in timeline layout for better visual hierarchy (04.1-04)
@@ -293,8 +295,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed Phase 05-01 (ngrok tunnel setup)
-Resume: Ready to continue Phase 5 (Polish + Deploy) with 05-02
+Stopped at: Completed Phase 5 (Polish + Deploy) - all 3 plans complete
+Resume: v3.2 CRM Core Fresh complete and production-ready
 
 ## Consolidated Verification
 
