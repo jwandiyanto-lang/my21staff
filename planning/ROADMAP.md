@@ -55,9 +55,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Configure Eagle workspace Kapso credentials
-- [ ] 02-02-PLAN.md — Create ARI configuration for Eagle workspace
-- [ ] 02-03-PLAN.md — End-to-end verification of webhook, messaging, and inbox
+- [x] 02-01-PLAN.md — Configure Eagle workspace Kapso credentials
+- [x] 02-02-PLAN.md — Create ARI configuration for Eagle workspace
+- [x] 02-03-PLAN.md — End-to-end verification of webhook, messaging, and inbox
 
 ### Phase 3: AI System
 
@@ -73,8 +73,13 @@ Plans:
   3. Conversation context passed between Mouth and Brain
   4. Usage tracking shows chat energy vs brain power consumption
 
+**Plans:** 4 plans
+
 Plans:
-- [ ] TBD during planning
+- [ ] 03-01-PLAN.md — Foundation: aiUsage schema, Anthropic SDK, workspace linkage fix
+- [ ] 03-02-PLAN.md — The Mouth: Sea-Lion/Grok conversational AI module
+- [ ] 03-03-PLAN.md — The Brain: Claude Haiku analytical AI module
+- [ ] 03-04-PLAN.md — Wire orchestration: Mouth+Brain in processARI, E2E verification
 
 ### Phase 4: Bot Workflow
 
@@ -156,7 +161,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 |-------|----------------|--------|-----------|
 | 1. Deployment | 1/1 | Complete | 2026-01-25 |
 | 2. Kapso Integration | 3/3 | Complete | 2026-01-25 |
-| 3. AI System | 0/TBD | Not started | - |
+| 3. AI System | 0/4 | Planned | - |
 | 4. Bot Workflow | 0/TBD | Not started | - |
 | 5. Lead Flow | 0/TBD | Not started | - |
 | 6. Pricing Page | 0/TBD | Not started | - |
