@@ -77,10 +77,10 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Foundation: aiUsage schema, Anthropic SDK, workspace linkage fix
-- [ ] 03-02-PLAN.md — The Mouth: Sea-Lion/Grok conversational AI module
-- [ ] 03-03-PLAN.md — The Brain: Claude Haiku analytical AI module
-- [ ] 03-04-PLAN.md — Wire orchestration: Mouth+Brain in processARI, E2E verification
+- [x] 03-01-PLAN.md — Foundation: aiUsage schema, Anthropic SDK, workspace linkage fix
+- [x] 03-02-PLAN.md — The Mouth: Sea-Lion/Grok conversational AI module
+- [x] 03-03-PLAN.md — The Brain: Claude Haiku analytical AI module
+- [x] 03-04-PLAN.md — Wire orchestration: Mouth+Brain in processARI, E2E verification
 
 ### Phase 3.1: Inbox Enhancement (INSERTED)
 
@@ -116,8 +116,15 @@ Plans:
   5. Hot lead can request 1-on-1 Consultation
   6. Human receives notification when consultation is requested
 
+**Plans:** 6 plans
+
 Plans:
-- [ ] TBD during planning
+- [ ] 04-01-PLAN.md — State-aware greeting prompt (QualificationContext + greeting instructions)
+- [ ] 04-02-PLAN.md — State-aware qualifying prompt (document collection flow)
+- [ ] 04-03-PLAN.md — Routing prompt + Eagle FAQ knowledge
+- [ ] 04-04-PLAN.md — Wire state/context through processARI to Mouth
+- [ ] 04-05-PLAN.md — Human notification on consultation request
+- [ ] 04-06-PLAN.md — E2E verification of complete bot workflow
 
 ### Phase 5: Lead Flow
 
@@ -182,7 +189,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 2. Kapso Integration | 3/3 | Complete | 2026-01-25 |
 | 3. AI System | 4/4 | Complete | 2026-01-25 |
 | 3.1 Inbox Enhancement | 1/1 | Complete | 2026-01-25 |
-| 4. Bot Workflow | 0/TBD | Not started | - |
+| 4. Bot Workflow | 0/6 | Not started | - |
 | 5. Lead Flow | 0/TBD | Not started | - |
 | 6. Pricing Page | 0/TBD | Not started | - |
 | 7. UI Verification | 0/TBD | Not started | - |
