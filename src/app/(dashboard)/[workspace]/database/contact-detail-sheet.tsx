@@ -13,9 +13,14 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import type { Contact } from '@/types/database'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery as useConvexQuery } from 'convex/react'
+import { api } from '../../../../../convex/_generated/api'
 import { format } from 'date-fns'
+import { cn } from '@/lib/utils'
+import { StickyNote } from 'lucide-react'
 
 interface ContactDetailSheetProps {
   contact: Contact | null
@@ -42,6 +47,18 @@ export function ContactDetailSheet({
   const [editedFields, setEditedFields] = useState<Partial<Contact>>({})
   const [newNote, setNewNote] = useState('')
   const queryClient = useQueryClient()
+
+  // Fetch conversation for this contact using Convex
+  const conversation = useConvexQuery(
+    api.conversations.getByContactId,
+    contact?.id ? { contact_id: contact.id as any } : 'skip'
+  )
+
+  // Fetch messages for the conversation
+  const messages = useConvexQuery(
+    api.messages.listByConversation,
+    conversation?._id ? { conversation_id: conversation._id } : 'skip'
+  )
 
   // Fetch notes for this contact
   const { data: notesData } = useQuery({
@@ -254,11 +271,39 @@ export function ContactDetailSheet({
             </TabsContent>
 
             {/* Messages Tab */}
-            <TabsContent value="messages" className="m-0">
-              <div className="text-sm text-muted-foreground p-8 text-center">
-                <p>Message history will appear here</p>
-                <p className="text-xs mt-2">Connect to inbox in Plan 03</p>
-              </div>
+            <TabsContent value="messages" className="m-0 h-[400px] overflow-hidden flex flex-col">
+              {messages === undefined ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground">Loading messages...</p>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground">No messages yet</p>
+                </div>
+              ) : (
+                <ScrollArea className="flex-1">
+                  <div className="space-y-3 p-2">
+                    {messages.map((msg) => (
+                      <div
+                        key={msg._id}
+                        className={cn(
+                          "flex",
+                          msg.direction === 'outbound' ? "justify-end" : "justify-start"
+                        )}
+                      >
+                        <div className={cn(
+                          "max-w-[80%] rounded-lg px-3 py-2 text-sm",
+                          msg.direction === 'outbound'
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted"
+                        )}>
+                          {msg.content}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
             </TabsContent>
 
             {/* Activity Tab */}
