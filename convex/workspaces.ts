@@ -306,3 +306,85 @@ export const getKapsoCredentials = query({
     };
   },
 });
+
+/**
+ * Get Kapso credential status for a workspace.
+ *
+ * Used to check if a workspace has Kapso credentials configured
+ * without exposing the actual credentials.
+ *
+ * @param slug - The workspace slug to check
+ * @returns Object with hasKapsoPhoneId and hasMetaAccessToken booleans, or null if not found
+ */
+export const getWorkspaceKapsoStatus = query({
+  args: {
+    slug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .first();
+
+    if (!workspace) {
+      return null;
+    }
+
+    return {
+      workspace_id: workspace._id,
+      name: workspace.name,
+      slug: workspace.slug,
+      hasKapsoPhoneId: !!workspace.kapso_phone_id,
+      hasMetaAccessToken: !!workspace.meta_access_token,
+    };
+  },
+});
+
+/**
+ * Update Kapso credentials for a workspace.
+ *
+ * Used to configure kapso_phone_id and meta_access_token for WhatsApp integration.
+ * This is an internal mutation - credentials should be set via Convex dashboard or CLI.
+ *
+ * @param workspace_id - The workspace ID to update
+ * @param kapso_phone_id - The Kapso phone_number_id from Meta
+ * @param meta_access_token - The Meta/Kapso API access token
+ * @returns Success status
+ */
+export const updateKapsoCredentials = mutation({
+  args: {
+    workspace_id: v.string(),
+    kapso_phone_id: v.optional(v.string()),
+    meta_access_token: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { workspace_id, kapso_phone_id, meta_access_token } = args;
+
+    const workspace = await ctx.db.get(workspace_id as any);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    const updates: Record<string, unknown> = {
+      updated_at: Date.now(),
+    };
+
+    if (kapso_phone_id !== undefined) {
+      updates.kapso_phone_id = kapso_phone_id;
+    }
+
+    if (meta_access_token !== undefined) {
+      updates.meta_access_token = meta_access_token;
+    }
+
+    await ctx.db.patch(workspace_id as any, updates);
+
+    console.log(
+      `[Workspace] Updated Kapso credentials for workspace ${workspace.slug}: ` +
+        `phone_id=${kapso_phone_id ? "set" : "unchanged"}, ` +
+        `token=${meta_access_token ? "set" : "unchanged"}`
+    );
+
+    return { success: true };
+  },
+});
