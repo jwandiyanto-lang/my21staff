@@ -5,17 +5,17 @@
 See: planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.3 Go Live — Phase 3: AI System
+**Current focus:** v3.3 Go Live — Phase 3 Complete, ready for Phase 4: Bot Workflow
 
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: 3 of 7 (AI System)
-Plan: 04 (Wire Orchestration) — E2E checkpoint pending
-Status: Phase 3 code complete, deployed, needs ariConfig fix + E2E test
-Last activity: 2026-01-25 — AI modules deployed to Convex
+Phase: 3 of 7 (AI System) — COMPLETE
+Plan: All 4 plans executed and verified
+Status: Phase 3 E2E verified — Mouth + Brain working with Grok-3
+Last activity: 2026-01-25 — Full E2E verification passed
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████░░░░ (201 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ███████░░░ (205 plans shipped)
 
 ## Performance Metrics
 
@@ -45,7 +45,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 1. Deployment | Fresh Vercel + production env | 4 (DEPLOY-01 to 04) | ✓ Complete |
 | 2. Kapso Integration | WhatsApp webhook + messaging | 4 (KAPSO-01 to 04) | ✓ Complete |
 | 2.1 UI Documentation | Document UI/buttons | N/A (inserted) | ✓ Complete |
-| 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | Plan 3/4 complete |
+| 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | Not started |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
@@ -72,11 +72,13 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ## Blocking Issues
 
-**ARI Workspace Linkage (blocks AI responses):**
-- Workspace with `kapso_phone_id` has ID `js7b1cwpdpadcgds1cr8dqw7dh7zv3a3`
-- `ariConfig` was created for a different workspace ID
-- **Fix required:** Update ariConfig.workspace_id in Convex dashboard to match kapso workspace
-- See: planning/phases/03-ai-system/03-01-SUMMARY.md for detailed steps
+**None** — All Phase 3 blockers resolved:
+
+- ✓ GROK_API_KEY updated with valid key (2026-01-25)
+- ✓ Workspace linkage correct (verified via admin:listAriConfigs)
+- ✓ grok-beta → grok-3 migration complete
+- ✓ processARI refactored to internalAction (can now call Mouth action)
+- ✓ E2E flow verified with real AI responses
 
 ## Accumulated Context
 
@@ -84,38 +86,54 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - v3.3 production deployed at my21staff.com
 - Convex deployment: https://intent-otter-212.convex.cloud
 - Kapso webhook working, messages appear in inbox
-- ARI system needs workspace linkage fix (different workspace IDs)
+- ARI system fully operational with Grok-3 (Mouth + Brain)
 
 **Recent Decisions:**
 - Phase numbering starts at 1 for new milestone
-- Dual-AI architecture: "The Mouth" (Sea-Lion) + "The Brain" (Grok)
+- Dual-AI architecture: "The Mouth" (Grok-3) + "The Brain" (Grok-3)
 - Use `undefined` instead of `null` for optional Convex fields
 - Use `withIndex` instead of `filter` callbacks in Convex queries
 - aiUsage table tracks costs via workspace_id + conversation_id + model + ai_type
-- Sea-Lion primary (free, local), Grok fallback (paid API) for The Mouth
+- Grok-3 as primary model (grok-beta deprecated 2025-09-15)
+- Sea-Lion disabled (not accessible from Convex cloud) — TODO: re-enable for local deployment
 - 10-message context window for Mouth (speed), 20 for Brain (analysis)
 - Indonesian default language with English support
-- Brain uses grok-beta model (~$5 per million tokens)
 - JSON extraction handles Grok markdown wrapping via regex
 - Cost queries filter by date range in memory after index lookup
+- processARI is internalAction (not mutation) so it can call other actions
+- Helper mutations pattern: getAriContext, saveAriResponse, logOutboundMessage
 
-**Known Issues for Phase 3:**
-- ARI not enabled log: workspace ID mismatch between kapso lookup and ARI config
-- Need to verify workspace linkage before AI responses work
+**Phase 3 Issues (All Resolved):**
+- ✓ Workspace ID mismatch - actually correct, ariConfig linked to Eagle workspace
+- ✓ processARI was mutation - refactored to internalAction
+- ✓ GROK_API_KEY invalid - updated with valid key
+- ✓ grok-beta deprecated - migrated to grok-3
+- ✓ Sea-Lion timeout - disabled for Convex cloud (uses Grok directly)
+- ✓ Brain not running - fixed scheduler call with await + error handling
 
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 03-03-PLAN.md
-Resume: Next plan is 03-04 (Integration testing)
+Stopped at: Phase 3 COMPLETE — E2E verified
+Resume: Start Phase 4 (Bot Workflow) or commit remaining changes
 
-**Phase 3 Progress:**
-- 03-01 ✓ AI Foundation (aiUsage table, Grok API verified, workspace issue documented)
-- 03-02 ✓ The Mouth (Sea-Lion/Grok conversational AI) - convex/ai/context.ts, convex/ai/mouth.ts
-- 03-03 ✓ The Brain (Grok analytical AI) - convex/ai/brain.ts, convex/ai/costTracker.ts
-- 03-04 ◆ Wire Orchestration - code complete, E2E checkpoint pending (needs ariConfig fix first)
+**Phase 3 Progress (COMPLETE):**
+- 03-01 ✓ AI Foundation (aiUsage table, Grok API verified)
+- 03-02 ✓ The Mouth (Grok-3 conversational AI) - convex/ai/context.ts, convex/ai/mouth.ts
+- 03-03 ✓ The Brain (Grok-3 analytical AI) - convex/ai/brain.ts, convex/ai/costTracker.ts
+- 03-04 ✓ Wire Orchestration - E2E verified
+  - Refactored processARI from internalMutation to internalAction
+  - Created helper mutations: getAriContext, saveAriResponse, logOutboundMessage
+  - Created admin utilities: testAriProcessing, testBrainAnalysis, checkRecentActivity
+  - E2E flow verified: webhook → processARI → Mouth → save → Kapso → log → Brain
+  - Lead scoring working: contacts.lead_score updates from Brain analysis
 
-**Blocker:** Fix ariConfig.workspace_id in Convex dashboard before E2E testing.
+**E2E Verification Results:**
+- Mouth calls: 6 (grok-3)
+- Brain calls: 2 (grok-3)
+- Lead score updated: 0 → 25
+- Lead temperature: cold
+- Response time: < 3 seconds
 
 ---
-*Last updated: 2026-01-25 — Plan 03-03 complete, Brain ready for integration*
+*Last updated: 2026-01-25 — Phase 3 COMPLETE, ready for Phase 4*

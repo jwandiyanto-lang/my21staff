@@ -16,7 +16,7 @@ import {
 
 export interface MouthResponse {
   content: string;
-  model: "sea-lion" | "grok-beta" | "fallback";
+  model: "sea-lion" | "grok-3" | "fallback";
   tokens: number;
   responseTimeMs: number;
 }
@@ -65,20 +65,21 @@ export const generateMouthResponse = internalAction({
       { role: "user", content: args.userMessage },
     ];
 
-    // Try Sea-Lion first (free, local)
-    try {
-      const seaLionResponse = await callSeaLion(messages);
-      if (seaLionResponse) {
-        return {
-          ...seaLionResponse,
-          responseTimeMs: Date.now() - startTime,
-        };
-      }
-    } catch (error) {
-      console.error("[Mouth] Sea-Lion error, falling back to Grok:", error);
-    }
+    // Skip Sea-Lion for now (not accessible from Convex cloud)
+    // TODO: Re-enable when running on local/Tailscale environment
+    // try {
+    //   const seaLionResponse = await callSeaLion(messages);
+    //   if (seaLionResponse) {
+    //     return {
+    //       ...seaLionResponse,
+    //       responseTimeMs: Date.now() - startTime,
+    //     };
+    //   }
+    // } catch (error) {
+    //   console.error("[Mouth] Sea-Lion error, falling back to Grok:", error);
+    // }
 
-    // Fall back to Grok
+    // Use Grok directly
     try {
       const grokResponse = await callGrok(messages);
       if (grokResponse) {
@@ -184,7 +185,7 @@ async function callGrok(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "grok-beta",
+      model: "grok-3",
       messages: formattedMessages,
       max_tokens: 150, // Keep responses short
       temperature: 0.8,
@@ -209,7 +210,7 @@ async function callGrok(
 
   return {
     content,
-    model: "grok-beta",
+    model: "grok-3",
     tokens: data.usage?.total_tokens || 0,
   };
 }

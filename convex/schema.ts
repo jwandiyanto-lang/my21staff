@@ -168,7 +168,7 @@ export default defineSchema({
   aiUsage: defineTable({
     workspace_id: v.id("workspaces"),
     conversation_id: v.optional(v.id("ariConversations")),
-    model: v.string(),  // "sea-lion", "grok-beta"
+    model: v.string(),  // "sea-lion", "grok-3"
     ai_type: v.string(),  // "mouth" or "brain"
     input_tokens: v.number(),
     output_tokens: v.number(),

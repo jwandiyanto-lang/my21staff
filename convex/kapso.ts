@@ -510,20 +510,31 @@ export const processARI = internalAction({
     console.log(`[ARI] Response sent in ${responseTime}ms (${mouthResponse.model})`);
 
     // 6. Schedule The Brain for async analysis
-    ctx.scheduler.runAfter(1000, internal.ai.brain.analyzeConversation, {
-      workspaceId: workspace_id,
-      contactId: contact_id,
-      ariConversationId: context.ariConversationId,
-      recentMessages: [
-        ...context.messageHistory,
-        { role: "user", content: user_message },
-        { role: "assistant", content: mouthResponse.content },
-      ],
-      contactName: context.contact.name || context.contact.kapso_name || undefined,
-      currentScore: context.contact.lead_score || 0,
-    });
+    try {
+      const brainArgs = {
+        workspaceId: workspace_id,
+        contactId: contact_id,
+        ariConversationId: context.ariConversationId,
+        recentMessages: [
+          ...context.messageHistory,
+          { role: "user", content: user_message },
+          { role: "assistant", content: mouthResponse.content },
+        ],
+        contactName: context.contact.name || context.contact.kapso_name || undefined,
+        currentScore: context.contact.lead_score || 0,
+      };
+      console.log(`[ARI] Brain args: ${JSON.stringify({
+        workspaceId: brainArgs.workspaceId,
+        contactId: brainArgs.contactId,
+        ariConversationId: brainArgs.ariConversationId,
+        messageCount: brainArgs.recentMessages.length,
+      })}`);
 
-    console.log(`[ARI] Scheduled Brain analysis for conversation`);
+      await ctx.scheduler.runAfter(1000, internal.ai.brain.analyzeConversation, brainArgs);
+      console.log(`[ARI] Brain analysis scheduled successfully`);
+    } catch (scheduleError) {
+      console.error(`[ARI] Failed to schedule Brain: ${scheduleError}`);
+    }
   },
 });
 
@@ -709,7 +720,7 @@ export const saveAriResponse = internalMutation({
         ai_type: "mouth",
         input_tokens: args.tokens,
         output_tokens: 0,
-        cost_usd: args.ai_model === "grok-beta"
+        cost_usd: args.ai_model === "grok-3"
           ? args.tokens * (5 / 1_000_000)
           : 0,
         created_at: now,

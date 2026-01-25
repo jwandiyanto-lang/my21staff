@@ -270,7 +270,7 @@ export const testGrokApi = internalAction({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "grok-beta",
+          model: "grok-3",
           messages: [
             { role: "system", content: "You are a helpful assistant." },
             { role: "user", content: "Say hello in Indonesian." },
@@ -316,6 +316,106 @@ export const runGrokTest = mutation({
 });
 
 /**
+ * Test Brain analysis directly.
+ * This helps diagnose if Brain works when called directly vs scheduled.
+ */
+export const testBrainAnalysis = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    console.log("[Test Brain] Starting direct Brain test...");
+
+    // 1. Find workspace with Kapso
+    const testData = await ctx.runMutation(internal.admin.prepareAriTest, {});
+
+    if ("error" in testData) {
+      return { error: testData.error };
+    }
+
+    // 2. Find ariConversation
+    const ariConv = await ctx.runMutation(internal.admin.getFirstAriConversation, {});
+
+    if (!ariConv) {
+      return { error: "No ariConversation found. Run testAriProcessing first." };
+    }
+
+    // 3. Get recent messages from ariMessages
+    const recentMsgs = await ctx.runMutation(internal.admin.getRecentAriMessages, {
+      ariConversationId: ariConv._id,
+    });
+
+    console.log(`[Test Brain] Found ${recentMsgs.length} messages for conversation`);
+
+    // 4. Call Brain directly
+    try {
+      const brainResult = await ctx.runAction(internal.ai.brain.analyzeConversation, {
+        workspaceId: testData.workspace_id,
+        contactId: testData.contact_id,
+        ariConversationId: ariConv._id,
+        recentMessages: recentMsgs,
+        contactName: testData.contact_name,
+        currentScore: 0,
+      });
+
+      return {
+        success: true,
+        brainResult,
+      };
+    } catch (error) {
+      console.error("[Test Brain] Error:", error);
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
+  },
+});
+
+/**
+ * Helper: Get first ariConversation.
+ */
+export const getFirstAriConversation = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const conv = await ctx.db.query("ariConversations").first();
+    return conv;
+  },
+});
+
+/**
+ * Helper: Get recent ariMessages for a conversation.
+ */
+export const getRecentAriMessages = internalMutation({
+  args: {
+    ariConversationId: v.id("ariConversations"),
+  },
+  handler: async (ctx, args) => {
+    const messages = await ctx.db
+      .query("ariMessages")
+      .withIndex("by_conversation_time", (q) =>
+        q.eq("ari_conversation_id", args.ariConversationId)
+      )
+      .order("desc")
+      .take(10);
+
+    return messages.reverse().map((m: any) => ({
+      role: m.role,
+      content: m.content,
+    }));
+  },
+});
+
+/**
+ * Public wrapper to run Brain test.
+ */
+export const runBrainTest = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await ctx.scheduler.runAfter(0, internal.admin.testBrainAnalysis, {});
+    return { scheduled: true, message: "Brain test scheduled. Check activity in 10 seconds." };
+  },
+});
+
+/**
  * Diagnostic: Check recent messages and ARI state.
  */
 export const checkRecentActivity = query({
@@ -344,16 +444,35 @@ export const checkRecentActivity = query({
       .order("desc")
       .take(10);
 
+    // Get contacts with lead scores
+    const contacts = await ctx.db
+      .query("contacts")
+      .order("desc")
+      .take(5);
+
     return {
       messages_count: messages.length,
-      recent_messages: messages.map((m) => ({
-        direction: m.direction,
-        content: m.content?.substring(0, 50),
-        created_at: new Date(m.created_at).toISOString(),
-      })),
       ari_messages_count: ariMessages.length,
-      ari_conversations_count: ariConversations.length,
+      ari_latest: ariMessages.length > 0 ? {
+        role: (ariMessages[0] as any).role,
+        content: (ariMessages[0] as any).content?.substring(0, 80),
+        ai_model: (ariMessages[0] as any).ai_model,
+      } : null,
+      ari_conversations: ariConversations.map((c: any) => ({
+        state: c.state,
+        lead_score: c.lead_score,
+        lead_temperature: c.lead_temperature,
+      })),
       ai_usage_count: aiUsage.length,
+      ai_usage_by_type: {
+        mouth: aiUsage.filter((u: any) => u.ai_type === "mouth").length,
+        brain: aiUsage.filter((u: any) => u.ai_type === "brain").length,
+      },
+      contacts_with_scores: contacts.map((c: any) => ({
+        name: c.name,
+        lead_score: c.lead_score,
+        lead_status: c.lead_status,
+      })),
     };
   },
 });

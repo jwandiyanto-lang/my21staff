@@ -55,12 +55,16 @@ export const analyzeConversation = internalAction({
     currentScore: v.optional(v.number()),
   },
   handler: async (ctx, args): Promise<BrainResponse | null> => {
+    console.log(`[Brain] Starting analysis for conversation ${args.ariConversationId}`);
+    console.log(`[Brain] Contact: ${args.contactName}, Current score: ${args.currentScore}, Messages: ${args.recentMessages.length}`);
+
     const grokApiKey = process.env.GROK_API_KEY;
 
     if (!grokApiKey) {
       console.error("[Brain] No GROK_API_KEY configured");
       return null;
     }
+    console.log(`[Brain] GROK_API_KEY present: ${grokApiKey.substring(0, 10)}...`);
 
     // Build context with full history (last 20 messages)
     const context = buildConversationContext(
@@ -85,7 +89,7 @@ export const analyzeConversation = internalAction({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "grok-beta",
+          model: "grok-3",
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: analysisPrompt },
@@ -156,7 +160,7 @@ export const analyzeConversation = internalAction({
       await ctx.runMutation(internal.ai.brain.logBrainUsage, {
         workspaceId: args.workspaceId,
         conversationId: args.ariConversationId,
-        model: "grok-beta",
+        model: "grok-3",
         inputTokens,
         outputTokens,
         costUsd,
@@ -168,7 +172,7 @@ export const analyzeConversation = internalAction({
 
       return {
         analysis,
-        model: "grok-beta",
+        model: "grok-3",
         inputTokens,
         outputTokens,
         costUsd,
