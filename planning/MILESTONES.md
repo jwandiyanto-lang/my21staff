@@ -1,5 +1,63 @@
 # Project Milestones: my21staff
 
+## v3.2 CRM Core Fresh (Shipped: 2026-01-25)
+
+**Delivered:** Complete CRM rebuild on Convex with Supabase entirely removed. Contact Database, WhatsApp Inbox, Dashboard, and Settings — all with real-time updates.
+
+**Phases completed:** 1, 1.2, 2, 3, 4, 4.1, 4.2, 5 (23 plans total)
+
+**Key accomplishments:**
+
+- Supabase completely removed (packages + code)
+- Contact Database rebuilt fresh with merge functionality
+- WhatsApp Inbox with v2.0 filter bar (Active/All toggle, Status/Tags filters)
+- Dashboard with stats cards, activity feed, and quick actions
+- Settings with team management via Clerk OrganizationProfile
+- Real-time updates throughout via Convex subscriptions
+
+**Stats:**
+
+- 602 files changed, 13,687 insertions, 5,131 deletions
+- 45,515 lines of TypeScript
+- 8 phases, 23 plans
+- 2 days (Jan 24 → Jan 25, 2026)
+
+**Git range:** `ab336cd` → `9ff852d`
+
+**Deferred (non-blocking):**
+- Webhook E2E testing (ngrok issues, will test in production)
+- n8n sync count verification (deferred to deployment)
+
+**What's next:** Production deployment (when Vercel billing resolved)
+
+---
+
+## v3.1 Convex + Clerk API Layer (Shipped: 2026-01-24)
+
+**Delivered:** API layer migration to Convex + Clerk. Auth uses Clerk, data uses Convex. Supabase cleanup deferred to v3.2.
+
+**Phases completed:** 1-7 (23/25 plans, 2 deferred)
+
+**Key accomplishments:**
+
+- Clerk authentication infrastructure with JWT template for Convex
+- User migration with ID mapping (Supabase UUID → Clerk ID)
+- Organization migration for Eagle Overseas workspace
+- Data migration for ARI, CMS, and ticket tables
+- n8n webhook integration restored for Eagle lead flow
+- API routes migrated from Supabase to Convex
+
+**Stats:**
+
+- 7 phases, 23 plans (2 deferred to v3.2)
+- 1 day (Jan 24, 2026)
+
+**Git range:** `8041e22` → `ab336cd`
+
+**What's next:** v3.2 — Supabase removal, CRM rebuild
+
+---
+
 ## v3.0 Performance & Speed (Shipped: 2026-01-23)
 
 **Delivered:** Hybrid architecture migration (Supabase auth + Convex data) achieving 25.4x performance improvement at P95 (37ms vs 926ms).
@@ -156,4 +214,4 @@
 
 ---
 
-*Total shipped:* 147 plans across 6 milestones
+*Total shipped:* 193 plans across 8 milestones

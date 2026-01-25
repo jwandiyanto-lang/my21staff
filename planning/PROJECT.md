@@ -10,57 +10,37 @@ WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-t
 
 The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
-## Previous State (v2.2)
+## Current State (v3.2 Shipped)
 
-**Production URL:** https://my21staff.com (Vercel)
-
-**First Client:** Eagle Overseas Education (onboarding ready)
-
-**Shipped in v2.2:**
-- ARI database infrastructure (7 tables with workspace-scoped RLS)
-- Multi-LLM AI system with Grok + Sea-Lion and deterministic A/B testing
-- Lead scoring engine (0-100 with category breakdown)
-- Automated lead routing (hot → consultation, warm → nurture, cold → community)
-- Consultation booking flow with Indonesian day/time parsing
-- Admin configuration UI ("Your Intern" page with 5 tabs)
-
-**Shipped in v2.1:**
-- Brand guidelines, email via Resend, role-based permissions
-- 4-stage support ticketing with central hub
-- Security info page, landing page redesign
-- TanStack Query caching, Kapso bot setup
-
-**Tech Stack (v2.x):**
-- ~43,000 lines TypeScript
-- Next.js 15 + React 19
-- Supabase (PostgreSQL + Auth + RLS)
-- Shadcn/ui + Tailwind CSS
-- Kapso API for WhatsApp
-- Resend for transactional email
-- TanStack Query v5 for client caching
-
-## Current State (v3.0 Shipped)
-
-**Production URL:** https://my21staff.com (Vercel)
+**Production URL:** https://my21staff.com (blocked — Vercel billing freeze)
 
 **Convex Deployment:** https://intent-otter-212.convex.cloud
 
-**Shipped in v3.0:**
-- Performance baseline with Vercel Speed Insights and API timing wrappers
-- Supabase optimization with composite indexes, parallel queries, explicit column selection
-- Convex spike validating 25.4x speedup (37ms vs 926ms P95)
-- Data-driven decision to proceed with hybrid architecture (Supabase auth + Convex data)
-- Full Convex implementation: schema, mutations, queries, HTTP actions, real-time subscriptions
+**Shipped in v3.2:**
+- Supabase completely removed (packages + code)
+- Contact Database rebuilt fresh with merge functionality
+- WhatsApp Inbox with v2.0 filter bar (Active/All toggle, Status/Tags filters)
+- Dashboard with stats cards, activity feed, and quick actions
+- Settings with team management via Clerk OrganizationProfile
+- Real-time updates throughout via Convex subscriptions
 
-**Tech Stack (v3.0):**
-- ~196,000 lines TypeScript
+**Shipped in v3.1:**
+- Clerk authentication (replaced Supabase auth)
+- User migration with ID mapping
+- Organization migration for Eagle Overseas
+- n8n webhook integration for lead flow
+- API routes migrated to Convex
+
+**Tech Stack (v3.2):**
+- ~45,500 lines TypeScript
 - Next.js 15 + React 19
-- Supabase (Auth only) + Convex (Data layer)
+- Clerk (Authentication)
+- Convex (Database + Real-time)
 - Shadcn/ui + Tailwind CSS
 - Kapso API for WhatsApp
 - Resend for transactional email
-- TanStack Query v5 for client caching
-- Convex for real-time subscriptions and data queries
+
+**First Client:** Eagle Overseas Education (ready for deployment)
 
 ## Requirements
 
@@ -99,18 +79,24 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - ✓ **Convex spike** — 25.4x speedup validation (37ms vs 926ms P95) — v3.0
 - ✓ **Decision gate** — Data-driven hybrid architecture decision — v3.0
 - ✓ **Convex migration** — Schema, mutations, queries, HTTP actions, real-time subscriptions deployed — v3.0
+- ✓ **Clerk authentication** — JWT template, user migration, organization migration — v3.1
+- ✓ **n8n integration** — Convex webhook endpoint for Eagle lead flow — v3.1
+- ✓ **Supabase removal** — Packages and code completely removed — v3.2
+- ✓ **Contact Database** — Rebuilt fresh with merge functionality — v3.2
+- ✓ **WhatsApp Inbox** — v2.0 filter bar with Active/All toggle, Status/Tags filters — v3.2
+- ✓ **Dashboard** — Stats cards, activity feed, quick actions — v3.2
+- ✓ **Settings** — Team management via Clerk OrganizationProfile — v3.2
 
 ### Active
 
-**v3.1 Full Convex + Clerk:**
-- [ ] Complete Supabase → Convex migration (all remaining tables)
-- [ ] Replace Supabase auth with Clerk
-- [ ] Fix n8n → CRM integration for Eagle leads
+**v4.0 Next Milestone:**
+- [ ] Production deployment (when Vercel billing resolved)
+- [ ] Webhook E2E testing in production
+- [ ] Payment Integration (Midtrans)
+- [ ] AI Model Selection UI
 
 ### Out of Scope
 
-- Payment Integration (Midtrans) — deferred to v3.2
-- AI Model Selection UI — deferred to v3.2
 - Visual workflow builder — future version
 - WhatsApp template messages (24h rule) — requires Meta approval process
 - Self-service onboarding — manual for now
@@ -127,25 +113,21 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 **Target Users:** Indonesian SMEs who have leads everywhere but no system to manage them.
 
-**Workspaces:**
-- My21Staff: `0318fda5-22c4-419b-bdd8-04471b818d17` (for pricing form leads)
-- Eagle Overseas: `25de3c4e-b9ca-4aff-9639-b35668f0a48e` (first paying client)
+**Organizations (Clerk):**
+- Eagle Overseas: `org_38fXP0PN0rgNQ2coi1KsqozLJYb` (first paying client)
 
-**Known Issues (Deferred):**
-- Forgot password still uses Supabase email (not Resend)
-- Resend/delete invitation has auth bug
-- In-memory rate limiting won't scale multi-instance
-- Webhook POST deployment — code complete, requires Vercel deploy push
-- Kapso webhook URL update — manual step after deployment confirmed
-- Legacy Next.js webhook route cleanup — after verification complete
+**Known Issues (Deferred to Production):**
+- Webhook E2E testing deferred (ngrok issues, will test in production)
+- n8n sync count verification deferred (webhook verified working)
+- Vercel deployment blocked (billing freeze)
 
 ## Constraints
 
-- **Tech Stack**: Next.js 15 + React 19 + TypeScript, Supabase (Auth) + Convex (Data), Shadcn/ui, Tailwind CSS
+- **Tech Stack**: Next.js 15 + React 19 + TypeScript, Clerk (Auth) + Convex (Data), Shadcn/ui, Tailwind CSS
 - **Design System**: CRM uses cool green palette, Landing uses sage/orange (Plus Jakarta Sans + Inter)
 - **Integration**: Kapso API for WhatsApp, Resend for email
 - **AI Models**: Grok API + Sea-Lion (Ollama at 100.113.96.25:11434)
-- **Deployment**: Vercel (single instance) + Convex Cloud
+- **Deployment**: Vercel (blocked) + Convex Cloud (active)
 - **Performance**: Convex achieves 37ms P95, 25.4x faster than Supabase
 
 ## Key Decisions
@@ -171,15 +153,24 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | 4-stage ticket workflow | Trust-building with clear progress | ✓ Good — v2.1 feature |
 | Central support hub | All client tickets → my21staff workspace | ✓ Good — v2.1 feature |
 | Convex migration (hybrid: Supabase auth + Convex data) | 25.4x faster (37ms vs 926ms P95) | ✓ Good — v3.0 achievement |
+| Clerk authentication | Free tier, good React integration | ✓ Good — v3.1 migration |
+| User ID mapping (Supabase UUID → Clerk ID) | Preserve data relationships | ✓ Good — smooth migration |
+| Eagle-only org migration | Clerk free plan limit | ✓ Good — practical |
+| Clean slate approach for v3.2 | Delete Supabase, rebuild fresh | ✓ Good — clean codebase |
+| UI revert to v2.0 style | User preference for original design | ✓ Good — familiar UX |
+| Webhook testing deferred to production | ngrok connectivity issues | — Pending production deployment |
 
-## Current Milestone: v3.1 Full Convex + Clerk
+## Next Milestone
 
-**Goal:** Complete the migration to Convex + Clerk, removing Supabase entirely from the stack and restoring Eagle's n8n lead flow.
+**Goal:** Deploy to production and verify all features work end-to-end.
 
-**Target features:**
-- Complete Supabase → Convex data migration (ARI tables, support tickets, all remaining)
-- Replace Supabase auth with Clerk (free tier)
-- Fix n8n webhook integration for Eagle Overseas leads
+**Blocking:** Vercel billing freeze — need to resolve billing or create fresh Vercel project.
+
+**When unblocked:**
+1. Deploy to Vercel
+2. Update Kapso webhook URL
+3. Run post-deployment verification checklist
+4. Verify Eagle lead flow works
 
 ---
-*Last updated: 2026-01-23 after v3.1 milestone started*
+*Last updated: 2026-01-25 after v3.2 milestone shipped*

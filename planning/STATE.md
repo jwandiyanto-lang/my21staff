@@ -2,40 +2,26 @@
 
 ## Project Reference
 
-See: planning/PROJECT.md (updated 2026-01-23)
+See: planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.2 CRM Core Fresh — SHIPPED ✓
+**Current focus:** Production deployment (blocked — Vercel billing freeze)
 
 ## Current Position
 
-Milestone: v3.2 CRM Core Fresh — COMPLETE ✓
-Phase: All phases complete (1, 1.2, 2, 3, 4, 4.1, 4.2, 5)
+Milestone: v3.2 CRM Core Fresh — SHIPPED ✓
+Phase: All complete
 Plan: 23/23 plans shipped
-Status: v3.2 CRM production-ready, awaiting Vercel billing resolution for deployment
-Last activity: 2026-01-25 - Milestone complete, deployment docs ready
+Status: Production-ready, awaiting Vercel billing resolution
+Last activity: 2026-01-25 — v3.2 milestone archived
 
-### UI Revert Decision (2026-01-25)
-
-**User request:** Revert to original v2.0 UI designs, only change is Supabase → Convex for data layer.
-
-**Scope:**
-- Contact Detail: Dialog → Sheet (slide from right)
-- Tabs: 4 tabs (Profile, Documents, Conversations, Notes) → 3 tabs (Details, Messages, Activity)
-- Inbox filters: Chips/badges → Popover with checkboxes
-- Labels: Keep English
-- Data layer: Keep Convex (not reverting to Supabase)
-
-**Reference:** Original v2.0 code available in git history before commit `ab336cd`
-
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ██████████ | v5.0 ███░░░░░░░ (171/204 plans completed)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ (193 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 171
-- Average duration: ~14 min
-- Total execution time: ~40.00 hours
+- Total plans completed: 193
+- Milestones shipped: 8
 
 **By Milestone:**
 
@@ -46,266 +32,51 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v2.1 | 30 | 3 |
 | v2.2 | 23 | <1 |
 | v3.0 | 21 | 3 |
+| v3.1 | 23 | 1 |
+| v3.2 | 23 | 2 |
 
-## Accumulated Context
+## What's Been Shipped
 
-### v3.1 Migration Context
+**v3.2 CRM Core Fresh (2026-01-25):**
+- Supabase completely removed (packages + code)
+- Contact Database rebuilt fresh with merge functionality
+- WhatsApp Inbox with v2.0 filter bar
+- Dashboard with stats cards, activity feed, quick actions
+- Settings with team management via Clerk
+- Real-time updates throughout via Convex
 
-**Goal:** Replace Supabase entirely with Convex + Clerk.
+**Tech Stack:**
+- Next.js 15 + React 19 + TypeScript
+- Clerk (Authentication)
+- Convex (Database + Real-time)
+- Shadcn/ui + Tailwind CSS
+- Kapso API for WhatsApp
 
-**Critical path:**
-1. Clerk auth infrastructure (JWT validation for Convex) - DONE
-2. Middleware + Provider + Auth UI (user-facing auth) - DONE
-3. Users table + webhook (user data in Convex) - DONE
-4. User migration + organizations (existing data) - DONE (04-05 complete)
-5. Data migration (remaining Supabase tables) - DONE (05-05 complete - API layer migrated)
-6. n8n integration (Eagle lead flow) - DONE (06-01 complete - webhook + workflow verified)
-7. Cleanup (remove Supabase) - NEXT
+## Blocking Issues
 
-**Key risks (from research):**
-- Session termination unavoidable (all users logged out)
-- User ID mapping: Supabase UUIDs referenced in 10+ tables
-- Double webhook migration: Kapso + n8n must both move
+**Vercel Billing Freeze:**
+- Cannot deploy to production
+- Need to resolve billing or create fresh Vercel project
+- All features verified working locally
 
-### Decisions
+## Deferred to Production
 
-All decisions logged in PROJECT.md Key Decisions table.
-
-Recent v3.2 decisions:
-- Environment variables grouped by service: .env.example organized into logical groups (Convex, Clerk, Kapso, etc.) with clear documentation and generation instructions (05-03)
-- Webhook testing deferred to production: ngrok connectivity issues prevented local testing, acceptable to test after deployment (05-02)
-- MessageThread wiring via wrapper: MessageThreadWrapper extracts contact from conversation list for props (04.1-03)
-- Messages tab with Convex queries: Contact detail Messages tab connected to real conversation history via getByContactId and listByConversation queries (04.1-04)
-- Activity timeline with icons: Notes displayed with StickyNote icons in timeline layout for better visual hierarchy (04.1-04)
-- Simplified listByConversation: Query no longer requires workspace_id, uses conversation_id only for contact detail context (04.1-04)
-- Contact detail 3-tab v2.0 style: Reverted to Details, Messages, Activity tabs (removed Documents), Messages tab placeholder for inbox integration (04.1-01)
-- Inbox filters as popover with checkboxes: Status filters moved to inbox header popover matching v2.0 design, tag filters removed from UI (04.1-02)
-- App UI language changed to English: Updated CLAUDE.md and all Indonesian UI text translated to English across inbox, dashboard, settings, contact components (04-02)
-- Phase 4 human verification deferred: All verification consolidated into single deployment testing session covering Phases 1-4 (04-02)
-- Settings type cast for Convex data: Cast workspace.settings to WorkspaceSettings interface for type safety (04-01)
-- Phase 3 human verification deferred: User chose to combine dashboard testing with Phase 1-2 batch verification (03-04)
-- Onboarding auto-hide: Checklist returns null when all steps complete, not manually dismissable (03-03)
-- Activity feed links to database: Clicking activity item navigates to /database?contact=ID pattern (03-03)
-- formatDistanceWIB for timestamps: Activity feed uses Indonesian locale relative time helper (03-03)
-- Activity feed placeholder for Plan 03: Added placeholder div for activity feed, to be implemented in next plan per phased approach (03-02)
-- Activity feed notes-only for v3.2: Contact notes only in activity feed, form fills and chat summaries deferred to future iteration (03-01)
-- Dashboard stats time filter options: Week/month/all with 'all' as default for complete workspace picture (03-01)
-- Dashboard queries without auth: No requireWorkspaceMembership in dashboard queries, matching contacts/conversations pattern (03-01)
-- Phase 2 human verification deferred: User chose to combine inbox testing with Phase 1 verification later (02-04)
-- Clerk auth in API routes: Message send API uses Clerk auth() instead of CRM_API_KEY for user authentication (02-03)
-- Encrypted credential management: Decrypt workspace.meta_access_token for Kapso API key using crypto.ts decrypt() (02-03)
-- Keyboard shortcuts for compose: Enter sends message, Shift+Enter adds new line (standard messaging pattern) (02-03)
-- getByIdInternal pattern: Added workspace query following existing pattern in conversations/contacts for API route access (02-03)
-- WhatsApp-style timestamp formatting: Relative time (<24h), day name (<7d), date (older) using date-fns with Indonesian locale (02-01)
-- Tag display strategy: Show first 2 tags with +N badge for remaining tags to prevent UI overflow (02-01)
-- Indonesian filter labels: Status filters use Indonesian labels (Semua, Baru, Hangat, Dingin, Terjual, Hilang) per app language requirement (02-01)
-- n8n sync verification deferred: Webhook verified working, lead count check deferred to batch deployment at end of v3.2 (v3.2-01-04)
-- Contact detail as Dialog not Sheet: User requested modal dialog instead of sliding sheet for better centered focus (v3.2-01-03)
-- 4-tab contact organization: Contact details organized into Profile (editable), Documents (placeholder), Conversations (placeholder), Notes (functional) tabs (v3.2-01-03)
-- Inline editing pattern: Profile fields use onChange/onBlur for immediate save without explicit save button (v3.2-01-03)
-- Notes via API routes: Notes use ConvexHttpClient in API routes instead of direct Convex React hooks (v3.2-01-03)
-- User field-by-field merge selection: Contact merge requires user to explicitly select each field value (name, email, phone, status, assignee, score) - no auto-selection per CONTEXT.md (v3.2-01-05)
-- Tags auto-combined in merge: Tags from both contacts automatically merged into Set, shown as preview to user (v3.2-01-05)
-- System notes for merge audit: Merge history logged in contactNotes table with type='system' for audit trail (v3.2-01-05)
-- Conversation reassignment on merge: All conversations from secondary contact reassigned to primary before deletion (v3.2-01-05)
-- Stubbed contact detail sheet and media uploads: Complex Supabase-dependent features deferred to Phase 2 CRM rebuild - stubbed with "temporarily unavailable" UI (v3.2-01-02)
-- Scripts excluded from TypeScript build: Migration scripts with Supabase imports excluded from compilation but still runnable via ts-node (v3.2-01-02)
-- Workspace switcher simplified to display-only: Multi-workspace switching deferred until rebuilt with Convex (v3.2-01-02)
-- Keep Settings in sidebar despite being non-functional: Settings link remains in sidebar to be redirected to team page in Plan 02 (v3.2-01)
-- Four files still have Supabase imports: layout.tsx (deferred to Plan 02), contact-detail-sheet.tsx, workspace-switcher.tsx, send-media route - not deleted as they weren't in the plan's deletion list (v3.2-01) - RESOLVED in Plan 02
-
-Recent v3.1 decisions:
-- Webhook batch mutations without auth: Kapso webhook mutations skip workspace membership checks since signature already validated (07-06)
-- ARI partial migration acceptable: Completed processor core functions, deferred supporting files to next plan due to interdependencies (07-06)
-- Centralized credential query: getKapsoCredentials query in workspaces module used by both webhook and ARI (07-06)
-- Preserved business logic in routes: Permission checks and validation stay in API routes during Convex migration, not moved to mutations (07-02)
-- Clerk user creation for admin: Admin client creation uses Clerk createUser instead of Supabase admin auth (07-02)
-- Type assertions for Convex queries: Added type casts to handle TypeScript union type inference from query results (07-02)
-- Notes export N+1 pattern: Notes export fetches contacts first, then notes per contact - no workspace index on contactNotes (07-03)
-- Public pricing form mutation: upsertPricingFormContact has no auth check - pricing form is public-facing endpoint (07-03)
-- Convex contact mutations: Created dedicated upsertContactForImport and mergeContacts mutations for cleaner separation vs reusing createContact (07-03)
-- Legacy Supabase auth pages deleted: signup and change-password pages were orphaned dead code with broken references - safely deleted (no incoming links) (07-01a)
-- createOutboundMessage visibility: Changed from internalMutation to mutation for API route access while maintaining auth (07-04)
-- Ticket attachments to Convex storage: Migrated ticket attachments to Convex file storage, chat media remains on Supabase temporarily (07-04)
-- Typing indicators deferred: Stubbed out local-only implementation - requires dedicated Convex real-time table (nice-to-have feature) (07-05)
-- ConvexHttpClient for server actions: Server actions use ConvexHttpClient (not React hooks) for Convex mutations (07-05)
-- intent-otter-212 deployment URL: n8n webhook uses intent-otter-212.convex.site (not pleasant-antelope) (06-01)
-- JSON.stringify for n8n body: n8n HTTP Request uses JSON.stringify($json) to send full payload (06-01)
-- Supabase storage retention for attachments: File storage can remain on Supabase while database moves to Convex (05-05)
-- ARI processor migration deferred: processor.ts is 999 lines requiring careful refactoring beyond atomic commit scope - infrastructure ready (05-05)
-- Portal uses Clerk auth: Portal is client-facing, needs consistent auth with main app - uses auth() from @clerk/nextjs/server (05-05)
-- Public mutations for unauthenticated endpoints: Created findOrCreateContact mutation without auth for public webinar registration (05-04)
-- Registration count pattern: Fetch counts in parallel using countWebinarRegistrations query for list views (05-04)
-- Timestamp conversion in API routes: Convert ISO strings to timestamps for Convex scheduled_at field (05-04)
-- ARI Convex module: Single convex/ari.ts for all ARI operations (config, flow stages, knowledge, scoring, slots) (05-03)
-- Simplified flow stage delete: No automatic reordering on delete - UI handles batch updates (05-03)
-- Category delete behavior: Categories deletable, entries must be unlinked first (no cascade in Convex) (05-03)
-- mutation vs internalMutation: Use mutation (not internalMutation) for migration functions to enable ConvexHttpClient access (05-02)
-- ConvexHttpClient pattern: Use api.migrate.* for type-safe mutation calls from Node.js scripts (05-02)
-- Empty table handling: Migration handles 0-record tables gracefully - ARI/CMS features not yet in production (05-02)
-- v.optional(v.any()) for JSONB fields: Preserves Supabase JSONB flexibility (ariDestinations.requirements, ariPayments.gateway_response) (05-01)
-- supabaseId in CMS tables: Enables migration reference tracking for articles/webinars (05-01)
-- Clerk OrganizationProfile for team management: Replaces custom UI with built-in invitations (04-05)
-- Deferred verification: Team page + webhook testing combined at end of phase (04-05)
-- Deferred webhook config: Organization webhooks configured at end of phase, not blocking (04-04)
-- Eagle-only org approach: Only migrate Eagle Overseas due to Clerk free plan limit (04-02)
-- My21Staff workspace stays in Supabase: Not converted to org, can add after plan upgrade (04-02)
-- external_id for ID mapping: Set Supabase UUID as external_id in Clerk (04-01)
-- skip_password_requirement: Migrated users use Forgot Password flow (04-01)
-- Manual PATCH for existing OAuth users: Update external_id instead of failing (04-01)
-- Convex HTTP endpoints use `.convex.site` domain (not `.convex.cloud`) (03-02)
-- Web Crypto API for svix signature verification (Convex doesn't support Node.js crypto) (03-02)
-- HTTP routes must be in `convex/http.ts` (Convex ignores `_internal/` for HTTP) (03-02)
-- Use internalMutation for webhook functions (not publicly accessible) (03-01)
-- Idempotent createUser handles webhook retries (03-01)
-- updateUser creates if missing (handles webhook ordering) (03-01)
-- ClerkProvider -> ConvexProviderWithClerk -> QueryClientProvider hierarchy (02-01)
-- Clerk catch-all route pattern [[...sign-in]] for password reset and MFA flows (02-02)
-- Use Clerk appearance API for brand styling (white background, my21staff logo) (02-02)
-- Replace custom profile menus with Clerk UserButton (02-02)
-
-Recent v3.0 decisions affecting v3.1:
-- Convex migration (hybrid: Supabase auth + Convex data) - 25.4x faster (37ms vs 926ms P95)
-- Use v.optional(v.any()) for metadata fields
-- Snake_case naming in Convex to match Supabase
-
-### User Migration Status
-
-**Migrated users:** 2/2 (100%)
-
-| Email | Supabase UUID | Clerk ID | Notes |
-|-------|---------------|----------|-------|
-| manjowan@gmail.com | e09597ff-4b0f-4e7b-b6c7-c74a47e9457e | user_38fLdL8Y1qHQIYQob1u1FtR9fEL | OAuth user updated |
-| jwandiyanto@gmail.com | d7012f0e-54a7-4013-9dfa-f63057040c08 | user_38fViPWAnLiNth62ZaAJj3PQDWU | Super-admin |
-
-**Mapping file:** `planning/migrations/user-id-mapping.json`
-
-### Organization Migration Status
-
-**Migrated orgs:** 1/2 (eagle-only per user decision)
-
-| Workspace | Supabase ID | Clerk Org ID | Status |
-|-----------|-------------|--------------|--------|
-| Eagle Overseas | 25de3c4e-b9ca-4aff-9639-b35668f0a48a | org_38fXP0PN0rgNQ2coi1KsqozLJYb | Migrated |
-| My21Staff | 0318fda5-22c4-419b-bdd8-04471b818d17 | N/A | Not migrated (free plan limit) |
-
-**Mapping file:** `planning/migrations/workspace-org-mapping.json`
-
-### Blockers/Concerns
-
-**Convex CLI Bug:** `npx convex deploy` incorrectly reports env var not set (despite `env list` confirming it). Workaround: use Convex Dashboard to deploy or wait for CLI fix. Dev deployment works correctly.
-
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 001 | Fix layout design - brand colors & Apple-like minimalism | 2026-01-25 | 88256f7 | [001-fix-dark-layout-brand-colors](./quick/001-fix-dark-layout-brand-colors/) |
-
-### v3.2 Strategy: Clean Slate
-
-**Decision:** Delete Supabase entirely. Hide broken pages from navigation. Rebuild CRM features fresh with Convex.
-
-**Pages to hide until rebuilt:**
-- Dashboard pages (workspace, inbox, database, settings, support, knowledge-base, integrations, website)
-- Portal pages (support)
-- Admin pages (clients)
-- Public pages (webinars, articles)
-
-**Reference:** `planning/phases/07-cleanup-verification/07-07-SUMMARY.md`
-
-### Ticket Migration Status
-
-**Ticket tables:** Empty (0 records) - ticketing system not yet used
-
-| Table | Records | Status |
-|-------|---------|--------|
-| tickets | 0 | Migration script ready |
-| ticketComments | 0 | Migration script ready |
-| ticketStatusHistory | 0 | Migration script ready |
-
-**Migration script:** `scripts/update-convex-ticket-ids.ts` (verified working)
-**Report:** `planning/migrations/user-id-update-report-tickets.json`
-
-### Core Table Migration Status
-
-**Core tables:** Empty (0 records) - data not yet migrated from Supabase
-
-| Table | Field | Records | Status |
-|-------|-------|---------|--------|
-| workspaces | owner_id | 0 | Migration script ready |
-| workspaceMembers | user_id | 0 | Migration script ready |
-| contacts | assigned_to | 0 | Migration script ready |
-| conversations | assigned_to | 0 | Migration script ready |
-| messages | sender_id | 0 | Migration script ready |
-| contactNotes | user_id | 0 | Migration script ready |
-
-**Migration script:** `scripts/update-convex-user-ids.ts` (verified working)
-**Report:** `planning/migrations/user-id-update-report-core.json`
-
-### Pending User Setup
-
-**Clerk Dashboard - Organization Webhooks (deferred from 04-04):**
-1. Go to Clerk Dashboard -> Webhooks
-2. Edit webhook: pleasant-antelope-109.convex.site/webhook/clerk
-3. Add events: organization.created, organization.updated, organization.deleted, organizationMembership.created, organizationMembership.updated, organizationMembership.deleted
-4. Save changes
-
-### Phase 4 Verification Checklist
-
-Before proceeding to Phase 5, verify:
-
-**Team Page (04-05):**
-- [ ] Start dev server: `npm run dev`
-- [ ] Navigate to /eagle-overseas/team
-- [ ] Member list shows organization members
-- [ ] Invite button works (opens Clerk modal)
-- [ ] Role management visible for owner
-
-**Organization Webhooks (04-04):**
-- [ ] Go to Clerk Dashboard -> Webhooks
-- [ ] Edit webhook: `pleasant-antelope-109.convex.site/webhook/clerk`
-- [ ] Add events: organization.created, organization.updated, organization.deleted, organizationMembership.created, organizationMembership.updated, organizationMembership.deleted
-- [ ] Save changes
-- [ ] Test: invite a member, check Convex organizations table
-
-### Data Migration Status
-
-**Remaining Supabase Tables:** 12 tables migrated (scripts ready, data empty)
-
-| Table | Records | Status |
-|-------|---------|--------|
-| ari_destinations | 0 | ✓ Migration script ready |
-| ari_payments | 0 | ✓ Migration script ready |
-| ari_appointments | 0 | ✓ Migration script ready |
-| ari_ai_comparison | 0 | ✓ Migration script ready |
-| ari_flow_stages | 0 | ✓ Migration script ready |
-| ari_knowledge_categories | 0 | ✓ Migration script ready |
-| ari_knowledge_entries | 0 | ✓ Migration script ready |
-| ari_scoring_config | 0 | ✓ Migration script ready |
-| consultant_slots | 2 (test) | Network error (non-critical) |
-| articles | N/A | Table not created yet (future) |
-| webinars | N/A | Table not created yet (future) |
-| webinar_registrations | N/A | Table not created yet (future) |
-
-**Migration script:** `scripts/migrate-supabase-to-convex.ts` (verified working)
-**Report:** `planning/migrations/data-migration-report.json`
-
-**Note:** All ARI extended and CMS tables are empty because these features aren't yet in production use. Migration infrastructure ready for when data exists.
+- Webhook E2E testing (ngrok connectivity issues)
+- n8n sync count verification (webhook verified working)
 
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed Phase 5 (Polish + Deploy) - all 3 plans complete
-Resume: v3.2 CRM Core Fresh complete and production-ready
+Stopped at: v3.2 milestone completed and archived
+Resume: `/gsd:new-milestone` when ready to start next version
 
-## Consolidated Verification
+## Next Steps
 
-All human verification for Phases 1-4.2 consolidated into single checklist:
-`planning/phases/04-settings/VERIFICATION-CHECKLIST.md`
-
-**Next steps:**
-1. Run `/gsd:discuss-phase 5` or `/gsd:plan-phase 5` to plan Phase 5 (Polish + Deploy)
-2. Or: push to deploy and run manual verification
+1. **Resolve Vercel billing** or create fresh Vercel project
+2. **Deploy to production** following DEPLOYMENT-READY.md guide
+3. **Update Kapso webhook URL** to production
+4. **Run post-deployment verification** checklist
+5. **Start v4.0** with `/gsd:new-milestone`
 
 ---
-*Last updated: 2026-01-25 - Phase 4.2 Inbox Rework complete (v2.0 filter bar with Active/All toggle, Status dropdown, Tags dropdown)*
+*Last updated: 2026-01-25 — v3.2 milestone archived*
