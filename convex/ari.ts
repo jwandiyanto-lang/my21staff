@@ -6,7 +6,7 @@
  */
 
 // @ts-nocheck - Schema types mismatch with generated Convex types
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireWorkspaceMembership } from "./lib/auth";
 
@@ -70,6 +70,66 @@ export const upsertAriConfig = mutation({
   handler: async (ctx, args) => {
     await requireWorkspaceMembership(ctx, args.workspace_id);
 
+    // Check if config exists
+    const existing = await ctx.db
+      .query("ariConfig")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
+      .first();
+
+    const now = Date.now();
+
+    if (existing) {
+      // Update existing config
+      await ctx.db.patch(existing._id, {
+        bot_name: args.bot_name,
+        greeting_style: args.greeting_style,
+        language: args.language,
+        tone: args.tone,
+        community_link: args.community_link || undefined,
+        updated_at: now,
+      });
+      return await ctx.db.get(existing._id);
+    } else {
+      // Create new config
+      const configId = await ctx.db.insert("ariConfig", {
+        workspace_id: args.workspace_id as any,
+        bot_name: args.bot_name,
+        greeting_style: args.greeting_style,
+        language: args.language,
+        tone: args.tone,
+        community_link: args.community_link,
+        created_at: now,
+        updated_at: now,
+      });
+      return await ctx.db.get(configId);
+    }
+  },
+});
+
+/**
+ * Seed ARI config (admin only, no auth check).
+ * Used for initial workspace setup via CLI.
+ *
+ * WARNING: This mutation bypasses auth. Use only for initial setup
+ * or admin operations via CLI.
+ *
+ * @param workspace_id - The workspace ID (Convex ID string)
+ * @param bot_name - Bot display name
+ * @param greeting_style - 'professional', 'friendly', 'casual'
+ * @param language - 'id' or 'en'
+ * @param tone - Optional tone settings object
+ * @param community_link - Optional community invite link
+ */
+export const seedAriConfig = mutation({
+  args: {
+    workspace_id: v.string(),
+    bot_name: v.string(),
+    greeting_style: v.string(),
+    language: v.string(),
+    tone: v.optional(v.any()),
+    community_link: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
     // Check if config exists
     const existing = await ctx.db
       .query("ariConfig")
