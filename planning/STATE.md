@@ -11,9 +11,9 @@ See: planning/PROJECT.md (updated 2026-01-23)
 
 Milestone: v3.2 CRM Core Fresh
 Phase: 4.1 UI REVERT (new phase - reverting to v2.0 UI with Convex backend)
-Plan: 02 of 04 complete
-Status: In progress - Inbox filters reverted to v2.0 popover style
-Last activity: 2026-01-25 - Completed 04.1-02-PLAN.md (Inbox Filters)
+Plan: 01-02 of 04 complete
+Status: In progress - Contact detail and inbox filters reverted to v2.0 style
+Last activity: 2026-01-25 - Completed 04.1-01-PLAN.md (Contact Detail Sheet)
 
 ### UI Revert Decision (2026-01-25)
 
@@ -72,6 +72,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.2 decisions:
+- Contact detail 3-tab v2.0 style: Reverted to Details, Messages, Activity tabs (removed Documents), Messages tab placeholder for inbox integration (04.1-01)
 - Inbox filters as popover with checkboxes: Status filters moved to inbox header popover matching v2.0 design, tag filters removed from UI (04.1-02)
 - App UI language changed to English: Updated CLAUDE.md and all Indonesian UI text translated to English across inbox, dashboard, settings, contact components (04-02)
 - Phase 4 human verification deferred: All verification consolidated into single deployment testing session covering Phases 1-4 (04-02)
@@ -288,8 +289,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 04.1-02-PLAN.md (Inbox Filters - Popover Style)
-Resume: Continue with Plan 03 (Contact Detail Sheet) or Plan 04 (Database View)
+Stopped at: Completed 04.1-01-PLAN.md (Contact Detail Sheet) and 04.1-02-PLAN.md (Inbox Filters)
+Resume: Continue with Plan 03 or Plan 04
 
 ## Consolidated Verification
 
@@ -302,4 +303,4 @@ All human verification for Phases 1-4 consolidated into single checklist:
 3. Report issues for Phase 5 gap closure or continue to Phase 5 planning
 
 ---
-*Last updated: 2026-01-25 - Phase 4.1 Plan 02 complete (Inbox Filters reverted to v2.0 popover style)*
+*Last updated: 2026-01-25 - Phase 4.1 Plans 01-02 complete (Contact Detail Sheet + Inbox Filters reverted to v2.0 style)*
