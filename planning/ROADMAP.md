@@ -132,13 +132,18 @@ Plans:
 - [x] 04.2-01-PLAN.md — Add v2.0 filter bar (Active/All toggle, Status dropdown, Tags dropdown) ✓
 
 ### Phase 5: Polish + Deploy
-**Goal**: Final verification and production deployment
+**Goal**: Local verification with ngrok + Kapso webhooks (Vercel deployment blocked - billing freeze)
 **Depends on**: Phase 4.2
 **Success Criteria** (what must be TRUE):
-  1. All CRM features verified working
-  2. Production deployment successful
-  3. Environment variables cleaned up
-**Plans**: TBD
+  1. Full round-trip messaging verified (receive + send via ngrok)
+  2. Environment variables documented and cleaned
+  3. Deployment readiness documented (for when billing resolved)
+**Plans**: 3 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Install ngrok + create tunnel script (model: haiku)
+- [ ] 05-02-PLAN.md — Round-trip webhook testing with Kapso (model: opus)
+- [ ] 05-03-PLAN.md — Environment cleanup + deployment readiness docs (model: sonnet)
 
 ---
 
@@ -413,10 +418,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
 | v3.1 Convex + Clerk API Layer | 1-7 | 23/25 | Complete (partial) | 2026-01-24 |
-| **v3.2 CRM Core Fresh** | 1-5 | 21/? | Phase 4.2 complete | - |
+| **v3.2 CRM Core Fresh** | 1-5 | 24/24 | Phase 5 planned | - |
 
 **Total shipped:** 204 plans across 6 milestones
 
 ---
 
-*Last updated: 2026-01-25 — v3.2 Phase 4.2 inbox filter bar complete*
+*Last updated: 2026-01-25 — v3.2 Phase 5 plans created (3 plans in 3 waves)*
