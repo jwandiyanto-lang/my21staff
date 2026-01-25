@@ -3,7 +3,6 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
-import { id as localeId } from 'date-fns/locale'
 import type { Id } from 'convex/_generated/dataModel'
 
 interface Conversation {
@@ -43,13 +42,13 @@ export function ConversationItem({ conversation, isSelected, onClick }: Conversa
 
     if (diffInHours < 24) {
       // Less than 24h: show relative time
-      return formatDistanceToNow(date, { addSuffix: true, locale: localeId })
+      return formatDistanceToNow(date, { addSuffix: true })
     } else if (diffInHours < 168) {
       // Less than 7 days: show day name
-      return date.toLocaleDateString('id-ID', { weekday: 'short' })
+      return date.toLocaleDateString('en-US', { weekday: 'short' })
     } else {
       // Older: show date
-      return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' })
+      return date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' })
     }
   }
 

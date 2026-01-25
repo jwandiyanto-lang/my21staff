@@ -1,20 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
-import { ConversationList } from '@/components/inbox/conversation-list'
-import { MessageThread } from '@/components/inbox/message-thread'
-import { InboxSkeleton } from '@/components/skeletons/inbox-skeleton'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
 import { Filter, MessageSquare } from 'lucide-react'
-import { LEAD_STATUS_CONFIG, LEAD_STATUSES } from '@/lib/lead-status'
+import { ConversationList } from '@/components/inbox/conversation-list'
+import { MessageThread } from '@/components/inbox/message-thread'
+import { InboxSkeleton } from '@/components/skeletons/inbox-skeleton'
+import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import type { Id } from 'convex/_generated/dataModel'
 
 interface InboxClientProps {
@@ -33,6 +34,7 @@ interface Conversation {
     name?: string
     kapso_name?: string
     phone: string
+    lead_status?: string
     tags?: string[]
   } | null
 }
@@ -54,7 +56,7 @@ function MessageThreadWrapper({
 
   if (!contact) {
     return (
-      <div className="flex-1 bg-[#f0f2f5] flex items-center justify-center">
+      <div className="flex-1 bg-muted/30 flex items-center justify-center">
         <p className="text-muted-foreground">Contact not found</p>
       </div>
     )
@@ -75,102 +77,134 @@ function MessageThreadWrapper({
 
 export function InboxClient({ workspaceId }: InboxClientProps) {
   const [selectedConversationId, setSelectedConversationId] = useState<Id<'conversations'> | null>(null)
-  const [statusFilters, setStatusFilters] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
 
   const data = useQuery(api.conversations.listWithFilters, {
     workspace_id: workspaceId as any,
-    statusFilters: statusFilters.length > 0 ? statusFilters : undefined,
+    statusFilters: statusFilter.length > 0 ? statusFilter : undefined,
   })
+
+  // Filter conversations by search query (client-side)
+  const filteredConversations = useMemo(() => {
+    if (!data?.conversations) return []
+    if (!searchQuery.trim()) return data.conversations
+
+    const query = searchQuery.toLowerCase()
+    return data.conversations.filter((conv) => {
+      const contact = conv.contact
+      if (!contact) return false
+      return (
+        contact.name?.toLowerCase().includes(query) ||
+        contact.kapso_name?.toLowerCase().includes(query) ||
+        contact.phone.toLowerCase().includes(query)
+      )
+    })
+  }, [data?.conversations, searchQuery])
+
+  const handleStatusToggle = (status: LeadStatus) => {
+    setStatusFilter((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
+    )
+  }
 
   if (data === undefined) {
     return <InboxSkeleton />
   }
 
-  const { conversations, members } = data
-
   return (
     <div className="flex h-[calc(100vh-4rem)]">
-      {/* Left panel - Conversation list */}
-      <div className="w-80 border-r flex flex-col bg-background">
-        {/* Filter Header */}
-        <div className="p-3 border-b flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Status
-                {statusFilters.length > 0 && (
-                  <span className="ml-2 bg-primary text-primary-foreground text-xs px-1.5 rounded">
-                    {statusFilters.length}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-56 p-2">
-              <div className="space-y-1">
-                {LEAD_STATUSES.map((status) => {
-                  const config = LEAD_STATUS_CONFIG[status]
-                  const isSelected = statusFilters.includes(status)
-                  return (
-                    <div
-                      key={status}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-                      onClick={() => {
-                        setStatusFilters(prev =>
-                          isSelected
-                            ? prev.filter(s => s !== status)
-                            : [...prev, status]
-                        )
-                      }}
+      {/* Left sidebar - Conversation list */}
+      <div className="w-80 border-r bg-background flex flex-col">
+        {/* Search and filter header */}
+        <div className="p-4 border-b space-y-3">
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Search conversations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1"
+            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0 relative">
+                  <Filter className="h-4 w-4" />
+                  {statusFilter.length > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
+                      {statusFilter.length}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56" align="end">
+                <div className="space-y-2">
+                  <p className="font-medium text-sm">Filter by status</p>
+                  {LEAD_STATUSES.map((status) => {
+                    const config = LEAD_STATUS_CONFIG[status]
+                    return (
+                      <label
+                        key={status}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={statusFilter.includes(status)}
+                          onCheckedChange={() => handleStatusToggle(status)}
+                        />
+                        <span
+                          className="px-2 py-0.5 rounded text-xs font-medium"
+                          style={{
+                            backgroundColor: config.bgColor,
+                            color: config.color,
+                          }}
+                        >
+                          {config.label}
+                        </span>
+                      </label>
+                    )
+                  })}
+                  {statusFilter.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full mt-2"
+                      onClick={() => setStatusFilter([])}
                     >
-                      <Checkbox checked={isSelected} />
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: config.color }}
-                      />
-                      <span className="text-sm">{config.label}</span>
-                    </div>
-                  )
-                })}
-                {statusFilters.length > 0 && (
-                  <>
-                    <div className="border-t my-1" />
-                    <button
-                      onClick={() => setStatusFilters([])}
-                      className="w-full text-xs text-muted-foreground hover:text-foreground text-left px-2 py-1"
-                    >
-                      Clear all
-                    </button>
-                  </>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
+                      Clear filters
+                    </Button>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
-        {/* Conversation List */}
+        {/* Conversation list */}
         <ConversationList
-          conversations={conversations}
+          conversations={filteredConversations}
           selectedId={selectedConversationId}
           onSelect={setSelectedConversationId}
-          members={members}
+          members={data.members}
         />
       </div>
 
-      {/* Right panel - Message thread */}
-      <div className="flex-1 flex flex-col">
+      {/* Right area - Message thread */}
+      <div className="flex-1 flex flex-col bg-muted/30">
         {selectedConversationId ? (
           <MessageThreadWrapper
             conversationId={selectedConversationId}
             workspaceId={workspaceId}
-            conversations={conversations}
+            conversations={filteredConversations}
           />
         ) : (
-          <div className="flex-1 bg-[#f0f2f5] flex items-center justify-center">
-            <div className="text-center text-muted-foreground">
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            <div className="text-center">
               <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="font-medium">Select a conversation</p>
-              <p className="text-sm mt-1">Choose a conversation to view messages</p>
+              <p className="text-lg font-medium">Select a conversation</p>
+              <p className="text-sm mt-2">
+                Choose a conversation from the sidebar to view messages
+              </p>
             </div>
           </div>
         )}
