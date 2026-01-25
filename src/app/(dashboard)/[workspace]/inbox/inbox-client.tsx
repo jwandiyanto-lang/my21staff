@@ -11,11 +11,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Filter, MessageSquare } from 'lucide-react'
+import { Filter, MessageSquare, Mail, MailOpen, ChevronDown, Tag } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { ConversationList } from '@/components/inbox/conversation-list'
 import { MessageThread } from '@/components/inbox/message-thread'
 import { InboxSkeleton } from '@/components/skeletons/inbox-skeleton'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
+import { cn } from '@/lib/utils'
 import type { Id } from 'convex/_generated/dataModel'
 
 interface InboxClientProps {
@@ -80,11 +82,32 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   const [selectedConversationId, setSelectedConversationId] = useState<Id<'conversations'> | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
+  const [viewMode, setViewMode] = useState<'active' | 'all'>('active')
+  const [tagFilter, setTagFilter] = useState<string[]>([])
 
   const data = useQuery(api.conversations.listWithFilters, {
     workspace_id: workspaceId as any,
+    active: viewMode === 'active',
     statusFilters: statusFilter.length > 0 ? statusFilter : undefined,
+    tagFilters: tagFilter.length > 0 ? tagFilter : undefined,
   })
+
+  // Extract data from query response
+  const activeCount = useMemo(() => {
+    if (!data?.conversations) return 0
+    return data.conversations.filter((c) => c.unread_count > 0).length
+  }, [data?.conversations])
+
+  const contactTags = useMemo(() => {
+    if (!data?.conversations) return []
+    const tags = new Set<string>()
+    data.conversations.forEach((conv) => {
+      if (conv.contact?.tags) {
+        conv.contact.tags.forEach((tag) => tags.add(tag))
+      }
+    })
+    return Array.from(tags).sort()
+  }, [data?.conversations])
 
   // Filter conversations by search query (client-side)
   const filteredConversations = useMemo(() => {
@@ -111,6 +134,14 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     )
   }
 
+  const handleTagToggle = (tag: string) => {
+    setTagFilter((prev) =>
+      prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag]
+    )
+  }
+
   if (data === undefined) {
     return <InboxSkeleton />
   }
@@ -121,6 +152,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
       <div className="w-80 border-r bg-background flex flex-col">
         {/* Search and filter header */}
         <div className="p-4 border-b space-y-3">
+          {/* Search input */}
           <div className="flex items-center gap-2">
             <Input
               placeholder="Search conversations..."
@@ -128,18 +160,66 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1"
             />
+          </div>
+
+          {/* Filter bar with toggles and dropdowns */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Active/All toggle */}
+            <div className="flex items-center rounded-full bg-muted p-1">
+              <button
+                onClick={() => setViewMode('active')}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                  viewMode === 'active'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Mail className="h-3.5 w-3.5" />
+                Active
+                {activeCount > 0 && (
+                  <Badge variant="default" className="ml-1 px-1.5 py-0 text-[10px] h-5">
+                    {activeCount}
+                  </Badge>
+                )}
+              </button>
+              <button
+                onClick={() => setViewMode('all')}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                  viewMode === 'all'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <MailOpen className="h-3.5 w-3.5" />
+                All
+              </button>
+            </div>
+
+            {/* Status filter dropdown */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="shrink-0 relative">
-                  <Filter className="h-4 w-4" />
-                  {statusFilter.length > 0 && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
-                      {statusFilter.length}
-                    </span>
+                <button
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                    statusFilter.length > 0
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted hover:bg-muted/80 text-muted-foreground'
                   )}
-                </Button>
+                >
+                  <Filter className="h-3.5 w-3.5" />
+                  {statusFilter.length > 0 ? (
+                    <>
+                      {statusFilter.length} status{statusFilter.length > 1 ? 'es' : ''}
+                    </>
+                  ) : (
+                    'All Status'
+                  )}
+                  <ChevronDown className="h-3 w-3" />
+                </button>
               </PopoverTrigger>
-              <PopoverContent className="w-56" align="end">
+              <PopoverContent className="w-56" align="start">
                 <div className="space-y-2">
                   <p className="font-medium text-sm">Filter by status</p>
                   {LEAD_STATUSES.map((status) => {
@@ -178,6 +258,62 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
                 </div>
               </PopoverContent>
             </Popover>
+
+            {/* Tags filter dropdown */}
+            {contactTags.length > 0 && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                      tagFilter.length > 0
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                    )}
+                  >
+                    <Tag className="h-3.5 w-3.5" />
+                    {tagFilter.length > 0 ? (
+                      <>
+                        {tagFilter.length} tag{tagFilter.length > 1 ? 's' : ''}
+                      </>
+                    ) : (
+                      'All Tags'
+                    )}
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56" align="start">
+                  <div className="space-y-2">
+                    <p className="font-medium text-sm">Filter by tag</p>
+                    {contactTags.map((tag) => (
+                      <label
+                        key={tag}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={tagFilter.includes(tag)}
+                          onCheckedChange={() => handleTagToggle(tag)}
+                        />
+                        <Badge variant="secondary" className="text-xs">
+                          <Tag className="mr-1 h-3 w-3" />
+                          {tag}
+                        </Badge>
+                      </label>
+                    ))}
+                    {tagFilter.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full mt-2"
+                        onClick={() => setTagFilter([])}
+                      >
+                        Clear tags
+                      </Button>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         </div>
 
