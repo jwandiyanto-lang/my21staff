@@ -10,10 +10,10 @@ See: planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Milestone: v3.2 CRM Core Fresh
-Phase: 4.2 INBOX REWORK — IN PROGRESS
-Plan: 01/04 complete
-Status: Filter bar added (Active/All toggle, Status dropdown, Tags dropdown) - v2.0 restoration on track
-Last activity: 2026-01-25 - Phase 4.2 Plan 01 filter bar implementation complete
+Phase: 4.2 INBOX REWORK — COMPLETE ✓
+Plan: 01/01 complete
+Status: Phase verified - v2.0 filter bar added (Active/All toggle, Status dropdown, Tags dropdown)
+Last activity: 2026-01-25 - Phase 4.2 verification passed (4/4 must-haves)
 
 ### UI Revert Decision (2026-01-25)
 
@@ -28,7 +28,7 @@ Last activity: 2026-01-25 - Phase 4.2 Plan 01 filter bar implementation complete
 
 **Reference:** Original v2.0 code available in git history before commit `ab336cd`
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 █████████░ (203 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 █████████░ (204 plans shipped)
 
 ## Performance Metrics
 
@@ -293,18 +293,17 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed Phase 4.2 Plan 01 (filter bar implementation)
-Resume: Phase 4.2 Plan 01 complete - 04.2-02 ready to execute or continue inbox rework
+Stopped at: Completed Phase 4.2 (inbox filter bar complete)
+Resume: Phase 4.2 complete - ready for Phase 5 (Polish + Deploy)
 
 ## Consolidated Verification
 
-All human verification for Phases 1-4 consolidated into single checklist:
+All human verification for Phases 1-4.2 consolidated into single checklist:
 `planning/phases/04-settings/VERIFICATION-CHECKLIST.md`
 
 **Next steps:**
-1. Push to deploy: `git push origin master`
-2. Run verification checklist at https://my21staff.vercel.app
-3. Report issues for Phase 5 gap closure or continue to Phase 5 planning
+1. Run `/gsd:discuss-phase 5` or `/gsd:plan-phase 5` to plan Phase 5 (Polish + Deploy)
+2. Or: push to deploy and run manual verification
 
 ---
-*Last updated: 2026-01-25 - Phase 4.1 UI Revert complete (all 4 plans: Contact Detail Sheet, Inbox Filters, Message Thread, Messages & Activity Tabs)*
+*Last updated: 2026-01-25 - Phase 4.2 Inbox Rework complete (v2.0 filter bar with Active/All toggle, Status dropdown, Tags dropdown)*

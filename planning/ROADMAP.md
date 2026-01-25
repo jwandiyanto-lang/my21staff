@@ -117,19 +117,19 @@ Plans:
 - [x] 03-PLAN.md — Inbox message thread ✓
 - [x] 04-PLAN.md — Contact Messages & Activity tabs ✓
 
-### Phase 4.2: Inbox Rework — IN PROGRESS (gap closure)
+### Phase 4.2: Inbox Rework — COMPLETE
 **Goal**: Fully restore inbox filter bar to v2.0 style
 **Depends on**: Phase 4.1
 **Type**: Gap closure from UAT
 **Success Criteria** (what must be TRUE):
-  1. [ ] Active/All toggle with count badge
-  2. [ ] Status filter as dropdown button
-  3. [ ] Tags filter as dropdown button
-  4. [ ] All filters wire to Convex query
-**Plans**: 1 plan
+  1. ✓ Active/All toggle with count badge
+  2. ✓ Status filter as dropdown button
+  3. ✓ Tags filter as dropdown button
+  4. ✓ All filters wire to Convex query
+**Plans**: 1/1 complete
 
 Plans:
-- [ ] 04.2-01-PLAN.md — Add v2.0 filter bar (Active/All toggle, Status dropdown, Tags dropdown)
+- [x] 04.2-01-PLAN.md — Add v2.0 filter bar (Active/All toggle, Status dropdown, Tags dropdown) ✓
 
 ### Phase 5: Polish + Deploy
 **Goal**: Final verification and production deployment
@@ -413,10 +413,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
 | v3.1 Convex + Clerk API Layer | 1-7 | 23/25 | Complete (partial) | 2026-01-24 |
-| **v3.2 CRM Core Fresh** | 1-5 | 20/? | Phase 4.2 in progress | - |
+| **v3.2 CRM Core Fresh** | 1-5 | 21/? | Phase 4.2 complete | - |
 
-**Total shipped:** 203 plans across 6 milestones
+**Total shipped:** 204 plans across 6 milestones
 
 ---
 
-*Last updated: 2026-01-25 — v3.2 Phase 4.2 gap closure (inbox filter bar)*
+*Last updated: 2026-01-25 — v3.2 Phase 4.2 inbox filter bar complete*
