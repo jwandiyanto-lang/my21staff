@@ -314,7 +314,7 @@ export function ContactDetailSheet({
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
                   placeholder="Add a note..."
-                  className="min-h-[80px]"
+                  className="min-h-[60px]"
                 />
                 <div className="flex justify-end">
                   <Button
@@ -327,19 +327,25 @@ export function ContactDetailSheet({
                 </div>
               </form>
 
-              {/* Notes list */}
+              {/* Activity Timeline */}
               <div className="space-y-3">
+                <h4 className="text-sm font-medium text-muted-foreground">Activity</h4>
                 {notes.map((note: any) => (
-                  <div key={note._id} className="p-3 bg-muted/50 rounded-lg">
-                    <p className="text-sm">{note.content}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(note.created_at), 'MMM d, yyyy h:mm a')}
-                    </p>
+                  <div key={note._id} className="flex gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                      <StickyNote className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">{note.content}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(new Date(note.created_at), 'MMM d, yyyy h:mm a')}
+                      </p>
+                    </div>
                   </div>
                 ))}
                 {notes.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No notes yet
+                    No activity yet
                   </p>
                 )}
               </div>
