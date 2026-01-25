@@ -33,7 +33,7 @@ export function InvitationEmail({
         <Button
           href={inviteLink}
           style={{
-            backgroundColor: '#2D4B3E',
+            backgroundColor: '#284b31',
             color: '#ffffff',
             padding: '14px 28px',
             borderRadius: '8px',

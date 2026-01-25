@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
+  LayoutDashboard,
+  MessageSquare,
   Users,
   Settings,
   ChevronLeft,
@@ -24,6 +26,16 @@ interface WorkspaceSidebarProps {
 }
 
 const operationsNav = [
+  {
+    title: 'Dashboard',
+    icon: LayoutDashboard,
+    href: '',
+  },
+  {
+    title: 'Inbox',
+    icon: MessageSquare,
+    href: '/inbox',
+  },
   {
     title: 'Lead Management',
     icon: Users,

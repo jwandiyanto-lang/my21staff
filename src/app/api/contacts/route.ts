@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     const paginatedContacts = contacts.slice(from, to)
 
     logQuerySummary('/api/contacts', metrics)
-    return NextResponse.json({ contacts: paginatedContacts })
+    return NextResponse.json({ contacts: paginatedContacts, total: contacts.length })
   } catch (error) {
     console.error('GET /api/contacts error:', error)
     logQuerySummary('/api/contacts', metrics)

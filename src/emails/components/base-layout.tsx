@@ -17,7 +17,7 @@ const brandConfig = {
   theme: {
     extend: {
       colors: {
-        'brand-forest': '#2D4B3E',
+        'brand-forest': '#284b31',
         'brand-text': '#2D2A26',
         'brand-muted': '#8C7E74',
         'brand-orange': '#F7931A',

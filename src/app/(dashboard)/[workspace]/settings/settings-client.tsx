@@ -365,10 +365,7 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
               {contactTags.length}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value="data" className="gap-2">
-            <FileSpreadsheet className="h-4 w-4" />
-            Data
-          </TabsTrigger>
+          {/* Data tab hidden for now - export features need fixes */}
         </TabsList>
 
         {/* Integrations Tab */}
@@ -652,8 +649,8 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
           </Card>
         </TabsContent>
 
-        {/* Data Tab */}
-        <TabsContent value="data" className="space-y-6">
+        {/* Data Tab - Hidden for now */}
+        <TabsContent value="data" className="space-y-6 hidden">
           {/* Export Data Card */}
           <Card>
             <CardHeader>

@@ -30,10 +30,10 @@ export async function PATCH(
     if (body.tags !== undefined) updates.tags = body.tags
     if (body.assigned_to !== undefined) updates.assigned_to = body.assigned_to
 
-    // Update contact in Convex
-    const updatedContact = await convex.mutation(api.contacts.updateContact, {
-      contact_id: id as any,
-      ...updates,
+    // Update contact in Convex - use mutations.updateContactInternal which supports all fields
+    const updatedContact = await convex.mutation(api.mutations.updateContactInternal, {
+      contact_id: id,
+      updates,
     })
 
     return NextResponse.json({ contact: updatedContact })
