@@ -72,6 +72,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 All decisions logged in PROJECT.md Key Decisions table.
 
 Recent v3.2 decisions:
+- MessageThread wiring via wrapper: MessageThreadWrapper extracts contact from conversation list for props (04.1-03)
 - Messages tab with Convex queries: Contact detail Messages tab connected to real conversation history via getByContactId and listByConversation queries (04.1-04)
 - Activity timeline with icons: Notes displayed with StickyNote icons in timeline layout for better visual hierarchy (04.1-04)
 - Simplified listByConversation: Query no longer requires workspace_id, uses conversation_id only for contact detail context (04.1-04)
