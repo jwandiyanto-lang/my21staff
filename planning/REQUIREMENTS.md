@@ -9,10 +9,10 @@ Requirements for production launch with Eagle. Each maps to roadmap phases.
 
 ### Deployment
 
-- [ ] **DEPLOY-01**: Fresh Vercel project created and connected to existing codebase
-- [ ] **DEPLOY-02**: Production environment variables configured (Clerk, Convex, Kapso)
-- [ ] **DEPLOY-03**: Domain configured (my21staff.com or production subdomain)
-- [ ] **DEPLOY-04**: Kapso webhook URL updated to production endpoint
+- [x] **DEPLOY-01**: Fresh Vercel project created and connected to existing codebase
+- [x] **DEPLOY-02**: Production environment variables configured (Clerk, Convex, Kapso)
+- [x] **DEPLOY-03**: Domain configured (my21staff.com or production subdomain)
+- [x] **DEPLOY-04**: Kapso webhook URL updated to production endpoint
 
 ### Kapso Integration
 
@@ -96,10 +96,10 @@ Deferred to after first client is live and generating revenue.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEPLOY-01 | Phase 1 | Pending |
-| DEPLOY-02 | Phase 1 | Pending |
-| DEPLOY-03 | Phase 1 | Pending |
-| DEPLOY-04 | Phase 1 | Pending |
+| DEPLOY-01 | Phase 1 | Complete |
+| DEPLOY-02 | Phase 1 | Complete |
+| DEPLOY-03 | Phase 1 | Complete |
+| DEPLOY-04 | Phase 1 | Complete |
 | KAPSO-01 | Phase 2 | Pending |
 | KAPSO-02 | Phase 2 | Pending |
 | KAPSO-03 | Phase 2 | Pending |
