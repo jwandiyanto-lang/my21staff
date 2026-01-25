@@ -11,11 +11,11 @@ See: planning/PROJECT.md (updated 2026-01-25)
 
 Milestone: v3.3 Go Live
 Phase: 3 of 7 (AI System)
-Plan: Ready to plan
-Status: Phases 1, 2, 2.1 complete
-Last activity: 2026-01-25 — Phase 2 Kapso Integration complete (webhook working, inbox showing messages)
+Plan: 1 of 4 complete
+Status: Plan 03-01 complete
+Last activity: 2026-01-25 — Completed 03-01 AI Foundation (aiUsage table, Grok API verified)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ███░░░░░░░ (198 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ████░░░░░░ (199 plans shipped)
 
 ## Performance Metrics
 
@@ -34,7 +34,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.0 | 21 | 3 |
 | v3.1 | 23 | 1 |
 | v3.2 | 23 | 2 |
-| v3.3 | 5 | In progress |
+| v3.3 | 6 | In progress |
 
 ## v3.3 Roadmap Summary
 
@@ -45,7 +45,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 1. Deployment | Fresh Vercel + production env | 4 (DEPLOY-01 to 04) | ✓ Complete |
 | 2. Kapso Integration | WhatsApp webhook + messaging | 4 (KAPSO-01 to 04) | ✓ Complete |
 | 2.1 UI Documentation | Document UI/buttons | N/A (inserted) | ✓ Complete |
-| 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | Not started |
+| 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | Plan 1/4 complete |
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | Not started |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
@@ -72,7 +72,11 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ## Blocking Issues
 
-None. Vercel deployment unblocked.
+**ARI Workspace Linkage (blocks AI responses):**
+- Workspace with `kapso_phone_id` has ID `js7b1cwpdpadcgds1cr8dqw7dh7zv3a3`
+- `ariConfig` was created for a different workspace ID
+- **Fix required:** Update ariConfig.workspace_id in Convex dashboard to match kapso workspace
+- See: planning/phases/03-ai-system/03-01-SUMMARY.md for detailed steps
 
 ## Accumulated Context
 
@@ -84,9 +88,10 @@ None. Vercel deployment unblocked.
 
 **Recent Decisions:**
 - Phase numbering starts at 1 for new milestone
-- Dual-AI architecture: "The Mouth" (Sea-Lion) + "The Brain" (Claude)
+- Dual-AI architecture: "The Mouth" (Sea-Lion) + "The Brain" (Grok)
 - Use `undefined` instead of `null` for optional Convex fields
 - Use `withIndex` instead of `filter` callbacks in Convex queries
+- aiUsage table tracks costs via workspace_id + conversation_id + model + ai_type
 
 **Known Issues for Phase 3:**
 - ARI not enabled log: workspace ID mismatch between kapso lookup and ARI config
@@ -95,15 +100,16 @@ None. Vercel deployment unblocked.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Phase 2 complete
-Resume: `/gsd:plan-phase 3` for AI System
+Stopped at: Completed 03-01-PLAN.md
+Resume: Next plan is 03-02 (The Mouth implementation)
 
-**Phase 2 Completion:**
-- 02-01 ✓ Kapso credentials mutation + webhook verification
-- 02-02 ✓ Eagle ARI config
-- 02-03 ✓ End-to-end verification (messages in inbox)
-- Deployed to production: my21staff.com
-- Fixed: null→undefined, filter→withIndex
+**Phase 3 Progress:**
+- 03-01 ✓ AI Foundation (aiUsage table, Grok API verified, workspace issue documented)
+- 03-02 Pending - The Mouth (Sea-Lion/Grok conversational AI)
+- 03-03 Pending - The Brain (Grok analytical AI)
+- 03-04 Pending - Integration testing
+
+**Note:** Workspace linkage must be fixed in Convex dashboard before 03-02 can test AI responses.
 
 ---
-*Last updated: 2026-01-25 — Phase 2 complete, ready for Phase 3*
+*Last updated: 2026-01-25 — Plan 03-01 complete, workspace fix needed before continuing*
