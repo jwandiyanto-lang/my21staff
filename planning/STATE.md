@@ -10,10 +10,10 @@ See: planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Milestone: v3.2 CRM Core Fresh
-Phase: 4.1 UI REVERT — COMPLETE ✓
-Plan: 04/04 complete
-Status: Phase verified - All UI reverted to v2.0 style, Convex backend intact
-Last activity: 2026-01-25 - Phase 4.1 verification passed (4/4 must-haves)
+Phase: 4.2 INBOX REWORK — IN PROGRESS
+Plan: 01/04 complete
+Status: Filter bar added (Active/All toggle, Status dropdown, Tags dropdown) - v2.0 restoration on track
+Last activity: 2026-01-25 - Phase 4.2 Plan 01 filter bar implementation complete
 
 ### UI Revert Decision (2026-01-25)
 
@@ -293,8 +293,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed Phase 4.1 UI Revert (all 4 plans)
-Resume: Phase 4.1 complete - ready for next milestone or verification
+Stopped at: Completed Phase 4.2 Plan 01 (filter bar implementation)
+Resume: Phase 4.2 Plan 01 complete - 04.2-02 ready to execute or continue inbox rework
 
 ## Consolidated Verification
 
