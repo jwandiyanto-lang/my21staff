@@ -14,7 +14,7 @@
 // @ts-nocheck - Schema types mismatch with generated Convex types
 import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type {
   MetaWebhookPayload,
   MetaWebhookMessage,
@@ -523,26 +523,37 @@ export const processARI = internalMutation({
     // Reverse to get chronological order
     const messageHistory = recentMessages.reverse();
 
-    // Build system prompt
-    const systemPrompt = buildSystemPrompt(ariConfig, contact);
-
-    // Build message history array
-    const messages = [
-      { role: "system", content: systemPrompt },
-      ...messageHistory.map((m: any) => ({
+    // ============================================
+    // 1. THE MOUTH: Generate immediate response
+    // ============================================
+    const mouthResponse = await ctx.runAction(internal.ai.mouth.generateMouthResponse, {
+      conversationHistory: messageHistory.map((m: any) => ({
         role: m.role,
         content: m.content,
       })),
-      { role: "user", content: user_message },
-    ];
-
-    // Generate AI response
-    const aiResponse = await generateAIResponse(
-      ariConversation.ai_model || "sea-lion",
-      messages
-    );
+      userMessage: user_message,
+      botName: ariConfig.bot_name,
+      contactName: contact?.name || contact?.kapso_name || undefined,
+      language: ariConfig.language,
+    });
 
     const responseTime = Date.now() - startTime;
+
+    // 2. Log Mouth usage (skip for fallback - no actual AI call)
+    if (mouthResponse.model !== "fallback") {
+      await ctx.db.insert("aiUsage", {
+        workspace_id: workspace_id as any,
+        conversation_id: ariConversation._id,
+        model: mouthResponse.model,
+        ai_type: "mouth",
+        input_tokens: mouthResponse.tokens,
+        output_tokens: 0, // Mouth doesn't track output separately
+        cost_usd: mouthResponse.model === "grok-beta"
+          ? mouthResponse.tokens * (5 / 1_000_000) // Grok: ~$5/M tokens
+          : 0, // Sea-Lion: free (local)
+        created_at: Date.now(),
+      });
+    }
 
     // Log user message
     // @ts-ignore - ariMessages types not synced
@@ -560,9 +571,9 @@ export const processARI = internalMutation({
       ari_conversation_id: (ariConversation as any)._id,
       workspace_id: workspace_id as any,
       role: "assistant",
-      content: aiResponse.content,
-      ai_model: aiResponse.model,
-      tokens_used: aiResponse.tokens,
+      content: mouthResponse.content,
+      ai_model: mouthResponse.model,
+      tokens_used: mouthResponse.tokens,
       response_time_ms: responseTime,
       created_at: Date.now(),
     });
@@ -575,11 +586,11 @@ export const processARI = internalMutation({
 
     // Send response via Kapso API
     // @ts-ignore - workspace optional access
-    await sendKapsoMessage(
+    const kapsoMessageId = await sendKapsoMessage(
       (workspace as any).meta_access_token,
       (workspace as any).kapso_phone_id,
       contact_phone,
-      aiResponse.content
+      mouthResponse.content
     );
 
     // Create outbound message record
@@ -597,11 +608,11 @@ export const processARI = internalMutation({
         direction: "outbound",
         sender_type: "bot",
         sender_id: "ari",
-        content: aiResponse.content,
+        content: mouthResponse.content,
         message_type: "text",
-        kapso_message_id: aiResponse.kapso_message_id,
+        kapso_message_id: kapsoMessageId,
         metadata: {
-          ari_model: aiResponse.model,
+          ari_model: mouthResponse.model,
           response_time_ms: responseTime,
         },
         created_at: Date.now(),
@@ -612,164 +623,38 @@ export const processARI = internalMutation({
       // @ts-ignore - conversation optional access
       await ctx.db.patch((conversation as any)._id, {
         last_message_at: Date.now(),
-        last_message_preview: aiResponse.content.substring(0, 200),
+        last_message_preview: mouthResponse.content.substring(0, 200),
         updated_at: Date.now(),
       });
     }
 
     console.log(
-      `[ARI] Response sent in ${responseTime}ms (${aiResponse.model})`
+      `[ARI] Response sent in ${responseTime}ms (${mouthResponse.model})`
     );
+
+    // ============================================
+    // 3. THE BRAIN: Schedule async analysis (after response sent)
+    // This runs after the user already received the Mouth's response
+    // ============================================
+    ctx.scheduler.runAfter(1000, internal.ai.brain.analyzeConversation, {
+      workspaceId: workspace_id as any,
+      contactId: contact_id as any,
+      ariConversationId: ariConversation._id,
+      recentMessages: [
+        ...messageHistory.map((m: any) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        { role: "user", content: user_message },
+        { role: "assistant", content: mouthResponse.content },
+      ],
+      contactName: contact?.name || contact?.kapso_name || undefined,
+      currentScore: (contact as any)?.lead_score || 0,
+    });
+
+    console.log(`[ARI] Scheduled Brain analysis for conversation`);
   },
 });
-
-// ============================================
-// Helper: Build System Prompt
-// ============================================
-
-function buildSystemPrompt(ariConfig: any, contact: any): string {
-  const { bot_name = "ARI", greeting_style = "professional", language = "id" } =
-    ariConfig;
-
-  const greetingStyles: Record<string, string> = {
-    professional: "formal dan profesional",
-    friendly: "ramah dan hangat",
-    casual: "santai dan tidak formal",
-  };
-
-  const style = greetingStyles[greeting_style] || "profesional";
-
-  const contactName = contact?.name || contact?.kapso_name || "kakak";
-
-  return `Kamu adalah ${bot_name}, asisten AI dari my21staff.
-
-Bahasa: ${language === "id" ? "Bahasa Indonesia" : "English"}
-Gaya: ${style}
-
-Kamu sedang berbicara dengan ${contactName}.
-
-Tugasmu:
-1. Sapa pelanggan dengan ramah
-2. Bantu menjawab pertanyaan tentang produk/jasa
-3. Jika pelanggan tertarik, kumpulkan info (nama, email, kebutuhan)
-4. Beri informasi cara memesan atau konsultasi
-
-Jangan:
-- Membuat janji yang tidak bisa dipenuhi
-- Mengatakan hal-hal yang tidak kamu ketahui
-- Terlalu formal atau robotik
-
-Jawab dengan singkat dan langsung ke inti.`;
-}
-
-// ============================================
-// Helper: Generate AI Response
-// ============================================
-
-interface AIResponse {
-  content: string;
-  model: string;
-  tokens?: number;
-  kapso_message_id?: string;
-}
-
-async function generateAIResponse(
-  model: string,
-  messages: { role: string; content: string }[]
-): Promise<AIResponse> {
-  // Try Sea-Lion first (local Ollama via Tailscale)
-  if (model === "sea-lion" || model === "default") {
-    try {
-      const seaLionUrl = process.env.SEALION_URL || "http://100.113.96.25:11434";
-      const response = await fetch(`${seaLionUrl}/api/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "sea-lion",
-          prompt: formatMessages(messages),
-          stream: false,
-          options: {
-            num_ctx: 2048,
-            temperature: 0.8,
-            top_p: 0.9,
-          },
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          content: data.response || data.message?.content || "",
-          model: "sea-lion",
-          tokens: data.eval_count,
-        };
-      }
-    } catch (error) {
-      console.error("[ARI] Sea-Lion error, falling back to Grok:", error);
-    }
-  }
-
-  // Fall back to Grok
-  if (model === "grok" || true) {
-    const grokApiKey = process.env.GROK_API_KEY;
-    if (!grokApiKey) {
-      console.warn("[ARI] No GROK_API_KEY configured, using fallback");
-      return {
-        content: "Terima kasih sudah menghubungi kami. Konsultan kami akan segera membantu.",
-        model: "fallback",
-      };
-    }
-
-    try {
-      const response = await fetch(
-        "https://api.x.ai/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${grokApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "grok-beta",
-            messages,
-            max_tokens: 150,
-            temperature: 0.8,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          content: data.choices?.[0]?.message?.content || "",
-          model: "grok-beta",
-          tokens: data.usage?.total_tokens,
-        };
-      }
-    } catch (error) {
-      console.error("[ARI] Grok error:", error);
-    }
-  }
-
-  // Final fallback
-  return {
-    content: "Terima kasih sudah menghubungi kami. Konsultan kami akan segera membantu.",
-    model: "fallback",
-  };
-}
-
-function formatMessages(
-  messages: { role: string; content: string }[]
-): string {
-  return messages
-    .map((m) => {
-      if (m.role === "system") return `${m.content}\n\n`;
-      if (m.role === "user") return `User: ${m.content}\n`;
-      if (m.role === "assistant") return `Assistant: ${m.content}\n`;
-      return `${m.content}\n`;
-    })
-    .join("") + "Assistant:";
-}
 
 // ============================================
 // Helper: Send Kapso Message
