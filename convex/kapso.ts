@@ -249,7 +249,7 @@ async function processWorkspaceMessages(
   const messageIds = allMessages.map((m) => m.message.id);
   const existingMessages = await ctx.db
     .query("messages")
-    .filter((q: any) => q.has("kapso_message_id"))
+    .withIndex("by_workspace", (q: any) => q.eq("workspace_id", workspaceId))
     .collect();
 
   const existingIds = new Set(
