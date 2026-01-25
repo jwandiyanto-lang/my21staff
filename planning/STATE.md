@@ -2,7 +2,7 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-01-23)
+See: planning/PROJECT.md (updated 2026-01-23)
 
 **Core value:** The system that lets you grow
 **Current focus:** v3.2 CRM Core Fresh
@@ -10,9 +10,22 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Milestone: v3.2 CRM Core Fresh
-Phase: 4 COMPLETE (2/2 plans, verification deferred)
-Status: Ready to deploy and verify Phases 1-4
-Last activity: 2026-01-25 - Quick task 001: Lightened layout for Apple-like minimalism, added DESIGN-PRINCIPLES.md
+Phase: 4.1 UI REVERT (new phase - reverting to v2.0 UI with Convex backend)
+Status: Planning UI revert to original v2.0 designs
+Last activity: 2026-01-25 - Decision to revert Inbox + Database UI to v2.0 style while keeping Convex
+
+### UI Revert Decision (2026-01-25)
+
+**User request:** Revert to original v2.0 UI designs, only change is Supabase → Convex for data layer.
+
+**Scope:**
+- Contact Detail: Dialog → Sheet (slide from right)
+- Tabs: 4 tabs (Profile, Documents, Conversations, Notes) → 3 tabs (Details, Messages, Activity)
+- Inbox filters: Chips/badges → Popover with checkboxes
+- Labels: Keep English
+- Data layer: Keep Convex (not reverting to Supabase)
+
+**Reference:** Original v2.0 code available in git history before commit `ab336cd`
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ████████░░ (201 plans shipped)
 
@@ -156,7 +169,7 @@ Recent v3.0 decisions affecting v3.1:
 | manjowan@gmail.com | e09597ff-4b0f-4e7b-b6c7-c74a47e9457e | user_38fLdL8Y1qHQIYQob1u1FtR9fEL | OAuth user updated |
 | jwandiyanto@gmail.com | d7012f0e-54a7-4013-9dfa-f63057040c08 | user_38fViPWAnLiNth62ZaAJj3PQDWU | Super-admin |
 
-**Mapping file:** `.planning/migrations/user-id-mapping.json`
+**Mapping file:** `planning/migrations/user-id-mapping.json`
 
 ### Organization Migration Status
 
@@ -167,7 +180,7 @@ Recent v3.0 decisions affecting v3.1:
 | Eagle Overseas | 25de3c4e-b9ca-4aff-9639-b35668f0a48a | org_38fXP0PN0rgNQ2coi1KsqozLJYb | Migrated |
 | My21Staff | 0318fda5-22c4-419b-bdd8-04471b818d17 | N/A | Not migrated (free plan limit) |
 
-**Mapping file:** `.planning/migrations/workspace-org-mapping.json`
+**Mapping file:** `planning/migrations/workspace-org-mapping.json`
 
 ### Blockers/Concerns
 
@@ -189,7 +202,7 @@ Recent v3.0 decisions affecting v3.1:
 - Admin pages (clients)
 - Public pages (webinars, articles)
 
-**Reference:** `.planning/phases/07-cleanup-verification/07-07-SUMMARY.md`
+**Reference:** `planning/phases/07-cleanup-verification/07-07-SUMMARY.md`
 
 ### Ticket Migration Status
 
@@ -202,7 +215,7 @@ Recent v3.0 decisions affecting v3.1:
 | ticketStatusHistory | 0 | Migration script ready |
 
 **Migration script:** `scripts/update-convex-ticket-ids.ts` (verified working)
-**Report:** `.planning/migrations/user-id-update-report-tickets.json`
+**Report:** `planning/migrations/user-id-update-report-tickets.json`
 
 ### Core Table Migration Status
 
@@ -218,7 +231,7 @@ Recent v3.0 decisions affecting v3.1:
 | contactNotes | user_id | 0 | Migration script ready |
 
 **Migration script:** `scripts/update-convex-user-ids.ts` (verified working)
-**Report:** `.planning/migrations/user-id-update-report-core.json`
+**Report:** `planning/migrations/user-id-update-report-core.json`
 
 ### Pending User Setup
 
@@ -266,7 +279,7 @@ Before proceeding to Phase 5, verify:
 | webinar_registrations | N/A | Table not created yet (future) |
 
 **Migration script:** `scripts/migrate-supabase-to-convex.ts` (verified working)
-**Report:** `.planning/migrations/data-migration-report.json`
+**Report:** `planning/migrations/data-migration-report.json`
 
 **Note:** All ARI extended and CMS tables are empty because these features aren't yet in production use. Migration infrastructure ready for when data exists.
 
@@ -279,7 +292,7 @@ Resume: Deploy and run consolidated verification checklist
 ## Consolidated Verification
 
 All human verification for Phases 1-4 consolidated into single checklist:
-`.planning/phases/04-settings/VERIFICATION-CHECKLIST.md`
+`planning/phases/04-settings/VERIFICATION-CHECKLIST.md`
 
 **Next steps:**
 1. Push to deploy: `git push origin master`

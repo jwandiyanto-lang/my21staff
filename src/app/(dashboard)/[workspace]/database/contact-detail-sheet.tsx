@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,7 +27,7 @@ interface ContactDetailSheetProps {
 }
 
 /**
- * Contact Detail Dialog - 4-tab interface for contact management
+ * Contact Detail Sheet - 4-tab interface for contact management
  * Tabs: Profile, Documents, Conversations, Notes
  */
 export function ContactDetailSheet({
@@ -38,7 +38,7 @@ export function ContactDetailSheet({
   contactTags = [],
   teamMembers = [],
 }: ContactDetailSheetProps) {
-  const [activeTab, setActiveTab] = useState('profile')
+  const [activeTab, setActiveTab] = useState('details')
   const [editedFields, setEditedFields] = useState<Partial<Contact>>({})
   const [newNote, setNewNote] = useState('')
   const queryClient = useQueryClient()
@@ -52,7 +52,7 @@ export function ContactDetailSheet({
       if (!res.ok) throw new Error('Failed to fetch notes')
       return res.json()
     },
-    enabled: !!contact?.id && activeTab === 'notes',
+    enabled: !!contact?.id && activeTab === 'activity',
   })
 
   const notes = notesData?.notes || []
@@ -118,24 +118,23 @@ export function ContactDetailSheet({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-[600px] w-full overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>
             {contact?.name || contact?.phone || 'Contact'}
-          </DialogTitle>
-        </DialogHeader>
+          </SheetTitle>
+        </SheetHeader>
 
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
           className="flex-1 flex flex-col overflow-hidden"
         >
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="conversations">Conversations</TabsTrigger>
-            <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="messages">Messages</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
           <div className="flex-1 overflow-auto mt-4">
@@ -312,7 +311,7 @@ export function ContactDetailSheet({
             </TabsContent>
           </div>
         </Tabs>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }

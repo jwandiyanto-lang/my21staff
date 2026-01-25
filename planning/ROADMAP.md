@@ -100,9 +100,26 @@ Plans:
 - [x] 04-01-PLAN.md — Settings page server component + team link ✓
 - [x] 04-02-PLAN.md — Human verification checkpoint (deferred)
 
+### Phase 4.1: UI Revert to v2.0 Style — IN PROGRESS
+**Goal**: Restore original v2.0 UI designs while keeping Convex backend
+**Depends on**: Phase 4
+**Decision**: User requested v2.0 UI (2026-01-25)
+**Success Criteria** (what must be TRUE):
+  1. Contact detail uses Sheet (slide from right, not Dialog)
+  2. 3 tabs: Details, Messages, Activity (not 4 tabs)
+  3. Inbox filters use Popover with checkboxes (not chips)
+  4. Message thread displays and send works
+**Plans**: 4 plans
+
+Plans:
+- [ ] 01-PLAN.md — Contact Detail Sheet structure
+- [ ] 02-PLAN.md — Inbox filter revert to popover
+- [ ] 03-PLAN.md — Inbox message thread
+- [ ] 04-PLAN.md — Contact Messages & Activity tabs
+
 ### Phase 5: Polish + Deploy
 **Goal**: Final verification and production deployment
-**Depends on**: Phase 4
+**Depends on**: Phase 4.1
 **Success Criteria** (what must be TRUE):
   1. All CRM features verified working
   2. Production deployment successful
