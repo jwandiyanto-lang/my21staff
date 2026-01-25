@@ -70,6 +70,7 @@ function MessageThreadWrapper({
         name: contact.name,
         kapso_name: contact.kapso_name,
         phone: contact.phone,
+        lead_status: contact.lead_status,
       }}
     />
   )

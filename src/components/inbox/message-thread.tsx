@@ -15,9 +15,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from '@/../convex/_generated/api'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getInitials } from '@/lib/utils'
 import { format } from 'date-fns'
+import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import { MessageBubble } from './message-bubble'
 import { DateSeparator } from './date-separator'
 import { ComposeInput } from './compose-input'
@@ -26,6 +28,7 @@ interface Contact {
   name?: string
   kapso_name?: string
   phone: string
+  lead_status?: string
 }
 
 interface MessageThreadProps {
@@ -71,27 +74,44 @@ export function MessageThread({ conversationId, workspaceId, contact }: MessageT
   const groupedMessages = messages ? groupMessagesByDate(messages) : new Map()
 
   const displayName = contact.name || contact.kapso_name || contact.phone || 'Unknown'
+  const status = (contact.lead_status || 'prospect') as LeadStatus
+  const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.prospect
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b bg-background flex items-center gap-3">
         <Avatar className="h-10 w-10">
-          <AvatarFallback className="text-sm">
+          <AvatarFallback className="bg-muted text-sm">
             {getInitials(displayName)}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <p className="font-medium truncate">{displayName}</p>
-          <p className="text-sm text-muted-foreground truncate">{contact.phone}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-medium truncate">{displayName}</p>
+            <Badge
+              variant="outline"
+              style={{
+                color: statusConfig.color,
+                borderColor: statusConfig.color,
+                backgroundColor: statusConfig.bgColor,
+              }}
+              className="text-xs"
+            >
+              {statusConfig.label}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground truncate">
+            {contact.name && contact.phone}
+          </p>
         </div>
       </div>
 
-      {/* Messages area - WhatsApp style background */}
+      {/* Messages area */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 bg-[#f0f2f5]"
+        className="flex-1 overflow-y-auto bg-muted/30 p-4"
       >
         {!messages ? (
           // Loading skeleton
@@ -109,7 +129,7 @@ export function MessageThread({ conversationId, workspaceId, contact }: MessageT
           </div>
         ) : (
           // Render messages grouped by date
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3">
             {Array.from(groupedMessages.entries()).map(([date, msgs]) => (
               <div key={date} className="space-y-2">
                 <DateSeparator date={date} />
