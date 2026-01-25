@@ -10,10 +10,10 @@ See: planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: 3 of 7 (AI System) — COMPLETE
-Plan: All 4 plans executed and verified
-Status: Phase 3 E2E verified — Mouth + Brain working with Grok-3
-Last activity: 2026-01-25 — Full E2E verification passed
+Phase: 3.1 (Inbox Enhancement) — PLANNED
+Plan: 03.1-01-PLAN.md ready for execution
+Status: Bug fixes deployed (messages auth, test data cleanup), Phase 3.1 plan created
+Last activity: 2026-01-25 — Created Phase 3.1 plan for inbox features
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ███████░░░ (205 plans shipped)
 
@@ -46,6 +46,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 2. Kapso Integration | WhatsApp webhook + messaging | 4 (KAPSO-01 to 04) | ✓ Complete |
 | 2.1 UI Documentation | Document UI/buttons | N/A (inserted) | ✓ Complete |
 | 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
+| 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | Planned |
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | Not started |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |

@@ -476,3 +476,81 @@ export const checkRecentActivity = query({
     };
   },
 });
+
+/**
+ * Clean up test data created by admin utilities.
+ * Deletes contacts with phone 6281234567890 and their related data.
+ */
+export const cleanupTestData = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const deleted = {
+      contacts: 0,
+      conversations: 0,
+      messages: 0,
+      ariConversations: 0,
+      ariMessages: 0,
+    };
+
+    // Find test contacts (phone 6281234567890)
+    const testContacts = await ctx.db
+      .query("contacts")
+      .filter((q) => q.eq(q.field("phone"), "6281234567890"))
+      .collect();
+
+    for (const contact of testContacts) {
+      // Delete related conversations and messages
+      const conversations = await ctx.db
+        .query("conversations")
+        .filter((q) => q.eq(q.field("contact_id"), contact._id))
+        .collect();
+
+      for (const conv of conversations) {
+        // Delete messages
+        const messages = await ctx.db
+          .query("messages")
+          .withIndex("by_conversation_time", (q) =>
+            q.eq("conversation_id", conv._id)
+          )
+          .collect();
+        for (const msg of messages) {
+          await ctx.db.delete(msg._id);
+          deleted.messages++;
+        }
+        await ctx.db.delete(conv._id);
+        deleted.conversations++;
+      }
+
+      // Delete ARI conversations and messages
+      const ariConvs = await ctx.db
+        .query("ariConversations")
+        .filter((q) => q.eq(q.field("contact_id"), contact._id))
+        .collect();
+
+      for (const ariConv of ariConvs) {
+        const ariMsgs = await ctx.db
+          .query("ariMessages")
+          .withIndex("by_conversation_time", (q) =>
+            q.eq("ari_conversation_id", ariConv._id)
+          )
+          .collect();
+        for (const msg of ariMsgs) {
+          await ctx.db.delete(msg._id);
+          deleted.ariMessages++;
+        }
+        await ctx.db.delete(ariConv._id);
+        deleted.ariConversations++;
+      }
+
+      // Delete the contact
+      await ctx.db.delete(contact._id);
+      deleted.contacts++;
+    }
+
+    return {
+      success: true,
+      deleted,
+      message: `Cleaned up test data: ${deleted.contacts} contacts, ${deleted.conversations} conversations, ${deleted.messages} messages`,
+    };
+  },
+});
