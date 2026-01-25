@@ -63,7 +63,7 @@ export function ComposeInput({ workspaceId, conversationId, disabled }: ComposeI
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Ketik pesan..."
+        placeholder="Type a message..."
         minRows={1}
         maxRows={5}
         disabled={disabled || isSending}

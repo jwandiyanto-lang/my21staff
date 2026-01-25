@@ -105,7 +105,7 @@ export function MessageThread({ conversationId, workspaceId, contact }: MessageT
         ) : messages.length === 0 ? (
           // No messages yet
           <div className="flex items-center justify-center h-full">
-            <p className="text-muted-foreground text-sm">Belum ada pesan</p>
+            <p className="text-muted-foreground text-sm">No messages yet</p>
           </div>
         ) : (
           // Render messages grouped by date

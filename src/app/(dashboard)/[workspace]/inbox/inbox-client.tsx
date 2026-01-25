@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { ConversationList } from '@/components/inbox/conversation-list'
+import { MessageThread } from '@/components/inbox/message-thread'
 import { InboxSkeleton } from '@/components/skeletons/inbox-skeleton'
 import {
   Popover,
@@ -12,12 +13,64 @@ import {
 } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
-import { Filter } from 'lucide-react'
+import { Filter, MessageSquare } from 'lucide-react'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES } from '@/lib/lead-status'
 import type { Id } from 'convex/_generated/dataModel'
 
 interface InboxClientProps {
   workspaceId: Id<'workspaces'>
+}
+
+interface Conversation {
+  _id: Id<'conversations'>
+  contact_id: Id<'contacts'>
+  status: string
+  unread_count: number
+  last_message_at?: number
+  last_message_preview?: string
+  contact: {
+    _id: Id<'contacts'>
+    name?: string
+    kapso_name?: string
+    phone: string
+    tags?: string[]
+  } | null
+}
+
+/**
+ * Wrapper to extract contact from conversation for MessageThread.
+ */
+function MessageThreadWrapper({
+  conversationId,
+  workspaceId,
+  conversations,
+}: {
+  conversationId: Id<'conversations'>
+  workspaceId: Id<'workspaces'>
+  conversations: Conversation[]
+}) {
+  const conversation = conversations.find((c) => c._id === conversationId)
+  const contact = conversation?.contact
+
+  if (!contact) {
+    return (
+      <div className="flex-1 bg-[#f0f2f5] flex items-center justify-center">
+        <p className="text-muted-foreground">Contact not found</p>
+      </div>
+    )
+  }
+
+  return (
+    <MessageThread
+      conversationId={conversationId as unknown as string}
+      workspaceId={workspaceId as unknown as string}
+      contact={{
+        name: contact.name,
+        kapso_name: contact.kapso_name,
+        phone: contact.phone,
+      }}
+    />
+  )
 }
 
 export function InboxClient({ workspaceId }: InboxClientProps) {
@@ -104,15 +157,23 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
         />
       </div>
 
-      {/* Right panel - Message thread placeholder */}
-      <div className="flex-1 bg-[#f0f2f5] flex items-center justify-center">
-        <div className="text-center text-muted-foreground">
-          {selectedConversationId ? (
-            <p>Loading message thread...</p>
-          ) : (
-            <p>Select a conversation to view messages</p>
-          )}
-        </div>
+      {/* Right panel - Message thread */}
+      <div className="flex-1 flex flex-col">
+        {selectedConversationId ? (
+          <MessageThreadWrapper
+            conversationId={selectedConversationId}
+            workspaceId={workspaceId}
+            conversations={conversations}
+          />
+        ) : (
+          <div className="flex-1 bg-[#f0f2f5] flex items-center justify-center">
+            <div className="text-center text-muted-foreground">
+              <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p className="font-medium">Select a conversation</p>
+              <p className="text-sm mt-1">Choose a conversation to view messages</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
