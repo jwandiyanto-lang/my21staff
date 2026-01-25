@@ -163,6 +163,23 @@ export default defineSchema({
     .index("by_workspace", ["workspace_id"]),
 
   // ============================================
+  // AI USAGE (Cost tracking for Mouth and Brain)
+  // ============================================
+  aiUsage: defineTable({
+    workspace_id: v.id("workspaces"),
+    conversation_id: v.optional(v.id("ariConversations")),
+    model: v.string(),  // "sea-lion", "grok-beta"
+    ai_type: v.string(),  // "mouth" or "brain"
+    input_tokens: v.number(),
+    output_tokens: v.number(),
+    cost_usd: v.number(),
+    created_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_type", ["workspace_id", "ai_type"])
+    .index("by_conversation", ["conversation_id"]),
+
+  // ============================================
   // TICKETS (Support ticketing system)
   // ============================================
   tickets: defineTable({
