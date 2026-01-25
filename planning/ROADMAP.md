@@ -100,22 +100,22 @@ Plans:
 - [x] 04-01-PLAN.md — Settings page server component + team link ✓
 - [x] 04-02-PLAN.md — Human verification checkpoint (deferred)
 
-### Phase 4.1: UI Revert to v2.0 Style — IN PROGRESS
+### Phase 4.1: UI Revert to v2.0 Style — COMPLETE
 **Goal**: Restore original v2.0 UI designs while keeping Convex backend
 **Depends on**: Phase 4
 **Decision**: User requested v2.0 UI (2026-01-25)
 **Success Criteria** (what must be TRUE):
-  1. Contact detail uses Sheet (slide from right, not Dialog)
-  2. 3 tabs: Details, Messages, Activity (not 4 tabs)
-  3. Inbox filters use Popover with checkboxes (not chips)
-  4. Message thread displays and send works
-**Plans**: 4 plans
+  1. ✓ Contact detail uses Sheet (slide from right, not Dialog)
+  2. ✓ 3 tabs: Details, Messages, Activity (not 4 tabs)
+  3. ✓ Inbox filters use Popover with checkboxes (not chips)
+  4. ✓ Message thread displays and send works
+**Plans**: 4/4 complete
 
 Plans:
-- [ ] 01-PLAN.md — Contact Detail Sheet structure
-- [ ] 02-PLAN.md — Inbox filter revert to popover
-- [ ] 03-PLAN.md — Inbox message thread
-- [ ] 04-PLAN.md — Contact Messages & Activity tabs
+- [x] 01-PLAN.md — Contact Detail Sheet structure ✓
+- [x] 02-PLAN.md — Inbox filter revert to popover ✓
+- [x] 03-PLAN.md — Inbox message thread ✓
+- [x] 04-PLAN.md — Contact Messages & Activity tabs ✓
 
 ### Phase 5: Polish + Deploy
 **Goal**: Final verification and production deployment
@@ -399,10 +399,10 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | v2.2 ARI & User Flow | 1-6 | 23/23 | Complete | 2026-01-20 |
 | v3.0 Performance & Speed | 1-5 | 21/21 | Complete | 2026-01-23 |
 | v3.1 Convex + Clerk API Layer | 1-7 | 23/25 | Complete (partial) | 2026-01-24 |
-| **v3.2 CRM Core Fresh** | 1-5 | 15/? | Phase 4 planned | - |
+| **v3.2 CRM Core Fresh** | 1-5 | 19/? | Phase 4.1 complete | - |
 
-**Total shipped:** 199 plans across 6 milestones
+**Total shipped:** 203 plans across 6 milestones
 
 ---
 
-*Last updated: 2026-01-24 — v3.2 Phase 4 planned (2 plans)*
+*Last updated: 2026-01-25 — v3.2 Phase 4.1 complete (UI revert to v2.0 style)*
