@@ -10,12 +10,12 @@ See: planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: 3.1 (Inbox Enhancement) — PLANNED
-Plan: 03.1-01-PLAN.md ready for execution
-Status: Bug fixes deployed (messages auth, test data cleanup), Phase 3.1 plan created
-Last activity: 2026-01-25 — Created Phase 3.1 plan for inbox features
+Phase: 3.1 (Inbox Enhancement) — COMPLETE
+Plan: 03.1-01-PLAN.md executed
+Status: Profile sidebar, handover toggle, merge button added to inbox
+Last activity: 2026-01-25 — Completed Phase 3.1 inbox enhancements
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ███████░░░ (205 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ████████░░ (206 plans shipped)
 
 ## Performance Metrics
 
@@ -46,7 +46,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 2. Kapso Integration | WhatsApp webhook + messaging | 4 (KAPSO-01 to 04) | ✓ Complete |
 | 2.1 UI Documentation | Document UI/buttons | N/A (inserted) | ✓ Complete |
 | 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
-| 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | Planned |
+| 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | ✓ Complete |
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | Not started |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
@@ -115,8 +115,15 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Phase 3 COMPLETE — E2E verified
-Resume: Start Phase 4 (Bot Workflow) or commit remaining changes
+Stopped at: Phase 3.1 COMPLETE — Inbox enhancements
+Resume: Start Phase 4 (Bot Workflow)
+
+**Phase 3.1 Progress (COMPLETE):**
+- 03.1-01 ✓ Inbox Enhancement - Profile sidebar, handover toggle, merge button
+  - Added InfoSidebar to inbox-client.tsx (3-column layout)
+  - Added AI/Human toggle button in message-thread.tsx
+  - Added merge button in info-sidebar.tsx
+  - Added updateConversationStatus mutation in conversations.ts
 
 **Phase 3 Progress (COMPLETE):**
 - 03-01 ✓ AI Foundation (aiUsage table, Grok API verified)
@@ -137,4 +144,4 @@ Resume: Start Phase 4 (Bot Workflow) or commit remaining changes
 - Response time: < 3 seconds
 
 ---
-*Last updated: 2026-01-25 — Phase 3 COMPLETE, ready for Phase 4*
+*Last updated: 2026-01-25 — Phase 3.1 COMPLETE, ready for Phase 4*
