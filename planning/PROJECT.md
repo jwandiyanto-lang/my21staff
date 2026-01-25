@@ -160,17 +160,22 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | UI revert to v2.0 style | User preference for original design | ✓ Good — familiar UX |
 | Webhook testing deferred to production | ngrok connectivity issues | — Pending production deployment |
 
-## Next Milestone
+## Current Milestone: v3.3 Go Live
 
-**Goal:** Deploy to production and verify all features work end-to-end.
+**Goal:** Deploy my21staff to production with Eagle Overseas Education as first live client — working WhatsApp bot processing real leads.
 
-**Blocking:** Vercel billing freeze — need to resolve billing or create fresh Vercel project.
+**Target features:**
+- Production deployment (fresh Vercel project)
+- WhatsApp bot workflow: Greet → Qualify (destination, documents, English) → Community link OR Consultation handoff
+- n8n → Convex lead sync verified in production
+- Pricing page updated with $497 startup + $97/$297/mo plans
+- Eagle using the system daily with real leads
 
-**When unblocked:**
-1. Deploy to Vercel
-2. Update Kapso webhook URL
-3. Run post-deployment verification checklist
-4. Verify Eagle lead flow works
+**Success criteria:**
+- Eagle receives WhatsApp message → Bot responds with qualification flow
+- Lead data appears in Convex CRM
+- Human gets notified for consultation requests
+- Pricing page reflects economics document
 
 ---
-*Last updated: 2026-01-25 after v3.2 milestone shipped*
+*Last updated: 2026-01-25 after v3.3 milestone started*

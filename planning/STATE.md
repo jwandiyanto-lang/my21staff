@@ -5,17 +5,17 @@
 See: planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** The system that lets you grow
-**Current focus:** Production deployment (blocked — Vercel billing freeze)
+**Current focus:** v3.3 Go Live — Eagle as first paying client
 
 ## Current Position
 
-Milestone: v3.2 CRM Core Fresh — SHIPPED ✓
-Phase: All complete
-Plan: 23/23 plans shipped
-Status: Production-ready, awaiting Vercel billing resolution
-Last activity: 2026-01-25 — v3.2 milestone archived
+Milestone: v3.3 Go Live
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-01-25 — Milestone v3.3 started
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ (193 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ░░░░░░░░░░ (193 plans shipped)
 
 ## Performance Metrics
 
@@ -35,48 +35,39 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.1 | 23 | 1 |
 | v3.2 | 23 | 2 |
 
-## What's Been Shipped
+## v3.3 Milestone Context
 
-**v3.2 CRM Core Fresh (2026-01-25):**
-- Supabase completely removed (packages + code)
-- Contact Database rebuilt fresh with merge functionality
-- WhatsApp Inbox with v2.0 filter bar
-- Dashboard with stats cards, activity feed, quick actions
-- Settings with team management via Clerk
-- Real-time updates throughout via Convex
+**First Client:** Eagle Overseas Education
+- Clerk org: `org_38fXP0PN0rgNQ2coi1KsqozLJYb`
+- Ari persona already configured
+- n8n webhook integration ready
 
-**Tech Stack:**
-- Next.js 15 + React 19 + TypeScript
-- Clerk (Authentication)
-- Convex (Database + Real-time)
-- Shadcn/ui + Tailwind CSS
-- Kapso API for WhatsApp
+**Bot Flow:**
+1. Greet → Ask destination, documents, English level
+2. Answer FAQs
+3. Offer: Free Community (link) OR 1-on-1 Consultation (human handoff)
+
+**Pricing (from economics doc):**
+- Startup: $497 one-time
+- Digital Receptionist: $97/mo
+- Digital Pro: $297/mo
 
 ## Blocking Issues
 
-**Vercel Billing Freeze:**
-- Cannot deploy to production
-- Need to resolve billing or create fresh Vercel project
-- All features verified working locally
+**Resolved:** Fresh Vercel project approach chosen (avoid billing issues on old project)
 
-## Deferred to Production
+## Accumulated Context
 
-- Webhook E2E testing (ngrok connectivity issues)
-- n8n sync count verification (webhook verified working)
+- v3.2 codebase is production-ready (~45,500 lines TypeScript)
+- Convex deployment active: https://intent-otter-212.convex.cloud
+- ARI system with lead scoring/booking flow available
+- Economics document saved to business/brainstorm/ECONOMICS.md
 
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: v3.2 milestone completed and archived
-Resume: `/gsd:new-milestone` when ready to start next version
-
-## Next Steps
-
-1. **Resolve Vercel billing** or create fresh Vercel project
-2. **Deploy to production** following DEPLOYMENT-READY.md guide
-3. **Update Kapso webhook URL** to production
-4. **Run post-deployment verification** checklist
-5. **Start v4.0** with `/gsd:new-milestone`
+Stopped at: Defining requirements for v3.3
+Resume: Continue with requirements definition
 
 ---
-*Last updated: 2026-01-25 — v3.2 milestone archived*
+*Last updated: 2026-01-25 — v3.3 milestone started*
