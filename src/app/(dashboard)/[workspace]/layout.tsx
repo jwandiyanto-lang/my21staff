@@ -42,7 +42,7 @@ export default async function WorkspaceLayout({
           <div className="flex-1 overflow-auto custom-scrollbar">
             {children}
           </div>
-          <footer className="h-10 px-8 bg-sidebar/40 border-t border-black/5 flex items-center justify-between shrink-0">
+          <footer className="h-10 px-8 bg-white/80 border-t border-black/5 flex items-center justify-between shrink-0">
             <div />
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-accent" />
@@ -84,7 +84,7 @@ export default async function WorkspaceLayout({
         <div className="flex-1 overflow-auto custom-scrollbar">
           {children}
         </div>
-        <footer className="h-10 px-8 bg-secondary border-t border-primary/10 flex items-center justify-between shrink-0">
+        <footer className="h-10 px-8 bg-white/80 border-t border-black/5 flex items-center justify-between shrink-0">
           <div />
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" />

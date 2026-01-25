@@ -53,9 +53,9 @@ html {
 :root {
   --radius: 0.625rem;
 
-  /* CRM Theme - Cool Green (aligned with landing page) */
-  /* Base colors - Off White background */
-  --background: oklch(0.96 0.01 145);             /* #f1f5f0 off-white green */
+  /* CRM Theme - Clean White (Apple-like minimalism) */
+  /* Base colors - Pure off-white background for clean look */
+  --background: oklch(0.985 0.002 90);            /* #FBFBFA pure off-white */
   --foreground: oklch(0.22 0.02 60);              /* #2D2A26 text-main */
 
   /* Card/Panel - White */
@@ -107,11 +107,11 @@ html {
   --sidebar-border: oklch(1 0 0 / 0.08);          /* subtle white border */
   --sidebar-ring: oklch(0.70 0.16 45);
 
-  /* CRM-specific tokens (updated to match landing) */
+  /* CRM-specific tokens (Apple-like minimalism) */
   --crm-forest: oklch(0.35 0.08 145);             /* #284b31 dark green */
   --crm-deep-forest: oklch(0.18 0.04 145);        /* #14261a deep forest */
   --crm-orange: oklch(0.70 0.16 45);              /* #F7931A */
-  --crm-surface: oklch(0.96 0.01 145);            /* #f1f5f0 off-white */
+  --crm-surface: oklch(0.985 0.002 90);           /* #FBFBFA pure off-white */
   --crm-panel: oklch(1 0 0);                      /* #ffffff white */
   --crm-sage: oklch(0.92 0.02 145);               /* #dce8dc sage */
   --crm-text: oklch(0.22 0.02 60);                /* #2D2A26 */

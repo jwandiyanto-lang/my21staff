@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-23)
 Milestone: v3.2 CRM Core Fresh
 Phase: 4 COMPLETE (2/2 plans, verification deferred)
 Status: Ready to deploy and verify Phases 1-4
-Last activity: 2026-01-24 - Phase 4 complete, UI translated to English, consolidated verification checklist created
+Last activity: 2026-01-25 - Quick task 001: Lightened layout for Apple-like minimalism, added DESIGN-PRINCIPLES.md
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 ████████░░ (201 plans shipped)
 
@@ -172,6 +172,12 @@ Recent v3.0 decisions affecting v3.1:
 ### Blockers/Concerns
 
 **Convex CLI Bug:** `npx convex deploy` incorrectly reports env var not set (despite `env list` confirming it). Workaround: use Convex Dashboard to deploy or wait for CLI fix. Dev deployment works correctly.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 001 | Fix layout design - brand colors & Apple-like minimalism | 2026-01-25 | 88256f7 | [001-fix-dark-layout-brand-colors](./quick/001-fix-dark-layout-brand-colors/) |
 
 ### v3.2 Strategy: Clean Slate
 
