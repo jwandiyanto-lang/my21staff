@@ -10,10 +10,10 @@ See: planning/PROJECT.md (updated 2026-01-23)
 ## Current Position
 
 Milestone: v3.2 CRM Core Fresh
-Phase: 4.2 INBOX REWORK — COMPLETE ✓
-Plan: 01/01 complete
-Status: Phase verified - v2.0 filter bar added (Active/All toggle, Status dropdown, Tags dropdown)
-Last activity: 2026-01-25 - Phase 4.2 verification passed (4/4 must-haves)
+Phase: 5 POLISH + DEPLOY — IN PROGRESS
+Plan: 05-01 Complete / Next: 05-02
+Status: ngrok tunnel setup complete - ready for webhook testing
+Last activity: 2026-01-25 - Installed ngrok and created tunnel startup script
 
 ### UI Revert Decision (2026-01-25)
 
@@ -28,7 +28,7 @@ Last activity: 2026-01-25 - Phase 4.2 verification passed (4/4 must-haves)
 
 **Reference:** Original v2.0 code available in git history before commit `ab336cd`
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 █████████░ (204 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 █████████▒ | v3.2 █████████░ | v5.0 ███░░░░░░░ (170/204 plans completed)
 
 ## Performance Metrics
 
@@ -293,8 +293,8 @@ Before proceeding to Phase 5, verify:
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed Phase 4.2 (inbox filter bar complete)
-Resume: Phase 4.2 complete - ready for Phase 5 (Polish + Deploy)
+Stopped at: Completed Phase 05-01 (ngrok tunnel setup)
+Resume: Ready to continue Phase 5 (Polish + Deploy) with 05-02
 
 ## Consolidated Verification
 
