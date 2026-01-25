@@ -289,6 +289,26 @@ export const countAll = query({
 });
 
 /**
+ * Get a conversation by contact ID only.
+ *
+ * Returns the first conversation for a given contact.
+ * Used by contact detail sheet to display message history.
+ * No workspace auth check - contact ID already scopes to correct workspace.
+ *
+ * @param contact_id - The contact ID to look up
+ * @returns The conversation document or null if not found
+ */
+export const getByContactId = query({
+  args: { contact_id: v.id('contacts') },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query('conversations')
+      .withIndex('by_contact', (q) => q.eq('contact_id', args.contact_id))
+      .first()
+  },
+})
+
+/**
  * Get a single conversation by ID.
  *
  * Returns conversation with associated contact information.

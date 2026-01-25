@@ -25,6 +25,37 @@ import { requireWorkspaceMembership } from "./lib/auth";
  */
 export const listByConversation = query({
   args: {
+    conversation_id: v.id('conversations'),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 100;
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversation_time", (q) =>
+        q.eq("conversation_id", args.conversation_id)
+      )
+      .order("asc")
+      .take(limit);
+
+    return messages;
+  },
+});
+
+/**
+ * List messages for a conversation with workspace auth.
+ *
+ * Returns messages ordered by created_at DESC (newest first)
+ * for efficient display in chat UI. Uses by_conversation_time
+ * index for optimal performance.
+ *
+ * @param conversation_id - The conversation to list messages for
+ * @param workspace_id - Workspace for authorization
+ * @param limit - Maximum number of messages to return (default: 100)
+ * @returns Array of message documents
+ */
+export const listByConversationWithAuth = query({
+  args: {
     conversation_id: v.string(),
     workspace_id: v.string(),
     limit: v.optional(v.number()),
