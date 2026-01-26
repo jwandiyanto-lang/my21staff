@@ -12,6 +12,7 @@ import {
   buildConversationContext,
   buildMouthSystemPrompt,
   type ConversationMessage,
+  type QualificationContext,
 } from "./context";
 
 export interface MouthResponse {
@@ -41,6 +42,9 @@ export const generateMouthResponse = internalAction({
     botName: v.optional(v.string()),
     contactName: v.optional(v.string()),
     language: v.optional(v.string()),
+    state: v.optional(v.string()),
+    context: v.optional(v.any()),
+    communityLink: v.optional(v.string()),
   },
   handler: async (_ctx, args): Promise<MouthResponse> => {
     const startTime = Date.now();
@@ -55,7 +59,10 @@ export const generateMouthResponse = internalAction({
     const systemPrompt = buildMouthSystemPrompt(
       args.botName ?? "Ari",
       args.contactName ?? "kakak",
-      args.language ?? "id"
+      args.language ?? "id",
+      args.state ?? "greeting",
+      args.context as QualificationContext | undefined,
+      args.communityLink
     );
 
     // Format messages for API
