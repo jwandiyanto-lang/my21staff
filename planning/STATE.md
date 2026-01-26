@@ -5,22 +5,22 @@
 See: planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.3 Go Live — Phase 3 Complete, ready for Phase 4: Bot Workflow
+**Current focus:** v3.3 Go Live — Phase 4 Complete, ready for Phase 5: Lead Flow
 
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: 4 (Bot Workflow) — IN PROGRESS
-Plan: 04-01, 04-02, 04-03, 04-04, 04-05 executed (5 of 6 complete)
-Status: State and context wired through processARI to Mouth, Brain's next_action triggers consultation handling
-Last activity: 2026-01-26 — Completed 04-04-PLAN.md
+Phase: 4 (Bot Workflow) — COMPLETE
+Plan: All 6 plans executed
+Status: Bot workflow verified — greeting, qualification, routing, consultation handling
+Last activity: 2026-01-26 — Completed Phase 4 Bot Workflow
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (211 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (212 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 211
+- Total plans completed: 212
 - Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
@@ -34,7 +34,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.0 | 21 | 3 |
 | v3.1 | 23 | 1 |
 | v3.2 | 23 | 2 |
-| v3.3 | 9 | In progress |
+| v3.3 | 13 | In progress |
 
 ## v3.3 Roadmap Summary
 
@@ -47,7 +47,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 2.1 UI Documentation | Document UI/buttons | N/A (inserted) | ✓ Complete |
 | 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
 | 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | ✓ Complete |
-| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | In progress (4/6 complete) |
+| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | ✓ Complete |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
 | 7. UI Verification | E2E testing | 5 (UI-01 to 05) | Not started |
@@ -126,39 +126,16 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed 04-04 (Wire State/Context to Mouth + Brain next_action)
-Resume: Continue Phase 4 with 04-06-PLAN.md (Wire Brain to update state)
+Stopped at: Phase 4 Bot Workflow COMPLETE
+Resume: Start Phase 5 (Lead Flow)
 
-**Phase 4 Progress (IN PROGRESS — 5/6 complete):**
+**Phase 4 Progress (COMPLETE — 6/6):**
 - 04-01 ✓ Greeting State Awareness
-  - Added QualificationContext interface (collected, documents, routing)
-  - Added buildGreetingInstructions helper function
-  - Enhanced buildMouthSystemPrompt with state and context parameters
-  - SUMMARY: planning/phases/04-bot-workflow/04-01-SUMMARY.md
 - 04-02 ✓ Document Collection State
-  - Added buildQualifyingInstructions helper (asks documents one at a time)
-  - Added formatCollectedData helper (shows what's been collected)
-  - Enhanced switch statement with "qualifying" state case
-  - SUMMARY: planning/phases/04-bot-workflow/04-02-SUMMARY.md
 - 04-03 ✓ Routing & FAQ Context
-  - Added buildRoutingInstructions helper (Community vs Consultation)
-  - Added buildEagleFAQ helper (services, destinations, pricing deflection)
-  - Enhanced switch statement with "routing" state case
-  - FAQ embedded in all Mouth prompts
-  - SUMMARY: planning/phases/04-bot-workflow/04-03-SUMMARY.md
 - 04-04 ✓ Wire State/Context to Mouth + Brain next_action
-  - Enhanced getAriContext to return ariState, ariContext, community_link, and IDs
-  - Updated Mouth to accept state, context, communityLink parameters
-  - Wired processARI to pass state/context to Mouth
-  - Changed Brain from scheduler to direct call to capture result
-  - Added next_action check to trigger handleConsultationRequest
-  - SUMMARY: planning/phases/04-bot-workflow/04-04-SUMMARY.md
 - 04-05 ✓ Consultation Request Handling
-  - Added updateAriContext mutation for context merging
-  - Added handleConsultationRequest helper function
-  - Added flagForHuman and findConversationByContact mutations
-  - Ready to be called by 04-04 processARI wiring
-  - SUMMARY: planning/phases/04-bot-workflow/04-05-SUMMARY.md
+- 04-06 ✓ E2E Verification
 
 **Phase 3.1 Progress (COMPLETE):**
 - 03.1-01 ✓ Inbox Enhancement - Profile sidebar, handover toggle, merge button
@@ -186,4 +163,4 @@ Resume: Continue Phase 4 with 04-06-PLAN.md (Wire Brain to update state)
 - Response time: < 3 seconds
 
 ---
-*Last updated: 2026-01-26 — Phase 4 in progress (3/6 complete)*
+*Last updated: 2026-01-26 — Phase 4 COMPLETE*

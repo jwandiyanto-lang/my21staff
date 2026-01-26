@@ -19,7 +19,7 @@ Take my21staff from development to production with Eagle Overseas Education as t
 - [x] **Phase 2.1: UI Documentation** - INSERTED: Document UI/buttons before deployment
 - [x] **Phase 3: AI System** - Dual-bot architecture (Mouth + Brain)
 - [x] **Phase 3.1: Inbox Enhancement** - INSERTED: Profile sidebar, AI/Human handover, merge
-- [ ] **Phase 4: Bot Workflow** - Eagle qualification flow
+- [x] **Phase 4: Bot Workflow** - Eagle qualification flow
 - [ ] **Phase 5: Lead Flow** - n8n to Convex production verification
 - [ ] **Phase 6: Pricing Page** - Economics-based pricing update
 - [ ] **Phase 7: UI Verification** - End-to-end testing with real workflows
@@ -119,12 +119,12 @@ Plans:
 **Plans:** 6 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — State-aware greeting prompt (QualificationContext + greeting instructions)
-- [ ] 04-02-PLAN.md — State-aware qualifying prompt (document collection flow)
-- [ ] 04-03-PLAN.md — Routing prompt + Eagle FAQ knowledge
-- [ ] 04-04-PLAN.md — Wire state/context through processARI to Mouth
-- [ ] 04-05-PLAN.md — Human notification on consultation request
-- [ ] 04-06-PLAN.md — E2E verification of complete bot workflow
+- [x] 04-01-PLAN.md — State-aware greeting prompt (QualificationContext + greeting instructions)
+- [x] 04-02-PLAN.md — State-aware qualifying prompt (document collection flow)
+- [x] 04-03-PLAN.md — Routing prompt + Eagle FAQ knowledge
+- [x] 04-04-PLAN.md — Wire state/context through processARI to Mouth
+- [x] 04-05-PLAN.md — Human notification on consultation request
+- [x] 04-06-PLAN.md — E2E verification of complete bot workflow
 
 ### Phase 5: Lead Flow
 
@@ -189,11 +189,11 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 2. Kapso Integration | 3/3 | Complete | 2026-01-25 |
 | 3. AI System | 4/4 | Complete | 2026-01-25 |
 | 3.1 Inbox Enhancement | 1/1 | Complete | 2026-01-25 |
-| 4. Bot Workflow | 0/6 | Not started | - |
+| 4. Bot Workflow | 6/6 | Complete | 2026-01-26 |
 | 5. Lead Flow | 0/TBD | Not started | - |
 | 6. Pricing Page | 0/TBD | Not started | - |
 | 7. UI Verification | 0/TBD | Not started | - |
 
 ---
 *Created: 2026-01-25*
-*Last updated: 2026-01-25*
+*Last updated: 2026-01-26*
