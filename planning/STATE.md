@@ -5,17 +5,17 @@
 See: planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.3 Go Live — Phase 4 Complete, ready for Phase 5: Lead Flow
+**Current focus:** v3.3 Go Live — Phase 5 Lead Flow in progress
 
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: 4 (Bot Workflow) — COMPLETE
-Plan: All 6 plans executed
-Status: Bot workflow verified — greeting, qualification, routing, consultation handling
-Last activity: 2026-01-26 — Completed quick task 003: Database UX fixes
+Phase: 5 (Lead Flow) — In Progress
+Plan: 1 of 3 complete
+Status: n8n webhook verified — duplicate detection working, 228 leads confirmed
+Last activity: 2026-01-26 — Completed 05-01-PLAN.md (n8n webhook verification)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (212 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (213 plans shipped)
 
 ## Performance Metrics
 
@@ -48,7 +48,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
 | 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | ✓ Complete |
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | ✓ Complete |
-| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
+| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | 1/3 Complete |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
 | 7. UI Verification | E2E testing | 5 (UI-01 to 05) | Not started |
 
@@ -85,7 +85,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 **Key Facts:**
 - v3.3 production deployed at my21staff.com
-- Convex deployment: https://intent-otter-212.convex.cloud
+- Convex deployment: https://intent-otter-212.convex.cloud (HTTP endpoints use .convex.site)
 - Kapso webhook working, messages appear in inbox
 - ARI system fully operational with Grok-3 (Mouth + Brain)
 
@@ -114,6 +114,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - flagForHuman sets unread_count: 1 to ensure inbox visibility
 - Brain changed from scheduler to direct call to enable next_action checks
 - State/context passed through processARI → Mouth for adaptive responses
+- Convex HTTP endpoints use .convex.site domain (not .convex.cloud)
+- n8n webhook returns 'exists' status for duplicate phone (idempotent, not error)
 
 **Phase 3 Issues (All Resolved):**
 - ✓ Workspace ID mismatch - actually correct, ariConfig linked to Eagle workspace
@@ -126,8 +128,11 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Phase 4 Bot Workflow COMPLETE
-Resume: Start Phase 5 (Lead Flow)
+Stopped at: Completed 05-01-PLAN.md (n8n webhook verification)
+Resume: Continue to 05-02 (Lead scoring verification)
+
+**Phase 5 Progress (In Progress — 1/3):**
+- 05-01 ✓ n8n Webhook Verification - Endpoint tested, duplicate detection verified, 228 leads confirmed
 
 **Phase 4 Progress (COMPLETE — 6/6):**
 - 04-01 ✓ Greeting State Awareness
@@ -170,4 +175,4 @@ Resume: Start Phase 5 (Lead Flow)
 | 003 | Remove merge button, clear default tags | 2026-01-26 | 8d7954b | [003-database-ux-fixes](./quick/003-database-ux-fixes/) |
 
 ---
-*Last updated: 2026-01-26 — Quick task 003 complete*
+*Last updated: 2026-01-26 — 05-01 n8n webhook verification complete*
