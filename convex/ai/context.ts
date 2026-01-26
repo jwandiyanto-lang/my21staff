@@ -11,6 +11,34 @@ export interface ConversationMessage {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * Qualification data collected during bot conversation.
+ * Stored in ariConversations.context field.
+ */
+export interface QualificationContext {
+  // Phase 1: Basic info
+  collected: {
+    full_name?: string;
+    destination_country?: string;  // Australia, Canada, UK, USA
+    education_level?: string;      // SMA, S1, S2
+  };
+  // Phase 2: Documents
+  documents: {
+    passport?: boolean | null;     // true/false/null (not asked)
+    cv?: boolean | null;
+    english_test?: boolean | null;
+    english_score?: number | null; // IELTS score if available
+    transcript?: boolean | null;
+  };
+  // Routing decision
+  routing?: {
+    offered_at?: number;
+    choice?: "community" | "consultation" | null;
+    community_link_sent?: boolean;
+    consultation_requested_at?: number;
+  };
+}
+
 export interface ContextOptions {
   maxMessages?: number;
   aiType: "mouth" | "brain";
