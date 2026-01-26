@@ -48,7 +48,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
 | 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | ✓ Complete |
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | ✓ Complete |
-| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | 3/3 (PARTIAL - gap) |
+| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | ✓ Complete (gaps noted) |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
 | 7. UI Verification | E2E testing | 5 (UI-01 to 05) | Not started |
 
