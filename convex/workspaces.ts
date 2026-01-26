@@ -341,6 +341,75 @@ export const getWorkspaceKapsoStatus = query({
 });
 
 /**
+ * Get lead status configuration for a workspace.
+ *
+ * Returns custom lead statuses if configured, otherwise returns
+ * default statuses that align with Brain's temperature mapping.
+ *
+ * @param workspaceId - The workspace ID
+ * @returns Array of status configurations with keys, labels, colors, and temperature mappings
+ */
+export const getStatusConfig = query({
+  args: { workspaceId: v.id("workspaces") },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace) return null;
+
+    // Return custom config or default
+    const customConfig = workspace.settings?.lead_statuses;
+    if (customConfig && Array.isArray(customConfig) && customConfig.length > 0) {
+      return customConfig;
+    }
+
+    // Default status configuration matching Brain's temperature mapping
+    return [
+      { key: "new", label: "New", color: "#6B7280", bgColor: "#F3F4F6", temperature: null },
+      { key: "cold", label: "Cold Lead", color: "#3B82F6", bgColor: "#DBEAFE", temperature: "cold" },
+      { key: "warm", label: "Warm Lead", color: "#F59E0B", bgColor: "#FEF3C7", temperature: "warm" },
+      { key: "hot", label: "Hot Lead", color: "#DC2626", bgColor: "#FEE2E2", temperature: "hot" },
+      { key: "client", label: "Client", color: "#10B981", bgColor: "#D1FAE5", temperature: null },
+      { key: "lost", label: "Lost", color: "#4B5563", bgColor: "#E5E7EB", temperature: null },
+    ];
+  },
+});
+
+/**
+ * Update lead status configuration for a workspace.
+ *
+ * Allows workspaces to customize their lead status stages and labels.
+ *
+ * @param workspaceId - The workspace ID
+ * @param leadStatuses - Array of status configurations
+ * @returns Success status
+ */
+export const updateStatusConfig = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    leadStatuses: v.array(v.object({
+      key: v.string(),
+      label: v.string(),
+      color: v.string(),
+      bgColor: v.string(),
+      temperature: v.union(v.literal("hot"), v.literal("warm"), v.literal("cold"), v.null()),
+    }))
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace) throw new Error("Workspace not found");
+
+    await ctx.db.patch(args.workspaceId, {
+      settings: {
+        ...workspace.settings,
+        lead_statuses: args.leadStatuses,
+      },
+      updated_at: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+/**
  * Update Kapso credentials for a workspace.
  *
  * Used to configure kapso_phone_id and meta_access_token for WhatsApp integration.
