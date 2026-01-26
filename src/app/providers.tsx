@@ -2,11 +2,14 @@
 
 import { ClerkProvider, useAuth } from '@clerk/nextjs'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
-import { ConvexReactClient } from 'convex/react'
+import { ConvexProvider, ConvexReactClient } from 'convex/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+
+// Dev mode skips Clerk entirely
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -24,6 +27,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       })
   )
+
+  // Dev mode: skip Clerk, use plain Convex provider
+  if (isDevMode) {
+    return (
+      <ConvexProvider client={convex}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </ConvexProvider>
+    )
+  }
 
   return (
     <ClerkProvider>

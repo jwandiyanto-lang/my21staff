@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { useQuery, useMutation } from 'convex/react'
+import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -16,12 +16,47 @@ import { Badge } from '@/components/ui/badge'
 import { ConversationList } from '@/components/inbox/conversation-list'
 import { MessageThread } from '@/components/inbox/message-thread'
 import { InfoSidebar } from '@/components/contact/info-sidebar'
-import { MergeContactsDialog } from '@/app/(dashboard)/[workspace]/database/merge-contacts-dialog'
 import { InboxSkeleton } from '@/components/skeletons/inbox-skeleton'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
 import type { Id } from 'convex/_generated/dataModel'
 import type { Contact } from '@/types/database'
+import { isDevMode, MOCK_CONVERSATIONS, MOCK_TEAM_MEMBERS, MOCK_CONTACTS, getNotesForContact } from '@/lib/mock-data'
+
+// Mock data formatted for inbox in dev mode
+const MOCK_INBOX_DATA = {
+  conversations: MOCK_CONVERSATIONS.map((conv) => ({
+    _id: conv.id as Id<'conversations'>,
+    contact_id: conv.contact_id as Id<'contacts'>,
+    status: conv.status,
+    unread_count: conv.unread_count,
+    last_message_at: new Date(conv.last_message_at!).getTime(),
+    last_message_preview: conv.last_message_preview,
+    assigned_to: conv.assigned_to,
+    contact: conv.contact ? {
+      _id: conv.contact.id as Id<'contacts'>,
+      name: conv.contact.name,
+      kapso_name: conv.contact.kapso_name,
+      phone: conv.contact.phone,
+      email: conv.contact.email,
+      lead_status: conv.contact.lead_status,
+      lead_score: conv.contact.lead_score,
+      tags: conv.contact.tags,
+      assigned_to: conv.contact.assigned_to,
+      metadata: conv.contact.metadata as Record<string, unknown> | undefined,
+      created_at: new Date(conv.contact.created_at!).getTime(),
+    } : null,
+  })),
+  members: MOCK_TEAM_MEMBERS.map((m) => ({
+    user_id: m.user_id,
+    role: m.role,
+    created_at: Date.now(),
+    profile: m.profile ? {
+      full_name: m.profile.full_name,
+      email: m.profile.email,
+    } : null,
+  })),
+}
 
 interface InboxClientProps {
   workspaceId: Id<'workspaces'>
@@ -59,10 +94,14 @@ function MessageThreadWrapper({
   conversationId,
   workspaceId,
   conversations,
+  showInfoSidebar,
+  onToggleSidebar,
 }: {
   conversationId: Id<'conversations'>
   workspaceId: Id<'workspaces'>
   conversations: Conversation[]
+  showInfoSidebar: boolean
+  onToggleSidebar: () => void
 }) {
   const conversation = conversations.find((c) => c._id === conversationId)
   const contact = conversation?.contact
@@ -86,6 +125,8 @@ function MessageThreadWrapper({
         lead_status: contact.lead_status,
       }}
       conversationStatus={conversation?.status || 'open'}
+      showInfoSidebar={showInfoSidebar}
+      onToggleSidebar={onToggleSidebar}
     />
   )
 }
@@ -96,15 +137,20 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
   const [viewMode, setViewMode] = useState<'active' | 'all'>('active')
   const [tagFilter, setTagFilter] = useState<string[]>([])
-  const [showMergeDialog, setShowMergeDialog] = useState(false)
-  const [mergeTargetContact, setMergeTargetContact] = useState<Contact | null>(null)
+  const [showInfoSidebar, setShowInfoSidebar] = useState(true)
 
-  const data = useQuery(api.conversations.listWithFilters, {
-    workspace_id: workspaceId as any,
-    active: viewMode === 'active',
-    statusFilters: statusFilter.length > 0 ? statusFilter : undefined,
-    tagFilters: tagFilter.length > 0 ? tagFilter : undefined,
-  })
+  // Skip Convex query in dev mode - use mock data
+  const convexData = useQuery(
+    api.conversations.listWithFilters,
+    isDevMode() ? 'skip' : {
+      workspace_id: workspaceId as any,
+      active: viewMode === 'active',
+      statusFilters: statusFilter.length > 0 ? statusFilter : undefined,
+      tagFilters: tagFilter.length > 0 ? tagFilter : undefined,
+    }
+  )
+
+  const data = isDevMode() ? MOCK_INBOX_DATA : convexData
 
   // Extract data from query response
   const activeCount = useMemo(() => {
@@ -123,22 +169,53 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     return Array.from(tags).sort()
   }, [data?.conversations])
 
-  // Filter conversations by search query (client-side)
+  // Filter conversations by search query, status, and tags (client-side for dev mode)
   const filteredConversations = useMemo(() => {
     if (!data?.conversations) return []
-    if (!searchQuery.trim()) return data.conversations
 
-    const query = searchQuery.toLowerCase()
-    return data.conversations.filter((conv) => {
-      const contact = conv.contact
-      if (!contact) return false
-      return (
-        contact.name?.toLowerCase().includes(query) ||
-        contact.kapso_name?.toLowerCase().includes(query) ||
-        contact.phone.toLowerCase().includes(query)
-      )
-    })
-  }, [data?.conversations, searchQuery])
+    // Cast to any to handle type differences between mock and convex data
+    let filtered = [...data.conversations] as any[]
+
+    // Filter by view mode (active = has unread messages)
+    if (viewMode === 'active') {
+      filtered = filtered.filter((conv: any) => conv.unread_count > 0 || conv.status === 'open')
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter((conv: any) => {
+        const contact = conv.contact
+        if (!contact) return false
+        return (
+          contact.name?.toLowerCase().includes(query) ||
+          contact.kapso_name?.toLowerCase().includes(query) ||
+          contact.phone.toLowerCase().includes(query)
+        )
+      })
+    }
+
+    // Filter by lead status
+    if (statusFilter.length > 0) {
+      filtered = filtered.filter((conv: any) => {
+        const contact = conv.contact
+        if (!contact) return false
+        const contactStatus = (contact.lead_status || 'prospect') as LeadStatus
+        return statusFilter.includes(contactStatus)
+      })
+    }
+
+    // Filter by tags
+    if (tagFilter.length > 0) {
+      filtered = filtered.filter((conv: any) => {
+        const contact = conv.contact
+        if (!contact?.tags) return false
+        return tagFilter.some((tag: string) => contact.tags?.includes(tag))
+      })
+    }
+
+    return filtered
+  }, [data?.conversations, searchQuery, statusFilter, tagFilter, viewMode])
 
   const handleStatusToggle = (status: LeadStatus) => {
     setStatusFilter((prev) =>
@@ -207,12 +284,33 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     // Handled via API calls in InfoSidebar
   }, [])
 
-  // Handle opening merge dialog
-  const handleOpenMergeDialog = useCallback(() => {
-    if (contactForSidebar) {
-      setMergeTargetContact(contactForSidebar)
-      setShowMergeDialog(true)
+  // Handle merge completion
+  const handleMergeComplete = useCallback((targetContactId: string) => {
+    // After merge, clear selection or refresh
+    // For dev mode, just log
+    console.log('Merged with contact:', targetContactId)
+  }, [])
+
+  // Get available contacts for merge (all contacts except selected one)
+  const availableContacts = useMemo(() => {
+    if (isDevMode()) {
+      return MOCK_CONTACTS.map(c => ({
+        ...c,
+        id: c.id,
+      })) as Contact[]
     }
+    // In production, would get from query - for now return empty
+    return []
+  }, [])
+
+  // Get recent notes for the selected contact
+  const recentNotes = useMemo(() => {
+    if (!contactForSidebar) return []
+    if (isDevMode()) {
+      return getNotesForContact(contactForSidebar.id)
+    }
+    // In production, would fetch from API
+    return []
   }, [contactForSidebar])
 
   if (data === undefined) {
@@ -220,7 +318,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    <div className="flex h-[calc(100vh-4rem)] relative">
       {/* Left sidebar - Conversation list */}
       <div className="w-80 border-r bg-background flex flex-col">
         {/* Search and filter header */}
@@ -400,12 +498,14 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
       </div>
 
       {/* Center area - Message thread */}
-      <div className="flex-1 flex flex-col bg-muted/30 min-w-0">
+      <div className="flex-1 flex flex-col bg-muted/30 min-w-0 relative">
         {selectedConversationId ? (
           <MessageThreadWrapper
             conversationId={selectedConversationId}
             workspaceId={workspaceId}
             conversations={filteredConversations}
+            showInfoSidebar={showInfoSidebar}
+            onToggleSidebar={() => setShowInfoSidebar(!showInfoSidebar)}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
@@ -420,37 +520,28 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
         )}
       </div>
 
-      {/* Right sidebar - Contact info */}
-      {selectedConversationId && contactForSidebar && (
-        <InfoSidebar
-          contact={contactForSidebar}
-          messagesCount={messagesCount}
-          lastActivity={selectedConversation?.last_message_at
-            ? new Date(selectedConversation.last_message_at).toISOString()
-            : null}
-          conversationStatus={selectedConversation?.status || 'open'}
-          contactTags={contactTags}
-          teamMembers={[]}
-          assignedTo={selectedConversation?.assigned_to}
-          conversationId={String(selectedConversationId)}
-          onContactUpdate={handleContactUpdate}
-          onAssignmentChange={handleAssignmentChange}
-          onMergeClick={handleOpenMergeDialog}
-        />
-      )}
-
-      {/* Merge contacts dialog */}
-      {showMergeDialog && mergeTargetContact && (
-        <MergeContactsDialog
-          contact1={mergeTargetContact}
-          contact2={mergeTargetContact} // User selects second contact in dialog
-          open={showMergeDialog}
-          onOpenChange={setShowMergeDialog}
-          onMergeComplete={() => {
-            setShowMergeDialog(false)
-            setMergeTargetContact(null)
-          }}
-        />
+      {/* Right sidebar - Contact info (overlay) */}
+      {showInfoSidebar && selectedConversationId && contactForSidebar && (
+        <div className="absolute right-0 top-0 h-full z-10 shadow-lg">
+          <InfoSidebar
+            contact={contactForSidebar}
+            messagesCount={messagesCount}
+            lastActivity={selectedConversation?.last_message_at
+              ? new Date(selectedConversation.last_message_at).toISOString()
+              : null}
+            conversationStatus={selectedConversation?.status || 'open'}
+            contactTags={contactTags}
+            teamMembers={[]}
+            assignedTo={selectedConversation?.assigned_to}
+            conversationId={String(selectedConversationId)}
+            onContactUpdate={handleContactUpdate}
+            onAssignmentChange={handleAssignmentChange}
+            onMergeComplete={handleMergeComplete}
+            onClose={() => setShowInfoSidebar(false)}
+            availableContacts={availableContacts}
+            recentNotes={recentNotes}
+          />
+        </div>
       )}
     </div>
   )

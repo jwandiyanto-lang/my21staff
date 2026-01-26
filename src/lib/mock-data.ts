@@ -136,26 +136,31 @@ export const MOCK_WORKSPACE: Workspace = {
   updated_at: '2024-01-01T00:00:00Z',
 }
 
+// Mock contacts - synced with /api/contacts for consistency
 export const MOCK_CONTACTS: Contact[] = [
-  // Real contacts from Kapso
   {
-    id: 'contact-kapso-001',
+    id: 'contact-001',
     workspace_id: 'dev-workspace-001',
-    phone: '+6285693542822',
-    phone_normalized: '+6285693542822',
-    name: 'dap4_ratu_akhmar',
-    email: null,
-    lead_score: 50,
-    lead_status: 'new',
-    tags: [],
-    assigned_to: 'dev-user-002', // Assigned to Sarah Chen
+    phone: '+6281234567890',
+    phone_normalized: '+6281234567890',
+    name: 'Budi Santoso',
+    email: 'budi@gmail.com',
+    lead_score: 85,
+    lead_status: 'hot',
+    tags: ['Student', 'Hot Lead'],
+    assigned_to: 'dev-user-001',
     metadata: {
-      source: 'Facebook CTWA',
-      interest: 'Family Immigration',
-      kapso_conversation_id: '366a22b7-11d6-4b9f-b721-9ec21a7054f8'
+      source: 'Website',
+      form_answers: {
+        'Pendidikan': 'S1 (Sarjana)',
+        'Jurusan': 'IT / Computer Science',
+        'Negara Tujuan': 'Australia',
+        'Budget': '300jt - 500jt per tahun',
+        'Target Berangkat': '2026',
+      },
     },
-    created_at: '2026-01-14T05:18:00Z',
-    updated_at: '2026-01-14T08:15:00Z',
+    created_at: '2026-01-15T10:00:00Z',
+    updated_at: '2026-01-20T14:30:00Z',
     cache_updated_at: null,
     kapso_is_online: null,
     kapso_last_seen: null,
@@ -163,19 +168,28 @@ export const MOCK_CONTACTS: Contact[] = [
     kapso_profile_pic: null,
   },
   {
-    id: 'contact-kapso-002',
+    id: 'contact-002',
     workspace_id: 'dev-workspace-001',
-    phone: '+62unknown',
-    phone_normalized: '+62unknown',
-    name: 'A',
-    email: null,
-    lead_score: 30,
-    lead_status: 'new',
-    tags: [],
+    phone: '+6282345678901',
+    phone_normalized: '+6282345678901',
+    name: 'Siti Rahayu',
+    email: 'siti.rahayu@yahoo.com',
+    lead_score: 60,
+    lead_status: 'warm',
+    tags: ['Parent', 'Follow Up'],
     assigned_to: null,
-    metadata: { source: 'Referral Link' },
-    created_at: '2026-01-14T08:00:00Z',
-    updated_at: '2026-01-14T08:00:00Z',
+    metadata: {
+      source: 'WhatsApp',
+      form_answers: {
+        'Pendidikan': 'SMA',
+        'Jurusan': 'Bisnis / Manajemen',
+        'Negara Tujuan': 'Malaysia',
+        'Budget': '150jt - 200jt per tahun',
+        'Target Berangkat': '2027',
+      },
+    },
+    created_at: '2026-01-18T09:00:00Z',
+    updated_at: '2026-01-22T11:00:00Z',
     cache_updated_at: null,
     kapso_is_online: null,
     kapso_last_seen: null,
@@ -186,31 +200,31 @@ export const MOCK_CONTACTS: Contact[] = [
 
 export const isDevMode = () => process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
-// Real conversations from Kapso
+// Mock conversations - synced with MOCK_CONTACTS
 export const MOCK_CONVERSATIONS_RAW: Conversation[] = [
   {
-    id: 'conv-kapso-001',
+    id: 'conv-001',
     workspace_id: 'dev-workspace-001',
-    contact_id: 'contact-kapso-001', // dap4_ratu_akhmar - student
+    contact_id: 'contact-001', // Budi Santoso
     status: 'open',
-    assigned_to: null,
-    unread_count: 4,
-    last_message_at: '2026-01-14T08:15:00Z',
-    last_message_preview: 'saya apa aja bisa insyaallah',
-    created_at: '2026-01-14T05:18:00Z',
-    updated_at: '2026-01-14T08:15:00Z',
+    assigned_to: 'dev-user-001',
+    unread_count: 2,
+    last_message_at: '2026-01-20T14:30:00Z',
+    last_message_preview: 'Terima kasih infonya, saya akan pertimbangkan.',
+    created_at: '2026-01-15T10:00:00Z',
+    updated_at: '2026-01-20T14:30:00Z',
   },
   {
-    id: 'conv-kapso-002',
+    id: 'conv-002',
     workspace_id: 'dev-workspace-001',
-    contact_id: 'contact-kapso-002', // A - referral link
+    contact_id: 'contact-002', // Siti Rahayu
     status: 'open',
     assigned_to: null,
     unread_count: 1,
-    last_message_at: '2026-01-14T08:00:00Z',
-    last_message_preview: 'https://lynk.id/iutami',
-    created_at: '2026-01-14T08:00:00Z',
-    updated_at: '2026-01-14T08:00:00Z',
+    last_message_at: '2026-01-22T11:00:00Z',
+    last_message_preview: 'Apakah ada beasiswa untuk anak saya?',
+    created_at: '2026-01-18T09:00:00Z',
+    updated_at: '2026-01-22T11:00:00Z',
   },
 ]
 
@@ -220,81 +234,151 @@ export const MOCK_CONVERSATIONS: ConversationWithContact[] = MOCK_CONVERSATIONS_
   contact: MOCK_CONTACTS.find((c) => c.id === conv.contact_id)!,
 }))
 
-// Mock messages across conversations
+// Mock messages - synced with MOCK_CONVERSATIONS
 export const MOCK_MESSAGES: Message[] = [
-  // Real Conversation - dap4_ratu_akhmar (student from Kapso)
+  // Conversation with Budi Santoso
   {
-    id: 'msg-kapso-001',
-    conversation_id: 'conv-kapso-001',
+    id: 'msg-001',
+    conversation_id: 'conv-001',
     workspace_id: 'dev-workspace-001',
     direction: 'inbound',
     sender_type: 'contact',
-    sender_id: 'contact-kapso-001',
-    content: 'https://lynk.id/iutami?fbclid=IwY2xjawPTzftleHRuA2FlbQlx...',
+    sender_id: 'contact-001',
+    content: 'Halo, saya tertarik untuk kuliah di Australia. Bisa minta info lebih lanjut?',
     message_type: 'text',
     media_url: null,
-    kapso_message_id: 'kapso-real-001',
-    metadata: { source: 'Facebook CTWA' },
-    created_at: '2026-01-14T05:18:00Z',
+    kapso_message_id: 'mock-001',
+    metadata: { source: 'Website' },
+    created_at: '2026-01-15T10:00:00Z',
   },
   {
-    id: 'msg-kapso-002',
-    conversation_id: 'conv-kapso-001',
+    id: 'msg-002',
+    conversation_id: 'conv-001',
     workspace_id: 'dev-workspace-001',
-    direction: 'inbound',
-    sender_type: 'contact',
-    sender_id: 'contact-kapso-001',
-    content: 'mohon maaf kalau untuk imigrasi sekeluarga tapi disana bekerja. bisa atau tidak ya',
+    direction: 'outbound',
+    sender_type: 'bot',
+    sender_id: 'bot',
+    content: 'Halo Budi! Terima kasih sudah menghubungi Eagle Overseas Education. Tentu, kami bisa bantu. Apakah sudah ada jurusan yang diminati?',
     message_type: 'text',
     media_url: null,
-    kapso_message_id: 'kapso-real-002',
+    kapso_message_id: 'mock-002',
     metadata: {},
-    created_at: '2026-01-14T08:13:00Z',
+    created_at: '2026-01-15T10:01:00Z',
   },
   {
-    id: 'msg-kapso-003',
-    conversation_id: 'conv-kapso-001',
+    id: 'msg-003',
+    conversation_id: 'conv-001',
     workspace_id: 'dev-workspace-001',
     direction: 'inbound',
     sender_type: 'contact',
-    sender_id: 'contact-kapso-001',
-    content: 'suami saya sebagai supir',
+    sender_id: 'contact-001',
+    content: 'Saya ingin ambil jurusan IT atau Computer Science. Budget sekitar 300jt per tahun.',
     message_type: 'text',
     media_url: null,
-    kapso_message_id: 'kapso-real-003',
+    kapso_message_id: 'mock-003',
     metadata: {},
-    created_at: '2026-01-14T08:14:00Z',
+    created_at: '2026-01-20T14:00:00Z',
   },
   {
-    id: 'msg-kapso-004',
-    conversation_id: 'conv-kapso-001',
+    id: 'msg-004',
+    conversation_id: 'conv-001',
     workspace_id: 'dev-workspace-001',
     direction: 'inbound',
     sender_type: 'contact',
-    sender_id: 'contact-kapso-001',
-    content: 'saya apa aja bisa insyaallah',
+    sender_id: 'contact-001',
+    content: 'Terima kasih infonya, saya akan pertimbangkan.',
     message_type: 'text',
     media_url: null,
-    kapso_message_id: 'kapso-real-004',
+    kapso_message_id: 'mock-004',
     metadata: {},
-    created_at: '2026-01-14T08:15:00Z',
+    created_at: '2026-01-20T14:30:00Z',
   },
-  // Real Conversation - A (referral link)
+  // Conversation with Siti Rahayu
   {
-    id: 'msg-kapso-005',
-    conversation_id: 'conv-kapso-002',
+    id: 'msg-005',
+    conversation_id: 'conv-002',
     workspace_id: 'dev-workspace-001',
     direction: 'inbound',
     sender_type: 'contact',
-    sender_id: 'contact-kapso-002',
-    content: 'https://lynk.id/iutami',
+    sender_id: 'contact-002',
+    content: 'Selamat siang, saya ibu dari anak yang mau kuliah ke luar negeri.',
     message_type: 'text',
     media_url: null,
-    kapso_message_id: 'kapso-real-005',
+    kapso_message_id: 'mock-005',
+    metadata: { source: 'WhatsApp' },
+    created_at: '2026-01-18T09:00:00Z',
+  },
+  {
+    id: 'msg-006',
+    conversation_id: 'conv-002',
+    workspace_id: 'dev-workspace-001',
+    direction: 'outbound',
+    sender_type: 'bot',
+    sender_id: 'bot',
+    content: 'Selamat siang, Bu! Senang bisa membantu. Anak Ibu mau kuliah di negara mana?',
+    message_type: 'text',
+    media_url: null,
+    kapso_message_id: 'mock-006',
     metadata: {},
-    created_at: '2026-01-14T08:00:00Z',
+    created_at: '2026-01-18T09:01:00Z',
+  },
+  {
+    id: 'msg-007',
+    conversation_id: 'conv-002',
+    workspace_id: 'dev-workspace-001',
+    direction: 'inbound',
+    sender_type: 'contact',
+    sender_id: 'contact-002',
+    content: 'Apakah ada beasiswa untuk anak saya?',
+    message_type: 'text',
+    media_url: null,
+    kapso_message_id: 'mock-007',
+    metadata: {},
+    created_at: '2026-01-22T11:00:00Z',
   },
 ]
+
+// Mock notes for contacts
+export interface MockNote {
+  id: string
+  content: string
+  due_date: string | null
+  is_completed: boolean
+  created_at: string
+  contact_id: string
+}
+
+export const MOCK_NOTES: MockNote[] = [
+  {
+    id: 'note-001',
+    content: 'Follow up about Australia visa requirements - he mentioned budget concerns',
+    due_date: '2026-01-28T10:00:00Z',
+    is_completed: false,
+    created_at: '2026-01-20T15:00:00Z',
+    contact_id: 'contact-001',
+  },
+  {
+    id: 'note-002',
+    content: 'Sent university brochure via email',
+    due_date: null,
+    is_completed: true,
+    created_at: '2026-01-18T11:00:00Z',
+    contact_id: 'contact-001',
+  },
+  {
+    id: 'note-003',
+    content: 'Call back next week to discuss scholarship options for her son',
+    due_date: '2026-01-30T09:00:00Z',
+    is_completed: false,
+    created_at: '2026-01-22T14:00:00Z',
+    contact_id: 'contact-002',
+  },
+]
+
+// Helper to get notes for a specific contact
+export const getNotesForContact = (contactId: string): MockNote[] => {
+  return MOCK_NOTES.filter(note => note.contact_id === contactId)
+}
 
 // Website Manager mock data
 export const mockArticles: Article[] = [
