@@ -95,6 +95,90 @@ Ari: "hai kak dewi! negara tujuannya kemana nih?"`;
 }
 
 /**
+ * Build qualifying instructions based on document collection progress.
+ * Asks about documents one at a time in order: passport -> CV -> english_test -> transcript
+ */
+function buildQualifyingInstructions(
+  context: QualificationContext | undefined,
+  isIndonesian: boolean
+): string {
+  const docs = context?.documents || {};
+
+  // Determine next document to ask about (null/undefined = not asked yet)
+  const nextDoc = docs.passport === undefined || docs.passport === null ? "passport" :
+                  docs.cv === undefined || docs.cv === null ? "CV" :
+                  docs.english_test === undefined || docs.english_test === null ? "IELTS/TOEFL" :
+                  docs.transcript === undefined || docs.transcript === null ? "ijazah/transkrip" : null;
+
+  if (isIndonesian) {
+    if (!nextDoc) {
+      return `## TUGAS SAAT INI: Semua dokumen sudah ditanya
+- Rangkum status dokumen yang sudah dikumpulkan
+- Siap untuk tawarkan next step (komunitas atau konsultasi)`;
+    }
+
+    return `## TUGAS SAAT INI: Tanya dokumen
+- Tanya tentang ${nextDoc}
+- Kalau sudah punya, bilang "oke bagus!"
+- Kalau belum punya, bilang "gpp nanti kita bantu"
+- HANYA tanya SATU dokumen per pesan
+
+CONTOH:
+Ari: "oh iya kak, ${nextDoc}nya udah punya belum?"
+
+User: "belum ada"
+Ari: "gpp kak, nanti kita bantu urus. terus kalau CV udah ada?"
+
+User: "udah"
+Ari: "oke bagus! kalau IELTS atau TOEFL gimana?"`;
+  }
+
+  if (!nextDoc) {
+    return `## CURRENT TASK: All documents asked
+- Summarize collected document status
+- Ready to offer next steps`;
+  }
+
+  return `## CURRENT TASK: Ask about documents
+- Ask about ${nextDoc}
+- If they have it, acknowledge positively
+- If not, reassure them we can help
+- Ask ONE document at a time`;
+}
+
+/**
+ * Format collected qualification data for system prompt.
+ */
+function formatCollectedData(context: QualificationContext | undefined): string {
+  if (!context) return "";
+
+  const lines: string[] = [];
+  const { collected, documents } = context;
+
+  if (collected?.full_name) lines.push(`Nama: ${collected.full_name}`);
+  if (collected?.destination_country) lines.push(`Tujuan: ${collected.destination_country}`);
+  if (collected?.education_level) lines.push(`Pendidikan: ${collected.education_level}`);
+
+  if (documents) {
+    if (documents.passport !== undefined && documents.passport !== null) {
+      lines.push(`Passport: ${documents.passport ? 'Ada' : 'Belum'}`);
+    }
+    if (documents.cv !== undefined && documents.cv !== null) {
+      lines.push(`CV: ${documents.cv ? 'Ada' : 'Belum'}`);
+    }
+    if (documents.english_test !== undefined && documents.english_test !== null) {
+      lines.push(`IELTS/TOEFL: ${documents.english_test ? 'Ada' : 'Belum'}`);
+    }
+    if (documents.transcript !== undefined && documents.transcript !== null) {
+      lines.push(`Ijazah/Transkrip: ${documents.transcript ? 'Ada' : 'Belum'}`);
+    }
+  }
+
+  if (lines.length === 0) return "";
+  return `## DATA YANG SUDAH DIKUMPULKAN\n${lines.join('\n')}`;
+}
+
+/**
  * Build routing instructions for offering next steps.
  * @param communityLink - From ariConfig.community_link (optional)
  */
@@ -213,6 +297,9 @@ export function buildMouthSystemPrompt(
     case "greeting":
       stateInstructions = buildGreetingInstructions(isIndonesian);
       break;
+    case "qualifying":
+      stateInstructions = buildQualifyingInstructions(context, isIndonesian);
+      break;
     case "routing":
       stateInstructions = buildRoutingInstructions(communityLink, isIndonesian);
       break;
@@ -266,13 +353,26 @@ Respond quickly and directly.`;
   // Build FAQ section
   const faqSection = buildEagleFAQ(isIndonesian);
 
-  // Combine base prompt with FAQ and state-specific instructions
+  // Build collected data section
+  const collectedDataSection = formatCollectedData(context);
+
+  // Combine base prompt with FAQ, collected data, and state-specific instructions
   if (stateInstructions) {
     return `${basePersonaPrompt}
 
 ${faqSection}
 
+${collectedDataSection}
+
 ${stateInstructions}`;
+  }
+
+  if (collectedDataSection) {
+    return `${basePersonaPrompt}
+
+${faqSection}
+
+${collectedDataSection}`;
   }
 
   return `${basePersonaPrompt}
