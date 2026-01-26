@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,7 +27,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, Users, Bot } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, Users, Bot, GripVertical, Palette, ChevronUp, ChevronDown } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
@@ -83,6 +83,14 @@ interface ImportPreview {
   duplicatesInFile: number
   preview: ValidatedRow[]
   allValidated: ValidatedRow[]
+}
+
+interface LeadStatusConfig {
+  key: string
+  label: string
+  color: string
+  bgColor: string
+  temperature: "hot" | "warm" | "cold" | null
 }
 
 interface SettingsClientProps {
@@ -143,7 +151,33 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
     updated: number
   } | null>(null)
 
+  // Lead stages state
+  const [leadStatuses, setLeadStatuses] = useState<LeadStatusConfig[]>([])
+  const [isLoadingStatuses, setIsLoadingStatuses] = useState(true)
+  const [isSavingStatuses, setIsSavingStatuses] = useState(false)
+  const [editingStatus, setEditingStatus] = useState<LeadStatusConfig | null>(null)
+  const [newStatus, setNewStatus] = useState<Partial<LeadStatusConfig>>({})
+  const [isAddingStatus, setIsAddingStatus] = useState(false)
+
   const isConnected = !!workspace.kapso_phone_id && !!workspace.settings?.kapso_api_key
+
+  // Load lead statuses on mount
+  useEffect(() => {
+    const loadStatuses = async () => {
+      try {
+        const res = await fetch(`/api/workspaces/${workspace.id}/status-config`)
+        if (res.ok) {
+          const data = await res.json()
+          setLeadStatuses(data)
+        }
+      } catch (error) {
+        console.error('Failed to load lead statuses:', error)
+      } finally {
+        setIsLoadingStatuses(false)
+      }
+    }
+    loadStatuses()
+  }, [workspace.id])
 
   // AI toggle handler
   const handleToggleAi = async (enabled: boolean) => {
@@ -280,6 +314,75 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
     await saveContactTags(updated)
   }
 
+  // Lead stages handlers
+  const saveLeadStatuses = async (statuses: LeadStatusConfig[]) => {
+    setIsSavingStatuses(true)
+    try {
+      const res = await fetch(`/api/workspaces/${workspace.id}/status-config`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leadStatuses: statuses }),
+      })
+      if (!res.ok) throw new Error('Failed to save')
+      setLeadStatuses(statuses)
+    } catch (error) {
+      console.error('Failed to save lead statuses:', error)
+    } finally {
+      setIsSavingStatuses(false)
+    }
+  }
+
+  const handleAddStatus = async () => {
+    if (!newStatus.label?.trim()) return
+
+    const key = newStatus.label.trim().toLowerCase().replace(/\s+/g, '_')
+
+    // Check for duplicate key
+    if (leadStatuses.some(s => s.key === key)) {
+      alert('A stage with this name already exists')
+      return
+    }
+
+    const status: LeadStatusConfig = {
+      key,
+      label: newStatus.label.trim(),
+      color: newStatus.color || '#6B7280',
+      bgColor: newStatus.bgColor || '#F3F4F6',
+      temperature: newStatus.temperature || null,
+    }
+
+    await saveLeadStatuses([...leadStatuses, status])
+    setNewStatus({})
+    setIsAddingStatus(false)
+  }
+
+  const handleUpdateStatus = async () => {
+    if (!editingStatus) return
+    const updated = leadStatuses.map(s =>
+      s.key === editingStatus.key ? editingStatus : s
+    )
+    await saveLeadStatuses(updated)
+    setEditingStatus(null)
+  }
+
+  const handleDeleteStatus = async (key: string) => {
+    if (leadStatuses.length <= 2) {
+      alert('You must have at least 2 stages')
+      return
+    }
+    const updated = leadStatuses.filter(s => s.key !== key)
+    await saveLeadStatuses(updated)
+  }
+
+  const handleMoveStatus = async (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1
+    if (newIndex < 0 || newIndex >= leadStatuses.length) return
+
+    const updated = [...leadStatuses]
+    ;[updated[index], updated[newIndex]] = [updated[newIndex], updated[index]]
+    await saveLeadStatuses(updated)
+  }
+
   // Import handlers
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -392,6 +495,13 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
             Tags
             <Badge variant="secondary" className="ml-1 text-xs">
               {contactTags.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="lead-stages" className="gap-2">
+            <Palette className="h-4 w-4" />
+            Lead Stages
+            <Badge variant="secondary" className="ml-1 text-xs">
+              {leadStatuses.length}
             </Badge>
           </TabsTrigger>
           {/* Data tab hidden for now - export features need fixes */}
@@ -710,6 +820,267 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
                   <p>No tags yet</p>
                   <p className="text-sm mt-1">Click "Add Tag" to create your first tag</p>
                 </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Lead Stages Tab */}
+        <TabsContent value="lead-stages" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Lead Stages</CardTitle>
+                  <CardDescription>
+                    Configure your sales pipeline stages. The AI will categorize leads based on temperature (hot/warm/cold).
+                  </CardDescription>
+                </div>
+                <Button onClick={() => setIsAddingStatus(true)} disabled={isAddingStatus}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Stage
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isLoadingStatuses ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <>
+                  {/* Add new status form */}
+                  {isAddingStatus && (
+                    <div className="border rounded-lg p-4 space-y-3 bg-muted/50">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Stage Name</Label>
+                          <Input
+                            placeholder="e.g., Qualified Lead"
+                            value={newStatus.label || ''}
+                            onChange={(e) => setNewStatus({
+                              ...newStatus,
+                              label: e.target.value,
+                            })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>AI Temperature</Label>
+                          <Select
+                            value={newStatus.temperature || 'none'}
+                            onValueChange={(v) => setNewStatus({
+                              ...newStatus,
+                              temperature: v === 'none' ? null : v as "hot" | "warm" | "cold",
+                            })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select temperature" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">None (manual only)</SelectItem>
+                              <SelectItem value="hot">Hot (high intent)</SelectItem>
+                              <SelectItem value="warm">Warm (medium intent)</SelectItem>
+                              <SelectItem value="cold">Cold (low intent)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Text Color</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={newStatus.color || '#6B7280'}
+                              onChange={(e) => setNewStatus({ ...newStatus, color: e.target.value })}
+                              className="w-12 h-9 p-1"
+                            />
+                            <Input
+                              value={newStatus.color || '#6B7280'}
+                              onChange={(e) => setNewStatus({ ...newStatus, color: e.target.value })}
+                              placeholder="#6B7280"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Background Color</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={newStatus.bgColor || '#F3F4F6'}
+                              onChange={(e) => setNewStatus({ ...newStatus, bgColor: e.target.value })}
+                              className="w-12 h-9 p-1"
+                            />
+                            <Input
+                              value={newStatus.bgColor || '#F3F4F6'}
+                              onChange={(e) => setNewStatus({ ...newStatus, bgColor: e.target.value })}
+                              placeholder="#F3F4F6"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={handleAddStatus} disabled={isSavingStatuses}>
+                          {isSavingStatuses ? 'Saving...' : 'Save'}
+                        </Button>
+                        <Button variant="outline" onClick={() => {
+                          setIsAddingStatus(false)
+                          setNewStatus({})
+                        }}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* List of stages */}
+                  <div className="space-y-2">
+                    {leadStatuses.map((status, index) => (
+                      <div key={status.key} className="border rounded-lg p-4">
+                        {editingStatus?.key === status.key ? (
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>Stage Name</Label>
+                                <Input
+                                  value={editingStatus.label}
+                                  onChange={(e) => setEditingStatus({ ...editingStatus, label: e.target.value })}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>AI Temperature</Label>
+                                <Select
+                                  value={editingStatus.temperature || 'none'}
+                                  onValueChange={(v) => setEditingStatus({
+                                    ...editingStatus,
+                                    temperature: v === 'none' ? null : v as "hot" | "warm" | "cold",
+                                  })}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="none">None (manual only)</SelectItem>
+                                    <SelectItem value="hot">Hot (high intent)</SelectItem>
+                                    <SelectItem value="warm">Warm (medium intent)</SelectItem>
+                                    <SelectItem value="cold">Cold (low intent)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>Text Color</Label>
+                                <div className="flex gap-2">
+                                  <Input
+                                    type="color"
+                                    value={editingStatus.color}
+                                    onChange={(e) => setEditingStatus({ ...editingStatus, color: e.target.value })}
+                                    className="w-12 h-9 p-1"
+                                  />
+                                  <Input
+                                    value={editingStatus.color}
+                                    onChange={(e) => setEditingStatus({ ...editingStatus, color: e.target.value })}
+                                  />
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Background Color</Label>
+                                <div className="flex gap-2">
+                                  <Input
+                                    type="color"
+                                    value={editingStatus.bgColor}
+                                    onChange={(e) => setEditingStatus({ ...editingStatus, bgColor: e.target.value })}
+                                    className="w-12 h-9 p-1"
+                                  />
+                                  <Input
+                                    value={editingStatus.bgColor}
+                                    onChange={(e) => setEditingStatus({ ...editingStatus, bgColor: e.target.value })}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button onClick={handleUpdateStatus} disabled={isSavingStatuses}>
+                                {isSavingStatuses ? 'Saving...' : 'Save'}
+                              </Button>
+                              <Button variant="outline" onClick={() => setEditingStatus(null)}>
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="flex flex-col gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5"
+                                  onClick={() => handleMoveStatus(index, 'up')}
+                                  disabled={index === 0 || isSavingStatuses}
+                                >
+                                  <ChevronUp className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5"
+                                  onClick={() => handleMoveStatus(index, 'down')}
+                                  disabled={index === leadStatuses.length - 1 || isSavingStatuses}
+                                >
+                                  <ChevronDown className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <Badge
+                                style={{
+                                  backgroundColor: status.bgColor,
+                                  color: status.color,
+                                  borderColor: status.color,
+                                }}
+                                className="border"
+                              >
+                                {status.label}
+                              </Badge>
+                              {status.temperature && (
+                                <span className="text-xs text-muted-foreground">
+                                  AI: {status.temperature}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => setEditingStatus(status)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-destructive"
+                                onClick={() => handleDeleteStatus(status.key)}
+                                disabled={isSavingStatuses || leadStatuses.length <= 2}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {leadStatuses.length === 0 && !isAddingStatus && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Palette className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No lead stages configured</p>
+                      <p className="text-sm mt-1">Click "Add Stage" to create your pipeline</p>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
