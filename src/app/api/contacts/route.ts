@@ -50,9 +50,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all contacts for this workspace using internal query (auth handled above)
+    // Pass high limit to fetch all contacts - pagination is done in this API layer
     // @ts-ignore - workspace_id is Id type
     const contacts = await fetchQuery(api.contacts.listByWorkspaceInternal, {
       workspace_id: workspace._id as any,
+      limit: 10000, // Fetch all contacts, paginate in API layer
     })
 
     // Apply pagination

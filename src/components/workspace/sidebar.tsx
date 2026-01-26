@@ -37,7 +37,7 @@ const operationsNav = [
     href: '/inbox',
   },
   {
-    title: 'Lead Management',
+    title: 'Database',
     icon: Users,
     href: '/database',
   },

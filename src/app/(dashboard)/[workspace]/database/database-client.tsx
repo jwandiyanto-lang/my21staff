@@ -309,7 +309,7 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Lead Management</h1>
+          <h1 className="text-2xl font-semibold">Database</h1>
           <p className="text-muted-foreground">
             {totalCount} contact{totalCount !== 1 ? 's' : ''}
             {filteredContacts.length !== contacts.length && ` (${filteredContacts.length} shown after filter)`}
