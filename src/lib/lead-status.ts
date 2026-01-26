@@ -1,16 +1,52 @@
-export type LeadStatus = 'prospect' | 'cold_lead' | 'hot_lead' | 'client' | 'student' | 'alumni' | 'lost'
-
-export const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; color: string; bgColor: string }> = {
-  prospect: { label: 'Prospect', color: '#6B7280', bgColor: '#F3F4F6' },
-  cold_lead: { label: 'Cold Lead', color: '#3B82F6', bgColor: '#DBEAFE' },
-  hot_lead: { label: 'Hot Lead', color: '#DC2626', bgColor: '#FEE2E2' },
-  client: { label: 'Client', color: '#10B981', bgColor: '#D1FAE5' },
-  student: { label: 'Student', color: '#8B5CF6', bgColor: '#EDE9FE' },
-  alumni: { label: 'Alumni', color: '#14B8A6', bgColor: '#CCFBF1' },
-  lost: { label: 'Lost', color: '#4B5563', bgColor: '#E5E7EB' },
+// Status configuration type
+export interface LeadStatusConfig {
+  key: string;
+  label: string;
+  color: string;
+  bgColor: string;
+  temperature: "hot" | "warm" | "cold" | null;
 }
 
-export const LEAD_STATUSES = Object.keys(LEAD_STATUS_CONFIG) as LeadStatus[]
+// Default configuration (matches Brain's default)
+export const DEFAULT_LEAD_STATUSES: LeadStatusConfig[] = [
+  { key: "new", label: "New", color: "#6B7280", bgColor: "#F3F4F6", temperature: null },
+  { key: "cold", label: "Cold Lead", color: "#3B82F6", bgColor: "#DBEAFE", temperature: "cold" },
+  { key: "warm", label: "Warm Lead", color: "#F59E0B", bgColor: "#FEF3C7", temperature: "warm" },
+  { key: "hot", label: "Hot Lead", color: "#DC2626", bgColor: "#FEE2E2", temperature: "hot" },
+  { key: "client", label: "Client", color: "#10B981", bgColor: "#D1FAE5", temperature: null },
+  { key: "lost", label: "Lost", color: "#4B5563", bgColor: "#E5E7EB", temperature: null },
+];
+
+// Legacy type for backwards compatibility
+export type LeadStatus = string;
+
+// Helper to get status config (static version for non-dynamic contexts)
+export function getStatusConfig(
+  statusKey: string,
+  workspaceConfig?: LeadStatusConfig[]
+): LeadStatusConfig {
+  const config = workspaceConfig || DEFAULT_LEAD_STATUSES;
+  const found = config.find(s => s.key === statusKey);
+
+  // Return found config or a fallback for unknown statuses
+  if (found) return found;
+
+  return {
+    key: statusKey,
+    label: statusKey.charAt(0).toUpperCase() + statusKey.slice(1).replace(/_/g, ' '),
+    color: "#6B7280",
+    bgColor: "#F3F4F6",
+    temperature: null,
+  };
+}
+
+// Legacy exports for backwards compatibility
+export const LEAD_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> =
+  Object.fromEntries(
+    DEFAULT_LEAD_STATUSES.map(s => [s.key, { label: s.label, color: s.color, bgColor: s.bgColor }])
+  );
+
+export const LEAD_STATUSES = DEFAULT_LEAD_STATUSES.map(s => s.key);
 
 // Default status for new contacts
-export const DEFAULT_LEAD_STATUS: LeadStatus = 'prospect'
+export const DEFAULT_LEAD_STATUS = "new";
