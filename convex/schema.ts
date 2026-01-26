@@ -114,6 +114,7 @@ export default defineSchema({
   // ============================================
   ariConfig: defineTable({
     workspace_id: v.id("workspaces"),
+    enabled: v.optional(v.boolean()), // AI toggle - true by default if not set
     bot_name: v.string(),
     greeting_style: v.string(), // 'professional', 'friendly', 'casual'
     language: v.string(), // 'id', 'en'

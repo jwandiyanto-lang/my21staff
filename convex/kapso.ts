@@ -376,7 +376,13 @@ async function processWorkspaceMessages(
       .first();
 
     if (!ariConfig) {
-      console.log(`[Kapso] ARI not enabled for workspace ${workspaceId}`);
+      console.log(`[Kapso] ARI not configured for workspace ${workspaceId}`);
+      continue;
+    }
+
+    // Check if AI is explicitly disabled (enabled defaults to true if not set)
+    if (ariConfig.enabled === false) {
+      console.log(`[Kapso] AI is disabled for workspace ${workspaceId}`);
       continue;
     }
 

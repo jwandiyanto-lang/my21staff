@@ -61,6 +61,7 @@ export const hasAriConfig = query({
 export const upsertAriConfig = mutation({
   args: {
     workspace_id: v.string(),
+    enabled: v.optional(v.boolean()),
     bot_name: v.string(),
     greeting_style: v.string(),
     language: v.string(),
@@ -80,19 +81,25 @@ export const upsertAriConfig = mutation({
 
     if (existing) {
       // Update existing config
-      await ctx.db.patch(existing._id, {
+      const updates: any = {
         bot_name: args.bot_name,
         greeting_style: args.greeting_style,
         language: args.language,
         tone: args.tone,
         community_link: args.community_link || undefined,
         updated_at: now,
-      });
+      };
+      // Only update enabled if explicitly provided
+      if (args.enabled !== undefined) {
+        updates.enabled = args.enabled;
+      }
+      await ctx.db.patch(existing._id, updates);
       return await ctx.db.get(existing._id);
     } else {
-      // Create new config
+      // Create new config (enabled defaults to true)
       const configId = await ctx.db.insert("ariConfig", {
         workspace_id: args.workspace_id as any,
+        enabled: args.enabled !== undefined ? args.enabled : true,
         bot_name: args.bot_name,
         greeting_style: args.greeting_style,
         language: args.language,
@@ -103,6 +110,36 @@ export const upsertAriConfig = mutation({
       });
       return await ctx.db.get(configId);
     }
+  },
+});
+
+/**
+ * Toggle AI enabled/disabled for a workspace.
+ * Simple mutation for the settings toggle.
+ */
+export const toggleAiEnabled = mutation({
+  args: {
+    workspace_id: v.string(),
+    enabled: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const existing = await ctx.db
+      .query("ariConfig")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
+      .first();
+
+    if (!existing) {
+      throw new Error("ARI config not found. Please configure AI settings first.");
+    }
+
+    await ctx.db.patch(existing._id, {
+      enabled: args.enabled,
+      updated_at: Date.now(),
+    });
+
+    return await ctx.db.get(existing._id);
   },
 });
 

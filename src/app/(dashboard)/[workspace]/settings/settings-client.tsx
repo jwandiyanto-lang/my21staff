@@ -27,7 +27,8 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, Users } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, Users, Bot } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
   DialogContent,
@@ -92,6 +93,7 @@ interface SettingsClientProps {
     kapso_phone_id: string | null
     settings: WorkspaceSettings | null
   }
+  aiEnabled: boolean
 }
 
 // Default quick replies
@@ -103,12 +105,16 @@ const DEFAULT_QUICK_REPLIES: QuickReply[] = [
   { id: '5', label: 'Schedule', text: 'Would you be available to schedule a call? Please let us know your available times.' },
 ]
 
-export function SettingsClient({ workspace }: SettingsClientProps) {
+export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: SettingsClientProps) {
   // WhatsApp settings state
   const [phoneId, setPhoneId] = useState(workspace.kapso_phone_id || '')
   const [apiKey, setApiKey] = useState(workspace.settings?.kapso_api_key || '')
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  // AI settings state
+  const [aiEnabled, setAiEnabled] = useState(initialAiEnabled)
+  const [isTogglingAi, setIsTogglingAi] = useState(false)
 
   // Quick replies state
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>(
@@ -138,6 +144,29 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   } | null>(null)
 
   const isConnected = !!workspace.kapso_phone_id && !!workspace.settings?.kapso_api_key
+
+  // AI toggle handler
+  const handleToggleAi = async (enabled: boolean) => {
+    setIsTogglingAi(true)
+    try {
+      const response = await fetch(`/api/workspaces/${workspace.slug}/ari-config`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled }),
+      })
+
+      if (response.ok) {
+        setAiEnabled(enabled)
+      } else {
+        // Revert on error
+        console.error('Failed to toggle AI')
+      }
+    } catch (error) {
+      console.error('Failed to toggle AI:', error)
+    } finally {
+      setIsTogglingAi(false)
+    }
+  }
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -438,6 +467,43 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
                     Settings saved
                   </span>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Assistant Toggle */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                    <Bot className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">AI Assistant</CardTitle>
+                    <CardDescription>
+                      Automatic AI responses for incoming messages
+                    </CardDescription>
+                  </div>
+                </div>
+                <Badge variant={aiEnabled ? 'default' : 'secondary'}>
+                  {aiEnabled ? 'Active' : 'Disabled'}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Enable AI Responses</p>
+                  <p className="text-xs text-muted-foreground">
+                    When enabled, AI will automatically respond to incoming WhatsApp messages
+                  </p>
+                </div>
+                <Switch
+                  checked={aiEnabled}
+                  onCheckedChange={handleToggleAi}
+                  disabled={isTogglingAi}
+                />
               </div>
             </CardContent>
           </Card>

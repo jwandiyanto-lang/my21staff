@@ -12,6 +12,7 @@ import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 // ARI Config insert type matching database schema
 interface ARIConfigInsert {
   workspace_id: string
+  enabled?: boolean | null
   bot_name?: string | null
   greeting_style?: string | null
   language?: string | null
@@ -25,6 +26,7 @@ interface RouteParams {
 
 // Default config values
 const DEFAULT_CONFIG = {
+  enabled: true,
   bot_name: 'ARI',
   greeting_style: 'professional',
   language: 'id',
@@ -167,6 +169,44 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ config })
   } catch (error) {
     console.error('Error in ari-config PUT:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// PATCH /api/workspaces/[id]/ari-config - Toggle AI enabled/disabled
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id: workspaceId } = await params
+
+    // Verify user has access
+    const authResult = await requireWorkspaceMembership(workspaceId)
+    if (authResult instanceof NextResponse) return authResult
+
+    const body = await request.json()
+
+    // Validate enabled field
+    if (typeof body.enabled !== 'boolean') {
+      return NextResponse.json(
+        { error: 'enabled must be a boolean' },
+        { status: 400 }
+      )
+    }
+
+    // Get workspace to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    // Toggle AI enabled
+    const config = await fetchMutation(api.ari.toggleAiEnabled, {
+      workspace_id: workspace._id,
+      enabled: body.enabled,
+    })
+
+    return NextResponse.json({ config })
+  } catch (error) {
+    console.error('Error in ari-config PATCH:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
