@@ -139,8 +139,12 @@ Plans:
   2. Lead appears in Contact Database with all fields populated correctly
   3. Lead status updates work (new -> qualified -> consultation/community)
 
+**Plans:** 3 plans
+
 Plans:
-- [ ] TBD during planning
+- [ ] 05-01-PLAN.md — Verify n8n webhook endpoint in production
+- [ ] 05-02-PLAN.md — Verify lead data and phone normalization
+- [ ] 05-03-PLAN.md — Verify lead status update workflow
 
 ### Phase 6: Pricing Page
 
@@ -190,7 +194,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. AI System | 4/4 | Complete | 2026-01-25 |
 | 3.1 Inbox Enhancement | 1/1 | Complete | 2026-01-25 |
 | 4. Bot Workflow | 6/6 | Complete | 2026-01-26 |
-| 5. Lead Flow | 0/TBD | Not started | - |
+| 5. Lead Flow | 0/3 | Not started | - |
 | 6. Pricing Page | 0/TBD | Not started | - |
 | 7. UI Verification | 0/TBD | Not started | - |
 
