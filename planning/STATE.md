@@ -10,17 +10,17 @@ See: planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: 3.1 (Inbox Enhancement) — COMPLETE
-Plan: 03.1-01-PLAN.md executed
-Status: Profile sidebar, handover toggle, merge button added to inbox
-Last activity: 2026-01-25 — Completed Phase 3.1 inbox enhancements
+Phase: 4 (Bot Workflow) — IN PROGRESS
+Plan: 04-01-PLAN.md executed (1 of 6 complete)
+Status: Greeting state awareness added to Mouth system prompt
+Last activity: 2026-01-26 — Completed 04-01-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ████████░░ (206 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (207 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 201
+- Total plans completed: 207
 - Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
@@ -47,7 +47,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 2.1 UI Documentation | Document UI/buttons | N/A (inserted) | ✓ Complete |
 | 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
 | 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | ✓ Complete |
-| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | Not started |
+| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | In progress (1/6 complete) |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
 | 7. UI Verification | E2E testing | 5 (UI-01 to 05) | Not started |
@@ -103,6 +103,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Cost queries filter by date range in memory after index lookup
 - processARI is internalAction (not mutation) so it can call other actions
 - Helper mutations pattern: getAriContext, saveAriResponse, logOutboundMessage
+- QualificationContext documents structure without runtime validation (uses v.any())
+- State-specific instructions appended to base prompt for adaptive behavior
+- Greeting instructions ask ONE thing at a time for natural conversation flow
 
 **Phase 3 Issues (All Resolved):**
 - ✓ Workspace ID mismatch - actually correct, ariConfig linked to Eagle workspace
@@ -114,9 +117,16 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ## Session Continuity
 
-Last session: 2026-01-25
-Stopped at: Phase 3.1 COMPLETE — Inbox enhancements
-Resume: Start Phase 4 (Bot Workflow)
+Last session: 2026-01-26
+Stopped at: Completed 04-01-PLAN.md (Greeting state awareness)
+Resume: Continue Phase 4 with 04-02-PLAN.md (Document collection state)
+
+**Phase 4 Progress (IN PROGRESS — 1/6 complete):**
+- 04-01 ✓ Greeting State Awareness
+  - Added QualificationContext interface (collected, documents, routing)
+  - Added buildGreetingInstructions helper function
+  - Enhanced buildMouthSystemPrompt with state and context parameters
+  - SUMMARY: planning/phases/04-bot-workflow/04-01-SUMMARY.md
 
 **Phase 3.1 Progress (COMPLETE):**
 - 03.1-01 ✓ Inbox Enhancement - Profile sidebar, handover toggle, merge button
@@ -144,4 +154,4 @@ Resume: Start Phase 4 (Bot Workflow)
 - Response time: < 3 seconds
 
 ---
-*Last updated: 2026-01-25 — Phase 3.1 COMPLETE, ready for Phase 4*
+*Last updated: 2026-01-26 — Phase 4 in progress (1/6 complete)*
