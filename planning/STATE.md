@@ -10,12 +10,12 @@ See: planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: 5 (Lead Flow) — Complete
-Plan: 5 of 5 complete (3 plans + 2 gap closure plans)
-Status: All contact CRUD endpoints implemented, awaiting post-deployment testing
-Last activity: 2026-01-26 — Completed 05-05-PLAN.md (contact CRUD endpoints)
+Phase: 5 (Lead Flow) — Gap closure in progress
+Plan: 6 of 8 complete (3 plans + 3 gap closure plans)
+Status: Workspace status config foundation complete, continuing gap closure
+Last activity: 2026-01-26 — Completed 05-06-PLAN.md (workspace status configuration)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (215 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (216 plans shipped)
 
 ## Performance Metrics
 
@@ -116,6 +116,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - State/context passed through processARI → Mouth for adaptive responses
 - Convex HTTP endpoints use .convex.site domain (not .convex.cloud)
 - n8n webhook returns 'exists' status for duplicate phone (idempotent, not error)
+- Lead status config stored in workspace.settings.lead_statuses (no schema migration needed)
+- Default status keys: new, cold, warm, hot, client, lost (aligned with Brain temperature output)
+- Brain fetches workspace status config before mapping temperature to status key
 
 **Phase 3 Issues (All Resolved):**
 - ✓ Workspace ID mismatch - actually correct, ariConfig linked to Eagle workspace
@@ -128,21 +131,24 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed 05-05-PLAN.md (contact CRUD endpoints)
-Resume: Next phase - 06-pricing-page or continue with gap closure testing
+Stopped at: Completed 05-06-PLAN.md (workspace status configuration)
+Resume: Continue with 05-07 (Database UI Integration) or 05-08 (Settings Page)
 
-**Phase 5 Progress (5/5 — Complete):**
+**Phase 5 Progress (6/8 — Gap Closure In Progress):**
 - 05-01 ✓ n8n Webhook Verification - Endpoint tested, duplicate detection verified, 228 leads confirmed
 - 05-02 ✓ Lead Data Verification - Phone normalization verified for Indonesian formats, all test contacts visible
 - 05-03 ~ Lead Status Verification - PARTIAL: Backend works, UI status mismatch found (gap noted)
 - 05-04 ✓ Gap Closure (Status Mismatch) - API endpoint created for contact updates
 - 05-05 ✓ Contact CRUD Operations - DELETE and PATCH endpoints implemented
+- 05-06 ✓ Workspace Status Config - Brain reads workspace config, UI lib updated
+- 05-07 ~ Database UI Integration - Pending
+- 05-08 ~ Settings Page - Pending
 
-**Gap Found (05-03):**
-- Brain's `mapTemperatureToStatus` returns: `hot`, `warm`, `cold`, `new`
-- UI's `LEAD_STATUS_CONFIG` expects: `prospect`, `cold_lead`, `hot_lead`, `client`, `student`, `alumni`, `lost`
-- Result: All Brain-assigned statuses display as "Prospect" in UI
-- User requirement: Make statuses configurable in Settings (not hardcoded)
+**Gap Resolution (05-06):**
+- Workspace can now store custom lead_statuses in settings
+- Brain fetches workspace config before mapping temperature to status
+- Default statuses aligned: new, cold, warm, hot, client, lost
+- UI lib supports dynamic status configuration with legacy fallbacks
 
 **Phase 4 Progress (COMPLETE — 6/6):**
 - 04-01 ✓ Greeting State Awareness
@@ -185,4 +191,4 @@ Resume: Next phase - 06-pricing-page or continue with gap closure testing
 | 003 | Remove merge button, clear default tags | 2026-01-26 | 8d7954b | [003-database-ux-fixes](./quick/003-database-ux-fixes/) |
 
 ---
-*Last updated: 2026-01-26 — 05-03 lead status verification PARTIAL (gap found)*
+*Last updated: 2026-01-26 — 05-06 workspace status configuration complete*
