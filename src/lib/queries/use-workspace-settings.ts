@@ -2,10 +2,12 @@
 
 import { useQuery } from 'convex/react'
 import { api } from '@/../convex/_generated/api'
-import { useAuth, useUser } from '@clerk/nextjs'
 
 // Import the exact types expected by consumer components
 import type { WorkspaceMember, Profile } from '@/types/database'
+
+// Dev mode check
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 // Re-export the same shape consumers expect
 export type TeamMember = WorkspaceMember & { profile: Profile | null }
@@ -15,21 +17,66 @@ interface WorkspaceSettingsResponse {
   contactTags: string[]
 }
 
-export function useWorkspaceSettings(workspaceId: string | null) {
+// Mock data for dev mode
+const MOCK_TEAM_MEMBERS: TeamMember[] = [
+  {
+    id: 'member-001',
+    workspace_id: 'dev-workspace-001',
+    user_id: 'dev-user-001',
+    role: 'owner',
+    must_change_password: false,
+    settings: null,
+    created_at: '2024-01-01T00:00:00Z',
+    profile: {
+      id: 'dev-user-001',
+      email: 'jonathan@eagle.edu',
+      full_name: 'Jonathan Wandiyanto',
+      avatar_url: null,
+      is_admin: false,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    },
+  },
+]
+
+const MOCK_CONTACT_TAGS = ['Hot Lead', 'Student', 'Parent', 'Follow Up']
+
+// Conditionally use Clerk hooks only in production
+function useClerkAuth() {
+  if (isDevMode) {
+    return { userId: 'dev-user-001', user: { fullName: 'Dev User', primaryEmailAddress: { emailAddress: 'dev@localhost' }, imageUrl: null } }
+  }
+  // Dynamic require to avoid Clerk initialization in dev mode
+  const { useAuth, useUser } = require('@clerk/nextjs')
   const { userId } = useAuth()
   const { user } = useUser()
+  return { userId, user }
+}
 
-  // Fetch workspace data
+export function useWorkspaceSettings(workspaceId: string | null) {
+  const { userId, user } = useClerkAuth()
+
+  // Dev mode: return mock data immediately, skip Convex queries
   const workspace = useQuery(
     api.workspaces.getById,
-    workspaceId ? { id: workspaceId } : 'skip'
+    isDevMode ? 'skip' : (workspaceId ? { id: workspaceId } : 'skip')
   )
 
-  // Fetch team members with user data
   const members = useQuery(
     api.workspaceMembers.listByWorkspaceWithUsers,
-    workspaceId ? { workspace_id: workspaceId } : 'skip'
+    isDevMode ? 'skip' : (workspaceId ? { workspace_id: workspaceId } : 'skip')
   )
+
+  // In dev mode, return mock data
+  if (isDevMode) {
+    return {
+      data: {
+        teamMembers: MOCK_TEAM_MEMBERS,
+        contactTags: MOCK_CONTACT_TAGS,
+      },
+      isLoading: false,
+    }
+  }
 
   const isLoading = workspace === undefined || members === undefined
 

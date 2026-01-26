@@ -1,7 +1,15 @@
 import { SignIn } from '@clerk/nextjs'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 export default function SignInPage() {
+  // Dev mode: skip sign-in, go directly to demo dashboard
+  if (isDevMode) {
+    redirect('/demo')
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation - matches landing page */}

@@ -10,6 +10,26 @@ import { ActivityFeed } from '@/components/dashboard/activity-feed'
 import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist'
 import type { Id } from 'convex/_generated/dataModel'
 
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+
+// Mock stats for offline dev mode
+const MOCK_STATS = {
+  totalContacts: 12,
+  totalConversations: 8,
+  activeConversations: 2,
+  statusBreakdown: {
+    new: 3,
+    hot: 4,
+    warm: 3,
+    cold: 2,
+    won: 0,
+    lost: 0,
+  },
+  hasContacts: true,
+  hasConversations: true,
+  hasKapsoConnected: true,
+}
+
 interface DashboardClientProps {
   workspaceId: Id<'workspaces'>
   workspaceSlug: string
@@ -18,10 +38,13 @@ interface DashboardClientProps {
 export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientProps) {
   const [timeFilter, setTimeFilter] = useState<'week' | 'month' | 'all'>('all')
 
-  const stats = useQuery(api.dashboard.getStats, {
-    workspace_id: workspaceId as any,
-    time_filter: timeFilter,
-  })
+  // Skip Convex query in dev mode - use mock data
+  const convexStats = useQuery(
+    api.dashboard.getStats,
+    isDevMode ? 'skip' : { workspace_id: workspaceId as any, time_filter: timeFilter }
+  )
+
+  const stats = isDevMode ? MOCK_STATS : convexStats
 
   if (stats === undefined) {
     return <DashboardSkeleton />

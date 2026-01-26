@@ -67,6 +67,67 @@ Kapso API for WhatsApp
 
 ---
 
+## TEST LOCAL BEFORE DEPLOYMENT (HARD RULE)
+
+**Always test at `localhost:3000/demo` before any deployment.**
+
+```bash
+# 1. Ensure dev mode is enabled
+cat .env.local | grep DEV_MODE
+# Must show: NEXT_PUBLIC_DEV_MODE=true
+
+# 2. Start dev server
+npm run dev
+
+# 3. Test ALL pages work without errors:
+http://localhost:3000/          # Landing page
+http://localhost:3000/demo      # Dashboard
+http://localhost:3000/demo/inbox
+http://localhost:3000/demo/database
+http://localhost:3000/demo/settings
+```
+
+**Why this matters:**
+- `/demo` uses **offline mock data** - no Convex/Clerk calls
+- Tests UI without internet dependency
+- Catches missing dev mode checks before they reach production
+- Footer shows "Offline Mode" (orange dot) = working correctly
+
+**If you see errors:** The component is missing a dev mode check. Fix it before proceeding.
+
+---
+
+## Local Development
+
+**Dev mode bypasses Clerk auth and Convex for local testing.**
+
+| Route | Mode | Description |
+|-------|------|-------------|
+| `/demo` | Offline | Mock data, no network calls |
+| `/eagle-overseas` | Online | Real Convex data (needs internet) |
+
+**Key files:**
+- `.env.local` has `NEXT_PUBLIC_DEV_MODE=true`
+- `src/lib/mock-data.ts` - mock workspace and helper functions
+- `src/app/providers.tsx` - skips ClerkProvider in dev mode
+- `src/app/api/contacts/route.ts` - returns mock contacts in dev mode
+
+**When adding new features:** Always add dev mode check:
+```tsx
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+
+// For Clerk components:
+{isDevMode ? <DevFallback /> : <ClerkComponent />}
+
+// For Convex queries:
+const data = useQuery(api.something, isDevMode ? 'skip' : { args })
+if (isDevMode) return MOCK_DATA
+```
+
+**Full guide:** [docs/LOCAL-DEVELOPMENT.md](docs/LOCAL-DEVELOPMENT.md)
+
+---
+
 ## Git & Deployment
 
 **🚫 VERCEL DEPLOYMENT BLOCKED - BILLING FREEZE 🚫**
