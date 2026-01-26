@@ -450,7 +450,7 @@ export const processARI = internalAction({
     console.log(`[ARI] Context loaded: conversation=${context.ariConversationId}, ${context.messageHistory.length} messages`);
 
     // 2. Call The Mouth for AI response
-    console.log(`[ARI] Step 2: Calling The Mouth...`);
+    console.log(`[ARI] Step 2: Calling The Mouth (state=${context.ariState})...`);
     let mouthResponse;
     try {
       mouthResponse = await ctx.runAction(internal.ai.mouth.generateMouthResponse, {
@@ -459,6 +459,9 @@ export const processARI = internalAction({
         botName: context.ariConfig.bot_name,
         contactName: context.contact.name || context.contact.kapso_name || undefined,
         language: context.ariConfig.language,
+        state: context.ariState,
+        context: context.ariContext,
+        communityLink: context.ariConfig.community_link,
       });
     } catch (mouthError) {
       console.error(`[ARI] Mouth error: ${mouthError}`);
@@ -509,9 +512,11 @@ export const processARI = internalAction({
 
     console.log(`[ARI] Response sent in ${responseTime}ms (${mouthResponse.model})`);
 
-    // 6. Schedule The Brain for async analysis
+    // 6. Call The Brain for analysis (directly, not scheduled)
+    console.log("[ARI] Step 6: Calling The Brain for analysis...");
+    let brainResponse;
     try {
-      const brainArgs = {
+      brainResponse = await ctx.runAction(internal.ai.brain.analyzeConversation, {
         workspaceId: workspace_id,
         contactId: contact_id,
         ariConversationId: context.ariConversationId,
@@ -522,18 +527,29 @@ export const processARI = internalAction({
         ],
         contactName: context.contact.name || context.contact.kapso_name || undefined,
         currentScore: context.contact.lead_score || 0,
-      };
-      console.log(`[ARI] Brain args: ${JSON.stringify({
-        workspaceId: brainArgs.workspaceId,
-        contactId: brainArgs.contactId,
-        ariConversationId: brainArgs.ariConversationId,
-        messageCount: brainArgs.recentMessages.length,
-      })}`);
+      });
+      console.log(`[ARI] Brain analysis complete: ${JSON.stringify(brainResponse?.analysis || {})}`);
+    } catch (brainError) {
+      console.error(`[ARI] Brain error: ${brainError}`);
+    }
 
-      await ctx.scheduler.runAfter(1000, internal.ai.brain.analyzeConversation, brainArgs);
-      console.log(`[ARI] Brain analysis scheduled successfully`);
-    } catch (scheduleError) {
-      console.error(`[ARI] Failed to schedule Brain: ${scheduleError}`);
+    // 7. Check Brain's next_action for consultation/handoff triggers
+    if (brainResponse?.analysis?.next_action) {
+      const nextAction = brainResponse.analysis.next_action;
+
+      if (nextAction === "offer_consultation" || nextAction === "handoff_human") {
+        console.log(`[ARI] Brain triggered ${nextAction} - calling handleConsultationRequest`);
+
+        await handleConsultationRequest(
+          ctx,
+          context.workspace._id,
+          context.contact._id,
+          context.ariConversationId,
+          nextAction === "handoff_human"
+            ? "User explicitly requested human assistance"
+            : "User interested in consultation"
+        );
+      }
     }
   },
 });
