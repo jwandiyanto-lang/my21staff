@@ -133,6 +133,66 @@ Let customer choose, acknowledge their choice.`;
 }
 
 /**
+ * Build Eagle Overseas FAQ knowledge section.
+ * This gives the bot knowledge to answer common questions.
+ */
+function buildEagleFAQ(isIndonesian: boolean): string {
+  if (isIndonesian) {
+    return `## FAQ (gunakan untuk jawab pertanyaan)
+
+TENTANG EAGLE:
+- Eagle Overseas Indonesia = agen studi luar negeri
+- Visa success rate: 98%
+- Fokus: karir dan potensi mahasiswa, bukan komisi universitas
+
+LAYANAN:
+- Perencanaan studi strategis
+- Bimbingan beasiswa
+- Review esai motivasi
+- Persiapan IELTS/TOEFL
+- Pendampingan visa
+- Optimasi CV & LinkedIn
+
+NEGARA TUJUAN:
+- Australia: Melbourne, UNSW, Monash
+- Canada: UBC, UofT, McGill
+- UK: Oxford, Cambridge, Imperial
+- USA: Harvard, MIT, Stanford
+
+KALAU DITANYA HARGA/BIAYA:
+- Bilang: "untuk detail biaya, nanti tim kita yang jelaskan langsung ya kak"
+- JANGAN kasih angka spesifik
+
+KALAU DITANYA HAL YANG GA TAU:
+- Bilang: "bentar ya saya tanya dulu ke tim, nanti saya kabarin"`;
+  }
+
+  return `## FAQ KNOWLEDGE
+
+ABOUT EAGLE:
+- Eagle Overseas Indonesia = study abroad agency
+- 98% visa success rate
+- Focus: student career potential, not university commissions
+
+SERVICES:
+- Strategic study planning
+- Scholarship guidance
+- Essay review
+- IELTS/TOEFL prep
+- Visa assistance
+- CV & LinkedIn optimization
+
+DESTINATIONS: Australia, Canada, UK, USA
+
+IF ASKED ABOUT PRICING:
+- Say: "our team will explain the details directly"
+- DO NOT give specific numbers
+
+IF UNSURE:
+- Say: "let me check with the team and get back to you"`;
+}
+
+/**
  * Build system prompt for The Mouth (conversational AI).
  * Style: Short, friendly, Indonesian-optimized.
  */
@@ -203,12 +263,21 @@ Style:
 
 Respond quickly and directly.`;
 
-  // Combine base prompt with state-specific instructions
-  return stateInstructions
-    ? `${basePersonaPrompt}
+  // Build FAQ section
+  const faqSection = buildEagleFAQ(isIndonesian);
 
-${stateInstructions}`
-    : basePersonaPrompt;
+  // Combine base prompt with FAQ and state-specific instructions
+  if (stateInstructions) {
+    return `${basePersonaPrompt}
+
+${faqSection}
+
+${stateInstructions}`;
+  }
+
+  return `${basePersonaPrompt}
+
+${faqSection}`;
 }
 
 /**
