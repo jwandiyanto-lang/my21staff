@@ -11,16 +11,16 @@ See: planning/PROJECT.md (updated 2026-01-25)
 
 Milestone: v3.3 Go Live
 Phase: 4 (Bot Workflow) — IN PROGRESS
-Plan: 04-01, 04-02, 04-03 executed (3 of 6 complete)
-Status: Bot context system complete with state awareness, document collection, routing, and FAQ
-Last activity: 2026-01-26 — Completed 04-03-PLAN.md
+Plan: 04-01, 04-02, 04-03, 04-05 executed (4 of 6 complete)
+Status: Bot context system complete with consultation request handling helpers
+Last activity: 2026-01-26 — Completed 04-05-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (209 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (210 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 209
+- Total plans completed: 210
 - Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
@@ -34,7 +34,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.0 | 21 | 3 |
 | v3.1 | 23 | 1 |
 | v3.2 | 23 | 2 |
-| v3.3 | 7 | In progress |
+| v3.3 | 8 | In progress |
 
 ## v3.3 Roadmap Summary
 
@@ -47,7 +47,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 2.1 UI Documentation | Document UI/buttons | N/A (inserted) | ✓ Complete |
 | 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
 | 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | ✓ Complete |
-| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | In progress (3/6 complete) |
+| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | In progress (4/6 complete) |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
 | 7. UI Verification | E2E testing | 5 (UI-01 to 05) | Not started |
@@ -109,6 +109,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - FAQ knowledge embedded directly in prompts rather than separate knowledge base
 - Routing offers Community (free) or Consultation (1-on-1 with human) based on readiness
 - Document collection: passport → CV → english_test → transcript (one at a time)
+- updateAriContext uses deep merge for nested objects (collected, documents, routing)
+- handleConsultationRequest sets minimum lead score 70 for hot consultation requests
+- flagForHuman sets unread_count: 1 to ensure inbox visibility
 
 **Phase 3 Issues (All Resolved):**
 - ✓ Workspace ID mismatch - actually correct, ariConfig linked to Eagle workspace
@@ -121,10 +124,10 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed 04-01, 04-02, 04-03 (Bot context system complete)
+Stopped at: Completed 04-05 (Consultation request handling helpers)
 Resume: Continue Phase 4 with 04-04-PLAN.md (Wire Brain to update state)
 
-**Phase 4 Progress (IN PROGRESS — 3/6 complete):**
+**Phase 4 Progress (IN PROGRESS — 4/6 complete):**
 - 04-01 ✓ Greeting State Awareness
   - Added QualificationContext interface (collected, documents, routing)
   - Added buildGreetingInstructions helper function
@@ -141,6 +144,12 @@ Resume: Continue Phase 4 with 04-04-PLAN.md (Wire Brain to update state)
   - Enhanced switch statement with "routing" state case
   - FAQ embedded in all Mouth prompts
   - SUMMARY: planning/phases/04-bot-workflow/04-03-SUMMARY.md
+- 04-05 ✓ Consultation Request Handling
+  - Added updateAriContext mutation for context merging
+  - Added handleConsultationRequest helper function
+  - Added flagForHuman and findConversationByContact mutations
+  - Ready to be called by 04-04 processARI wiring
+  - SUMMARY: planning/phases/04-bot-workflow/04-05-SUMMARY.md
 
 **Phase 3.1 Progress (COMPLETE):**
 - 03.1-01 ✓ Inbox Enhancement - Profile sidebar, handover toggle, merge button
