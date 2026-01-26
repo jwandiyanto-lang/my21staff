@@ -823,3 +823,84 @@ export const updateAriContext = internalMutation({
     });
   },
 });
+
+/**
+ * Flag conversation for human attention.
+ */
+export const flagForHuman = internalMutation({
+  args: {
+    conversationId: v.id("conversations"),
+    reason: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.conversationId, {
+      status: "open",  // Ensure it's visible
+      unread_count: 1, // Flag as needing attention
+      updated_at: Date.now(),
+    });
+  },
+});
+
+/**
+ * Find conversation by contact ID.
+ */
+export const findConversationByContact = internalQuery({
+  args: {
+    contactId: v.id("contacts"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("conversations")
+      .withIndex("by_contact", (q) => q.eq("contact_id", args.contactId))
+      .first();
+  },
+});
+
+/**
+ * Handle consultation request - update state and notify human.
+ * Called when Brain's next_action is "offer_consultation" or "handoff_human".
+ * This function is CALLED by Plan 04-04 Task 4 in processARI.
+ */
+async function handleConsultationRequest(
+  ctx: any,
+  workspaceId: string,
+  contactId: string,
+  ariConversationId: string,
+  reason: string
+): Promise<void> {
+  const now = Date.now();
+
+  // Update context to mark consultation requested
+  await ctx.runMutation(internal.kapso.updateAriContext, {
+    ariConversationId,
+    updates: {
+      routing: {
+        consultation_requested_at: now,
+        choice: "consultation",
+      },
+    },
+  });
+
+  // Update conversation state to handoff
+  await ctx.runMutation(internal.ai.brain.updateConversationState, {
+    ariConversationId,
+    state: "handoff",
+    leadScore: 70, // Minimum hot lead score
+    leadTemperature: "hot",
+  });
+
+  // Update conversation status to flag for human attention
+  // Find the regular conversation and mark unread
+  const conversation = await ctx.runQuery(internal.kapso.findConversationByContact, {
+    contactId,
+  });
+
+  if (conversation) {
+    await ctx.runMutation(internal.kapso.flagForHuman, {
+      conversationId: conversation._id,
+      reason,
+    });
+  }
+
+  console.log(`[ARI] Consultation requested - flagged for human (${reason})`);
+}
