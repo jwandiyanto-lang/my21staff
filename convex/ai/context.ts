@@ -150,6 +150,9 @@ export function buildMouthSystemPrompt(
   let stateInstructions = "";
 
   switch (state) {
+    case "greeting":
+      stateInstructions = buildGreetingInstructions(isIndonesian);
+      break;
     case "routing":
       stateInstructions = buildRoutingInstructions(communityLink, isIndonesian);
       break;
