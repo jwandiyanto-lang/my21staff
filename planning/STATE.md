@@ -11,11 +11,11 @@ See: planning/PROJECT.md (updated 2026-01-25)
 
 Milestone: v3.3 Go Live
 Phase: 5 (Lead Flow) — In Progress
-Plan: 2 of 3 complete
-Status: Lead data verification complete — phone normalization working for all Indonesian formats
-Last activity: 2026-01-26 — Completed 05-02-PLAN.md (lead data verification)
+Plan: 3 of 3 complete (PARTIAL — gap found)
+Status: Lead status verification partial — Backend works, UI status values mismatch
+Last activity: 2026-01-26 — Completed 05-03-PLAN.md (PARTIAL - gap found)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (214 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (215 plans shipped)
 
 ## Performance Metrics
 
@@ -48,7 +48,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
 | 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | ✓ Complete |
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | ✓ Complete |
-| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | 1/3 Complete |
+| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | 3/3 (PARTIAL - gap) |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
 | 7. UI Verification | E2E testing | 5 (UI-01 to 05) | Not started |
 
@@ -128,12 +128,19 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed 05-02-PLAN.md (lead data verification)
-Resume: Continue to 05-03 (n8n workflow documentation)
+Stopped at: Completed 05-03-PLAN.md (PARTIAL - gap found)
+Resume: Create 05-04 gap closure plan for configurable statuses
 
-**Phase 5 Progress (In Progress — 2/3):**
+**Phase 5 Progress (3/3 — PARTIAL, gap found):**
 - 05-01 ✓ n8n Webhook Verification - Endpoint tested, duplicate detection verified, 228 leads confirmed
 - 05-02 ✓ Lead Data Verification - Phone normalization verified for Indonesian formats, all test contacts visible
+- 05-03 ~ Lead Status Verification - PARTIAL: Backend works, UI status mismatch found
+
+**Gap Found (05-03):**
+- Brain's `mapTemperatureToStatus` returns: `hot`, `warm`, `cold`, `new`
+- UI's `LEAD_STATUS_CONFIG` expects: `prospect`, `cold_lead`, `hot_lead`, `client`, `student`, `alumni`, `lost`
+- Result: All Brain-assigned statuses display as "Prospect" in UI
+- User requirement: Make statuses configurable in Settings (not hardcoded)
 
 **Phase 4 Progress (COMPLETE — 6/6):**
 - 04-01 ✓ Greeting State Awareness
@@ -176,4 +183,4 @@ Resume: Continue to 05-03 (n8n workflow documentation)
 | 003 | Remove merge button, clear default tags | 2026-01-26 | 8d7954b | [003-database-ux-fixes](./quick/003-database-ux-fixes/) |
 
 ---
-*Last updated: 2026-01-26 — 05-02 lead data verification complete*
+*Last updated: 2026-01-26 — 05-03 lead status verification PARTIAL (gap found)*
