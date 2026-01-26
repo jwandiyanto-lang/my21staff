@@ -97,7 +97,7 @@ export const MOCK_CONTACTS: Contact[] = [
     email: null,
     lead_score: 50,
     lead_status: 'new',
-    tags: ['Community', '1on1'],
+    tags: [],
     assigned_to: 'dev-user-002', // Assigned to Sarah Chen
     metadata: {
       source: 'Facebook CTWA',

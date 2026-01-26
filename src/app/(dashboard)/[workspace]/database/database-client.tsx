@@ -109,7 +109,7 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   const contacts = contactsData?.contacts ?? []
   const totalCount = contactsData?.total ?? 0
   const teamMembers = settingsData?.teamMembers ?? []
-  const contactTags = settingsData?.contactTags ?? ['Community', '1on1']
+  const contactTags = settingsData?.contactTags ?? []
 
   // TanStack Query mutations
   const updateMutation = useUpdateContact(workspace.id)
@@ -315,31 +315,9 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
             {filteredContacts.length !== contacts.length && ` (${filteredContacts.length} shown after filter)`}
           </p>
         </div>
+        {/* Merge Duplicates button hidden - feature not needed for now */}
         <div className="flex items-center gap-2">
-          <Button
-            variant={mergeMode ? "secondary" : "outline"}
-            size="sm"
-            onClick={() => {
-              if (mergeMode) {
-                // Cancel merge mode
-                setMergeMode(false)
-                setSelectedForMerge([])
-              } else {
-                setMergeMode(true)
-              }
-            }}
-          >
-            {mergeMode ? 'Cancel Merge' : 'Merge Duplicates'}
-          </Button>
-
-          {mergeMode && selectedForMerge.length === 2 && (
-            <Button
-              size="sm"
-              onClick={() => setShowMergeDialog(true)}
-            >
-              Merge Selected ({selectedForMerge.length})
-            </Button>
-          )}
+          {/* Future: Add bulk actions here */}
         </div>
       </div>
 
@@ -551,17 +529,7 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
         )}
       </div>
 
-      {/* Merge Mode Instructions */}
-      {mergeMode && (
-        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-          <p className="text-sm text-blue-900 dark:text-blue-100">
-            <strong>Merge Mode:</strong> Select 2 contacts to merge.
-            {selectedForMerge.length === 0 && ' Click on any contact to start.'}
-            {selectedForMerge.length === 1 && ' Select 1 more contact to merge.'}
-            {selectedForMerge.length === 2 && ' Click "Merge Selected" to continue.'}
-          </p>
-        </div>
-      )}
+      {/* Merge Mode Instructions - hidden, merge feature disabled */}
 
       {/* Data Table */}
       <DataTable

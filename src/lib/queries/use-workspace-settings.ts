@@ -41,7 +41,7 @@ export function useWorkspaceSettings(workspaceId: string | null) {
   }
 
   // Extract contact tags from workspace settings
-  const contactTags = ((workspace as { settings?: Record<string, unknown> }).settings)?.contact_tags as string[] || ['Community', '1on1']
+  const contactTags = ((workspace as { settings?: Record<string, unknown> }).settings)?.contact_tags as string[] || []
 
   // Map Convex members to expected TeamMember structure
   const teamMembers: TeamMember[] = members.map((m: Record<string, unknown>) => {

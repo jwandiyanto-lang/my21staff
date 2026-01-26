@@ -47,7 +47,7 @@ export function useConversations(
         totalCount: MOCK_CONVERSATIONS.length,
         activeCount: MOCK_CONVERSATIONS.filter(c => (c.unread_count ?? 0) > 0).length,
         members: [],
-        tags: ['Community', '1on1'],
+        tags: [],
       } as ConversationsResponse,
       isLoading: false,
       error: null,

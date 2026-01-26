@@ -110,7 +110,7 @@ export function ContactDetailSheet({
   workspace,
   open,
   onOpenChange,
-  contactTags = ['Community', '1on1'],
+  contactTags = [],
   teamMembers = [],
 }: ContactDetailSheetProps) {
   const router = useRouter()
