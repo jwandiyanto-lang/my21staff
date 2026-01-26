@@ -328,9 +328,16 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
   }
 
   // Lead stages handlers
+  const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+
   const saveLeadStatuses = async (statuses: LeadStatusConfig[]) => {
     setIsSavingStatuses(true)
     try {
+      // In dev mode, just update local state (no API)
+      if (isDevMode) {
+        setLeadStatuses(statuses)
+        return
+      }
       const res = await fetch(`/api/workspaces/${workspace.id}/status-config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
