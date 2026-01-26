@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation'
 import { fetchQuery } from 'convex/nextjs'
 import { api } from 'convex/_generated/api'
 import { DatabaseClient } from './database-client'
-import { MOCK_WORKSPACE, isDevMode } from '@/lib/mock-data'
+import { shouldUseMockData, MOCK_CONVEX_WORKSPACE } from '@/lib/mock-data'
+import type { Id } from 'convex/_generated/dataModel'
 
 interface DatabasePageProps {
   params: Promise<{ workspace: string }>
@@ -11,20 +12,20 @@ interface DatabasePageProps {
 export default async function DatabasePage({ params }: DatabasePageProps) {
   const { workspace: workspaceSlug } = await params
 
-  // Dev mode: use mock workspace
-  if (isDevMode()) {
+  // Dev mode + demo: use mock data (fully offline, no Convex calls)
+  if (shouldUseMockData(workspaceSlug)) {
     return (
       <DatabaseClient
         workspace={{
-          id: MOCK_WORKSPACE.id,
-          name: MOCK_WORKSPACE.name,
-          slug: MOCK_WORKSPACE.slug,
+          id: MOCK_CONVEX_WORKSPACE._id as Id<'workspaces'>,
+          name: MOCK_CONVEX_WORKSPACE.name,
+          slug: MOCK_CONVEX_WORKSPACE.slug,
         }}
       />
     )
   }
 
-  // Production: validate workspace exists via Convex
+  // Production: fetch real workspace from Convex
   const workspace = await fetchQuery(api.workspaces.getBySlug, {
     slug: workspaceSlug,
   })

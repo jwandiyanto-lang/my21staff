@@ -1,8 +1,58 @@
-// Mock data for development - bypasses Supabase when NEXT_PUBLIC_DEV_MODE=true
+// Mock data for development - bypasses Convex when NEXT_PUBLIC_DEV_MODE=true
+// This allows fully OFFLINE local development at localhost:3000/demo
 
 import type { Contact, Workspace, Conversation, Message, ConversationWithContact, Article, Webinar, WorkspaceMember, Profile } from '@/types/database'
 
 export type MockTeamMember = WorkspaceMember & { profile: Profile | null }
+
+// =============================================================================
+// CONVEX-COMPATIBLE MOCK WORKSPACE
+// Used by server components to avoid Convex calls when offline
+// =============================================================================
+export type MockConvexWorkspace = {
+  _id: string  // Fake Convex ID format
+  _creationTime: number
+  name: string
+  slug: string
+  owner_id: string
+  kapso_phone_id: string | null
+  meta_access_token?: string
+  settings: {
+    kapso_api_key?: string
+    whatsapp_number?: string
+    whatsapp_name?: string
+    quick_replies?: { id: string; label: string; text: string }[]
+    contact_tags?: string[]
+  } | null
+  created_at: number
+  updated_at: number
+}
+
+export const MOCK_CONVEX_WORKSPACE: MockConvexWorkspace = {
+  _id: 'dev_workspace_001',  // Fake Convex document ID
+  _creationTime: Date.now(),
+  name: 'Eagle Overseas Education',
+  slug: 'demo',
+  owner_id: 'dev-user-001',
+  kapso_phone_id: '647015955153740',
+  settings: {
+    kapso_api_key: 'mock-api-key',
+    whatsapp_number: '+62 xxx xxxx xxxx',
+    whatsapp_name: 'Jonathan Wandiyanto',
+    quick_replies: [
+      { id: '1', label: 'Greeting', text: 'Halo! Ada yang bisa saya bantu?' },
+      { id: '2', label: 'Thanks', text: 'Terima kasih sudah menghubungi kami!' },
+    ],
+    contact_tags: ['Hot Lead', 'Student', 'Parent', 'Follow Up'],
+  },
+  created_at: Date.now(),
+  updated_at: Date.now(),
+}
+
+// Helper to check if we should use mock data (dev mode + demo slug)
+export const shouldUseMockData = (slug: string) => {
+  return isDevMode() && slug === 'demo'
+}
 
 // Mock team members for dev mode
 export const MOCK_TEAM_MEMBERS: MockTeamMember[] = [

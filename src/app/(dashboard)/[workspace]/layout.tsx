@@ -3,7 +3,8 @@ import { auth } from '@clerk/nextjs/server'
 import { ConvexHttpClient } from 'convex/browser'
 import { api } from '@/../convex/_generated/api'
 import { WorkspaceSidebar } from '@/components/workspace/sidebar'
-import { MOCK_WORKSPACE, isDevMode } from '@/lib/mock-data'
+import { shouldUseMockData, MOCK_CONVEX_WORKSPACE, isDevMode } from '@/lib/mock-data'
+import type { Id } from '@/../convex/_generated/dataModel'
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
@@ -26,13 +27,19 @@ export default async function WorkspaceLayout({
 }: WorkspaceLayoutProps) {
   const { workspace: workspaceSlug } = await params
 
-  // Dev mode: skip auth and use mock workspace
-  if (isDevMode()) {
-    const workspace = { id: MOCK_WORKSPACE.id, name: MOCK_WORKSPACE.name, slug: MOCK_WORKSPACE.slug }
+  // Dev mode + demo: fully offline mock data (no Convex calls)
+  if (shouldUseMockData(workspaceSlug)) {
     return (
       <div className="flex h-screen overflow-hidden bg-background">
         <div className="noise-overlay" style={{ opacity: 0.03 }} />
-        <WorkspaceSidebar workspace={workspace} isAdmin={true} />
+        <WorkspaceSidebar
+          workspace={{
+            id: MOCK_CONVEX_WORKSPACE._id as Id<'workspaces'>,
+            name: MOCK_CONVEX_WORKSPACE.name,
+            slug: MOCK_CONVEX_WORKSPACE.slug,
+          }}
+          isAdmin={true}
+        />
         <main className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-auto custom-scrollbar">
             {children}
@@ -40,9 +47,42 @@ export default async function WorkspaceLayout({
           <footer className="h-10 px-8 bg-white/80 border-t border-black/5 flex items-center justify-between shrink-0">
             <div />
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]" />
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Network Stable
+                Offline Mode
+              </span>
+            </div>
+          </footer>
+        </main>
+      </div>
+    )
+  }
+
+  // Dev mode (non-demo slugs): skip auth, use real Convex data
+  if (isDevMode()) {
+    const workspace = await getWorkspaceBySlug(workspaceSlug)
+
+    if (!workspace) {
+      notFound()
+    }
+
+    return (
+      <div className="flex h-screen overflow-hidden bg-background">
+        <div className="noise-overlay" style={{ opacity: 0.03 }} />
+        <WorkspaceSidebar
+          workspace={{ id: workspace._id, name: workspace.name, slug: workspace.slug }}
+          isAdmin={true}
+        />
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-auto custom-scrollbar">
+            {children}
+          </div>
+          <footer className="h-10 px-8 bg-white/80 border-t border-black/5 flex items-center justify-between shrink-0">
+            <div />
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Dev Mode
               </span>
             </div>
           </footer>
