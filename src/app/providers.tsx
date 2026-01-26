@@ -8,7 +8,7 @@ import { useState } from 'react'
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
-// Dev mode skips Clerk entirely
+// Dev mode uses Clerk but skips Convex auth
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -28,24 +28,24 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   )
 
-  // Dev mode: skip Clerk, use plain Convex provider
-  if (isDevMode) {
-    return (
-      <ConvexProvider client={convex}>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </ConvexProvider>
-    )
-  }
-
+  // ALWAYS wrap with ClerkProvider (needed for hooks to work)
+  // In dev mode: use plain Convex (no auth)
+  // In production: use Convex with Clerk auth
   return (
     <ClerkProvider>
-      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </ConvexProviderWithClerk>
+      {isDevMode ? (
+        <ConvexProvider client={convex}>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </ConvexProvider>
+      ) : (
+        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </ConvexProviderWithClerk>
+      )}
     </ClerkProvider>
   )
 }

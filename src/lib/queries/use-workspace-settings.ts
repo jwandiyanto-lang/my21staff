@@ -2,6 +2,7 @@
 
 import { useQuery } from 'convex/react'
 import { api } from '@/../convex/_generated/api'
+import { useAuth, useUser } from '@clerk/nextjs'
 
 // Import the exact types expected by consumer components
 import type { WorkspaceMember, Profile } from '@/types/database'
@@ -41,20 +42,14 @@ const MOCK_TEAM_MEMBERS: TeamMember[] = [
 
 const MOCK_CONTACT_TAGS = ['Hot Lead', 'Student', 'Parent', 'Follow Up']
 
-// Conditionally use Clerk hooks only in production
-function useClerkAuth() {
-  if (isDevMode) {
-    return { userId: 'dev-user-001', user: { fullName: 'Dev User', primaryEmailAddress: { emailAddress: 'dev@localhost' }, imageUrl: null } }
-  }
-  // Dynamic require to avoid Clerk initialization in dev mode
-  const { useAuth, useUser } = require('@clerk/nextjs')
-  const { userId } = useAuth()
-  const { user } = useUser()
-  return { userId, user }
-}
-
 export function useWorkspaceSettings(workspaceId: string | null) {
-  const { userId, user } = useClerkAuth()
+  // Call Clerk hooks unconditionally (required by React rules of hooks)
+  const clerkAuth = useAuth()
+  const clerkUser = useUser()
+
+  // Use Clerk data in production, mock data in dev mode
+  const userId = isDevMode ? 'dev-user-001' : clerkAuth.userId
+  const user = isDevMode ? { fullName: 'Dev User', primaryEmailAddress: { emailAddress: 'dev@localhost' }, imageUrl: null } : clerkUser.user
 
   // Dev mode: return mock data immediately, skip Convex queries
   const workspace = useQuery(
