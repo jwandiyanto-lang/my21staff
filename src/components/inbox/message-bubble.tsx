@@ -7,12 +7,15 @@
  * - Support for text, image, document, video, audio types
  * - Timestamp and read receipt status
  * - WhatsApp-style bubble shape with tail
+ * - Reply functionality on hover
  */
 
 'use client'
 
+import { useState } from 'react'
 import { format } from 'date-fns'
-import { FileText, Download } from 'lucide-react'
+import { FileText, Download, Reply } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { MessageStatus } from './message-status'
 
@@ -33,13 +36,36 @@ interface Message {
 
 interface MessageBubbleProps {
   message: Message
+  onReply?: (message: Message) => void
 }
 
-export function MessageBubble({ message }: MessageBubbleProps) {
+export function MessageBubble({ message, onReply }: MessageBubbleProps) {
   const isOutbound = message.direction === 'outbound'
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handleReply = () => {
+    onReply?.(message)
+  }
 
   return (
-    <div className={cn('flex', isOutbound ? 'justify-end' : 'justify-start')}>
+    <div
+      className={cn('flex group', isOutbound ? 'justify-end' : 'justify-start')}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Reply button - left side for outbound, shows on hover */}
+      {isOutbound && isHovered && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity mr-1 self-end mb-1"
+          onClick={handleReply}
+          title="Reply"
+        >
+          <Reply className="h-3.5 w-3.5" />
+        </Button>
+      )}
+
       <div
         className={cn(
           'max-w-[70%] rounded-lg px-4 py-2 shadow-sm',
@@ -102,6 +128,19 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           {isOutbound && <MessageStatus status={message.metadata?.status} />}
         </div>
       </div>
+
+      {/* Reply button - right side for inbound, shows on hover */}
+      {!isOutbound && isHovered && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity ml-1 self-end mb-1"
+          onClick={handleReply}
+          title="Reply"
+        >
+          <Reply className="h-3.5 w-3.5" />
+        </Button>
+      )}
     </div>
   )
 }

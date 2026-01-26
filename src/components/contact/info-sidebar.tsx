@@ -32,7 +32,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Phone, Mail, Calendar as CalendarIcon, User, Loader2, Tag, Pencil, Check, X, Clock, GitMerge } from 'lucide-react'
+import { Phone, Mail, Calendar as CalendarIcon, User, Loader2, Tag, Pencil, Check, X, Clock, GitMerge, PanelRightClose, StickyNote, ChevronRight, ArrowLeft, Trash2, Send } from 'lucide-react'
 import { ScoreBreakdown } from './score-breakdown'
 import { format, formatDistanceToNow } from 'date-fns'
 import { formatWIB, DATE_FORMATS } from '@/lib/utils/timezone'
@@ -42,6 +42,15 @@ import { toast } from 'sonner'
 import type { Contact, WorkspaceMember, Profile } from '@/types/database'
 
 type TeamMember = WorkspaceMember & { profile: Profile | null }
+
+// Note type for display (simplified)
+interface DisplayNote {
+  id: string
+  content: string
+  due_date: string | null
+  is_completed: boolean
+  created_at: string
+}
 
 interface InfoSidebarProps {
   contact: Contact
@@ -54,7 +63,8 @@ interface InfoSidebarProps {
   conversationId?: string
   onContactUpdate?: (contactId: string, updates: Partial<Contact>) => void
   onAssignmentChange?: (userId: string | null) => void
-  onMergeClick?: () => void
+  onMergeComplete?: (targetContactId: string) => void
+  onClose?: () => void
   ariScoreData?: {
     score: number;
     breakdown?: {
@@ -65,6 +75,10 @@ interface InfoSidebarProps {
     };
     reasons?: string[];
   };
+  // For merge functionality - list of other contacts to merge with
+  availableContacts?: Contact[]
+  // Notes for this contact
+  recentNotes?: DisplayNote[]
 }
 
 // Helper function for avatar color - uses phone for stability (doesn't change when name is edited)
@@ -103,8 +117,11 @@ export function InfoSidebar({
   conversationId,
   onContactUpdate,
   onAssignmentChange,
-  onMergeClick,
+  onMergeComplete,
+  onClose,
   ariScoreData,
+  availableContacts = [],
+  recentNotes = [],
 }: InfoSidebarProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -132,6 +149,22 @@ export function InfoSidebar({
   const [newNoteContent, setNewNoteContent] = useState('')
   const [newNoteDueDate, setNewNoteDueDate] = useState<Date | undefined>(undefined)
   const [isAddingNote, setIsAddingNote] = useState(false)
+
+  // Notes panel state (shows recent notes overlay)
+  const [showNotesPanel, setShowNotesPanel] = useState(false)
+
+  // Merge dialog state
+  const [isMergeDialogOpen, setIsMergeDialogOpen] = useState(false)
+  const [selectedMergeTarget, setSelectedMergeTarget] = useState<string | null>(null)
+  const [mergeStep, setMergeStep] = useState<'select' | 'compare'>('select')
+  const [mergeSelections, setMergeSelections] = useState<Record<string, 'current' | 'target'>>({})
+  const [isMerging, setIsMerging] = useState(false)
+
+  // Quick note input (for chat-bar style)
+  const [quickNoteInput, setQuickNoteInput] = useState('')
+  const [quickNoteDueDate, setQuickNoteDueDate] = useState<Date | undefined>(undefined)
+  const [showDueDatePicker, setShowDueDatePicker] = useState(false)
+  const [isAddingQuickNote, setIsAddingQuickNote] = useState(false)
 
   // Sync local state when contact changes
   useEffect(() => {
@@ -352,6 +385,124 @@ export function InfoSidebar({
     }
   }
 
+  // Quick note handler (for chat-bar style input)
+  const handleQuickNote = async () => {
+    if (!quickNoteInput.trim()) return
+
+    setIsAddingQuickNote(true)
+    try {
+      const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+      if (isDevMode) {
+        toast.success(quickNoteDueDate ? 'Note with reminder added (dev mode)' : 'Note added (dev mode)')
+        setQuickNoteInput('')
+        setQuickNoteDueDate(undefined)
+        setShowDueDatePicker(false)
+        return
+      }
+
+      const response = await fetch(`/api/contacts/${contact.id}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: quickNoteInput.trim(),
+          due_date: quickNoteDueDate ? quickNoteDueDate.toISOString() : null,
+        }),
+      })
+
+      if (response.ok) {
+        toast.success('Note added')
+        setQuickNoteInput('')
+        setQuickNoteDueDate(undefined)
+        setShowDueDatePicker(false)
+        startTransition(() => router.refresh())
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Failed to add note')
+      }
+    } catch (error) {
+      console.error('Error adding note:', error)
+      toast.error('Failed to add note')
+    } finally {
+      setIsAddingQuickNote(false)
+    }
+  }
+
+  // Merge handler
+  const handleMerge = async () => {
+    if (!selectedMergeTarget) return
+
+    setIsMerging(true)
+    try {
+      // In dev mode, just show a toast
+      const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+      if (isDevMode) {
+        toast.success('Contacts merged (dev mode)')
+        setIsMergeDialogOpen(false)
+        setSelectedMergeTarget(null)
+        onMergeComplete?.(selectedMergeTarget)
+        return
+      }
+
+      const response = await fetch(`/api/contacts/${contact.id}/merge`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetContactId: selectedMergeTarget }),
+      })
+
+      if (response.ok) {
+        toast.success('Contacts merged successfully')
+        setIsMergeDialogOpen(false)
+        setSelectedMergeTarget(null)
+        onMergeComplete?.(selectedMergeTarget)
+        startTransition(() => router.refresh())
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Failed to merge contacts')
+      }
+    } catch (error) {
+      console.error('Error merging contacts:', error)
+      toast.error('Failed to merge contacts')
+    } finally {
+      setIsMerging(false)
+    }
+  }
+
+  // Filter contacts for merge (exclude current contact)
+  const mergeableContacts = availableContacts.filter(c => c.id !== contact.id)
+
+  // Get selected target contact for comparison
+  const targetContact = selectedMergeTarget
+    ? mergeableContacts.find(c => c.id === selectedMergeTarget)
+    : null
+
+  // Fields to compare in merge
+  const mergeFields = [
+    { key: 'name', label: 'Name' },
+    { key: 'phone', label: 'Phone' },
+    { key: 'email', label: 'Email' },
+    { key: 'lead_status', label: 'Status' },
+    { key: 'lead_score', label: 'Score' },
+  ] as const
+
+  // Initialize merge selections when target changes
+  const initializeMergeSelections = (target: Contact) => {
+    const selections: Record<string, 'current' | 'target'> = {}
+    mergeFields.forEach(field => {
+      // Default to current contact's value if it exists, otherwise use target's
+      const currentValue = contact[field.key as keyof Contact]
+      selections[field.key] = currentValue ? 'current' : 'target'
+    })
+    setMergeSelections(selections)
+  }
+
+  // Handle proceeding to compare step
+  const handleProceedToCompare = () => {
+    if (targetContact) {
+      initializeMergeSelections(targetContact)
+      setMergeStep('compare')
+    }
+  }
+
   // Extract form responses from metadata
   const metadata = contact.metadata as Record<string, unknown> | null
   const innerMetadata = (metadata?.metadata as Record<string, unknown>) || metadata
@@ -383,276 +534,267 @@ export function InfoSidebar({
     return '#6B7280'
   }
 
-  return (
-    <div className="w-80 shrink-0 border-l bg-background flex flex-col overflow-hidden">
-      {/* Contact header */}
-      <div className="p-4 border-b">
-        <div className="flex items-center gap-3">
-          <Avatar className={cn('h-12 w-12', getAvatarColor(contact.phone))}>
-            <AvatarFallback className="text-white font-medium bg-transparent">
-              {getInitials(contact.name, contact.phone)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold truncate">{contact.name || contact.phone}</p>
-            <p className="text-sm text-muted-foreground">{contact.phone}</p>
-          </div>
-        </div>
+  // Calculate lead age
+  const leadAge = contact.created_at
+    ? formatDistanceToNow(new Date(contact.created_at), { addSuffix: false })
+    : 'Unknown age'
 
-        {/* Quick actions */}
-        <div className="flex gap-2 mt-4">
-          <Button variant="outline" size="sm" className="flex-1 text-xs">
-            View conversations
-          </Button>
+  return (
+    <div className="w-80 shrink-0 border-l bg-background flex flex-col h-full overflow-hidden relative">
+      {/* Sidebar header with lead age + status */}
+      <div className="p-3 border-b shrink-0">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs text-muted-foreground truncate flex-1">
+            {leadAge} old
+          </span>
+          {/* Editable status badge */}
+          <Select
+            value={localStatus}
+            onValueChange={(value) => handleStatusChange(value as LeadStatus)}
+            disabled={isUpdatingStatus}
+          >
+            <SelectTrigger
+              className="h-6 w-auto gap-1 px-2 text-[10px] border-0"
+              style={{
+                backgroundColor: statusConfig.bgColor,
+                color: statusConfig.color,
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ backgroundColor: statusConfig.color }}
+              />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LEAD_STATUSES.map((status) => {
+                const config = LEAD_STATUS_CONFIG[status]
+                return (
+                  <SelectItem key={status} value={status} className="text-xs">
+                    <span
+                      className="inline-block w-2 h-2 rounded-full mr-2"
+                      style={{ backgroundColor: config.color }}
+                    />
+                    {config.label}
+                  </SelectItem>
+                )
+              })}
+            </SelectContent>
+          </Select>
+          {isUpdatingStatus && <Loader2 className="h-3 w-3 animate-spin" />}
+          {onClose && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-6 w-6"
+              title="Close sidebar"
+            >
+              <PanelRightClose className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Quick actions */}
+      <div className="p-3 border-b shrink-0">
+        <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
             className="flex-1 text-xs"
-            onClick={() => setIsNoteDialogOpen(true)}
-          >
-            + Add note
-          </Button>
-        </div>
-        {onMergeClick && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full mt-2 text-xs"
-            onClick={onMergeClick}
+            onClick={() => setIsMergeDialogOpen(true)}
+            disabled={mergeableContacts.length === 0}
+            title={mergeableContacts.length === 0 ? 'No other contacts to merge with' : 'Merge this contact with another'}
           >
             <GitMerge className="h-3 w-3 mr-1" />
-            Merge with...
+            Merge
           </Button>
-        )}
+          <Button
+            variant={showNotesPanel ? 'default' : 'outline'}
+            size="sm"
+            className="flex-1 text-xs"
+            onClick={() => setShowNotesPanel(!showNotesPanel)}
+          >
+            <StickyNote className="h-3 w-3 mr-1" />
+            Note
+            {recentNotes.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-4 px-1 text-[10px]">
+                {recentNotes.length}
+              </Badge>
+            )}
+          </Button>
+        </div>
       </div>
+
+      {/* Notes panel overlay - covers full sidebar */}
+      {showNotesPanel && (
+        <div className="absolute inset-0 z-20 bg-amber-50 dark:bg-amber-950/30 flex flex-col">
+          {/* Notes header */}
+          <div className="px-3 pt-3 pb-2 border-b border-amber-200 dark:border-amber-800 flex items-center justify-between">
+            <span className="text-xs font-medium text-amber-800 dark:text-amber-200">Notes</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 text-xs text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
+              onClick={() => setShowNotesPanel(false)}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+
+          {/* Scrollable notes list */}
+          <div className="flex-1 overflow-y-auto">
+            {recentNotes.length === 0 ? (
+              <p className="text-xs text-amber-700 dark:text-amber-300 py-8 text-center">No notes yet</p>
+            ) : (
+              <div className="p-2 space-y-2">
+                {recentNotes.map((note) => (
+                  <div
+                    key={note.id}
+                    className={cn(
+                      'p-2 rounded-md border text-xs',
+                      note.is_completed
+                        ? 'bg-amber-100/50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800 line-through opacity-60'
+                        : 'bg-white dark:bg-amber-900/50 border-amber-200 dark:border-amber-700'
+                    )}
+                  >
+                    <p className="whitespace-pre-wrap text-amber-900 dark:text-amber-100">{note.content}</p>
+                    <div className="flex items-center gap-2 mt-1 text-amber-600 dark:text-amber-400">
+                      <span>{format(new Date(note.created_at), 'MMM d')}</span>
+                      {note.due_date && (
+                        <span className="text-orange-600 dark:text-orange-400 font-medium">
+                          Due {format(new Date(note.due_date), 'MMM d')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Chat-bar style input with due date toggle */}
+          <div className="p-2 border-t border-amber-200 dark:border-amber-800 bg-amber-100/50 dark:bg-amber-900/50">
+            {/* Due date picker row */}
+            {showDueDatePicker && (
+              <div className="mb-2 p-2 rounded-md bg-white dark:bg-amber-950 border border-amber-200 dark:border-amber-700">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-amber-700 dark:text-amber-300">Set reminder</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 px-1 text-xs"
+                    onClick={() => {
+                      setQuickNoteDueDate(undefined)
+                      setShowDueDatePicker(false)
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+                <Calendar
+                  mode="single"
+                  selected={quickNoteDueDate}
+                  onSelect={(date) => {
+                    setQuickNoteDueDate(date)
+                  }}
+                  className="rounded-md border-0 p-0"
+                  classNames={{
+                    months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                    month: "space-y-2",
+                    caption: "flex justify-center pt-1 relative items-center text-xs",
+                    caption_label: "text-xs font-medium",
+                    nav: "space-x-1 flex items-center",
+                    nav_button: "h-6 w-6 bg-transparent p-0 opacity-50 hover:opacity-100",
+                    table: "w-full border-collapse space-y-1",
+                    head_row: "flex",
+                    head_cell: "text-muted-foreground rounded-md w-7 font-normal text-[0.7rem]",
+                    row: "flex w-full mt-1",
+                    cell: "text-center text-xs p-0 relative",
+                    day: "h-7 w-7 p-0 font-normal text-xs hover:bg-amber-100 dark:hover:bg-amber-800 rounded-md",
+                    day_selected: "bg-amber-500 text-white hover:bg-amber-600",
+                    day_today: "bg-amber-100 dark:bg-amber-900",
+                    day_outside: "opacity-50",
+                  }}
+                />
+              </div>
+            )}
+
+            <div className="flex gap-2 items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-8 px-2 shrink-0",
+                  quickNoteDueDate
+                    ? "text-orange-600 bg-orange-100 dark:bg-orange-900/50"
+                    : "text-amber-600 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-800"
+                )}
+                onClick={() => setShowDueDatePicker(!showDueDatePicker)}
+                title={quickNoteDueDate ? `Due: ${format(quickNoteDueDate, 'MMM d')}` : 'Add reminder'}
+              >
+                <Clock className="h-3.5 w-3.5" />
+                {quickNoteDueDate && (
+                  <span className="ml-1 text-xs">{format(quickNoteDueDate, 'MMM d')}</span>
+                )}
+              </Button>
+              <Input
+                value={quickNoteInput}
+                onChange={(e) => setQuickNoteInput(e.target.value)}
+                placeholder="Add a note..."
+                className="flex-1 h-8 text-xs bg-white dark:bg-amber-950 border-amber-200 dark:border-amber-700"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleQuickNote()
+                  }
+                }}
+              />
+              <Button
+                size="sm"
+                className="h-8 px-3 bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={handleQuickNote}
+                disabled={!quickNoteInput.trim() || isAddingQuickNote}
+              >
+                {isAddingQuickNote ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Send className="h-3 w-3" />
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-4">
-          {/* Contact Info - Editable */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Contact Info
-              </h3>
-              {isUpdatingInfo && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-            </div>
-            <div className="space-y-2 text-sm">
-              {/* Name field */}
-              <div className="flex items-center gap-2 group">
-                <User className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                {editingField === 'name' ? (
-                  <div className="flex-1 flex items-center gap-1">
-                    <Input
-                      value={localName}
-                      onChange={(e) => setLocalName(e.target.value)}
-                      className="h-7 text-sm"
-                      placeholder="Name"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveField('name')
-                        if (e.key === 'Escape') handleCancelEdit('name')
-                      }}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => handleSaveField('name')}
-                      disabled={isUpdatingInfo}
-                    >
-                      <Check className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => handleCancelEdit('name')}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex-1 flex items-center justify-between">
-                    <span className="truncate">{localName || 'No name'}</span>
-                    <button
-                      onClick={() => setEditingField('name')}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded"
-                    >
-                      <Pencil className="h-3 w-3 text-muted-foreground" />
-                    </button>
-                  </div>
-                )}
+
+          {/* Lead Background - Form Responses */}
+          {formResponses.length > 0 && (
+            <>
+              <div className="space-y-3">
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Lead Background
+                </h3>
+                <div className="space-y-2">
+                  {formResponses.slice(0, 5).map(([key, value]) => (
+                    <div key={key} className="text-xs">
+                      <span className="text-muted-foreground capitalize block">
+                        {key.replace(/_/g, ' ')}
+                      </span>
+                      <span className="font-medium">
+                        {String(value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
+              <Separator />
+            </>
+          )}
 
-              {/* Phone field */}
-              <div className="flex items-center gap-2 group">
-                <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                {editingField === 'phone' ? (
-                  <div className="flex-1 flex items-center gap-1">
-                    <Input
-                      value={localPhone}
-                      onChange={(e) => setLocalPhone(e.target.value)}
-                      className="h-7 text-sm"
-                      placeholder="Phone"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveField('phone')
-                        if (e.key === 'Escape') handleCancelEdit('phone')
-                      }}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => handleSaveField('phone')}
-                      disabled={isUpdatingInfo}
-                    >
-                      <Check className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => handleCancelEdit('phone')}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex-1 flex items-center justify-between">
-                    <span>{localPhone}</span>
-                    <button
-                      onClick={() => setEditingField('phone')}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded"
-                    >
-                      <Pencil className="h-3 w-3 text-muted-foreground" />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Email field */}
-              <div className="flex items-center gap-2 group">
-                <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                {editingField === 'email' ? (
-                  <div className="flex-1 flex items-center gap-1">
-                    <Input
-                      value={localEmail}
-                      onChange={(e) => setLocalEmail(e.target.value)}
-                      className="h-7 text-sm"
-                      placeholder="Email"
-                      type="email"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveField('email')
-                        if (e.key === 'Escape') handleCancelEdit('email')
-                      }}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => handleSaveField('email')}
-                      disabled={isUpdatingInfo}
-                    >
-                      <Check className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => handleCancelEdit('email')}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex-1 flex items-center justify-between">
-                    <span className="truncate">{localEmail || 'No email'}</span>
-                    <button
-                      onClick={() => setEditingField('email')}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded"
-                    >
-                      <Pencil className="h-3 w-3 text-muted-foreground" />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Created date - not editable */}
-              <div className="text-sm text-muted-foreground">
-                Added {contact.created_at ? format(new Date(contact.created_at), 'MMM d, yyyy') : 'Unknown'}
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Conversation Status */}
-          <div className="space-y-2">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Conversation
-            </h3>
-            <Badge
-              variant="outline"
-              className={cn(
-                'text-xs',
-                isActive ? 'bg-emerald-500/20 text-emerald-600 border-emerald-500/30' : ''
-              )}
-            >
-              {isActive ? 'Active' : 'Closed'}
-            </Badge>
-            <div className="text-xs text-muted-foreground mt-1">
-              {lastActivity
-                ? `Last active: ${formatDistanceToNow(new Date(lastActivity), { addSuffix: false })} ago`
-                : 'No activity'}
-              {' • '}{messagesCount} messages
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Lead Status */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Lead Status
-              </h3>
-              {isUpdatingStatus && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-            </div>
-            <Select
-              value={localStatus}
-              onValueChange={(value) => handleStatusChange(value as LeadStatus)}
-              disabled={isUpdatingStatus}
-            >
-              <SelectTrigger
-                className="w-full h-8 text-xs"
-                style={{
-                  backgroundColor: statusConfig.bgColor,
-                  color: statusConfig.color,
-                  borderColor: statusConfig.color,
-                }}
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LEAD_STATUSES.map((status) => {
-                  const config = LEAD_STATUS_CONFIG[status]
-                  return (
-                    <SelectItem key={status} value={status} className="text-xs">
-                      <span
-                        className="inline-block w-2 h-2 rounded-full mr-2"
-                        style={{ backgroundColor: config.color }}
-                      />
-                      {config.label}
-                    </SelectItem>
-                  )
-                })}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Separator />
 
           {/* ARI Score - shows breakdown if available, falls back to manual slider */}
           <div className="space-y-2">
@@ -732,63 +874,27 @@ export function InfoSidebar({
 
           {teamMembers.length > 0 && <Separator />}
 
-          {/* Tags */}
+          {/* Tags - Display only */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Tags
-              </h3>
-              {isUpdatingTags && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-            </div>
-            {contactTags.length > 0 ? (
-              <div className="space-y-2">
-                {contactTags.map((tag) => (
-                  <label
-                    key={tag}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <Checkbox
-                      checked={localTags.includes(tag)}
-                      onCheckedChange={() => handleToggleTag(tag)}
-                      disabled={isUpdatingTags}
-                    />
-                    <Badge variant={localTags.includes(tag) ? 'default' : 'secondary'} className="text-xs">
-                      <Tag className="mr-1 h-3 w-3" />
-                      {tag}
-                    </Badge>
-                  </label>
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Tags
+            </h3>
+            {localTags.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {localTags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    <Tag className="mr-1 h-3 w-3" />
+                    {tag}
+                  </Badge>
                 ))}
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">
-                No tags configured. Add tags in Settings.
+                No tags
               </p>
             )}
           </div>
 
-          {/* Form Responses */}
-          {formResponses.length > 0 && (
-            <>
-              <Separator />
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Form Responses
-                </h3>
-                <div className="space-y-2">
-                  {formResponses.map(([key, value]) => (
-                    <div key={key} className="flex justify-between gap-2 text-xs">
-                      <span className="text-muted-foreground capitalize truncate">
-                        {key.replace(/_/g, ' ')}
-                      </span>
-                      <span className="font-medium text-right truncate max-w-[120px]">
-                        {String(value)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
         </div>
       </ScrollArea>
 
@@ -860,6 +966,208 @@ export function InfoSidebar({
               Save
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Merge Dialog - Two Step Process */}
+      <Dialog
+        open={isMergeDialogOpen}
+        onOpenChange={(open) => {
+          setIsMergeDialogOpen(open)
+          if (!open) {
+            setSelectedMergeTarget(null)
+            setMergeStep('select')
+            setMergeSelections({})
+          }
+        }}
+      >
+        <DialogContent className={cn(mergeStep === 'compare' && 'max-w-2xl')}>
+          {mergeStep === 'select' ? (
+            <>
+              {/* Step 1: Select contact */}
+              <DialogHeader>
+                <DialogTitle>Merge Contact</DialogTitle>
+                <DialogDescription>
+                  Select another contact to merge with {contact.name || contact.phone}.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                {mergeableContacts.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No other contacts available to merge with.
+                  </p>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {mergeableContacts.map((c) => (
+                      <div
+                        key={c.id}
+                        className={cn(
+                          'p-3 rounded-lg border cursor-pointer transition-colors',
+                          selectedMergeTarget === c.id
+                            ? 'border-primary bg-primary/5'
+                            : 'hover:bg-muted/50'
+                        )}
+                        onClick={() => setSelectedMergeTarget(c.id)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className={getAvatarColor(c.phone)}>
+                              {getInitials(c.name, c.phone)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {c.name || c.phone}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {c.phone}
+                              {c.email && ` • ${c.email}`}
+                            </p>
+                          </div>
+                          {selectedMergeTarget === c.id && (
+                            <Check className="h-4 w-4 text-primary" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsMergeDialogOpen(false)
+                    setSelectedMergeTarget(null)
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleProceedToCompare}
+                  disabled={!selectedMergeTarget}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              {/* Step 2: Compare and select fields */}
+              <DialogHeader>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setMergeStep('select')}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <div>
+                    <DialogTitle>Compare & Merge</DialogTitle>
+                    <DialogDescription>
+                      Select which values to keep for the merged contact.
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="py-4">
+                {/* Header row */}
+                <div className="grid grid-cols-3 gap-4 mb-4 pb-2 border-b">
+                  <div className="text-xs font-medium text-muted-foreground uppercase">Field</div>
+                  <div className="text-center">
+                    <Badge variant="default" className="text-xs">Keep</Badge>
+                    <p className="text-xs text-muted-foreground mt-1 truncate">
+                      {contact.name || contact.phone}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <Badge variant="outline" className="text-xs">
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Delete
+                    </Badge>
+                    <p className="text-xs text-muted-foreground mt-1 truncate">
+                      {targetContact?.name || targetContact?.phone}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Field comparison rows */}
+                <div className="space-y-3">
+                  {mergeFields.map((field) => {
+                    const currentValue = String(contact[field.key as keyof Contact] || '-')
+                    const targetValue = String(targetContact?.[field.key as keyof Contact] || '-')
+                    const selection = mergeSelections[field.key] || 'current'
+
+                    return (
+                      <div key={field.key} className="grid grid-cols-3 gap-4 items-center">
+                        <div className="text-sm font-medium">{field.label}</div>
+                        <button
+                          className={cn(
+                            'p-2 rounded-lg border text-sm text-center transition-all',
+                            selection === 'current'
+                              ? 'border-primary bg-primary/10 ring-2 ring-primary/20'
+                              : 'border-muted hover:border-muted-foreground/50'
+                          )}
+                          onClick={() => setMergeSelections(prev => ({
+                            ...prev,
+                            [field.key]: 'current'
+                          }))}
+                        >
+                          <span className="truncate block">{currentValue}</span>
+                        </button>
+                        <button
+                          className={cn(
+                            'p-2 rounded-lg border text-sm text-center transition-all',
+                            selection === 'target'
+                              ? 'border-primary bg-primary/10 ring-2 ring-primary/20'
+                              : 'border-muted hover:border-muted-foreground/50'
+                          )}
+                          onClick={() => setMergeSelections(prev => ({
+                            ...prev,
+                            [field.key]: 'target'
+                          }))}
+                        >
+                          <span className="truncate block">{targetValue}</span>
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Warning */}
+                <div className="mt-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                  <p className="text-xs text-destructive">
+                    <strong>Warning:</strong> The contact &quot;{targetContact?.name || targetContact?.phone}&quot; will be deleted after merge. This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setMergeStep('select')}
+                >
+                  Back
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleMerge}
+                  disabled={isMerging}
+                >
+                  {isMerging ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <GitMerge className="h-4 w-4 mr-2" />
+                  )}
+                  Merge & Delete
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>

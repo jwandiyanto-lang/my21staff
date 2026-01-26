@@ -24,7 +24,25 @@ import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import { MessageBubble } from './message-bubble'
 import { DateSeparator } from './date-separator'
 import { ComposeInput } from './compose-input'
-import { Bot, User, Loader2 } from 'lucide-react'
+import { Bot, User, Loader2, PanelRight, PanelRightClose } from 'lucide-react'
+import { isDevMode, MOCK_MESSAGES } from '@/lib/mock-data'
+
+// Format mock messages for dev mode
+const getMockMessagesForConversation = (conversationId: string) => {
+  return MOCK_MESSAGES
+    .filter((m) => m.conversation_id === conversationId)
+    .map((m) => ({
+      _id: m.id,
+      conversation_id: m.conversation_id,
+      workspace_id: m.workspace_id,
+      direction: m.direction,
+      sender_type: m.sender_type,
+      sender_id: m.sender_id,
+      content: m.content,
+      message_type: m.message_type,
+      created_at: new Date(m.created_at!).getTime(),
+    }))
+}
 
 interface Contact {
   name?: string
@@ -39,6 +57,8 @@ interface MessageThreadProps {
   contact: Contact
   conversationStatus?: string
   onStatusChange?: () => void
+  showInfoSidebar?: boolean
+  onToggleSidebar?: () => void
 }
 
 export function MessageThread({
@@ -47,15 +67,33 @@ export function MessageThread({
   contact,
   conversationStatus = 'open',
   onStatusChange,
+  showInfoSidebar = true,
+  onToggleSidebar,
 }: MessageThreadProps) {
-  const messages = useQuery(api.messages.listByConversationAsc, {
-    conversation_id: conversationId,
-    workspace_id: workspaceId,
-  })
+  // Skip Convex query in dev mode - use mock messages
+  const convexMessages = useQuery(
+    api.messages.listByConversationAsc,
+    isDevMode() ? 'skip' : {
+      conversation_id: conversationId,
+      workspace_id: workspaceId,
+    }
+  )
+  const messages = isDevMode() ? getMockMessagesForConversation(conversationId) : convexMessages
 
   // Handover toggle state
   const [isToggling, setIsToggling] = useState(false)
   const isAiActive = conversationStatus !== 'handover'
+
+  // Handle reply to message
+  const handleReply = (message: any) => {
+    // In dev mode, just log
+    if (isDevMode()) {
+      console.log('Reply to message:', message)
+      return
+    }
+    // In production, would scroll to compose and populate with reply context
+    console.log('Reply to message:', message)
+  }
 
   // Handle AI/Human handover toggle
   const handleHandoverToggle = async () => {
@@ -160,17 +198,33 @@ export function MessageThread({
           )}
           {isAiActive ? "ARI Active" : "Manual"}
         </Button>
+        {/* Toggle info sidebar */}
+        {onToggleSidebar && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleSidebar}
+            className="h-8 w-8 shrink-0"
+            title={showInfoSidebar ? 'Hide contact info' : 'Show contact info'}
+          >
+            {showInfoSidebar ? (
+              <PanelRightClose className="h-4 w-4" />
+            ) : (
+              <PanelRight className="h-4 w-4" />
+            )}
+          </Button>
+        )}
       </div>
 
       {/* Messages area */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto bg-muted/30 p-4"
+        className="flex-1 overflow-y-auto bg-muted/30 py-4"
       >
         {!messages ? (
           // Loading skeleton
-          <div className="space-y-4">
+          <div className="space-y-4 px-4">
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className={i % 2 === 0 ? 'flex justify-end' : 'flex justify-start'}>
                 <Skeleton className="h-16 w-[70%] rounded-lg" />
@@ -183,17 +237,19 @@ export function MessageThread({
             <p className="text-muted-foreground text-sm">No messages yet</p>
           </div>
         ) : (
-          // Render messages grouped by date
-          <div className="flex flex-col gap-3">
-            {Array.from(groupedMessages.entries()).map(([date, msgs]) => (
-              <div key={date} className="space-y-2">
-                <DateSeparator date={date} />
-                {msgs.map((message) => (
-                  <MessageBubble key={message._id} message={message} />
-                ))}
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
+          // Render messages grouped by date - max width container for better readability
+          <div className="max-w-3xl mx-auto w-full px-6">
+            <div className="flex flex-col gap-3">
+              {Array.from(groupedMessages.entries()).map(([date, msgs]) => (
+                <div key={date} className="space-y-2">
+                  <DateSeparator date={date} />
+                  {msgs.map((message) => (
+                    <MessageBubble key={message._id} message={message} onReply={handleReply} />
+                  ))}
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
         )}
       </div>

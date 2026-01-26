@@ -68,7 +68,7 @@ export function ConversationList({
 
   return (
     <ScrollArea className="flex-1">
-      <div className="divide-y">
+      <div>
         {conversations.map((conversation) => {
           const contact = conversation.contact
           if (!contact) return null
@@ -81,44 +81,59 @@ export function ConversationList({
             <button
               key={conversation._id}
               onClick={() => onSelect(conversation._id)}
-              className={`w-full p-4 text-left hover:bg-muted/50 transition-colors ${
+              className={`w-full pl-4 pr-12 py-4 text-left hover:bg-muted/50 transition-colors border-b border-border/50 ${
                 selectedId === conversation._id ? 'bg-muted' : ''
               }`}
             >
-              <div className="flex items-start gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="text-sm">
+              <div className="flex gap-3 pr-6">
+                {/* Avatar */}
+                <Avatar className="h-12 w-12 shrink-0">
+                  <AvatarFallback
+                    className="text-base font-medium"
+                    style={{ backgroundColor: statusConfig.bgColor, color: statusConfig.color }}
+                  >
                     {getInitials(contact.name || contact.kapso_name, contact.phone)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium truncate">
+
+                {/* Content */}
+                <div className="flex-1 min-w-0 overflow-hidden pr-2">
+                  {/* Row 1: Name + Timestamp */}
+                  <div className="flex items-start justify-between gap-8 mb-1">
+                    <span className="font-semibold text-[15px] truncate block max-w-[50%]">
                       {displayName}
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-2 h-2 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: statusConfig.color }}
-                        title={statusConfig.label}
-                      />
-                      {conversation.unread_count > 0 && (
-                        <Badge variant="default" className="h-5 px-1.5 text-xs">
-                          {conversation.unread_count}
-                        </Badge>
-                      )}
-                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {conversation.last_message_at
+                        ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: false })
+                        : ''}
+                    </span>
                   </div>
-                  <p className="text-sm text-muted-foreground truncate mt-0.5">
-                    {conversation.last_message_preview || 'No messages yet'}
-                  </p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">
-                    {conversation.last_message_at
-                      ? formatDistanceToNow(new Date(conversation.last_message_at), {
-                          addSuffix: true,
-                        })
-                      : 'Never'}
-                  </p>
+
+                  {/* Row 2: Message preview + Status/Unread */}
+                  <div className="flex items-center gap-4 mb-1.5">
+                    <p className="text-sm text-muted-foreground truncate block flex-1 min-w-0 max-w-[55%]">
+                      {conversation.last_message_preview || 'No messages yet'}
+                    </p>
+                    {conversation.unread_count > 0 && (
+                      <Badge variant="default" className="h-5 px-1.5 text-xs shrink-0">
+                        {conversation.unread_count}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Row 3: Status tag */}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-xs px-2 py-0.5 rounded"
+                      style={{
+                        color: statusConfig.color,
+                        backgroundColor: statusConfig.bgColor,
+                      }}
+                    >
+                      {statusConfig.label}
+                    </span>
+                  </div>
                 </div>
               </div>
             </button>
