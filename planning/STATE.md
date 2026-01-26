@@ -11,16 +11,16 @@ See: planning/PROJECT.md (updated 2026-01-25)
 
 Milestone: v3.3 Go Live
 Phase: 4 (Bot Workflow) — IN PROGRESS
-Plan: 04-01-PLAN.md executed (1 of 6 complete)
-Status: Greeting state awareness added to Mouth system prompt
-Last activity: 2026-01-26 — Completed 04-01-PLAN.md
+Plan: 04-01, 04-02, 04-03 executed (3 of 6 complete)
+Status: Bot context system complete with state awareness, document collection, routing, and FAQ
+Last activity: 2026-01-26 — Completed 04-03-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (207 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (209 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 207
+- Total plans completed: 209
 - Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
@@ -47,7 +47,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 2.1 UI Documentation | Document UI/buttons | N/A (inserted) | ✓ Complete |
 | 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
 | 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | ✓ Complete |
-| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | In progress (1/6 complete) |
+| 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | In progress (3/6 complete) |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | Not started |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
 | 7. UI Verification | E2E testing | 5 (UI-01 to 05) | Not started |
@@ -106,6 +106,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - QualificationContext documents structure without runtime validation (uses v.any())
 - State-specific instructions appended to base prompt for adaptive behavior
 - Greeting instructions ask ONE thing at a time for natural conversation flow
+- FAQ knowledge embedded directly in prompts rather than separate knowledge base
+- Routing offers Community (free) or Consultation (1-on-1 with human) based on readiness
+- Document collection: passport → CV → english_test → transcript (one at a time)
 
 **Phase 3 Issues (All Resolved):**
 - ✓ Workspace ID mismatch - actually correct, ariConfig linked to Eagle workspace
@@ -118,15 +121,26 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed 04-01-PLAN.md (Greeting state awareness)
-Resume: Continue Phase 4 with 04-02-PLAN.md (Document collection state)
+Stopped at: Completed 04-01, 04-02, 04-03 (Bot context system complete)
+Resume: Continue Phase 4 with 04-04-PLAN.md (Wire Brain to update state)
 
-**Phase 4 Progress (IN PROGRESS — 1/6 complete):**
+**Phase 4 Progress (IN PROGRESS — 3/6 complete):**
 - 04-01 ✓ Greeting State Awareness
   - Added QualificationContext interface (collected, documents, routing)
   - Added buildGreetingInstructions helper function
   - Enhanced buildMouthSystemPrompt with state and context parameters
   - SUMMARY: planning/phases/04-bot-workflow/04-01-SUMMARY.md
+- 04-02 ✓ Document Collection State
+  - Added buildQualifyingInstructions helper (asks documents one at a time)
+  - Added formatCollectedData helper (shows what's been collected)
+  - Enhanced switch statement with "qualifying" state case
+  - SUMMARY: planning/phases/04-bot-workflow/04-02-SUMMARY.md
+- 04-03 ✓ Routing & FAQ Context
+  - Added buildRoutingInstructions helper (Community vs Consultation)
+  - Added buildEagleFAQ helper (services, destinations, pricing deflection)
+  - Enhanced switch statement with "routing" state case
+  - FAQ embedded in all Mouth prompts
+  - SUMMARY: planning/phases/04-bot-workflow/04-03-SUMMARY.md
 
 **Phase 3.1 Progress (COMPLETE):**
 - 03.1-01 ✓ Inbox Enhancement - Profile sidebar, handover toggle, merge button
@@ -154,4 +168,4 @@ Resume: Continue Phase 4 with 04-02-PLAN.md (Document collection state)
 - Response time: < 3 seconds
 
 ---
-*Last updated: 2026-01-26 — Phase 4 in progress (1/6 complete)*
+*Last updated: 2026-01-26 — Phase 4 in progress (3/6 complete)*
