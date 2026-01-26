@@ -77,7 +77,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
     cell: ({ row }) => {
       const contact = row.original
       const status = row.getValue('lead_status') as LeadStatus
-      const config = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.prospect
+      const config = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.new || { label: 'Unknown', color: '#6B7280', bgColor: '#F3F4F6' }
       const isDefaultStatus = status === 'prospect'
 
       if (!onStatusChange) {

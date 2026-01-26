@@ -75,7 +75,7 @@ export function ConversationList({
 
           const displayName = contact.name || contact.kapso_name || contact.phone
           const status = (contact.lead_status || 'prospect') as LeadStatus
-          const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.prospect
+          const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.new || { label: 'Unknown', color: '#6B7280', bgColor: '#F3F4F6' }
 
           return (
             <button

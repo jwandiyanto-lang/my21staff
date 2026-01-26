@@ -609,7 +609,7 @@ export function ContactDetailSheet({
     return colors[Math.abs(hash) % colors.length]
   }
 
-  const statusConfig = LEAD_STATUS_CONFIG[localStatus] || LEAD_STATUS_CONFIG.prospect
+  const statusConfig = LEAD_STATUS_CONFIG[localStatus] || LEAD_STATUS_CONFIG.new || { label: 'Unknown', color: '#6B7280', bgColor: '#F3F4F6' }
 
   const openWhatsApp = () => {
     const phone = contact.phone.replace(/\D/g, '')

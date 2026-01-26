@@ -149,7 +149,7 @@ export function InfoSidebar({
     setLocalAssignedTo(assignedTo || null)
   }, [assignedTo])
 
-  const statusConfig = LEAD_STATUS_CONFIG[localStatus] || LEAD_STATUS_CONFIG.prospect
+  const statusConfig = LEAD_STATUS_CONFIG[localStatus] || LEAD_STATUS_CONFIG.new || { label: 'Unknown', color: '#6B7280', bgColor: '#F3F4F6' }
 
   // Debounced score update
   const debouncedScoreUpdate = useCallback(

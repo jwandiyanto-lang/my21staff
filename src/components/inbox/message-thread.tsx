@@ -108,7 +108,7 @@ export function MessageThread({
 
   const displayName = contact.name || contact.kapso_name || contact.phone || 'Unknown'
   const status = (contact.lead_status || 'prospect') as LeadStatus
-  const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.prospect
+  const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.new || { label: 'Unknown', color: '#6B7280', bgColor: '#F3F4F6' }
 
   return (
     <div className="flex flex-col h-full">
