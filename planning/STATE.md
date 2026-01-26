@@ -49,8 +49,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | ✓ Complete |
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | ✓ Complete |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | ✓ Complete |
-| 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
-| 7. UI Verification | E2E testing | 5 (UI-01 to 05) | Not started |
+| 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | SKIPPED |
+| 6. UI Polish | Smooth localhost | Derived from testing | Not started |
 
 **Coverage:** 30/30 requirements mapped (100%)
 
@@ -131,8 +131,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Phase 5 COMPLETE
-Resume: Plan and execute Phase 6 (Pricing Page)
+Stopped at: Phase 5 COMPLETE, Pricing skipped
+Resume: Plan and execute Phase 6 (UI Polish)
 
 **Phase 5 Progress (COMPLETE — 8/8):**
 - 05-01 ✓ n8n Webhook Verification - Endpoint tested, duplicate detection verified, 228 leads confirmed

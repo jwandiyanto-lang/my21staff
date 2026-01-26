@@ -21,8 +21,8 @@ Take my21staff from development to production with Eagle Overseas Education as t
 - [x] **Phase 3.1: Inbox Enhancement** - INSERTED: Profile sidebar, AI/Human handover, merge
 - [x] **Phase 4: Bot Workflow** - Eagle qualification flow
 - [x] **Phase 5: Lead Flow** - n8n to Convex production verification + configurable status stages
-- [ ] **Phase 6: Pricing Page** - Economics-based pricing update
-- [ ] **Phase 7: UI Verification** - End-to-end testing with real workflows
+- [ ] ~~**Phase 6: Pricing Page**~~ - SKIPPED (deferred to post-launch)
+- [ ] **Phase 6: UI Polish** - Smooth localhost experience (bugs, performance, visual, navigation)
 
 ## Phase Details
 
@@ -152,37 +152,24 @@ Plans:
 - [x] 05-07-PLAN.md — Settings UI for lead stage configuration (gap closure)
 - [x] 05-08-PLAN.md — Human verification of status system + CRUD endpoints (gap closure)
 
-### Phase 6: Pricing Page
+### Phase 6: Pricing Page (SKIPPED)
 
-**Goal**: Landing page pricing reflects $497 startup + $97/$297 monthly plans with staff evolution narrative
+**Status**: Deferred to post-launch. Pricing updates not blocking for Eagle pilot.
 
-**Depends on**: Nothing (independent update)
+### Phase 6: UI Polish
 
-**Requirements**: PRICE-01, PRICE-02, PRICE-03, PRICE-04
+**Goal**: Smooth, polished localhost experience — fix bugs, improve performance, add visual polish, refine navigation
 
-**Success Criteria** (what must be TRUE):
-  1. Landing page shows Startup Package at $497
-  2. Landing page shows Digital Receptionist plan at $97/mo
-  3. Landing page shows Digital Pro plan at $297/mo
-  4. Pricing copy uses "Staff Evolution" narrative from economics document
+**Depends on**: Phase 5
 
-Plans:
-- [ ] TBD during planning
-
-### Phase 7: UI Verification
-
-**Goal**: All core UI features work correctly in production with real data and mobile devices
-
-**Depends on**: Phase 4, Phase 5
-
-**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05
+**Requirements**: Derived from testing
 
 **Success Criteria** (what must be TRUE):
-  1. WhatsApp Inbox displays conversations from Kapso with correct filters
-  2. Contact Database shows leads with working status and tag filters
-  3. Dashboard stats update in real-time when new leads arrive
-  4. Settings page allows team management via Clerk
-  5. Key pages (Inbox, Contacts, Dashboard) work correctly on mobile devices
+  1. No console errors or component crashes in dev mode
+  2. Pages load instantly with proper loading states
+  3. Smooth transitions and consistent hover states
+  4. Navigation feels natural (sidebar, back button, page transitions)
+  5. All core pages work: Dashboard, Inbox, Database, Settings
 
 Plans:
 - [ ] TBD during planning
@@ -201,8 +188,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3.1 Inbox Enhancement | 1/1 | Complete | 2026-01-25 |
 | 4. Bot Workflow | 6/6 | Complete | 2026-01-26 |
 | 5. Lead Flow | 8/8 | Complete | 2026-01-26 |
-| 6. Pricing Page | 0/TBD | Not started | - |
-| 7. UI Verification | 0/TBD | Not started | - |
+| 6. Pricing Page | - | SKIPPED | - |
+| 6. UI Polish | 0/TBD | Not started | - |
 
 ---
 *Created: 2026-01-25*
