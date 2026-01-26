@@ -27,24 +27,8 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, Users, Bot, GripVertical, Palette, ChevronUp, ChevronDown } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, Users, Bot, Palette, ChevronUp, ChevronDown } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { useRef } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDistanceToNow } from 'date-fns'
@@ -104,6 +88,25 @@ interface SettingsClientProps {
   aiEnabled: boolean
 }
 
+// Color gradient for lead stages (cold blue -> warm orange -> hot red)
+const STAGE_COLORS = [
+  { color: '#3B82F6', bgColor: '#DBEAFE' }, // Blue (cold)
+  { color: '#06B6D4', bgColor: '#CFFAFE' }, // Cyan
+  { color: '#10B981', bgColor: '#D1FAE5' }, // Green
+  { color: '#F59E0B', bgColor: '#FEF3C7' }, // Amber (warm)
+  { color: '#F97316', bgColor: '#FED7AA' }, // Orange
+  { color: '#EF4444', bgColor: '#FEE2E2' }, // Red (hot)
+  { color: '#DC2626', bgColor: '#FECACA' }, // Dark red
+  { color: '#9333EA', bgColor: '#E9D5FF' }, // Purple (extra)
+]
+
+function getStageColor(index: number, total: number): { color: string; bgColor: string } {
+  if (total <= 1) return STAGE_COLORS[0]
+  // Map index to color gradient
+  const colorIndex = Math.round((index / (total - 1)) * (STAGE_COLORS.length - 1))
+  return STAGE_COLORS[Math.min(colorIndex, STAGE_COLORS.length - 1)]
+}
+
 // Default quick replies
 const DEFAULT_QUICK_REPLIES: QuickReply[] = [
   { id: '1', label: 'Greeting', text: 'Hello! Thank you for contacting us. How can we help you?' },
@@ -153,10 +156,11 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
 
   // Lead stages state
   const [leadStatuses, setLeadStatuses] = useState<LeadStatusConfig[]>([])
+  const [leadStagesEnabled, setLeadStagesEnabled] = useState(true)
   const [isLoadingStatuses, setIsLoadingStatuses] = useState(true)
   const [isSavingStatuses, setIsSavingStatuses] = useState(false)
   const [editingStatus, setEditingStatus] = useState<LeadStatusConfig | null>(null)
-  const [newStatus, setNewStatus] = useState<Partial<LeadStatusConfig>>({})
+  const [newStatusName, setNewStatusName] = useState('')
   const [isAddingStatus, setIsAddingStatus] = useState(false)
 
   const isConnected = !!workspace.kapso_phone_id && !!workspace.settings?.kapso_api_key
@@ -333,9 +337,9 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
   }
 
   const handleAddStatus = async () => {
-    if (!newStatus.label?.trim()) return
+    if (!newStatusName.trim()) return
 
-    const key = newStatus.label.trim().toLowerCase().replace(/\s+/g, '_')
+    const key = newStatusName.trim().toLowerCase().replace(/\s+/g, '_')
 
     // Check for duplicate key
     if (leadStatuses.some(s => s.key === key)) {
@@ -343,23 +347,26 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
       return
     }
 
+    // Get color based on position (will be at end of list)
+    const colors = getStageColor(leadStatuses.length, leadStatuses.length + 1)
+
     const status: LeadStatusConfig = {
       key,
-      label: newStatus.label.trim(),
-      color: newStatus.color || '#6B7280',
-      bgColor: newStatus.bgColor || '#F3F4F6',
-      temperature: newStatus.temperature || null,
+      label: newStatusName.trim(),
+      color: colors.color,
+      bgColor: colors.bgColor,
+      temperature: null,
     }
 
     await saveLeadStatuses([...leadStatuses, status])
-    setNewStatus({})
+    setNewStatusName('')
     setIsAddingStatus(false)
   }
 
   const handleUpdateStatus = async () => {
     if (!editingStatus) return
     const updated = leadStatuses.map(s =>
-      s.key === editingStatus.key ? editingStatus : s
+      s.key === editingStatus.key ? { ...s, label: editingStatus.label } : s
     )
     await saveLeadStatuses(updated)
     setEditingStatus(null)
@@ -370,7 +377,12 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
       alert('You must have at least 2 stages')
       return
     }
-    const updated = leadStatuses.filter(s => s.key !== key)
+    const filtered = leadStatuses.filter(s => s.key !== key)
+    // Recalculate colors for remaining stages
+    const updated = filtered.map((s, i) => ({
+      ...s,
+      ...getStageColor(i, filtered.length),
+    }))
     await saveLeadStatuses(updated)
   }
 
@@ -378,8 +390,13 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
     const newIndex = direction === 'up' ? index - 1 : index + 1
     if (newIndex < 0 || newIndex >= leadStatuses.length) return
 
-    const updated = [...leadStatuses]
-    ;[updated[index], updated[newIndex]] = [updated[newIndex], updated[index]]
+    const reordered = [...leadStatuses]
+    ;[reordered[index], reordered[newIndex]] = [reordered[newIndex], reordered[index]]
+    // Recalculate colors based on new positions
+    const updated = reordered.map((s, i) => ({
+      ...s,
+      ...getStageColor(i, reordered.length),
+    }))
     await saveLeadStatuses(updated)
   }
 
@@ -833,13 +850,19 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
                 <div>
                   <CardTitle className="text-lg">Lead Stages</CardTitle>
                   <CardDescription>
-                    Configure your sales pipeline stages. The AI will categorize leads based on temperature (hot/warm/cold).
+                    Organize your contacts into stages. Colors are assigned automatically (cold → hot).
                   </CardDescription>
                 </div>
-                <Button onClick={() => setIsAddingStatus(true)} disabled={isAddingStatus}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Stage
-                </Button>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="lead-stages-toggle" className="text-sm">Enable</Label>
+                    <Switch
+                      id="lead-stages-toggle"
+                      checked={leadStagesEnabled}
+                      onCheckedChange={setLeadStagesEnabled}
+                    />
+                  </div>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -847,237 +870,116 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
+              ) : !leadStagesEnabled ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Palette className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Lead stages are disabled</p>
+                  <p className="text-sm mt-1">Turn on the toggle above to use lead stages</p>
+                </div>
               ) : (
                 <>
-                  {/* Add new status form */}
-                  {isAddingStatus && (
-                    <div className="border rounded-lg p-4 space-y-3 bg-muted/50">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Stage Name</Label>
-                          <Input
-                            placeholder="e.g., Qualified Lead"
-                            value={newStatus.label || ''}
-                            onChange={(e) => setNewStatus({
-                              ...newStatus,
-                              label: e.target.value,
-                            })}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>AI Temperature</Label>
-                          <Select
-                            value={newStatus.temperature || 'none'}
-                            onValueChange={(v) => setNewStatus({
-                              ...newStatus,
-                              temperature: v === 'none' ? null : v as "hot" | "warm" | "cold",
-                            })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select temperature" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">None (manual only)</SelectItem>
-                              <SelectItem value="hot">Hot (high intent)</SelectItem>
-                              <SelectItem value="warm">Warm (medium intent)</SelectItem>
-                              <SelectItem value="cold">Cold (low intent)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Text Color</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value={newStatus.color || '#6B7280'}
-                              onChange={(e) => setNewStatus({ ...newStatus, color: e.target.value })}
-                              className="w-12 h-9 p-1"
-                            />
-                            <Input
-                              value={newStatus.color || '#6B7280'}
-                              onChange={(e) => setNewStatus({ ...newStatus, color: e.target.value })}
-                              placeholder="#6B7280"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Background Color</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value={newStatus.bgColor || '#F3F4F6'}
-                              onChange={(e) => setNewStatus({ ...newStatus, bgColor: e.target.value })}
-                              className="w-12 h-9 p-1"
-                            />
-                            <Input
-                              value={newStatus.bgColor || '#F3F4F6'}
-                              onChange={(e) => setNewStatus({ ...newStatus, bgColor: e.target.value })}
-                              placeholder="#F3F4F6"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button onClick={handleAddStatus} disabled={isSavingStatuses}>
-                          {isSavingStatuses ? 'Saving...' : 'Save'}
-                        </Button>
-                        <Button variant="outline" onClick={() => {
-                          setIsAddingStatus(false)
-                          setNewStatus({})
-                        }}>
-                          Cancel
-                        </Button>
-                      </div>
+                  {/* Add new stage - simple inline */}
+                  {isAddingStatus ? (
+                    <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
+                      <Input
+                        placeholder="Stage name..."
+                        value={newStatusName}
+                        onChange={(e) => setNewStatusName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleAddStatus()
+                          if (e.key === 'Escape') {
+                            setIsAddingStatus(false)
+                            setNewStatusName('')
+                          }
+                        }}
+                        autoFocus
+                        className="flex-1"
+                      />
+                      <Button size="sm" onClick={handleAddStatus} disabled={isSavingStatuses || !newStatusName.trim()}>
+                        Add
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => {
+                        setIsAddingStatus(false)
+                        setNewStatusName('')
+                      }}>
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => setIsAddingStatus(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Stage
+                    </Button>
                   )}
 
-                  {/* List of stages */}
-                  <div className="space-y-2">
-                    {leadStatuses.map((status, index) => (
-                      <div key={status.key} className="border rounded-lg p-4">
-                        {editingStatus?.key === status.key ? (
-                          <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label>Stage Name</Label>
-                                <Input
-                                  value={editingStatus.label}
-                                  onChange={(e) => setEditingStatus({ ...editingStatus, label: e.target.value })}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label>AI Temperature</Label>
-                                <Select
-                                  value={editingStatus.temperature || 'none'}
-                                  onValueChange={(v) => setEditingStatus({
-                                    ...editingStatus,
-                                    temperature: v === 'none' ? null : v as "hot" | "warm" | "cold",
-                                  })}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="none">None (manual only)</SelectItem>
-                                    <SelectItem value="hot">Hot (high intent)</SelectItem>
-                                    <SelectItem value="warm">Warm (medium intent)</SelectItem>
-                                    <SelectItem value="cold">Cold (low intent)</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label>Text Color</Label>
-                                <div className="flex gap-2">
-                                  <Input
-                                    type="color"
-                                    value={editingStatus.color}
-                                    onChange={(e) => setEditingStatus({ ...editingStatus, color: e.target.value })}
-                                    className="w-12 h-9 p-1"
-                                  />
-                                  <Input
-                                    value={editingStatus.color}
-                                    onChange={(e) => setEditingStatus({ ...editingStatus, color: e.target.value })}
-                                  />
-                                </div>
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Background Color</Label>
-                                <div className="flex gap-2">
-                                  <Input
-                                    type="color"
-                                    value={editingStatus.bgColor}
-                                    onChange={(e) => setEditingStatus({ ...editingStatus, bgColor: e.target.value })}
-                                    className="w-12 h-9 p-1"
-                                  />
-                                  <Input
-                                    value={editingStatus.bgColor}
-                                    onChange={(e) => setEditingStatus({ ...editingStatus, bgColor: e.target.value })}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button onClick={handleUpdateStatus} disabled={isSavingStatuses}>
-                                {isSavingStatuses ? 'Saving...' : 'Save'}
-                              </Button>
-                              <Button variant="outline" onClick={() => setEditingStatus(null)}>
-                                Cancel
-                              </Button>
-                            </div>
+                  {/* List of stages - simple list */}
+                  <div className="space-y-1">
+                    {leadStatuses.map((status, index) => {
+                      const colors = getStageColor(index, leadStatuses.length)
+                      return (
+                        <div key={status.key} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 group">
+                          {/* Reorder buttons */}
+                          <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleMoveStatus(index, 'up')}
+                              disabled={index === 0 || isSavingStatuses}
+                              className="p-0.5 hover:bg-muted rounded disabled:opacity-30"
+                            >
+                              <ChevronUp className="h-3 w-3" />
+                            </button>
+                            <button
+                              onClick={() => handleMoveStatus(index, 'down')}
+                              disabled={index === leadStatuses.length - 1 || isSavingStatuses}
+                              className="p-0.5 hover:bg-muted rounded disabled:opacity-30"
+                            >
+                              <ChevronDown className="h-3 w-3" />
+                            </button>
                           </div>
-                        ) : (
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="flex flex-col gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-5 w-5"
-                                  onClick={() => handleMoveStatus(index, 'up')}
-                                  disabled={index === 0 || isSavingStatuses}
-                                >
-                                  <ChevronUp className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-5 w-5"
-                                  onClick={() => handleMoveStatus(index, 'down')}
-                                  disabled={index === leadStatuses.length - 1 || isSavingStatuses}
-                                >
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                              </div>
-                              <Badge
-                                style={{
-                                  backgroundColor: status.bgColor,
-                                  color: status.color,
-                                  borderColor: status.color,
-                                }}
-                                className="border"
-                              >
-                                {status.label}
-                              </Badge>
-                              {status.temperature && (
-                                <span className="text-xs text-muted-foreground">
-                                  AI: {status.temperature}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => setEditingStatus(status)}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-destructive"
-                                onClick={() => handleDeleteStatus(status.key)}
-                                disabled={isSavingStatuses || leadStatuses.length <= 2}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+
+                          {/* Color indicator */}
+                          <div
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: colors.color }}
+                          />
+
+                          {/* Label - editable inline */}
+                          {editingStatus?.key === status.key ? (
+                            <Input
+                              value={editingStatus.label}
+                              onChange={(e) => setEditingStatus({ ...editingStatus, label: e.target.value })}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleUpdateStatus()
+                                if (e.key === 'Escape') setEditingStatus(null)
+                              }}
+                              onBlur={handleUpdateStatus}
+                              autoFocus
+                              className="h-7 flex-1"
+                            />
+                          ) : (
+                            <span
+                              className="flex-1 cursor-pointer hover:underline"
+                              onClick={() => setEditingStatus(status)}
+                            >
+                              {status.label}
+                            </span>
+                          )}
+
+                          {/* Delete button */}
+                          <button
+                            onClick={() => handleDeleteStatus(status.key)}
+                            disabled={isSavingStatuses || leadStatuses.length <= 2}
+                            className="p-1 opacity-0 group-hover:opacity-100 hover:text-destructive transition-all disabled:opacity-30"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )
+                    })}
                   </div>
 
-                  {leadStatuses.length === 0 && !isAddingStatus && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Palette className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No lead stages configured</p>
-                      <p className="text-sm mt-1">Click "Add Stage" to create your pipeline</p>
+                  {leadStatuses.length === 0 && (
+                    <div className="text-center py-4 text-muted-foreground text-sm">
+                      No stages yet. Add your first stage above.
                     </div>
                   )}
                 </>
