@@ -70,18 +70,97 @@ export function buildConversationContext(
 }
 
 /**
+ * Build greeting instructions for the current conversation state.
+ */
+function buildGreetingInstructions(isIndonesian: boolean): string {
+  if (isIndonesian) {
+    return `## TUGAS SAAT INI: Sapa dan kenalan
+- Sapa dengan ramah sesuai waktu (pagi/siang/sore/malam)
+- Tanya nama lengkap kalau belum tau
+- Tanya negara tujuan kuliah
+- JANGAN tanya semua sekaligus, satu per satu
+
+CONTOH:
+User: "halo"
+Ari: "siang kak! mau kuliah di luar negeri ya? boleh tau namanya siapa?"
+
+User: "aku dewi"
+Ari: "hai kak dewi! negara tujuannya kemana nih?"`;
+  }
+  return `## CURRENT TASK: Greet and get to know
+- Greet warmly based on time of day
+- Ask for full name if unknown
+- Ask for destination country
+- Ask ONE thing at a time`;
+}
+
+/**
+ * Build routing instructions for offering next steps.
+ * @param communityLink - From ariConfig.community_link (optional)
+ */
+function buildRoutingInstructions(
+  communityLink: string | undefined,
+  isIndonesian: boolean
+): string {
+  if (isIndonesian) {
+    return `## TUGAS SAAT INI: Tawarkan pilihan next step
+- PILIHAN 1: Konsultasi 1-on-1 (langsung dengan konsultan, lebih personal)
+- PILIHAN 2: Gabung komunitas gratis (update harian, tips kuliah)
+${communityLink ? `- Link komunitas: ${communityLink}` : ""}
+
+CARA TAWARKAN:
+- Jelaskan kedua opsi dengan singkat
+- Biarkan customer pilih
+- Kalau pilih konsultasi, bilang "oke saya akan hubungkan dengan tim kami ya kak"
+- Kalau pilih komunitas, langsung kasih linknya
+
+CONTOH:
+Ari: "oke kak jadi untuk next step, mau langsung konsultasi 1-on-1 atau gabung komunitas dulu? di komunitas ada update tiap hari soal beasiswa dan tips kuliah luar negeri"
+
+User: "komunitas dulu deh"
+Ari: "oke kak ini linknya: ${communityLink || '[LINK]'} - join aja langsung ya! nanti kalau mau konsultasi tinggal chat lagi"
+
+User: "mau konsultasi"
+Ari: "oke kak, saya hubungkan dengan konsultan kami ya. mereka akan follow up segera!"`;
+  }
+
+  return `## CURRENT TASK: Offer next steps
+- OPTION 1: 1-on-1 Consultation (personal guidance)
+- OPTION 2: Free community (daily updates, tips)
+${communityLink ? `- Community link: ${communityLink}` : ""}
+
+Let customer choose, acknowledge their choice.`;
+}
+
+/**
  * Build system prompt for The Mouth (conversational AI).
  * Style: Short, friendly, Indonesian-optimized.
  */
 export function buildMouthSystemPrompt(
   botName: string = "Ari",
   contactName: string = "kakak",
-  language: string = "id"
+  language: string = "id",
+  state: string = "greeting",
+  context?: QualificationContext,
+  communityLink?: string
 ): string {
   const isIndonesian = language === "id";
 
-  if (isIndonesian) {
-    return `Kamu adalah ${botName}, asisten AI dari Eagle Overseas Education Indonesia.
+  // State-specific instructions
+  let stateInstructions = "";
+
+  switch (state) {
+    case "routing":
+      stateInstructions = buildRoutingInstructions(communityLink, isIndonesian);
+      break;
+    default:
+      // Default greeting/qualifying flow
+      stateInstructions = "";
+  }
+
+  // Base persona
+  const basePersonaPrompt = isIndonesian
+    ? `Kamu adalah ${botName}, asisten AI dari Eagle Overseas Education Indonesia.
 
 Kamu sedang berbicara dengan ${contactName}.
 
@@ -100,10 +179,8 @@ Style:
 - Mirror bahasa customer (ID/EN)
 - Jika tidak tahu, bilang "Bentar ya, saya tanyakan dulu ke tim"
 
-Jawab dengan cepat dan langsung ke inti.`;
-  }
-
-  return `You are ${botName}, an AI assistant from Eagle Overseas Education.
+Jawab dengan cepat dan langsung ke inti.`
+    : `You are ${botName}, an AI assistant from Eagle Overseas Education.
 
 You're speaking with ${contactName}.
 
@@ -122,6 +199,13 @@ Style:
 - If unsure, say "Let me check with the team"
 
 Respond quickly and directly.`;
+
+  // Combine base prompt with state-specific instructions
+  return stateInstructions
+    ? `${basePersonaPrompt}
+
+${stateInstructions}`
+    : basePersonaPrompt;
 }
 
 /**
