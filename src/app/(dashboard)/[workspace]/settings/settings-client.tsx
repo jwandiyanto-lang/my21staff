@@ -32,6 +32,7 @@ import { Switch } from '@/components/ui/switch'
 import { useRef } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDistanceToNow } from 'date-fns'
+import { DEFAULT_LEAD_STATUSES } from '@/lib/lead-status'
 
 interface QuickReply {
   id: string
@@ -165,17 +166,25 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
 
   const isConnected = !!workspace.kapso_phone_id && !!workspace.settings?.kapso_api_key
 
-  // Load lead statuses on mount
+  // Load lead statuses on mount (use defaults if API fails or returns empty)
   useEffect(() => {
     const loadStatuses = async () => {
       try {
         const res = await fetch(`/api/workspaces/${workspace.id}/status-config`)
         if (res.ok) {
           const data = await res.json()
-          setLeadStatuses(data)
+          // Use defaults if API returns empty array
+          if (Array.isArray(data) && data.length > 0) {
+            setLeadStatuses(data)
+          } else {
+            setLeadStatuses(DEFAULT_LEAD_STATUSES)
+          }
+        } else {
+          setLeadStatuses(DEFAULT_LEAD_STATUSES)
         }
       } catch (error) {
         console.error('Failed to load lead statuses:', error)
+        setLeadStatuses(DEFAULT_LEAD_STATUSES)
       } finally {
         setIsLoadingStatuses(false)
       }
