@@ -11,16 +11,16 @@ See: planning/PROJECT.md (updated 2026-01-25)
 
 Milestone: v3.3 Go Live
 Phase: 4 (Bot Workflow) — IN PROGRESS
-Plan: 04-01, 04-02, 04-03, 04-05 executed (4 of 6 complete)
-Status: Bot context system complete with consultation request handling helpers
-Last activity: 2026-01-26 — Completed 04-05-PLAN.md
+Plan: 04-01, 04-02, 04-03, 04-04, 04-05 executed (5 of 6 complete)
+Status: State and context wired through processARI to Mouth, Brain's next_action triggers consultation handling
+Last activity: 2026-01-26 — Completed 04-04-PLAN.md
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (210 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (211 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 210
+- Total plans completed: 211
 - Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
@@ -34,7 +34,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.0 | 21 | 3 |
 | v3.1 | 23 | 1 |
 | v3.2 | 23 | 2 |
-| v3.3 | 8 | In progress |
+| v3.3 | 9 | In progress |
 
 ## v3.3 Roadmap Summary
 
@@ -112,6 +112,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - updateAriContext uses deep merge for nested objects (collected, documents, routing)
 - handleConsultationRequest sets minimum lead score 70 for hot consultation requests
 - flagForHuman sets unread_count: 1 to ensure inbox visibility
+- Brain changed from scheduler to direct call to enable next_action checks
+- State/context passed through processARI → Mouth for adaptive responses
 
 **Phase 3 Issues (All Resolved):**
 - ✓ Workspace ID mismatch - actually correct, ariConfig linked to Eagle workspace
@@ -124,10 +126,10 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed 04-05 (Consultation request handling helpers)
-Resume: Continue Phase 4 with 04-04-PLAN.md (Wire Brain to update state)
+Stopped at: Completed 04-04 (Wire State/Context to Mouth + Brain next_action)
+Resume: Continue Phase 4 with 04-06-PLAN.md (Wire Brain to update state)
 
-**Phase 4 Progress (IN PROGRESS — 4/6 complete):**
+**Phase 4 Progress (IN PROGRESS — 5/6 complete):**
 - 04-01 ✓ Greeting State Awareness
   - Added QualificationContext interface (collected, documents, routing)
   - Added buildGreetingInstructions helper function
@@ -144,6 +146,13 @@ Resume: Continue Phase 4 with 04-04-PLAN.md (Wire Brain to update state)
   - Enhanced switch statement with "routing" state case
   - FAQ embedded in all Mouth prompts
   - SUMMARY: planning/phases/04-bot-workflow/04-03-SUMMARY.md
+- 04-04 ✓ Wire State/Context to Mouth + Brain next_action
+  - Enhanced getAriContext to return ariState, ariContext, community_link, and IDs
+  - Updated Mouth to accept state, context, communityLink parameters
+  - Wired processARI to pass state/context to Mouth
+  - Changed Brain from scheduler to direct call to capture result
+  - Added next_action check to trigger handleConsultationRequest
+  - SUMMARY: planning/phases/04-bot-workflow/04-04-SUMMARY.md
 - 04-05 ✓ Consultation Request Handling
   - Added updateAriContext mutation for context merging
   - Added handleConsultationRequest helper function
