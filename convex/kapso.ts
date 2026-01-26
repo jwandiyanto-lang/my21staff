@@ -652,19 +652,24 @@ export const getAriContext = internalMutation({
 
     return {
       workspace: {
+        _id: workspace._id,
         meta_access_token: workspace.meta_access_token,
         kapso_phone_id: workspace.kapso_phone_id,
       },
       ariConfig: {
         bot_name: ariConfig.bot_name,
         language: ariConfig.language,
+        community_link: ariConfig.community_link,
       },
       contact: {
+        _id: contact._id,
         name: contact.name,
         kapso_name: contact.kapso_name,
         lead_score: contact.lead_score,
       },
       ariConversationId: ariConversation._id,
+      ariState: ariConversation.state,
+      ariContext: ariConversation.context,
       messageHistory: recentMessages.reverse().map((m: any) => ({
         role: m.role,
         content: m.content,
