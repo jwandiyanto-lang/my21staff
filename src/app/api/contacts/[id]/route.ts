@@ -24,6 +24,7 @@ export async function PATCH(
     // Extract allowed fields for update
     const updates: any = {}
     if (body.name !== undefined) updates.name = body.name
+    if (body.phone !== undefined) updates.phone = body.phone
     if (body.email !== undefined) updates.email = body.email
     if (body.lead_status !== undefined) updates.lead_status = body.lead_status
     if (body.lead_score !== undefined) updates.lead_score = body.lead_score
