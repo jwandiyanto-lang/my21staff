@@ -11,7 +11,7 @@
  * Uses Grok API for cost-effective analysis (~$5 per million tokens).
  */
 
-import { internalAction, internalMutation } from "../_generated/server";
+import { internalAction, internalMutation, internalQuery } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { v } from "convex/values";
 import { buildConversationContext, buildBrainSystemPrompt } from "./context";
@@ -141,11 +141,16 @@ export const analyzeConversation = internalAction({
       const totalTokens = data.usage?.total_tokens || inputTokens + outputTokens;
       const costUsd = totalTokens * (5 / 1_000_000);
 
-      // Update contact lead score
+      // Fetch workspace status config
+      const statusConfig = await ctx.runQuery(internal.ai.brain.getWorkspaceStatusConfig, {
+        workspaceId: args.workspaceId,
+      });
+
+      // Update contact lead score with mapped status
       await ctx.runMutation(internal.ai.brain.updateContactScore, {
         contactId: args.contactId,
         leadScore: analysis.lead_score,
-        leadStatus: mapTemperatureToStatus(analysis.temperature),
+        leadStatus: mapTemperatureToStatus(analysis.temperature, statusConfig),
       });
 
       // Update ariConversation state
@@ -209,16 +214,46 @@ Provide your analysis as JSON only, no markdown formatting.`;
 }
 
 /**
- * Map temperature to contact lead_status field.
+ * Map temperature to contact lead_status field using workspace config.
  */
-function mapTemperatureToStatus(temperature: "hot" | "warm" | "cold"): string {
-  switch (temperature) {
-    case "hot": return "hot";
-    case "warm": return "warm";
-    case "cold": return "cold";
-    default: return "new";
+function mapTemperatureToStatus(
+  temperature: "hot" | "warm" | "cold",
+  statusConfig: Array<{ key: string; temperature: string | null }>
+): string {
+  // Find status with matching temperature
+  const matchingStatus = statusConfig.find(s => s.temperature === temperature);
+  if (matchingStatus) {
+    return matchingStatus.key;
   }
+
+  // Fallback to temperature value directly (backwards compatible)
+  return temperature;
 }
+
+/**
+ * Get workspace status configuration (internal query for Brain).
+ *
+ * Returns the lead status config from workspace settings,
+ * or a default config if not customized.
+ */
+export const getWorkspaceStatusConfig = internalQuery({
+  args: { workspaceId: v.id("workspaces") },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace?.settings?.lead_statuses) {
+      // Default config with temperature mappings
+      return [
+        { key: "new", temperature: null },
+        { key: "cold", temperature: "cold" },
+        { key: "warm", temperature: "warm" },
+        { key: "hot", temperature: "hot" },
+        { key: "client", temperature: null },
+        { key: "lost", temperature: null },
+      ];
+    }
+    return workspace.settings.lead_statuses;
+  },
+});
 
 // ============================================
 // HELPER MUTATIONS (called by analyzeConversation)
