@@ -34,6 +34,47 @@ export const createAriConfig = mutation({
   },
 });
 
+/**
+ * Toggle ARI on/off for a workspace.
+ * Deletes ariConfig to disable, recreates to enable.
+ */
+export const toggleAri = mutation({
+  args: {
+    workspaceId: v.string(),
+    enabled: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const existingConfig = await ctx.db
+      .query("ariConfig")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspaceId as any))
+      .first();
+
+    if (args.enabled) {
+      // Enable ARI - create config if not exists
+      if (existingConfig) {
+        return { enabled: true, message: "ARI already enabled" };
+      }
+      const now = Date.now();
+      await ctx.db.insert("ariConfig", {
+        workspace_id: args.workspaceId as any,
+        bot_name: "Ari",
+        greeting_style: "friendly",
+        language: "id",
+        created_at: now,
+        updated_at: now,
+      });
+      return { enabled: true, message: "ARI enabled" };
+    } else {
+      // Disable ARI - delete config if exists
+      if (!existingConfig) {
+        return { enabled: false, message: "ARI already disabled" };
+      }
+      await ctx.db.delete(existingConfig._id);
+      return { enabled: false, message: "ARI disabled" };
+    }
+  },
+});
+
 // ============================================
 // DIAGNOSTIC QUERIES
 // ============================================
@@ -551,6 +592,53 @@ export const cleanupTestData = mutation({
       success: true,
       deleted,
       message: `Cleaned up test data: ${deleted.contacts} contacts, ${deleted.conversations} conversations, ${deleted.messages} messages`,
+    };
+  },
+});
+
+/**
+ * Verify contact data by phone number.
+ * Used for testing n8n webhook lead creation.
+ *
+ * @param phone - Phone number to look up (normalized format)
+ * @returns Contact data or error message
+ */
+export const verifyContactByPhone = query({
+  args: {
+    phone: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Find contact by phone across all workspaces
+    const contacts = await ctx.db
+      .query("contacts")
+      .filter((q) => q.eq(q.field("phone"), args.phone))
+      .collect();
+
+    if (contacts.length === 0) {
+      return { found: false, message: `No contact found with phone ${args.phone}` };
+    }
+
+    const contact = contacts[0];
+    const workspace = await ctx.db.get(contact.workspace_id);
+
+    return {
+      found: true,
+      contact: {
+        _id: contact._id,
+        workspace_id: contact.workspace_id,
+        workspace_name: workspace?.name || "Unknown",
+        name: contact.name,
+        phone: contact.phone,
+        phone_normalized: contact.phone_normalized,
+        email: contact.email,
+        lead_score: contact.lead_score,
+        lead_status: contact.lead_status,
+        tags: contact.tags,
+        source: contact.source,
+        metadata: contact.metadata,
+        created_at: contact.created_at,
+        updated_at: contact.updated_at,
+      },
     };
   },
 });
