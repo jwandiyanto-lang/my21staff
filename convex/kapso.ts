@@ -12,7 +12,7 @@
  */
 
 // @ts-nocheck - Schema types mismatch with generated Convex types
-import { mutation, internalMutation, internalAction } from "./_generated/server";
+import { mutation, internalMutation, internalAction, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import type {
@@ -781,6 +781,45 @@ export const logOutboundMessage = internalMutation({
       last_message_at: now,
       last_message_preview: args.content.substring(0, 200),
       updated_at: now,
+    });
+  },
+});
+
+/**
+ * Update ariConversation context with new data.
+ * Merges new data with existing context.
+ */
+export const updateAriContext = internalMutation({
+  args: {
+    ariConversationId: v.id("ariConversations"),
+    updates: v.any(), // Partial QualificationContext
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.ariConversationId);
+    if (!conversation) return;
+
+    const existingContext = conversation.context || {};
+    const mergedContext = {
+      ...existingContext,
+      ...args.updates,
+      // Deep merge for nested objects
+      collected: {
+        ...(existingContext.collected || {}),
+        ...(args.updates.collected || {}),
+      },
+      documents: {
+        ...(existingContext.documents || {}),
+        ...(args.updates.documents || {}),
+      },
+      routing: {
+        ...(existingContext.routing || {}),
+        ...(args.updates.routing || {}),
+      },
+    };
+
+    await ctx.db.patch(args.ariConversationId, {
+      context: mergedContext,
+      updated_at: Date.now(),
     });
   },
 });
