@@ -45,3 +45,34 @@ export async function PATCH(
     )
   }
 }
+
+/**
+ * DELETE /api/contacts/[id] - Delete a contact
+ * Cascades to: conversations, messages, contact notes
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const { id } = await params
+
+    // Delete contact and related data from Convex
+    await convex.mutation(api.mutations.deleteContactCascade, {
+      contact_id: id,
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('DELETE /api/contacts/[id] error:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete contact' },
+      { status: 500 }
+    )
+  }
+}
