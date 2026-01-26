@@ -3,7 +3,8 @@ import { auth } from '@clerk/nextjs/server'
 import { ConvexHttpClient } from 'convex/browser'
 import { api } from 'convex/_generated/api'
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+const convex = isDevMode ? null : new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 /**
  * PATCH /api/contacts/[id] - Update a contact
@@ -12,9 +13,12 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Dev mode: skip auth
+  if (!isDevMode) {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
   }
 
   try {
@@ -31,8 +35,13 @@ export async function PATCH(
     if (body.tags !== undefined) updates.tags = body.tags
     if (body.assigned_to !== undefined) updates.assigned_to = body.assigned_to
 
+    // Dev mode: return mock success
+    if (isDevMode) {
+      return NextResponse.json({ contact: { _id: id, ...updates } })
+    }
+
     // Update contact in Convex - use mutations.updateContactInternal which supports all fields
-    const updatedContact = await convex.mutation(api.mutations.updateContactInternal, {
+    const updatedContact = await convex!.mutation(api.mutations.updateContactInternal, {
       contact_id: id,
       updates,
     })
@@ -55,16 +64,24 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Dev mode: skip auth
+  if (!isDevMode) {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
   }
 
   try {
     const { id } = await params
 
+    // Dev mode: return mock success
+    if (isDevMode) {
+      return NextResponse.json({ success: true })
+    }
+
     // Delete contact and related data from Convex
-    await convex.mutation(api.mutations.deleteContactCascade, {
+    await convex!.mutation(api.mutations.deleteContactCascade, {
       contact_id: id,
     })
 
