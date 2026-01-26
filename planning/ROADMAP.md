@@ -20,7 +20,7 @@ Take my21staff from development to production with Eagle Overseas Education as t
 - [x] **Phase 3: AI System** - Dual-bot architecture (Mouth + Brain)
 - [x] **Phase 3.1: Inbox Enhancement** - INSERTED: Profile sidebar, AI/Human handover, merge
 - [x] **Phase 4: Bot Workflow** - Eagle qualification flow
-- [x] **Phase 5: Lead Flow** - n8n to Convex production verification (gaps: status mismatch, configurable stages)
+- [ ] **Phase 5: Lead Flow** - n8n to Convex production verification + configurable status stages
 - [ ] **Phase 6: Pricing Page** - Economics-based pricing update
 - [ ] **Phase 7: UI Verification** - End-to-end testing with real workflows
 
@@ -138,20 +138,19 @@ Plans:
   1. n8n webhook successfully delivers lead data to production Convex endpoint
   2. Lead appears in Contact Database with all fields populated correctly
   3. Lead status updates work (new -> qualified -> consultation/community)
+  4. Lead statuses are configurable per workspace in Settings
 
-**Plans:** 5 plans
+**Plans:** 8 plans
 
 Plans:
 - [x] 05-01-PLAN.md — Verify n8n webhook endpoint in production
 - [x] 05-02-PLAN.md — Verify lead data and phone normalization
-- [x] 05-03-PLAN.md — Verify lead status update workflow (GAP: status mismatch)
-- [x] 05-04-PLAN.md — Rename "Lead Management" to "Database" in UI (pre-existing)
+- [x] 05-03-PLAN.md — Verify lead status update workflow (GAP: status mismatch found)
+- [x] 05-04-PLAN.md — Rename "Lead Management" to "Database" in UI
 - [x] 05-05-PLAN.md — Fix DELETE and UPDATE contact functionality (testing deferred)
-
-**Gaps for Phase 5.1:**
-- Status value mismatch: Brain returns hot/warm/cold, UI expects hot_lead/cold_lead/prospect
-- User requirement: Make status names and stage count configurable in Settings
-- DELETE/PATCH endpoints need production testing
+- [ ] 05-06-PLAN.md — Schema + Backend for configurable status stages (gap closure)
+- [ ] 05-07-PLAN.md — Settings UI for lead stage configuration (gap closure)
+- [ ] 05-08-PLAN.md — Human verification of status system + CRUD endpoints (gap closure)
 
 ### Phase 6: Pricing Page
 
@@ -201,7 +200,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. AI System | 4/4 | Complete | 2026-01-25 |
 | 3.1 Inbox Enhancement | 1/1 | Complete | 2026-01-25 |
 | 4. Bot Workflow | 6/6 | Complete | 2026-01-26 |
-| 5. Lead Flow | 5/5 | Complete (gaps) | 2026-01-26 |
+| 5. Lead Flow | 5/8 | In Progress (gap closure) | - |
 | 6. Pricing Page | 0/TBD | Not started | - |
 | 7. UI Verification | 0/TBD | Not started | - |
 
