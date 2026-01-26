@@ -12,16 +12,16 @@ import type { Id } from 'convex/_generated/dataModel'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
-// Mock stats for offline dev mode
+// Mock stats for offline dev mode - matches /api/contacts MOCK_CONTACTS
 const MOCK_STATS = {
-  totalContacts: 12,
-  totalConversations: 8,
+  totalContacts: 5,
+  totalConversations: 2,
   activeConversations: 2,
   statusBreakdown: {
-    new: 3,
-    hot: 4,
-    warm: 3,
-    cold: 2,
+    new: 1,
+    hot: 2,
+    warm: 1,
+    cold: 1,
     won: 0,
     lost: 0,
   },
@@ -67,8 +67,8 @@ export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientP
         onTimeFilterChange={setTimeFilter}
       />
 
-      {/* Quick Actions */}
-      <QuickActions workspaceSlug={workspaceSlug} />
+      {/* Quick Actions - disabled for now */}
+      {/* <QuickActions workspaceSlug={workspaceSlug} /> */}
 
       {/* Onboarding Checklist (for new workspaces) */}
       {!isOnboarded && (

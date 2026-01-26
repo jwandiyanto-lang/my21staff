@@ -11,7 +11,17 @@ const isPublicRoute = createRouteMatcher([
   '/api/public(.*)',
 ])
 
+// TEMPORARY: Allow all routes on localhost for development
+const isLocalhost = (request: Request) => {
+  const url = new URL(request.url)
+  return url.hostname === 'localhost' || url.hostname === '127.0.0.1'
+}
+
 export default clerkMiddleware(async (auth, request) => {
+  // Skip auth on localhost for development
+  if (isLocalhost(request)) {
+    return
+  }
   if (!isPublicRoute(request)) {
     await auth.protect()
   }

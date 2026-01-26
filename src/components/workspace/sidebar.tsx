@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import {
   LayoutDashboard,
   MessageSquare,
@@ -11,10 +12,29 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
-import { UserButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
 import { WorkspaceSwitcher } from './workspace-switcher'
 import { Button } from '@/components/ui/button'
+
+// Dev mode check - skip Clerk components entirely
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+
+// Placeholder avatar for dev mode
+function DevAvatar() {
+  return (
+    <div className="w-10 h-10 rounded-full bg-[#F7931A] flex items-center justify-center text-white font-bold text-sm">
+      DEV
+    </div>
+  )
+}
+
+// Dynamically import UserButton only in production to avoid Clerk initialization in dev
+const UserButton = isDevMode
+  ? DevAvatar
+  : dynamic(() => import('@clerk/nextjs').then((mod) => mod.UserButton), {
+      ssr: false,
+      loading: () => <div className="w-10 h-10 rounded-full bg-muted animate-pulse" />,
+    })
 
 interface WorkspaceSidebarProps {
   workspace: {
@@ -175,26 +195,11 @@ export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSideba
       <div className={cn('p-2', collapsed ? 'px-2' : 'p-4')}>
         {collapsed ? (
           <div className="flex justify-center p-2">
-            <UserButton
-              appearance={{
-                elements: {
-                  avatarBox: 'w-10 h-10',
-                },
-              }}
-              afterSignOutUrl="/"
-            />
+            <UserButton />
           </div>
         ) : (
           <div className="flex items-center gap-3 p-3 bg-white/10 rounded-2xl border border-white/10">
-            <UserButton
-              appearance={{
-                elements: {
-                  avatarBox: 'w-10 h-10',
-                },
-              }}
-              afterSignOutUrl="/"
-              showName={false}
-            />
+            <UserButton />
             <div className="overflow-hidden">
               <p className="text-sm font-bold text-white truncate">{workspace.name}</p>
               <p className="text-[10px] text-white/50 font-mono uppercase tracking-tighter">
