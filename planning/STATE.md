@@ -5,15 +5,15 @@
 See: planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.3 Go Live — Phase 5 Lead Flow in progress
+**Current focus:** v3.3 Go Live — Phase 5 complete, Phase 6 ready
 
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: 5 (Lead Flow) — Gap closure in progress
-Plan: 7 of 8 complete (3 plans + 4 gap closure plans)
-Status: Lead Stages Settings UI complete
-Last activity: 2026-01-26 — Completed 05-07-PLAN.md (Lead Stages Settings UI)
+Phase: 5 (Lead Flow) — COMPLETE
+Plan: 8 of 8 complete
+Status: Phase 5 verified and finalized
+Last activity: 2026-01-26 — Completed 05-08 Human Verification
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (217 plans shipped)
 
@@ -48,7 +48,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 3. AI System | Dual-bot (Mouth + Brain) | 4 (AI-01 to 04) | ✓ Complete (E2E verified) |
 | 3.1 Inbox Enhancement | Profile, handover, merge | N/A (gap closure) | ✓ Complete |
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | ✓ Complete |
-| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | ✓ Complete (gaps noted) |
+| 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | ✓ Complete |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | Not started |
 | 7. UI Verification | E2E testing | 5 (UI-01 to 05) | Not started |
 
@@ -131,26 +131,24 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-26
-Stopped at: Completed 05-07-PLAN.md (Lead Stages Settings UI)
-Resume: Continue with 05-08 (if planned) or Phase 6
+Stopped at: Phase 5 COMPLETE
+Resume: Plan and execute Phase 6 (Pricing Page)
 
-**Phase 5 Progress (7/8 — Gap Closure In Progress):**
+**Phase 5 Progress (COMPLETE — 8/8):**
 - 05-01 ✓ n8n Webhook Verification - Endpoint tested, duplicate detection verified, 228 leads confirmed
 - 05-02 ✓ Lead Data Verification - Phone normalization verified for Indonesian formats, all test contacts visible
-- 05-03 ~ Lead Status Verification - PARTIAL: Backend works, UI status mismatch found (gap noted)
+- 05-03 ✓ Lead Status Verification - Backend works, UI status mismatch found (gap noted)
 - 05-04 ✓ Gap Closure (Status Mismatch) - API endpoint created for contact updates
 - 05-05 ✓ Contact CRUD Operations - DELETE and PATCH endpoints implemented
 - 05-06 ✓ Workspace Status Config - Brain reads workspace config, UI lib updated
-- 05-07 ✓ Lead Stages Settings UI - Full CRUD in Settings page, color pickers, temperature mapping
-- 05-08 ~ Pending (if planned)
+- 05-07 ✓ Lead Stages Settings UI - Simplified UI with on/off toggle, inline editing
+- 05-08 ✓ Human Verification - All functionality verified, user approved
 
-**Gap Resolution (05-07):**
+**Gap Resolution (05-07/05-08):**
 - Lead Stages tab added to Settings page
-- Users can add/edit/delete pipeline stages
-- Color customization (text and background) for each stage
-- AI temperature mapping (hot/warm/cold) configurable per stage
-- Reorder stages with up/down buttons
-- Minimum 2 stages required to prevent empty pipeline
+- Simplified UI: on/off toggle, inline editing, auto gradient colors
+- Contact CRUD (edit/delete) verified working in dev mode
+- statusConfig fallback chain handles unknown statuses gracefully
 
 **Phase 4 Progress (COMPLETE — 6/6):**
 - 04-01 ✓ Greeting State Awareness
