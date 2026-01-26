@@ -1,6 +1,7 @@
 {
   "mode": "yolo",
   "depth": "standard",
+  "model_profile": "budget",
   "gates": {
     "confirm_project": false,
     "confirm_phases": false,
