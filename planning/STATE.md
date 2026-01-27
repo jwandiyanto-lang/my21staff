@@ -10,17 +10,17 @@ See: planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Milestone: v3.3 Go Live
-Phase: 5 (Lead Flow) — COMPLETE
-Plan: 8 of 8 complete
-Status: Phase 5 verified and finalized
-Last activity: 2026-01-26 — Completed 05-08 Human Verification
+Phase: 6 (UI Polish) — IN PROGRESS
+Plan: 1 of 4+ complete (06-04)
+Status: Gap closure plans in progress
+Last activity: 2026-01-27 — Completed 06-04 Database Dropdown Bug Fix
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (217 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (218 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 215
+- Total plans completed: 218
 - Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
@@ -50,7 +50,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | ✓ Complete |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | ✓ Complete |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | SKIPPED |
-| 6. UI Polish | Smooth localhost | Derived from testing | Not started |
+| 6. UI Polish | Smooth localhost | Derived from testing | In progress (1/4+) |
 
 **Coverage:** 30/30 requirements mapped (100%)
 
@@ -119,6 +119,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Lead status config stored in workspace.settings.lead_statuses (no schema migration needed)
 - Default status keys: new, cold, warm, hot, client, lost (aligned with Brain temperature output)
 - Brain fetches workspace status config before mapping temperature to status key
+- Radix UI components with portals need unique key={contactId} props to force React instance recreation
 
 **Phase 3 Issues (All Resolved):**
 - ✓ Workspace ID mismatch - actually correct, ariConfig linked to Eagle workspace
@@ -130,9 +131,12 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ## Session Continuity
 
-Last session: 2026-01-26
-Stopped at: Phase 5 COMPLETE, Pricing skipped
-Resume: Plan and execute Phase 6 (UI Polish)
+Last session: 2026-01-27
+Stopped at: Completed 06-04-PLAN.md (Database Dropdown Bug Fix)
+Resume: Continue Phase 6 gap closure plans
+
+**Phase 6 Progress (IN PROGRESS — 1/4+):**
+- 06-04 ✓ Database Dropdown Bug Fix - Added key={contactId} to DropdownMenu components (Status, Tags, Assignee)
 
 **Phase 5 Progress (COMPLETE — 8/8):**
 - 05-01 ✓ n8n Webhook Verification - Endpoint tested, duplicate detection verified, 228 leads confirmed
@@ -191,4 +195,4 @@ Resume: Plan and execute Phase 6 (UI Polish)
 | 003 | Remove merge button, clear default tags | 2026-01-26 | 8d7954b | [003-database-ux-fixes](./quick/003-database-ux-fixes/) |
 
 ---
-*Last updated: 2026-01-26 — 05-07 Lead Stages Settings UI complete*
+*Last updated: 2026-01-27 — 06-04 Database Dropdown Bug Fix complete*
