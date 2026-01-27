@@ -10,12 +10,12 @@ See: planning/PROJECT.md (updated 2026-01-27)
 ## Current Position
 
 Milestone: v3.4 Kapso Inbox Integration
-Phase: 2 of 6 (Your Intern Debug)
-Plan: 02-02 complete
-Status: Phase 2 complete, verified passed
-Last activity: 2026-01-27 — Completed 02-02-PLAN.md (error boundaries for tabs), verified passed (4/4)
+Phase: 2 of 6 (Your Intern Debug) - COMPLETE ✓
+Plan: 02-02 complete, UAT verified
+Status: Phase 2 complete, all tests passed, sidebar navigation added
+Last activity: 2026-01-27 — Phase 2 verified and completed (4/4 tests passed, workspace ID fix applied, Your Intern added to sidebar)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ████░░░░░ (~33%)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ████░░░░░ (~40%)
 
 ## Performance Metrics
 
@@ -53,11 +53,21 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - User scope for MCP server (git push blocked, project scope would expose API key)
 - Progressive disclosure pattern via agent-skills (contextual knowledge loading)
 
-### Decisions from Phase 2 (Your Intern Debug - Plan 01)
+### Decisions from Phase 2 (Your Intern Debug)
 
+**Plan 01:**
 - shouldUseMockData() pattern for server components enables fully offline development
 - isDevMode() helper for API routes provides consistent dev mode bypass
 - Dev mode pattern: check isDevMode() && workspaceId === 'demo' before requireWorkspaceMembership
+
+**Plan 02:**
+- react-error-boundary library for tab-level error isolation
+- TabErrorBoundary reusable component pattern
+
+**UAT & Fixes:**
+- MOCK_CONVEX_WORKSPACE._id must be 'demo' to match API route dev mode checks
+- Sidebar navigation includes "Your Intern" link with Bot icon
+- Dev mode works identically offline and online (no Supabase, Convex-only stack)
 
 ### v3.4 Phase Structure
 
@@ -88,24 +98,28 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ### Next Phase Readiness
 
-- Your Intern page routing and API dev mode complete
+- Phase 2 (Your Intern Debug) COMPLETE ✓
+- Your Intern page routing and API dev mode verified working
 - Error boundaries in place for all 5 tabs
 - /demo/knowledge-base works fully offline for development
-- Ready for Inbox UI & Filtering phase (Phase 3)
+- Sidebar navigation includes Your Intern link
+- Ready for Your Intern Configuration phase (Phase 3)
 
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Completed Phase 2 Plan 02 (error boundaries for tabs)
-Resume: Ready for next phase (Phase 3: Inbox UI & Filtering)
+Stopped at: Phase 2 complete and verified via UAT (4/4 tests passed)
+Resume: Ready for next phase (Phase 3: Your Intern Configuration)
 
 **Files ready:**
 - `.planning/phases/02-your-intern-debug/02-01-SUMMARY.md` — Plan 01 complete (page.tsx + API dev mode)
 - `.planning/phases/02-your-intern-debug/02-02-SUMMARY.md` — Plan 02 complete (error boundaries)
+- `.planning/phases/02-your-intern-debug/02-UAT.md` — UAT complete (4/4 passed, workspace ID fix applied)
 - `.planning/phases/02-your-intern-debug/02-VERIFICATION.md` — Verification passed (4/4 must-haves)
 - `.planning/STATE.md` — This file, updated with Phase 2 completion
 - `.planning/ROADMAP.md` — Phase 2 marked complete
+- `src/components/workspace/sidebar.tsx` — Your Intern navigation added
 
 ---
 
-*Last updated: 2026-01-27 — Phase 2 complete, verified*
+*Last updated: 2026-01-27 — Phase 2 complete, verified via UAT*
