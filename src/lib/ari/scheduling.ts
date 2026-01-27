@@ -47,6 +47,34 @@ export function getIndonesianDayName(dayOfWeek: number): string {
 // ===========================================
 
 /**
+ * Get available slots from workspace consultation_slots config
+ *
+ * @param consultationSlots - Slots from workspace.settings.consultation_slots
+ * @param daysAhead - How many days ahead to look (default 14)
+ * @returns Array of formatted slot strings (day + time)
+ */
+export function getAvailableSlotsFromConfig(
+  consultationSlots: Array<{ day: string; time: string; duration_minutes: number; available: boolean }>,
+  daysAhead: number = 14
+): string[] {
+  if (!consultationSlots?.length) {
+    console.log('[Scheduling] No consultation slots configured');
+    return [];
+  }
+
+  // Filter to only available slots
+  const activeSlots = consultationSlots.filter(s => s.available === true);
+
+  if (!activeSlots.length) {
+    console.log('[Scheduling] No available consultation slots');
+    return [];
+  }
+
+  // Format as "Day HH:MM" strings
+  return activeSlots.map(s => `${s.day} ${s.time}`);
+}
+
+/**
  * Get available slots for a workspace within the booking window
  *
  * @param workspaceId - Workspace ID
