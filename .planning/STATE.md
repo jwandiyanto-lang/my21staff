@@ -10,19 +10,19 @@ See: planning/PROJECT.md (updated 2026-01-27)
 ## Current Position
 
 Milestone: v3.4 Kapso Inbox Integration
-Phase: 5 of 6 (Real-time & Handover)
-Plan: 3 of 3 in phase (Phase 5 complete)
-Status: Phase 5 complete - visual mode indicators + end-to-end verification approved
-Last activity: 2026-01-27 — Completed 05-03-PLAN.md (visual mode indicators + end-to-end verification)
+Phase: 6 of 6 (ARI Flow Integration)
+Plan: 1 of 3 in phase
+Status: In progress - Mouth hot-reload configuration complete
+Last activity: 2026-01-27 — Completed 06-01-PLAN.md (Mouth hot-reload configuration)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 █████████░ (~83%)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 █████████░ (~87%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 236 (all v3.3 phases + v3.4 phases 1-5)
+- Total plans completed: 237 (all v3.3 phases + v3.4 phases 1-5 + 06-01)
 - v3.3 execution: 7 phases, ~22 plans, 3 days (2026-01-25 to 2026-01-27)
-- v3.4 execution: 5 phases, 11 plans, ~62 min
+- v3.4 execution: 6 phases (5 complete), 12 plans, ~65 min
 
 **By Milestone:**
 
@@ -139,7 +139,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
   - Plan 05-01: Real-time sync verification + AI/Human toggle UI — ✓ Complete
   - Plan 05-02: Wire AI/Human toggle to processARI gate — ✓ Complete
   - Plan 05-03: Visual mode indicators + end-to-end verification — ✓ Complete
-- **Phase 6:** ARI Flow Integration (ARI-01,03,04) — Pending
+- **Phase 6:** ARI Flow Integration (06-01, 06-03, 06-04) — In Progress
+  - Plan 06-01: Mouth hot-reload configuration — ✓ Complete
 
 ### Coverage Status
 
@@ -159,40 +160,44 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Kapso integration uses wrapper pattern (not wholesale replacement)
 - ARI behavior feeds from Your Intern config (tight coupling)
 
+### Decisions from Phase 6 (ARI Flow Integration)
+
+**Plan 01:**
+- Hot-reload configuration: getAriContext fetches workspace.settings on every call (no caching)
+- Persona config precedence: workspace.settings.persona overrides ariConfig.bot_name
+- Flow stages fallback: Use hardcoded instructions if workspace flow stages not configured
+- Workspace config flow: getAriContext → processARI → Mouth → buildMouthSystemPrompt
+- Optional config parameters pattern with backward-compatible fallback values
+
 ### Next Phase Readiness
 
 - Phase 5 (Real-time & Handover) COMPLETE (all 3 plans)
-- Phase 6 (ARI Flow Integration) ready to start
-- Real-time message sync verified working via Convex subscriptions
-- AI/Human toggle UI complete with confirmation dialog and visual feedback
-- Visual mode indicators in conversation list and thread header (green = AI, blue = human)
-- Handover mode fully wired to processARI gate (two-level gating system)
-- Typing indicator and system messages ready for ARI flow integration
-- Complete end-to-end workflow tested and approved by user
+- Phase 6 (ARI Flow Integration) Plan 01 COMPLETE
+- Hot-reload configuration working end-to-end (workspace.settings → Mouth system prompt)
+- Persona changes in Your Intern immediately affect next bot response
+- Flow stage changes immediately affect conversation instructions
+- Ready for Plan 06-03 (Brain scoring rules integration)
+- Ready for Plan 06-04 (Consultation slots routing integration)
 
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Phase 5 complete (visual mode indicators + end-to-end verification approved)
-Resume: Ready for Phase 6 (ARI Flow Integration)
+Stopped at: Phase 6 Plan 01 complete (Mouth hot-reload configuration)
+Resume: Ready for Phase 6 Plans 03 and 04 (Brain scoring + consultation slots)
 
-**Files modified in Phase 5:**
-- `src/components/inbox/typing-indicator.tsx` — [NEW] WhatsApp-style typing animation
-- `src/components/inbox/system-message.tsx` — [NEW] Inline conversation notifications
-- `src/components/inbox/message-thread.tsx` — Added confirmation dialog, system messages, typing indicator, mode indicator badge
-- `src/components/inbox/conversation-list.tsx` — Added mode badge beside status tag (Bot = AI, User = Human)
-- `src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx` — Added conversationStatusOverrides state for toggle persistence
-- `convex/kapso.ts` — Added conversation.status gate before processARI scheduling
-- `src/lib/mock-data.ts` — Updated conversation statuses + getMockMessagesForConversation helper
+**Files modified in Phase 6 Plan 01:**
+- `convex/kapso.ts` — Enhanced getAriContext to extract persona, flowStages, scoringRules, consultationSlots from workspace.settings; Updated processARI to pass workspace config to Mouth
+- `convex/ai/context.ts` — Added personaConfig and flowStages optional parameters to buildMouthSystemPrompt; Inject persona into system prompt; Use flow stages for state instructions
+- `convex/ai/mouth.ts` — Added persona and flowStages optional args to generateMouthResponse; Pass workspace config to buildMouthSystemPrompt
 
 **Recent commits:**
+- `41fac1d` - feat(06-01): wire Mouth to use workspace config from getAriContext
+- `ec1c473` - feat(06-01): update buildMouthSystemPrompt to use workspace config
+- `a74ff21` - feat(06-01): enhance getAriContext to fetch workspace.settings config
 - `90baa48` - fix(05-03): change Manual button color from orange to blue
 - `065bdaa` - fix(05-03): wire toggle to parent state for bidirectional switching
 - `5d2dcdd` - fix(05-03): make mode badge visible in conversation list
-- `03c2ad0` - feat(05-03): add AI/Human mode indicators to conversation list and message thread
-- `513d777` - feat(05-02): wire AI/Human toggle to processARI gate
-- `9e629b0` - feat(05-01): complete AI/Human toggle with confirmation and visual feedback
 
 ---
 
-*Last updated: 2026-01-27 — Phase 5 complete (visual mode indicators + end-to-end verification approved)*
+*Last updated: 2026-01-27 — Phase 6 Plan 01 complete (Mouth hot-reload configuration)*
