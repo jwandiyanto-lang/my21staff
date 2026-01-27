@@ -76,6 +76,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
     header: 'Status',
     cell: ({ row }) => {
       const contact = row.original
+      const contactId = contact.id // Capture ID in local variable to avoid closure issues
       const status = row.getValue('lead_status') as LeadStatus
       const config = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.new || { label: 'Unknown', color: '#6B7280', bgColor: '#F3F4F6' }
       const isDefaultStatus = status === 'prospect'
@@ -127,7 +128,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
               return (
                 <DropdownMenuItem
                   key={s}
-                  onClick={() => onStatusChange(contact.id, s)}
+                  onClick={() => onStatusChange(contactId, s)}
                   className={isSelected ? 'bg-muted' : ''}
                 >
                   <span
@@ -151,6 +152,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
     header: 'Tags',
     cell: ({ row }) => {
       const contact = row.original
+      const contactId = contact.id // Capture ID in local variable to avoid closure issues
       const tags = row.getValue('tags') as string[] || []
 
       if (!onTagsChange || contactTags.length === 0) {
@@ -178,7 +180,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
         const newTags = tags.includes(tag)
           ? tags.filter(t => t !== tag)
           : [...tags, tag]
-        onTagsChange(contact.id, newTags)
+        onTagsChange(contactId, newTags)
       }
 
       return (
@@ -228,6 +230,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
     header: 'Assigned to',
     cell: ({ row }) => {
       const contact = row.original
+      const contactId = contact.id // Capture ID in local variable to avoid closure issues
       const assignedTo = row.getValue('assigned_to') as string | null
       const assignedMember = teamMembers.find((m) => m.id === assignedTo)
 
@@ -262,7 +265,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem
-              onClick={() => onAssigneeChange(contact.id, null)}
+              onClick={() => onAssigneeChange(contactId, null)}
               className={!assignedTo ? 'bg-muted' : ''}
             >
               <span className="w-2 h-2 rounded-full mr-2 bg-muted-foreground" />
@@ -274,7 +277,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
                 {teamMembers.map((member) => (
                   <DropdownMenuItem
                     key={member.id}
-                    onClick={() => onAssigneeChange(contact.id, member.id)}
+                    onClick={() => onAssigneeChange(contactId, member.id)}
                     className={assignedTo === member.id ? 'bg-muted' : ''}
                   >
                     <span className="w-2 h-2 rounded-full mr-2 bg-primary" />
