@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 06-ui-polish
 source: 06-SUMMARY.md
 started: 2026-01-27T10:15:00Z
-updated: 2026-01-27T10:24:00Z
+updated: 2026-01-27T10:28:00Z
 ---
 
 ## Current Test
@@ -63,17 +63,33 @@ skipped: 4
   reason: "User reported: still error, dont know why because we already fixed it"
   severity: blocker
   test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Settings page is a server component that calls auth-protected Convex query during SSR, but Clerk auth context is unavailable in SSR"
+  artifacts:
+    - path: "src/app/(dashboard)/[workspace]/settings/page.tsx"
+      issue: "Calls fetchQuery(api.ari.getAriConfig) during SSR (line 48)"
+    - path: "convex/ari.ts"
+      issue: "getAriConfig requires auth via requireWorkspaceMembership (line 26)"
+    - path: "convex/lib/auth.ts"
+      issue: "Auth helper requires Clerk session unavailable in SSR (line 44)"
+  missing:
+    - "Move AI status fetch to client component"
+    - "Client-side useQuery has Clerk auth context via ClerkProvider"
+  debug_session: "planning/debug/settings-page-crash.md"
 
 - truth: "Status dropdown changes the correct contact, not a different one. Tags and Assignee dropdowns work."
   status: failed
   reason: "User reported: nope still not fix. I dont know what was fix before but its still doing it. Also tags and assigned to doesnt work and cant be adjust"
   severity: blocker
   test: 3
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Radix UI DropdownMenu components lack unique key props, causing React to reuse component instances with stale closures"
+  artifacts:
+    - path: "src/app/(dashboard)/[workspace]/database/columns.tsx"
+      issue: "Status dropdown (lines 102-143) missing key prop"
+    - path: "src/app/(dashboard)/[workspace]/database/columns.tsx"
+      issue: "Tags dropdown (lines 187-224) missing key prop"
+    - path: "src/app/(dashboard)/[workspace]/database/columns.tsx"
+      issue: "Assignee dropdown (lines 248-297) missing key prop"
+  missing:
+    - "Add key={contactId} prop to each DropdownMenu component"
+    - "Forces React to create new instances when row data changes"
+  debug_session: "planning/debug/database-dropdown-bug.md"
