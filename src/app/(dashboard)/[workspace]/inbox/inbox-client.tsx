@@ -5,7 +5,7 @@ import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Mail, MailOpen } from 'lucide-react'
+import { Mail, MailOpen, MessageSquare } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { FilterTabs } from '@/components/inbox/filter-tabs'
 import { TagFilterDropdown } from '@/components/inbox/tag-filter-dropdown'
@@ -298,9 +298,16 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] relative">
+    <div
+      className={cn(
+        "grid h-[calc(100vh-4rem)]",
+        showInfoSidebar && selectedConversationId
+          ? "grid-cols-[350px_1fr] lg:grid-cols-[350px_1fr_400px]"
+          : "grid-cols-[350px_1fr]"
+      )}
+    >
       {/* Left sidebar - Conversation list */}
-      <div className="w-80 border-r bg-background flex flex-col">
+      <div className="border-r bg-background flex flex-col">
         {/* Search and filter header */}
         <div className="p-4 border-b space-y-3">
           {/* Active/All toggle at top */}
@@ -370,7 +377,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
       </div>
 
       {/* Center area - Message thread */}
-      <div className="flex-1 flex flex-col bg-muted/30 min-w-0 relative">
+      <div className="flex flex-col bg-muted/30 min-w-0">
         {selectedConversationId ? (
           <MessageThreadWrapper
             conversationId={selectedConversationId}
@@ -392,9 +399,9 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
         )}
       </div>
 
-      {/* Right sidebar - Contact info (overlay) */}
+      {/* Right sidebar - Contact info (integrated on desktop, hidden on mobile) */}
       {showInfoSidebar && selectedConversationId && contactForSidebar && (
-        <div className="absolute right-0 top-0 h-full z-10 shadow-lg">
+        <div className="hidden lg:flex border-l bg-background overflow-y-auto">
           <InfoSidebar
             contact={contactForSidebar}
             messagesCount={messagesCount}
