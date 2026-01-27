@@ -286,7 +286,9 @@ export function buildMouthSystemPrompt(
   language: string = "id",
   state: string = "greeting",
   context?: QualificationContext,
-  communityLink?: string
+  communityLink?: string,
+  personaConfig?: { name: string; description: string; tone: string },
+  flowStages?: Array<{ name: string; description: string; questions: string[] }>
 ): string {
   const isIndonesian = language === "id";
 
@@ -295,10 +297,32 @@ export function buildMouthSystemPrompt(
 
   switch (state) {
     case "greeting":
-      stateInstructions = buildGreetingInstructions(isIndonesian);
+      // Use workspace flow stage if provided, otherwise fallback to hardcoded
+      if (flowStages && flowStages.length > 0) {
+        const greetingStage = flowStages.find(s => s.name.toLowerCase() === "greeting");
+        if (greetingStage) {
+          const questions = greetingStage.questions?.join("\n- ") || "";
+          stateInstructions = `## TUGAS SAAT INI: ${greetingStage.description}\n\nPertanyaan yang perlu ditanya:\n- ${questions}`;
+        } else {
+          stateInstructions = buildGreetingInstructions(isIndonesian);
+        }
+      } else {
+        stateInstructions = buildGreetingInstructions(isIndonesian);
+      }
       break;
     case "qualifying":
-      stateInstructions = buildQualifyingInstructions(context, isIndonesian);
+      // Use workspace flow stage if provided, otherwise fallback to hardcoded
+      if (flowStages && flowStages.length > 0) {
+        const qualifyingStage = flowStages.find(s => s.name.toLowerCase() === "qualifying");
+        if (qualifyingStage) {
+          const questions = qualifyingStage.questions?.join("\n- ") || "";
+          stateInstructions = `## TUGAS SAAT INI: ${qualifyingStage.description}\n\nPertanyaan yang perlu ditanya:\n- ${questions}`;
+        } else {
+          stateInstructions = buildQualifyingInstructions(context, isIndonesian);
+        }
+      } else {
+        stateInstructions = buildQualifyingInstructions(context, isIndonesian);
+      }
       break;
     case "routing":
       stateInstructions = buildRoutingInstructions(communityLink, isIndonesian);
@@ -308,10 +332,15 @@ export function buildMouthSystemPrompt(
       stateInstructions = "";
   }
 
+  // Use persona config if provided, otherwise use default
+  const effectiveBotName = personaConfig?.name ?? botName;
+  const personaDescription = personaConfig?.description ?? "";
+  const personaTone = personaConfig?.tone ?? "friendly";
+
   // Base persona
   const basePersonaPrompt = isIndonesian
-    ? `Kamu adalah ${botName}, asisten AI dari Eagle Overseas Education Indonesia.
-
+    ? `Kamu adalah ${effectiveBotName}, asisten AI dari Eagle Overseas Education Indonesia.
+${personaDescription ? `\n${personaDescription}\n` : ""}
 Kamu sedang berbicara dengan ${contactName}.
 
 Tugasmu:
@@ -323,15 +352,15 @@ Tugasmu:
 
 Style:
 - Singkat (1-2 kalimat max)
-- Santai dan ramah, seperti teman
+- Gaya komunikasi: ${personaTone}
 - JANGAN pakai emoji
 - Tanya satu hal per pesan
 - Mirror bahasa customer (ID/EN)
 - Jika tidak tahu, bilang "Bentar ya, saya tanyakan dulu ke tim"
 
 Jawab dengan cepat dan langsung ke inti.`
-    : `You are ${botName}, an AI assistant from Eagle Overseas Education.
-
+    : `You are ${effectiveBotName}, an AI assistant from Eagle Overseas Education.
+${personaDescription ? `\n${personaDescription}\n` : ""}
 You're speaking with ${contactName}.
 
 Your tasks:
@@ -343,7 +372,7 @@ Your tasks:
 
 Style:
 - Brief (1-2 sentences max)
-- Friendly and casual, like a friend
+- Communication style: ${personaTone}
 - NO emojis
 - Ask one thing per message
 - If unsure, say "Let me check with the team"
