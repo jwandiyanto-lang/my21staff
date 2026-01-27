@@ -12,7 +12,7 @@ Requirements for Kapso Inbox Integration milestone. Each maps to roadmap phases.
 - [ ] **INBOX-01**: User can view conversations in Kapso-styled UI
 - [ ] **INBOX-02**: User can view message thread with Kapso-styled components
 - [ ] **INBOX-03**: User can filter conversations by status (hot/warm/cold/new/client/lost)
-- [ ] **INBOX-04**: User sees real-time message updates without refresh
+- [x] **INBOX-04**: User sees real-time message updates without refresh
 - [ ] **INBOX-05**: User can send messages from Inbox
 - [ ] **INBOX-06**: User can view media (images, documents) in messages
 
@@ -29,7 +29,7 @@ Requirements for Kapso Inbox Integration milestone. Each maps to roadmap phases.
 ### ARI Flow Integration
 
 - [ ] **ARI-01**: New leads receive automatic AI response (AI-first)
-- [ ] **ARI-02**: User can toggle AI/Human mode per conversation in Inbox
+- [x] **ARI-02**: User can toggle AI/Human mode per conversation in Inbox
 - [ ] **ARI-03**: Your Intern configuration changes reflect in ARI behavior
 - [ ] **ARI-04**: Complete flow works (new lead → ARI greeting → qualification → handover)
 
@@ -73,7 +73,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INBOX-01 | 4 | Pending |
 | INBOX-02 | 4 | Pending |
 | INBOX-03 | 4 | Pending |
-| INBOX-04 | 5 | Pending |
+| INBOX-04 | 5 | Complete |
 | INBOX-05 | 4 | Pending |
 | INBOX-06 | 4 | Pending |
 | INTERN-01 | 2 | Complete |
@@ -84,7 +84,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTERN-06 | 3 | Pending |
 | INTERN-07 | 3 | Complete |
 | ARI-01 | 6 | Pending |
-| ARI-02 | 5 | Pending |
+| ARI-02 | 5 | Complete |
 | ARI-03 | 6 | Pending |
 | ARI-04 | 6 | Pending |
 
@@ -96,4 +96,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 
 *Requirements defined: 2026-01-27*
-*Last updated: 2026-01-27 after roadmap creation*
+*Last updated: 2026-01-27 — Phase 5 requirements complete (INBOX-04, ARI-02)*

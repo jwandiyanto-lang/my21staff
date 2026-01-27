@@ -209,9 +209,9 @@ Note: Plans 04-04 and 04-05 (gap closure for layout redesign) were reverted per 
 **Plans**: 3-4 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Verify real-time sync + complete toggle UI (confirmation, system messages, typing indicator)
-- [ ] 05-02-PLAN.md — Wire toggle to processARI gate (skip ARI when status = handover)
-- [ ] 05-03-PLAN.md — Add mode indicators + end-to-end verification
+- [x] 05-01-PLAN.md — Verify real-time sync + complete toggle UI (confirmation, system messages, typing indicator)
+- [x] 05-02-PLAN.md — Wire toggle to processARI gate (skip ARI when status = handover)
+- [x] 05-03-PLAN.md — Add mode indicators + end-to-end verification
 
 ### Phase 6: ARI Flow Integration
 **Goal**: New leads get automatic AI response; configuration changes in Your Intern immediately affect bot behavior end-to-end
@@ -244,10 +244,10 @@ Phases execute sequentially: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Your Intern Debug | v3.4 | 2/2 | Complete | 2026-01-27 |
 | 3. Your Intern Config | v3.4 | 2/2 | Complete | 2026-01-27 |
 | 4. Inbox UI & Filtering | v3.4 | 3/3 | Complete | 2026-01-27 |
-| 5. Real-time & Handover | v3.4 | 0/3-4 | Not started | - |
+| 5. Real-time & Handover | v3.4 | 3/3 | Complete | 2026-01-27 |
 | 6. ARI Flow Integration | v3.4 | 0/4 | Not started | - |
 
 ---
 
 *Roadmap created: 2026-01-27*
-*Last updated: 2026-01-27*
+*Last updated: 2026-01-27 — Phase 5 complete*
