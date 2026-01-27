@@ -303,59 +303,62 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
       <div className="w-80 border-r bg-background flex flex-col">
         {/* Search and filter header */}
         <div className="p-4 border-b space-y-3">
-          {/* Active/All toggle at top */}
-          <div className="flex items-center rounded-full bg-muted p-1">
-            <button
-              onClick={() => setViewMode('active')}
-              className={cn(
-                'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                viewMode === 'active'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <Mail className="h-3.5 w-3.5" />
-              Active
-              {activeCount > 0 && (
-                <Badge variant="default" className="ml-1 px-1.5 py-0 text-[10px] h-5">
-                  {activeCount}
-                </Badge>
-              )}
-            </button>
-            <button
-              onClick={() => setViewMode('all')}
-              className={cn(
-                'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                viewMode === 'all'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <MailOpen className="h-3.5 w-3.5" />
-              All
-            </button>
-          </div>
-
-          {/* Status filter tabs - NEW */}
-          <FilterTabs
-            value={statusFilter}
-            onChange={setStatusFilter}
-            workspaceId={workspaceId}
-            activeOnly={viewMode === 'active'}
+          {/* Search at top */}
+          <Input
+            placeholder="Search conversations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full"
           />
 
-          {/* Tag filter + Search - NEW LAYOUT */}
+          {/* Active/All toggle + Status filter + Tag filter in one row */}
           <div className="flex items-center gap-2">
+            {/* Active/All toggle */}
+            <div className="flex items-center rounded-full bg-muted p-1 shrink-0">
+              <button
+                onClick={() => setViewMode('active')}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                  viewMode === 'active'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Mail className="h-3.5 w-3.5" />
+                Active
+                {activeCount > 0 && (
+                  <Badge variant="default" className="ml-1 px-1.5 py-0 text-[10px] h-5">
+                    {activeCount}
+                  </Badge>
+                )}
+              </button>
+              <button
+                onClick={() => setViewMode('all')}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                  viewMode === 'all'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <MailOpen className="h-3.5 w-3.5" />
+                All
+              </button>
+            </div>
+
+            {/* Status filter dropdown */}
+            <FilterTabs
+              value={statusFilter}
+              onChange={setStatusFilter}
+              workspaceId={workspaceId}
+              activeOnly={viewMode === 'active'}
+            />
+
+            {/* Tag filter dropdown */}
             <TagFilterDropdown
               value={tagFilter}
               onChange={setTagFilter}
               workspaceId={workspaceId}
-            />
-            <Input
-              placeholder="Search conversations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1"
             />
           </div>
         </div>
