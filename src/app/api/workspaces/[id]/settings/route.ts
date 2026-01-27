@@ -7,11 +7,20 @@ import { safeEncrypt } from '@/lib/crypto'
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
+function isDevMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+}
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Dev mode: just return success (no DB to update)
+    if (isDevMode()) {
+      return NextResponse.json({ success: true })
+    }
+
     const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

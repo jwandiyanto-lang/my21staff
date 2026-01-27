@@ -9,6 +9,10 @@ import { fetchQuery, fetchMutation } from 'convex/nextjs'
 import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 
+function isDevMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+}
+
 // ARI Config insert type matching database schema
 interface ARIConfigInsert {
   workspace_id: string
@@ -177,6 +181,17 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
+
+    // Dev mode: just return success with enabled status
+    if (isDevMode()) {
+      const body = await request.json()
+      return NextResponse.json({
+        config: {
+          enabled: body.enabled,
+          ...DEFAULT_CONFIG
+        }
+      })
+    }
 
     // Verify user has access
     const authResult = await requireWorkspaceMembership(workspaceId)

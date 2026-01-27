@@ -3,13 +3,23 @@ import { auth } from "@clerk/nextjs/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/../convex/_generated/api";
 import { Id } from "@/../convex/_generated/dataModel";
+import { DEFAULT_LEAD_STATUSES } from "@/lib/lead-status";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+function isDevMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Dev mode: return default statuses
+  if (isDevMode()) {
+    return NextResponse.json(DEFAULT_LEAD_STATUSES);
+  }
+
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -35,6 +45,11 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Dev mode: just return success (no DB to update)
+  if (isDevMode()) {
+    return NextResponse.json({ success: true });
+  }
+
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
