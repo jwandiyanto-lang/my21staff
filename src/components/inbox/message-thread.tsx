@@ -284,7 +284,7 @@ export function MessageThread({
             "text-xs shrink-0",
             isAiActive
               ? "bg-green-600 hover:bg-green-700"
-              : "bg-orange-500 hover:bg-orange-600 text-white border-orange-500"
+              : "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
           )}
         >
           {isToggling ? (
