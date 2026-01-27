@@ -684,6 +684,9 @@ export const getAriContext = internalMutation({
       .order("desc")
       .take(20);
 
+    // Extract workspace configuration from settings
+    const workspaceSettings = workspace.settings || {};
+
     return {
       workspace: {
         _id: workspace._id,
@@ -708,6 +711,14 @@ export const getAriContext = internalMutation({
         role: m.role,
         content: m.content,
       })),
+      persona: {
+        name: workspaceSettings.persona?.name ?? ariConfig.bot_name ?? "Ari",
+        description: workspaceSettings.persona?.description ?? "",
+        tone: workspaceSettings.persona?.tone ?? "friendly",
+      },
+      flowStages: workspaceSettings.flow_stages ?? [],
+      scoringRules: workspaceSettings.scoring_rules ?? {},
+      consultationSlots: workspaceSettings.consultation_slots ?? [],
     };
   },
 });
