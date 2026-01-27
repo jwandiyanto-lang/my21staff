@@ -136,6 +136,7 @@ export default defineSchema({
     lead_temperature: v.optional(v.string()), // 'hot', 'warm', 'cold'
     context: v.optional(v.any()), // Form answers, document status, scheduling state
     ai_model: v.optional(v.string()), // 'sea-lion', 'grok', 'gpt-4'
+    next_action: v.optional(v.string()), // Human-readable next step (e.g., "Ask about passport", "Offer routing options")
     handoff_at: v.optional(v.number()),
     handoff_reason: v.optional(v.string()),
     last_ai_message_at: v.optional(v.number()),
