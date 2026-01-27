@@ -23,6 +23,12 @@ export type MockConvexWorkspace = {
     whatsapp_name?: string
     quick_replies?: { id: string; label: string; text: string }[]
     contact_tags?: string[]
+    lead_statuses?: {
+      key: string
+      label: string
+      color: string
+      enabled: boolean
+    }[]
   } | null
   created_at: number
   updated_at: number
@@ -44,6 +50,14 @@ export const MOCK_CONVEX_WORKSPACE: MockConvexWorkspace = {
       { id: '2', label: 'Thanks', text: 'Terima kasih sudah menghubungi kami!' },
     ],
     contact_tags: ['Hot Lead', 'Student', 'Parent', 'Follow Up'],
+    lead_statuses: [
+      { key: 'new', label: 'New', color: '#808080', enabled: true },
+      { key: 'cold', label: 'Cold', color: '#3b82f6', enabled: true },
+      { key: 'warm', label: 'Warm', color: '#f59e0b', enabled: true },
+      { key: 'hot', label: 'Hot', color: '#ef4444', enabled: true },
+      { key: 'client', label: 'Client', color: '#10b981', enabled: true },
+      { key: 'lost', label: 'Lost', color: '#6b7280', enabled: false },
+    ],
   },
   created_at: Date.now(),
   updated_at: Date.now(),
@@ -144,11 +158,13 @@ export const MOCK_CONTACTS: Contact[] = [
     phone: '+6281234567890',
     phone_normalized: '+6281234567890',
     name: 'Budi Santoso',
+    kapso_name: 'Budi Santoso',
     email: 'budi@gmail.com',
     lead_score: 85,
     lead_status: 'hot',
     tags: ['Student', 'Hot Lead'],
     assigned_to: 'dev-user-001',
+    source: 'Website',
     metadata: {
       source: 'Website',
       form_answers: {
@@ -159,13 +175,13 @@ export const MOCK_CONTACTS: Contact[] = [
         'Target Berangkat': '2026',
       },
     },
-    created_at: '2026-01-15T10:00:00Z',
-    updated_at: '2026-01-20T14:30:00Z',
+    created_at: new Date('2026-01-15T10:00:00Z').getTime(),
+    updated_at: new Date('2026-01-20T14:30:00Z').getTime(),
     cache_updated_at: null,
     kapso_is_online: null,
     kapso_last_seen: null,
-    kapso_name: null,
     kapso_profile_pic: null,
+    supabaseId: 'supabase-contact-001',
   },
   {
     id: 'contact-002',
@@ -173,11 +189,13 @@ export const MOCK_CONTACTS: Contact[] = [
     phone: '+6282345678901',
     phone_normalized: '+6282345678901',
     name: 'Siti Rahayu',
+    kapso_name: 'Siti Rahayu',
     email: 'siti.rahayu@yahoo.com',
     lead_score: 60,
     lead_status: 'warm',
     tags: ['Parent', 'Follow Up'],
     assigned_to: null,
+    source: 'WhatsApp',
     metadata: {
       source: 'WhatsApp',
       form_answers: {
@@ -188,13 +206,13 @@ export const MOCK_CONTACTS: Contact[] = [
         'Target Berangkat': '2027',
       },
     },
-    created_at: '2026-01-18T09:00:00Z',
-    updated_at: '2026-01-22T11:00:00Z',
+    created_at: new Date('2026-01-18T09:00:00Z').getTime(),
+    updated_at: new Date('2026-01-22T11:00:00Z').getTime(),
     cache_updated_at: null,
     kapso_is_online: null,
     kapso_last_seen: null,
-    kapso_name: null,
     kapso_profile_pic: null,
+    supabaseId: 'supabase-contact-002',
   },
 ]
 
@@ -209,10 +227,11 @@ export const MOCK_CONVERSATIONS_RAW: Conversation[] = [
     status: 'open',
     assigned_to: 'dev-user-001',
     unread_count: 2,
-    last_message_at: '2026-01-20T14:30:00Z',
+    last_message_at: new Date('2026-01-20T14:30:00Z').getTime(),
     last_message_preview: 'Terima kasih infonya, saya akan pertimbangkan.',
-    created_at: '2026-01-15T10:00:00Z',
-    updated_at: '2026-01-20T14:30:00Z',
+    created_at: new Date('2026-01-15T10:00:00Z').getTime(),
+    updated_at: new Date('2026-01-20T14:30:00Z').getTime(),
+    supabaseId: 'supabase-conv-001',
   },
   {
     id: 'conv-002',
@@ -221,10 +240,11 @@ export const MOCK_CONVERSATIONS_RAW: Conversation[] = [
     status: 'open',
     assigned_to: null,
     unread_count: 1,
-    last_message_at: '2026-01-22T11:00:00Z',
+    last_message_at: new Date('2026-01-22T11:00:00Z').getTime(),
     last_message_preview: 'Apakah ada beasiswa untuk anak saya?',
-    created_at: '2026-01-18T09:00:00Z',
-    updated_at: '2026-01-22T11:00:00Z',
+    created_at: new Date('2026-01-18T09:00:00Z').getTime(),
+    updated_at: new Date('2026-01-22T11:00:00Z').getTime(),
+    supabaseId: 'supabase-conv-002',
   },
 ]
 
@@ -249,7 +269,8 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-001',
     metadata: { source: 'Website' },
-    created_at: '2026-01-15T10:00:00Z',
+    created_at: new Date('2026-01-15T10:00:00Z').getTime(),
+    supabaseId: 'supabase-msg-001',
   },
   {
     id: 'msg-002',
@@ -263,7 +284,8 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-002',
     metadata: {},
-    created_at: '2026-01-15T10:01:00Z',
+    created_at: new Date('2026-01-15T10:01:00Z').getTime(),
+    supabaseId: 'supabase-msg-002',
   },
   {
     id: 'msg-003',
@@ -277,7 +299,8 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-003',
     metadata: {},
-    created_at: '2026-01-20T14:00:00Z',
+    created_at: new Date('2026-01-20T14:00:00Z').getTime(),
+    supabaseId: 'supabase-msg-003',
   },
   {
     id: 'msg-004',
@@ -291,7 +314,8 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-004',
     metadata: {},
-    created_at: '2026-01-20T14:30:00Z',
+    created_at: new Date('2026-01-20T14:30:00Z').getTime(),
+    supabaseId: 'supabase-msg-004',
   },
   // Conversation with Siti Rahayu
   {
@@ -306,7 +330,8 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-005',
     metadata: { source: 'WhatsApp' },
-    created_at: '2026-01-18T09:00:00Z',
+    created_at: new Date('2026-01-18T09:00:00Z').getTime(),
+    supabaseId: 'supabase-msg-005',
   },
   {
     id: 'msg-006',
@@ -320,7 +345,8 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-006',
     metadata: {},
-    created_at: '2026-01-18T09:01:00Z',
+    created_at: new Date('2026-01-18T09:01:00Z').getTime(),
+    supabaseId: 'supabase-msg-006',
   },
   {
     id: 'msg-007',
@@ -334,18 +360,22 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-007',
     metadata: {},
-    created_at: '2026-01-22T11:00:00Z',
+    created_at: new Date('2026-01-22T11:00:00Z').getTime(),
+    supabaseId: 'supabase-msg-007',
   },
 ]
 
 // Mock notes for contacts
 export interface MockNote {
   id: string
-  content: string
-  due_date: string | null
-  is_completed: boolean
-  created_at: string
+  workspace_id: string
   contact_id: string
+  user_id: string
+  content: string
+  due_date: string | null  // Keep for UI compatibility
+  is_completed: boolean  // Keep for UI compatibility
+  created_at: number
+  supabaseId: string
 }
 
 export const MOCK_NOTES: MockNote[] = [

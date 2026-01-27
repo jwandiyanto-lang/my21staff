@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useQuery } from 'convex/react'
+import { api } from 'convex/_generated/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -86,7 +88,6 @@ interface SettingsClientProps {
     kapso_phone_id: string | null
     settings: WorkspaceSettings | null
   }
-  aiEnabled: boolean
 }
 
 // Color gradient for lead stages (cold blue -> warm orange -> hot red)
@@ -117,7 +118,18 @@ const DEFAULT_QUICK_REPLIES: QuickReply[] = [
   { id: '5', label: 'Schedule', text: 'Would you be available to schedule a call? Please let us know your available times.' },
 ]
 
-export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: SettingsClientProps) {
+export function SettingsClient({ workspace }: SettingsClientProps) {
+  const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+
+  // Fetch AI config on client side with Clerk auth context
+  const ariConfig = useQuery(
+    api.ari.getAriConfig,
+    isDevMode ? 'skip' : { workspace_id: workspace.id }
+  )
+
+  // In dev mode, default to enabled. In production, wait for query result.
+  const aiEnabled = isDevMode ? true : (ariConfig?.enabled !== false)
+
   // WhatsApp settings state
   const [phoneId, setPhoneId] = useState(workspace.kapso_phone_id || '')
   const [apiKey, setApiKey] = useState(workspace.settings?.kapso_api_key || '')
@@ -125,7 +137,6 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
   const [saved, setSaved] = useState(false)
 
   // AI settings state
-  const [aiEnabled, setAiEnabled] = useState(initialAiEnabled)
   const [isTogglingAi, setIsTogglingAi] = useState(false)
 
   // Quick replies state
@@ -202,12 +213,11 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
         body: JSON.stringify({ enabled }),
       })
 
-      if (response.ok) {
-        setAiEnabled(enabled)
-      } else {
-        // Revert on error
+      if (!response.ok) {
+        // Error handling - the query will refetch automatically
         console.error('Failed to toggle AI')
       }
+      // Success - the Convex query will automatically refetch and update aiEnabled
     } catch (error) {
       console.error('Failed to toggle AI:', error)
     } finally {
@@ -328,8 +338,6 @@ export function SettingsClient({ workspace, aiEnabled: initialAiEnabled }: Setti
   }
 
   // Lead stages handlers
-  const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
-
   const saveLeadStatuses = async (statuses: LeadStatusConfig[]) => {
     setIsSavingStatuses(true)
     try {

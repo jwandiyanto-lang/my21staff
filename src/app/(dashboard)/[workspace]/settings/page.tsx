@@ -30,7 +30,6 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           kapso_phone_id: MOCK_CONVEX_WORKSPACE.kapso_phone_id,
           settings: MOCK_CONVEX_WORKSPACE.settings as WorkspaceSettings,
         }}
-        aiEnabled={true}
       />
     )
   }
@@ -44,14 +43,6 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
     notFound()
   }
 
-  // Get ARI config to check if AI is enabled
-  const ariConfig = await fetchQuery(api.ari.getAriConfig, {
-    workspace_id: workspace._id,
-  })
-
-  // AI is enabled by default (true if not set or if enabled is true)
-  const aiEnabled = ariConfig?.enabled !== false
-
   return (
     <SettingsClient
       workspace={{
@@ -61,7 +52,6 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
         kapso_phone_id: workspace.kapso_phone_id || null,
         settings: (workspace.settings as WorkspaceSettings) || null,
       }}
-      aiEnabled={aiEnabled}
     />
   )
 }
