@@ -181,16 +181,22 @@ function formatCollectedData(context: QualificationContext | undefined): string 
 /**
  * Build routing instructions for offering next steps.
  * @param communityLink - From ariConfig.community_link (optional)
+ * @param consultationSlots - Available consultation slots from workspace config
  */
 function buildRoutingInstructions(
   communityLink: string | undefined,
-  isIndonesian: boolean
+  isIndonesian: boolean,
+  consultationSlots?: Array<{ day: string; time: string; duration_minutes: number; available: boolean }>
 ): string {
+  const availableSlotsInfo = formatAvailableSlots(consultationSlots);
+
   if (isIndonesian) {
     return `## TUGAS SAAT INI: Tawarkan pilihan next step
 - PILIHAN 1: Konsultasi 1-on-1 (langsung dengan konsultan, lebih personal)
 - PILIHAN 2: Gabung komunitas gratis (update harian, tips kuliah)
 ${communityLink ? `- Link komunitas: ${communityLink}` : ""}
+
+${availableSlotsInfo}
 
 CARA TAWARKAN:
 - Jelaskan kedua opsi dengan singkat
@@ -212,6 +218,8 @@ Ari: "oke kak, saya hubungkan dengan konsultan kami ya. mereka akan follow up se
 - OPTION 1: 1-on-1 Consultation (personal guidance)
 - OPTION 2: Free community (daily updates, tips)
 ${communityLink ? `- Community link: ${communityLink}` : ""}
+
+${availableSlotsInfo}
 
 Let customer choose, acknowledge their choice.`;
 }
@@ -277,6 +285,29 @@ IF UNSURE:
 }
 
 /**
+ * Format available consultation slots for AI prompt
+ */
+function formatAvailableSlots(
+  consultationSlots: Array<{ day: string; time: string; duration_minutes: number; available: boolean }> | undefined
+): string {
+  if (!consultationSlots || consultationSlots.length === 0) {
+    return "Tidak ada jadwal konsultasi yang tersedia saat ini. Bilang ke customer: 'Tim kami akan menghubungi untuk jadwalkan konsultasi.'";
+  }
+
+  const availableSlots = consultationSlots.filter(s => s.available === true);
+
+  if (availableSlots.length === 0) {
+    return "Tidak ada jadwal konsultasi yang tersedia saat ini. Bilang ke customer: 'Tim kami akan menghubungi untuk jadwalkan konsultasi.'";
+  }
+
+  const slotList = availableSlots
+    .map(s => `${s.day} ${s.time} (${s.duration_minutes} menit)`)
+    .join(', ');
+
+  return `Jadwal konsultasi yang tersedia: ${slotList}\n\nHANYA tawarkan jadwal ini. Jangan kasih opsi lain.`;
+}
+
+/**
  * Build system prompt for The Mouth (conversational AI).
  * Style: Short, friendly, Indonesian-optimized.
  */
@@ -288,7 +319,8 @@ export function buildMouthSystemPrompt(
   context?: QualificationContext,
   communityLink?: string,
   personaConfig?: { name: string; description: string; tone: string },
-  flowStages?: Array<{ name: string; description: string; questions: string[] }>
+  flowStages?: Array<{ name: string; description: string; questions: string[] }>,
+  consultationSlots?: Array<{ day: string; time: string; duration_minutes: number; available: boolean }>
 ): string {
   const isIndonesian = language === "id";
 
@@ -325,7 +357,14 @@ export function buildMouthSystemPrompt(
       }
       break;
     case "routing":
-      stateInstructions = buildRoutingInstructions(communityLink, isIndonesian);
+      stateInstructions = buildRoutingInstructions(communityLink, isIndonesian, consultationSlots);
+      break;
+    case "scheduling":
+      // When in scheduling state, show available slots
+      const schedulingSlots = formatAvailableSlots(consultationSlots);
+      stateInstructions = isIndonesian
+        ? `## TUGAS SAAT INI: Bantu pilih jadwal konsultasi\n\n${schedulingSlots}\n\nTanya hari mana yang cocok untuk customer.`
+        : `## CURRENT TASK: Help choose consultation schedule\n\n${schedulingSlots}\n\nAsk which day works for the customer.`;
       break;
     default:
       // Default greeting/qualifying flow
