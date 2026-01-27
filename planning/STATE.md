@@ -11,9 +11,9 @@ See: planning/PROJECT.md (updated 2026-01-25)
 
 Milestone: v3.3 Go Live
 Phase: 6 (UI Polish) — IN PROGRESS
-Plan: 2 of 4+ complete (06-03, 06-04)
+Plan: 2 of 4+ complete (06-02, 06-03)
 Status: Gap closure plans in progress
-Last activity: 2026-01-27 — Completed 06-03 Settings Page SSR Fix
+Last activity: 2026-01-27 — Completed 06-02 Database Dropdown Bug Fix
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (218 plans shipped)
 
@@ -135,12 +135,12 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Completed 06-03-PLAN.md (Settings Page SSR Fix)
+Stopped at: Completed 06-02-PLAN.md (Database Dropdown Bug Fix)
 Resume: Continue Phase 6 gap closure plans
 
 **Phase 6 Progress (IN PROGRESS — 2/4+):**
+- 06-02 ✓ Database Dropdown Bug Fix - Added key={contactId} to DropdownMenu components (Status, Tags, Assignee)
 - 06-03 ✓ Settings Page SSR Fix - Moved AI config fetch from server to client component
-- 06-04 ✓ Database Dropdown Bug Fix - Added key={contactId} to DropdownMenu components (Status, Tags, Assignee)
 
 **Phase 5 Progress (COMPLETE — 8/8):**
 - 05-01 ✓ n8n Webhook Verification - Endpoint tested, duplicate detection verified, 228 leads confirmed
@@ -199,4 +199,4 @@ Resume: Continue Phase 6 gap closure plans
 | 003 | Remove merge button, clear default tags | 2026-01-26 | 8d7954b | [003-database-ux-fixes](./quick/003-database-ux-fixes/) |
 
 ---
-*Last updated: 2026-01-27 — 06-03 Settings Page SSR Fix complete*
+*Last updated: 2026-01-27 — 06-02 Database Dropdown Bug Fix complete*
