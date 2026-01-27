@@ -548,8 +548,17 @@ export const processARI = internalAction({
         ],
         contactName: context.contact.name || context.contact.kapso_name || undefined,
         currentScore: context.contact.lead_score || 0,
+        scoringRules: context.scoringRules, // Pass workspace scoring rules to Brain
       });
       console.log(`[ARI] Brain analysis complete: ${JSON.stringify(brainResponse?.analysis || {})}`);
+
+      // Save next_action to ariConversation for debugging
+      if (brainResponse?.analysis?.next_action) {
+        await ctx.runMutation(internal.kapso.saveNextAction, {
+          ariConversationId: context.ariConversationId,
+          nextAction: brainResponse.analysis.next_action,
+        });
+      }
     } catch (brainError) {
       console.error(`[ARI] Brain error: ${brainError}`);
     }
@@ -906,6 +915,22 @@ export const findConversationByContact = internalQuery({
       .query("conversations")
       .withIndex("by_contact", (q) => q.eq("contact_id", args.contactId))
       .first();
+  },
+});
+
+/**
+ * Save Brain's next_action to ariConversation for debugging.
+ */
+export const saveNextAction = internalMutation({
+  args: {
+    ariConversationId: v.id("ariConversations"),
+    nextAction: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.ariConversationId, {
+      next_action: args.nextAction,
+      updated_at: Date.now(),
+    });
   },
 });
 
