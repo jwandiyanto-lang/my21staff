@@ -18,7 +18,7 @@ Requirements for Kapso Inbox Integration milestone. Each maps to roadmap phases.
 
 ### Your Intern Configuration
 
-- [ ] **INTERN-01**: Your Intern page loads without errors in production
+- [x] **INTERN-01**: Your Intern page loads without errors in production
 - [ ] **INTERN-02**: User can configure bot persona in Persona tab
 - [ ] **INTERN-03**: User can configure conversation flow in Flow tab
 - [ ] **INTERN-04**: User can configure database fields in Database tab
@@ -35,7 +35,7 @@ Requirements for Kapso Inbox Integration milestone. Each maps to roadmap phases.
 
 ### Development Workflow
 
-- [ ] **DEV-01**: Agent-skills MCP installed and configured
+- [x] **DEV-01**: Agent-skills MCP installed and configured
 
 ## Future Requirements
 
@@ -69,14 +69,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEV-01 | 1 | Pending |
+| DEV-01 | 1 | Complete |
 | INBOX-01 | 4 | Pending |
 | INBOX-02 | 4 | Pending |
 | INBOX-03 | 4 | Pending |
 | INBOX-04 | 5 | Pending |
 | INBOX-05 | 4 | Pending |
 | INBOX-06 | 4 | Pending |
-| INTERN-01 | 2 | Pending |
+| INTERN-01 | 2 | Complete |
 | INTERN-02 | 3 | Pending |
 | INTERN-03 | 3 | Pending |
 | INTERN-04 | 3 | Pending |

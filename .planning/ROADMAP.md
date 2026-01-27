@@ -150,8 +150,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Create page.tsx, add dev mode handling to API routes
-- [ ] 02-02-PLAN.md — Add error boundaries to tabs, verify page resilience
+- [x] 02-01-PLAN.md — Create page.tsx, add dev mode handling to API routes
+- [x] 02-02-PLAN.md — Add error boundaries to tabs, verify page resilience
 
 ### Phase 3: Your Intern Configuration
 **Goal**: User can configure bot behavior across 5 tabs (Persona, Flow, Database, Scoring, Slots) with one global AI toggle
@@ -241,7 +241,7 @@ Phases execute sequentially: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|-----------|----------------|--------|-----------|
 | 1-6. v3.3 | v3.3 | 33/33 | Complete | 2026-01-27 |
 | 1. Agent Skills Setup | v3.4 | 1/1 | Complete | 2026-01-27 |
-| 2. Your Intern Debug | v3.4 | 0/2 | Planned | - |
+| 2. Your Intern Debug | v3.4 | 2/2 | Complete | 2026-01-27 |
 | 3. Your Intern Config | v3.4 | 0/6 | Not started | - |
 | 4. Inbox UI & Filtering | v3.4 | 0/5-6 | Not started | - |
 | 5. Real-time & Handover | v3.4 | 0/3-4 | Not started | - |
