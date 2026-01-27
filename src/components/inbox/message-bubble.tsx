@@ -68,20 +68,20 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
 
       <div
         className={cn(
-          'max-w-[70%] rounded-lg px-4 py-2 shadow-sm',
+          'max-w-[70%] rounded-2xl px-3 py-2 shadow-sm',
           isOutbound
-            ? 'bg-primary text-primary-foreground rounded-tr-none'
-            : 'bg-white rounded-tl-none'
+            ? 'bg-emerald-500 text-white rounded-tr-sm'
+            : 'bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100 rounded-tl-sm border border-gray-200 dark:border-gray-700'
         )}
       >
         {/* Content based on message_type */}
         {message.message_type === 'image' && message.media_url && (
-          <div className="mb-2">
+          <div className="mb-2 overflow-hidden rounded-lg">
             <img
               src={message.media_url}
               alt="Image"
-              className="rounded max-w-full h-auto"
-              style={{ maxWidth: '300px' }}
+              className="max-w-full h-auto cursor-pointer hover:opacity-95 transition-opacity"
+              style={{ maxWidth: '280px' }}
             />
           </div>
         )}
@@ -95,19 +95,19 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
         )}
 
         {message.message_type === 'video' && message.media_url && (
-          <div className="mb-2">
+          <div className="mb-2 overflow-hidden rounded-lg">
             <video
               src={message.media_url}
               controls
-              className="rounded max-w-full h-auto"
-              style={{ maxWidth: '300px' }}
+              className="max-w-full h-auto"
+              style={{ maxWidth: '280px' }}
             />
           </div>
         )}
 
         {message.message_type === 'audio' && message.media_url && (
           <div className="mb-2">
-            <audio src={message.media_url} controls className="max-w-full" />
+            <audio src={message.media_url} controls className="max-w-full h-8" />
           </div>
         )}
 
@@ -120,7 +120,7 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
           <span
             className={cn(
               'text-xs',
-              isOutbound ? 'text-primary-foreground/70' : 'text-muted-foreground'
+              isOutbound ? 'text-white/70' : 'text-gray-500'
             )}
           >
             {format(new Date(message.created_at), 'HH:mm')}
