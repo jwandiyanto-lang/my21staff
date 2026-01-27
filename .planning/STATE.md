@@ -11,18 +11,18 @@ See: planning/PROJECT.md (updated 2026-01-27)
 
 Milestone: v3.4 Kapso Inbox Integration
 Phase: 5 of 6 (Real-time & Handover)
-Plan: 2 of 2 in phase (Phase 5 complete)
-Status: Phase 5 complete - real-time sync verified, AI/Human toggle UI and backend gate wired
-Last activity: 2026-01-27 — Completed 05-02-PLAN.md (handover mode gates ARI processing)
+Plan: 3 of 3 in phase (Phase 5 complete)
+Status: Phase 5 complete - visual mode indicators + end-to-end verification approved
+Last activity: 2026-01-27 — Completed 05-03-PLAN.md (visual mode indicators + end-to-end verification)
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 █████████░ (~83%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 235 (all v3.3 phases + v3.4 phases 1-5)
+- Total plans completed: 236 (all v3.3 phases + v3.4 phases 1-5)
 - v3.3 execution: 7 phases, ~22 plans, 3 days (2026-01-25 to 2026-01-27)
-- v3.4 execution: 5 phases, 10 plans, ~27 min
+- v3.4 execution: 5 phases, 11 plans, ~62 min
 
 **By Milestone:**
 
@@ -115,6 +115,14 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Early exit pattern with `continue` matches existing gate from Phase 03-02
 - Status values: 'open' = AI active, 'handover' = Human mode, 'closed' = Archived
 
+**Plan 03:**
+- Visual mode indicators: Badge with icon + text beside status tag in conversation list
+- Mode indicator in message thread header next to contact name
+- Consistent color scheme: Green for AI mode, Blue for Human mode
+- Button color matches badge color (green "ARI Active" / blue "Manual")
+- Parent state management: conversationStatusOverrides for toggle persistence in dev mode
+- Toggle works bidirectionally with proper state flow from parent to child components
+
 ### v3.4 Phase Structure
 
 - **Phase 1:** Agent Skills Setup (01-01) — ✓ Complete (Kapso skills + MCP server)
@@ -127,9 +135,10 @@ Progress: v1.0 ██████████ | v2.0 █████████
   - Plan 04-02: Message bubbles and auto-scroll — ✓ Complete
   - Plan 04-03: Integrate filters into inbox-client — ✓ Complete
   - Post-plan: Converted tabs to dropdown + optimized layout — ✓ Complete
-- **Phase 5:** Real-time & Handover (05-01, 05-02) — ✓ Complete
+- **Phase 5:** Real-time & Handover (05-01, 05-02, 05-03) — ✓ Complete
   - Plan 05-01: Real-time sync verification + AI/Human toggle UI — ✓ Complete
   - Plan 05-02: Wire AI/Human toggle to processARI gate — ✓ Complete
+  - Plan 05-03: Visual mode indicators + end-to-end verification — ✓ Complete
 - **Phase 6:** ARI Flow Integration (ARI-01,03,04) — Pending
 
 ### Coverage Status
@@ -152,31 +161,38 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ### Next Phase Readiness
 
-- Phase 5 (Real-time & Handover) COMPLETE (both plans)
+- Phase 5 (Real-time & Handover) COMPLETE (all 3 plans)
 - Phase 6 (ARI Flow Integration) ready to start
 - Real-time message sync verified working via Convex subscriptions
 - AI/Human toggle UI complete with confirmation dialog and visual feedback
+- Visual mode indicators in conversation list and thread header (green = AI, blue = human)
 - Handover mode fully wired to processARI gate (two-level gating system)
 - Typing indicator and system messages ready for ARI flow integration
+- Complete end-to-end workflow tested and approved by user
 
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Phase 5 complete (real-time sync + AI/Human toggle UI + backend gate wiring)
+Stopped at: Phase 5 complete (visual mode indicators + end-to-end verification approved)
 Resume: Ready for Phase 6 (ARI Flow Integration)
 
 **Files modified in Phase 5:**
 - `src/components/inbox/typing-indicator.tsx` — [NEW] WhatsApp-style typing animation
 - `src/components/inbox/system-message.tsx` — [NEW] Inline conversation notifications
-- `src/components/inbox/message-thread.tsx` — Added confirmation dialog, system messages, typing indicator
+- `src/components/inbox/message-thread.tsx` — Added confirmation dialog, system messages, typing indicator, mode indicator badge
+- `src/components/inbox/conversation-list.tsx` — Added mode badge beside status tag (Bot = AI, User = Human)
+- `src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx` — Added conversationStatusOverrides state for toggle persistence
 - `convex/kapso.ts` — Added conversation.status gate before processARI scheduling
 - `src/lib/mock-data.ts` — Updated conversation statuses + getMockMessagesForConversation helper
 
 **Recent commits:**
+- `90baa48` - fix(05-03): change Manual button color from orange to blue
+- `065bdaa` - fix(05-03): wire toggle to parent state for bidirectional switching
+- `5d2dcdd` - fix(05-03): make mode badge visible in conversation list
+- `03c2ad0` - feat(05-03): add AI/Human mode indicators to conversation list and message thread
 - `513d777` - feat(05-02): wire AI/Human toggle to processARI gate
 - `9e629b0` - feat(05-01): complete AI/Human toggle with confirmation and visual feedback
-- `c98d520` - docs(05-01): verify real-time message sync via Convex subscriptions
 
 ---
 
-*Last updated: 2026-01-27 — Phase 5 complete (real-time sync verified, AI/Human toggle UI + backend gate wired)*
+*Last updated: 2026-01-27 — Phase 5 complete (visual mode indicators + end-to-end verification approved)*
