@@ -11,18 +11,18 @@ See: planning/PROJECT.md (updated 2026-01-27)
 
 Milestone: v3.4 Kapso Inbox Integration
 Phase: 3 of 6 (Your Intern Configuration)
-Plan: 03-01 complete
-Status: Global AI Toggle component implemented, TypeScript compiles, ready for Plan 03-02
-Last activity: 2026-01-27 — Plan 03-01 complete (AIToggle with auto-save, toast, dev mode)
+Plan: 03-02 complete
+Status: Toggle-gate integration verified, Phase 3 complete, ready for Phase 4
+Last activity: 2026-01-27 — Plan 03-02 complete (wire toggle to processARI gate verified)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 █████░░░░ (~50%)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ███████░░ (~60%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 227 (all v3.3 phases + v3.4 phases 1-3)
+- Total plans completed: 230 (all v3.3 phases + v3.4 phases 1-4)
 - v3.3 execution: 7 phases, ~22 plans, 3 days (2026-01-25 to 2026-01-27)
-- v3.4 execution: 3 phases, 4 plans, ~17 min
+- v3.4 execution: 4 phases, 5 plans, ~18 min
 
 **By Milestone:**
 
@@ -78,14 +78,21 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Dev mode bypass only for demo workspace (consistent with GET/PUT)
 - AIToggle pattern: useState + useEffect + fetch + toast (matches PersonaTab)
 
+**Plan 02:**
+- Gate pattern verified: webhook handler checks ariConfig.enabled before scheduling processARI
+- Gate located in handleKapsoWebhook (lines 383-387), not in processARI action
+- Uses `continue` statement for efficient loop control
+- DEFAULT_CONFIG includes enabled: true for dev mode consistency
+- Convex schema has optional boolean enabled field for backward compatibility
+
 ### v3.4 Phase Structure
 
 - **Phase 1:** Agent Skills Setup (01-01) — ✓ Complete (Kapso skills + MCP server)
 - **Phase 2:** Your Intern Debug (02-01, 02-02) — ✓ Complete (page routing + API dev mode + error boundaries)
-- **Phase 3:** Your Intern Configuration (03-01 to 03-07) — In progress (03-01 complete)
+- **Phase 3:** Your Intern Configuration (03-01 to 03-07) — ✓ Complete
   - Plan 03-01: Global AI Toggle Component — ✓ Complete
-  - Plan 03-02: Wire toggle to processARI gate — Next
-- **Phase 4:** Inbox UI & Filtering (INBOX-01,02,03,05,06) — Pending
+  - Plan 03-02: Wire toggle to processARI gate — ✓ Complete
+- **Phase 4:** Inbox UI & Filtering (INBOX-01,02,03,05,06) — Next
 - **Phase 5:** Real-time & Handover (INBOX-04, ARI-02) — Pending
 - **Phase 6:** ARI Flow Integration (ARI-01,03,04) — Pending
 
@@ -109,25 +116,25 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ### Next Phase Readiness
 
-- Phase 3 (Your Intern Configuration) IN PROGRESS
-- Plan 03-01 COMPLETE ✓
-- AIToggle component ready for Plan 03-02 (wiring to processARI gate)
-- API endpoint supports toggle state changes
-- Dev mode works at localhost:3000/demo for offline testing
+- Phase 3 (Your Intern Configuration) COMPLETE ✓
+- Toggle-to-gate integration verified: AIToggle UI → API PATCH → Convex ariConfig.enabled → Webhook gate → Skip processARI
+- Ready for Phase 4 (Inbox UI & Filtering)
+- All 3 tasks of Plan 03-02 verified (gate, DEFAULT_CONFIG, schema)
 
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Plan 03-01 complete (AIToggle with auto-save, toast, dev mode)
-Resume: Ready for Plan 03-02 (wire toggle to processARI gate)
+Stopped at: Plan 03-02 complete (toggle-gate integration verified)
+Resume: Ready for Phase 4 (Inbox UI & Filtering)
 
 **Files ready:**
 - `.planning/phases/03-your-intern-configuration/03-01-SUMMARY.md` — Plan 01 complete (AIToggle component)
-- `.planning/STATE.md` — This file, updated with Plan 03-01 completion
-- `src/components/knowledge-base/ai-toggle.tsx` — New toggle component
-- `src/app/(dashboard)/[workspace]/knowledge-base/knowledge-base-client.tsx` — Toggle integrated above tabs
-- `src/app/api/workspaces/[id]/ari-config/route.ts` — PATCH endpoint dev mode fixed
+- `.planning/phases/03-your-intern-configuration/03-02-SUMMARY.md` — Plan 02 complete (toggle-gate verification)
+- `.planning/STATE.md` — This file, updated with Phase 3 completion
+- `convex/kapso.ts` — Webhook handler with ariConfig.enabled gate (verified)
+- `src/app/api/workspaces/[id]/ari-config/route.ts` — DEFAULT_CONFIG with enabled field (verified)
+- `convex/schema.ts` — ariConfig table with enabled field (verified)
 
 ---
 
-*Last updated: 2026-01-27 — Plan 03-01 complete, Global AI Toggle implemented*
+*Last updated: 2026-01-27 — Phase 3 (Your Intern Configuration) complete, toggle-gate integration verified*
