@@ -386,6 +386,17 @@ async function processWorkspaceMessages(
       continue;
     }
 
+    // Skip ARI if conversation is in handover (Human) mode
+    if (!conversation) {
+      console.error(`[ARI Gate] Conversation not found for contact ${contact._id}`);
+      continue;
+    }
+
+    if (conversation.status === 'handover') {
+      console.log(`[ARI Gate] Skipping ARI for conversation ${conversation._id} - Human mode active`);
+      continue;
+    }
+
     // Check if workspace has Kapso credentials
     const workspace = await ctx.db.get(workspaceId);
     if (!workspace?.meta_access_token) {
@@ -393,6 +404,7 @@ async function processWorkspaceMessages(
       continue;
     }
 
+    // Conversation is in 'open' or 'closed' - proceed with ARI
     // Schedule ARI processing (processARI is an internalMutation)
     await ctx.scheduler.runAfter(0, internal.kapso.processARI, {
       workspace_id: workspaceId,

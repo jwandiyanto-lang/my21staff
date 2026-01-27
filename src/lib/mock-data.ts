@@ -403,6 +403,11 @@ export const getNotesForContact = (contactId: string): MockNote[] => {
   return MOCK_NOTES.filter(note => note.contact_id === contactId)
 }
 
+// Helper to get messages for a specific conversation
+export const getMockMessagesForConversation = (conversationId: string): Message[] => {
+  return MOCK_MESSAGES.filter(message => message.conversation_id === conversationId)
+}
+
 // Website Manager mock data
 export const mockArticles: Article[] = [
   {
