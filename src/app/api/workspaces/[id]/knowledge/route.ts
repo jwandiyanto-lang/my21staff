@@ -12,6 +12,10 @@ import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import type { KnowledgeCategoryInsert, KnowledgeEntryInsert } from '@/lib/ari/types'
 
+function isDevMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+}
+
 interface RouteParams {
   params: Promise<{ id: string }>
 }
@@ -20,6 +24,11 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
+
+    // Dev mode: return mock data without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      return NextResponse.json({ categories: [], entries: [] })
+    }
 
     // Verify user has access to workspace
     const authResult = await requireWorkspaceMembership(workspaceId)
@@ -51,6 +60,36 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
+
+    // Dev mode: return mock success without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      const body = await request.json()
+      if (body.type === 'category') {
+        return NextResponse.json({
+          category: {
+            id: `mock-category-${Date.now()}`,
+            workspace_id: workspaceId,
+            name: body.name || 'New Category',
+            description: body.description || null,
+            display_order: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        }, { status: 201 })
+      }
+      return NextResponse.json({
+        entry: {
+          id: `mock-entry-${Date.now()}`,
+          workspace_id: workspaceId,
+          category_id: body.category_id || null,
+          title: body.title || 'New Entry',
+          content: body.content || '',
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      }, { status: 201 })
+    }
 
     // Verify user has access
     const authResult = await requireWorkspaceMembership(workspaceId)
@@ -125,6 +164,22 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
 
+    // Dev mode: return mock success without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      const body = await request.json()
+      return NextResponse.json({
+        category: {
+          id: body.category_id,
+          workspace_id: workspaceId,
+          name: body.name || 'Updated Category',
+          description: body.description || null,
+          display_order: body.display_order ?? 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      })
+    }
+
     // Verify user has access
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
@@ -166,6 +221,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
+
+    // Dev mode: return mock success without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      return NextResponse.json({ success: true, entriesDeleted: 0 })
+    }
 
     // Verify user has access
     const authResult = await requireWorkspaceMembership(workspaceId)

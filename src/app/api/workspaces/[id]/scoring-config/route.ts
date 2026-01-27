@@ -12,6 +12,10 @@ import type { ScoringConfig } from '@/lib/ari/types';
 import { DEFAULT_SCORING_CONFIG } from '@/lib/ari/types';
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth';
 
+function isDevMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+}
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
@@ -82,6 +86,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params;
 
+    // Dev mode: return mock config without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      return NextResponse.json({
+        config: {
+          workspace_id: workspaceId,
+          ...DEFAULT_SCORING_CONFIG,
+        },
+        isDefault: true,
+      });
+    }
+
     // Verify user has access to workspace
     const authResult = await requireWorkspaceMembership(workspaceId);
     if (authResult instanceof NextResponse) return authResult;
@@ -126,6 +141,22 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params;
+
+    // Dev mode: return mock config without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      const body = await request.json();
+      return NextResponse.json({
+        config: {
+          workspace_id: workspaceId,
+          hot_threshold: body.hot_threshold ?? DEFAULT_SCORING_CONFIG.hot_threshold,
+          warm_threshold: body.warm_threshold ?? DEFAULT_SCORING_CONFIG.warm_threshold,
+          weight_basic: body.weight_basic ?? DEFAULT_SCORING_CONFIG.weight_basic,
+          weight_qualification: body.weight_qualification ?? DEFAULT_SCORING_CONFIG.weight_qualification,
+          weight_document: body.weight_document ?? DEFAULT_SCORING_CONFIG.weight_document,
+          weight_engagement: body.weight_engagement ?? DEFAULT_SCORING_CONFIG.weight_engagement,
+        },
+      });
+    }
 
     // Verify user has access (admin role check is implicit in mutation)
     const authResult = await requireWorkspaceMembership(workspaceId);

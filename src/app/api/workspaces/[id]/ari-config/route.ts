@@ -43,6 +43,18 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
 
+    // Dev mode: return mock config without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      return NextResponse.json({
+        config: {
+          workspace_id: workspaceId,
+          enabled: true,
+          bot_name: 'ARI',
+          ...DEFAULT_CONFIG,
+        },
+      })
+    }
+
     // Verify user has access to workspace
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
@@ -80,6 +92,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
+
+    // Dev mode: return mock success without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      return NextResponse.json({
+        config: {
+          workspace_id: workspaceId,
+          ...DEFAULT_CONFIG,
+        },
+      })
+    }
 
     // Verify user has access
     const authResult = await requireWorkspaceMembership(workspaceId)

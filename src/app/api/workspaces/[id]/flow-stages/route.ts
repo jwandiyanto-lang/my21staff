@@ -12,6 +12,10 @@ import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import { DEFAULT_FLOW_STAGES, type FlowStageInsert } from '@/lib/ari/types'
 
+function isDevMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+}
+
 interface RouteParams {
   params: Promise<{ id: string }>
 }
@@ -20,6 +24,18 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
+
+    // Dev mode: return mock stages without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      const mockStages = DEFAULT_FLOW_STAGES.map((stage, index) => ({
+        id: `mock-stage-${index}`,
+        workspace_id: workspaceId,
+        ...stage,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }))
+      return NextResponse.json({ stages: mockStages, isDefault: true })
+    }
 
     // Verify user has access to workspace
     const authResult = await requireWorkspaceMembership(workspaceId)
@@ -59,6 +75,22 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
+
+    // Dev mode: return mock success without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      return NextResponse.json({
+        stage: {
+          id: `mock-stage-${Date.now()}`,
+          workspace_id: workspaceId,
+          name: 'New Stage',
+          goal: 'Stage goal',
+          stage_order: 0,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      }, { status: 201 })
+    }
 
     // Verify user has access
     const authResult = await requireWorkspaceMembership(workspaceId)
@@ -116,6 +148,20 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
+
+    // Dev mode: return mock success without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      const body = await request.json()
+      return NextResponse.json({
+        stage: {
+          id: body.id || `mock-stage-${Date.now()}`,
+          workspace_id: workspaceId,
+          ...body,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      })
+    }
 
     // Verify user has access
     const authResult = await requireWorkspaceMembership(workspaceId)
@@ -196,6 +242,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (!stageId) {
       return NextResponse.json({ error: 'Stage id is required' }, { status: 400 })
+    }
+
+    // Dev mode: return mock success without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      return NextResponse.json({ success: true })
     }
 
     // Verify user has access

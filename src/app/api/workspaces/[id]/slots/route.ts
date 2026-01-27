@@ -10,6 +10,10 @@ import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import type { ConsultantSlotInsert } from '@/lib/ari/types'
 
+function isDevMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+}
+
 interface RouteParams {
   params: Promise<{ id: string }>
 }
@@ -18,6 +22,11 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
+
+    // Dev mode: return mock slots without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      return NextResponse.json({ slots: [] })
+    }
 
     // Verify user has access to workspace
     const authResult = await requireWorkspaceMembership(workspaceId)
@@ -45,6 +54,27 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
+
+    // Dev mode: return mock slot without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      const body = await request.json()
+      return NextResponse.json({
+        slot: {
+          id: `mock-slot-${Date.now()}`,
+          workspace_id: workspaceId,
+          consultant_id: body.consultant_id || null,
+          day_of_week: body.day_of_week ?? 0,
+          start_time: body.start_time || '09:00',
+          end_time: body.end_time || '17:00',
+          duration_minutes: body.duration_minutes ?? 60,
+          booking_window_days: body.booking_window_days ?? 14,
+          max_bookings_per_slot: body.max_bookings_per_slot ?? 1,
+          is_active: body.is_active ?? true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      }, { status: 201 })
+    }
 
     // Verify user has access
     const authResult = await requireWorkspaceMembership(workspaceId)
