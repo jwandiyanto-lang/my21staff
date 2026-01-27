@@ -48,8 +48,20 @@ export type ARIState =
 /** Lead temperature based on score and engagement */
 export type LeadTemperature = 'hot' | 'warm' | 'cold';
 
-// Note: STATE_TRANSITIONS is now defined in state-machine.ts
-// with enhanced transition rules (e.g., qualifying can stay in qualifying)
+/**
+ * Valid state transitions map
+ * Prevents invalid state changes and enables state machine validation
+ */
+export const STATE_TRANSITIONS: Record<ARIState, ARIState[]> = {
+  greeting: ['qualifying'],
+  qualifying: ['scoring', 'qualifying'], // Can stay in qualifying to collect more info
+  scoring: ['booking', 'handoff'],
+  booking: ['payment', 'handoff'],
+  payment: ['scheduling', 'payment', 'handoff'], // Can retry payment
+  scheduling: ['handoff', 'scheduling'], // Can reschedule
+  handoff: ['completed'],
+  completed: [],
+};
 
 // ===========================================
 // Context Types (JSONB fields)
