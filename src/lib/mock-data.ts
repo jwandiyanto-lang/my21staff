@@ -164,7 +164,6 @@ export const MOCK_CONTACTS: Contact[] = [
     lead_status: 'hot',
     tags: ['Student', 'Hot Lead'],
     assigned_to: 'dev-user-001',
-    source: 'Website',
     metadata: {
       source: 'Website',
       form_answers: {
@@ -175,13 +174,12 @@ export const MOCK_CONTACTS: Contact[] = [
         'Target Berangkat': '2026',
       },
     },
-    created_at: new Date('2026-01-15T10:00:00Z').getTime(),
-    updated_at: new Date('2026-01-20T14:30:00Z').getTime(),
+    created_at: '2026-01-15T10:00:00Z',
+    updated_at: '2026-01-20T14:30:00Z',
     cache_updated_at: null,
     kapso_is_online: null,
     kapso_last_seen: null,
     kapso_profile_pic: null,
-    supabaseId: 'supabase-contact-001',
   },
   {
     id: 'contact-002',
@@ -195,7 +193,6 @@ export const MOCK_CONTACTS: Contact[] = [
     lead_status: 'warm',
     tags: ['Parent', 'Follow Up'],
     assigned_to: null,
-    source: 'WhatsApp',
     metadata: {
       source: 'WhatsApp',
       form_answers: {
@@ -206,13 +203,12 @@ export const MOCK_CONTACTS: Contact[] = [
         'Target Berangkat': '2027',
       },
     },
-    created_at: new Date('2026-01-18T09:00:00Z').getTime(),
-    updated_at: new Date('2026-01-22T11:00:00Z').getTime(),
+    created_at: '2026-01-18T09:00:00Z',
+    updated_at: '2026-01-22T11:00:00Z',
     cache_updated_at: null,
     kapso_is_online: null,
     kapso_last_seen: null,
     kapso_profile_pic: null,
-    supabaseId: 'supabase-contact-002',
   },
 ]
 
@@ -227,11 +223,10 @@ export const MOCK_CONVERSATIONS_RAW: Conversation[] = [
     status: 'open',
     assigned_to: 'dev-user-001',
     unread_count: 2,
-    last_message_at: new Date('2026-01-20T14:30:00Z').getTime(),
+    last_message_at: '2026-01-20T14:30:00Z',
     last_message_preview: 'Terima kasih infonya, saya akan pertimbangkan.',
-    created_at: new Date('2026-01-15T10:00:00Z').getTime(),
-    updated_at: new Date('2026-01-20T14:30:00Z').getTime(),
-    supabaseId: 'supabase-conv-001',
+    created_at: '2026-01-15T10:00:00Z',
+    updated_at: '2026-01-20T14:30:00Z',
   },
   {
     id: 'conv-002',
@@ -240,11 +235,10 @@ export const MOCK_CONVERSATIONS_RAW: Conversation[] = [
     status: 'open',
     assigned_to: null,
     unread_count: 1,
-    last_message_at: new Date('2026-01-22T11:00:00Z').getTime(),
+    last_message_at: '2026-01-22T11:00:00Z',
     last_message_preview: 'Apakah ada beasiswa untuk anak saya?',
-    created_at: new Date('2026-01-18T09:00:00Z').getTime(),
-    updated_at: new Date('2026-01-22T11:00:00Z').getTime(),
-    supabaseId: 'supabase-conv-002',
+    created_at: '2026-01-18T09:00:00Z',
+    updated_at: '2026-01-22T11:00:00Z',
   },
 ]
 
@@ -269,8 +263,7 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-001',
     metadata: { source: 'Website' },
-    created_at: new Date('2026-01-15T10:00:00Z').getTime(),
-    supabaseId: 'supabase-msg-001',
+    created_at: '2026-01-15T10:00:00Z',
   },
   {
     id: 'msg-002',
@@ -284,8 +277,7 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-002',
     metadata: {},
-    created_at: new Date('2026-01-15T10:01:00Z').getTime(),
-    supabaseId: 'supabase-msg-002',
+    created_at: '2026-01-15T10:01:00Z',
   },
   {
     id: 'msg-003',
@@ -299,8 +291,7 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-003',
     metadata: {},
-    created_at: new Date('2026-01-20T14:00:00Z').getTime(),
-    supabaseId: 'supabase-msg-003',
+    created_at: '2026-01-20T14:00:00Z',
   },
   {
     id: 'msg-004',
@@ -314,8 +305,7 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-004',
     metadata: {},
-    created_at: new Date('2026-01-20T14:30:00Z').getTime(),
-    supabaseId: 'supabase-msg-004',
+    created_at: '2026-01-20T14:30:00Z',
   },
   // Conversation with Siti Rahayu
   {
@@ -330,8 +320,7 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-005',
     metadata: { source: 'WhatsApp' },
-    created_at: new Date('2026-01-18T09:00:00Z').getTime(),
-    supabaseId: 'supabase-msg-005',
+    created_at: '2026-01-18T09:00:00Z',
   },
   {
     id: 'msg-006',
@@ -345,8 +334,7 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-006',
     metadata: {},
-    created_at: new Date('2026-01-18T09:01:00Z').getTime(),
-    supabaseId: 'supabase-msg-006',
+    created_at: '2026-01-18T09:01:00Z',
   },
   {
     id: 'msg-007',
@@ -360,8 +348,7 @@ export const MOCK_MESSAGES: Message[] = [
     media_url: null,
     kapso_message_id: 'mock-007',
     metadata: {},
-    created_at: new Date('2026-01-22T11:00:00Z').getTime(),
-    supabaseId: 'supabase-msg-007',
+    created_at: '2026-01-22T11:00:00Z',
   },
 ]
 
@@ -374,34 +361,39 @@ export interface MockNote {
   content: string
   due_date: string | null  // Keep for UI compatibility
   is_completed: boolean  // Keep for UI compatibility
-  created_at: number
-  supabaseId: string
+  created_at: string
 }
 
 export const MOCK_NOTES: MockNote[] = [
   {
     id: 'note-001',
+    workspace_id: 'dev-workspace-001',
+    contact_id: 'contact-001',
+    user_id: 'dev-user-001',
     content: 'Follow up about Australia visa requirements - he mentioned budget concerns',
     due_date: '2026-01-28T10:00:00Z',
     is_completed: false,
     created_at: '2026-01-20T15:00:00Z',
-    contact_id: 'contact-001',
   },
   {
     id: 'note-002',
+    workspace_id: 'dev-workspace-001',
+    contact_id: 'contact-001',
+    user_id: 'dev-user-001',
     content: 'Sent university brochure via email',
     due_date: null,
     is_completed: true,
     created_at: '2026-01-18T11:00:00Z',
-    contact_id: 'contact-001',
   },
   {
     id: 'note-003',
+    workspace_id: 'dev-workspace-001',
+    contact_id: 'contact-002',
+    user_id: 'dev-user-001',
     content: 'Call back next week to discuss scholarship options for her son',
     due_date: '2026-01-30T09:00:00Z',
     is_completed: false,
     created_at: '2026-01-22T14:00:00Z',
-    contact_id: 'contact-002',
   },
 ]
 
