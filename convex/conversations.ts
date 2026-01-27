@@ -9,6 +9,7 @@
 import { query, internalQuery, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireWorkspaceMembership } from "./lib/auth";
+import type { LeadStatus } from "@/lib/lead-status";
 
 /**
  * Get a conversation by ID (internal version for API routes).
@@ -583,5 +584,67 @@ export const listWithFilters = query({
       })),
       tags: Array.from(tagSet).sort(),
     };
+  },
+});
+
+export type ConversationCountsByStatus = Record<LeadStatus, number>
+
+/**
+ * Get conversation counts grouped by lead status.
+ *
+ * Returns counts of conversations by the contact's lead_status.
+ * Used for filter tabs with real-time counts in inbox UI.
+ *
+ * @param workspace_id - The workspace to count conversations for
+ * @param active - Optional filter for only active (unread) conversations
+ * @returns Object with status as key and count as value: { new: 5, hot: 12, warm: 8, ... }
+ */
+export const getConversationCountsByStatus = query({
+  args: {
+    workspace_id: v.id("workspaces"),
+    active: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args): Promise<ConversationCountsByStatus> => {
+    // Build conversation query with workspace filter
+    let q = ctx.db
+      .query("conversations")
+      .withIndex("by_workspace", (q) =>
+        q.eq("workspace_id", args.workspace_id)
+      );
+
+    // Collect all conversations for the workspace
+    const allConversations = await q.collect();
+
+    // Apply active filter if specified
+    const filteredConversations = args.active
+      ? allConversations.filter((c) => c.unread_count > 0)
+      : allConversations;
+
+    // Fetch contacts in parallel for efficiency
+    const contactIds = filteredConversations.map((c) => c.contact_id);
+    const contacts = await Promise.all(
+      contactIds.map((id) => ctx.db.get(id))
+    );
+
+    // Initialize counts with all statuses set to 0
+    const counts: ConversationCountsByStatus = {
+      new: 0,
+      hot: 0,
+      warm: 0,
+      cold: 0,
+      client: 0,
+      lost: 0,
+    };
+
+    // Group by lead_status
+    for (const conversation of filteredConversations) {
+      const contact = contacts.find((c) => c?._id === conversation.contact_id);
+      const status = contact?.lead_status || "new";
+      if (status in counts) {
+        counts[status as LeadStatus]++;
+      }
+    }
+
+    return counts;
   },
 });
