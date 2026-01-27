@@ -53,6 +53,7 @@ export const analyzeConversation = internalAction({
     })),
     contactName: v.optional(v.string()),
     currentScore: v.optional(v.number()),
+    scoringRules: v.optional(v.any()), // Workspace scoring configuration
   },
   handler: async (ctx, args): Promise<BrainResponse | null> => {
     console.log(`[Brain] Starting analysis for conversation ${args.ariConversationId}`);
@@ -72,8 +73,8 @@ export const analyzeConversation = internalAction({
       { aiType: "brain", maxMessages: 20 }
     );
 
-    // Build analysis prompt
-    const systemPrompt = buildBrainSystemPrompt();
+    // Build analysis prompt with workspace scoring rules
+    const systemPrompt = buildBrainSystemPrompt(args.scoringRules);
     const analysisPrompt = buildAnalysisPrompt(
       context,
       args.contactName ?? "Unknown",

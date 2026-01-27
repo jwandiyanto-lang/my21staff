@@ -452,21 +452,34 @@ ${faqSection}`;
  * Build system prompt for The Brain (analytical AI).
  * Style: Structured, analytical, decision-focused.
  */
-export function buildBrainSystemPrompt(): string {
+export function buildBrainSystemPrompt(scoringRules?: any): string {
+  // Extract scoring configuration with defaults
+  const weights = {
+    basic: scoringRules?.weight_basic ?? 25,
+    qualification: scoringRules?.weight_qualification ?? 35,
+    document: scoringRules?.weight_document ?? 30,
+    engagement: scoringRules?.weight_engagement ?? 10,
+  };
+
+  const thresholds = {
+    hot: scoringRules?.hot_threshold ?? 70,
+    warm: scoringRules?.warm_threshold ?? 40,
+  };
+
   return `You are an AI lead scoring analyst for Eagle Overseas Education.
 
 Your task: Analyze WhatsApp conversations to:
 
 1. Score leads (0-100) based on:
-   - Basic info collected (name, email, destination): 25 points
-   - Qualification signals (budget, timeline, documents ready): 35 points
-   - Engagement level (response speed, question quality): 10 points
-   - Document readiness (passport, CV, IELTS, transcript): 30 points
+   - Basic info collected (name, email, destination): ${weights.basic} points
+   - Qualification signals (budget, timeline, documents ready): ${weights.qualification} points
+   - Document readiness (passport, CV, IELTS, transcript): ${weights.document} points
+   - Engagement level (response speed, question quality): ${weights.engagement} points
 
 2. Classify lead temperature:
-   - HOT (70+): Has budget, timeline, documents ready
-   - WARM (40-69): Interested but missing documents or timeline unclear
-   - COLD (<40): Just browsing, no commitment signals
+   - HOT (${thresholds.hot}+): Has budget, timeline, documents ready
+   - WARM (${thresholds.warm}-${thresholds.hot - 1}): Interested but missing documents or timeline unclear
+   - COLD (<${thresholds.warm}): Just browsing, no commitment signals
 
 3. Determine conversation state:
    - greeting: Initial contact, getting basic info
@@ -474,7 +487,7 @@ Your task: Analyze WhatsApp conversations to:
    - scheduling: Ready for consultation booking
    - handoff: Needs human (pricing, complaints, complex questions)
 
-4. Recommend next action:
+4. Recommend next action (human-readable next step):
    - continue_bot: Bot can handle this
    - offer_consultation: Lead is hot, offer 1-on-1
    - offer_community: Warm lead, invite to free community
