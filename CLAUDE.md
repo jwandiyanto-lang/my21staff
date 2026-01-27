@@ -17,7 +17,7 @@ WhatsApp CRM + AI team for Indonesian SMEs.
 | `business/clients/` | Client reference files |
 | `src/` | Next.js webapp code |
 | `public/` | Static assets |
-| `planning/` | GSD workflow |
+| `.planning/` | GSD workflow |
 | `docs/` | Deployment & migration guides |
 
 ---
@@ -29,8 +29,8 @@ WhatsApp CRM + AI team for Indonesian SMEs.
 | Brand Guidelines | [business/brand/docs/BRAND.md](business/brand/docs/BRAND.md) |
 | Business Plan | [business/brand/docs/BUSINESS-PLAN.md](business/brand/docs/BUSINESS-PLAN.md) |
 | Pricing | [business/brand/docs/PRICING.md](business/brand/docs/PRICING.md) |
-| Project | [planning/PROJECT.md](planning/PROJECT.md) |
-| Roadmap | [planning/ROADMAP.md](planning/ROADMAP.md) |
+| Project | [.planning/PROJECT.md](.planning/PROJECT.md) |
+| Roadmap | [.planning/ROADMAP.md](.planning/ROADMAP.md) |
 
 ---
 

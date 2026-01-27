@@ -1,557 +1,592 @@
-# Domain Pitfalls: Kapso Integration & Production Debugging
+# Pitfalls Research: v3.1 Migration (Supabase to Clerk + Convex)
 
-**Project:** my21staff v3.4 Kapso Inbox Integration + Your Intern Debug
-**Researched:** 2026-01-27
-**Focus:** Common mistakes when integrating third-party WhatsApp components with Convex backends and debugging production crashes
+**Domain:** Auth provider migration (Supabase -> Clerk) + data migration (remaining Supabase tables -> Convex)
+**Researched:** 2026-01-23
+**Project context:** my21staff (196k LOC TypeScript), production at my21staff.com, first paying client (Eagle Overseas Education), active WhatsApp leads flowing through system
+**Migration scope:** Complete removal of Supabase from stack, full migration to Clerk + Convex
 
 ---
 
 ## Executive Summary
 
-Integrating Kapso's `whatsapp-cloud-inbox` with a custom Convex backend introduces three high-risk failure modes:
+**Top 3 Risks to Watch:**
 
-1. **Data Structure Mismatch** — The external component expects specific Convex query shapes; changing filters breaks assumptions
-2. **Hydration Crashes (Dev vs. Prod)** — Dev mode mock data differs from production subscriptions, causing SSR/client render divergence
-3. **Your Intern Crash Root Causes** — Missing environment checks, async hook calls, and state initialization errors during SSR
+1. **User Session Disruption** - Switching auth providers terminates ALL existing sessions. Every user (including Eagle's team) will be logged out. Password hashes may not transfer cleanly, forcing password resets.
 
-Each pitfall has specific prevention strategies tied to your current architecture.
+2. **User ID Mapping Breaks Foreign Keys** - Supabase user IDs (UUIDs) are referenced throughout Convex schema (`owner_id`, `user_id`, `assigned_to`, `requester_id`). New Clerk user IDs won't match, breaking workspace membership, ticket ownership, and message attribution.
 
----
-
-## Critical Pitfalls
-
-### Pitfall 1: Component API Expectation Mismatch
-
-**What goes wrong:**
-You integrate Kapso's `whatsapp-cloud-inbox` component which expects data in a specific schema. Your existing Inbox works because you manually shape data (`MOCK_INBOX_DATA` transformation in `inbox-client.tsx`). When you swap components:
-- Kapso component expects fields like `conversation.metadata.lastMessageAt` (nested)
-- Your Convex query returns `conversation.last_message_at` (flat)
-- Component silently renders nothing, or crashes with undefined property access
-
-**Why it happens:**
-Third-party components aren't written for your schema. They assume their own data structures. You must either:
-1. Shape all data to match their expectations (adapter pattern)
-2. Convince them to accept your schema (unlikely with closed components)
-3. Create a translation layer that converts between schemas
-
-The trap: Component documentation shows example data that "looks right" but doesn't match your actual Convex types.
-
-**Consequences:**
-- Conversations don't render in Inbox
-- Filter/search features malfunction silently
-- Real-time updates don't propagate to the UI
-- You debug for 2+ hours before realizing it's a schema mismatch
-
-**Evidence:**
-Your current `inbox-client.tsx` (line 27-59) already does this translation work:
-```typescript
-const MOCK_INBOX_DATA = {
-  conversations: MOCK_CONVERSATIONS.map((conv) => ({
-    _id: conv.id as Id<'conversations'>,
-    status: conv.status,
-    // ... manual field mapping
-  })),
-}
-```
-
-When you replace this with Kapso's component, you need the same adapter for production Convex data.
-
-**Prevention:**
-1. **Before integrating:** Read Kapso component's TypeScript interfaces for required data shape
-2. **Create an adapter function:**
-   ```typescript
-   function adaptConvexToKapsoFormat(convexConversation: ConversationType) {
-     return {
-       id: convexConversation._id,
-       messages: convexConversation.messages.map(m => ({
-         id: m._id,
-         content: m.body,
-         timestamp: m.created_at,
-         // ... all required fields
-       }))
-     }
-   }
-   ```
-3. **Test against component's expected types** — Use TypeScript strict mode to catch missing/wrong fields early
-4. **Keep both implementations temporarily** — Run side-by-side until you're confident data flows correctly
-
-**Detection:**
-- Component renders empty
-- No errors in console (it silently falls back)
-- Convex subscription shows data in dev tools, but component shows nothing
-- Filter buttons exist but don't change visible conversations
-
-**Phase responsibility:** Phase 1 (Kapso replacement) — must validate schema before full swap
+3. **n8n Webhook Double-Migration** - You have TWO webhook migrations: (1) Next.js API -> Convex HTTP actions (Kapso), (2) Update n8n workflows for new Convex endpoints. Missing either leaves Eagle's leads orphaned.
 
 ---
 
-### Pitfall 2: Hydration Mismatch (Dev Mock vs. Prod Subscriptions)
+## Auth Migration Pitfalls (Supabase -> Clerk)
 
-**What goes wrong:**
-Your app works perfectly in dev mode (`/demo`) because `isDevMode()` returns mock data:
-```typescript
-const convexData = useQuery(
-  api.conversations.listWithFilters,
-  isDevMode() ? 'skip' : { workspace_id: workspaceId, ... }
-)
-const data = isDevMode() ? MOCK_INBOX_DATA : convexData
-```
+### P0: Session Termination Without Warning
 
-On production (`my21staff.com`):
-- Server renders with Convex subscription
-- Client hydrates and calls `useQuery` again
-- If subscription data changes between server render and client render → hydration mismatch
-- React throws: "Text content does not match server-rendered HTML"
-- Page crashes or shows blank
+**What goes wrong:** Switching to Clerk terminates ALL existing Supabase sessions immediately. Users get logged out mid-session. If this happens during business hours, Eagle's team can't access their CRM when leads are coming in.
 
-**Why it happens:**
-Next.js SSR renders on server, then hydrates on client. If the same component renders different content:
-- Server: Sees 5 conversations
-- Client: Subscription fires, now sees 6 conversations (new message arrived)
-- Mismatch → crash
+**Why it happens:** Clerk manages sessions independently from Supabase. There's no session handoff mechanism. Once you remove Supabase auth middleware, all Supabase JWTs become invalid.
 
-With dev mode, you avoid real subscriptions entirely, so this never happens locally.
-
-**Evidence:**
-Your INTEGRATION_CHECK_V3.3.md notes (line 99):
-> Real-time sync: PARTIAL — Dev mode doesn't sync; production uses Convex subscriptions
-
-This is the exact mismatch vector.
-
-**Consequences:**
-- Works in dev (`/demo`), crashes in production
-- Error only appears after deployment
-- Hard to reproduce locally
-- Takes hours to debug because "it works on my machine"
+**Warning signs:**
+- Planning to switch auth "over the weekend" without user communication
+- No migration timeline shared with Eagle team
+- Assuming users can "just log in again"
 
 **Prevention:**
-1. **Never skip Convex queries in server components** — Use `fetchQuery` instead:
+1. **Schedule migration window with Eagle** - Get explicit approval for a 1-2 hour maintenance window
+2. **Pre-create Clerk accounts** - Import users with same email BEFORE switching auth
+3. **Force password reset for all users** - Password hashes may not transfer (bcrypt vs scrypt compatibility)
+4. **Send email notification** - "We're upgrading security, please reset your password by [date]"
+
+**Phase:** Pre-migration communication phase
+
+**Confidence:** HIGH - [Clerk migration docs](https://clerk.com/docs/guides/development/migrating/overview) explicitly state sessions are not preserved
+
+---
+
+### P0: Password Hash Incompatibility
+
+**What goes wrong:** Supabase stores passwords using bcrypt. Clerk also uses bcrypt, BUT the import process may not accept raw password hashes directly. Users can't log in with their existing passwords.
+
+**Why it happens:** Password hash format includes algorithm identifier, cost factor, and salt. Even if both use bcrypt, the exact format may differ. Clerk's user import API requires specific `password_hasher` parameter.
+
+**Warning signs:**
+- Assuming "both use bcrypt so it'll work"
+- Not testing password import on a single user first
+- Users reporting "wrong password" after migration
+
+**Prevention:**
+1. **Export Supabase password hashes** - Query `auth.users` table directly (requires Supabase admin access)
+2. **Test import with one user** - Create a test user in Clerk with exported hash before bulk import
+3. **Have password reset flow ready** - If hash import fails, all users need password reset
+4. **Use `external_id` for mapping** - Store Supabase UUID as Clerk external_id for data correlation
+
+**Phase:** User data export/import phase
+
+**Confidence:** MEDIUM - [Clerk CreateUser API](https://clerk.com/docs/guides/development/migrating/overview) shows password_hasher support but exact Supabase compatibility needs testing
+
+---
+
+### P1: User ID Mismatch in Convex Data
+
+**What goes wrong:** Current Convex schema stores Supabase UUIDs everywhere:
+- `workspaces.owner_id` (string - Supabase UUID)
+- `workspaceMembers.user_id` (string - Supabase UUID)
+- `contacts.assigned_to` (string - Supabase UUID)
+- `tickets.requester_id` (string - Supabase UUID)
+- `ticketComments.author_id` (string - Supabase UUID)
+
+Clerk assigns NEW user IDs. All these references become orphaned.
+
+**Why it happens:** You're replacing the identity provider, but the data layer still references old identity format. Convex doesn't have "foreign key constraints" - these are just strings that no longer map to real users.
+
+**Warning signs:**
+- "User not found" errors in workspace member queries
+- Tickets showing "Unknown requester"
+- Assigned contacts appearing unassigned
+- Ownership checks failing (workspace owner can't access workspace)
+
+**Prevention:**
+1. **Store Supabase UUID as Clerk external_id** - This is the bridge between old and new
+2. **Create user mapping table in Convex:**
    ```typescript
-   // BAD (what inbox does now):
-   const data = useQuery(...) // client hook, can't use in SSR
-
-   // GOOD (for SSR pages):
-   export const MyPage = async () => {
-     const data = await fetchQuery(api.conversations.listWithFilters, args)
-     return <InboxClient initialData={data} />
-   }
+   userMappings: defineTable({
+     supabase_id: v.string(),
+     clerk_id: v.string(),
+     email: v.string(),
+   }).index("by_supabase", ["supabase_id"]).index("by_clerk", ["clerk_id"])
    ```
+3. **Update all user_id references during migration** - Run migration that looks up new Clerk ID and updates all documents
+4. **Preserve original IDs temporarily** - Add `legacy_user_id` field during transition
 
-2. **Implement Suspense + streaming for subscriptions:**
+**Phase:** Post-Clerk-import migration phase
+
+**Confidence:** HIGH - Analyzed current Convex schema (lines 11, 26-27, 47, 171, 194, 206)
+
+---
+
+### P1: Middleware Migration Breaks Protected Routes
+
+**What goes wrong:** Current Next.js middleware (`src/middleware.ts`) uses Supabase session checking:
+```typescript
+const supabase = createServerClient(...)
+const { data: { user } } = await supabase.auth.getUser()
+```
+Replacing with Clerk middleware has different API. Misconfiguration exposes protected routes or blocks public routes.
+
+**Why it happens:** Clerk middleware uses `clerkMiddleware()` with route matchers. Different pattern from Supabase's cookie-based session. Easy to misconfigure public vs protected routes.
+
+**Warning signs:**
+- Login page redirecting to itself (loop)
+- Protected pages accessible without auth
+- API routes failing with 401 when they shouldn't
+- Public pages (/, /pricing, /articles) requiring login
+
+**Prevention:**
+1. **Map current public routes explicitly:**
    ```typescript
-   <Suspense fallback={<Skeleton />}>
-     <InboxClient workspaceId={workspaceId} />
-   </Suspense>
+   // Current public routes in middleware.ts line 47
+   const publicRoutes = ['/', '/login', '/signup', '/change-password', '/pricing', '/set-password', '/forgot-password', '/reset-password']
    ```
-
-3. **Add explicit dev mode checks before integration:**
+2. **Use Clerk's `createRouteMatcher`** for clarity:
    ```typescript
-   if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
-     // Client only, safe from SSR
-   }
+   const isPublicRoute = createRouteMatcher([
+     '/',
+     '/login',
+     '/signup',
+     '/pricing(.*)',
+     '/articles(.*)',
+     '/api/webhook(.*)', // Critical: webhooks are public!
+   ])
    ```
+3. **Test EVERY route type** - Public pages, protected pages, API routes, webhooks
+4. **Keep old middleware during transition** - Comment out, don't delete
 
-4. **Test in production-like environment before deployment:**
+**Phase:** Middleware migration phase
+
+**Confidence:** HIGH - [Clerk middleware migration guide](https://clerk.com/docs/guides/development/upgrading/upgrade-guides/core-2/nextjs) documents route matcher pattern
+
+---
+
+### P2: Webhook Authentication Confusion
+
+**What goes wrong:** Current Convex auth config (`convex/auth.config.ts`) validates Supabase JWTs:
+```typescript
+issuer: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1`,
+jwks: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/.well-known/jwks.json`,
+```
+Clerk JWTs have different issuer and structure. Convex auth layer rejects valid Clerk sessions.
+
+**Why it happens:** Convex validates JWTs against configured issuer. Changing auth provider requires updating Convex auth config to validate Clerk JWTs instead.
+
+**Warning signs:**
+- "Unauthorized" errors in Convex queries after Clerk migration
+- `getAuthUserId()` returning null for logged-in users
+- Frontend showing authenticated, backend rejecting requests
+
+**Prevention:**
+1. **Update Convex auth.config.ts for Clerk:**
+   ```typescript
+   export default {
+     providers: [
+       {
+         domain: process.env.CLERK_JWT_ISSUER_DOMAIN,
+         applicationID: "convex",
+       },
+     ],
+   } satisfies AuthConfig;
+   ```
+2. **Deploy Convex auth config BEFORE frontend migration**
+3. **Test with a single endpoint** before full rollout
+4. **Set up Clerk webhook to Convex** for user data sync
+
+**Phase:** Convex + Clerk integration phase
+
+**Confidence:** HIGH - [Clerk Convex integration](https://clerk.com/blog/webhooks-data-sync-convex) documents auth config pattern
+
+---
+
+## Data Migration Pitfalls (Supabase -> Convex)
+
+### P0: Remaining Supabase Tables Not Migrated
+
+**What goes wrong:** v3.0 migrated core tables to Convex, but some tables may still be in Supabase:
+- Knowledge base entries (`ari_knowledge`)
+- Flow stages configuration
+- Scoring configuration
+- Consultation slots
+
+If these aren't migrated, app breaks when Supabase is removed.
+
+**Why it happens:** Incremental migration leaves "forgotten" tables. The app works until someone accesses a feature that reads from unmigrated table.
+
+**Warning signs:**
+- "Your Intern" admin pages failing after migration
+- Knowledge base empty
+- Consultation booking broken
+- ARI responses using outdated config
+
+**Prevention:**
+1. **Audit ALL Supabase tables:**
    ```bash
-   npm run build
-   npm run start  # Runs with SSR, not dev server
+   # In Supabase SQL editor
+   SELECT table_name FROM information_schema.tables
+   WHERE table_schema = 'public';
    ```
+2. **Cross-reference with Convex schema** - Every Supabase table needs a Convex equivalent
+3. **Test EVERY feature** - Not just the main inbox flow
+4. **Create migration checklist** by table
 
-5. **Mock data must match production schema exactly** — Your `MOCK_INBOX_DATA` needs same timestamp format, same field types, same nested structure as Convex queries return
+**Phase:** Data audit phase (before migration)
 
-**Detection:**
-- App works at `localhost:3000` but crashes on Vercel
-- Console shows React hydration errors (specific text content mismatch)
-- Page is blank after initial paint
-- Error happens during page load, not user interaction
-
-**Phase responsibility:** Integration testing phase (before production swap) — must verify dev/prod parity
+**Confidence:** HIGH - Current Convex schema shows some tables but needs verification against Supabase
 
 ---
 
-### Pitfall 3: Real-Time Subscription Not Re-Running on Filter Changes
+### P1: ID Format Change (UUID -> Convex ID)
 
-**What goes wrong:**
-Your current inbox filters work because they're client-side:
-```typescript
-const filteredConversations = useMemo(() => {
-  // Filter client-side after query loads
-  let filtered = [...data.conversations]
-  if (statusFilter.length > 0) {
-    filtered = filtered.filter(c => statusFilter.includes(c.contact.lead_status))
-  }
-  return filtered
-}, [data?.conversations, statusFilter, tagFilter, viewMode])
-```
+**What goes wrong:** Supabase uses UUIDs (`25de3c4e-b9ca-4aff-9639-b35668f0a48e`). Convex uses its own ID format (`j57g3kz9h8g0c0cxz8f6s3hb`). All `supabaseId` fields become orphaned references.
 
-When you replace with Kapso component:
-- Kapso's own filtering logic may not know about your `statusFilter` state
-- Component filters its own data, but real-time subscription doesn't re-run
-- You change filter → UI updates with old data → confusion
+**Why it happens:** You're moving between two different data stores with incompatible ID systems. The `supabaseId` field in current Convex schema was meant for migration tracking, not permanent use.
 
-**Why it happens:**
-Convex subscriptions are smart — they re-run when query dependencies change. But:
-- If you pass filtered data to a component, subscription doesn't know about filter changes
-- Component might cache data and not request updates
-- Two sources of truth (Convex query + component's internal cache)
-
-**Consequences:**
-- User selects "Hot" status filter → sees old list anyway
-- User thinks feature is broken
-- UI feels sluggish or unresponsive
-- Filter buttons exist but don't work
-
-**Evidence:**
-Your `inbox-client.tsx` passes all conversations to `ConversationList`:
-```typescript
-<ConversationList
-  conversations={filteredConversations}  // Already filtered client-side
-  selectedId={selectedConversationId}
-  onSelect={setSelectedConversationId}
-  members={data.members}
-/>
-```
-
-If Kapso component doesn't know about this filtering, it won't update.
+**Warning signs:**
+- Joins/lookups by supabaseId failing
+- URL parameters containing old UUIDs not resolving
+- "Contact not found" errors for bookmarked URLs
+- External integrations (n8n) still sending Supabase IDs
 
 **Prevention:**
-1. **Keep Convex query filtering, not component filtering:**
+1. **Keep supabaseId for backward compatibility** - Don't remove during migration
+2. **Add index on supabaseId** - For efficient lookup during transition
+3. **Update external systems gradually** - n8n, bookmarked URLs, etc.
+4. **Implement ID translation layer:**
    ```typescript
-   // GOOD: Filter at query level
-   const convexData = useQuery(
-     api.conversations.listWithFilters,
-     {
-       workspace_id: workspaceId,
-       statusFilters: statusFilter.length > 0 ? statusFilter : undefined,
-       tagFilters: tagFilter.length > 0 ? tagFilter : undefined,
-     }
-   )
-
-   // Then pass directly to component, no client-side filtering
-   <KapsoInbox data={convexData} />
-   ```
-
-2. **Verify Kapso component accepts filter props** — Read its documentation for how to control filtering
-3. **Use TanStack Query cache invalidation explicitly:**
-   ```typescript
-   const queryClient = useQueryClient()
-   const handleFilterChange = (newFilter) => {
-     setStatusFilter(newFilter)
-     // Force Convex to re-run query
-     queryClient.invalidateQueries({
-       queryKey: ['conversations', workspaceId, newFilter]
-     })
+   // In Convex query
+   async function getContactByAnyId(ctx, id: string) {
+     // Try as Convex ID first
+     const normalized = ctx.db.normalizeId("contacts", id);
+     if (normalized) return ctx.db.get(normalized);
+     // Fall back to supabaseId lookup
+     return ctx.db.query("contacts")
+       .withIndex("by_supabase_id", q => q.eq("supabaseId", id))
+       .first();
    }
    ```
 
-4. **Test filter → wait for update → select conversation cycle** before deploying
+**Phase:** Data migration phase
 
-**Detection:**
-- Filter buttons highlight but conversations don't change
-- Filtering works on page reload (not in real-time)
-- UI shows "no conversations" but DevTools show data exists
-- Search works but status filter doesn't
-
-**Phase responsibility:** Phase 2 (Real-time integration) — must verify filters trigger subscriptions
+**Confidence:** HIGH - Current schema has `supabaseId` fields (lines 53, 72, 93, etc.) that need preservation
 
 ---
 
-## Your Intern Page Crash — Specific Pitfalls
+### P1: Real-time Subscription Breaks During Migration
 
-### Pitfall 4: SSR Hook Calls in Server Components
+**What goes wrong:** Frontend uses Convex subscriptions for real-time updates. During migration, schema changes may invalidate existing subscriptions. Users see stale data or errors.
 
-**What goes wrong:**
-Your `knowledge-base-client.tsx` uses client hooks:
-```typescript
-'use client'
-const [activeTab, setActiveTab] = useState('persona')
-```
+**Why it happens:** Convex validates schema at deployment time. If migration adds required fields or changes types, existing data may not conform, causing query failures.
 
-But if the parent page component tries to use Clerk or Convex hooks during SSR:
-```typescript
-// In page.tsx (server component)
-const data = useQuery(api.workspaces.getBySlug) // ← Can't use hooks on server!
-```
-
-Next.js crashes because you're calling client-only hooks in a server context.
-
-**Why it happens:**
-- Clerk's `useAuth()` hook doesn't work during SSR
-- Convex's `useQuery()` hook doesn't work on the server
-- Your Your Intern page likely fetches workspace data on the server, then passes to client component
-- If the page tries to do this with hooks instead of async functions, it crashes
-
-**Evidence:**
-Your INTEGRATION_CHECK notes mention:
-> Settings page SSR auth crash (gap closure - move AI config to client)
-
-This was fixed in Phase 06-03, but the pattern might repeat in the Your Intern page.
-
-**Consequences:**
-- Page returns 500 Internal Server Error in production
-- Works in dev because dev mode bypasses auth
-- Error: "useAuth is not a valid hook call"
-- Cannot access workspace data
+**Warning signs:**
+- "Schema validation failed" during deployment
+- Real-time updates stopping silently
+- Console errors about "undefined" fields
+- Inbox not updating when new messages arrive
 
 **Prevention:**
-1. **Use `fetchQuery` for server-side data:**
+1. **Use optional fields during transition:**
    ```typescript
-   // page.tsx (server component)
-   import { fetchQuery } from 'convex/nextjs'
+   // Instead of: newField: v.string()
+   newField: v.optional(v.string())
+   // Then migrate data, then make required
+   ```
+2. **Deploy schema changes in phases:**
+   - Phase 1: Add optional fields
+   - Phase 2: Run data migration
+   - Phase 3: Make fields required (if needed)
+3. **Monitor Convex dashboard** during migration for subscription errors
+4. **Have rollback plan** - Keep previous schema version
 
-   export default async function YourInternPage() {
-     const workspace = await fetchQuery(api.workspaces.getBySlug, {
-       slug: params.workspace
-     })
-     return <KnowledgeBaseClient workspace={workspace} />
+**Phase:** Schema evolution phase
+
+**Confidence:** HIGH - [Convex migration guide](https://stack.convex.dev/intro-to-migrations) emphasizes phased schema changes
+
+---
+
+### P2: Data Volume Limits
+
+**What goes wrong:** Convex has different performance characteristics than Postgres. Large batch imports (100k+ records) may timeout or hit rate limits.
+
+**Why it happens:** Convex mutations have execution time limits. Bulk imports need to be chunked. No direct SQL equivalent for mass updates.
+
+**Warning signs:**
+- Import mutations timing out
+- "Too many requests" errors
+- Migration taking hours instead of minutes
+- Incomplete imports (partial data)
+
+**Prevention:**
+1. **Chunk imports** - 100-500 records per mutation
+2. **Use Convex migrations component** for large datasets
+3. **Track progress** - Store migration cursor to resume if interrupted
+4. **Off-hours migration** - Less read traffic competing with writes
+
+**Phase:** Data migration execution phase
+
+**Confidence:** MEDIUM - [Convex data import](https://stack.convex.dev/migrate-data-postgres-to-convex) recommends chunking
+
+---
+
+## Integration Pitfalls (n8n, Webhooks, Production Traffic)
+
+### P0: n8n Webhook URLs Still Point to Old Endpoints
+
+**What goes wrong:** Eagle's leads come through n8n workflows that POST to Next.js API routes. These routes use Supabase. After migration, n8n continues sending to old endpoints that no longer work.
+
+**Why it happens:** n8n workflows are stored externally (on your home server). Changing the codebase doesn't update n8n configuration. Leads silently fail.
+
+**Warning signs:**
+- New leads stop appearing in CRM
+- n8n workflow executions showing errors
+- Eagle asking "where are my leads?"
+- Kapso showing messages delivered but not in system
+
+**Prevention:**
+1. **Document ALL n8n webhook URLs currently in use:**
+   - Kapso webhook forwarding
+   - Lead creation endpoints
+   - Any other integrations
+2. **Create Convex HTTP action equivalents** BEFORE removing old endpoints
+3. **Update n8n workflows** with new Convex URLs
+4. **Keep old endpoints as redirects** temporarily:
+   ```typescript
+   // Old endpoint becomes redirect
+   export async function POST(request: NextRequest) {
+     return NextResponse.redirect(
+       'https://intent-otter-212.convex.site/api/leads',
+       307 // Temporary redirect, keeps POST method
+     );
    }
    ```
+5. **Test n8n workflows** after updating URLs
 
-2. **Never import hooks in server components:**
-   ```typescript
-   // BAD in page.tsx:
-   import { useAuth } from '@clerk/nextjs'
+**Phase:** Integration migration phase
 
-   // GOOD in page.tsx:
-   import { auth } from '@clerk/nextjs/server'
-   ```
-
-3. **Add `'use client'` only to components that need hooks**
-
-4. **Test with `npm run build && npm run start`** (catches SSR issues)
-
-**Detection:**
-- 500 error on Vercel, works on localhost
-- Console shows "useAuth is not a valid hook"
-- Error mentions "cannot be used in a server context"
-- Page renders in dev but not production
-
-**Phase responsibility:** Phase 1 (Your Intern debug) — must trace exact error with production logs
+**Confidence:** HIGH - n8n runs on separate server (100.113.96.25:5678), manual update required
 
 ---
 
-### Pitfall 5: Missing DevMode Check in New Features
+### P1: Kapso Webhook URL Change
 
-**What goes wrong:**
-Your Your Intern page has 5 tabs with forms. If any tab:
-- Makes a Convex mutation
-- Reads from Convex
-- Uses Clerk organizations
+**What goes wrong:** Current Kapso webhook points to Next.js API route (`/api/webhook/kapso`). v3.0 already has Convex webhook handler, but Kapso dashboard may still point to old URL.
 
-And doesn't have a `isDevMode()` check, it will crash in `/demo` mode.
+**Why it happens:** Kapso webhook configuration is external. Must be manually updated in Kapso dashboard.
 
-Example:
-```typescript
-// PersonaTab.tsx
-export function PersonaTab({ workspaceId }: { workspaceId: string }) {
-  const mutation = useMutation(api.workspaces.updateARI) // ← No dev mode check
-
-  const handleSave = async (data) => {
-    await mutation({ workspace_id: workspaceId, ...data })
-  }
-}
-```
-
-On `/demo`, `workspaceId` is a string ID but `useMutation` tries to call Convex API → crash.
-
-**Why it happens:**
-When you added Your Intern in v2.2, it wasn't designed for dev mode. The dev mode bypass was added later in v3.2. New code doesn't know about this pattern.
-
-**Evidence:**
-Your `mock-data.ts` has no mock functions for ARI config:
-```typescript
-// Only these mocks exist:
-MOCK_CONVERSATIONS, MOCK_TEAM_MEMBERS, MOCK_CONTACTS, getNotesForContact
-// Missing: MOCK_ARI_CONFIG, MOCK_SCORING_RULES, etc.
-```
-
-**Consequences:**
-- `/demo` crashes when visiting Your Intern tab
-- Users testing locally can't access the feature
-- Can't test UI without running full Convex backend
-- Feature development is slow (need Convex running)
+**Warning signs:**
+- WhatsApp messages not appearing in CRM
+- Webhook handler logs showing no traffic
+- Kapso dashboard showing delivery failures
 
 **Prevention:**
-1. **Add dev mode check to all new mutations/queries:**
-   ```typescript
-   const PersonaTab = ({ workspaceId }) => {
-     const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+1. **Verify current Kapso webhook URL** in Kapso dashboard
+2. **Update to Convex URL:** `https://intent-otter-212.convex.site/api/webhook/kapso`
+3. **Keep BOTH endpoints live temporarily** - Route traffic to same handler
+4. **Monitor both endpoints** for traffic during transition
+5. **WEBHOOK-MIGRATION-STEPS.md** already documents this - follow it!
 
-     const mutation = useMutation(
-       isDevMode ? undefined : api.workspaces.updateARI
-     )
+**Phase:** External integration update phase
 
-     const handleSave = async (data) => {
-       if (isDevMode) {
-         console.log('Dev mode: would save', data)
-         return
-       }
-       await mutation({ workspace_id: workspaceId, ...data })
-     }
-   }
-   ```
-
-2. **Add mock data for Your Intern:**
-   ```typescript
-   // mock-data.ts
-   export const MOCK_ARI_CONFIG = {
-     workspace_id: MOCK_WORKSPACE_ID,
-     persona_name: 'Ari',
-     greeting_message: 'Hello!',
-   }
-   ```
-
-3. **Test every Your Intern tab at `localhost:3000/demo`**
-
-4. **Add a checklist to PR template:** "All new Convex calls have `isDevMode()` check"
-
-**Detection:**
-- `/demo` page throws error when clicking tabs
-- Works at `localhost:3000/[workspace]/knowledge-base`
-- Error message mentions Convex API or mutation
-- Console shows "Cannot read property of undefined"
-
-**Phase responsibility:** Phase 1 (Your Intern debug) — add dev mode bypass before production swap
+**Confidence:** HIGH - WEBHOOK-MIGRATION-STEPS.md exists in repo with instructions
 
 ---
 
-## Moderate Pitfalls
+### P1: Webhook Signature Verification Key Mismatch
 
-### Pitfall 6: Component Library Styling Conflicts
+**What goes wrong:** Kapso webhook signature verification uses `KAPSO_WEBHOOK_SECRET`. If this env var isn't set in Convex, webhooks fail signature validation and are rejected.
 
-**What goes wrong:**
-Kapso's `whatsapp-cloud-inbox` might use Tailwind CSS or CSS modules. Your app uses Shadcn/ui (Tailwind). If:
-- Both use same Tailwind config → style collisions
-- Kapso uses inline styles → overrides your theme
-- Kapso uses CSS-in-JS → conflicts with your CSS class names
+**Why it happens:** Environment variables don't automatically transfer between Vercel and Convex. Must be explicitly set in both.
 
-Result: Conversations render with wrong colors, broken layout, unclickable buttons.
+**Warning signs:**
+- Webhook returning 401 "Invalid signature"
+- Logs showing "signature verification failed"
+- Messages from WhatsApp not being processed
 
 **Prevention:**
-1. Install Kapso component in an isolated div with CSS reset
-2. Check Kapso's CSS imports and bundle size
-3. Test theme switching (dark/light mode) after integration
-4. Use CSS modules for Kapso if needed to isolate styles
+1. **Copy webhook secret to Convex:**
+   ```bash
+   npx convex env set KAPSO_WEBHOOK_SECRET "your-secret-here"
+   ```
+2. **Verify in Convex dashboard** - Settings > Environment Variables
+3. **Test webhook verification** before switching traffic
 
-**Detection:**
-- Component renders but colors are wrong
-- Layout is broken (components overlap)
-- Dark mode doesn't apply to Kapso component
-- Buttons don't respond to hover
+**Phase:** Environment configuration phase
+
+**Confidence:** HIGH - Current webhook handler in `route.ts` lines 101-110 checks signature
 
 ---
 
-### Pitfall 7: Missing Dependency Updates for Kapso
+### P2: Rate Limiting Differences
 
-**What goes wrong:**
-Kapso's component might depend on Next.js 14 but your project uses Next.js 15. Incompatibility causes:
-- Build errors
-- Runtime crashes
-- Type mismatches
+**What goes wrong:** Current rate limiting is in-memory in Vercel function. Convex has different rate limiting characteristics. High-volume webhook bursts may be handled differently.
+
+**Why it happens:** Convex functions have built-in rate limiting and queuing. Behavior under load may differ from Vercel `waitUntil` pattern.
+
+**Warning signs:**
+- Webhooks being throttled unexpectedly
+- Message processing delays during high volume
+- Duplicate message processing (retry storms)
 
 **Prevention:**
-1. Check Kapso's `package.json` for Next.js version requirement
-2. Run `npm list next` to verify compatibility
-3. Test full build: `npm run build`
-4. Look for peer dependency warnings during install
+1. **Understand Convex rate limits** - Check current plan limits
+2. **Implement idempotency** - Current `kapso_message_id` dedup is good, verify it works in Convex
+3. **Use Convex scheduler for queuing** - Instead of immediate processing:
+   ```typescript
+   await ctx.scheduler.runAfter(0, api.kapso.processMessage, { payload });
+   ```
+4. **Monitor during high-traffic periods**
 
-**Detection:**
-- Build fails with "cannot find module"
-- TypeScript errors about undefined types
-- Component doesn't render (blank page)
+**Phase:** Production hardening phase
+
+**Confidence:** MEDIUM - [Convex rate limits](https://docs.convex.dev/production/state/limits) vary by plan
 
 ---
 
-### Pitfall 8: Async Initialization in Client Components
+## Production Safety
 
-**What goes wrong:**
-Your Inbox component is marked `'use client'` but tries to wait for Convex subscription:
-```typescript
-'use client'
+### P0: No Rollback Plan
 
-export function InboxClient() {
-  // This waits for data, but component is rendered immediately
-  const data = useQuery(api.conversations.listWithFilters, ...)
+**What goes wrong:** Migration fails mid-way. Supabase is partially deprecated, Convex has partial data, Clerk has some users. No clear path to recover.
 
-  if (data === undefined) return <Skeleton />
-  // Data will be undefined until subscription connects
-}
-```
+**Why it happens:** "We'll figure it out if something goes wrong" mentality. Complex migrations need explicit rollback procedures.
 
-If Kapso component doesn't handle undefined data well, it crashes.
+**Warning signs:**
+- "We've already deleted the old data"
+- "Supabase subscription was cancelled"
+- No backup before migration
+- "We can't go back now"
 
 **Prevention:**
-1. **Provide initial data from server:**
-   ```typescript
-   <Suspense fallback={<Skeleton />}>
-     <InboxClient initialData={serverData} />
-   </Suspense>
-   ```
+1. **Keep Supabase active** for 2 weeks post-migration (read-only fallback)
+2. **Document point-of-no-return** - What actions can't be undone?
+3. **Create rollback scripts:**
+   - Revert Convex schema to previous version
+   - Re-enable Supabase auth in middleware
+   - Redirect webhooks back to Next.js
+4. **Test rollback procedure** in staging before production
 
-2. **Ensure component gracefully handles loading state:**
-   ```typescript
-   if (!data) return null // Don't render Kapso component until data exists
-   ```
+**Phase:** Migration planning phase
 
-3. **Test network throttling** — Simulate slow Convex connection
+**Confidence:** HIGH - Standard migration safety practice
+
+---
+
+### P1: Zero-Downtime Not Actually Zero
+
+**What goes wrong:** Plan for "zero downtime" but:
+- Users get logged out (session termination)
+- Real-time subscriptions disconnect during deploy
+- Webhooks queue during switchover
+
+**Why it happens:** True zero-downtime requires dual-write/dual-read patterns. Simple "flip the switch" migration has inherent downtime.
+
+**Warning signs:**
+- Claiming "zero downtime" without dual-write implementation
+- Users reporting "lost connection" during migration
+- Webhook queue building up
+
+**Prevention:**
+1. **Define acceptable downtime** with Eagle team - 10 minutes? 1 hour?
+2. **Schedule maintenance window** - Don't surprise users
+3. **Implement staged rollout:**
+   - Day 1: Add Clerk alongside Supabase (dual auth)
+   - Day 2: Migrate users to Clerk
+   - Day 3: Remove Supabase auth
+4. **Communicate status** - Status page or email updates
+
+**Phase:** Migration execution phase
+
+**Confidence:** HIGH - True zero-downtime requires significant engineering effort
+
+---
+
+### P1: Eagle-Specific Data Verification
+
+**What goes wrong:** Generic migration verification passes, but Eagle's specific data (their workspace, their leads, their conversations) has issues.
+
+**Why it happens:** Eagle is your paying client with real data. Generic test data doesn't catch workspace-specific issues.
+
+**Warning signs:**
+- "Migration successful" but Eagle can't see their leads
+- Message history partially missing
+- ARI configuration not migrated correctly
+
+**Prevention:**
+1. **Create Eagle-specific verification checklist:**
+   - [ ] Eagle workspace accessible
+   - [ ] All Eagle contacts present (count check)
+   - [ ] Message history complete (spot check 5 random conversations)
+   - [ ] ARI configuration intact (check "Your Intern" page)
+   - [ ] Eagle team members can log in
+   - [ ] New WhatsApp messages flowing through
+2. **Do a test migration** with Eagle's data in staging
+3. **Have Eagle verify** after migration before declaring success
+
+**Phase:** Post-migration verification phase
+
+**Confidence:** HIGH - First paying client deserves special attention
 
 ---
 
 ## Phase-Specific Warnings
 
-| Phase | Topic | Likely Pitfall | Mitigation |
-|-------|-------|---------------|------------|
-| Phase 1: Kapso Swap | Data schema mismatch | Component expects different field names/structure | Create adapter function before integration; validate TypeScript types |
-| Phase 1: Your Intern Debug | SSR hook calls | `useAuth()` called in server component | Use `fetchQuery` on server, pass data to client components |
-| Phase 1: Your Intern Debug | Missing dev mode check | `/demo` crashes on new Convex calls | Add `isDevMode()` guard to all mutations; create mock data |
-| Phase 2: Real-time integration | Hydration mismatch | Dev/prod schemas differ | Ensure mock data exactly matches Convex schema |
-| Phase 2: Real-time integration | Filter logic location | Client-side filters don't trigger subscription re-runs | Move filtering to Convex query level, not component level |
-| Phase 2: Real-time integration | Component caching | Kapso caches data without knowing about filter changes | Test filter → wait → verify update cycle |
-| Production deployment | Environment secrets | Wrong Convex deployment URL or API keys | Verify all env vars match between dev/prod (use checklist) |
-| Production deployment | Styling conflicts | Kapso styles override your design system | Isolate component in scoped CSS or shadow DOM |
+| Phase | Likely Pitfall | Mitigation |
+|-------|---------------|------------|
+| User export from Supabase | Password hash format incompatibility | Test single user import first |
+| Clerk user import | Missing external_id mapping | Store Supabase UUID as external_id |
+| Middleware migration | Route matcher misconfiguration | Test every route type manually |
+| Convex auth config | Wrong JWT issuer | Deploy Convex config before frontend |
+| Data migration | Timeout on large tables | Chunk into 100-500 record batches |
+| n8n webhook update | Forgetting to update | Document ALL webhook URLs in use |
+| Kapso webhook switch | Signature verification failure | Copy env var to Convex |
+| Go-live | No rollback plan | Keep Supabase active 2 weeks post-migration |
+| Post-migration | Eagle data not verified | Create Eagle-specific verification checklist |
 
 ---
 
-## Summary: Prevention Strategy by Incident
+## Quick Reference Checklist
 
-### "Component Renders Empty"
-1. Check schema mismatch (Pitfall 1)
-2. Verify dev mode is not enabled in production
-3. Inspect network tab — is Convex subscription connecting?
-4. Log component's props in browser console
+### Before Starting Migration
+- [ ] Eagle team informed of maintenance window
+- [ ] All Supabase tables documented for migration
+- [ ] All webhook URLs documented (Kapso, n8n, any others)
+- [ ] Rollback procedure documented
+- [ ] Supabase password hashes exported
+- [ ] Clerk environment set up and tested
 
-### "Works in Dev, Crashes in Prod"
-1. Check for SSR hook calls (Pitfall 4)
-2. Verify hydration parity (Pitfall 2)
-3. Test with `npm run build && npm run start`
-4. Check Vercel logs for error messages
+### Before Switching Auth
+- [ ] All users imported to Clerk
+- [ ] Password import tested on single user
+- [ ] external_id set to Supabase UUID for all users
+- [ ] Convex auth.config.ts updated for Clerk
+- [ ] Middleware migrated and tested
+- [ ] Clerk webhook to Convex set up
 
-### "Filters Don't Work"
-1. Verify filters modify Convex query params (Pitfall 3)
-2. Check if component has its own filter logic
-3. Ensure subscription re-runs on filter state change
-4. Test manually with TanStack DevTools
+### Before Switching Webhooks
+- [ ] Convex HTTP action handlers deployed
+- [ ] Environment variables set in Convex
+- [ ] n8n workflows updated with new URLs
+- [ ] Kapso webhook URL updated
+- [ ] Old endpoints kept as redirects
 
-### "Your Intern Tabs Crash"
-1. Check for `useAuth()` in server component (Pitfall 4)
-2. Verify all mutations have `isDevMode()` check (Pitfall 5)
-3. Check mock data exists for new features (Pitfall 5)
-4. Run at `/demo` to verify dev mode works
+### After Migration
+- [ ] Eagle workspace verified
+- [ ] Eagle contact count matches
+- [ ] Message history spot-checked
+- [ ] New WhatsApp messages flowing
+- [ ] ARI configuration intact
+- [ ] All team members can log in
+- [ ] Supabase kept read-only for 2 weeks
 
 ---
 
 ## Sources
 
-- [Kapso WhatsApp Cloud Inbox GitHub](https://github.com/gokapso/whatsapp-cloud-inbox)
-- [Kapso Documentation](https://docs.kapso.ai/)
-- [Next.js Hydration Error Documentation](https://nextjs.org/docs/messages/react-hydration-error)
-- [Resolving Hydration Errors in Next.js - LogRocket Blog](https://blog.logrocket.com/resolving-hydration-mismatch-errors-next-js/)
-- [Convex Real-Time Database Guide](https://docs.convex.dev/home)
-- [React Query Cache Invalidation Strategies](https://borstch.com/blog/development/strategies-for-effective-query-invalidation-and-cache-management-react-query-library)
-- [Next.js SSR Debugging Guide - Sentry Blog](https://blog.sentry.io/next-js-debugging-tips-and-techniques-from-dev-to-prod/)
-- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)
+### Clerk Migration
+- [Clerk Migration Overview](https://clerk.com/docs/guides/development/migrating/overview) - Official migration guide
+- [Supabase to Clerk Guide](https://felixvemmer.com/en/blog/migrate-user-authentication-supabase-clerk-dev) - Step-by-step with Python script
+- [Clerk Webhooks with Convex](https://clerk.com/blog/webhooks-data-sync-convex) - User data sync pattern
+
+### Convex Migration
+- [Intro to Migrations](https://stack.convex.dev/intro-to-migrations) - Core concepts
+- [Migrate from Postgres to Convex](https://stack.convex.dev/migrate-data-postgres-to-convex) - Data migration patterns
+- [Zero-Downtime Migrations](https://stack.convex.dev/zero-downtime-migrations) - Production safety
+- [Lightweight Migrations](https://stack.convex.dev/lightweight-zero-downtime-migrations) - Phased approach
+
+### n8n
+- [n8n Webhook URL Change](https://mpiresolutions.com/blog/how-to-change-webhook-url-in-n8n/) - URL migration steps
+
+### Production Safety
+- [Zero-Downtime Database Migration](https://dev.to/ari-ghosh/zero-downtime-database-migration-the-definitive-guide-5672) - General patterns
+- [Database Migration Strategies](https://sanjaygoraniya.dev/blog/2025/10/database-migration-strategies) - Zero-downtime deployments
 
 ---
 
-*Created: 2026-01-27 for v3.4 Milestone Research*
-*Scope: Kapso Integration + Your Intern Debugging*
+*Last updated: 2026-01-23*

@@ -1,373 +1,458 @@
-# Technology Stack: Kapso Integration Additions
+# Stack Research: v3.1 Convex + Clerk Migration
 
-**Project:** my21staff v3.4 Milestone
-**Research Date:** 2026-01-27
-**Focus:** Stack additions for whatsapp-cloud-inbox UI replacement + agent-skills MCP
-**Confidence:** HIGH (verified against Kapso official sources + GitHub)
-
----
-
-## Executive Summary
-
-The v3.4 milestone requires two distinct integrations:
-
-1. **whatsapp-cloud-inbox UI replacement** — A reference Next.js 15 application, not an npm package. Requires **copying component patterns** from the open-source repo, not adding a dependency.
-
-2. **agent-skills MCP setup** — A development-only MCP server for Claude integration. Requires **MCP client installation** (not a runtime dependency).
-
-**Key finding:** Neither addition requires new production dependencies. The whatsapp-cloud-inbox is a reference implementation to learn from and adapt. The MCP is purely for dev workflow enhancement.
+**Project:** my21staff
+**Researched:** 2026-01-23
+**Confidence:** HIGH (verified with official docs)
 
 ---
 
-## Recommended Stack
+## Current Stack
 
-### Current Stack (Validated, Keep As-Is)
+### Already in Place (Keep These)
 
-| Technology | Version | Purpose | Status |
-|-----------|---------|---------|--------|
-| Next.js | 16.1.1 | Framework | ✓ Current |
-| React | 19.2.3 | UI library | ✓ Current |
-| TypeScript | 5.x | Type safety | ✓ Current |
-| Convex | 1.31.6 | Database + real-time | ✓ Current |
-| Clerk | 6.36.9 | Authentication + orgs | ✓ Current |
-| Shadcn/ui | Latest | Component system | ✓ Current |
-| Tailwind CSS | 4.x | Styling | ✓ Current |
-| Lucide React | 0.562.0 | Icons | ✓ Current |
-| Radix UI | 1.x | Headless primitives | ✓ Current |
+| Package | Current Version | Purpose |
+|---------|-----------------|---------|
+| `convex` | 1.31.5 | Data layer, real-time subscriptions |
+| `@convex-dev/auth` | 0.0.90 | Auth utilities (will change usage pattern) |
+| `next` | 16.1.1 | App framework |
+| `react` | 19.2.3 | UI library |
 
-### New Additions: Runtime (None)
+### To Remove
 
-**Critical:** The whatsapp-cloud-inbox **does not publish an npm package**. It's a reference implementation on GitHub. You will:
-- Study its component patterns
-- Adapt and copy components into your codebase (not import as dependency)
-- Learn from its Convex integration approach
+| Package | Current Version | Reason |
+|---------|-----------------|--------|
+| `@supabase/ssr` | 0.8.0 | Replacing auth with Clerk |
+| `@supabase/supabase-js` | 2.90.1 | Replacing data with Convex |
 
-This avoids version lock-in and allows customization for my21staff specifics.
+### Convex Schema (Already Migrated in v3.0)
 
-### New Additions: Development Only
+Tables already in Convex:
+- `workspaces`
+- `workspaceMembers`
+- `contacts`
+- `conversations`
+- `messages`
+- `contactNotes`
+- `ariConfig`
+- `ariConversations`
+- `ariMessages`
+- `tickets`
+- `ticketComments`
+- `ticketStatusHistory`
 
-#### MCP Client Installation (Development Workflow Only)
+---
 
-| Tool | Version | Purpose | Installation |
-|------|---------|---------|--------------|
-| Claude MCP | Latest | Enable agent-skills in Claude Code | Via `claude mcp add` command |
+## Required Changes
 
-**Installation command:**
+### 1. ADD: Clerk Packages
+
 ```bash
-claude mcp add --transport http kapso https://app.kapso.ai/mcp --header "X-API-Key: YOUR_API_KEY"
+npm install @clerk/nextjs@^6.36.8 svix@^1.84.1
 ```
 
-Replaces `YOUR_API_KEY` with your Kapso project API key from Project Settings.
+| Package | Version | Purpose | Why This Version |
+|---------|---------|---------|------------------|
+| `@clerk/nextjs` | ^6.36.8 | Clerk integration for Next.js 15 | Current stable (published 2026-01-20), compatible with Next.js 15 + React 19 |
+| `svix` | ^1.84.1 | Webhook signature verification | Required for Clerk user sync webhooks |
 
-**No npm package required.** The MCP server runs as an HTTP endpoint, not as a local dependency.
+**DO NOT INSTALL:**
+- `@clerk/clerk-react` - Redundant, `@clerk/nextjs` includes all React components
+- `@clerk/backend` - Redundant, included in `@clerk/nextjs`
+- `@clerk/themes` - Use Shadcn styling instead
 
-### Reference Implementation: whatsapp-cloud-inbox
+### 2. UPDATE: Convex Auth Config
 
-| Component | Source | Use For |
-|-----------|--------|---------|
-| GitHub repo | [gokapso/whatsapp-cloud-inbox](https://github.com/gokapso/whatsapp-cloud-inbox) | Reference architecture only |
-| Tech stack | Next.js 15.5.9, React 19.1.0, TypeScript 5.9.3 | Version compatibility check |
-| UI kit | Radix UI + Tailwind CSS | Component pattern learning |
-| Dependencies | date-fns, lucide-react, clsx | Optional for inbox features |
+Replace `convex/auth.config.ts`:
 
-**Note:** Clone/study this repo, don't npm install it. Copy the patterns you need into `src/components/inbox/`.
-
----
-
-## Architecture Integration Points
-
-### Inbox UI Integration (whatsapp-cloud-inbox → my21staff)
-
-**Current state:** my21staff has custom inbox components
-```
-src/components/inbox/
-├── conversation-list.tsx      # Your implementation
-├── message-thread.tsx         # Your implementation
-├── message-bubble.tsx         # Your implementation
-├── compose-input.tsx          # Your implementation
-└── ...
-```
-
-**Kapso reference has:**
-```
-gokapso/whatsapp-cloud-inbox/src/components/
-├── inbox/                     # Component patterns to learn from
-├── messages/                  # Message rendering patterns
-└── conversations/             # Conversation list patterns
-```
-
-**Integration approach:**
-1. Study Kapso's component structure (don't import)
-2. Enhance your existing components with Kapso patterns
-3. Maintain Convex integration (Kapso uses different backend)
-4. Keep Shadcn/ui + Radix UI (Kapso uses same stack)
-
-**Convex bindings remain unchanged:**
 ```typescript
-// Your existing hook — no changes needed
-const conversations = useQuery(api.conversations.listWithFilters, ...)
+// BEFORE (Supabase JWT):
+export default {
+  providers: [
+    {
+      type: "customJwt",
+      applicationID: process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1]?.split(".")[0] || "",
+      issuer: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1`,
+      jwks: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/.well-known/jwks.json`,
+      algorithm: "RS256",
+    },
+  ],
+} satisfies AuthConfig;
 
-// Kapso reference uses different backend (Firebase/Supabase)
-// You will keep Convex real-time subscriptions
+// AFTER (Clerk JWT):
+import { AuthConfig } from "convex/server";
+
+export default {
+  providers: [
+    {
+      domain: process.env.CLERK_JWT_ISSUER_DOMAIN!,
+      applicationID: "convex",
+    },
+  ],
+} satisfies AuthConfig;
 ```
 
-### MCP Integration (agent-skills for development)
+### 3. ADD: Convex Users Table
 
-**What it enables:**
-- Claude Code can call Kapso API methods during development
-- Agent-skills provide context about WhatsApp capabilities
-- Reduces need to manually look up Kapso API docs
+New schema addition for storing Clerk user data:
 
-**Where it lives:**
-- Claude MCP configuration (outside Next.js codebase)
-- Not imported into your app code
-- Pure IDE/CLI enhancement
-
-**API methods exposed by MCP:**
-```
-Messaging tools     → Send texts, templates, media
-Operator tools      → Inbox management, conversation context
-Management tools    → Search/update contacts & conversations
-Platform tools      → Customer and setup link management
-```
-
-See [Kapso MCP docs](https://docs.kapso.ai/docs/mcp/introduction) for full method list.
-
----
-
-## Dependency Review: What NOT to Add
-
-| Package | Reason to Skip |
-|---------|----------------|
-| `@kapso/whatsapp-cloud-inbox` | Not published on npm (GitHub reference only) |
-| `@kapso/whatsapp-cloud-api` | Already using raw HTTP via `fetch` for Kapso calls; SDK adds nothing for webhook consumption |
-| `@mcp/sdk` | MCP runs as HTTP server, not npm dependency |
-| Extra UI libraries | Kapso uses same stack (Radix UI, Tailwind) — no new deps needed |
-
-### Current Kapso Integration (Already Working)
-
-**How you use Kapso today:**
 ```typescript
-// API Routes (sending messages)
-fetch('https://api.kapso.ai/meta/whatsapp/v24.0/{phone_number_id}/messages', {
-  headers: { 'X-API-Key': apiKey },
-  body: JSON.stringify({ to, type: 'text', text: { body } })
+// convex/schema.ts - ADD to existing schema
+users: defineTable({
+  clerkId: v.string(),          // Clerk user ID (user_xxx format)
+  email: v.string(),
+  name: v.optional(v.string()),
+  imageUrl: v.optional(v.string()),
+  created_at: v.number(),
+  updated_at: v.number(),
 })
-
-// Webhooks (receiving messages)
-// POST /api/webhook/kapso
+  .index("by_clerk_id", ["clerkId"])
+  .index("by_email", ["email"]),
 ```
 
-**This approach stays unchanged** because:
-- Works reliably with zero SDK dependency
-- Gives you control over request/response handling
-- Easier to add logging, error handling, retry logic
-- No version lock-in from SDK updates
+**Why:** Clerk user data must be stored in Convex for:
+- Displaying user names/avatars across the app
+- Looking up other users (not just current user)
+- Avoiding rate limits on Clerk's backend API
 
-The `@kapso/whatsapp-cloud-api` SDK is optional — useful if you want typed method calls, but adds a dependency for zero functional gain given your current implementation.
+### 4. ADD: Remaining Supabase Tables to Convex
 
----
+Tables still in Supabase that need migration:
 
-## Installation & Setup
+| Table | Priority | Notes |
+|-------|----------|-------|
+| `profiles` | HIGH | Replace with `users` table synced from Clerk |
+| `ari_appointments` | HIGH | Booking system for Eagle |
+| `consultant_slots` | HIGH | Scheduling availability |
+| `workspace_invitations` | HIGH | Team invite flow |
+| `user_todos` | MEDIUM | Task management |
+| `ari_knowledge_categories` | MEDIUM | Knowledge base structure |
+| `ari_knowledge_entries` | MEDIUM | Knowledge base content |
+| `knowledge_base` | MEDIUM | FAQ matching |
+| `ari_destinations` | MEDIUM | Eagle-specific university data |
+| `ari_payments` | LOW | Payment records (deferred feature) |
+| `ari_ai_comparison` | LOW | AI model analytics |
+| `flows` | LOW | Automation (future) |
+| `form_templates` | LOW | Forms (future) |
 
-### No New npm Dependencies Required
+### 5. REMOVE: Supabase Packages (After Migration)
 
 ```bash
-# Your package.json needs ZERO new entries
-# Current stack is sufficient
-npm install  # No changes
+npm uninstall @supabase/ssr @supabase/supabase-js
 ```
 
-### whatsapp-cloud-inbox Learning (Reference Only)
+---
+
+## Environment Variables
+
+### ADD (Clerk)
+
+```env
+# Clerk API Keys (from clerk.com dashboard)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_xxx  # or pk_test_xxx for dev
+CLERK_SECRET_KEY=sk_live_xxx                    # or sk_test_xxx for dev
+
+# Clerk JWT Issuer for Convex (from Clerk JWT template)
+CLERK_JWT_ISSUER_DOMAIN=https://your-clerk-instance.clerk.accounts.dev
+
+# Clerk Webhook Secret (from Clerk webhooks dashboard)
+CLERK_WEBHOOK_SECRET=whsec_xxx
+```
+
+### Convex Dashboard Environment Variables
+
+Add to Convex dashboard (Settings > Environment Variables):
+- `CLERK_JWT_ISSUER_DOMAIN` - Same as above
+- `CLERK_WEBHOOK_SECRET` - For webhook verification in HTTP actions
+
+### REMOVE (After migration complete)
+
+```env
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+```
+
+---
+
+## Integration Points
+
+### 1. Clerk + Convex Provider Setup
+
+Create `src/app/ConvexClientProvider.tsx`:
+
+```typescript
+"use client";
+
+import { ClerkProvider, useAuth } from "@clerk/nextjs";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
+import { ConvexReactClient } from "convex/react";
+
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+export function ConvexClientProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <ClerkProvider>
+      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+        {children}
+      </ConvexProviderWithClerk>
+    </ClerkProvider>
+  );
+}
+```
+
+**Key points:**
+- `ConvexProviderWithClerk` must be inside `ClerkProvider`
+- Uses `convex/react-clerk` (built into convex package)
+- Pass Clerk's `useAuth` hook to the provider
+
+### 2. Middleware Migration
+
+Replace Supabase middleware with Clerk:
+
+```typescript
+// src/middleware.ts
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/login(.*)",
+  "/signup(.*)",
+  "/pricing",
+  "/articles/(.*)",
+  "/webinars/(.*)",
+  "/api/webhook/(.*)",  // Webhooks must be public
+  "/api/leads",         // Public lead capture
+  "/portal/(.*)",       // Public support portal
+]);
+
+export default clerkMiddleware((auth, req) => {
+  if (!isPublicRoute(req)) {
+    auth.protect();
+  }
+});
+
+export const config = {
+  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+};
+```
+
+### 3. Clerk Webhook HTTP Action
+
+Add to Convex HTTP router (`convex/http.ts`):
+
+```typescript
+import { httpRouter } from "convex/server";
+import { httpAction } from "./_generated/server";
+import { Webhook } from "svix";
+import { internal } from "./_generated/api";
+
+const http = httpRouter();
+
+// Clerk webhook endpoint for user sync
+http.route({
+  path: "/clerk-users-webhook",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const webhookSecret = process.env.CLERK_WEBHOOK_SECRET!;
+
+    const svix = new Webhook(webhookSecret);
+    const headers = {
+      "svix-id": request.headers.get("svix-id")!,
+      "svix-timestamp": request.headers.get("svix-timestamp")!,
+      "svix-signature": request.headers.get("svix-signature")!,
+    };
+
+    const body = await request.text();
+
+    try {
+      const event = svix.verify(body, headers) as any;
+
+      switch (event.type) {
+        case "user.created":
+        case "user.updated":
+          await ctx.runMutation(internal.users.upsertFromClerk, {
+            clerkId: event.data.id,
+            email: event.data.email_addresses[0]?.email_address ?? "",
+            name: `${event.data.first_name || ""} ${event.data.last_name || ""}`.trim() || null,
+            imageUrl: event.data.image_url || null,
+          });
+          break;
+        case "user.deleted":
+          await ctx.runMutation(internal.users.deleteByClerkId, {
+            clerkId: event.data.id,
+          });
+          break;
+      }
+
+      return new Response(null, { status: 200 });
+    } catch (err) {
+      console.error("Webhook verification failed:", err);
+      return new Response("Webhook verification failed", { status: 400 });
+    }
+  }),
+});
+
+export default http;
+```
+
+### 4. Auth in Convex Functions
+
+Replace current auth pattern:
+
+```typescript
+// BEFORE (using @convex-dev/auth):
+import { getAuthUserId } from "@convex-dev/auth/server";
+const userId = await getAuthUserId(ctx);
+
+// AFTER (using ctx.auth directly with Clerk):
+const identity = await ctx.auth.getUserIdentity();
+if (!identity) throw new Error("Unauthorized");
+const clerkId = identity.subject; // This is the Clerk user ID
+```
+
+### 5. User ID Migration Strategy
+
+**Critical consideration:** Current schema uses Supabase UUIDs for `user_id` fields (format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`). Clerk uses different IDs (format: `user_xxxxxxxxxxxxxx`).
+
+**Recommended approach: Use Clerk IDs directly**
+
+1. Add new `clerk_user_id` field to affected tables
+2. Update all new records to use Clerk IDs
+3. Migrate existing records with mapping
+4. Remove old `user_id` field
+
+**Tables with user_id references:**
+- `workspaces.owner_id`
+- `workspaceMembers.user_id`
+- `contacts.assigned_to`
+- `conversations.assigned_to`
+- `messages.sender_id`
+- `contactNotes.user_id`
+- `tickets.requester_id`, `tickets.assigned_to`
+- `ticketComments.author_id`
+- `ticketStatusHistory.changed_by`
+
+### 6. n8n Webhook to Convex HTTP Action
+
+For Eagle leads from n8n:
+
+```typescript
+// convex/http.ts - ADD route
+http.route({
+  path: "/n8n-lead",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    // Verify webhook secret (simple token-based)
+    const authHeader = request.headers.get("Authorization");
+    const expectedToken = process.env.N8N_WEBHOOK_SECRET;
+
+    if (authHeader !== `Bearer ${expectedToken}`) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+
+    const body = await request.json();
+
+    // Create contact in Convex
+    await ctx.runMutation(internal.contacts.createFromWebhook, {
+      workspaceId: body.workspace_id,
+      phone: body.phone,
+      name: body.name,
+      email: body.email,
+      source: "n8n",
+      metadata: body.metadata || {},
+    });
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }),
+});
+```
+
+---
+
+## Not Adding (And Why)
+
+| Package | Why Not |
+|---------|---------|
+| `@clerk/clerk-react` | Redundant - `@clerk/nextjs` includes all React components |
+| `@clerk/backend` | Redundant - `@clerk/nextjs` includes backend utilities |
+| `@clerk/themes` | Not needed - use Shadcn styling for consistency |
+| `@auth/core` | Wrong library - we're using Clerk, not Auth.js |
+| Any Supabase package | Removing Supabase entirely |
+| `@convex-dev/auth` | Keep but change usage - built-in `ctx.auth` is sufficient for Clerk |
+
+---
+
+## Installation Commands
+
+### Phase 1: Add Clerk (before removing Supabase)
 
 ```bash
-# Clone the reference repo to study patterns
-git clone https://github.com/gokapso/whatsapp-cloud-inbox.git ./docs/kapso-reference
-
-# Study these files:
-# - docs/kapso-reference/src/components/
-# - docs/kapso-reference/package.json (for version insights)
-# - docs/kapso-reference/src/app/layout.tsx (Next.js 15 patterns)
-
-# Note: DO NOT npm install from this directory
+npm install @clerk/nextjs@^6.36.8 svix@^1.84.1
 ```
 
-### MCP Setup (Development Only)
+### Phase 2: Remove Supabase (after migration complete)
 
 ```bash
-# Install Claude Code MCP client
-# (Already installed if you use Claude Code)
-
-# Configure Kapso MCP endpoint
-claude mcp add --transport http kapso https://app.kapso.ai/mcp \
-  --header "X-API-Key: YOUR_API_KEY"
-
-# Replace YOUR_API_KEY with value from Kapso Project Settings
-```
-
-Verify setup:
-```bash
-# In Claude Code or integrated IDE, MCP should appear in context menu
-# No code changes required to your Next.js app
+npm uninstall @supabase/ssr @supabase/supabase-js
 ```
 
 ---
 
-## Version Compatibility Matrix
+## Clerk Dashboard Setup
 
-### Next.js 16 Compatibility Check
+### 1. Create Clerk Application
 
-| Dependency | Current | whatsapp-cloud-inbox uses | Compatible? |
-|-----------|---------|------------------------|------------|
-| Next.js | 16.1.1 | 15.5.9 | ✓ Patterns portable |
-| React | 19.2.3 | 19.1.0 | ✓ Same major version |
-| TypeScript | 5.x | 5.9.3 | ✓ Compatible |
-| Radix UI | 1.x | 1.x | ✓ Exact match likely |
-| Tailwind CSS | 4.x | 4.x | ✓ Exact match |
+1. Go to clerk.com and create new application
+2. Choose "Next.js" as framework
+3. Enable authentication methods:
+   - Email + Password (required)
+   - Optional: Google OAuth for convenience
 
-**Key insight:** whatsapp-cloud-inbox uses Next.js 15 but patterns are fully portable to Next.js 16. No API breaking changes between these versions.
+### 2. Create JWT Template for Convex
 
----
+1. Navigate to JWT Templates in Clerk dashboard
+2. Click "New Template" > Select "Convex"
+3. **DO NOT rename the template** - must stay as "convex"
+4. Copy the Issuer URL (this is `CLERK_JWT_ISSUER_DOMAIN`)
 
-## Recommended Approach: Selective Adoption
+### 3. Create Webhook Endpoint
 
-Don't do a wholesale "replace inbox with Kapso's inbox." Instead:
-
-### Phase 1: Learn (Week 1)
-```
-├── Clone whatsapp-cloud-inbox repo
-├── Study component structure:
-│   ├── How they handle message rendering
-│   ├── How they manage conversation state
-│   ├── How they handle real-time updates
-│   └── How they style with Tailwind
-└── Document patterns in ARCHITECTURE.md
-```
-
-### Phase 2: Enhance (Week 2)
-```
-├── Apply learned patterns to your components:
-│   ├── Improve message-bubble.tsx styling/UX
-│   ├── Enhance conversation-list.tsx filtering
-│   ├── Upgrade message-thread.tsx interactions
-│   └── Polish compose-input.tsx
-├── Keep Convex integration unchanged
-├── Keep existing Clerk auth
-└── Test all changes locally at localhost:3000/demo
-```
-
-### Phase 3: Deploy (Week 3)
-```
-├── UI improvements go live
-├── Feature parity with v2.0 established
-└── Ready for production at my21staff.com
-```
-
-**What changes:** UI/UX patterns
-**What stays:** Convex, Clerk, authentication, real-time subscriptions
+1. Navigate to Webhooks in Clerk dashboard
+2. Add endpoint URL: `https://intent-otter-212.convex.site/clerk-users-webhook`
+3. Select events:
+   - `user.created`
+   - `user.updated`
+   - `user.deleted`
+4. Copy signing secret (this is `CLERK_WEBHOOK_SECRET`)
 
 ---
 
-## MCP Benefits in Development
+## Migration Sequence
 
-### Before MCP
-```
-# To check Kapso message format
-1. Open browser → docs.kapso.ai
-2. Search for "message sending"
-3. Find JSON example
-4. Copy into code
-```
-
-### After MCP
-```
-# Claude Code knows Kapso methods
-# Ask "How do I send an interactive message?"
-# Claude sees method signatures in context
-# Auto-complete and suggestions work
-```
-
-**Impact:** Faster feature development, fewer doc lookups, better IDE integration.
-
----
-
-## Avoiding Common Pitfalls
-
-### Pitfall 1: Importing whatsapp-cloud-inbox as npm package
-**Problem:** Package doesn't exist on npm
-**Solution:** Clone the repo, study components, copy patterns locally
-**Prevention:** Treat it as reference docs, not a dependency
-
-### Pitfall 2: Upgrading to the SDK when not needed
-**Problem:** `@kapso/whatsapp-cloud-api` adds a dependency for zero functional improvement
-**Solution:** Continue using HTTP `fetch` directly
-**Prevention:** Only add SDK if you find fetch approach limiting (unlikely)
-
-### Pitfall 3: MCP breaking your app
-**Problem:** MCP runs outside Node.js process — can't break your app
-**Solution:** MCP is pure development/IDE enhancement
-**Prevention:** No code changes needed in Next.js app
-
-### Pitfall 4: Forgetting Convex still owns the inbox state
-**Problem:** Trying to import Convex hooks from whatsapp-cloud-inbox (it uses different backend)
-**Solution:** Keep your Convex queries, adapt their component patterns
-**Prevention:** Read whatsapp-cloud-inbox's backend assumptions before copying code
-
----
-
-## Success Criteria: How to Know You're Done
-
-- [ ] whatsapp-cloud-inbox repo cloned to `docs/kapso-reference/`
-- [ ] Component patterns documented in ARCHITECTURE.md
-- [ ] Inbox components enhanced with Kapso-inspired improvements
-- [ ] All inbox features work at `localhost:3000/demo` (dev mode)
-- [ ] Production inbox features work at `localhost:3000` (with Convex)
-- [ ] MCP installed via `claude mcp add` command
-- [ ] Claude Code recognizes Kapso methods in suggestions
-- [ ] Zero new npm dependencies added
-- [ ] Existing tests pass
-- [ ] No deployment blockers introduced
+1. Install Clerk packages (can run alongside Supabase temporarily)
+2. Add `users` table to Convex schema
+3. Set up Clerk webhook in Convex HTTP router
+4. Update `ConvexClientProvider` to use `ClerkProvider` + `ConvexProviderWithClerk`
+5. Update `middleware.ts` to use `clerkMiddleware`
+6. Update `convex/auth.config.ts` for Clerk JWT
+7. Migrate remaining Supabase tables to Convex schema
+8. Update all Convex function auth checks (use `ctx.auth.getUserIdentity()`)
+9. Update user ID references across all tables
+10. Migrate existing users (script or manual)
+11. Test all auth flows
+12. Remove Supabase packages and environment variables
 
 ---
 
 ## Sources
 
-### Primary (HIGH Confidence - Official/Current)
-
-- **Kapso GitHub:** [gokapso/whatsapp-cloud-inbox](https://github.com/gokapso/whatsapp-cloud-inbox) — Reference implementation, verified 2026-01-27
-- **Kapso Docs:** [docs.kapso.ai](https://docs.kapso.ai) — Official SDK documentation
-- **Kapso MCP:** [docs.kapso.ai/docs/mcp/introduction](https://docs.kapso.ai/docs/mcp/introduction) — Model Context Protocol setup guide
-- **Model Context Protocol Spec:** [modelcontextprotocol.io/specification](https://modelcontextprotocol.io/specification/2025-11-25) — Official MCP definition
-
-### Secondary (MEDIUM Confidence - Reference Implementations)
-
-- **MCP GitHub:** [github.com/modelcontextprotocol](https://github.com/modelcontextprotocol) — MCP reference servers and examples
-- **whatsapp-cloud-inbox package.json:** Verified Next.js 15.5.9, React 19.1.0, TypeScript 5.9.3 compatibility
-
-### Tertiary (Reference)
-
-- **my21staff codebase:** Current Convex integration verified at `src/app/api/webhook/kapso/route.ts` and inbox components at `src/components/inbox/`
-
----
-
-## Why This Approach
-
-**"Stack" isn't just npm packages.** It's also:
-- Reference implementations to learn from
-- Development tools (MCP)
-- Architecture patterns
-- Integration points
-
-This research treats "stack" holistically:
-- What runtime deps you need (none new)
-- What dev tools enhance workflow (MCP)
-- What reference code teaches patterns (whatsapp-cloud-inbox)
-- Where integration happens (Convex queries, Clerk auth stay unchanged)
-
-**Bottom line:** v3.4 succeeds without new dependencies, by applying reference patterns and adding development tools. Your existing stack is sufficient.
-
----
-
-*Research completed: 2026-01-27*
-*Valid for: Next.js 16.x, React 19.x, Convex stable*
-*Review date: 2026-02-27 (if Kapso releases major version updates)*
+- [Clerk + Convex Integration (Clerk Docs)](https://clerk.com/docs/guides/development/integrations/databases/convex) - Updated 2026-01-14
+- [Convex + Clerk Guide (Convex Docs)](https://docs.convex.dev/auth/clerk)
+- [Storing Users in Convex (Convex Docs)](https://docs.convex.dev/auth/database-auth)
+- [Clerk Webhooks Data Sync](https://clerk.com/blog/webhooks-data-sync-convex)
+- [@clerk/nextjs npm](https://www.npmjs.com/package/@clerk/nextjs) - v6.36.8 (published 2026-01-20)
+- [convex npm](https://www.npmjs.com/package/convex) - v1.31.5 (published 2026-01-20)
+- [svix npm](https://www.npmjs.com/package/svix) - v1.84.1 (published 2026-01-05)
