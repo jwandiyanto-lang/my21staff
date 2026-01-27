@@ -11,18 +11,18 @@ See: planning/PROJECT.md (updated 2026-01-27)
 
 Milestone: v3.4 Kapso Inbox Integration
 Phase: 5 of 6 (Real-time & Handover)
-Plan: 1 of 1 in phase (05-01 complete)
-Status: Phase 5 plan 1 complete - real-time sync verified, AI/Human toggle with confirmation UI
-Last activity: 2026-01-27 — Completed 05-01-PLAN.md (real-time sync + toggle UI)
+Plan: 2 of 2 in phase (Phase 5 complete)
+Status: Phase 5 complete - real-time sync verified, AI/Human toggle UI and backend gate wired
+Last activity: 2026-01-27 — Completed 05-02-PLAN.md (handover mode gates ARI processing)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ████████░ (~75%)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 █████████░ (~83%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 234 (all v3.3 phases + v3.4 phases 1-5)
+- Total plans completed: 235 (all v3.3 phases + v3.4 phases 1-5)
 - v3.3 execution: 7 phases, ~22 plans, 3 days (2026-01-25 to 2026-01-27)
-- v3.4 execution: 5 phases, 9 plans, ~25 min
+- v3.4 execution: 5 phases, 10 plans, ~27 min
 
 **By Milestone:**
 
@@ -108,6 +108,13 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Mock conversations include mixed statuses ('open' for AI, 'handover' for Manual)
 - Real-time sync via Convex subscriptions verified working (no changes needed)
 
+**Plan 02:**
+- Per-conversation handover mode gates ARI processing at webhook handler level
+- Two-level gating: Global AI toggle (ariConfig.enabled) + per-conversation toggle (conversation.status)
+- Gate order: Check global toggle first, then per-conversation status (performance optimization)
+- Early exit pattern with `continue` matches existing gate from Phase 03-02
+- Status values: 'open' = AI active, 'handover' = Human mode, 'closed' = Archived
+
 ### v3.4 Phase Structure
 
 - **Phase 1:** Agent Skills Setup (01-01) — ✓ Complete (Kapso skills + MCP server)
@@ -120,8 +127,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
   - Plan 04-02: Message bubbles and auto-scroll — ✓ Complete
   - Plan 04-03: Integrate filters into inbox-client — ✓ Complete
   - Post-plan: Converted tabs to dropdown + optimized layout — ✓ Complete
-- **Phase 5:** Real-time & Handover (05-01) — ✓ Complete
+- **Phase 5:** Real-time & Handover (05-01, 05-02) — ✓ Complete
   - Plan 05-01: Real-time sync verification + AI/Human toggle UI — ✓ Complete
+  - Plan 05-02: Wire AI/Human toggle to processARI gate — ✓ Complete
 - **Phase 6:** ARI Flow Integration (ARI-01,03,04) — Pending
 
 ### Coverage Status
@@ -144,29 +152,31 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ### Next Phase Readiness
 
-- Phase 5 (Real-time & Handover) COMPLETE
+- Phase 5 (Real-time & Handover) COMPLETE (both plans)
 - Phase 6 (ARI Flow Integration) ready to start
 - Real-time message sync verified working via Convex subscriptions
 - AI/Human toggle UI complete with confirmation dialog and visual feedback
+- Handover mode fully wired to processARI gate (two-level gating system)
 - Typing indicator and system messages ready for ARI flow integration
 
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Phase 5 complete (real-time sync verified + AI/Human toggle UI)
+Stopped at: Phase 5 complete (real-time sync + AI/Human toggle UI + backend gate wiring)
 Resume: Ready for Phase 6 (ARI Flow Integration)
 
 **Files modified in Phase 5:**
 - `src/components/inbox/typing-indicator.tsx` — [NEW] WhatsApp-style typing animation
 - `src/components/inbox/system-message.tsx` — [NEW] Inline conversation notifications
 - `src/components/inbox/message-thread.tsx` — Added confirmation dialog, system messages, typing indicator
-- `src/lib/mock-data.ts` — Updated conversation statuses ('open', 'handover')
+- `convex/kapso.ts` — Added conversation.status gate before processARI scheduling
+- `src/lib/mock-data.ts` — Updated conversation statuses + getMockMessagesForConversation helper
 
 **Recent commits:**
+- `513d777` - feat(05-02): wire AI/Human toggle to processARI gate
 - `9e629b0` - feat(05-01): complete AI/Human toggle with confirmation and visual feedback
 - `c98d520` - docs(05-01): verify real-time message sync via Convex subscriptions
-- `877fc82` - Filter layout optimization (search, status dropdown, Active/All + Tags)
 
 ---
 
-*Last updated: 2026-01-27 — Phase 5 complete (real-time sync verified, AI/Human toggle UI with confirmation)*
+*Last updated: 2026-01-27 — Phase 5 complete (real-time sync verified, AI/Human toggle UI + backend gate wired)*
