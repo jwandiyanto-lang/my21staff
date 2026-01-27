@@ -1,30 +1,14 @@
-# Roadmap: my21staff v3.3 Go Live
-
-## Overview
-
-Take my21staff from development to production with Eagle Overseas Education as the first paying client. This milestone focuses on deployment, Kapso WhatsApp integration, dual-AI system (Mouth + Brain), bot qualification workflow, lead sync, pricing updates, and end-to-end verification.
+# Roadmap: my21staff
 
 ## Milestones
 
-- **v3.3 Go Live** - Phases 1-7 (in progress)
+- ✅ **v3.3 Go Live** - Phases 1-6 (shipped 2026-01-27)
+- 🚧 **v3.4 Kapso Inbox Integration** - Phases 1-6 (in progress)
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
-
-- [x] **Phase 1: Deployment** - Fresh Vercel project with production environment
-- [x] **Phase 2: Kapso Integration** - WhatsApp webhook and messaging
-- [x] **Phase 2.1: UI Documentation** - INSERTED: Document UI/buttons before deployment
-- [x] **Phase 3: AI System** - Dual-bot architecture (Mouth + Brain)
-- [x] **Phase 3.1: Inbox Enhancement** - INSERTED: Profile sidebar, AI/Human handover, merge
-- [x] **Phase 4: Bot Workflow** - Eagle qualification flow
-- [x] **Phase 5: Lead Flow** - n8n to Convex production verification + configurable status stages
-- [ ] ~~**Phase 6: Pricing Page**~~ - SKIPPED (deferred to post-launch)
-- [ ] **Phase 6: UI Polish** - Fix critical bugs (Settings crash, Database dropdowns)
-
-## Phase Details
+<details>
+<summary>✅ v3.3 Go Live (Phases 1-6) - SHIPPED 2026-01-27</summary>
 
 ### Phase 1: Deployment
 
@@ -47,12 +31,6 @@ Plans:
 
 **Requirements**: KAPSO-01, KAPSO-02, KAPSO-03, KAPSO-04
 
-**Success Criteria** (what must be TRUE):
-  1. Kapso webhook receives WhatsApp messages in production
-  2. Bot sends replies back via Kapso API
-  3. Message history syncs to Convex database
-  4. Webhook signature verification working
-
 **Plans:** 3 plans
 
 Plans:
@@ -68,12 +46,6 @@ Plans:
 
 **Requirements**: AI-01, AI-02, AI-03, AI-04
 
-**Success Criteria** (what must be TRUE):
-  1. "The Mouth" (Sea-Lion) handles greetings, FAQ, qualification conversations
-  2. "The Brain" (Claude) analyzes leads — scoring, CRM updates, smart decisions
-  3. Conversation context passed between Mouth and Brain
-  4. Usage tracking shows chat energy vs brain power consumption
-
 **Plans:** 4 plans
 
 Plans:
@@ -88,13 +60,6 @@ Plans:
 
 **Depends on**: Phase 3
 
-**Requirements**: N/A (gap closure)
-
-**Success Criteria** (what must be TRUE):
-  1. Contact profile sidebar appears when viewing conversation
-  2. AI/Human handover toggle button works in message thread
-  3. Merge contacts functionality available from inbox
-
 **Plans:** 1 plan
 
 Plans:
@@ -107,14 +72,6 @@ Plans:
 **Depends on**: Phase 3
 
 **Requirements**: BOT-01, BOT-02, BOT-03, BOT-04, BOT-05, BOT-06
-
-**Success Criteria** (what must be TRUE):
-  1. Incoming WhatsApp message receives greeting from bot
-  2. Bot asks qualification questions (destination, documents, English level)
-  3. Bot answers common FAQs about Eagle services
-  4. Qualified lead receives Community link (free path)
-  5. Hot lead can request 1-on-1 Consultation
-  6. Human receives notification when consultation is requested
 
 **Plans:** 6 plans
 
@@ -134,12 +91,6 @@ Plans:
 
 **Requirements**: LEAD-01, LEAD-02, LEAD-03
 
-**Success Criteria** (what must be TRUE):
-  1. n8n webhook successfully delivers lead data to production Convex endpoint
-  2. Lead appears in Contact Database with all fields populated correctly
-  3. Lead status updates work (new -> qualified -> consultation/community)
-  4. Lead statuses are configurable per workspace in Settings
-
 **Plans:** 8 plans
 
 Plans:
@@ -152,24 +103,11 @@ Plans:
 - [x] 05-07-PLAN.md — Settings UI for lead stage configuration (gap closure)
 - [x] 05-08-PLAN.md — Human verification of status system + CRUD endpoints (gap closure)
 
-### Phase 6: Pricing Page (SKIPPED)
-
-**Status**: Deferred to post-launch. Pricing updates not blocking for Eagle pilot.
-
 ### Phase 6: UI Polish
 
 **Goal**: Fix critical production bugs and ensure dev/production environment parity
 
 **Depends on**: Phase 5
-
-**Requirements**: Derived from UAT testing + environment sync requirement
-
-**Success Criteria** (what must be TRUE):
-  1. Settings page loads without React errors or crashes (production)
-  2. Database status dropdown changes the correct contact
-  3. Database tags dropdown works correctly
-  4. Database assignee dropdown works correctly
-  5. Dev mode mock data structure matches production Convex schema exactly
 
 **Plans:** 5 plans
 
@@ -180,23 +118,139 @@ Plans:
 - [x] 06-04-PLAN.md — Fix Database dropdown closure bug (gap closure - add key props)
 - [x] 06-05-PLAN.md — Sync dev mode database with production schema (gap closure - environment parity)
 
+</details>
+
+## 🚧 v3.4 Kapso Inbox Integration (In Progress)
+
+**Milestone Goal:** Replace Inbox with Kapso's WhatsApp-first UI and fix Your Intern production crashes. Build complete bot configuration UI (5 tabs) and integrate end-to-end automation flow. Eagle Overseas has modern interface with fully configurable AI.
+
+### Phase 1: Agent Skills Setup
+**Goal**: Install Kapso agent-skills MCP for improved development workflow
+**Depends on**: Nothing (development tool, execute first)
+**Requirements**: DEV-01
+**Success Criteria** (what must be TRUE):
+  1. agent-skills MCP installed via `npx skills add gokapso/agent-skills`
+  2. MCP server appears in Claude Code skill list
+  3. Can execute at least one Kapso command (e.g., list contacts, send test message)
+  4. Kapso API key configured and authenticated
+**Plans**: 1-2 plans
+
+Plans:
+- [ ] 01-01: Install agent-skills and configure Kapso API access
+- [ ] 01-02: Test basic commands (list contacts, send message)
+
+### Phase 2: Your Intern Debug
+**Goal**: Your Intern page loads without errors in production, removing P0 blocker for admin configuration work
+**Depends on**: Nothing (critical path, execute first)
+**Requirements**: INTERN-01
+**Success Criteria** (what must be TRUE):
+  1. Your Intern page loads at `/demo/your-intern` without JS errors
+  2. Page continues loading in production environment (not localhost-only)
+  3. All UI elements render without crash (tabs visible, no console errors)
+  4. User can click between tabs without page reload required
+**Plans**: 3-4 plans
+
+Plans:
+- [ ] 02-01: Audit Your Intern errors (identify root causes from research notes)
+- [ ] 02-02: Fix SSR auth crashes (move useQuery to client components)
+- [ ] 02-03: Add error boundaries (prevent one tab crash from breaking page)
+- [ ] 02-04: Verify production load (test at localhost:3000/demo, then staging if available)
+
+### Phase 3: Your Intern Configuration
+**Goal**: User can configure bot behavior across 5 tabs (Persona, Flow, Database, Scoring, Slots) with one global AI toggle
+**Depends on**: Phase 2 (page must load first)
+**Requirements**: INTERN-02, INTERN-03, INTERN-04, INTERN-05, INTERN-06, INTERN-07
+**Success Criteria** (what must be TRUE):
+  1. Persona tab loads/saves bot name, description, tone; changes visible in ARI responses
+  2. Flow tab loads/saves greeting, qualification, routing instructions; next conversation uses new flow
+  3. Database tab displays available contact fields (name, phone, email, etc.); field config affects data collection
+  4. Scoring tab displays/edits lead scoring rules (0-100 scale); changes affect lead temperature calculation
+  5. Slots tab displays/edits consultation time slots; bot routing offers available slots to leads
+  6. Global AI toggle (master on/off button) disables all AI processing when off
+**Plans**: 6 plans
+
+Plans:
+- [ ] 03-01: Persona tab UI (form for name, description, tone; persist to workspace.settings)
+- [ ] 03-02: Flow tab UI (textarea/editor for greeting, qualification, routing; persist to workspace.settings)
+- [ ] 03-03: Database tab UI (read-only field list with toggle for collection; persist enabled_fields config)
+- [ ] 03-04: Scoring tab UI (rules editor with 0-100 slider; persist to workspace.settings.scoring_rules)
+- [ ] 03-05: Slots tab UI (time slot manager with add/edit/delete; persist to workspace.settings.consultation_slots)
+- [ ] 03-06: Global AI toggle (master switch with Convex mutation; disables processARI when off)
+
+### Phase 4: Inbox UI & Filtering
+**Goal**: Conversations display with Kapso's WhatsApp-first UI; user can filter by status (hot/warm/cold/new/client/lost) and tags
+**Depends on**: Phase 2 (auth working), Phase 3 (admin config affects filter options)
+**Requirements**: INBOX-01, INBOX-02, INBOX-03, INBOX-05, INBOX-06
+**Success Criteria** (what must be TRUE):
+  1. Conversations render in Kapso-styled UI (modern WhatsApp-like appearance, not custom)
+  2. Message thread displays with Kapso components (bubbles, timestamps, author attribution)
+  3. Status filter shows dropdown with hot/warm/cold/new/client/lost options; filtering works
+  4. Tag filter shows multi-select of workspace tags; can filter conversations by multiple tags
+  5. User can send message from Inbox; message appears in thread immediately (optimistic UI)
+  6. Media (images, documents) render inline in messages (if Kapso component supports, or fallback to link)
+**Plans**: 5-6 plans
+
+Plans:
+- [ ] 04-01: Clone Kapso whatsapp-cloud-inbox repo for reference (learn UI patterns)
+- [ ] 04-02: Create KapsoInbox wrapper component (adapter between Kapso UI and Convex data)
+- [ ] 04-03: Replace InboxClient conversation/message components with Kapso-styled UI
+- [ ] 04-04: Add status filter dropdown (hot/warm/cold/new/client/lost from lead_statuses config)
+- [ ] 04-05: Add tag filter multi-select; apply combined filters to conversation list
+- [ ] 04-06: Test message sending, media rendering, real-time updates in dev mode
+
+### Phase 5: Real-time & Handover
+**Goal**: Real-time message updates continue flowing via Convex subscriptions; user can toggle AI/Human mode per conversation
+**Depends on**: Phase 4 (Inbox structure in place)
+**Requirements**: INBOX-04, ARI-02
+**Success Criteria** (what must be TRUE):
+  1. New incoming WhatsApp messages appear in Inbox without page refresh (within <2 sec)
+  2. Conversation list updates when conversation receives new message (reorders to top, unread count increases)
+  3. User sees AI/Human toggle button in message thread; toggling changes conversation.ai_enabled flag
+  4. When AI toggle off, new messages skip ARI processing and wait for human response
+  5. When AI toggle on, new messages resume going through ARI (Mouth → Brain cycle)
+**Plans**: 3-4 plans
+
+Plans:
+- [ ] 05-01: Preserve Convex subscriptions through Kapso integration (verify real-time sync)
+- [ ] 05-02: Add AI/Human toggle in message thread (Convex mutation updateConversationAiMode)
+- [ ] 05-03: Wire toggle to processARI gate (skip if conversation.ai_enabled === false)
+- [ ] 05-04: Test real-time updates with mock Kapso webhook, verify message flow
+
+### Phase 6: ARI Flow Integration
+**Goal**: New leads get automatic AI response; configuration changes in Your Intern immediately affect bot behavior end-to-end
+**Depends on**: Phase 3 (Your Intern config ready), Phase 4 (Inbox structure ready), Phase 5 (toggle working)
+**Requirements**: ARI-01, ARI-03, ARI-04
+**Success Criteria** (what must be TRUE):
+  1. New conversation from WhatsApp automatically triggers Mouth response (greeting message sent back)
+  2. Flow progresses through greeting → qualification → routing automatically as user answers
+  3. Changes to Persona/Flow tabs in Your Intern immediately appear in next ARI response (no restart needed)
+  4. Complete flow works: new lead → AI greeting → asks Q1 → saves answer → asks Q2 → routes to consultation/community
+  5. Brain analysis updates lead_score and temperature based on conversation; Scoring config rules applied
+  6. Conversation.next_action field shows AI's planned next step (human-readable for debugging)
+**Plans**: 4 plans
+
+Plans:
+- [ ] 06-01: Wire Mouth to read latest Persona/Flow config from workspace.settings (no caching)
+- [ ] 06-02: Verify getAriContext fetches workspace config on each call (includes persona, flow, scoring_rules)
+- [ ] 06-03: Verify Brain routing logic respects consultation_slots config (offers available times)
+- [ ] 06-04: End-to-end test: new lead → greeting → Q1 → answer → Q2 → scoring → routing (via demo mode)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
-(Phase 5 and 6 can run in parallel after Phase 1)
+Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Deployment | 1/1 | Complete | 2026-01-25 |
-| 2. Kapso Integration | 3/3 | Complete | 2026-01-25 |
-| 3. AI System | 4/4 | Complete | 2026-01-25 |
-| 3.1 Inbox Enhancement | 1/1 | Complete | 2026-01-25 |
-| 4. Bot Workflow | 6/6 | Complete | 2026-01-26 |
-| 5. Lead Flow | 8/8 | Complete | 2026-01-26 |
-| 6. Pricing Page | - | SKIPPED | - |
-| 6. UI Polish | 5/5 | Complete | 2026-01-27 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1-6. v3.3 | v3.3 | 33/33 | Complete | 2026-01-27 |
+| 1. Agent Skills Setup | v3.4 | 0/1-2 | Not started | - |
+| 2. Your Intern Debug | v3.4 | 0/3-4 | Not started | - |
+| 3. Your Intern Config | v3.4 | 0/6 | Not started | - |
+| 4. Inbox UI & Filtering | v3.4 | 0/5-6 | Not started | - |
+| 5. Real-time & Handover | v3.4 | 0/3-4 | Not started | - |
+| 6. ARI Flow Integration | v3.4 | 0/4 | Not started | - |
 
 ---
-*Created: 2026-01-25*
+
+*Roadmap created: 2026-01-27*
 *Last updated: 2026-01-27*

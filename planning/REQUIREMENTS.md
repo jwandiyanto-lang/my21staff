@@ -33,6 +33,10 @@ Requirements for Kapso Inbox Integration milestone. Each maps to roadmap phases.
 - [ ] **ARI-03**: Your Intern configuration changes reflect in ARI behavior
 - [ ] **ARI-04**: Complete flow works (new lead → ARI greeting → qualification → handover)
 
+### Development Workflow
+
+- [ ] **DEV-01**: Agent-skills MCP installed and configured
+
 ## Future Requirements
 
 Deferred to next milestone.
@@ -45,7 +49,6 @@ Deferred to next milestone.
 
 ### Development Workflow
 
-- **DEV-01**: Agent-skills MCP installed and configured
 - **DEV-02**: MCP commands documented for team use
 
 ## Out of Scope
@@ -66,29 +69,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INBOX-01 | TBD | Pending |
-| INBOX-02 | TBD | Pending |
-| INBOX-03 | TBD | Pending |
-| INBOX-04 | TBD | Pending |
-| INBOX-05 | TBD | Pending |
-| INBOX-06 | TBD | Pending |
-| INTERN-01 | TBD | Pending |
-| INTERN-02 | TBD | Pending |
-| INTERN-03 | TBD | Pending |
-| INTERN-04 | TBD | Pending |
-| INTERN-05 | TBD | Pending |
-| INTERN-06 | TBD | Pending |
-| INTERN-07 | TBD | Pending |
-| ARI-01 | TBD | Pending |
-| ARI-02 | TBD | Pending |
-| ARI-03 | TBD | Pending |
-| ARI-04 | TBD | Pending |
+| DEV-01 | 1 | Pending |
+| INBOX-01 | 4 | Pending |
+| INBOX-02 | 4 | Pending |
+| INBOX-03 | 4 | Pending |
+| INBOX-04 | 5 | Pending |
+| INBOX-05 | 4 | Pending |
+| INBOX-06 | 4 | Pending |
+| INTERN-01 | 2 | Pending |
+| INTERN-02 | 3 | Pending |
+| INTERN-03 | 3 | Pending |
+| INTERN-04 | 3 | Pending |
+| INTERN-05 | 3 | Pending |
+| INTERN-06 | 3 | Pending |
+| INTERN-07 | 3 | Pending |
+| ARI-01 | 6 | Pending |
+| ARI-02 | 5 | Pending |
+| ARI-03 | 6 | Pending |
+| ARI-04 | 6 | Pending |
 
 **Coverage:**
-- v3.4 requirements: 17 total
-- Mapped to phases: 0 (awaiting roadmap)
-- Unmapped: 17 ⚠️
+- v3.4 requirements: 18 total
+- Mapped to phases: 18 (100%)
+- Unmapped: 0 ✓
 
 ---
+
 *Requirements defined: 2026-01-27*
-*Last updated: 2026-01-27 after initial definition*
+*Last updated: 2026-01-27 after roadmap creation*
