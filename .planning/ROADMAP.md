@@ -209,10 +209,9 @@ Note: Plans 04-04 and 04-05 (gap closure for layout redesign) were reverted per 
 **Plans**: 3-4 plans
 
 Plans:
-- [ ] 05-01: Preserve Convex subscriptions through Kapso integration (verify real-time sync)
-- [ ] 05-02: Add AI/Human toggle in message thread (Convex mutation updateConversationAiMode)
-- [ ] 05-03: Wire toggle to processARI gate (skip if conversation.ai_enabled === false)
-- [ ] 05-04: Test real-time updates with mock Kapso webhook, verify message flow
+- [ ] 05-01-PLAN.md — Verify real-time sync + complete toggle UI (confirmation, system messages, typing indicator)
+- [ ] 05-02-PLAN.md — Wire toggle to processARI gate (skip ARI when status = handover)
+- [ ] 05-03-PLAN.md — Add mode indicators + end-to-end verification
 
 ### Phase 6: ARI Flow Integration
 **Goal**: New leads get automatic AI response; configuration changes in Your Intern immediately affect bot behavior end-to-end
