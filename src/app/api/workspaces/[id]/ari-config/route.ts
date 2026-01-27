@@ -204,8 +204,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId } = await params
 
-    // Dev mode: just return success with enabled status
-    if (isDevMode()) {
+    // Dev mode: return mock config for demo workspace
+    if (isDevMode() && workspaceId === 'demo') {
       const body = await request.json()
       return NextResponse.json({
         config: {
