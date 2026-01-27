@@ -89,11 +89,17 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 ### Active
 
-**v4.0 Next Milestone:**
-- [ ] Production deployment (when Vercel billing resolved)
-- [ ] Webhook E2E testing in production
+**v3.4 Current Milestone:**
+- [ ] Replace Inbox with Kapso's whatsapp-cloud-inbox UI
+- [ ] Enhanced status filtering integrated with Convex
+- [ ] Fix Your Intern page crashes
+- [ ] Install agent-skills MCP for development
+
+**Future Milestones:**
+- [ ] Production deployment optimization
 - [ ] Payment Integration (Midtrans)
 - [ ] AI Model Selection UI
+- [ ] Kapso broadcasts for newsletter distribution
 
 ### Out of Scope
 
@@ -160,22 +166,23 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | UI revert to v2.0 style | User preference for original design | ✓ Good — familiar UX |
 | Webhook testing deferred to production | ngrok connectivity issues | — Pending production deployment |
 
-## Current Milestone: v3.3 Go Live
+## Current Milestone: v3.4 Kapso Inbox Integration
 
-**Goal:** Deploy my21staff to production with Eagle Overseas Education as first live client — working WhatsApp bot processing real leads.
+**Goal:** Replace current Inbox with Kapso's WhatsApp Cloud Inbox UI and fix Your Intern page crashes for production use.
 
 **Target features:**
-- Production deployment (fresh Vercel project)
-- WhatsApp bot workflow: Greet → Qualify (destination, documents, English) → Community link OR Consultation handoff
-- n8n → Convex lead sync verified in production
-- Pricing page updated with $497 startup + $97/$297/mo plans
-- Eagle using the system daily with real leads
+- Replace Inbox with Kapso's whatsapp-cloud-inbox (Next.js 15 + shadcn/ui)
+- Enhanced status filtering (hot/warm/cold/new/client/lost)
+- Fix Your Intern page application errors in production
+- Keep Your Intern as separate sidebar item
+- Install agent-skills MCP for development workflow
 
 **Success criteria:**
-- Eagle receives WhatsApp message → Bot responds with qualification flow
-- Lead data appears in Convex CRM
-- Human gets notified for consultation requests
-- Pricing page reflects economics document
+- Inbox displays conversations using Kapso UI components
+- Status filter works with Convex lead statuses
+- Real-time updates continue working via Convex subscriptions
+- Your Intern page loads without errors on my21staff.com
+- All 5 tabs functional (Persona, Flow, Database, Scoring, Slots)
 
 ---
-*Last updated: 2026-01-25 after v3.3 milestone started*
+*Last updated: 2026-01-27 after v3.4 milestone started*

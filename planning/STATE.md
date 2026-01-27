@@ -2,18 +2,18 @@
 
 ## Project Reference
 
-See: planning/PROJECT.md (updated 2026-01-25)
+See: planning/PROJECT.md (updated 2026-01-27)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.3 Go Live — Phase 5 complete, Phase 6 ready
+**Current focus:** v3.4 Kapso Inbox Integration
 
 ## Current Position
 
-Milestone: v3.3 Go Live
-Phase: 6 (UI Polish) — COMPLETE
-Plan: 5 of 5 complete
-Status: All gap closure plans executed and verified
-Last activity: 2026-01-27 — Phase 6 complete
+Milestone: v3.4 Kapso Inbox Integration
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-01-27 — Milestone v3.4 started
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ (222 plans shipped)
 
