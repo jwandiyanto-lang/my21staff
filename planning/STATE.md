@@ -11,16 +11,16 @@ See: planning/PROJECT.md (updated 2026-01-25)
 
 Milestone: v3.3 Go Live
 Phase: 6 (UI Polish) — IN PROGRESS
-Plan: 2 of 4+ complete (06-02, 06-03)
+Plan: 3 of 4+ complete (06-01, 06-02, 06-03)
 Status: Gap closure plans in progress
-Last activity: 2026-01-27 — Completed 06-02 Database Dropdown Bug Fix
+Last activity: 2026-01-27 — Completed 06-01 Settings Page Crash Fix
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (218 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (219 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 218
+- Total plans completed: 219
 - Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
@@ -34,7 +34,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.0 | 21 | 3 |
 | v3.1 | 23 | 1 |
 | v3.2 | 23 | 2 |
-| v3.3 | 14 | In progress |
+| v3.3 | 15 | In progress |
 
 ## v3.3 Roadmap Summary
 
@@ -50,7 +50,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | ✓ Complete |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | ✓ Complete |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | SKIPPED |
-| 6. UI Polish | Smooth localhost | Derived from testing | In progress (1/4+) |
+| 6. UI Polish | Smooth localhost | Derived from testing | In progress (3/4+) |
 
 **Coverage:** 30/30 requirements mapped (100%)
 
@@ -135,10 +135,11 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Completed 06-02-PLAN.md (Database Dropdown Bug Fix)
+Stopped at: Completed 06-01-PLAN.md (Settings Page Crash Fix)
 Resume: Continue Phase 6 gap closure plans
 
-**Phase 6 Progress (IN PROGRESS — 2/4+):**
+**Phase 6 Progress (IN PROGRESS — 3/4+):**
+- 06-01 ✓ Settings Page Crash Fix - Moved AI config fetch from server to client component (fix SSR auth crash)
 - 06-02 ✓ Database Dropdown Bug Fix - Added key={contactId} to DropdownMenu components (Status, Tags, Assignee)
 - 06-03 ✓ Settings Page SSR Fix - Moved AI config fetch from server to client component
 
@@ -199,4 +200,4 @@ Resume: Continue Phase 6 gap closure plans
 | 003 | Remove merge button, clear default tags | 2026-01-26 | 8d7954b | [003-database-ux-fixes](./quick/003-database-ux-fixes/) |
 
 ---
-*Last updated: 2026-01-27 — 06-02 Database Dropdown Bug Fix complete*
+*Last updated: 2026-01-27 — 06-01 Settings Page Crash Fix complete*
