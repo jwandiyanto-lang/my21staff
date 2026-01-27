@@ -120,7 +120,7 @@ Plans:
 
 </details>
 
-## 🚧 v3.4 Kapso Inbox Integration (In Progress)
+## v3.4 Kapso Inbox Integration (In Progress)
 
 **Milestone Goal:** Replace Inbox with Kapso's WhatsApp-first UI and fix Your Intern production crashes. Build complete bot configuration UI (5 tabs) and integrate end-to-end automation flow. Eagle Overseas has modern interface with fully configurable AI.
 
@@ -133,11 +133,10 @@ Plans:
   2. MCP server appears in Claude Code skill list
   3. Can execute at least one Kapso command (e.g., list contacts, send test message)
   4. Kapso API key configured and authenticated
-**Plans**: 1-2 plans
+**Plans**: 1 plan
 
 Plans:
-- [ ] 01-01: Install agent-skills and configure Kapso API access
-- [ ] 01-02: Test basic commands (list contacts, send message)
+- [ ] 01-01-PLAN.md — Install agent-skills, configure MCP server, verify Kapso tools
 
 ### Phase 2: Your Intern Debug
 **Goal**: Your Intern page loads without errors in production, removing P0 blocker for admin configuration work
@@ -207,7 +206,7 @@ Plans:
   2. Conversation list updates when conversation receives new message (reorders to top, unread count increases)
   3. User sees AI/Human toggle button in message thread; toggling changes conversation.ai_enabled flag
   4. When AI toggle off, new messages skip ARI processing and wait for human response
-  5. When AI toggle on, new messages resume going through ARI (Mouth → Brain cycle)
+  5. When AI toggle on, new messages resume going through ARI (Mouth -> Brain cycle)
 **Plans**: 3-4 plans
 
 Plans:
@@ -222,9 +221,9 @@ Plans:
 **Requirements**: ARI-01, ARI-03, ARI-04
 **Success Criteria** (what must be TRUE):
   1. New conversation from WhatsApp automatically triggers Mouth response (greeting message sent back)
-  2. Flow progresses through greeting → qualification → routing automatically as user answers
+  2. Flow progresses through greeting -> qualification -> routing automatically as user answers
   3. Changes to Persona/Flow tabs in Your Intern immediately appear in next ARI response (no restart needed)
-  4. Complete flow works: new lead → AI greeting → asks Q1 → saves answer → asks Q2 → routes to consultation/community
+  4. Complete flow works: new lead -> AI greeting -> asks Q1 -> saves answer -> asks Q2 -> routes to consultation/community
   5. Brain analysis updates lead_score and temperature based on conversation; Scoring config rules applied
   6. Conversation.next_action field shows AI's planned next step (human-readable for debugging)
 **Plans**: 4 plans
@@ -233,17 +232,17 @@ Plans:
 - [ ] 06-01: Wire Mouth to read latest Persona/Flow config from workspace.settings (no caching)
 - [ ] 06-02: Verify getAriContext fetches workspace config on each call (includes persona, flow, scoring_rules)
 - [ ] 06-03: Verify Brain routing logic respects consultation_slots config (offers available times)
-- [ ] 06-04: End-to-end test: new lead → greeting → Q1 → answer → Q2 → scoring → routing (via demo mode)
+- [ ] 06-04: End-to-end test: new lead -> greeting -> Q1 -> answer -> Q2 -> scoring -> routing (via demo mode)
 
 ## Progress
 
 **Execution Order:**
-Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute sequentially: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1-6. v3.3 | v3.3 | 33/33 | Complete | 2026-01-27 |
-| 1. Agent Skills Setup | v3.4 | 0/1-2 | Not started | - |
+| 1. Agent Skills Setup | v3.4 | 0/1 | Planned | - |
 | 2. Your Intern Debug | v3.4 | 0/3-4 | Not started | - |
 | 3. Your Intern Config | v3.4 | 0/6 | Not started | - |
 | 4. Inbox UI & Filtering | v3.4 | 0/5-6 | Not started | - |
