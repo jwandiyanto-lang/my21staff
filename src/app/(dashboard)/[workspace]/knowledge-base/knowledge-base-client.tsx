@@ -8,6 +8,7 @@ import { PersonaTab } from '@/components/knowledge-base/persona-tab'
 import { FlowTab } from '@/components/knowledge-base/flow-tab'
 import { DatabaseTab } from '@/components/knowledge-base/database-tab'
 import { ScoringTab } from '@/components/knowledge-base/scoring-tab'
+import { TabErrorBoundary } from '@/components/error-boundaries/tab-error-boundary'
 
 interface TeamMember {
   id: string
@@ -63,23 +64,33 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
         </TabsList>
 
         <TabsContent value="persona" className="space-y-6">
-          <PersonaTab workspaceId={workspace.id} />
+          <TabErrorBoundary tabName="Persona">
+            <PersonaTab workspaceId={workspace.id} />
+          </TabErrorBoundary>
         </TabsContent>
 
         <TabsContent value="flow" className="space-y-6">
-          <FlowTab workspaceId={workspace.id} />
+          <TabErrorBoundary tabName="Flow">
+            <FlowTab workspaceId={workspace.id} />
+          </TabErrorBoundary>
         </TabsContent>
 
         <TabsContent value="database" className="space-y-6">
-          <DatabaseTab workspaceId={workspace.id} />
+          <TabErrorBoundary tabName="Database">
+            <DatabaseTab workspaceId={workspace.id} />
+          </TabErrorBoundary>
         </TabsContent>
 
         <TabsContent value="scoring" className="space-y-6">
-          <ScoringTab workspaceId={workspace.id} />
+          <TabErrorBoundary tabName="Scoring">
+            <ScoringTab workspaceId={workspace.id} />
+          </TabErrorBoundary>
         </TabsContent>
 
         <TabsContent value="slots" className="space-y-6">
-          <SlotManager workspaceId={workspace.id} teamMembers={teamMembers} />
+          <TabErrorBoundary tabName="Slots">
+            <SlotManager workspaceId={workspace.id} teamMembers={teamMembers} />
+          </TabErrorBoundary>
         </TabsContent>
       </Tabs>
     </div>
