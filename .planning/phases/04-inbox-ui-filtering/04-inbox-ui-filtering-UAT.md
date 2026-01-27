@@ -78,7 +78,16 @@ skipped: 9
   reason: "User reported: Inbox doesn't match Kapso WhatsApp Cloud Inbox design (github.com/gokapso/whatsapp-cloud-inbox). Should be clean 2-column layout with WhatsApp Web aesthetic: narrow conversation sidebar with search, wide message thread with green bubbles, minimal design. Current UI appears to be old custom design, not Kapso's WhatsApp-first structure."
   severity: blocker
   test: 1
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Architecture mismatch - Current 3-column layout (sidebar + thread + overlay) vs Kapso's 2-column design. InfoSidebar uses floating overlay instead of integrated panel. Filters crammed into header instead of dedicated bar. Components are individually correct (FilterTabs, MessageBubble use emerald-500 properly), but layout structure diverges from Kapso reference."
+  artifacts:
+    - path: "src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx"
+      issue: "3-column layout needs restructure to 2-column"
+    - path: "src/components/contact/info-sidebar.tsx"
+      issue: "Overlay positioning needs integration or modal conversion"
+    - path: "src/components/inbox/filter-tabs.tsx"
+      issue: "Needs dedicated filter bar section"
+  missing:
+    - "Dedicated filter bar (separate section below search)"
+    - "Integrated right panel (not overlay)"
+    - "Responsive proportions for sidebar (25-30% width)"
+  debug_session: ".planning/debug/inbox-kapso-design-gap.md"
