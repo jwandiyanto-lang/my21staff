@@ -80,7 +80,7 @@ export function AIToggle({ workspaceId, initialEnabled = true }: AIToggleProps) 
   }
 
   return (
-    <div className="bg-accent rounded-lg p-4">
+    <div className="bg-accent/10 rounded-lg p-4">
       <div className="flex items-center justify-between">
         {/* Label and Icon */}
         <div className="flex items-center gap-3">
