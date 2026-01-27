@@ -26,6 +26,18 @@ import { DateSeparator } from './date-separator'
 import { ComposeInput } from './compose-input'
 import { Bot, User, Loader2, PanelRight, PanelRightClose, ChevronDown } from 'lucide-react'
 import { isDevMode, MOCK_MESSAGES } from '@/lib/mock-data'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { TypingIndicator } from './typing-indicator'
+import { SystemMessage } from './system-message'
 
 // Format mock messages for dev mode
 const getMockMessagesForConversation = (conversationId: string) => {
@@ -82,6 +94,9 @@ export function MessageThread({
 
   // Handover toggle state
   const [isToggling, setIsToggling] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [showTypingIndicator, setShowTypingIndicator] = useState(false)
+  const [systemMessages, setSystemMessages] = useState<{ id: string; text: string; timestamp: number }[]>([])
   const isAiActive = conversationStatus !== 'handover'
 
   // Handle reply to message
@@ -95,16 +110,70 @@ export function MessageThread({
     console.log('Reply to message:', message)
   }
 
-  // Handle AI/Human handover toggle
-  const handleHandoverToggle = async () => {
+  // Handle AI/Human handover toggle - show confirmation dialog first
+  const handleToggleClick = () => {
+    setShowConfirmDialog(true)
+  }
+
+  // Execute toggle after confirmation
+  const handleConfirmToggle = async () => {
+    setShowConfirmDialog(false)
     setIsToggling(true)
+
     try {
+      // In dev mode, simulate the toggle with system message
+      if (isDevMode()) {
+        // Simulate AI typing indicator when switching to AI mode
+        if (!isAiActive) {
+          setShowTypingIndicator(true)
+          setTimeout(() => {
+            setShowTypingIndicator(false)
+          }, 2000)
+        }
+
+        // Add system message to local state
+        const newSystemMessage = {
+          id: `system-${Date.now()}`,
+          text: isAiActive
+            ? 'You switched to Manual mode. You will handle responses manually.'
+            : 'You enabled AI mode. AI will respond to new messages.',
+          timestamp: Date.now()
+        }
+        setSystemMessages(prev => [...prev, newSystemMessage])
+
+        // Trigger status change in parent (updates conversation status)
+        onStatusChange?.()
+
+        setIsToggling(false)
+        return
+      }
+
+      // Production mode - API call
       const res = await fetch(`/api/conversations/${conversationId}/handover`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ai_paused: isAiActive }) // Toggle current state
       })
+
       if (res.ok) {
+        // Add system message after successful toggle
+        const newSystemMessage = {
+          id: `system-${Date.now()}`,
+          text: isAiActive
+            ? 'You switched to Manual mode. You will handle responses manually.'
+            : 'You enabled AI mode. AI will respond to new messages.',
+          timestamp: Date.now()
+        }
+        setSystemMessages(prev => [...prev, newSystemMessage])
+
+        // Show typing indicator when switching to AI mode
+        if (!isAiActive) {
+          setShowTypingIndicator(true)
+          setTimeout(() => {
+            setShowTypingIndicator(false)
+          }, 2000)
+        }
+
         onStatusChange?.()
       }
     } catch (error) {
@@ -196,7 +265,7 @@ export function MessageThread({
         <Button
           variant={isAiActive ? "default" : "outline"}
           size="sm"
-          onClick={handleHandoverToggle}
+          onClick={handleToggleClick}
           disabled={isToggling}
           className={cn(
             "text-xs shrink-0",
@@ -256,14 +325,43 @@ export function MessageThread({
           // Render messages grouped by date - max width container for better readability
           <div className="max-w-3xl mx-auto w-full px-6">
             <div className="flex flex-col gap-3">
-              {Array.from(groupedMessages.entries()).map(([date, msgs]) => (
+              {Array.from(groupedMessages.entries()).map(([date, msgs], groupIndex) => (
                 <div key={date} className="space-y-2">
                   <DateSeparator date={date} />
-                  {msgs.map((message) => (
-                    <MessageBubble key={message._id} message={message} onReply={handleReply} />
+                  {msgs.map((message, msgIndex) => (
+                    <div key={message._id}>
+                      <MessageBubble message={message} onReply={handleReply} />
+                      {/* Show system messages after corresponding real messages */}
+                      {systemMessages
+                        .filter(sm => {
+                          const messageTime = new Date(message.created_at).getTime()
+                          const systemTime = sm.timestamp
+                          // Show system message after the message it corresponds to
+                          const isLastMessageInGroup = msgIndex === msgs.length - 1
+                          const isLastGroup = groupIndex === Array.from(groupedMessages.entries()).length - 1
+                          return isLastMessageInGroup && isLastGroup && systemTime > messageTime
+                        })
+                        .map(sm => (
+                          <SystemMessage key={sm.id} text={sm.text} />
+                        ))
+                      }
+                    </div>
                   ))}
                 </div>
               ))}
+              {/* System messages that are newer than all messages */}
+              {systemMessages
+                .filter(sm => {
+                  if (messages.length === 0) return true
+                  const lastMessageTime = messages[messages.length - 1]?.created_at || 0
+                  return sm.timestamp > lastMessageTime
+                })
+                .map(sm => (
+                  <SystemMessage key={sm.id} text={sm.text} />
+                ))
+              }
+              {/* Typing indicator - shows when AI is processing */}
+              {showTypingIndicator && <TypingIndicator />}
               {/* New messages indicator - appears when scrolled up with new messages */}
               {showNewIndicator && (
                 <button
@@ -288,6 +386,28 @@ export function MessageThread({
         workspaceId={workspaceId}
         conversationId={conversationId}
       />
+
+      {/* Confirmation dialog for mode toggle */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isAiActive ? 'Switch to Manual mode?' : 'Enable AI mode?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isAiActive
+                ? 'AI will stop responding to new messages. You will need to respond manually.'
+                : 'AI will automatically respond to new messages from this contact.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmToggle}>
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

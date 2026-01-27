@@ -215,12 +215,13 @@ export const MOCK_CONTACTS: Contact[] = [
 export const isDevMode = () => process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 // Mock conversations - synced with MOCK_CONTACTS
+// status: 'open' = AI active, 'handover' = Manual mode, 'closed' = Archived
 export const MOCK_CONVERSATIONS_RAW: Conversation[] = [
   {
     id: 'conv-001',
     workspace_id: 'dev-workspace-001',
     contact_id: 'contact-001', // Budi Santoso
-    status: 'open',
+    status: 'open', // AI active (ARI Active)
     assigned_to: 'dev-user-001',
     unread_count: 2,
     last_message_at: '2026-01-20T14:30:00Z',
@@ -232,7 +233,7 @@ export const MOCK_CONVERSATIONS_RAW: Conversation[] = [
     id: 'conv-002',
     workspace_id: 'dev-workspace-001',
     contact_id: 'contact-002', // Siti Rahayu
-    status: 'open',
+    status: 'handover', // Manual mode (Human handling)
     assigned_to: null,
     unread_count: 1,
     last_message_at: '2026-01-22T11:00:00Z',
