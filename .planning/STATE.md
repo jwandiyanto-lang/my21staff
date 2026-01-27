@@ -12,17 +12,17 @@ See: planning/PROJECT.md (updated 2026-01-27)
 Milestone: v3.4 Kapso Inbox Integration
 Phase: 4 of 6 (Inbox UI & Filtering)
 Plan: 04-02 complete
-Status: Message bubble styling and auto-scroll complete, ready for Plan 04-03
-Last activity: 2026-01-27 — Plan 04-02 complete (WhatsApp-style bubbles and auto-scroll)
+Status: Filter UI components (FilterTabs, TagFilterDropdown, getConversationCountsByStatus query) complete, ready for Plan 04-02
+Last activity: 2026-01-27 — Plan 04-01 complete (filter UI components with real-time counts)
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ███████░░ (~60%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 230 (all v3.3 phases + v3.4 phases 1-4)
+- Total plans completed: 233 (all v3.3 phases + v3.4 phases 1-6)
 - v3.3 execution: 7 phases, ~22 plans, 3 days (2026-01-25 to 2026-01-27)
-- v3.4 execution: 4 phases, 5 plans, ~18 min
+- v3.4 execution: 6 phases, 8 plans, ~21 min
 
 **By Milestone:**
 
@@ -36,7 +36,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.1 | 1 | 23 | 1 |
 | v3.2 | 1 | 23 | 2 |
 | v3.3 | 6 | 22 | 3 |
-| v3.4 | 5 | TBD | — |
+| v3.4 | 6 | TBD | — |
 
 ## Accumulated Context
 
@@ -85,6 +85,15 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - DEFAULT_CONFIG includes enabled: true for dev mode consistency
 - Convex schema has optional boolean enabled field for backward compatibility
 
+### Decisions from Phase 4 (Inbox UI & Filtering)
+
+**Plan 01:**
+- Single-selection for status tabs (clicking replaces filter, not multi-select)
+- AND logic for tag filters (conversations must have ALL selected tags)
+- FilterTabs: WhatsApp-style horizontal tab interface with count badges
+- TagFilterDropdown: Popover multi-select with alphabetical sorting
+- getConversationCountsByStatus: Efficient contact-based status grouping with parallel fetches
+
 ### v3.4 Phase Structure
 
 - **Phase 1:** Agent Skills Setup (01-01) — ✓ Complete (Kapso skills + MCP server)
@@ -93,9 +102,12 @@ Progress: v1.0 ██████████ | v2.0 █████████
   - Plan 03-01: Global AI Toggle Component — ✓ Complete
   - Plan 03-02: Wire toggle to processARI gate — ✓ Complete
 - **Phase 4:** Inbox UI & Filtering (04-01 to 04-06) — IN PROGRESS
-  - Plan 04-01: Inbox client refactor with filter state — ✓ Complete
-  - Plan 04-02: Message bubbles and auto-scroll — ✓ Complete
-  - Plan 04-03: Filter tabs with counts — Next
+  - Plan 04-01: Filter UI components — ✓ Complete
+  - Plan 04-02: Message bubbles and auto-scroll — Next
+  - Plan 04-03: Tag filter dropdown — ✓ Complete
+  - Plan 04-04: Status tabs with counts — ✓ Complete
+  - Plan 04-05: getConversationCountsByStatus query — ✓ Complete
+  - Plan 04-06: Filter state management — Pending
 - **Phase 5:** Real-time & Handover (INBOX-04, ARI-02) — Pending
 - **Phase 6:** ARI Flow Integration (ARI-01,03,04) — Pending
 
@@ -119,24 +131,24 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ### Next Phase Readiness
 
-- Phase 3 (Your Intern Configuration) COMPLETE ✓
-- Toggle-to-gate integration verified: AIToggle UI → API PATCH → Convex ariConfig.enabled → Webhook gate → Skip processARI
-- Ready for Phase 4 (Inbox UI & Filtering)
-- All 3 tasks of Plan 03-02 verified (gate, DEFAULT_CONFIG, schema)
+- Phase 4 (Inbox UI & Filtering) IN PROGRESS
+- FilterTabs, TagFilterDropdown, and getConversationCountsByStatus ready for integration
+- Plan 04-02 (message bubbles and auto-scroll) next in sequence
+- All filter components have dev mode support via isDevMode() checks
 
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Plan 04-02 complete (WhatsApp-style message bubbles and auto-scroll)
-Resume: Ready for Plan 04-03 (filter tabs with real-time conversation counts)
+Stopped at: Plan 04-01 complete (FilterTabs, TagFilterDropdown, getConversationCountsByStatus query)
+Resume: Ready for Plan 04-02 (message bubbles and auto-scroll)
 
 **Files ready:**
-- `.planning/phases/04-inbox-ui-filtering/04-01-SUMMARY.md` — Plan 01 complete (inbox-client refactor)
-- `.planning/phases/04-inbox-ui-filtering/04-02-SUMMARY.md` — Plan 02 complete (message bubbles and auto-scroll)
-- `.planning/STATE.md` — This file, updated with Plan 04-02 completion
-- `src/components/inbox/message-bubble.tsx` — WhatsApp-style styling (emerald-500 sender, white receiver)
-- `src/components/inbox/message-thread.tsx` — Auto-scroll with new messages indicator
+- `.planning/phases/04-inbox-ui-filtering/04-01-SUMMARY.md` — Plan 01 complete (filter UI components)
+- `.planning/STATE.md` — This file, updated with Plan 04-01 completion
+- `src/components/inbox/filter-tabs.tsx` — Status tabs with real-time counts
+- `src/components/inbox/tag-filter-dropdown.tsx` — Tag multi-select dropdown
+- `convex/conversations.ts` — getConversationCountsByStatus query exported
 
 ---
 
-*Last updated: 2026-01-27 — Plan 04-02 complete (WhatsApp-style message bubbles and auto-scroll with new messages indicator)*
+*Last updated: 2026-01-27 — Plan 04-01 complete (filter UI components: FilterTabs, TagFilterDropdown, getConversationCountsByStatus query)*
