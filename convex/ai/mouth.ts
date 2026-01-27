@@ -51,6 +51,7 @@ export const generateMouthResponse = internalAction({
       tone: v.string(),
     })),
     flowStages: v.optional(v.array(v.any())),
+    consultationSlots: v.optional(v.array(v.any())),
   },
   handler: async (_ctx, args): Promise<MouthResponse> => {
     const startTime = Date.now();
@@ -70,7 +71,8 @@ export const generateMouthResponse = internalAction({
       args.context as QualificationContext | undefined,
       args.communityLink,
       args.persona,
-      args.flowStages as Array<{ name: string; description: string; questions: string[] }> | undefined
+      args.flowStages as Array<{ name: string; description: string; questions: string[] }> | undefined,
+      args.consultationSlots as Array<{ day: string; time: string; duration_minutes: number; available: boolean }> | undefined
     );
 
     // Format messages for API
