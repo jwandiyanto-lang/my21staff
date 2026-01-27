@@ -10,10 +10,10 @@ See: planning/PROJECT.md (updated 2026-01-27)
 ## Current Position
 
 Milestone: v3.4 Kapso Inbox Integration
-Phase: 4 of 6 (Inbox UI & Filtering)
-Plan: 04-02 complete
-Status: Filter UI components (FilterTabs, TagFilterDropdown, getConversationCountsByStatus query) complete, ready for Plan 04-02
-Last activity: 2026-01-27 — Plan 04-01 complete (filter UI components with real-time counts)
+Phase: 5 of 6 (Real-time & Handover)
+Plan: Ready to start 05-01
+Status: Phase 4 complete - inbox filter UI with dropdown status filter, optimized layout
+Last activity: 2026-01-27 — Phase 4 complete (status dropdown + optimized filter layout)
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ███████░░ (~60%)
 
@@ -94,6 +94,11 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - TagFilterDropdown: Popover multi-select with alphabetical sorting
 - getConversationCountsByStatus: Efficient contact-based status grouping with parallel fetches
 
+**Post-plan refinements:**
+- Converted status filter from horizontal tabs to dropdown menu for cleaner UI
+- Optimized layout: Search at top, status dropdown below, Active/All + Tags in one row
+- Reverted 2-column grid layout attempt (04-04, 04-05) - keeping original flex layout per user decision
+
 ### v3.4 Phase Structure
 
 - **Phase 1:** Agent Skills Setup (01-01) — ✓ Complete (Kapso skills + MCP server)
@@ -101,13 +106,11 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - **Phase 3:** Your Intern Configuration (03-01 to 03-07) — ✓ Complete
   - Plan 03-01: Global AI Toggle Component — ✓ Complete
   - Plan 03-02: Wire toggle to processARI gate — ✓ Complete
-- **Phase 4:** Inbox UI & Filtering (04-01 to 04-06) — IN PROGRESS
+- **Phase 4:** Inbox UI & Filtering (04-01 to 04-03) — ✓ Complete
   - Plan 04-01: Filter UI components — ✓ Complete
-  - Plan 04-02: Message bubbles and auto-scroll — Next
-  - Plan 04-03: Tag filter dropdown — ✓ Complete
-  - Plan 04-04: Status tabs with counts — ✓ Complete
-  - Plan 04-05: getConversationCountsByStatus query — ✓ Complete
-  - Plan 04-06: Filter state management — Pending
+  - Plan 04-02: Message bubbles and auto-scroll — ✓ Complete
+  - Plan 04-03: Integrate filters into inbox-client — ✓ Complete
+  - Post-plan: Converted tabs to dropdown + optimized layout — ✓ Complete
 - **Phase 5:** Real-time & Handover (INBOX-04, ARI-02) — Pending
 - **Phase 6:** ARI Flow Integration (ARI-01,03,04) — Pending
 
@@ -131,24 +134,31 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ### Next Phase Readiness
 
-- Phase 4 (Inbox UI & Filtering) IN PROGRESS
-- FilterTabs, TagFilterDropdown, and getConversationCountsByStatus ready for integration
-- Plan 04-02 (message bubbles and auto-scroll) next in sequence
-- All filter components have dev mode support via isDevMode() checks
+- Phase 4 (Inbox UI & Filtering) COMPLETE
+- Phase 5 (Real-time & Handover) ready to start
+- Inbox UI foundation solid: dropdown filters, search, Active/All toggle
+- Real-time subscriptions already in place from earlier phases
+- AI/Human handover toggle will build on existing conversation state
 
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Plan 04-01 complete (FilterTabs, TagFilterDropdown, getConversationCountsByStatus query)
-Resume: Ready for Plan 04-02 (message bubbles and auto-scroll)
+Stopped at: Phase 4 complete (inbox filter UI with dropdown + optimized layout)
+Resume: Ready for Phase 5 (Real-time & Handover)
 
-**Files ready:**
-- `.planning/phases/04-inbox-ui-filtering/04-01-SUMMARY.md` — Plan 01 complete (filter UI components)
-- `.planning/STATE.md` — This file, updated with Plan 04-01 completion
-- `src/components/inbox/filter-tabs.tsx` — Status tabs with real-time counts
+**Files modified in Phase 4:**
+- `src/components/inbox/filter-tabs.tsx` — Status dropdown with counts (converted from tabs)
 - `src/components/inbox/tag-filter-dropdown.tsx` — Tag multi-select dropdown
-- `convex/conversations.ts` — getConversationCountsByStatus query exported
+- `src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx` — Optimized filter layout (search top, status dropdown, Active/All + Tags row)
+- `convex/conversations.ts` — getConversationCountsByStatus query
+
+**Recent commits:**
+- `877fc82` - Filter layout optimization (search, status dropdown, Active/All + Tags)
+- `91f9733` - Initial layout attempt
+- `e8c2bc8` - Convert status tabs to dropdown menu
+- `5caab52` - Fix MessageSquare import
+- `a842880` - Revert 2-column grid layout
 
 ---
 
-*Last updated: 2026-01-27 — Plan 04-01 complete (filter UI components: FilterTabs, TagFilterDropdown, getConversationCountsByStatus query)*
+*Last updated: 2026-01-27 — Phase 4 complete (inbox filter UI with dropdown status filter and optimized layout)*
