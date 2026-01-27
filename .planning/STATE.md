@@ -10,10 +10,10 @@ See: planning/PROJECT.md (updated 2026-01-27)
 ## Current Position
 
 Milestone: v3.4 Kapso Inbox Integration
-Phase: 3 of 6 (Your Intern Configuration)
-Plan: 03-02 complete
-Status: Toggle-gate integration verified, Phase 3 complete, ready for Phase 4
-Last activity: 2026-01-27 — Plan 03-02 complete (wire toggle to processARI gate verified)
+Phase: 4 of 6 (Inbox UI & Filtering)
+Plan: 04-02 complete
+Status: Message bubble styling and auto-scroll complete, ready for Plan 04-03
+Last activity: 2026-01-27 — Plan 04-02 complete (WhatsApp-style bubbles and auto-scroll)
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ███████░░ (~60%)
 
@@ -92,7 +92,10 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - **Phase 3:** Your Intern Configuration (03-01 to 03-07) — ✓ Complete
   - Plan 03-01: Global AI Toggle Component — ✓ Complete
   - Plan 03-02: Wire toggle to processARI gate — ✓ Complete
-- **Phase 4:** Inbox UI & Filtering (INBOX-01,02,03,05,06) — Next
+- **Phase 4:** Inbox UI & Filtering (04-01 to 04-06) — IN PROGRESS
+  - Plan 04-01: Inbox client refactor with filter state — ✓ Complete
+  - Plan 04-02: Message bubbles and auto-scroll — ✓ Complete
+  - Plan 04-03: Filter tabs with counts — Next
 - **Phase 5:** Real-time & Handover (INBOX-04, ARI-02) — Pending
 - **Phase 6:** ARI Flow Integration (ARI-01,03,04) — Pending
 
@@ -124,17 +127,16 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Plan 03-02 complete (toggle-gate integration verified)
-Resume: Ready for Phase 4 (Inbox UI & Filtering)
+Stopped at: Plan 04-02 complete (WhatsApp-style message bubbles and auto-scroll)
+Resume: Ready for Plan 04-03 (filter tabs with real-time conversation counts)
 
 **Files ready:**
-- `.planning/phases/03-your-intern-configuration/03-01-SUMMARY.md` — Plan 01 complete (AIToggle component)
-- `.planning/phases/03-your-intern-configuration/03-02-SUMMARY.md` — Plan 02 complete (toggle-gate verification)
-- `.planning/STATE.md` — This file, updated with Phase 3 completion
-- `convex/kapso.ts` — Webhook handler with ariConfig.enabled gate (verified)
-- `src/app/api/workspaces/[id]/ari-config/route.ts` — DEFAULT_CONFIG with enabled field (verified)
-- `convex/schema.ts` — ariConfig table with enabled field (verified)
+- `.planning/phases/04-inbox-ui-filtering/04-01-SUMMARY.md` — Plan 01 complete (inbox-client refactor)
+- `.planning/phases/04-inbox-ui-filtering/04-02-SUMMARY.md` — Plan 02 complete (message bubbles and auto-scroll)
+- `.planning/STATE.md` — This file, updated with Plan 04-02 completion
+- `src/components/inbox/message-bubble.tsx` — WhatsApp-style styling (emerald-500 sender, white receiver)
+- `src/components/inbox/message-thread.tsx` — Auto-scroll with new messages indicator
 
 ---
 
-*Last updated: 2026-01-27 — Phase 3 (Your Intern Configuration) complete, toggle-gate integration verified*
+*Last updated: 2026-01-27 — Plan 04-02 complete (WhatsApp-style message bubbles and auto-scroll with new messages indicator)*
