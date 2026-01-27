@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useQuery } from "convex/react"
-import { api } from "@/convex/_generated/api"
-import { Tag } from "lucide-react"
+import { api } from "convex/_generated/api"
+import { ChevronDown, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -11,11 +11,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Checkbox } from "@/components/ui/checkbox"
 import { isDevMode } from "@/lib/mock-data"
 import { MOCK_CONVERSATIONS } from "@/lib/mock-data"
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status"
-import type { Id } from "@/convex/_generated/dataModel"
+import type { Id } from "convex/_generated/dataModel"
 
 // Status configuration for tabs (ordered as specified)
 const STATUS_TABS = [
@@ -44,8 +43,8 @@ interface FilterTabsProps {
 /**
  * FilterTabs component for filtering conversations by lead status.
  *
- * Displays horizontal tabs (WhatsApp-style) with real-time conversation counts.
- * Single selection - clicking a tab replaces the current filter.
+ * Displays dropdown menu with real-time conversation counts.
+ * Single selection - clicking an option replaces the current filter.
  */
 export function FilterTabs({
   value,
@@ -53,6 +52,8 @@ export function FilterTabs({
   workspaceId,
   activeOnly = false,
 }: FilterTabsProps) {
+  const [open, setOpen] = useState(false)
+
   // Fetch real-time counts from Convex
   const counts = useQuery(
     api.conversations.getConversationCountsByStatus,
@@ -87,12 +88,13 @@ export function FilterTabs({
   // Current selection as tab key
   const selectedKey: StatusTabKey = value.length === 0 ? "all" : (value[0] as StatusTabKey)
 
-  const handleTabClick = (key: StatusTabKey) => {
+  const handleSelect = (key: StatusTabKey) => {
     if (key === "all") {
       onChange([])
     } else {
       onChange([key as LeadStatus])
     }
+    setOpen(false)
   }
 
   // Calculate total count
@@ -101,59 +103,84 @@ export function FilterTabs({
       ? Object.values(currentCounts).reduce((sum, c) => sum + (c || 0), 0)
       : null
 
+  // Get current selection label and count
+  const selectedTab = STATUS_TABS.find((tab) => tab.key === selectedKey)
+  const selectedCount =
+    currentCounts !== null
+      ? selectedKey === "all"
+        ? totalCount
+        : currentCounts[selectedKey as LeadStatus] || 0
+      : null
+
   return (
-    <div className="flex items-center gap-1 overflow-x-auto pb-2">
-      {STATUS_TABS.map((tab) => {
-        const count =
-          currentCounts !== null
-            ? tab.key === "all"
-              ? totalCount
-              : currentCounts[tab.key as LeadStatus] || 0
-            : null
-
-        const isSelected = selectedKey === tab.key
-        const config = tab.key === "all" ? null : LEAD_STATUS_CONFIG[tab.key]
-
-        return (
-          <Button
-            key={tab.key}
-            variant="ghost"
-            size="sm"
-            onClick={() => handleTabClick(tab.key)}
-            className={`
-              flex items-center gap-1.5 whitespace-nowrap transition-colors
-              ${isSelected
-                ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                : "bg-muted hover:bg-muted/80 text-muted-foreground"
-              }
-            `}
-          >
-            <span>{tab.label}</span>
-            {count !== null && count > 0 && (
-              <Badge
-                variant="secondary"
-                className={`
-                  h-5 min-w-[1.25rem] px-1 text-xs
-                  ${isSelected
-                    ? "bg-white/20 text-white"
-                    : "bg-background/80 text-foreground"
-                  }
-                `}
-              >
-                {count}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full justify-between text-left font-normal"
+        >
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span>{selectedTab?.label || "All"}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {selectedCount !== null && selectedCount > 0 && (
+              <Badge variant="secondary" className="h-5 min-w-[1.25rem] px-1.5 text-xs">
+                {selectedCount}
               </Badge>
             )}
-            {count === null && (
-              <Badge
-                variant="secondary"
-                className="h-5 min-w-[1.25rem] px-1 text-xs bg-transparent"
-              >
-                ...
-              </Badge>
-            )}
-          </Button>
-        )
-      })}
-    </div>
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          </div>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[240px] p-0" align="start">
+        <div className="max-h-[300px] overflow-y-auto">
+          <div className="p-1">
+            {STATUS_TABS.map((tab) => {
+              const count =
+                currentCounts !== null
+                  ? tab.key === "all"
+                    ? totalCount
+                    : currentCounts[tab.key as LeadStatus] || 0
+                  : null
+
+              const isSelected = selectedKey === tab.key
+
+              return (
+                <Button
+                  key={tab.key}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleSelect(tab.key)}
+                  className={`
+                    w-full justify-between font-normal
+                    ${isSelected ? "bg-accent" : ""}
+                  `}
+                >
+                  <span>{tab.label}</span>
+                  {count !== null && count > 0 && (
+                    <Badge
+                      variant="secondary"
+                      className="h-5 min-w-[1.25rem] px-1.5 text-xs"
+                    >
+                      {count}
+                    </Badge>
+                  )}
+                  {count === null && (
+                    <Badge
+                      variant="secondary"
+                      className="h-5 min-w-[1.25rem] px-1 text-xs bg-transparent"
+                    >
+                      ...
+                    </Badge>
+                  )}
+                </Button>
+              )
+            })}
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
