@@ -136,24 +136,22 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md — Install agent-skills, configure MCP server, verify Kapso tools
+- [x] 01-01-PLAN.md — Install agent-skills, configure MCP server, verify Kapso tools
 
 ### Phase 2: Your Intern Debug
-**Goal**: Your Intern page loads without errors in production, removing P0 blocker for admin configuration work
+**Goal**: Your Intern page loads without errors in dev mode, removing P0 blocker for admin configuration work
 **Depends on**: Nothing (critical path, execute first)
 **Requirements**: INTERN-01
 **Success Criteria** (what must be TRUE):
-  1. Your Intern page loads at `/demo/your-intern` without JS errors
-  2. Page continues loading in production environment (not localhost-only)
+  1. Your Intern page loads at `/demo/knowledge-base` without JS errors
+  2. Page loads in dev mode with mock data (no Clerk auth required)
   3. All UI elements render without crash (tabs visible, no console errors)
   4. User can click between tabs without page reload required
-**Plans**: 3-4 plans
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: Audit Your Intern errors (identify root causes from research notes)
-- [ ] 02-02: Fix SSR auth crashes (move useQuery to client components)
-- [ ] 02-03: Add error boundaries (prevent one tab crash from breaking page)
-- [ ] 02-04: Verify production load (test at localhost:3000/demo, then staging if available)
+- [ ] 02-01-PLAN.md — Create page.tsx, add dev mode handling to API routes
+- [ ] 02-02-PLAN.md — Add error boundaries to tabs, verify page resilience
 
 ### Phase 3: Your Intern Configuration
 **Goal**: User can configure bot behavior across 5 tabs (Persona, Flow, Database, Scoring, Slots) with one global AI toggle
@@ -242,8 +240,8 @@ Phases execute sequentially: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1-6. v3.3 | v3.3 | 33/33 | Complete | 2026-01-27 |
-| 1. Agent Skills Setup | v3.4 | 0/1 | Planned | - |
-| 2. Your Intern Debug | v3.4 | 0/3-4 | Not started | - |
+| 1. Agent Skills Setup | v3.4 | 1/1 | Complete | 2026-01-27 |
+| 2. Your Intern Debug | v3.4 | 0/2 | Planned | - |
 | 3. Your Intern Config | v3.4 | 0/6 | Not started | - |
 | 4. Inbox UI & Filtering | v3.4 | 0/5-6 | Not started | - |
 | 5. Real-time & Handover | v3.4 | 0/3-4 | Not started | - |
