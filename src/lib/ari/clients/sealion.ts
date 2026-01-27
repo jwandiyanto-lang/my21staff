@@ -1,19 +1,20 @@
 /**
  * Sea-Lion AI Client
  *
- * Uses OpenAI SDK to connect to Sea-Lion API (api.sea-lion.ai)
+ * Uses OpenAI SDK to connect to Sea-Lion via Ollama (Tailscale)
+ * Ollama provides OpenAI-compatible API at http://100.113.96.25:11434/v1
  */
 
 import OpenAI from 'openai';
 import type { AIResponse, AIModelType } from '../types';
 
-// Sea-Lion API endpoint
-const SEALION_URL = process.env.SEALION_URL || 'https://api.sea-lion.ai/v1';
-const SEALION_API_KEY = process.env.SEALION_API_KEY || '';
+// Sea-Lion via Ollama (Tailscale) endpoint
+const SEALION_URL = process.env.SEALION_URL || 'http://100.113.96.25:11434/v1';
 
-// Sea-Lion client (OpenAI-compatible API)
+// Sea-Lion client (OpenAI-compatible API via Ollama)
+// Note: Ollama doesn't require real API key, uses 'ollama' as placeholder
 const sealionClient = new OpenAI({
-  apiKey: SEALION_API_KEY,
+  apiKey: 'ollama',
   baseURL: SEALION_URL,
 });
 
