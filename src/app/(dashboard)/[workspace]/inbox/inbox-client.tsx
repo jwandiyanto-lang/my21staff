@@ -92,12 +92,14 @@ function MessageThreadWrapper({
   conversations,
   showInfoSidebar,
   onToggleSidebar,
+  onStatusChange,
 }: {
   conversationId: Id<'conversations'>
   workspaceId: Id<'workspaces'>
   conversations: Conversation[]
   showInfoSidebar: boolean
   onToggleSidebar: () => void
+  onStatusChange: () => void
 }) {
   const conversation = conversations.find((c) => c._id === conversationId)
   const contact = conversation?.contact
@@ -121,6 +123,7 @@ function MessageThreadWrapper({
         lead_status: contact.lead_status,
       }}
       conversationStatus={conversation?.status || 'open'}
+      onStatusChange={onStatusChange}
       showInfoSidebar={showInfoSidebar}
       onToggleSidebar={onToggleSidebar}
     />
@@ -134,6 +137,9 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   const [viewMode, setViewMode] = useState<'active' | 'all'>('active')
   const [tagFilter, setTagFilter] = useState<string[]>([])
   const [showInfoSidebar, setShowInfoSidebar] = useState(true)
+
+  // Track conversation status changes in dev mode
+  const [conversationStatusOverrides, setConversationStatusOverrides] = useState<Record<string, string>>({})
 
   // Skip Convex query in dev mode - use mock data
   const convexData = useQuery(
@@ -171,6 +177,17 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
 
     // Cast to any to handle type differences between mock and convex data
     let filtered = [...data.conversations] as any[]
+
+    // Apply status overrides in dev mode
+    if (isDevMode() && Object.keys(conversationStatusOverrides).length > 0) {
+      filtered = filtered.map((conv: any) => {
+        const overrideStatus = conversationStatusOverrides[conv._id]
+        if (overrideStatus) {
+          return { ...conv, status: overrideStatus }
+        }
+        return conv
+      })
+    }
 
     // Filter by view mode (active = has unread messages)
     if (viewMode === 'active') {
@@ -211,7 +228,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     }
 
     return filtered
-  }, [data?.conversations, searchQuery, statusFilter, tagFilter, viewMode])
+  }, [data?.conversations, searchQuery, statusFilter, tagFilter, viewMode, conversationStatusOverrides])
 
   // Get the selected conversation and contact
   const selectedConversation = useMemo(() => {
@@ -270,6 +287,24 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     // For dev mode, just log
     console.log('Merged with contact:', targetContactId)
   }, [])
+
+  // Handle conversation status change (toggle AI/Human mode)
+  const handleStatusChange = useCallback(() => {
+    if (!selectedConversationId) return
+
+    // Get current status
+    const currentConversation = filteredConversations.find((c) => c._id === selectedConversationId)
+    const currentStatus = currentConversation?.status || 'open'
+
+    // Toggle status
+    const newStatus = currentStatus === 'handover' ? 'open' : 'handover'
+
+    // Update status override
+    setConversationStatusOverrides((prev) => ({
+      ...prev,
+      [selectedConversationId]: newStatus,
+    }))
+  }, [selectedConversationId, filteredConversations])
 
   // Get available contacts for merge (all contacts except selected one)
   const availableContacts = useMemo(() => {
@@ -381,6 +416,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
             conversations={filteredConversations}
             showInfoSidebar={showInfoSidebar}
             onToggleSidebar={() => setShowInfoSidebar(!showInfoSidebar)}
+            onStatusChange={handleStatusChange}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
