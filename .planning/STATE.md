@@ -10,19 +10,19 @@ See: planning/PROJECT.md (updated 2026-01-27)
 ## Current Position
 
 Milestone: v3.4 Kapso Inbox Integration
-Phase: 2 of 6 (Your Intern Debug) - COMPLETE ✓
-Plan: 02-02 complete, UAT verified
-Status: Phase 2 complete, all tests passed, sidebar navigation added
-Last activity: 2026-01-27 — Phase 2 verified and completed (4/4 tests passed, workspace ID fix applied, Your Intern added to sidebar)
+Phase: 3 of 6 (Your Intern Configuration)
+Plan: 03-01 complete
+Status: Global AI Toggle component implemented, TypeScript compiles, ready for Plan 03-02
+Last activity: 2026-01-27 — Plan 03-01 complete (AIToggle with auto-save, toast, dev mode)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ████░░░░░ (~40%)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 █████░░░░ (~50%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 224 (all v3.3 phases + v3.4 phases 1-2)
+- Total plans completed: 227 (all v3.3 phases + v3.4 phases 1-3)
 - v3.3 execution: 7 phases, ~22 plans, 3 days (2026-01-25 to 2026-01-27)
-- v3.4 execution: 2 phases, 3 plans, ~12 min
+- v3.4 execution: 3 phases, 4 plans, ~17 min
 
 **By Milestone:**
 
@@ -69,14 +69,25 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Sidebar navigation includes "Your Intern" link with Bot icon
 - Dev mode works identically offline and online (no Supabase, Convex-only stack)
 
+### Decisions from Phase 3 (Your Intern Configuration)
+
+**Plan 01:**
+- Global AI toggle placed above tabs as master control
+- Auto-save on toggle change with toast notifications
+- Status badge shows green when enabled, gray when disabled
+- Dev mode bypass only for demo workspace (consistent with GET/PUT)
+- AIToggle pattern: useState + useEffect + fetch + toast (matches PersonaTab)
+
 ### v3.4 Phase Structure
 
 - **Phase 1:** Agent Skills Setup (01-01) — ✓ Complete (Kapso skills + MCP server)
 - **Phase 2:** Your Intern Debug (02-01, 02-02) — ✓ Complete (page routing + API dev mode + error boundaries)
-- **Phase 3:** Inbox UI & Filtering (INBOX-01,02,03,05,06) — Kapso integration
-- **Phase 4:** Real-time & Handover (INBOX-04, ARI-02) — Preserve sync, add toggle
-- **Phase 5:** ARI Flow Integration (ARI-01,03,04) — End-to-end automation
-- **Phase 6:** Your Intern Config (INTERN-02 to 07) — 5-tab admin UI
+- **Phase 3:** Your Intern Configuration (03-01 to 03-07) — In progress (03-01 complete)
+  - Plan 03-01: Global AI Toggle Component — ✓ Complete
+  - Plan 03-02: Wire toggle to processARI gate — Next
+- **Phase 4:** Inbox UI & Filtering (INBOX-01,02,03,05,06) — Pending
+- **Phase 5:** Real-time & Handover (INBOX-04, ARI-02) — Pending
+- **Phase 6:** ARI Flow Integration (ARI-01,03,04) — Pending
 
 ### Coverage Status
 
@@ -98,28 +109,25 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ### Next Phase Readiness
 
-- Phase 2 (Your Intern Debug) COMPLETE ✓
-- Your Intern page routing and API dev mode verified working
-- Error boundaries in place for all 5 tabs
-- /demo/knowledge-base works fully offline for development
-- Sidebar navigation includes Your Intern link
-- Ready for Your Intern Configuration phase (Phase 3)
+- Phase 3 (Your Intern Configuration) IN PROGRESS
+- Plan 03-01 COMPLETE ✓
+- AIToggle component ready for Plan 03-02 (wiring to processARI gate)
+- API endpoint supports toggle state changes
+- Dev mode works at localhost:3000/demo for offline testing
 
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Phase 2 complete and verified via UAT (4/4 tests passed)
-Resume: Ready for next phase (Phase 3: Your Intern Configuration)
+Stopped at: Plan 03-01 complete (AIToggle with auto-save, toast, dev mode)
+Resume: Ready for Plan 03-02 (wire toggle to processARI gate)
 
 **Files ready:**
-- `.planning/phases/02-your-intern-debug/02-01-SUMMARY.md` — Plan 01 complete (page.tsx + API dev mode)
-- `.planning/phases/02-your-intern-debug/02-02-SUMMARY.md` — Plan 02 complete (error boundaries)
-- `.planning/phases/02-your-intern-debug/02-UAT.md` — UAT complete (4/4 passed, workspace ID fix applied)
-- `.planning/phases/02-your-intern-debug/02-VERIFICATION.md` — Verification passed (4/4 must-haves)
-- `.planning/STATE.md` — This file, updated with Phase 2 completion
-- `.planning/ROADMAP.md` — Phase 2 marked complete
-- `src/components/workspace/sidebar.tsx` — Your Intern navigation added
+- `.planning/phases/03-your-intern-configuration/03-01-SUMMARY.md` — Plan 01 complete (AIToggle component)
+- `.planning/STATE.md` — This file, updated with Plan 03-01 completion
+- `src/components/knowledge-base/ai-toggle.tsx` — New toggle component
+- `src/app/(dashboard)/[workspace]/knowledge-base/knowledge-base-client.tsx` — Toggle integrated above tabs
+- `src/app/api/workspaces/[id]/ari-config/route.ts` — PATCH endpoint dev mode fixed
 
 ---
 
-*Last updated: 2026-01-27 — Phase 2 complete, verified via UAT*
+*Last updated: 2026-01-27 — Plan 03-01 complete, Global AI Toggle implemented*
