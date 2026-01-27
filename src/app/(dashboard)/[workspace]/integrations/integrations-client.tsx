@@ -64,7 +64,7 @@ export function IntegrationsClient({ workspace }: IntegrationsClientProps) {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-foreground">WhatsApp Business API</h2>
-                <p className="text-sm text-muted-foreground">via Kapso</p>
+                <p className="text-sm text-muted-foreground">Powered by Meta Business</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -141,8 +141,8 @@ export function IntegrationsClient({ workspace }: IntegrationsClientProps) {
                 <Settings className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-sm text-foreground">Kapso Dashboard</p>
-                <p className="text-xs text-muted-foreground">Manage settings</p>
+                <p className="font-semibold text-sm text-foreground">WhatsApp Settings</p>
+                <p className="text-xs text-muted-foreground">Manage integration</p>
               </div>
               <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </a>
