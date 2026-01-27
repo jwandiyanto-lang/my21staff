@@ -24,7 +24,7 @@ import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import { MessageBubble } from './message-bubble'
 import { DateSeparator } from './date-separator'
 import { ComposeInput } from './compose-input'
-import { Bot, User, Loader2, PanelRight, PanelRightClose } from 'lucide-react'
+import { Bot, User, Loader2, PanelRight, PanelRightClose, ChevronDown } from 'lucide-react'
 import { isDevMode, MOCK_MESSAGES } from '@/lib/mock-data'
 
 // Format mock messages for dev mode
@@ -117,6 +117,8 @@ export function MessageThread({
   const containerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
+  const [showNewIndicator, setShowNewIndicator] = useState(false)
+  const [lastMessageCount, setLastMessageCount] = useState(0)
 
   // Track if user is at bottom of scroll container
   const handleScroll = () => {
@@ -125,12 +127,26 @@ export function MessageThread({
     const threshold = 100 // pixels from bottom
     const atBottom = scrollHeight - scrollTop - clientHeight < threshold
     setIsAtBottom(atBottom)
+
+    // Hide new indicator when user scrolls to bottom
+    if (atBottom) {
+      setShowNewIndicator(false)
+    }
   }
 
   // Auto-scroll to bottom when messages change (only if user was at bottom)
   useEffect(() => {
-    if (isAtBottom && messages && messages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messages && messages.length > 0) {
+      // Track if new messages arrived
+      if (messages.length > lastMessageCount && !isAtBottom) {
+        setShowNewIndicator(true)
+      }
+      setLastMessageCount(messages.length)
+
+      if (isAtBottom) {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        setShowNewIndicator(false)
+      }
     }
   }, [messages, isAtBottom])
 
@@ -248,6 +264,19 @@ export function MessageThread({
                   ))}
                 </div>
               ))}
+              {/* New messages indicator - appears when scrolled up with new messages */}
+              {showNewIndicator && (
+                <button
+                  onClick={() => {
+                    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+                    setShowNewIndicator(false)
+                  }}
+                  className="sticky bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-full shadow-lg hover:bg-emerald-600 transition-all"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                  <span className="text-sm font-medium">New messages</span>
+                </button>
+              )}
               <div ref={messagesEndRef} />
             </div>
           </div>
