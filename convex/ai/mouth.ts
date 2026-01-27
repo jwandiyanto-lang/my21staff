@@ -45,6 +45,12 @@ export const generateMouthResponse = internalAction({
     state: v.optional(v.string()),
     context: v.optional(v.any()),
     communityLink: v.optional(v.string()),
+    persona: v.optional(v.object({
+      name: v.string(),
+      description: v.string(),
+      tone: v.string(),
+    })),
+    flowStages: v.optional(v.array(v.any())),
   },
   handler: async (_ctx, args): Promise<MouthResponse> => {
     const startTime = Date.now();
@@ -55,14 +61,16 @@ export const generateMouthResponse = internalAction({
       maxMessages: 10,
     });
 
-    // Build system prompt
+    // Build system prompt with workspace config
     const systemPrompt = buildMouthSystemPrompt(
-      args.botName ?? "Ari",
+      args.persona?.name ?? args.botName ?? "Ari",
       args.contactName ?? "kakak",
       args.language ?? "id",
       args.state ?? "greeting",
       args.context as QualificationContext | undefined,
-      args.communityLink
+      args.communityLink,
+      args.persona,
+      args.flowStages as Array<{ name: string; description: string; questions: string[] }> | undefined
     );
 
     // Format messages for API

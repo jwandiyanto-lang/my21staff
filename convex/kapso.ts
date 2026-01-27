@@ -480,6 +480,8 @@ export const processARI = internalAction({
         state: context.ariState,
         context: context.ariContext,
         communityLink: context.ariConfig.community_link,
+        persona: context.persona,
+        flowStages: context.flowStages,
       });
     } catch (mouthError) {
       console.error(`[ARI] Mouth error: ${mouthError}`);
