@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { LEAD_STATUS_CONFIG, type LeadStatus } from '@/lib/lead-status'
 import type { Id } from 'convex/_generated/dataModel'
+import { Bot, User } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface Conversation {
   _id: Id<'conversations'>
@@ -77,6 +79,9 @@ export function ConversationList({
           const status = (contact.lead_status || 'prospect') as LeadStatus
           const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.new || { label: 'Unknown', color: '#6B7280', bgColor: '#F3F4F6' }
 
+          // Determine AI/Human mode from conversation status
+          const isAiMode = conversation.status !== 'handover'
+
           return (
             <button
               key={conversation._id}
@@ -85,15 +90,30 @@ export function ConversationList({
                 selectedId === conversation._id ? 'bg-muted' : ''
               }`}
             >
-              <div className="flex gap-3 pr-6">
+              <div className="flex gap-3 pr-6 relative">
                 {/* Avatar */}
-                <Avatar className="h-12 w-12 shrink-0">
+                <Avatar className="h-12 w-12 shrink-0 relative">
                   <AvatarFallback
                     className="text-base font-medium"
                     style={{ backgroundColor: statusConfig.bgColor, color: statusConfig.color }}
                   >
                     {getInitials(contact.name || contact.kapso_name, contact.phone)}
                   </AvatarFallback>
+                  {/* Mode badge overlay on avatar */}
+                  <div className="absolute -bottom-1 -right-1">
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "h-5 w-5 p-0 rounded-full flex items-center justify-center border-2 border-background",
+                        isAiMode
+                          ? "bg-green-100 text-green-700 border-green-200"
+                          : "bg-blue-100 text-blue-700 border-blue-200"
+                      )}
+                      title={isAiMode ? 'AI Mode' : 'Human Mode'}
+                    >
+                      {isAiMode ? <Bot className="w-2.5 h-2.5" /> : <User className="w-2.5 h-2.5" />}
+                    </Badge>
+                  </div>
                 </Avatar>
 
                 {/* Content */}

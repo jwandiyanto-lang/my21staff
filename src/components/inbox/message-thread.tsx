@@ -256,6 +256,19 @@ export function MessageThread({
             >
               {statusConfig.label}
             </Badge>
+            {/* Mode indicator badge */}
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-xs gap-1",
+                isAiActive
+                  ? "bg-green-50 text-green-700 border-green-200"
+                  : "bg-blue-50 text-blue-700 border-blue-200"
+              )}
+            >
+              {isAiActive ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
+              {isAiActive ? 'AI' : 'Human'}
+            </Badge>
           </div>
           <p className="text-sm text-muted-foreground truncate">
             {contact.name && contact.phone}
