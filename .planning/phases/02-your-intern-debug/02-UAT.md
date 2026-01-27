@@ -44,7 +44,19 @@ issues: 0
 pending: 0
 skipped: 0
 
-Note: All gaps have been resolved. Test #4 failure was a symptom of Test #2/#3 upstream issue (workspace ID mismatch). After workspace ID fix (commit 10e4eb3), all tests pass. Error boundary implementation is correct and provides proper tab-level isolation.
+## Notes
+
+**All gaps resolved.** Test #4 failure was a symptom of Test #2/#3 upstream issue (workspace ID mismatch). After workspace ID fix (commit 10e4eb3), all tests pass. Error boundary implementation is correct and provides proper tab-level isolation.
+
+**Dev Mode Behavior (Critical):**
+- Route `/demo/knowledge-base` uses mock data whether you're offline OR online
+- Dev mode is enabled when `NEXT_PUBLIC_DEV_MODE=true` in `.env.local`
+- All API routes check `if (isDevMode() && workspaceId === 'demo')` to return mock data
+- This allows development without network/auth dependencies
+- Mock data comes from `src/lib/mock-data.ts` (Convex-shaped data)
+- **IMPORTANT:** No Supabase involved - entire app uses Convex for database, Clerk for auth
+- When testing at `/demo`, behavior is identical whether you have internet or not
+- For real workspace routes (e.g., `/eagle-overseas`), dev mode is bypassed and Convex is queried normally
 
 ## Gaps
 
