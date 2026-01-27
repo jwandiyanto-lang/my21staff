@@ -154,25 +154,27 @@ Plans:
 - [x] 02-02-PLAN.md — Add error boundaries to tabs, verify page resilience
 
 ### Phase 3: Your Intern Configuration
-**Goal**: User can configure bot behavior across 5 tabs (Persona, Flow, Database, Scoring, Slots) with one global AI toggle
+**Goal**: User can configure bot behavior with global AI toggle. All 5 tabs (Persona, Flow, Database, Scoring, Slots) already implemented from v2.2 — this phase adds master on/off control.
 **Depends on**: Phase 2 (page must load first)
-**Requirements**: INTERN-02, INTERN-03, INTERN-04, INTERN-05, INTERN-06, INTERN-07
+**Requirements**: INTERN-07 (Global AI toggle)
 **Success Criteria** (what must be TRUE):
-  1. Persona tab loads/saves bot name, description, tone; changes visible in ARI responses
-  2. Flow tab loads/saves greeting, qualification, routing instructions; next conversation uses new flow
-  3. Database tab displays available contact fields (name, phone, email, etc.); field config affects data collection
-  4. Scoring tab displays/edits lead scoring rules (0-100 scale); changes affect lead temperature calculation
-  5. Slots tab displays/edits consultation time slots; bot routing offers available slots to leads
-  6. Global AI toggle (master on/off button) disables all AI processing when off
-**Plans**: 6 plans
+  1. Global AI toggle (master on/off button) visible at top of page above tabs
+  2. Toggle state persists across page refresh
+  3. When toggle OFF, processARI skips execution (no AI responses)
+  4. When toggle ON, processARI resumes (AI responds automatically)
+  5. Visual feedback shows AI enabled vs disabled state clearly
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: Persona tab UI (form for name, description, tone; persist to workspace.settings)
-- [ ] 03-02: Flow tab UI (textarea/editor for greeting, qualification, routing; persist to workspace.settings)
-- [ ] 03-03: Database tab UI (read-only field list with toggle for collection; persist enabled_fields config)
-- [ ] 03-04: Scoring tab UI (rules editor with 0-100 slider; persist to workspace.settings.scoring_rules)
-- [ ] 03-05: Slots tab UI (time slot manager with add/edit/delete; persist to workspace.settings.consultation_slots)
-- [ ] 03-06: Global AI toggle (master switch with Convex mutation; disables processARI when off)
+- [ ] 03-01-PLAN.md — Create AIToggle component, integrate into page above tabs
+- [ ] 03-02-PLAN.md — Wire toggle to processARI gate (skip when disabled)
+
+**Note:** Requirements INTERN-02 to INTERN-06 already complete from v2.2:
+- ✓ INTERN-02: Persona tab (bot name, description, tone) — src/components/knowledge-base/persona-tab.tsx
+- ✓ INTERN-03: Flow tab (conversation stages with add/edit/delete/reorder) — src/components/knowledge-base/flow-tab.tsx
+- ✓ INTERN-04: Database tab (knowledge categories + entries CRUD) — src/components/knowledge-base/database-tab.tsx
+- ✓ INTERN-05: Scoring tab (hot/warm/cold thresholds + category weights) — src/components/knowledge-base/scoring-tab.tsx
+- ✓ INTERN-06: Slots tab (consultation schedule with day/time/duration) — src/components/knowledge-base/slot-manager.tsx
 
 ### Phase 4: Inbox UI & Filtering
 **Goal**: Conversations display with Kapso's WhatsApp-first UI; user can filter by status (hot/warm/cold/new/client/lost) and tags
@@ -242,7 +244,7 @@ Phases execute sequentially: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1-6. v3.3 | v3.3 | 33/33 | Complete | 2026-01-27 |
 | 1. Agent Skills Setup | v3.4 | 1/1 | Complete | 2026-01-27 |
 | 2. Your Intern Debug | v3.4 | 2/2 | Complete | 2026-01-27 |
-| 3. Your Intern Config | v3.4 | 0/6 | Not started | - |
+| 3. Your Intern Config | v3.4 | 0/2 | Not started | - |
 | 4. Inbox UI & Filtering | v3.4 | 0/5-6 | Not started | - |
 | 5. Real-time & Handover | v3.4 | 0/3-4 | Not started | - |
 | 6. ARI Flow Integration | v3.4 | 0/4 | Not started | - |
