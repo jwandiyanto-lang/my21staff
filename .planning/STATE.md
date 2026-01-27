@@ -11,18 +11,18 @@ See: planning/PROJECT.md (updated 2026-01-27)
 
 Milestone: v3.4 Kapso Inbox Integration
 Phase: 6 of 6 (ARI Flow Integration)
-Plan: 1 of 3 in phase
-Status: In progress - Mouth hot-reload configuration complete
-Last activity: 2026-01-27 — Completed 06-01-PLAN.md (Mouth hot-reload configuration)
+Plan: 3 of 3 in phase
+Status: In progress - Consultation slots routing complete
+Last activity: 2026-01-27 — Completed 06-03-PLAN.md (Consultation slots routing)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 █████████░ (~87%)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ██████████ (100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 237 (all v3.3 phases + v3.4 phases 1-5 + 06-01)
+- Total plans completed: 239 (all v3.3 phases + v3.4 phases 1-6 complete)
 - v3.3 execution: 7 phases, ~22 plans, 3 days (2026-01-25 to 2026-01-27)
-- v3.4 execution: 6 phases (5 complete), 12 plans, ~65 min
+- v3.4 execution: 6 phases (ALL complete), 14 plans, ~71 min
 
 **By Milestone:**
 
@@ -139,8 +139,10 @@ Progress: v1.0 ██████████ | v2.0 █████████
   - Plan 05-01: Real-time sync verification + AI/Human toggle UI — ✓ Complete
   - Plan 05-02: Wire AI/Human toggle to processARI gate — ✓ Complete
   - Plan 05-03: Visual mode indicators + end-to-end verification — ✓ Complete
-- **Phase 6:** ARI Flow Integration (06-01, 06-03, 06-04) — In Progress
+- **Phase 6:** ARI Flow Integration (06-01, 06-02, 06-03) — ✓ Complete
   - Plan 06-01: Mouth hot-reload configuration — ✓ Complete
+  - Plan 06-02: Brain scoring rules integration — ✓ Complete
+  - Plan 06-03: Consultation slots routing — ✓ Complete
 
 ### Coverage Status
 
@@ -169,35 +171,42 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Workspace config flow: getAriContext → processARI → Mouth → buildMouthSystemPrompt
 - Optional config parameters pattern with backward-compatible fallback values
 
+**Plan 03:**
+- getAvailableSlotsFromConfig filters workspace slots to available: true only
+- formatAvailableSlots provides graceful degradation message when no slots
+- Consultation slots injected into routing and scheduling state prompts
+- Complete data flow: workspace.settings → getAriContext → processARI → Mouth → buildMouthSystemPrompt
+- Bot offers only workspace-configured available times
+
 ### Next Phase Readiness
 
 - Phase 5 (Real-time & Handover) COMPLETE (all 3 plans)
-- Phase 6 (ARI Flow Integration) Plan 01 COMPLETE
-- Hot-reload configuration working end-to-end (workspace.settings → Mouth system prompt)
-- Persona changes in Your Intern immediately affect next bot response
-- Flow stage changes immediately affect conversation instructions
-- Ready for Plan 06-03 (Brain scoring rules integration)
-- Ready for Plan 06-04 (Consultation slots routing integration)
+- Phase 6 (ARI Flow Integration) COMPLETE (all 3 plans)
+- v3.4 Kapso Inbox Integration COMPLETE (all 6 phases done)
+- Hot-reload configuration working end-to-end for all workspace settings
+- Persona, flow stages, scoring rules, consultation slots all hot-reload immediately
+- Ready for v3.5 or next milestone planning
 
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Phase 6 Plan 01 complete (Mouth hot-reload configuration)
-Resume: Ready for Phase 6 Plans 03 and 04 (Brain scoring + consultation slots)
+Stopped at: Phase 6 Plan 03 complete (Consultation slots routing)
+Resume: v3.4 milestone COMPLETE - ready for next milestone planning
 
-**Files modified in Phase 6 Plan 01:**
-- `convex/kapso.ts` — Enhanced getAriContext to extract persona, flowStages, scoringRules, consultationSlots from workspace.settings; Updated processARI to pass workspace config to Mouth
-- `convex/ai/context.ts` — Added personaConfig and flowStages optional parameters to buildMouthSystemPrompt; Inject persona into system prompt; Use flow stages for state instructions
-- `convex/ai/mouth.ts` — Added persona and flowStages optional args to generateMouthResponse; Pass workspace config to buildMouthSystemPrompt
+**Files modified in Phase 6 Plan 03:**
+- `src/lib/ari/scheduling.ts` — Added getAvailableSlotsFromConfig to filter workspace.settings.consultation_slots to available-only
+- `convex/ai/context.ts` — Added formatAvailableSlots helper; Added consultationSlots parameter to buildMouthSystemPrompt
+- `convex/ai/mouth.ts` — Added consultationSlots parameter to generateMouthResponse args
+- `convex/kapso.ts` — processARI passes context.consultationSlots to Mouth action
 
 **Recent commits:**
+- `866a8b9` - feat(06-03): wire consultationSlots from processARI to Mouth
+- `5df4db0` - feat(06-03): wire consultation slots into buildMouthSystemPrompt
+- `7865f34` - feat(06-03): add getAvailableSlotsFromConfig for workspace consultation_slots
+- `5f10c9a` - feat(06-02): update Brain to use workspace scoring_rules
+- `a07085d` - feat(06-02): add next_action field to ariConversations schema
 - `41fac1d` - feat(06-01): wire Mouth to use workspace config from getAriContext
-- `ec1c473` - feat(06-01): update buildMouthSystemPrompt to use workspace config
-- `a74ff21` - feat(06-01): enhance getAriContext to fetch workspace.settings config
-- `90baa48` - fix(05-03): change Manual button color from orange to blue
-- `065bdaa` - fix(05-03): wire toggle to parent state for bidirectional switching
-- `5d2dcdd` - fix(05-03): make mode badge visible in conversation list
 
 ---
 
-*Last updated: 2026-01-27 — Phase 6 Plan 01 complete (Mouth hot-reload configuration)*
+*Last updated: 2026-01-27 — v3.4 Kapso Inbox Integration COMPLETE*
