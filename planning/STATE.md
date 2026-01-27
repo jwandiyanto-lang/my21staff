@@ -11,16 +11,16 @@ See: planning/PROJECT.md (updated 2026-01-25)
 
 Milestone: v3.3 Go Live
 Phase: 6 (UI Polish) — IN PROGRESS
-Plan: 3 of 4+ complete (06-01, 06-02, 06-03)
-Status: Gap closure plans in progress
-Last activity: 2026-01-27 — Completed 06-01 Settings Page Crash Fix
+Plan: 5 of 5+ complete (06-01 to 06-05)
+Status: Gap closure complete, ready for verification
+Last activity: 2026-01-27 — Completed 06-05 Dev/Prod Environment Parity
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (219 plans shipped)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 █████████░ (220 plans shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 219
+- Total plans completed: 220
 - Milestones shipped: 7 (v1.0, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2)
 
 **By Milestone:**
@@ -34,7 +34,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | v3.0 | 21 | 3 |
 | v3.1 | 23 | 1 |
 | v3.2 | 23 | 2 |
-| v3.3 | 15 | In progress |
+| v3.3 | 16 | In progress |
 
 ## v3.3 Roadmap Summary
 
@@ -50,7 +50,7 @@ Progress: v1.0 ██████████ | v2.0 █████████
 | 4. Bot Workflow | Eagle qualification flow | 6 (BOT-01 to 06) | ✓ Complete |
 | 5. Lead Flow | n8n → Convex sync | 3 (LEAD-01 to 03) | ✓ Complete |
 | 6. Pricing Page | $497/$97/$297 plans | 4 (PRICE-01 to 04) | SKIPPED |
-| 6. UI Polish | Smooth localhost | Derived from testing | In progress (3/4+) |
+| 6. UI Polish | Smooth localhost | Derived from testing | In progress (5/5+ gap closure) |
 
 **Coverage:** 30/30 requirements mapped (100%)
 
@@ -123,6 +123,9 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Server components should fetch only public data (no auth required)
 - Client components fetch auth-protected data via useQuery with Clerk context
 - Settings page AI config now fetched client-side to avoid SSR auth crashes
+- Mock data supports dual type systems: Supabase (legacy) for MOCK_CONTACTS/WORKSPACE, Convex for MOCK_CONVEX_WORKSPACE
+- Mock timestamps kept as strings (Supabase format) for type compatibility, not numbers (Convex format)
+- lead_statuses in MOCK_CONVEX_WORKSPACE.settings enables Settings page functionality in dev mode
 
 **Phase 3 Issues (All Resolved):**
 - ✓ Workspace ID mismatch - actually correct, ariConfig linked to Eagle workspace
@@ -135,13 +138,22 @@ Progress: v1.0 ██████████ | v2.0 █████████
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Completed 06-01-PLAN.md (Settings Page Crash Fix)
-Resume: Continue Phase 6 gap closure plans
+Stopped at: Completed 06-05-PLAN.md (Dev/Prod Environment Parity)
+Resume: Phase 6 gap closure complete, ready for human verification
 
-**Phase 6 Progress (IN PROGRESS — 3/4+):**
+**Phase 6 Progress (IN PROGRESS — 5/5+ gap closure complete):**
 - 06-01 ✓ Settings Page Crash Fix - Moved AI config fetch from server to client component (fix SSR auth crash)
 - 06-02 ✓ Database Dropdown Bug Fix - Added key={contactId} to DropdownMenu components (Status, Tags, Assignee)
 - 06-03 ✓ Settings Page SSR Fix - Moved AI config fetch from server to client component
+- 06-04 ✓ Contact Edit Form Fix - Fixed form state and API integration for contact updates
+- 06-05 ✓ Dev/Prod Environment Parity - Added lead_statuses, kapso_name, workspace_id/user_id to mock data
+
+**Gap Resolution (06-01 to 06-05):**
+- Settings page no longer crashes on load (SSR auth fix)
+- Database dropdowns properly re-render on contact switch (React key fix)
+- Contact editing form functional (state management fix)
+- Mock data enriched with Convex schema fields for dev mode testing
+- Settings > Lead Stages tab now works in dev mode
 
 **Phase 5 Progress (COMPLETE — 8/8):**
 - 05-01 ✓ n8n Webhook Verification - Endpoint tested, duplicate detection verified, 228 leads confirmed
