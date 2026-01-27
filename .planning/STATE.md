@@ -10,18 +10,19 @@ See: planning/PROJECT.md (updated 2026-01-27)
 ## Current Position
 
 Milestone: v3.4 Kapso Inbox Integration
-Phase: 1 of 6 (Agent Skills Setup)
-Plan: 01-01 complete
-Status: Phase 1 complete, ready for Phase 2
-Last activity: 2026-01-27 — Completed 01-01-PLAN.md (Agent Skills Setup)
+Phase: 2 of 6 (Your Intern Debug)
+Plan: 02-01 complete
+Status: Phase 2 in progress
+Last activity: 2026-01-27 — Completed 02-01-PLAN.md (Your Intern page + API dev mode)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ██░░░░░░░░ (~17%)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ███░░░░░░░ (~25%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 222 (all v3.3 phases shipped)
+- Total plans completed: 223 (all v3.3 phases + 02-01)
 - v3.3 execution: 7 phases, ~22 plans, 3 days (2026-01-25 to 2026-01-27)
+- v3.4 execution: 2 phases, 2 plans, ~10 min
 
 **By Milestone:**
 
@@ -52,13 +53,19 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - User scope for MCP server (git push blocked, project scope would expose API key)
 - Progressive disclosure pattern via agent-skills (contextual knowledge loading)
 
+### Decisions from Phase 2 (Your Intern Debug - Plan 01)
+
+- shouldUseMockData() pattern for server components enables fully offline development
+- isDevMode() helper for API routes provides consistent dev mode bypass
+- Dev mode pattern: check isDevMode() && workspaceId === 'demo' before requireWorkspaceMembership
+
 ### v3.4 Phase Structure
 
 - **Phase 1:** Agent Skills Setup (01-01) — ✓ Complete (Kapso skills + MCP server)
-- **Phase 2:** Inbox UI & Filtering (INBOX-01,02,03,05,06) — Kapso integration
-- **Phase 3:** Real-time & Handover (INBOX-04, ARI-02) — Preserve sync, add toggle
-- **Phase 4:** ARI Flow Integration (ARI-01,03,04) — End-to-end automation
-- **Phase 5:** Your Intern Debug (INTERN-01) — Fix production crashes
+- **Phase 2:** Your Intern Debug (02-01) — ✓ Complete (page routing + API dev mode)
+- **Phase 3:** Inbox UI & Filtering (INBOX-01,02,03,05,06) — Kapso integration
+- **Phase 4:** Real-time & Handover (INBOX-04, ARI-02) — Preserve sync, add toggle
+- **Phase 5:** ARI Flow Integration (ARI-01,03,04) — End-to-end automation
 - **Phase 6:** Your Intern Config (INTERN-02 to 07) — 5-tab admin UI
 
 ### Coverage Status
@@ -79,17 +86,22 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Kapso integration uses wrapper pattern (not wholesale replacement)
 - ARI behavior feeds from Your Intern config (tight coupling)
 
+### Next Phase Readiness
+
+- Your Intern page routing and API dev mode complete
+- /demo/knowledge-base works fully offline for development
+- Ready for Your Intern Config tab development (Phase 2-02 onwards)
+
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Completed Phase 1 Plan 01 (Agent Skills Setup)
-Resume: Ready to create Phase 2 plan (Inbox UI & Filtering)
+Stopped at: Completed Phase 2 Plan 01 (Your Intern page + API dev mode)
+Resume: Ready for next plan in Your Intern Debug (02-02 or onwards)
 
 **Files ready:**
-- `planning/phases/01-agent-skills-setup/01-01-SUMMARY.md` — Phase 1 complete
-- `planning/STATE.md` — This file, updated with Phase 1 completion
-- `planning/ROADMAP.md` — Phases 1-6 defined with full coverage
+- `.planning/phases/02-your-intern-debug/02-01-SUMMARY.md` — Plan 01 complete
+- `.planning/STATE.md` — This file, updated with Phase 2 progress
 
 ---
 
-*Last updated: 2026-01-27 — v3.4 roadmap created*
+*Last updated: 2026-01-27 — Phase 2 Plan 01 complete*
