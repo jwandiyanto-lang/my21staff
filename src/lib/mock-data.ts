@@ -35,7 +35,7 @@ export type MockConvexWorkspace = {
 }
 
 export const MOCK_CONVEX_WORKSPACE: MockConvexWorkspace = {
-  _id: 'dev_workspace_001',  // Fake Convex document ID
+  _id: 'demo',  // Must match API route dev mode check: isDevMode() && workspaceId === 'demo'
   _creationTime: Date.now(),
   name: 'Eagle Overseas Education',
   slug: 'demo',
