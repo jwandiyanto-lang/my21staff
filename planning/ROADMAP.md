@@ -158,25 +158,27 @@ Plans:
 
 ### Phase 6: UI Polish
 
-**Goal**: Fix critical production bugs - Settings page crash and Database dropdown closure bug
+**Goal**: Fix critical production bugs and ensure dev/production environment parity
 
 **Depends on**: Phase 5
 
-**Requirements**: Derived from UAT testing
+**Requirements**: Derived from UAT testing + environment sync requirement
 
 **Success Criteria** (what must be TRUE):
   1. Settings page loads without React errors or crashes (production)
   2. Database status dropdown changes the correct contact
   3. Database tags dropdown works correctly
   4. Database assignee dropdown works correctly
+  5. Dev mode mock data structure matches production Convex schema exactly
 
-**Plans:** 4 plans
+**Plans:** 5 plans
 
 Plans:
 - [x] 06-01-PLAN.md — Fix Database page dev mode check (executed but didn't fix bug)
 - [x] 06-02-PLAN.md — Fix Settings page dev mode check (executed but didn't fix bug)
 - [ ] 06-03-PLAN.md — Fix Settings page SSR auth crash (gap closure - move AI config to client)
 - [ ] 06-04-PLAN.md — Fix Database dropdown closure bug (gap closure - add key props)
+- [ ] 06-05-PLAN.md — Sync dev mode database with production schema (gap closure - environment parity)
 
 ## Progress
 
@@ -193,7 +195,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. Bot Workflow | 6/6 | Complete | 2026-01-26 |
 | 5. Lead Flow | 8/8 | Complete | 2026-01-26 |
 | 6. Pricing Page | - | SKIPPED | - |
-| 6. UI Polish | 2/4 | In Progress | - |
+| 6. UI Polish | 2/5 | In Progress | - |
 
 ---
 *Created: 2026-01-25*
