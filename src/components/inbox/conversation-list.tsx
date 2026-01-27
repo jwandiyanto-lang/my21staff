@@ -92,28 +92,13 @@ export function ConversationList({
             >
               <div className="flex gap-3 pr-6 relative">
                 {/* Avatar */}
-                <Avatar className="h-12 w-12 shrink-0 relative">
+                <Avatar className="h-12 w-12 shrink-0">
                   <AvatarFallback
                     className="text-base font-medium"
                     style={{ backgroundColor: statusConfig.bgColor, color: statusConfig.color }}
                   >
                     {getInitials(contact.name || contact.kapso_name, contact.phone)}
                   </AvatarFallback>
-                  {/* Mode badge overlay on avatar */}
-                  <div className="absolute -bottom-1 -right-1">
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "h-5 w-5 p-0 rounded-full flex items-center justify-center border-2 border-background",
-                        isAiMode
-                          ? "bg-green-100 text-green-700 border-green-200"
-                          : "bg-blue-100 text-blue-700 border-blue-200"
-                      )}
-                      title={isAiMode ? 'AI Mode' : 'Human Mode'}
-                    >
-                      {isAiMode ? <Bot className="w-2.5 h-2.5" /> : <User className="w-2.5 h-2.5" />}
-                    </Badge>
-                  </div>
                 </Avatar>
 
                 {/* Content */}
@@ -142,7 +127,7 @@ export function ConversationList({
                     )}
                   </div>
 
-                  {/* Row 3: Status tag */}
+                  {/* Row 3: Status tag + Mode badge */}
                   <div className="flex items-center gap-2">
                     <span
                       className="text-xs px-2 py-0.5 rounded"
@@ -153,6 +138,19 @@ export function ConversationList({
                     >
                       {statusConfig.label}
                     </span>
+                    {/* AI/Human mode badge */}
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-xs gap-1 px-1.5 py-0",
+                        isAiMode
+                          ? "bg-green-50 text-green-700 border-green-200"
+                          : "bg-blue-50 text-blue-700 border-blue-200"
+                      )}
+                    >
+                      {isAiMode ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
+                      <span className="font-medium">{isAiMode ? 'AI' : 'Human'}</span>
+                    </Badge>
                   </div>
                 </div>
               </div>
