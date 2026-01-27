@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Calendar, Bot, GitBranch, Database, Target } from 'lucide-react'
 import { SlotManager } from '@/components/knowledge-base/slot-manager'
@@ -9,6 +9,7 @@ import { FlowTab } from '@/components/knowledge-base/flow-tab'
 import { DatabaseTab } from '@/components/knowledge-base/database-tab'
 import { ScoringTab } from '@/components/knowledge-base/scoring-tab'
 import { TabErrorBoundary } from '@/components/error-boundaries/tab-error-boundary'
+import { AIToggle } from '@/components/knowledge-base/ai-toggle'
 
 interface TeamMember {
   id: string
@@ -27,6 +28,22 @@ interface KnowledgeBaseClientProps {
 
 export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseClientProps) {
   const [activeTab, setActiveTab] = useState('persona')
+  const [aiEnabled, setAiEnabled] = useState(true)
+
+  // Fetch initial AI enabled state
+  useEffect(() => {
+    async function fetchAiStatus() {
+      try {
+        const res = await fetch(`/api/workspaces/${workspace.id}/ari-config`)
+        if (!res.ok) return
+        const data = await res.json()
+        setAiEnabled(data.config?.enabled ?? true)
+      } catch (error) {
+        console.error('Failed to fetch AI status:', error)
+      }
+    }
+    fetchAiStatus()
+  }, [workspace.id])
 
   return (
     <div className="p-8 space-y-8">
@@ -37,6 +54,9 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
           Configure your intern&apos;s persona, conversation flow, knowledge, and scoring
         </p>
       </div>
+
+      {/* Global AI Toggle */}
+      <AIToggle workspaceId={workspace.id} initialEnabled={aiEnabled} />
 
       {/* Tabs for different sections */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
