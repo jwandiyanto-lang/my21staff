@@ -187,12 +187,14 @@ Plans:
   4. Tag filter shows multi-select of workspace tags; can filter conversations by multiple tags
   5. User can send message from Inbox; message appears in thread immediately (optimistic UI)
   6. Real-time filter counts update via Convex subscriptions
-**Plans**: 3 plans
+**Plans**: 5 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Create FilterTabs, TagFilterDropdown, and getConversationCountsByStatus query
-- [ ] 04-02-PLAN.md — Enhance message-bubble and message-thread with WhatsApp-style UI
-- [ ] 04-03-PLAN.md — Integrate filters into inbox-client and verify complete workflow
+- [x] 04-01-PLAN.md — Create FilterTabs, TagFilterDropdown, and getConversationCountsByStatus query
+- [x] 04-02-PLAN.md — Enhance message-bubble and message-thread with WhatsApp-style UI
+- [x] 04-03-PLAN.md — Integrate filters into inbox-client and verify complete workflow
+- [ ] 04-04-PLAN.md — Restructure inbox layout to 2-column grid (gap closure)
+- [ ] 04-05-PLAN.md — Create dedicated filter bar section with horizontal scroll (gap closure)
 
 ### Phase 5: Real-time & Handover
 **Goal**: Real-time message updates continue flowing via Convex subscriptions; user can toggle AI/Human mode per conversation
@@ -242,7 +244,7 @@ Phases execute sequentially: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Agent Skills Setup | v3.4 | 1/1 | Complete | 2026-01-27 |
 | 2. Your Intern Debug | v3.4 | 2/2 | Complete | 2026-01-27 |
 | 3. Your Intern Config | v3.4 | 2/2 | Complete | 2026-01-27 |
-| 4. Inbox UI & Filtering | v3.4 | 0/3 | Not started | - |
+| 4. Inbox UI & Filtering | v3.4 | 3/5 | Gap closure | - |
 | 5. Real-time & Handover | v3.4 | 0/3-4 | Not started | - |
 | 6. ARI Flow Integration | v3.4 | 0/4 | Not started | - |
 
