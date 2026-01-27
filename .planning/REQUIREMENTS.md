@@ -24,7 +24,7 @@ Requirements for Kapso Inbox Integration milestone. Each maps to roadmap phases.
 - [ ] **INTERN-04**: User can configure database fields in Database tab
 - [ ] **INTERN-05**: User can configure lead scoring rules in Scoring tab
 - [ ] **INTERN-06**: User can configure consultation slots in Slots tab
-- [ ] **INTERN-07**: User can toggle AI on/off globally with one button
+- [x] **INTERN-07**: User can toggle AI on/off globally with one button
 
 ### ARI Flow Integration
 
@@ -82,7 +82,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTERN-04 | 3 | Pending |
 | INTERN-05 | 3 | Pending |
 | INTERN-06 | 3 | Pending |
-| INTERN-07 | 3 | Pending |
+| INTERN-07 | 3 | Complete |
 | ARI-01 | 6 | Pending |
 | ARI-02 | 5 | Pending |
 | ARI-03 | 6 | Pending |

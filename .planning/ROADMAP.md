@@ -166,8 +166,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Create AIToggle component, integrate into page above tabs
-- [ ] 03-02-PLAN.md — Wire toggle to processARI gate (skip when disabled)
+- [x] 03-01-PLAN.md — Create AIToggle component, integrate into page above tabs
+- [x] 03-02-PLAN.md — Wire toggle to processARI gate (skip when disabled)
 
 **Note:** Requirements INTERN-02 to INTERN-06 already complete from v2.2:
 - ✓ INTERN-02: Persona tab (bot name, description, tone) — src/components/knowledge-base/persona-tab.tsx
