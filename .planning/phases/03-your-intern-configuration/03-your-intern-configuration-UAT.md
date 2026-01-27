@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 03-your-intern-configuration
 source: 03-01-SUMMARY.md, 03-02-SUMMARY.md
 started: 2026-01-27T11:15:00Z
-updated: 2026-01-27T11:20:00Z
+updated: 2026-01-27T11:21:00Z
 ---
 
 ## Current Test
@@ -46,11 +46,15 @@ skipped: 1
 ## Gaps
 
 - truth: "Toggle shows a switch UI with a status badge (green when enabled, gray when disabled)"
-  status: failed
+  status: resolved
   reason: "User reported: pass, just make the color less orange, it hurts the eyes"
   severity: cosmetic
   test: 1
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "The AIToggle container uses full-saturation accent orange (#F7931A) as the background. This color is designed for logos, CTAs, and small highlights - not as a large background surface."
+  artifacts:
+    - path: "src/components/knowledge-base/ai-toggle.tsx"
+      issue: "Line 83 - bg-accent uses full accent orange as background"
+  missing:
+    - "Should use bg-accent/10 (10% opacity orange background) to match existing pattern in component"
+  debug_session: ".planning/debug/toggle-color-harsh.md"
+  fix_commit: "d3cc8a9 - fix(03): soften AIToggle background color to 10% opacity"
