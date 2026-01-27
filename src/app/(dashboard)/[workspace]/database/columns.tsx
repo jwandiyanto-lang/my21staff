@@ -99,7 +99,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
       }
 
       return (
-        <DropdownMenu>
+        <DropdownMenu key={contactId}>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
             {isDefaultStatus ? (
               <button
@@ -184,7 +184,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
       }
 
       return (
-        <DropdownMenu>
+        <DropdownMenu key={contactId}>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
             {tags.length === 0 ? (
               <button className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground hover:bg-muted transition-colors">
@@ -245,7 +245,7 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
       }
 
       return (
-        <DropdownMenu>
+        <DropdownMenu key={contactId}>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
             {assignedTo && assignedMember ? (
               <button
