@@ -227,10 +227,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 06-01: Wire Mouth to read latest Persona/Flow config from workspace.settings (no caching)
-- [ ] 06-02: Verify getAriContext fetches workspace config on each call (includes persona, flow, scoring_rules)
-- [ ] 06-03: Verify Brain routing logic respects consultation_slots config (offers available times)
-- [ ] 06-04: End-to-end test: new lead -> greeting -> Q1 -> answer -> Q2 -> scoring -> routing (via demo mode)
+- [ ] 06-01-PLAN.md — Wire Mouth to read latest Persona/Flow config from workspace.settings (no caching)
+- [ ] 06-02-PLAN.md — Wire Brain to use workspace scoring_rules; add next_action field to schema
+- [ ] 06-03-PLAN.md — Wire routing logic to respect consultation_slots config (offers available times)
+- [ ] 06-04-PLAN.md — End-to-end test: new lead -> greeting -> Q1 -> answer -> Q2 -> scoring -> routing (via demo mode)
 
 ## Progress
 
