@@ -22,7 +22,7 @@ Take my21staff from development to production with Eagle Overseas Education as t
 - [x] **Phase 4: Bot Workflow** - Eagle qualification flow
 - [x] **Phase 5: Lead Flow** - n8n to Convex production verification + configurable status stages
 - [ ] ~~**Phase 6: Pricing Page**~~ - SKIPPED (deferred to post-launch)
-- [ ] **Phase 6: UI Polish** - Smooth localhost experience (bugs, performance, visual, navigation)
+- [ ] **Phase 6: UI Polish** - Fix critical bugs (Settings crash, Database dropdowns)
 
 ## Phase Details
 
@@ -158,34 +158,23 @@ Plans:
 
 ### Phase 6: UI Polish
 
-**Goal**: Smooth, polished localhost experience — fix bugs, improve performance, add visual polish, refine navigation
+**Goal**: Fix critical production bugs - Settings page crash and Database dropdown closure bug
 
 **Depends on**: Phase 5
 
-**Requirements**: Derived from testing
+**Requirements**: Derived from UAT testing
 
 **Success Criteria** (what must be TRUE):
-  1. No console errors or component crashes in dev mode ✅
-  2. Pages load instantly with proper loading states ✅
-  3. Smooth transitions and consistent hover states (partial - Inbox polish local only)
-  4. Navigation feels natural (sidebar, back button, page transitions) ✅
-  5. All core pages work: Dashboard, Inbox, Database, Settings ✅
+  1. Settings page loads without React errors or crashes (production)
+  2. Database status dropdown changes the correct contact
+  3. Database tags dropdown works correctly
+  4. Database assignee dropdown works correctly
 
-**Approach**: Interactive bug fixing (no formal plans)
+**Plans:** 2 plans
 
-**Work Completed**:
-- Fixed critical production crash: Database & Settings pages (Clerk hooks violation)
-- Fixed Database dropdown closure bug (status/tags/assignee)
-- Added dev mode support to Settings API routes
-- Created docs/DEV-MODE-PATTERNS.md to prevent future issues
-- Inbox polish work (local only, not committed)
-
-**Commits**: 3
-- 40fb338: Clerk hooks fix (Database + Settings)
-- 77d8f8a: Database dropdown closure fix
-- da5d85c: Settings API dev mode support
-
-**Summary**: planning/phases/06-ui-polish/06-SUMMARY.md
+Plans:
+- [ ] 06-01-PLAN.md — Fix Settings page crash (move AI config fetch to client)
+- [ ] 06-02-PLAN.md — Fix Database dropdown closure bug (add key props)
 
 ## Progress
 
@@ -202,7 +191,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. Bot Workflow | 6/6 | Complete | 2026-01-26 |
 | 5. Lead Flow | 8/8 | Complete | 2026-01-26 |
 | 6. Pricing Page | - | SKIPPED | - |
-| 6. UI Polish | 3 commits | Complete | 2026-01-27 |
+| 6. UI Polish | 0/2 | In Progress | - |
 
 ---
 *Created: 2026-01-25*
