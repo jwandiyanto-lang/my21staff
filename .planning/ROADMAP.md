@@ -183,19 +183,16 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Conversations render in Kapso-styled UI (modern WhatsApp-like appearance, not custom)
   2. Message thread displays with Kapso components (bubbles, timestamps, author attribution)
-  3. Status filter shows dropdown with hot/warm/cold/new/client/lost options; filtering works
+  3. Status filter shows tabs with hot/warm/cold/new/client/lost options; filtering works
   4. Tag filter shows multi-select of workspace tags; can filter conversations by multiple tags
   5. User can send message from Inbox; message appears in thread immediately (optimistic UI)
-  6. Media (images, documents) render inline in messages (if Kapso component supports, or fallback to link)
-**Plans**: 5-6 plans
+  6. Real-time filter counts update via Convex subscriptions
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Clone Kapso whatsapp-cloud-inbox repo for reference (learn UI patterns)
-- [ ] 04-02: Create KapsoInbox wrapper component (adapter between Kapso UI and Convex data)
-- [ ] 04-03: Replace InboxClient conversation/message components with Kapso-styled UI
-- [ ] 04-04: Add status filter dropdown (hot/warm/cold/new/client/lost from lead_statuses config)
-- [ ] 04-05: Add tag filter multi-select; apply combined filters to conversation list
-- [ ] 04-06: Test message sending, media rendering, real-time updates in dev mode
+- [ ] 04-01-PLAN.md — Create FilterTabs, TagFilterDropdown, and getConversationCountsByStatus query
+- [ ] 04-02-PLAN.md — Enhance message-bubble and message-thread with WhatsApp-style UI
+- [ ] 04-03-PLAN.md — Integrate filters into inbox-client and verify complete workflow
 
 ### Phase 5: Real-time & Handover
 **Goal**: Real-time message updates continue flowing via Convex subscriptions; user can toggle AI/Human mode per conversation
@@ -244,8 +241,8 @@ Phases execute sequentially: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1-6. v3.3 | v3.3 | 33/33 | Complete | 2026-01-27 |
 | 1. Agent Skills Setup | v3.4 | 1/1 | Complete | 2026-01-27 |
 | 2. Your Intern Debug | v3.4 | 2/2 | Complete | 2026-01-27 |
-| 3. Your Intern Config | v3.4 | 0/2 | Not started | - |
-| 4. Inbox UI & Filtering | v3.4 | 0/5-6 | Not started | - |
+| 3. Your Intern Config | v3.4 | 2/2 | Complete | 2026-01-27 |
+| 4. Inbox UI & Filtering | v3.4 | 0/3 | Not started | - |
 | 5. Real-time & Handover | v3.4 | 0/3-4 | Not started | - |
 | 6. ARI Flow Integration | v3.4 | 0/4 | Not started | - |
 
