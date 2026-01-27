@@ -472,3 +472,111 @@ export const mockWebinars: Webinar[] = [
     updated_at: '2026-01-14T10:00:00Z',
   },
 ]
+
+// =============================================================================
+// MOCK ARI CONVERSATIONS
+// Shows complete flow progression for demo mode testing
+// =============================================================================
+
+export interface MockARIMessage {
+  role: 'assistant' | 'user' | 'system'
+  content: string
+  timestamp: number
+}
+
+export interface MockARIConversation {
+  id: string
+  contact_id: string
+  contact_name: string
+  state: 'greeting' | 'qualifying' | 'scoring' | 'routing' | 'scheduling' | 'booking'
+  lead_score: number
+  lead_temperature: 'cold' | 'warm' | 'hot'
+  next_action: string
+  messages: MockARIMessage[]
+  created_at: number
+  updated_at: number
+}
+
+export const MOCK_ARI_CONVERSATIONS: MockARIConversation[] = [
+  {
+    id: 'mock-ari-001',
+    contact_id: 'contact-001',
+    contact_name: 'Budi Santoso',
+    state: 'qualifying',
+    lead_score: 45,
+    lead_temperature: 'warm',
+    next_action: 'Ask about passport availability and document readiness',
+    messages: [
+      {
+        role: 'assistant',
+        content: 'Selamat siang! Saya Ari dari Eagle Overseas Education. Mau kuliah di luar negeri ya? Boleh tau namanya siapa?',
+        timestamp: Date.now() - 300000, // 5 minutes ago
+      },
+      {
+        role: 'user',
+        content: 'Halo, nama saya Budi',
+        timestamp: Date.now() - 280000,
+      },
+      {
+        role: 'assistant',
+        content: 'Hai kak Budi! Senang bisa bantu. Negara tujuannya kemana nih?',
+        timestamp: Date.now() - 260000,
+      },
+      {
+        role: 'user',
+        content: 'Australia kak, saya tertarik jurusan IT',
+        timestamp: Date.now() - 240000,
+      },
+      {
+        role: 'assistant',
+        content: 'Wah keren! IT di Australia banyak peluangnya. Oh iya kak, paspor nya udah punya belum?',
+        timestamp: Date.now() - 220000,
+      },
+    ],
+    created_at: Date.now() - 300000,
+    updated_at: Date.now() - 220000,
+  },
+  {
+    id: 'mock-ari-002',
+    contact_id: 'contact-002',
+    contact_name: 'Siti Rahayu',
+    state: 'routing',
+    lead_score: 65,
+    lead_temperature: 'warm',
+    next_action: 'Offer consultation slot for scholarship discussion',
+    messages: [
+      {
+        role: 'assistant',
+        content: 'Selamat siang! Saya Ari dari Eagle Overseas Education. Ada yang bisa saya bantu?',
+        timestamp: Date.now() - 600000, // 10 minutes ago
+      },
+      {
+        role: 'user',
+        content: 'Selamat siang, saya ibu dari anak yang mau kuliah ke luar negeri',
+        timestamp: Date.now() - 580000,
+      },
+      {
+        role: 'assistant',
+        content: 'Senang bisa membantu, Bu! Anak ibu mau kuliah di negara mana?',
+        timestamp: Date.now() - 560000,
+      },
+      {
+        role: 'user',
+        content: 'Malaysia, jurusan bisnis. Ada beasiswa gak ya?',
+        timestamp: Date.now() - 540000,
+      },
+      {
+        role: 'assistant',
+        content: 'Ada bu! Malaysia ada beasiswa untuk jurusan bisnis. Mau konsultasi lebih detail? Saya bisa jadwalkan dengan konsultan kami.',
+        timestamp: Date.now() - 520000,
+      },
+    ],
+    created_at: Date.now() - 600000,
+    updated_at: Date.now() - 520000,
+  },
+]
+
+// Helper function to get mock ARI conversation by contact ID
+export const getMockAriConversation = (contactId: string): MockARIConversation | undefined => {
+  return MOCK_ARI_CONVERSATIONS.find((conv) => conv.contact_id === contactId)
+}
