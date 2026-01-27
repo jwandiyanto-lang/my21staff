@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useQuery } from "convex/react"
-import { api } from "@/convex/_generated/api"
+import { api } from "convex/_generated/api"
 import { Tags } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/popover"
 import { Checkbox } from "@/components/ui/checkbox"
 import { isDevMode, MOCK_CONVEX_WORKSPACE } from "@/lib/mock-data"
-import type { Id } from "@/convex/_generated/dataModel"
+import type { Id } from "convex/_generated/dataModel"
 
 interface TagFilterDropdownProps {
   /** Currently selected tags */

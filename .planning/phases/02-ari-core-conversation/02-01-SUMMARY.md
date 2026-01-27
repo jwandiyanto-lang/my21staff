@@ -2,44 +2,48 @@
 phase: 02-ari-core-conversation
 plan: 01
 subsystem: ai
-tags: [openai, grok, sealion, ollama, typescript, ab-testing]
+tags: [openai, grok, sea-lion, ollama, typescript, a-b-testing]
 
 # Dependency graph
 requires:
-  - phase: 01-database-inbox-overhaul
-    provides: ARI database tables (ari_config, ari_conversations, ari_messages, etc.)
+  - phase: 01-agent-skills-setup
+    provides: MCP server for Kapso agent skills
 provides:
-  - ARI TypeScript type definitions matching database schema
-  - Multi-LLM AI clients (Grok + Sea-Lion)
-  - Deterministic A/B model selection for contacts
-affects: [02-02, 02-03, 02-04, 02-05, 02-06, 02-07, 02-08, 02-09]
+  - ARI TypeScript types with STATE_TRANSITIONS
+  - Grok AI client using OpenAI SDK (x.ai endpoint)
+  - Sea-Lion AI client via Ollama (Tailscale)
+  - Deterministic A/B model routing (50/50 default split)
+affects: [02-02, 02-03, 02-04, ARI-integration]
 
 # Tech tracking
 tech-stack:
   added: [openai@6.16.0]
-  patterns: [OpenAI SDK for multi-LLM, hash-based A/B routing]
+  patterns:
+    - OpenAI-compatible SDK pattern for multi-LLM support
+    - Deterministic A/B testing using contact_id hash
+    - Fallback error handling with Indonesian messages
 
 key-files:
-  created:
+  created: []
+  modified:
     - src/lib/ari/types.ts
-    - src/lib/ari/clients/grok.ts
     - src/lib/ari/clients/sealion.ts
     - src/lib/ari/ai-router.ts
-    - src/lib/ari/index.ts
 
 key-decisions:
-  - "Use OpenAI SDK for both Grok and Sea-Lion (both support OpenAI-compatible API)"
-  - "Hash-based A/B selection: same contact always gets same model (prevents test contamination)"
-  - "Fallback to Indonesian error message on API failure"
+  - "Use OpenAI SDK for both Grok and Sea-Lion (OpenAI-compatible API)"
+  - "Sea-Lion via Ollama on Tailscale (http://100.113.96.25:11434/v1) not hosted API"
+  - "50/50 A/B split default between Grok and Sea-Lion"
+  - "Deterministic hash function prevents A/B test contamination"
 
 patterns-established:
-  - "AIResponse interface: standardized response with content, tokens, responseTimeMs, model"
-  - "Client pattern: generateXResponse(messages, options) for each AI model"
-  - "Deterministic A/B: hash contactId to 0-99, compare against weight threshold"
+  - "OpenAI SDK client pattern: single SDK, different baseURL per provider"
+  - "A/B routing: hash(contactId) % 100 < grokWeight ? grok : sealion"
+  - "AI response interface: { content, tokens, responseTimeMs, model }"
 
 # Metrics
-duration: 5min
-completed: 2026-01-20
+duration: 4min
+completed: 2026-01-27
 ---
 
 # Phase 02 Plan 01: ARI Foundation - Types and AI Clients Summary

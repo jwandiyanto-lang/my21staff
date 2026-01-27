@@ -3,15 +3,15 @@ status: testing
 phase: 04-bot-workflow
 source: [04-01-SUMMARY.md, 04-02-SUMMARY.md, 04-03-SUMMARY.md, 04-04-SUMMARY.md, 04-05-SUMMARY.md, 04-06-SUMMARY.md]
 started: 2026-01-26T15:30:00Z
-updated: 2026-01-26T15:30:00Z
+updated: 2026-01-27T16:40:00Z
 ---
 
 ## Current Test
 
-number: 1
-name: Greeting Response
+number: 3
+name: FAQ Answers
 expected: |
-  When a new WhatsApp message arrives, Ari responds with a time-appropriate greeting and asks ONE question (about destination, documents, or English level).
+  When user asks about Eagle services (destinations, visa success rate, programs), bot provides accurate answers from embedded FAQ knowledge
 awaiting: user response
 
 ## Tests
@@ -22,7 +22,9 @@ result: pass
 
 ### 2. Document Collection One-at-a-Time
 expected: After greeting, bot asks about documents ONE AT A TIME in order: passport → CV → IELTS/TOEFL → transcript. Each question waits for answer before asking next.
-result: [pending]
+result: issue
+reported: "Module not found: Can't resolve '@/convex/_generated/api' - import path was incorrect in filter-tabs.tsx and tag-filter-dropdown.tsx"
+severity: blocker
 
 ### 3. FAQ Answers
 expected: When user asks about Eagle services (destinations, visa success rate, programs), bot provides accurate answers from embedded FAQ knowledge
@@ -60,10 +62,18 @@ result: [pending]
 
 total: 10
 passed: 1
-issues: 0
+issues: 1
 pending: 9
 skipped: 0
 
 ## Gaps
 
-[none yet]
+- truth: "Development server loads without build errors"
+  status: failed
+  reason: "User reported: Module not found: Can't resolve '@/convex/_generated/api' - import path was incorrect in filter-tabs.tsx and tag-filter-dropdown.tsx"
+  severity: blocker
+  test: 2
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
