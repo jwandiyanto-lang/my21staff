@@ -31,6 +31,10 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
   const [aiEnabled, setAiEnabled] = useState(true)
 
   // Fetch initial AI enabled state
+  // Note: All tab components (PersonaTab, FlowTab, ScoringTab, SlotManager)
+  // implement auto-save with toast notifications for immediate user feedback
+  // when configuration changes are saved. This ensures users know their changes
+  // are persisted and will affect the next bot response (hot-reload pattern).
   useEffect(() => {
     async function fetchAiStatus() {
       try {
