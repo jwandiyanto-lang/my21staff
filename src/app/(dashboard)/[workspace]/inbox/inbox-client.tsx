@@ -311,7 +311,15 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
             className="w-full"
           />
 
-          {/* Active/All toggle + Status filter + Tag filter in one row */}
+          {/* Status filter dropdown */}
+          <FilterTabs
+            value={statusFilter}
+            onChange={setStatusFilter}
+            workspaceId={workspaceId}
+            activeOnly={viewMode === 'active'}
+          />
+
+          {/* Active/All toggle + Tag filter in one row */}
           <div className="flex items-center gap-2">
             {/* Active/All toggle */}
             <div className="flex items-center rounded-full bg-muted p-1 shrink-0">
@@ -345,14 +353,6 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
                 All
               </button>
             </div>
-
-            {/* Status filter dropdown */}
-            <FilterTabs
-              value={statusFilter}
-              onChange={setStatusFilter}
-              workspaceId={workspaceId}
-              activeOnly={viewMode === 'active'}
-            />
 
             {/* Tag filter dropdown */}
             <TagFilterDropdown
