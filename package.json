@@ -52,6 +52,7 @@
     "react": "19.2.3",
     "react-day-picker": "^9.13.0",
     "react-dom": "19.2.3",
+    "react-error-boundary": "^6.1.0",
     "react-hook-form": "^7.71.1",
     "react-textarea-autosize": "^8.5.9",
     "resend": "^6.7.0",
