@@ -11,18 +11,18 @@ See: planning/PROJECT.md (updated 2026-01-27)
 
 Milestone: v3.4 Kapso Inbox Integration
 Phase: 5 of 6 (Real-time & Handover)
-Plan: Ready to start 05-01
-Status: Phase 4 complete - inbox filter UI with dropdown status filter, optimized layout
-Last activity: 2026-01-27 — Phase 4 complete (status dropdown + optimized filter layout)
+Plan: 1 of 1 in phase (05-01 complete)
+Status: Phase 5 plan 1 complete - real-time sync verified, AI/Human toggle with confirmation UI
+Last activity: 2026-01-27 — Completed 05-01-PLAN.md (real-time sync + toggle UI)
 
-Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ███████░░ (~60%)
+Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ████████░ (~75%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 233 (all v3.3 phases + v3.4 phases 1-6)
+- Total plans completed: 234 (all v3.3 phases + v3.4 phases 1-5)
 - v3.3 execution: 7 phases, ~22 plans, 3 days (2026-01-25 to 2026-01-27)
-- v3.4 execution: 6 phases, 8 plans, ~21 min
+- v3.4 execution: 5 phases, 9 plans, ~25 min
 
 **By Milestone:**
 
@@ -99,6 +99,15 @@ Progress: v1.0 ██████████ | v2.0 █████████
 - Optimized layout: Search at top, status dropdown below, Active/All + Tags in one row
 - Reverted 2-column grid layout attempt (04-04, 04-05) - keeping original flex layout per user decision
 
+### Decisions from Phase 5 (Real-time & Handover)
+
+**Plan 01:**
+- Confirmation dialog for ALL mode switches (prevents accidental handover)
+- System messages in conversation thread (persistent record of mode changes)
+- 2-second typing indicator simulation in dev mode (realistic UX testing)
+- Mock conversations include mixed statuses ('open' for AI, 'handover' for Manual)
+- Real-time sync via Convex subscriptions verified working (no changes needed)
+
 ### v3.4 Phase Structure
 
 - **Phase 1:** Agent Skills Setup (01-01) — ✓ Complete (Kapso skills + MCP server)
@@ -111,7 +120,8 @@ Progress: v1.0 ██████████ | v2.0 █████████
   - Plan 04-02: Message bubbles and auto-scroll — ✓ Complete
   - Plan 04-03: Integrate filters into inbox-client — ✓ Complete
   - Post-plan: Converted tabs to dropdown + optimized layout — ✓ Complete
-- **Phase 5:** Real-time & Handover (INBOX-04, ARI-02) — Pending
+- **Phase 5:** Real-time & Handover (05-01) — ✓ Complete
+  - Plan 05-01: Real-time sync verification + AI/Human toggle UI — ✓ Complete
 - **Phase 6:** ARI Flow Integration (ARI-01,03,04) — Pending
 
 ### Coverage Status
@@ -134,31 +144,29 @@ Progress: v1.0 ██████████ | v2.0 █████████
 
 ### Next Phase Readiness
 
-- Phase 4 (Inbox UI & Filtering) COMPLETE
-- Phase 5 (Real-time & Handover) ready to start
-- Inbox UI foundation solid: dropdown filters, search, Active/All toggle
-- Real-time subscriptions already in place from earlier phases
-- AI/Human handover toggle will build on existing conversation state
+- Phase 5 (Real-time & Handover) COMPLETE
+- Phase 6 (ARI Flow Integration) ready to start
+- Real-time message sync verified working via Convex subscriptions
+- AI/Human toggle UI complete with confirmation dialog and visual feedback
+- Typing indicator and system messages ready for ARI flow integration
 
 ## Session Continuity
 
 Last session: 2026-01-27
-Stopped at: Phase 4 complete (inbox filter UI with dropdown + optimized layout)
-Resume: Ready for Phase 5 (Real-time & Handover)
+Stopped at: Phase 5 complete (real-time sync verified + AI/Human toggle UI)
+Resume: Ready for Phase 6 (ARI Flow Integration)
 
-**Files modified in Phase 4:**
-- `src/components/inbox/filter-tabs.tsx` — Status dropdown with counts (converted from tabs)
-- `src/components/inbox/tag-filter-dropdown.tsx` — Tag multi-select dropdown
-- `src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx` — Optimized filter layout (search top, status dropdown, Active/All + Tags row)
-- `convex/conversations.ts` — getConversationCountsByStatus query
+**Files modified in Phase 5:**
+- `src/components/inbox/typing-indicator.tsx` — [NEW] WhatsApp-style typing animation
+- `src/components/inbox/system-message.tsx` — [NEW] Inline conversation notifications
+- `src/components/inbox/message-thread.tsx` — Added confirmation dialog, system messages, typing indicator
+- `src/lib/mock-data.ts` — Updated conversation statuses ('open', 'handover')
 
 **Recent commits:**
+- `9e629b0` - feat(05-01): complete AI/Human toggle with confirmation and visual feedback
+- `c98d520` - docs(05-01): verify real-time message sync via Convex subscriptions
 - `877fc82` - Filter layout optimization (search, status dropdown, Active/All + Tags)
-- `91f9733` - Initial layout attempt
-- `e8c2bc8` - Convert status tabs to dropdown menu
-- `5caab52` - Fix MessageSquare import
-- `a842880` - Revert 2-column grid layout
 
 ---
 
-*Last updated: 2026-01-27 — Phase 4 complete (inbox filter UI with dropdown status filter and optimized layout)*
+*Last updated: 2026-01-27 — Phase 5 complete (real-time sync verified, AI/Human toggle UI with confirmation)*
