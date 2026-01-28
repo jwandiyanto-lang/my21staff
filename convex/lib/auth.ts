@@ -45,12 +45,23 @@ export async function requireWorkspaceMembership(
     throw new Error("Unauthorized");
   }
 
-  const userId = identity.subject;
+  const clerkId = identity.subject;
 
+  // Look up user by Clerk ID to get their Convex user document
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q: any) => q.eq("clerk_id", clerkId))
+    .first();
+
+  if (!user) {
+    throw new Error("User not found in database");
+  }
+
+  // Check workspace membership using the user's Convex ID
   const membership = await ctx.db
     .query("workspaceMembers")
     .withIndex("by_user_workspace", (q: any) =>
-      q.eq("user_id", userId).eq("workspace_id", workspaceId)
+      q.eq("user_id", user._id).eq("workspace_id", workspaceId)
     )
     .first();
 
@@ -58,7 +69,7 @@ export async function requireWorkspaceMembership(
     throw new Error("Not a member of this workspace");
   }
 
-  return { userId, membership };
+  return { userId: user._id, membership };
 }
 
 /**
