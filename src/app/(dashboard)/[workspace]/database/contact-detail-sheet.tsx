@@ -968,7 +968,7 @@ export function ContactDetailSheet({
 
                 <Separator />
 
-                {/* Lead Score */}
+                {/* Lead Score with Tabs */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
@@ -1011,40 +1011,66 @@ export function ContactDetailSheet({
                     </div>
                   </div>
 
-                  {/* Score Breakdown - only show if we have breakdown data */}
-                  {scoreBreakdown.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <h4 className="text-xs font-medium text-muted-foreground">Score Breakdown</h4>
-                      <div className="space-y-1.5">
-                        {scoreBreakdown.map((item) => (
-                          <div key={item.label} className="flex items-center justify-between text-sm">
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground">{item.label}</span>
-                              <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                                {item.value}
+                  {/* Score Type Tabs */}
+                  <Tabs defaultValue="form" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 h-9">
+                      <TabsTrigger value="form" className="text-xs">Form Score</TabsTrigger>
+                      <TabsTrigger value="chat" className="text-xs">Chat Score</TabsTrigger>
+                    </TabsList>
+
+                    {/* Form Score Tab */}
+                    <TabsContent value="form" className="mt-3 space-y-2">
+                      {scoreBreakdown.length > 0 ? (
+                        <>
+                          <h4 className="text-xs font-medium text-muted-foreground">Questionnaire Breakdown</h4>
+                          <div className="space-y-1.5">
+                            {scoreBreakdown.map((item) => (
+                              <div key={item.label} className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-muted-foreground">{item.label}</span>
+                                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                                    {item.value}
+                                  </span>
+                                </div>
+                                <span className={cn(
+                                  "font-medium tabular-nums",
+                                  item.points < 0 ? "text-red-500" :
+                                  item.points >= item.maxPoints ? "text-green-600" : "text-foreground"
+                                )}>
+                                  {item.points > 0 ? '+' : ''}{item.points}
+                                  {item.maxPoints > 0 && (
+                                    <span className="text-muted-foreground text-xs">/{item.maxPoints}</span>
+                                  )}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
+                              <span>Total</span>
+                              <span style={{ color: getScoreColor(calculatedScore) }}>
+                                {calculatedScore} pts
                               </span>
                             </div>
-                            <span className={cn(
-                              "font-medium tabular-nums",
-                              item.points < 0 ? "text-red-500" :
-                              item.points >= item.maxPoints ? "text-green-600" : "text-foreground"
-                            )}>
-                              {item.points > 0 ? '+' : ''}{item.points}
-                              {item.maxPoints > 0 && (
-                                <span className="text-muted-foreground text-xs">/{item.maxPoints}</span>
-                              )}
-                            </span>
                           </div>
-                        ))}
-                        <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
-                          <span>Total</span>
-                          <span style={{ color: getScoreColor(displayScore) }}>
-                            {calculatedScore} pts
-                          </span>
+                        </>
+                      ) : (
+                        <div className="text-center py-4">
+                          <p className="text-sm text-muted-foreground">No questionnaire data available</p>
                         </div>
+                      )}
+                    </TabsContent>
+
+                    {/* Chat Score Tab */}
+                    <TabsContent value="chat" className="mt-3 space-y-2">
+                      <h4 className="text-xs font-medium text-muted-foreground">Bot Conversation Analysis</h4>
+                      <div className="text-center py-6">
+                        <MessageCircle className="mx-auto h-8 w-8 text-muted-foreground/50 mb-2" />
+                        <p className="text-sm text-muted-foreground">Chat scoring coming soon</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Scores will be calculated based on bot conversation quality
+                        </p>
                       </div>
-                    </div>
-                  )}
+                    </TabsContent>
+                  </Tabs>
                 </div>
 
                 <Separator />
