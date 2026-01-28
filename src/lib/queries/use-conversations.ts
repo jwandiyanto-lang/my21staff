@@ -37,8 +37,25 @@ export function useConversations(
   page: number = 0,
   filters: ConversationFilters = {}
 ) {
-  // In dev mode, use mock data
-  if (isDevMode()) {
+  const devMode = isDevMode()
+
+  // Use Convex useQuery with real-time subscriptions (skip in dev mode)
+  // @ts-ignore - Convex types will be generated when dev server runs
+  const response = useQuery(
+    devMode ? 'skip' : 'conversations:listWithFilters',
+    devMode ? 'skip' : {
+      workspace_id: workspaceId,
+      active: filters.active,
+      statusFilters: filters.statusFilters,
+      tagFilters: filters.tagFilters,
+      assignedTo: filters.assignedTo,
+      limit: PAGE_SIZE,
+      page,
+    }
+  )
+
+  // In dev mode, return mock data
+  if (devMode) {
     return {
       data: {
         conversations: filters.active
@@ -53,21 +70,6 @@ export function useConversations(
       error: null,
     }
   }
-
-  // Use Convex useQuery with real-time subscriptions
-  // @ts-ignore - Convex types will be generated when dev server runs
-  const response = useQuery(
-    'conversations:listWithFilters',
-    {
-      workspace_id: workspaceId,
-      active: filters.active,
-      statusFilters: filters.statusFilters,
-      tagFilters: filters.tagFilters,
-      assignedTo: filters.assignedTo,
-      limit: PAGE_SIZE,
-      page,
-    }
-  )
 
   // Transform response to match expected format
   const data = response

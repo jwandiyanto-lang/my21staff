@@ -13,8 +13,21 @@ import { isDevMode, MOCK_MESSAGES } from '@/lib/mock-data'
  * instantly without manual subscription management.
  */
 export function useMessages(conversationId: string | null, workspaceId?: string) {
+  const devMode = isDevMode()
+
+  // Use Convex useQuery with real-time subscriptions (skip in dev mode)
+  // @ts-ignore - Convex types will be generated when dev server runs
+  const response = useQuery(
+    devMode ? 'skip' : 'messages:listByConversationAsc',
+    devMode ? 'skip' : {
+      conversation_id: conversationId,
+      workspace_id: workspaceId || '',
+      limit: 100,
+    }
+  )
+
   // In dev mode, use mock data
-  if (isDevMode()) {
+  if (devMode) {
     if (!conversationId) {
       return { data: [], isLoading: false, error: null }
     }
@@ -22,17 +35,6 @@ export function useMessages(conversationId: string | null, workspaceId?: string)
     filtered.sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
     return { data: filtered, isLoading: false, error: null }
   }
-
-  // Use Convex useQuery with real-time subscriptions
-  // @ts-ignore - Convex types will be generated when dev server runs
-  const response = useQuery(
-    'messages:listByConversationAsc',
-    {
-      conversation_id: conversationId,
-      workspace_id: workspaceId || '',
-      limit: 100,
-    }
-  )
 
   // Transform response to match expected format
   const data = response
