@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, MessageCircle, RefreshCw, BarChart3, Snowflake, Lock } from "lucide-react";
+import { Check, X, MessageCircle, BarChart3, ArrowRight, Building2 } from "lucide-react";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -26,60 +26,6 @@ const staggerContainer = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
-
-const PROBLEMS = [
-  {
-    icon: MessageCircle,
-    title: "WhatsApp Overwhelm",
-    problem: "Too many chats coming in, can't focus on anything else. Reply to one, five more come in.",
-    solutions: [
-      "WhatsApp Bot auto-replies 24/7",
-      "Lead scoring in CRM",
-      "Get notified only for serious leads",
-    ],
-  },
-  {
-    icon: RefreshCw,
-    title: "Stuck in Day-to-Day",
-    problem: "Always busy with operations, no time to think about new products or build relationships.",
-    solutions: [
-      "Automated tasks from AI",
-      "Partner follow-up reminders",
-      "Time for you to plan strategy",
-    ],
-  },
-  {
-    icon: BarChart3,
-    title: "Messy Bookkeeping",
-    problem: "No proper records. When tax season comes, panic looking for data.",
-    solutions: [
-      "Transactions recorded automatically",
-      "Weekly reports to your WhatsApp",
-      "Clean books ready for you",
-    ],
-  },
-  {
-    icon: Snowflake,
-    title: "Leads Go Cold",
-    problem: "Replied once, then forgot to follow up. Customer buys elsewhere.",
-    solutions: [
-      "Auto follow-up at the right time",
-      "Tasks appear in CRM",
-      "Nothing slips through",
-    ],
-  },
-  {
-    icon: Lock,
-    title: "Can't Step Away",
-    problem: "Want a day off? Can't. Business stops when you stop.",
-    solutions: [
-      "AI runs 24/7",
-      "All activity tracked",
-      "Notified only for important things",
-      "Take over anytime you want",
-    ],
-  },
-];
 
 export default function PricingPage() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -188,7 +134,7 @@ export default function PricingPage() {
       className={`${plusJakartaSans.variable} ${inter.variable} antialiased bg-[#f1f5f0]`}
       style={{ fontFamily: "var(--font-inter)" }}
     >
-      {/* Navigation - blends into hero */}
+      {/* Navigation */}
       <nav className="bg-[#284b31]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
@@ -199,7 +145,7 @@ export default function PricingPage() {
             </span>
           </Link>
           <a
-            href="#pricing"
+            href="#comparison"
             className="text-sm text-white/80 hover:text-[#F7931A] transition-colors duration-150 font-medium tracking-[-0.02em]"
           >
             Get Started
@@ -208,133 +154,9 @@ export default function PricingPage() {
       </nav>
 
       <main>
-        {/* Hero Quote */}
-        <section className="bg-[#284b31] text-white pt-16 pb-12 px-6">
-          <div className="mx-auto max-w-2xl">
-            <blockquote className="border-l-4 border-[#F7931A]/30 pl-6 md:pl-8">
-              <p className="text-white/60 text-sm mb-6 italic tracking-[-0.02em]">
-                A letter from yourself, 6 months from now
-              </p>
-
-              <div className="space-y-6 text-lg leading-relaxed tracking-[-0.02em]">
-                <div>
-                  <p className="font-semibold text-[#F7931A] mb-3">Before...</p>
-                  <p>
-                    Someone messaged yesterday. Asked about pricing. Ready to pay deposit.
-                  </p>
-                  <p className="mt-3">
-                    But I was busy handling regular customers, so I forgot to reply.
-                    When I messaged back — they had <strong>ghosted</strong>.
-                  </p>
-                  <p className="mt-3">
-                    Sometimes I manage to handle new clients, but they don&apos;t buy either.
-                    Meanwhile, family complains I have no time for them.
-                  </p>
-                </div>
-
-                <div>
-                  <p className="font-semibold text-[#F7931A] mb-3">Now...</p>
-                  <p>
-                    After using the system, every incoming lead is automatically scored and followed up.
-                  </p>
-                  <p className="mt-3">
-                    When there&apos;s a good lead, I get notified and can take over the chat.
-                  </p>
-                  <p className="mt-3">
-                    Results are much better — and I have energy for business planning and building relationships.
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-[#F7931A] font-semibold mt-10 text-right tracking-[-0.02em]">
-                — You, 6 months from now
-              </p>
-            </blockquote>
-          </div>
-        </section>
-
-        {/* Tagline */}
-        <section className="bg-[#284b31] text-white px-6 py-8">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-center tracking-[-0.02em]">
-              No system = <span className="text-[#F7931A]">No growth.</span>
-            </h2>
-          </div>
-        </section>
-
-        {/* Story / Problem */}
-        <section className="bg-white px-6 py-12 md:py-16">
-          <div className="mx-auto max-w-3xl">
-            <div className="space-y-6 text-lg md:text-xl text-[#2D2A26] leading-relaxed tracking-[-0.02em]">
-              <p>
-                Business wants to grow, but <strong>your head is full</strong>.
-              </p>
-
-              <p>
-                Every lead needs <strong>manual handling</strong>.
-                Every follow-up needs <strong>remembering</strong>.
-                Every opportunity that comes — <strong>slips away</strong> because no time.
-              </p>
-
-              <p>
-                Want to hire? <strong>Complicated</strong>. Training, supervision, monthly salary.
-                And if they quit? <strong>Start from zero again</strong>.
-              </p>
-
-              <p>
-                Want to delegate? <strong>Scared of mistakes</strong>. Scared it won&apos;t meet standards.
-              </p>
-
-              <p>
-                End up <strong>doing everything yourself</strong>. Not to mention the <strong>tax man</strong> who shows up unexpectedly.
-              </p>
-
-              <p className="text-[#2D2A26] font-medium">
-                Feels unfair. Hard to do business.<br />
-                But who can you work with?
-              </p>
-            </div>
-
-            <hr className="my-12 border-[#2D2A26]/10" />
-
-            <div className="space-y-6 text-lg md:text-xl text-[#2D2A26] leading-relaxed tracking-[-0.02em]">
-              <p className="text-2xl md:text-3xl font-extrabold text-[#284b31]">
-                The solution isn&apos;t more staff.<br />
-                The solution is a <span className="text-[#F7931A]">system</span> — with <span className="text-[#F7931A]">digital staff</span>.
-              </p>
-
-              <p>
-                Digital staff <strong>don&apos;t get sick</strong>. <strong>Don&apos;t resign</strong>. <strong>Don&apos;t need supervision</strong>.
-              </p>
-
-              <p>
-                They follow instructions <strong>exactly as you want</strong>.
-                And all activity can be <strong>tracked anytime</strong>.
-              </p>
-
-              <p className="text-[#2D2A26] font-medium">
-                You stay in control. But you don&apos;t have to do everything yourself.
-              </p>
-            </div>
-
-            {/* Why we exist */}
-            <div className="mt-12 p-8 md:p-10 bg-[#F7931A] rounded-2xl shadow-lg max-w-4xl mx-auto">
-              <p className="text-2xl md:text-3xl font-extrabold text-white mb-4 tracking-[-0.02em]">
-                This is why we exist.
-              </p>
-              <p className="text-lg md:text-xl text-white leading-relaxed tracking-[-0.02em]">
-                We <strong className="text-[#284b31]">don&apos;t sell software then make you follow our rules</strong>.
-              </p>
-              <p className="text-lg md:text-xl text-white leading-relaxed mt-3 tracking-[-0.02em]">
-                We <strong className="text-[#284b31]">discuss and build your system from scratch</strong> as your business grows.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Problems & Solutions */}
-        <section className="bg-[#f1f5f0] px-6 py-16">
-          <div className="mx-auto max-w-5xl">
+        {/* SECTION 1: Differentiation — Two Bots */}
+        <section className="bg-white px-6 py-16 md:py-20">
+          <div className="mx-auto max-w-6xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -342,173 +164,396 @@ export default function PricingPage() {
               transition={{ duration: 0.15 }}
               className="text-center mb-12"
             >
-              <h2 className="text-2xl md:text-3xl font-extrabold text-[#284b31] tracking-[-0.02em]">
-                Problems we often see — And how my21staff helps
-              </h2>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#284b31] mb-4 tracking-[-0.02em]">
+                YOU GET A TEAM, NOT JUST A CHATBOT
+              </h1>
+              <p className="text-lg md:text-xl text-[#2D2A26]/70 tracking-[-0.02em]">
+                One handles chat. The other makes sense of it.
+              </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {PROBLEMS.map((item, index) => (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.15, delay: 0.05 * index }}
-                  className="bg-white rounded-2xl p-6 shadow-sm border border-[#284b31]/5"
-                >
-                  <div className="w-10 h-10 bg-[#284b31] rounded-xl flex items-center justify-center mb-4">
-                    <item.icon className="w-5 h-5 text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold text-[#284b31] mb-2 tracking-[-0.02em]">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-[#2D2A26]/70 mb-4 tracking-[-0.02em]">
-                    {item.problem}
-                  </p>
-                  <div className="pt-4 border-t border-[#284b31]/10">
-                    <p className="text-xs font-semibold text-[#F7931A] uppercase tracking-wider mb-2">
-                      Our System
-                    </p>
-                    <ul className="space-y-1.5">
-                      {item.solutions.map((solution) => (
-                        <li key={solution} className="flex items-start gap-2 text-sm text-[#2D2A26]/80 tracking-[-0.02em]">
-                          <span className="text-[#284b31] mt-0.5">→</span>
-                          {solution}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </motion.div>
-              ))}
-
-              {/* CTA Card - fills the 6th spot */}
+            <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+              {/* Bot A */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.15, delay: 0.25 }}
-                className="bg-[#284b31] rounded-2xl p-6 shadow-sm flex flex-col justify-center"
+                transition={{ duration: 0.15 }}
+                className="bg-[#f1f5f0] rounded-2xl p-8 border-2 border-[#284b31]/10"
               >
-                <h3 className="text-xl font-bold text-white mb-2 tracking-[-0.02em]">
-                  Have similar problems?
-                </h3>
-                <p className="text-sm text-white/70 mb-6 tracking-[-0.02em]">
-                  Tell us your challenges. Let&apos;s set up your system.
-                </p>
-                <a
-                  href="#pricing"
-                  className="inline-flex items-center justify-center px-6 py-3 bg-[#F7931A] text-white font-bold text-sm rounded-xl hover:bg-[#e8850f] transition-colors duration-150"
-                >
-                  Get Started
-                </a>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing Section */}
-        <section id="pricing" className="bg-[#284b31] text-white py-16">
-          <div className="mx-auto max-w-5xl px-6">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-12 tracking-[-0.02em]">
-              Ready to build <span className="text-[#F7931A]">Your System</span>?
-            </h2>
-
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
-              variants={staggerContainer}
-            >
-              {/* Solo */}
-              <motion.div
-                className="bg-white text-[#2D2A26] rounded-2xl p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-150"
-                variants={fadeInUp}
-              >
-                <h3 className="text-xl font-extrabold tracking-[-0.02em]">Solo</h3>
-                <p className="text-xs text-[#2D2A26]/60 mb-4 tracking-[-0.02em]">Founders & freelancers</p>
-                <div className="mb-4">
-                  <span className="text-3xl font-extrabold">$240</span>
-                  <span className="text-sm text-[#2D2A26]/60">/mo</span>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-14 h-14 bg-[#284b31] rounded-xl flex items-center justify-center">
+                    <MessageCircle className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-[#284b31] tracking-[-0.02em]">
+                      BOT A — THE MOUTH
+                    </h2>
+                  </div>
                 </div>
-                <ul className="space-y-2 mb-6 text-sm tracking-[-0.02em]">
-                  {["1 WhatsApp Number", "200 Marketing Messages/mo", "100 Utility Messages/mo", "30,000 AI Chats/mo"].map((item) => (
-                    <li key={item} className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-[#284b31]" />
+                <ul className="space-y-3">
+                  {[
+                    "Replies 24/7, never sleeps",
+                    "Handles FAQs automatically",
+                    "Captures leads instantly",
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-[#2D2A26] tracking-[-0.02em]">
+                      <span className="text-[#284b31]">→</span>
                       {item}
                     </li>
                   ))}
                 </ul>
-                <button
-                  onClick={() => openModal("Solo")}
-                  className="block w-full text-center py-3 rounded-xl border-2 border-[#284b31] text-[#284b31] font-bold text-sm hover:bg-[#284b31] hover:text-white transition-all duration-150 cursor-pointer"
+              </motion.div>
+
+              {/* Bot B */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.15, delay: 0.1 }}
+                className="bg-[#f1f5f0] rounded-2xl p-8 border-2 border-[#284b31]/10"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-14 h-14 bg-[#F7931A] rounded-xl flex items-center justify-center">
+                    <BarChart3 className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-[#284b31] tracking-[-0.02em]">
+                      BOT B — THE BRAIN
+                    </h2>
+                  </div>
+                </div>
+                <ul className="space-y-3">
+                  {[
+                    "Analyzes every conversation",
+                    "Scores leads Hot/Cold",
+                    "Updates CRM automatically",
+                    "Flags urgent conversations",
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-[#2D2A26] tracking-[-0.02em]">
+                      <span className="text-[#F7931A]">→</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            </div>
+
+            {/* The Kicker */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.15, delay: 0.2 }}
+              className="mt-12 text-center"
+            >
+              <div className="inline-block bg-[#F7931A]/10 border-2 border-[#F7931A] rounded-2xl px-8 py-6">
+                <p className="text-sm font-semibold text-[#F7931A] uppercase tracking-wider mb-2">
+                  THE KICKER?
+                </p>
+                <p className="text-2xl md:text-3xl font-extrabold text-[#284b31] tracking-[-0.02em] mb-4">
+                  It's always developing for you.
+                </p>
+                <a
+                  href="#comparison"
+                  className="inline-flex items-center gap-2 text-[#284b31] font-semibold hover:text-[#F7931A] transition-colors duration-150 tracking-[-0.02em]"
                 >
-                  Choose Solo
-                </button>
+                  Don't believe it? Chat with us! <ArrowRight className="w-5 h-5" />
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* SECTION 2: 3-Step Process + Free Month */}
+        <section className="bg-[#284b31] text-white px-6 py-16 md:py-20">
+          <div className="mx-auto max-w-6xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.15 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-[-0.02em] mb-4">
+                YOUR DIGITAL STAFF, IN 3 STEPS
+              </h2>
+            </motion.div>
+
+            <div className="grid md:grid-cols-3 gap-4 mb-10">
+              {[
+                { step: "STEP 1", title: "Discover", desc: "We discuss your business", icon: "1" },
+                { step: "STEP 2", title: "Setup", desc: "We build your system", icon: "2" },
+                { step: "STEP 3", title: "Go Live", desc: "They work 24/7", icon: "3" },
+              ].map((item, index) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.15, delay: 0.05 * index }}
+                  className="relative bg-[#f1f5f0] rounded-xl p-5 border-2 border-[#284b31]/10 hover:border-[#284b31]/30 transition-colors duration-150"
+                >
+                  {/* Step label and number */}
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold text-[#284b31] uppercase tracking-wider">
+                      {item.step}
+                    </span>
+                    <span className="w-12 h-12 bg-[#284b31] rounded-xl flex items-center justify-center text-white font-extrabold text-xl">
+                      {item.icon}
+                    </span>
+                  </div>
+
+                  {/* Content */}
+                  <div>
+                    <p className="text-xl font-bold text-[#284b31] mb-1">
+                      {item.title}
+                    </p>
+                    <p className="text-sm text-[#2D2A26]/70">
+                      {item.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.15, delay: 0.2 }}
+              className="max-w-2xl mx-auto text-center"
+            >
+              <p className="text-base md:text-lg mb-3 tracking-[-0.02em] text-white/90">
+                30 days setup → You test & adjust → Go live
+              </p>
+              <div className="inline-block bg-[#F7931A] rounded-xl px-6 py-4">
+                <p className="text-xl md:text-2xl font-extrabold tracking-[-0.02em] mb-1">
+                  🎁 FREE 1ST MONTH ON US!
+                </p>
+                <p className="text-sm tracking-[-0.02em]">
+                  Pay setup fee. First month free. You're in control.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* SECTION 3: Solo vs Team Comparison */}
+        <section id="comparison" className="bg-white px-6 py-16 md:py-20">
+          <div className="mx-auto max-w-6xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.15 }}
+              className="grid md:grid-cols-2 gap-8 lg:gap-12"
+            >
+              {/* Solo */}
+              <motion.div
+                className="bg-[#f1f5f0] rounded-2xl p-8 border-2 border-[#284b31]/10"
+                variants={fadeInUp}
+              >
+                <div className="mb-6 pb-6 border-b-2 border-[#284b31]/10">
+                  <h2 className="text-2xl font-extrabold text-[#284b31] tracking-[-0.02em]">
+                    SOLO
+                  </h2>
+                  <p className="text-3xl font-extrabold text-[#284b31] mt-2 tracking-[-0.02em]">
+                    Rp3,900,000
+                    <span className="text-lg text-[#2D2A26]/60 font-normal">/mo</span>
+                  </p>
+                  <p className="text-sm text-[#F7931A] font-semibold mt-1 tracking-[-0.02em]">
+                    1st month: FREE
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-xs font-semibold text-[#2D2A26]/60 uppercase tracking-wider mb-3">
+                      📦 WHAT YOU GET:
+                    </p>
+
+                    <div className="mb-4">
+                      <p className="text-sm font-semibold text-[#284b31] mb-2">🤖 Bot A (The Mouth)</p>
+                      <ul className="space-y-1 text-sm text-[#2D2A26]/80">
+                        {["24/7 auto-reply", "FAQ handling", "Lead capture"].map((item) => (
+                          <li key={item} className="flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5 text-[#284b31]" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm font-semibold text-[#284b31] mb-2">🧠 Bot B (The Brain)</p>
+                      <ul className="space-y-1 text-sm text-[#2D2A26]/80">
+                        {["Lead scoring", "CRM updates", "Weekly reports"].map((item) => (
+                          <li key={item} className="flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5 text-[#284b31]" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm font-semibold text-[#284b31] mb-2">📊 QUOTA:</p>
+                      <ul className="space-y-1 text-sm text-[#2D2A26]/80">
+                        {["1 WhatsApp number", "30,000 AI chats/mo", "200 marketing msgs", "100 utility msgs"].map((item) => (
+                          <li key={item} className="flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5 text-[#284b31]" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm font-semibold text-[#284b31] mb-2">🚀 FEATURE UNLOCK:</p>
+                      <p className="text-sm text-[#2D2A26]/80">
+                        Every <strong>3 months</strong>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t-2 border-[#284b31]/10">
+                    <p className="text-sm text-[#2D2A26]/80 mb-4">
+                      💰 SETUP: <span className="font-semibold text-[#284b31]">Rp7,500,000</span>
+                      <span className="text-xs text-[#2D2A26]/60 ml-1">(one-time)</span>
+                    </p>
+                    <button
+                      onClick={() => openModal("Solo")}
+                      className="block w-full text-center py-4 rounded-xl bg-[#284b31] text-white font-bold text-sm hover:bg-[#1e3a23] transition-all duration-150"
+                    >
+                      CHOOSE SOLO
+                    </button>
+                  </div>
+                </div>
               </motion.div>
 
               {/* Team */}
               <motion.div
-                className="bg-[#F7931A] text-white rounded-2xl p-6 relative md:-translate-y-2 hover:shadow-xl hover:-translate-y-3 transition-all duration-150"
+                className="bg-[#F7931A] text-white rounded-2xl p-8 relative md:-translate-y-2 border-2 border-[#284b31]"
                 variants={fadeInUp}
               >
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#284b31] text-white text-xs font-bold px-3 py-1 rounded-full tracking-[-0.02em]">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#284b31] text-white text-xs font-bold px-4 py-1.5 rounded-full tracking-[-0.02em]">
                   POPULAR
                 </span>
-                <h3 className="text-xl font-extrabold mt-1 tracking-[-0.02em]">Team</h3>
-                <p className="text-xs text-white/80 mb-4 tracking-[-0.02em]">Small teams & SMBs</p>
-                <div className="mb-4">
-                  <span className="text-3xl font-extrabold">$490</span>
-                  <span className="text-sm text-white/80">/mo</span>
-                </div>
-                <ul className="space-y-2 mb-6 text-sm tracking-[-0.02em]">
-                  {["3 WhatsApp Numbers", "500 Marketing Messages/mo", "300 Utility Messages/mo", "60,000 AI Chats/mo"].map((item) => (
-                    <li key={item} className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-white" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  onClick={() => openModal("Team")}
-                  className="block w-full text-center py-3 rounded-xl bg-white text-[#F7931A] font-bold text-sm hover:bg-white/90 transition-all duration-150 cursor-pointer"
-                >
-                  Choose Team
-                </button>
-              </motion.div>
 
-              {/* Studio */}
-              <motion.div
-                className="bg-white text-[#2D2A26] rounded-2xl p-6 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-150"
-                variants={fadeInUp}
-              >
-                <h3 className="text-xl font-extrabold tracking-[-0.02em]">Studio</h3>
-                <p className="text-xs text-[#2D2A26]/60 mb-4 tracking-[-0.02em]">Enterprise & custom</p>
-                <div className="mb-4">
-                  <span className="text-3xl font-extrabold">Custom</span>
+                <div className="mb-6 pb-6 border-b-2 border-white/20">
+                  <h2 className="text-2xl font-extrabold tracking-[-0.02em]">
+                    TEAM
+                  </h2>
+                  <p className="text-3xl font-extrabold mt-2 tracking-[-0.02em]">
+                    Rp7,900,000
+                    <span className="text-lg text-white/80 font-normal">/mo</span>
+                  </p>
+                  <p className="text-sm font-semibold mt-1 tracking-[-0.02em]">
+                    1st month: FREE
+                  </p>
                 </div>
-                <p className="text-sm text-[#2D2A26]/70 mb-6 flex-1 tracking-[-0.02em]">
-                  Need more than Solo or Team? Let&apos;s discuss and tailor the solution to your business needs.
-                </p>
-                <button
-                  onClick={() => openModal("Studio")}
-                  className="block w-full text-center py-3 rounded-xl border-2 border-[#284b31] text-[#284b31] font-bold text-sm hover:bg-[#284b31] hover:text-white transition-all duration-150 cursor-pointer"
-                >
-                  Contact Us
-                </button>
+
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-3">
+                      📦 WHAT YOU GET:
+                    </p>
+
+                    <div className="mb-4">
+                      <p className="text-sm font-semibold mb-2">🤖 Bot A (The Mouth)</p>
+                      <ul className="space-y-1 text-sm text-white/90">
+                        {["24/7 auto-reply", "FAQ handling", "Lead capture"].map((item) => (
+                          <li key={item} className="flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm font-semibold mb-2">🧠 Bot B (The Brain)</p>
+                      <ul className="space-y-1 text-sm text-white/90">
+                        {["Lead scoring", "CRM updates", "Weekly reports", "Priority support", "Multi-agent sync"].map((item) => (
+                          <li key={item} className="flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm font-semibold mb-2">📊 QUOTA:</p>
+                      <ul className="space-y-1 text-sm text-white/90">
+                        {["3 WhatsApp numbers", "60,000 AI chats/mo", "500 marketing msgs", "300 utility msgs"].map((item) => (
+                          <li key={item} className="flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm font-semibold mb-2">🚀 FEATURE UNLOCK:</p>
+                      <p className="text-sm text-white/90">
+                        Every <strong>1 month</strong>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t-2 border-white/20">
+                    <p className="text-sm text-white/80 mb-4">
+                      💰 SETUP: <span className="font-semibold">Rp7,500,000</span>
+                      <span className="text-xs text-white/70 ml-1">(one-time)</span>
+                    </p>
+                    <button
+                      onClick={() => openModal("Team")}
+                      className="block w-full text-center py-4 rounded-xl bg-white text-[#F7931A] font-bold text-sm hover:bg-white/90 transition-all duration-150"
+                    >
+                      CHOOSE TEAM
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             </motion.div>
+          </div>
+        </section>
 
-            {/* Setup Fee Box */}
-            <div className="mt-8 max-w-xl mx-auto bg-white/10 rounded-xl py-3 px-6 text-center">
-              <p className="text-sm text-white/80 tracking-[-0.02em]">One-time setup fee: <span className="font-bold text-white">$465</span> — Website / Web App + Business Consultation</p>
-            </div>
+        {/* SECTION 4: Enterprise Small Box */}
+        <section className="bg-[#f1f5f0] px-6 py-12">
+          <div className="mx-auto max-w-4xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.15 }}
+              className="bg-white rounded-2xl p-8 text-center border-2 border-[#284b31]/10"
+            >
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Building2 className="w-8 h-8 text-[#284b31]" />
+                <h2 className="text-xl font-bold text-[#284b31] tracking-[-0.02em]">
+                  NEED MORE THAN TEAM?
+                </h2>
+              </div>
+              <p className="text-[#2D2A26]/70 mb-6 tracking-[-0.02em]">
+                Enterprise and custom plans available.<br />
+                High-volume, multi-location, or custom workflows.
+              </p>
+              <button
+                onClick={() => openModal("Enterprise")}
+                className="inline-flex items-center gap-2 px-8 py-3 bg-[#284b31] text-white font-bold text-sm rounded-xl hover:bg-[#1e3a23] transition-all duration-150"
+              >
+                CONTACT US FOR ENTERPRISE <ArrowRight className="w-4 h-4" />
+              </button>
+            </motion.div>
           </div>
         </section>
       </main>
 
-      {/* Footer - matches landing page */}
+      {/* Footer */}
       <footer className="bg-[#284b31] border-t border-white/10 py-6">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex items-center justify-center gap-4 text-sm text-white/60 tracking-[-0.02em]">
@@ -566,7 +611,7 @@ export default function PricingPage() {
                 Interested in {selectedPlan}?
               </h3>
               <p className="text-sm text-[#2D2A26]/60 mb-6 tracking-[-0.02em]">
-                Fill this form and we&apos;ll contact you shortly.
+                Fill this form and we'll contact you shortly.
               </p>
 
               {/* Form */}
@@ -786,7 +831,7 @@ export default function PricingPage() {
               </form>
 
               <p className="text-xs text-center text-gray-400 mt-4 tracking-[-0.02em]">
-                We&apos;ll contact you via WhatsApp within 24 hours.
+                We'll contact you via WhatsApp within 24 hours.
               </p>
             </motion.div>
           </motion.div>

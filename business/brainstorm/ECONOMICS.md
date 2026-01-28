@@ -25,73 +25,50 @@ Every client goes through "Startup" which delivers:
 - Data flow setup
 
 **Price Anchor Script:**
-"Build this yourself: Web Agency ($2,000+) + CRM Consultant ($1,000+) + Developer ($500+) = $3,500. We do it for $497."
+"Build this yourself: Web Agency ($2,000+) + CRM Consultant ($1,000+) + Developer ($500+) = $3,500. We do it for Rp7,500,000 (one-time) — then Rp3,900,000/mo."
 
 ---
 
-## Monthly Plans
+## Subscription Plans
 
-### The Digital Receptionist — $97/mo
-*"The employee who never sleeps, never complains, and costs $3 a day."*
+| | Solo | Team |
+|---|------|------|
+| **Price** | Rp3,900,000/mo | Rp7,900,000/mo |
+| **WhatsApp Numbers** | 1 | 3 |
+| **Marketing Messages** | 200/mo | 500/mo |
+| **Utility Messages** | 100/mo | 300/mo |
+| **AI Chats** | 30,000/mo | 60,000/mo |
+| **Best For** | Solo founders, freelancers | Small teams, growing SMBs |
 
-**Staff Member Profile:**
-- **Role:** Front Desk & Gatekeeper
-- **Name:** Customizable (e.g., "Sarah")
-- **Job Description:**
-  - 24/7 Availability — Instantly replies to "Hi", "Price?", "Location?"
-  - The Gatekeeper — Filters spam and unserious inquiries
-  - The Greeter — FAQ persona, pushes products/webinar
-  - The Hand-off — Pings owner when lead is "Hot"
-
-**The Weekly Report (Every Friday 5PM):**
-```
-Weekly Performance Review for [Bot Name]
-Boss, here's what I did this week:
-- Chats Handled: 142
-- Leads Qualified: 12 (Added to CRM)
-- Spam Blocked: 5
-- Time Saved: ~4.5 Hours
-
-Fuel Tank Status: 65% used. Good for the month!
-```
-
-**"Promotion" System (Every 90 days):**
-- Website Expansion (new page)
-- Persona Overhaul (voice change)
-- Workflow Refinement (new logic branch)
-- Knowledge Base Refresh (new prices/services)
-
-### The Digital Pro — $297/mo
-*Velocity tier — don't wait 90 days, improve every month.*
-
-**Monthly Credit Options:**
-- Month 1: Lead Magnet (automated PDF via WhatsApp)
-- Month 2: Booking System Integration (Cal.com/Google Calendar)
-- Month 3: Success Story page with storytelling bot
-- Month 4: Referral Branch (ask happy customers to refer)
-
-**Extras:**
-- CRM updates and PA access
-- Business improvement consulting
-- Keep leads engaging
-- A/B testing on WhatsApp/Meta ads
-
-### Enterprise — Custom Pricing
-- High touch: Zoom call, workflow mapping, custom proposal
+**Pricing Logic:** Big jump Solo → Team (+Rp4jt). Apple-style psychology.
 
 ---
 
-## Cost Structure Per Heavy User (33 leads/day)
+## Cost Structure Per User (High Usage)
 
-| Component | Monthly Cost |
-|-----------|-------------|
-| Vercel | $2 |
-| Convex | $0 |
-| Gemini | $0.15 |
-| Claude | $3 |
-| Inbound Meta | $0 |
-| Error Margin | $1 |
-| **Total** | **$7** |
+### Solo (Rp3,900,000/mo)
+
+| Cost Item | Monthly Cost |
+|-----------|--------------|
+| Kapso (1 number) | Rp160,000 |
+| AI API (30K chats × Rp4.00) | Rp120,000 |
+| Meta Marketing (200 × Rp586) | Rp117,200 |
+| Meta Utility (100 × Rp357) | Rp35,700 |
+| Buffer (15%) | Rp64,935 |
+| **Total Cost** | **Rp497,835** |
+| **Profit** | **Rp3,402,165 (87%)** |
+
+### Team (Rp7,900,000/mo)
+
+| Cost Item | Monthly Cost |
+|-----------|--------------|
+| Kapso (3 numbers) | Rp480,000 |
+| AI API (60K chats × Rp4.00) | Rp240,000 |
+| Meta Marketing (500 × Rp586) | Rp293,000 |
+| Meta Utility (300 × Rp357) | Rp107,100 |
+| Buffer (15%) | Rp168,015 |
+| **Total Cost** | **Rp1,288,115** |
+| **Profit** | **Rp6,611,885 (84%)** |
 
 ### Meta Messaging Costs
 - Marketing (Blasts): $0.035/msg
@@ -119,7 +96,7 @@ CRM builds itself. Bot listens to WhatsApp, populates CRM. Zero data entry.
 Not just chat — moves the needle. Qualifies leads, asks for sale. 24/7 without supervision.
 
 ### 3. The Evolution (The Promotion System)
-System tracks its own gaps. Every 90 days ($97) or 30 days ($297), generates a "Promotion":
+System tracks its own gaps. Every 90 days (Solo) or 30 days (Team), generates a "Promotion":
 *"I've learned enough to handle X now. Click here to promote me."*
 
 **MVP Hook:** "Stop buying software that stays the same. Hire a Digital Firm that grows with you."
@@ -164,7 +141,7 @@ Canceling = "firing" a Senior Staff member and losing all progress.
 ### Upsell Bridge
 When they see Phase 3 skills but realize they must wait 6 months:
 - "Can I pay more to get that NOW?"
-- Answer: "Upgrade to Pro ($297) for monthly upgrades instead of quarterly."
+- Answer: "Upgrade to Team (Rp7,900,000/mo) for monthly upgrades instead of quarterly."
 
 ### Economic Benefit
 Skills are pre-written System Prompts or API connections. Nearly zero labor to "promote" once library is built. Selling Progress with minimal manual work.
