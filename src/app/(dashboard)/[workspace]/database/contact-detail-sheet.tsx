@@ -1156,8 +1156,8 @@ export function ContactDetailSheet({
                           ))}
                           <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
                             <span>Total</span>
-                            <span style={{ color: getScoreColor(calculatedScore) }}>
-                              {calculatedScore} pts
+                            <span style={{ color: getScoreColor(calculatedTotalScore) }}>
+                              {calculatedTotalScore} pts
                             </span>
                           </div>
                         </div>

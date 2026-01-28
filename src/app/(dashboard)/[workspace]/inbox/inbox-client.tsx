@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { useQuery } from 'convex/react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -136,10 +136,13 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
   const [viewMode, setViewMode] = useState<'active' | 'all'>('active')
   const [tagFilter, setTagFilter] = useState<string[]>([])
-  const [showInfoSidebar, setShowInfoSidebar] = useState(true)
+  const [showInfoSidebar, setShowInfoSidebar] = useState(false)
 
   // Track conversation status changes in dev mode
   const [conversationStatusOverrides, setConversationStatusOverrides] = useState<Record<string, string>>({})
+
+  // Mutation to mark conversation as read
+  const markAsRead = useMutation(api.conversations.markAsRead)
 
   // Skip Convex query in dev mode - use mock data
   const convexData = useQuery(
@@ -288,6 +291,20 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     console.log('Merged with contact:', targetContactId)
   }, [])
 
+  // Handle conversation selection - mark as read when clicked
+  const handleConversationSelect = useCallback((conversationId: Id<'conversations'>) => {
+    // Set as selected
+    setSelectedConversationId(conversationId)
+
+    // Mark as read in production (skip in dev mode)
+    if (!isDevMode()) {
+      markAsRead({ conversation_id: conversationId as unknown as string })
+        .catch((error) => {
+          console.error('Failed to mark conversation as read:', error)
+        })
+    }
+  }, [markAsRead])
+
   // Handle conversation status change (toggle AI/Human mode)
   const handleStatusChange = useCallback(() => {
     if (!selectedConversationId) return
@@ -402,7 +419,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
         <ConversationList
           conversations={filteredConversations}
           selectedId={selectedConversationId}
-          onSelect={setSelectedConversationId}
+          onSelect={handleConversationSelect}
           members={data.members}
         />
       </div>
@@ -442,15 +459,8 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
               : null}
             conversationStatus={selectedConversation?.status || 'open'}
             contactTags={contactTags}
-            teamMembers={[]}
-            assignedTo={selectedConversation?.assigned_to}
             conversationId={String(selectedConversationId)}
-            onContactUpdate={handleContactUpdate}
-            onAssignmentChange={handleAssignmentChange}
-            onMergeComplete={handleMergeComplete}
             onClose={() => setShowInfoSidebar(false)}
-            availableContacts={availableContacts}
-            recentNotes={recentNotes}
           />
         </div>
       )}

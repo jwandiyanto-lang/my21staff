@@ -104,8 +104,8 @@ export function useWorkspaceSettings(workspaceId: string | null) {
   // Extract contact tags, main form fields, and field scores from workspace settings
   const workspaceSettings = (workspace as { settings?: Record<string, unknown> }).settings
   const contactTags = workspaceSettings?.contact_tags as string[] || []
-  const mainFormFields = workspaceSettings?.main_form_fields as string[] || MOCK_MAIN_FORM_FIELDS
-  const fieldScores = workspaceSettings?.form_field_scores as Record<string, number> || MOCK_FIELD_SCORES
+  const mainFormFields = workspaceSettings?.main_form_fields as string[] || []
+  const fieldScores = workspaceSettings?.form_field_scores as Record<string, number> || {}
 
   // Map Convex members to expected TeamMember structure
   const teamMembers: TeamMember[] = members.map((m: Record<string, unknown>) => {
