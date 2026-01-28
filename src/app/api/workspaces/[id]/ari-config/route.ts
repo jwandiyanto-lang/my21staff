@@ -95,10 +95,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Dev mode: return mock success without auth
     if (isDevMode() && workspaceId === 'demo') {
+      const body = await request.json()
       return NextResponse.json({
         config: {
           workspace_id: workspaceId,
           ...DEFAULT_CONFIG,
+          bot_name: body.bot_name || DEFAULT_CONFIG.bot_name,
+          tone: {
+            ...DEFAULT_CONFIG.tone,
+            description: body.tone_description || '',
+            greeting_template: body.greeting_template || '',
+          },
+          community_link: body.community_link || null,
         },
       })
     }
