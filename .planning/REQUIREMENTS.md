@@ -69,28 +69,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LOCALHOST-01 | Phase 7 | Pending |
-| LOCALHOST-02 | Phase 7 | Pending |
-| LOCALHOST-03 | Phase 7 | Pending |
-| LOCALHOST-04 | Phase 7 | Pending |
-| LOCALHOST-05 | Phase 7 | Pending |
-| LOCALHOST-06 | Phase 7 | Pending |
-| LOCALHOST-07 | Phase 7 | Pending |
-| LOCALHOST-08 | Phase 7 | Pending |
-| DEPLOY-01 | Phase 8 | Pending |
-| DEPLOY-02 | Phase 8 | Pending |
-| DEPLOY-03 | Phase 8 | Pending |
-| DEPLOY-04 | Phase 8 | Pending |
-| DEPLOY-05 | Phase 8 | Pending |
-| DEPLOY-06 | Phase 8 | Pending |
-| DEPLOY-07 | Phase 8 | Pending |
-| BOT-01 | Phase 9 | Pending |
-| BOT-02 | Phase 9 | Pending |
-| BOT-03 | Phase 9 | Pending |
-| BOT-04 | Phase 9 | Pending |
-| BOT-05 | Phase 9 | Pending |
-| BOT-06 | Phase 9 | Pending |
-| BOT-07 | Phase 9 | Pending |
+| LOCALHOST-01 | Phase 1 | Pending |
+| LOCALHOST-02 | Phase 1 | Pending |
+| LOCALHOST-03 | Phase 1 | Pending |
+| LOCALHOST-04 | Phase 1 | Pending |
+| LOCALHOST-05 | Phase 1 | Pending |
+| LOCALHOST-06 | Phase 1 | Pending |
+| LOCALHOST-07 | Phase 1 | Pending |
+| LOCALHOST-08 | Phase 1 | Pending |
+| DEPLOY-01 | Phase 2 | Pending |
+| DEPLOY-02 | Phase 2 | Pending |
+| DEPLOY-03 | Phase 2 | Pending |
+| DEPLOY-04 | Phase 2 | Pending |
+| DEPLOY-05 | Phase 2 | Pending |
+| DEPLOY-06 | Phase 2 | Pending |
+| DEPLOY-07 | Phase 2 | Pending |
+| BOT-01 | Phase 3 | Pending |
+| BOT-02 | Phase 3 | Pending |
+| BOT-03 | Phase 3 | Pending |
+| BOT-04 | Phase 3 | Pending |
+| BOT-05 | Phase 3 | Pending |
+| BOT-06 | Phase 3 | Pending |
+| BOT-07 | Phase 3 | Pending |
 
 **Coverage:**
 - v3.5 requirements: 22 total
