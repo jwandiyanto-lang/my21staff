@@ -10,6 +10,10 @@ import { api } from 'convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import type { ConsultantSlotUpdate } from '@/lib/ari/types'
 
+function isDevMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+}
+
 interface RouteParams {
   params: Promise<{ id: string; slotId: string }>
 }
@@ -18,12 +22,23 @@ interface RouteParams {
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId, slotId } = await params
+    const body = await request.json()
+
+    // Dev mode: return mock updated slot without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      return NextResponse.json({
+        slot: {
+          id: slotId,
+          workspace_id: workspaceId,
+          ...body,
+          updated_at: new Date().toISOString(),
+        },
+      })
+    }
 
     // Verify user has access
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
-
-    const body = await request.json()
 
     // Get workspace to get Convex ID
     const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
@@ -56,6 +71,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: workspaceId, slotId } = await params
+
+    // Dev mode: return success without auth
+    if (isDevMode() && workspaceId === 'demo') {
+      return NextResponse.json({ success: true })
+    }
 
     // Verify user has access
     const authResult = await requireWorkspaceMembership(workspaceId)

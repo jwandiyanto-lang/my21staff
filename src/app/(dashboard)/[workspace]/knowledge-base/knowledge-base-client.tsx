@@ -64,7 +64,7 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
 
       {/* Tabs for different sections */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-2xl h-auto">
+        <TabsList className="grid w-full grid-cols-5 max-w-2xl h-auto">
           <TabsTrigger value="persona" className="flex items-center gap-2 py-2">
             <Bot className="w-4 h-4 shrink-0" />
             <span className="hidden sm:inline">Persona</span>
@@ -80,6 +80,10 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
           <TabsTrigger value="scoring" className="flex items-center gap-2 py-2">
             <Target className="w-4 h-4 shrink-0" />
             <span className="hidden sm:inline">Scoring</span>
+          </TabsTrigger>
+          <TabsTrigger value="slots" className="flex items-center gap-2 py-2">
+            <Calendar className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Slots</span>
           </TabsTrigger>
         </TabsList>
 
@@ -104,6 +108,12 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
         <TabsContent value="scoring" className="space-y-6">
           <TabErrorBoundary tabName="Scoring">
             <ScoringTab workspaceId={workspace.id} />
+          </TabErrorBoundary>
+        </TabsContent>
+
+        <TabsContent value="slots" className="space-y-6">
+          <TabErrorBoundary tabName="Slots">
+            <SlotManager workspaceId={workspace.id} teamMembers={teamMembers} />
           </TabErrorBoundary>
         </TabsContent>
       </Tabs>
