@@ -51,3 +51,4 @@ app.log
 
 # clerk configuration (can include secrets)
 /.clerk/
+.obsidian/
