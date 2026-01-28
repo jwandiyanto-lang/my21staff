@@ -2,13 +2,13 @@
 
 ## Milestones
 
-- ✅ **v3.4 Kapso Inbox Integration** - Phases 1-6 (shipped 2026-01-28)
-- 🚧 **v3.5 Production Go-Live** - Phases 7-9 (in progress)
+- v3.4 Kapso Inbox Integration - Phases 1-6 (shipped 2026-01-28)
+- v3.5 Production Go-Live - Phases 7-9 (in progress)
 
 ## Phases
 
 <details>
-<summary>✅ v3.4 Kapso Inbox Integration (Phases 1-6) - SHIPPED 2026-01-28</summary>
+<summary>v3.4 Kapso Inbox Integration (Phases 1-6) - SHIPPED 2026-01-28</summary>
 
 **Delivered:** Modern WhatsApp-first Inbox UI with AI configuration hot-reload. Complete bot admin interface with real-time filtering, AI/Human handover toggle, and end-to-end automation flow from new lead to consultation booking.
 
@@ -18,11 +18,11 @@
 - Inbox Modernization — WhatsApp-first UI with status filtering, real-time sync, AI/Human toggle per conversation
 - Configuration Hot-Reload — Complete ARI flow with workspace config applied on every message without restart
 - Two-Level AI Gating — Global toggle (ariConfig.enabled) + per-conversation toggle (conversation.status)
-- End-to-End Automation — New lead → AI greeting → qualification → routing → consultation booking complete
+- End-to-End Automation — New lead -> AI greeting -> qualification -> routing -> consultation booking complete
 
 </details>
 
-### 🚧 v3.5 Production Go-Live (In Progress)
+### v3.5 Production Go-Live (In Progress)
 
 **Milestone Goal:** Deploy v3.4 features to production and activate live Kapso bot with Eagle Overseas.
 
@@ -36,7 +36,7 @@
 - Production deployment matches localhost feature parity
 - Kapso webhooks deliver messages to production
 - ARI bot responds to real WhatsApp conversations
-- Complete lead flow works: greeting → qualification → routing → booking
+- Complete lead flow works: greeting -> qualification -> routing -> booking
 - All Your Intern settings tabs active and functional in production
 
 ---
@@ -54,15 +54,17 @@
 2. All identified issues are fixed and verified
 3. All /demo pages load without console errors or unhandled rejections
 4. All 5 Your Intern tabs render and function correctly (Persona, Flow, Database, Scoring, Slots)
-5. Complete lead flow is testable end-to-end in offline mode (greeting → qualification → routing → booking)
+5. Complete lead flow is testable end-to-end in offline mode (greeting -> qualification -> routing -> booking)
 6. Dev mode code is confirmed safe (no dev bypasses leak to production build)
 7. All React hooks follow rules of hooks (no conditional calls)
 8. UI polish complete (spacing, labels, visual consistency)
 
-**Plans:** TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 07-01: TBD (plan-phase will create)
+- [ ] 01-01-PLAN.md — Interactive audit to identify issues
+- [ ] 01-02-PLAN.md — Add missing Slots tab and fix audit issues
+- [ ] 01-03-PLAN.md — Hooks compliance, production build verification, final check
 
 ---
 
@@ -104,7 +106,7 @@ Plans:
 3. Test message triggers bot response successfully
 4. ARI greeting, qualification, and routing work with real WhatsApp conversations
 5. All Your Intern configuration tabs affect live bot behavior (changes applied immediately)
-6. Complete automation verified end-to-end (new lead → greeting → qualification → routing → booking)
+6. Complete automation verified end-to-end (new lead -> greeting -> qualification -> routing -> booking)
 7. 24-hour monitoring confirms stability (no webhook failures, no integration errors)
 
 **Plans:** TBD
@@ -117,7 +119,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -127,7 +129,7 @@ Phases execute in numeric order: 1 → 2 → 3
 | 4. Inbox Modernization | v3.4 | 3/3 | Complete | 2026-01-28 |
 | 5. AI/Human Handover | v3.4 | 2/2 | Complete | 2026-01-28 |
 | 6. ARI Flow Integration | v3.4 | 2/2 | Complete | 2026-01-28 |
-| 1. Localhost Polish | v3.5 | 0/? | Not started | - |
+| 1. Localhost Polish | v3.5 | 0/3 | In Progress | - |
 | 2. Production Deployment | v3.5 | 0/? | Not started | - |
 | 3. Live Bot Integration | v3.5 | 0/? | Not started | - |
 
