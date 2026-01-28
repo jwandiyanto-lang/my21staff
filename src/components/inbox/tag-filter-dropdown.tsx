@@ -46,7 +46,7 @@ export function TagFilterDropdown({
   // Dev mode mock tags
   const availableTags = isDevMode()
     ? MOCK_CONVEX_WORKSPACE.settings?.contact_tags || []
-    : workspace?.settings?.contact_tags || []
+    : (workspace as any)?.settings?.contact_tags || []
 
   // Sort tags alphabetically
   const sortedTags = [...availableTags].sort((a, b) =>
