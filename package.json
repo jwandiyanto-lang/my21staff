@@ -7,7 +7,10 @@
     "build": "next build",
     "deploy": "node scripts/deploy-convex.js",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "type-check": "tsc --noEmit",
+    "pre-commit": "npm run lint && npm run type-check",
     "analyze": "ANALYZE=true next build --webpack",
     "test": "jest"
   },

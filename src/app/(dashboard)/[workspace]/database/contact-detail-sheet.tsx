@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -68,7 +67,7 @@ import { toast } from 'sonner'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
-import type { Contact, Message, ContactNote, Profile, WorkspaceMember } from '@/types/database'
+import type { Contact, ContactNote, Profile, WorkspaceMember } from '@/types/database'
 
 type TeamMember = WorkspaceMember & { profile: Profile | null }
 
@@ -103,6 +102,8 @@ interface ContactDetailSheetProps {
   onOpenChange: (open: boolean) => void
   contactTags?: string[]
   teamMembers?: TeamMember[]
+  mainFormFields?: string[]
+  fieldScores?: Record<string, number>
 }
 
 export function ContactDetailSheet({
@@ -112,6 +113,8 @@ export function ContactDetailSheet({
   onOpenChange,
   contactTags = [],
   teamMembers = [],
+  mainFormFields = [],
+  fieldScores = {},
 }: ContactDetailSheetProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -121,7 +124,6 @@ export function ContactDetailSheet({
   const [localScore, setLocalScore] = useState(contact?.lead_score ?? 0)
   const [localTags, setLocalTags] = useState<string[]>(contact?.tags || [])
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
-  const [isUpdatingScore, setIsUpdatingScore] = useState(false)
   const [isUpdatingTags, setIsUpdatingTags] = useState(false)
 
   // Editable contact info
@@ -131,13 +133,8 @@ export function ContactDetailSheet({
   const [editingField, setEditingField] = useState<'name' | 'phone' | 'email' | null>(null)
   const [isUpdatingInfo, setIsUpdatingInfo] = useState(false)
 
-  // Messages state
-  const [activeTab, setActiveTab] = useState('details')
-  const [messages, setMessages] = useState<Message[]>([])
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
-  const [messagesLoaded, setMessagesLoaded] = useState(false)
-
   // Activity & Notes state
+  const [activeTab, setActiveTab] = useState('details')
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [isLoadingActivities, setIsLoadingActivities] = useState(false)
   const [activitiesLoaded, setActivitiesLoaded] = useState(false)
@@ -160,9 +157,6 @@ export function ContactDetailSheet({
       setLocalPhone(contact.phone || '')
       setLocalEmail(contact.email || '')
       setEditingField(null)
-      // Reset messages state for new contact
-      setMessages([])
-      setMessagesLoaded(false)
       // Reset activity state for new contact
       setActivities([])
       setActivitiesLoaded(false)
@@ -173,42 +167,6 @@ export function ContactDetailSheet({
     }
   }, [contact])
 
-  // Debounced score update
-  const debouncedScoreUpdate = useCallback(
-    (() => {
-      let timeoutId: NodeJS.Timeout | null = null
-      return (contactId: string, score: number) => {
-        if (timeoutId) clearTimeout(timeoutId)
-        timeoutId = setTimeout(async () => {
-          setIsUpdatingScore(true)
-          try {
-            const response = await fetch(`/api/contacts/${contactId}`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ lead_score: score }),
-            })
-            if (!response.ok) {
-              // Revert on error
-              if (contact) setLocalScore(contact.lead_score)
-              console.error('Failed to update score')
-            } else {
-              // Refresh data
-              startTransition(() => {
-                router.refresh()
-              })
-            }
-          } catch (error) {
-            // Revert on error
-            if (contact) setLocalScore(contact.lead_score)
-            console.error('Error updating score:', error)
-          } finally {
-            setIsUpdatingScore(false)
-          }
-        }, 500)
-      }
-    })(),
-    [contact, router]
-  )
 
   // Status update handler
   const handleStatusChange = async (newStatus: LeadStatus) => {
@@ -243,14 +201,6 @@ export function ContactDetailSheet({
     } finally {
       setIsUpdatingStatus(false)
     }
-  }
-
-  // Score change handler
-  const handleScoreChange = (value: number[]) => {
-    if (!contact) return
-    const newScore = value[0]
-    setLocalScore(newScore)
-    debouncedScoreUpdate(contact.id, newScore)
   }
 
   // Tag toggle handler (for predefined tags)
@@ -339,27 +289,6 @@ export function ContactDetailSheet({
     if (field === 'email') setLocalEmail(contact.email || '')
     setEditingField(null)
   }
-
-  // Load messages when Messages tab is selected
-  const loadMessages = useCallback(async () => {
-    if (!contact || messagesLoaded || isLoadingMessages) return
-
-    setIsLoadingMessages(true)
-    try {
-      // Fetch messages via API route
-      const response = await fetch(`/api/contacts/${contact.id}/messages`)
-      if (response.ok) {
-        const data = await response.json()
-        setMessages(data.messages || [])
-      }
-      setMessagesLoaded(true)
-    } catch (error) {
-      console.error('Error loading messages:', error)
-      setMessagesLoaded(true)
-    } finally {
-      setIsLoadingMessages(false)
-    }
-  }, [contact, messagesLoaded, isLoadingMessages])
 
   // Load activities for Activity tab
   const loadActivities = useCallback(async () => {
@@ -555,9 +484,6 @@ export function ContactDetailSheet({
   // Handle tab change - lazy load data
   const handleTabChange = (value: string) => {
     setActiveTab(value)
-    if (value === 'messages' && !messagesLoaded) {
-      loadMessages()
-    }
     if (value === 'activity' && !activitiesLoaded) {
       loadActivities()
     }
@@ -644,6 +570,23 @@ export function ContactDetailSheet({
     ? Object.entries(formAnswersData).filter(([key]) => !key.startsWith('_'))
     : []
 
+  // Filter form responses to show only main fields in Form Score tab
+  const mainFormResponses = mainFormFields.length > 0
+    ? formResponses.filter(([key]) => mainFormFields.includes(key))
+    : formResponses
+
+  // Field labels mapping (from Settings)
+  const FIELD_LABELS: Record<string, string> = {
+    'Pendidikan': 'Education Level',
+    'Jurusan': 'Major / Field of Study',
+    'Aktivitas': 'Current Activity',
+    'Negara Tujuan': 'Target Country',
+    'Budget': 'Budget Range',
+    'Target Berangkat': 'Target Departure',
+    'Level Bahasa Inggris': 'English Level',
+    'Goals': 'Study Goals',
+  }
+
   // Lead score color
   const getScoreColor = (score: number) => {
     if (score >= 80) return '#10B981' // green
@@ -685,66 +628,142 @@ export function ContactDetailSheet({
       return null
     }
 
-    // English Level (30 pts max)
-    const englishLevel = getField(
-      ['EnglishLevel', 'english_level'],
-      ['Level Bahasa Inggris', 'EnglishLevel']
-    )
-    if (englishLevel) {
-      const englishMap: Record<string, number> = {
-        'native': 30, 'has_score': 30, 'advanced': 25, 'intermediate': 15, 'beginner': 5
-      }
-      const points = englishMap[String(englishLevel)] || 0
-      breakdown.push({ label: 'English Level', value: String(englishLevel), points, maxPoints: 30 })
+    // Helper to normalize values for lookup
+    const normalizeValue = (value: string): string => {
+      return String(value).toLowerCase().trim()
     }
 
-    // Budget (25 pts max)
-    const budget = getField(
-      ['Budget', 'budget'],
-      ['Budget']
-    )
-    if (budget) {
-      const budgetMap: Record<string, number> = {
-        '500jt-1m': 25, '300-500jt': 20, '100-300jt': 15, '<100jt': 5, 'scholarship': 5
+    // Helper to find score from field scores (dropdown or open-ended)
+    const getScoreForField = (fieldKey: string, value: string | null): { points: number; maxPoints: number } | null => {
+      if (!value) return null
+
+      // First try exact match with dropdown choice
+      const choiceKey = `${fieldKey}:${value}`
+      if (fieldScores[choiceKey] !== undefined) {
+        // Find max score for this field
+        const fieldMax = Math.max(...Object.entries(fieldScores)
+          .filter(([key]) => key.startsWith(`${fieldKey}:`))
+          .map(([, score]) => score))
+        return { points: fieldScores[choiceKey], maxPoints: fieldMax }
       }
-      const points = budgetMap[String(budget)] || 0
-      breakdown.push({ label: 'Budget', value: String(budget), points, maxPoints: 25 })
+
+      // Try normalized value matching
+      const normalized = normalizeValue(value)
+      const matchingKey = Object.keys(fieldScores).find(key => {
+        if (!key.startsWith(`${fieldKey}:`)) return false
+        const choiceValue = key.split(':')[1]
+        return normalizeValue(choiceValue) === normalized || normalized.includes(normalizeValue(choiceValue))
+      })
+
+      if (matchingKey) {
+        const fieldMax = Math.max(...Object.entries(fieldScores)
+          .filter(([key]) => key.startsWith(`${fieldKey}:`))
+          .map(([, score]) => score))
+        return { points: fieldScores[matchingKey], maxPoints: fieldMax }
+      }
+
+      // For open-ended fields, return full score if answered
+      if (fieldScores[fieldKey] !== undefined) {
+        return { points: fieldScores[fieldKey], maxPoints: fieldScores[fieldKey] }
+      }
+
+      return null
     }
 
-    // Timeline (20 pts max)
-    const timeline = getField(
-      ['TargetDeparture', 'target_departure'],
-      ['Target Berangkat', 'TargetDeparture']
+    // Education Level
+    const educationLevel = getField(
+      ['Education', 'education_level', 'EducationLevel'],
+      ['Pendidikan', 'Education']
     )
-    if (timeline) {
-      const timelineMap: Record<string, number> = {
-        '3months': 20, '6months': 15, '1year': 10, '2years': 5, 'flexible': 5
+    if (educationLevel) {
+      const score = getScoreForField('Pendidikan', String(educationLevel))
+      if (score) {
+        breakdown.push({ label: 'Education Level', value: String(educationLevel), points: score.points, maxPoints: score.maxPoints })
       }
-      const points = timelineMap[String(timeline)] || 0
-      breakdown.push({ label: 'Timeline', value: String(timeline), points, maxPoints: 20 })
     }
 
-    // Activity (15 pts max)
+    // Major / Field of Study
+    const major = getField(
+      ['Major', 'major', 'field_of_study'],
+      ['Jurusan', 'Major']
+    )
+    if (major) {
+      const score = getScoreForField('Jurusan', String(major))
+      if (score) {
+        breakdown.push({ label: 'Major / Field of Study', value: String(major), points: score.points, maxPoints: score.maxPoints })
+      }
+    }
+
+    // Current Activity
     const activity = getField(
       ['Activity', 'activity'],
       ['Aktivitas', 'Activity']
     )
     if (activity) {
-      const activityMap: Record<string, number> = {
-        'working': 15, 'fresh_grad': 12, 'other': 10, 'student': 5
+      const score = getScoreForField('Aktivitas', String(activity))
+      if (score) {
+        breakdown.push({ label: 'Current Activity', value: String(activity), points: score.points, maxPoints: score.maxPoints })
       }
-      const points = activityMap[String(activity)] || 0
-      breakdown.push({ label: 'Activity', value: String(activity), points, maxPoints: 15 })
     }
 
-    // Target Country (10 pts max)
+    // Target Country
     const targetCountry = getField(
       ['TargetCountry', 'target_country'],
       ['Negara Tujuan', 'TargetCountry']
     )
     if (targetCountry) {
-      const points = String(targetCountry) === 'undecided' ? 3 : 10
-      breakdown.push({ label: 'Target Country', value: String(targetCountry), points, maxPoints: 10 })
+      const score = getScoreForField('Negara Tujuan', String(targetCountry))
+      if (score) {
+        breakdown.push({ label: 'Target Country', value: String(targetCountry), points: score.points, maxPoints: score.maxPoints })
+      }
+    }
+
+    // Budget
+    const budget = getField(
+      ['Budget', 'budget'],
+      ['Budget']
+    )
+    if (budget) {
+      const score = getScoreForField('Budget', String(budget))
+      if (score) {
+        breakdown.push({ label: 'Budget', value: String(budget), points: score.points, maxPoints: score.maxPoints })
+      }
+    }
+
+    // Target Departure
+    const timeline = getField(
+      ['TargetDeparture', 'target_departure'],
+      ['Target Berangkat', 'TargetDeparture']
+    )
+    if (timeline) {
+      const score = getScoreForField('Target Berangkat', String(timeline))
+      if (score) {
+        breakdown.push({ label: 'Target Departure', value: String(timeline), points: score.points, maxPoints: score.maxPoints })
+      }
+    }
+
+    // English Level
+    const englishLevel = getField(
+      ['EnglishLevel', 'english_level'],
+      ['Level Bahasa Inggris', 'EnglishLevel']
+    )
+    if (englishLevel) {
+      const score = getScoreForField('Level Bahasa Inggris', String(englishLevel))
+      if (score) {
+        breakdown.push({ label: 'English Level', value: String(englishLevel), points: score.points, maxPoints: score.maxPoints })
+      }
+    }
+
+    // Study Goals
+    const goals = getField(
+      ['Goals', 'goals', 'study_goals'],
+      ['Goals']
+    )
+    if (goals) {
+      const score = getScoreForField('Goals', String(goals))
+      if (score) {
+        breakdown.push({ label: 'Study Goals', value: String(goals), points: score.points, maxPoints: score.maxPoints })
+      }
     }
 
     // Remardk Penalty (-20 pts)
@@ -765,9 +784,21 @@ export function ContactDetailSheet({
 
   const scoreBreakdown = metadata ? calculateScoreBreakdown(metadata) : []
 
-  // Calculate score from form answers if stored score is 0
-  const calculatedScore = scoreBreakdown.reduce((sum, item) => sum + item.points, 0)
-  const displayScore = localScore === 0 && calculatedScore > 0 ? calculatedScore : localScore
+  // Calculate total for ONLY the main form fields (for Form Score tab)
+  const mainFieldsFormScore = mainFormResponses.reduce((total, [key]) => {
+    const breakdown = scoreBreakdown.find(item => {
+      const itemKey = Object.keys(FIELD_LABELS).find(k => FIELD_LABELS[k] === item.label)
+      return itemKey === key || item.label === key
+    })
+    return total + (breakdown?.points || 0)
+  }, 0)
+
+  // Chat score from conversation outcomes (dummy data for now)
+  const chatScore = 47
+
+  // Total lead score = Form Score + Chat Score
+  const calculatedTotalScore = mainFieldsFormScore + chatScore
+  const displayScore = localScore === 0 && calculatedTotalScore > 0 ? calculatedTotalScore : localScore
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -780,18 +811,19 @@ export function ContactDetailSheet({
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0">
-              <SheetTitle className="text-xl truncate">
-                {contact.name || contact.phone}
-              </SheetTitle>
-              <div className="flex items-center gap-2 mt-1">
+            <div className="flex-1 min-w-0 space-y-3">
+              {/* Name and Status on same line */}
+              <div className="flex items-center gap-2">
+                <SheetTitle className="text-xl truncate">
+                  {contact.name || contact.phone}
+                </SheetTitle>
                 <Select
                   value={localStatus}
                   onValueChange={(value) => handleStatusChange(value as LeadStatus)}
                   disabled={isUpdatingStatus}
                 >
                   <SelectTrigger
-                    className="w-auto h-7 text-xs border-none shadow-none px-2"
+                    className="w-auto h-6 text-xs border-none shadow-none px-2"
                     style={{
                       backgroundColor: statusConfig.bgColor,
                       color: statusConfig.color,
@@ -822,7 +854,9 @@ export function ContactDetailSheet({
                   <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-3">
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
                 <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={openWhatsApp}>
                   <MessageCircle className="mr-2 h-4 w-4" />
                   WhatsApp
@@ -834,6 +868,18 @@ export function ContactDetailSheet({
                   </a>
                 </Button>
               </div>
+
+              {/* Tags Display (Read-only) */}
+              {localTags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {localTags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="text-xs">
+                      <Tag className="mr-1 h-3 w-3" />
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </SheetHeader>
@@ -842,7 +888,6 @@ export function ContactDetailSheet({
         <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="w-full justify-start rounded-none border-b px-6 h-12">
             <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="messages">Messages</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
@@ -986,17 +1031,12 @@ export function ContactDetailSheet({
                     <TabsContent value="total" className="mt-3 space-y-3">
                       <div className="flex items-center justify-between">
                         <h4 className="text-xs font-medium text-muted-foreground">Combined Score</h4>
-                        <div className="flex items-center gap-2">
-                          {isUpdatingScore && (
-                            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                          )}
-                          <span
-                            className="text-2xl font-semibold tabular-nums"
-                            style={{ color: getScoreColor(displayScore) }}
-                          >
-                            {displayScore}
-                          </span>
-                        </div>
+                        <span
+                          className="text-2xl font-semibold tabular-nums"
+                          style={{ color: getScoreColor(displayScore) }}
+                        >
+                          {displayScore}
+                        </span>
                       </div>
                       <div className="space-y-3">
                         <div className="h-3 flex-1 rounded-full bg-muted overflow-hidden">
@@ -1008,18 +1048,10 @@ export function ContactDetailSheet({
                             }}
                           />
                         </div>
-                        <Slider
-                          value={[displayScore]}
-                          onValueChange={handleScoreChange}
-                          min={0}
-                          max={100}
-                          step={1}
-                          className="w-full"
-                        />
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>0</span>
-                          <span>50</span>
                           <span>100</span>
+                          <span>200</span>
                         </div>
                       </div>
 
@@ -1029,18 +1061,18 @@ export function ContactDetailSheet({
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Form Score</span>
-                            <span className="font-medium" style={{ color: getScoreColor(calculatedScore) }}>
-                              {calculatedScore} pts
+                            <span className="font-medium" style={{ color: getScoreColor(mainFieldsFormScore) }}>
+                              {mainFieldsFormScore} pts
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Chat Score</span>
-                            <span className="font-medium" style={{ color: getScoreColor(35) }}>
-                              35 pts
+                            <span className="font-medium" style={{ color: getScoreColor(47) }}>
+                              47 pts
                             </span>
                           </div>
                           <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
-                            <span>Average</span>
+                            <span>Total Lead Score</span>
                             <span style={{ color: getScoreColor(displayScore) }}>
                               {displayScore} pts
                             </span>
@@ -1051,17 +1083,59 @@ export function ContactDetailSheet({
 
                     {/* Form Score Tab */}
                     <TabsContent value="form" className="mt-3 space-y-3">
-                      {/* Questionnaire Score */}
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-medium text-muted-foreground">Questionnaire Score</h4>
-                        <span
-                          className="text-2xl font-semibold tabular-nums"
-                          style={{ color: getScoreColor(calculatedScore) }}
-                        >
-                          {calculatedScore}
-                        </span>
-                      </div>
-                      {scoreBreakdown.length > 0 ? (
+                      {/* Main Form Fields with Scores - Like Chat Score Format */}
+                      {mainFormResponses.length > 0 ? (
+                        <>
+                          {/* Questionnaire Score - show only main fields total */}
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-medium text-muted-foreground">Questionnaire Score</h4>
+                            <span
+                              className="text-2xl font-semibold tabular-nums"
+                              style={{ color: getScoreColor(mainFieldsFormScore) }}
+                            >
+                              {mainFieldsFormScore}
+                            </span>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            {mainFormResponses.map(([key, value]) => {
+                              const maxScore = fieldScores[key] || 0
+                              // Find the score breakdown for this field if it exists
+                              const breakdown = scoreBreakdown.find(item => {
+                                // Match by checking if the breakdown label matches the field
+                                const itemKey = Object.keys(FIELD_LABELS).find(k => FIELD_LABELS[k] === item.label)
+                                return itemKey === key || item.label === key
+                              })
+                              const earnedPoints = breakdown?.points || 0
+
+                              return (
+                                <div key={key} className="flex items-center justify-between text-sm">
+                                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    <span className="text-muted-foreground">
+                                      {FIELD_LABELS[key] || key.replace(/_/g, ' ')}
+                                    </span>
+                                    <span className="text-xs bg-muted px-1.5 py-0.5 rounded truncate">
+                                      {String(value)}
+                                    </span>
+                                  </div>
+                                  <span className={cn(
+                                    "font-medium tabular-nums shrink-0",
+                                    earnedPoints >= maxScore ? "text-green-600" : "text-foreground"
+                                  )}>
+                                    +{earnedPoints}
+                                  </span>
+                                </div>
+                              )
+                            })}
+                            <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
+                              <span>Total</span>
+                              <span style={{ color: getScoreColor(mainFieldsFormScore) }}>
+                                {mainFieldsFormScore} pts
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      ) : scoreBreakdown.length > 0 ? (
                         <div className="space-y-1.5">
                           {scoreBreakdown.map((item) => (
                             <div key={item.label} className="flex items-center justify-between text-sm">
@@ -1077,9 +1151,6 @@ export function ContactDetailSheet({
                                 item.points >= item.maxPoints ? "text-green-600" : "text-foreground"
                               )}>
                                 {item.points > 0 ? '+' : ''}{item.points}
-                                {item.maxPoints > 0 && (
-                                  <span className="text-muted-foreground text-xs">/{item.maxPoints}</span>
-                                )}
                               </span>
                             </div>
                           ))}
@@ -1103,51 +1174,68 @@ export function ContactDetailSheet({
                         <h4 className="text-xs font-medium text-muted-foreground">Bot Conversation Score</h4>
                         <span
                           className="text-2xl font-semibold tabular-nums"
-                          style={{ color: getScoreColor(35) }}
+                          style={{ color: getScoreColor(47) }}
                         >
-                          35
+                          47
                         </span>
                       </div>
 
-                      {/* Dummy Chat Score Breakdown */}
+                      {/* Chat Score Breakdown - Flow Stage Outcomes */}
                       <div className="space-y-1.5">
+                        {/* Greeting Stage Outcome */}
                         <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Response Quality</span>
-                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                              Good
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-muted-foreground">Located in Australia</span>
+                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded truncate">
+                              Greeting
                             </span>
                           </div>
-                          <span className="font-medium tabular-nums text-foreground">
-                            +15<span className="text-muted-foreground text-xs">/20</span>
+                          <span className="font-medium tabular-nums shrink-0 text-green-600">
+                            +15
+                          </span>
+                        </div>
+
+                        {/* Qualifying Stage Outcomes */}
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-muted-foreground">IELTS 6.5+</span>
+                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded truncate">
+                              Qualifying
+                            </span>
+                          </div>
+                          <span className="font-medium tabular-nums shrink-0 text-green-600">
+                            +10
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Engagement Level</span>
-                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                              Medium
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-muted-foreground">Budget 300-500 juta</span>
+                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded truncate">
+                              Qualifying
                             </span>
                           </div>
-                          <span className="font-medium tabular-nums text-foreground">
-                            +10<span className="text-muted-foreground text-xs">/15</span>
+                          <span className="font-medium tabular-nums shrink-0 text-green-600">
+                            +12
                           </span>
                         </div>
+
+                        {/* Scoring Stage Outcome */}
                         <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Intent Clarity</span>
-                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                              High
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-muted-foreground">Working professional</span>
+                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded truncate">
+                              Scoring
                             </span>
                           </div>
-                          <span className="font-medium tabular-nums text-green-600">
-                            +10<span className="text-muted-foreground text-xs">/10</span>
+                          <span className="font-medium tabular-nums shrink-0 text-foreground">
+                            +10
                           </span>
                         </div>
+
                         <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
                           <span>Total</span>
-                          <span style={{ color: getScoreColor(35) }}>
-                            35 pts
+                          <span style={{ color: getScoreColor(47) }}>
+                            47 pts
                           </span>
                         </div>
                       </div>
@@ -1158,121 +1246,8 @@ export function ContactDetailSheet({
                     </TabsContent>
                   </Tabs>
                 </div>
-
-                <Separator />
-
-                {/* Tags */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                      Tags
-                    </h3>
-                    {isUpdatingTags && (
-                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                    )}
-                  </div>
-                  {contactTags.length > 0 ? (
-                    <div className="space-y-2">
-                      {contactTags.map((tag) => (
-                        <label
-                          key={tag}
-                          className="flex items-center gap-3 cursor-pointer"
-                        >
-                          <Checkbox
-                            checked={localTags.includes(tag)}
-                            onCheckedChange={() => handleToggleTag(tag)}
-                            disabled={isUpdatingTags}
-                          />
-                          <Badge variant={localTags.includes(tag) ? 'default' : 'secondary'}>
-                            <Tag className="mr-1 h-3 w-3" />
-                            {tag}
-                          </Badge>
-                        </label>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No tags configured. Add tags in Settings.
-                    </p>
-                  )}
-                </div>
-
-                {/* Lead Background (from questionnaire metadata) */}
-                {formResponses.length > 0 && (
-                  <>
-                    <Separator />
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                        Lead Background
-                      </h3>
-                      <div className="space-y-3">
-                        {formResponses.map(([key, value]) => (
-                          <div key={key} className="flex justify-between gap-4">
-                            <span className="text-sm text-muted-foreground capitalize">
-                              {key.replace(/_/g, ' ')}
-                            </span>
-                            <span className="text-sm font-medium text-right">
-                              {String(value)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
               </div>
             </ScrollArea>
-          </TabsContent>
-
-          {/* Messages Tab */}
-          <TabsContent value="messages" className="flex-1 m-0 overflow-hidden flex flex-col">
-            {isLoadingMessages ? (
-              <div className="flex items-center justify-center h-full p-6">
-                <div className="text-center">
-                  <Loader2 className="mx-auto h-8 w-8 text-muted-foreground animate-spin" />
-                  <p className="mt-4 text-muted-foreground">Loading messages...</p>
-                </div>
-              </div>
-            ) : messages.length > 0 ? (
-              <ScrollArea className="flex-1">
-                <div className="p-4 flex flex-col gap-3">
-                  {messages.map((message) => {
-                    const isOutbound = message.direction === 'outbound'
-                    return (
-                      <div
-                        key={message.id}
-                        className={cn(
-                          'max-w-[85%] rounded-lg px-3 py-2',
-                          isOutbound
-                            ? 'ml-auto bg-primary text-primary-foreground'
-                            : 'bg-muted'
-                        )}
-                      >
-                        {message.content && (
-                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                        )}
-                        <span className={cn(
-                          'text-xs block mt-1',
-                          isOutbound ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                        )}>
-                          {formatWIB(message.created_at, DATE_FORMATS.DATETIME)}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </ScrollArea>
-            ) : (
-              <div className="flex items-center justify-center h-full p-6">
-                <div className="text-center">
-                  <MessageCircle className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <p className="mt-4 text-muted-foreground font-medium">No messages yet</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Start a conversation in the Inbox
-                  </p>
-                </div>
-              </div>
-            )}
           </TabsContent>
 
           {/* Activity Tab */}

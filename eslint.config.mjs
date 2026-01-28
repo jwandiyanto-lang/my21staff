@@ -13,6 +13,17 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Catch variables used before declaration (prevents "Cannot access before initialization" errors)
+      '@typescript-eslint/no-use-before-define': ['error', {
+        variables: true,
+        functions: false, // Allow function hoisting
+        classes: true,
+        allowNamedExports: false,
+      }],
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Calendar, Bot, GitBranch, Database, Target } from 'lucide-react'
+import { Calendar, Bot, GitBranch, Database } from 'lucide-react'
 import { SlotManager } from '@/components/knowledge-base/slot-manager'
 import { PersonaTab } from '@/components/knowledge-base/persona-tab'
 import { FlowTab } from '@/components/knowledge-base/flow-tab'
 import { DatabaseTab } from '@/components/knowledge-base/database-tab'
-import { ScoringTab } from '@/components/knowledge-base/scoring-tab'
 import { TabErrorBoundary } from '@/components/error-boundaries/tab-error-boundary'
 import { AIToggle } from '@/components/knowledge-base/ai-toggle'
 
@@ -31,7 +30,7 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
   const [aiEnabled, setAiEnabled] = useState(true)
 
   // Fetch initial AI enabled state
-  // Note: All tab components (PersonaTab, FlowTab, ScoringTab, SlotManager)
+  // Note: All tab components (PersonaTab, FlowTab, DatabaseTab, SlotManager)
   // implement auto-save with toast notifications for immediate user feedback
   // when configuration changes are saved. This ensures users know their changes
   // are persisted and will affect the next bot response (hot-reload pattern).
@@ -55,7 +54,7 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
       <div>
         <h1 className="text-2xl font-bold text-foreground">Your Intern</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Configure your intern&apos;s persona, conversation flow, knowledge, and scoring
+          Configure your intern&apos;s persona, conversation flow, and knowledge
         </p>
       </div>
 
@@ -64,7 +63,7 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
 
       {/* Tabs for different sections */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 max-w-2xl h-auto">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl h-auto">
           <TabsTrigger value="persona" className="flex items-center gap-2 py-2">
             <Bot className="w-4 h-4 shrink-0" />
             <span className="hidden sm:inline">Persona</span>
@@ -76,10 +75,6 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
           <TabsTrigger value="database" className="flex items-center gap-2 py-2">
             <Database className="w-4 h-4 shrink-0" />
             <span className="hidden sm:inline">Database</span>
-          </TabsTrigger>
-          <TabsTrigger value="scoring" className="flex items-center gap-2 py-2">
-            <Target className="w-4 h-4 shrink-0" />
-            <span className="hidden sm:inline">Scoring</span>
           </TabsTrigger>
           <TabsTrigger value="slots" className="flex items-center gap-2 py-2">
             <Calendar className="w-4 h-4 shrink-0" />
@@ -102,12 +97,6 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
         <TabsContent value="database" className="space-y-6">
           <TabErrorBoundary tabName="Database">
             <DatabaseTab workspaceId={workspace.id} />
-          </TabErrorBoundary>
-        </TabsContent>
-
-        <TabsContent value="scoring" className="space-y-6">
-          <TabErrorBoundary tabName="Scoring">
-            <ScoringTab workspaceId={workspace.id} />
           </TabErrorBoundary>
         </TabsContent>
 

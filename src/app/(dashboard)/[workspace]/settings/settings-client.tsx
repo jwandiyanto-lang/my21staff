@@ -35,6 +35,8 @@ import { useRef } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDistanceToNow } from 'date-fns'
 import { DEFAULT_LEAD_STATUSES } from '@/lib/lead-status'
+import { cn } from '@/lib/utils'
+import { updateMockWorkspaceSettings, getMockWorkspaceSettings } from '@/lib/mock-data'
 
 interface QuickReply {
   id: string
@@ -46,10 +48,124 @@ interface WorkspaceSettings {
   kapso_api_key?: string
   quick_replies?: QuickReply[]
   contact_tags?: string[]
+  main_form_fields?: string[]
+  form_field_scores?: Record<string, number>
 }
 
 // Default contact tags
 const DEFAULT_CONTACT_TAGS = ['Community', '1on1']
+
+// Form field configuration with dropdown choices and scores
+type FieldChoice = {
+  value: string
+  label: string
+  defaultScore: number
+}
+
+type FormFieldConfig = {
+  key: string
+  label: string
+  type: 'dropdown' | 'open-ended'
+  choices?: FieldChoice[]
+  defaultMaxScore?: number // for open-ended fields
+}
+
+const FORM_FIELD_CONFIGS: FormFieldConfig[] = [
+  {
+    key: 'Pendidikan',
+    label: 'Education Level',
+    type: 'dropdown',
+    choices: [
+      { value: 'SMA', label: 'SMA', defaultScore: 2 },
+      { value: 'D3', label: 'D3', defaultScore: 4 },
+      { value: 'S1', label: 'S1 (Sarjana)', defaultScore: 6 },
+      { value: 'S2', label: 'S2 (Magister)', defaultScore: 8 },
+      { value: 'S3', label: 'S3 (Doktor)', defaultScore: 10 },
+    ]
+  },
+  {
+    key: 'Jurusan',
+    label: 'Major / Field of Study',
+    type: 'open-ended',
+    defaultMaxScore: 5
+  },
+  {
+    key: 'Aktivitas',
+    label: 'Current Activity',
+    type: 'dropdown',
+    choices: [
+      { value: 'kuliah', label: 'Kuliah', defaultScore: 5 },
+      { value: 'gap_year', label: 'Gap Year', defaultScore: 8 },
+      { value: 'working', label: 'Working', defaultScore: 15 },
+      { value: 'fresh_graduate', label: 'Fresh Graduate', defaultScore: 12 },
+      { value: 'others', label: 'Others', defaultScore: 10 },
+    ]
+  },
+  {
+    key: 'Negara Tujuan',
+    label: 'Target Country',
+    type: 'open-ended',
+    defaultMaxScore: 5
+  },
+  {
+    key: 'Budget',
+    label: 'Budget Range',
+    type: 'dropdown',
+    choices: [
+      { value: '<100jt', label: '<100 Juta', defaultScore: 4 },
+      { value: '100-300jt', label: '100-300 Juta', defaultScore: 8 },
+      { value: '300-500jt', label: '300-500 Juta', defaultScore: 12 },
+      { value: '500jt-1m', label: '500 Juta - 1 Miliar', defaultScore: 16 },
+      { value: '>1m', label: '>1 Miliar', defaultScore: 20 },
+      { value: 'beasiswa', label: 'Mencari Beasiswa', defaultScore: 4 },
+    ]
+  },
+  {
+    key: 'Target Berangkat',
+    label: 'Target Departure',
+    type: 'dropdown',
+    choices: [
+      { value: '<3bulan', label: '<3 Bulan', defaultScore: 15 },
+      { value: '3-6bulan', label: '3-6 Bulan', defaultScore: 12 },
+      { value: '6-12bulan', label: '6-12 Bulan', defaultScore: 9 },
+      { value: '1-2tahun', label: '1-2 Tahun', defaultScore: 6 },
+      { value: 'fleksibel', label: 'Fleksibel', defaultScore: 3 },
+    ]
+  },
+  {
+    key: 'Level Bahasa Inggris',
+    label: 'English Level',
+    type: 'dropdown',
+    choices: [
+      { value: 'pemula', label: 'Pemula', defaultScore: 5 },
+      { value: 'menengah', label: 'Menengah', defaultScore: 10 },
+      { value: 'mahir', label: 'Mahir', defaultScore: 15 },
+      { value: 'native', label: 'Native/Bilingual', defaultScore: 25 },
+      { value: 'skor', label: 'Sudah Ada Skor IELTS/TOEFL', defaultScore: 25 },
+    ]
+  },
+  {
+    key: 'Goals',
+    label: 'Study Goals',
+    type: 'open-ended',
+    defaultMaxScore: 5
+  },
+]
+
+// Default main form fields (shown in Form Score summary)
+const DEFAULT_MAIN_FIELDS = ['Pendidikan', 'Negara Tujuan', 'Budget', 'Target Berangkat']
+
+// Build default field scores from configs
+const DEFAULT_FIELD_SCORES = FORM_FIELD_CONFIGS.reduce((acc, field) => {
+  if (field.type === 'dropdown' && field.choices) {
+    field.choices.forEach(choice => {
+      acc[`${field.key}:${choice.value}`] = choice.defaultScore
+    })
+  } else if (field.type === 'open-ended' && field.defaultMaxScore) {
+    acc[field.key] = field.defaultMaxScore
+  }
+  return acc
+}, {} as Record<string, number>)
 
 // Import types
 interface ValidatedRow {
@@ -121,6 +237,9 @@ const DEFAULT_QUICK_REPLIES: QuickReply[] = [
 export function SettingsClient({ workspace }: SettingsClientProps) {
   const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
+  // Track which field is expanded in Form Fields accordion
+  const [expandedField, setExpandedField] = useState<string | null>(null)
+
   // Fetch AI config on client side with Clerk auth context
   const ariConfig = useQuery(
     api.ari.getAriConfig,
@@ -155,6 +274,32 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   const [newTag, setNewTag] = useState('')
   const [isAddingTag, setIsAddingTag] = useState(false)
   const [isSavingTags, setIsSavingTags] = useState(false)
+
+  // Main form fields state
+  const [mainFormFields, setMainFormFields] = useState<string[]>(() => {
+    const settings = isDevMode ? getMockWorkspaceSettings() : workspace.settings
+    return settings?.main_form_fields || DEFAULT_MAIN_FIELDS
+  })
+  const [originalMainFormFields, setOriginalMainFormFields] = useState<string[]>(() => {
+    const settings = isDevMode ? getMockWorkspaceSettings() : workspace.settings
+    return settings?.main_form_fields || DEFAULT_MAIN_FIELDS
+  })
+  const [isSavingFields, setIsSavingFields] = useState(false)
+
+  // Form field scores state
+  const [fieldScores, setFieldScores] = useState<Record<string, number>>(() => {
+    const settings = isDevMode ? getMockWorkspaceSettings() : workspace.settings
+    return settings?.form_field_scores || DEFAULT_FIELD_SCORES
+  })
+  const [originalFieldScores, setOriginalFieldScores] = useState<Record<string, number>>(() => {
+    const settings = isDevMode ? getMockWorkspaceSettings() : workspace.settings
+    return settings?.form_field_scores || DEFAULT_FIELD_SCORES
+  })
+  const [isSavingScores, setIsSavingScores] = useState(false)
+
+  // Track unsaved changes for form fields
+  const [hasUnsavedFormFieldChanges, setHasUnsavedFormFieldChanges] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   // Import state
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -202,6 +347,38 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
     }
     loadStatuses()
   }, [workspace.id])
+
+  // Sync with mock settings updates in dev mode
+  useEffect(() => {
+    if (!isDevMode) return
+
+    const handleSettingsUpdate = () => {
+      const settings = getMockWorkspaceSettings()
+      const newMainFields = settings?.main_form_fields || DEFAULT_MAIN_FIELDS
+      const newFieldScores = settings?.form_field_scores || DEFAULT_FIELD_SCORES
+
+      setMainFormFields(newMainFields)
+      setOriginalMainFormFields(newMainFields)
+      setFieldScores(newFieldScores)
+      setOriginalFieldScores(newFieldScores)
+    }
+
+    window.addEventListener('mockWorkspaceSettingsUpdated', handleSettingsUpdate)
+    return () => window.removeEventListener('mockWorkspaceSettingsUpdated', handleSettingsUpdate)
+  }, [isDevMode])
+
+  // Detect unsaved changes in form fields
+  useEffect(() => {
+    const fieldsChanged = JSON.stringify(mainFormFields.sort()) !== JSON.stringify(originalMainFormFields.sort())
+    const scoresChanged = JSON.stringify(fieldScores) !== JSON.stringify(originalFieldScores)
+    setHasUnsavedFormFieldChanges(fieldsChanged || scoresChanged)
+
+    // Clear save success message after 3 seconds
+    if (saveSuccess) {
+      const timer = setTimeout(() => setSaveSuccess(false), 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [mainFormFields, fieldScores, originalMainFormFields, originalFieldScores, saveSuccess])
 
   // AI toggle handler
   const handleToggleAi = async (enabled: boolean) => {
@@ -335,6 +512,147 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   const handleDeleteTag = async (tag: string) => {
     const updated = contactTags.filter(t => t !== tag)
     await saveContactTags(updated)
+  }
+
+  // Main form fields handlers
+  const saveMainFormFields = async (fields: string[]) => {
+    setIsSavingFields(true)
+    try {
+      // In dev mode, just update local state (no API)
+      if (isDevMode) {
+        setMainFormFields(fields)
+        return
+      }
+
+      const response = await fetch(`/api/workspaces/${workspace.id}/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: {
+            ...workspace.settings,
+            main_form_fields: fields
+          },
+        }),
+      })
+      if (!response.ok) throw new Error('Failed to save')
+      setMainFormFields(fields)
+    } catch (error) {
+      console.error('Failed to save main form fields:', error)
+    } finally {
+      setIsSavingFields(false)
+    }
+  }
+
+  const handleToggleField = (fieldKey: string) => {
+    const updated = mainFormFields.includes(fieldKey)
+      ? mainFormFields.filter(f => f !== fieldKey)
+      : [...mainFormFields, fieldKey]
+    setMainFormFields(updated)
+  }
+
+  const saveFieldScores = async (scores: Record<string, number>) => {
+    setIsSavingScores(true)
+    try {
+      // In dev mode, just update local state (no API)
+      if (isDevMode) {
+        setFieldScores(scores)
+        return
+      }
+
+      const response = await fetch(`/api/workspaces/${workspace.id}/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: {
+            ...workspace.settings,
+            form_field_scores: scores
+          },
+        }),
+      })
+      if (!response.ok) throw new Error('Failed to save')
+      setFieldScores(scores)
+    } catch (error) {
+      console.error('Failed to save field scores:', error)
+    } finally {
+      setIsSavingScores(false)
+    }
+  }
+
+  // Calculate max possible total score (taking highest score from each field)
+  const calculateMaxPossibleScore = (scores: Record<string, number>) => {
+    const fieldMaxScores: Record<string, number> = {}
+
+    // For each field, find the highest score among its choices or use the open-ended score
+    Object.entries(scores).forEach(([key, score]) => {
+      if (key.includes(':')) {
+        // Dropdown choice (e.g., "Pendidikan:S1")
+        const fieldKey = key.split(':')[0]
+        fieldMaxScores[fieldKey] = Math.max(fieldMaxScores[fieldKey] || 0, score)
+      } else {
+        // Open-ended field (e.g., "Jurusan")
+        fieldMaxScores[key] = score
+      }
+    })
+
+    return Object.values(fieldMaxScores).reduce((sum, score) => sum + score, 0)
+  }
+
+  const handleScoreChange = (scoreKey: string, newScore: number) => {
+    const updated = { ...fieldScores, [scoreKey]: newScore }
+
+    // Calculate max possible total with new scores
+    const maxTotal = calculateMaxPossibleScore(updated)
+
+    // Don't allow max total to exceed 100
+    if (maxTotal > 100) {
+      return
+    }
+
+    setFieldScores(updated)
+  }
+
+  // Combined save function for form fields and scores
+  const saveFormFieldSettings = async () => {
+    setIsSavingFields(true)
+    setIsSavingScores(true)
+    setSaveSuccess(false)
+    try {
+      // In dev mode, update mock workspace settings
+      if (isDevMode) {
+        updateMockWorkspaceSettings({
+          main_form_fields: mainFormFields,
+          form_field_scores: fieldScores
+        })
+        setOriginalMainFormFields(mainFormFields)
+        setOriginalFieldScores(fieldScores)
+        setSaveSuccess(true)
+        return
+      }
+
+      const response = await fetch(`/api/workspaces/${workspace.id}/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: {
+            ...workspace.settings,
+            main_form_fields: mainFormFields,
+            form_field_scores: fieldScores
+          },
+        }),
+      })
+      if (!response.ok) throw new Error('Failed to save')
+
+      // Update original values to match current (marks as saved)
+      setOriginalMainFormFields(mainFormFields)
+      setOriginalFieldScores(fieldScores)
+      setSaveSuccess(true)
+    } catch (error) {
+      console.error('Failed to save form field settings:', error)
+      alert('Failed to save settings. Please try again.')
+    } finally {
+      setIsSavingFields(false)
+      setIsSavingScores(false)
+    }
   }
 
   // Lead stages handlers
@@ -543,6 +861,13 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
             Lead Stages
             <Badge variant="secondary" className="ml-1 text-xs">
               {leadStatuses.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="form-fields" className="gap-2">
+            <FileSpreadsheet className="h-4 w-4" />
+            Form Fields
+            <Badge variant="secondary" className="ml-1 text-xs">
+              {mainFormFields.length}
             </Badge>
           </TabsTrigger>
           {/* Data tab hidden for now - export features need fixes */}
@@ -1007,6 +1332,213 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
                     </div>
                   )}
                 </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Form Fields Tab */}
+        <TabsContent value="form-fields" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Main Form Fields</CardTitle>
+              <CardDescription>
+                Select which questionnaire fields should be displayed in the Form Score summary. All fields will still be visible in Activity timeline.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Total Score Display */}
+              {(() => {
+                const maxTotal = calculateMaxPossibleScore(fieldScores)
+                const remaining = 100 - maxTotal
+                return (
+                  <div className={cn(
+                    "p-3 rounded-lg border-2",
+                    maxTotal === 100 ? "bg-green-50 border-green-200" :
+                    maxTotal > 100 ? "bg-red-50 border-red-200" :
+                    "bg-blue-50 border-blue-200"
+                  )}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-medium">
+                          Max Possible Score: <span className="text-lg">{maxTotal}</span> / 100
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          (Taking the highest score from each field)
+                        </div>
+                        {remaining > 0 && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {remaining} points remaining
+                          </div>
+                        )}
+                        {remaining < 0 && (
+                          <div className="text-xs text-red-600 mt-0.5">
+                            Over by {Math.abs(remaining)} points - reduce some scores
+                          </div>
+                        )}
+                      </div>
+                      {maxTotal === 100 && (
+                        <Badge variant="default" className="bg-green-600">
+                          Perfect
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* Field configuration cards - Collapsible */}
+              <div className="space-y-2">
+                {FORM_FIELD_CONFIGS.map((field) => {
+                  const isMain = mainFormFields.includes(field.key)
+                  const isExpanded = expandedField === field.key
+
+                  // Calculate max score for this field
+                  let maxScore = 0
+                  if (field.type === 'dropdown' && field.choices) {
+                    // For dropdown, find the highest score among choices
+                    maxScore = Math.max(...field.choices.map(choice => {
+                      const scoreKey = `${field.key}:${choice.value}`
+                      return fieldScores[scoreKey] ?? choice.defaultScore
+                    }))
+                  } else {
+                    // For open-ended, it's just the field score
+                    maxScore = fieldScores[field.key] ?? field.defaultMaxScore ?? 0
+                  }
+
+                  return (
+                    <div key={field.key} className="border rounded-lg overflow-hidden">
+                      {/* Field header - clickable to expand */}
+                      <div
+                        className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => setExpandedField(isExpanded ? null : field.key)}
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <Switch
+                            checked={isMain}
+                            onCheckedChange={(checked) => {
+                              handleToggleField(field.key)
+                            }}
+                            disabled={isSavingFields}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium">{field.label}</div>
+                            <div className="text-xs text-muted-foreground">{field.type === 'dropdown' ? 'Multiple choice' : 'Open-ended'}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <div className="font-semibold text-lg tabular-nums">{maxScore}</div>
+                            <div className="text-xs text-muted-foreground">max pts</div>
+                          </div>
+                          {isMain && (
+                            <Badge variant="default" className="text-xs">
+                              Main
+                            </Badge>
+                          )}
+                          <ChevronDown
+                            className={cn(
+                              "h-5 w-5 text-muted-foreground transition-transform",
+                              isExpanded && "transform rotate-180"
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Score configuration - expandable */}
+                      {isExpanded && (
+                        <div className="px-4 pb-4 pt-0 border-t bg-muted/20">
+                          {field.type === 'dropdown' && field.choices ? (
+                            <div className="space-y-2 mt-3">
+                              <div className="text-sm font-medium text-muted-foreground mb-2">Score for each answer:</div>
+                              {field.choices.map((choice) => {
+                                const scoreKey = `${field.key}:${choice.value}`
+                                const currentScore = fieldScores[scoreKey] ?? choice.defaultScore
+                                return (
+                                  <div key={choice.value} className="flex items-center justify-between gap-3 p-2 rounded-lg bg-background border">
+                                    <span className="text-sm">{choice.label}</span>
+                                    <div className="flex items-center gap-2">
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={currentScore}
+                                        onChange={(e) => handleScoreChange(scoreKey, parseInt(e.target.value) || 0)}
+                                        disabled={isSavingScores}
+                                        className="w-16 h-8 text-sm"
+                                      />
+                                      <span className="text-xs text-muted-foreground">pts</span>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          ) : (
+                            <div className="mt-3">
+                              <div className="flex items-center gap-3 p-2 rounded-lg bg-background border">
+                                <Label className="text-sm text-muted-foreground flex-1">Max score if answered:</Label>
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={fieldScores[field.key] ?? field.defaultMaxScore ?? 0}
+                                    onChange={(e) => handleScoreChange(field.key, parseInt(e.target.value) || 0)}
+                                    disabled={isSavingScores}
+                                    className="w-16 h-8 text-sm"
+                                  />
+                                  <span className="text-xs text-muted-foreground">pts</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {mainFormFields.length === 0 && (
+                <div className="text-center py-6 text-muted-foreground border rounded-lg bg-muted/30">
+                  <p className="text-sm">No main fields selected. At least one field should be marked as main.</p>
+                </div>
+              )}
+
+              {/* Save button - appears when there are unsaved changes */}
+              {hasUnsavedFormFieldChanges && (
+                <div className="flex items-center justify-between p-3 rounded-lg border-2 border-blue-200 bg-blue-50">
+                  <div className="text-sm text-blue-900">
+                    You have unsaved changes
+                  </div>
+                  <Button
+                    onClick={saveFormFieldSettings}
+                    disabled={isSavingFields || isSavingScores}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {(isSavingFields || isSavingScores) ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {/* Success message */}
+              {saveSuccess && !hasUnsavedFormFieldChanges && (
+                <div className="flex items-center gap-2 p-3 rounded-lg border-2 border-green-200 bg-green-50 text-green-900 text-sm">
+                  <Check className="h-4 w-4" />
+                  Settings saved successfully
+                </div>
               )}
             </CardContent>
           </Card>

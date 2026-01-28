@@ -1,8 +1,10 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from '@/../convex/_generated/api'
 import { useAuth, useUser } from '@clerk/nextjs'
+import { MOCK_WORKSPACE, getMockWorkspaceSettings } from '@/lib/mock-data'
 
 // Import the exact types expected by consumer components
 import type { WorkspaceMember, Profile } from '@/types/database'
@@ -16,6 +18,8 @@ export type TeamMember = WorkspaceMember & { profile: Profile | null }
 interface WorkspaceSettingsResponse {
   teamMembers: TeamMember[]
   contactTags: string[]
+  mainFormFields: string[]
+  fieldScores: Record<string, number>
 }
 
 // Mock data for dev mode
@@ -40,16 +44,27 @@ const MOCK_TEAM_MEMBERS: TeamMember[] = [
   },
 ]
 
-const MOCK_CONTACT_TAGS = ['Hot Lead', 'Student', 'Parent', 'Follow Up']
-
 export function useWorkspaceSettings(workspaceId: string | null) {
   // Call Clerk hooks unconditionally (required by React rules of hooks)
   const clerkAuth = useAuth()
   const clerkUser = useUser()
+  const [mockSettingsVersion, setMockSettingsVersion] = useState(0)
 
   // Use Clerk data in production, mock data in dev mode
   const userId = isDevMode ? 'dev-user-001' : clerkAuth.userId
   const user = isDevMode ? { fullName: 'Dev User', primaryEmailAddress: { emailAddress: 'dev@localhost' }, imageUrl: null } : clerkUser.user
+
+  // Listen for mock settings updates in dev mode
+  useEffect(() => {
+    if (!isDevMode) return
+
+    const handleSettingsUpdate = () => {
+      setMockSettingsVersion(v => v + 1)
+    }
+
+    window.addEventListener('mockWorkspaceSettingsUpdated', handleSettingsUpdate)
+    return () => window.removeEventListener('mockWorkspaceSettingsUpdated', handleSettingsUpdate)
+  }, [])
 
   // Dev mode: return mock data immediately, skip Convex queries
   const workspace = useQuery(
@@ -62,12 +77,16 @@ export function useWorkspaceSettings(workspaceId: string | null) {
     isDevMode ? 'skip' : (workspaceId ? { workspace_id: workspaceId } : 'skip')
   )
 
-  // In dev mode, return mock data
+  // In dev mode, return mock data from MOCK_WORKSPACE
+  // mockSettingsVersion is used to trigger re-renders when settings change
   if (isDevMode) {
+    const mockSettings = getMockWorkspaceSettings()
     return {
       data: {
         teamMembers: MOCK_TEAM_MEMBERS,
-        contactTags: MOCK_CONTACT_TAGS,
+        contactTags: mockSettings.contact_tags || [],
+        mainFormFields: mockSettings.main_form_fields || [],
+        fieldScores: mockSettings.form_field_scores || {},
       },
       isLoading: false,
     }
@@ -82,8 +101,11 @@ export function useWorkspaceSettings(workspaceId: string | null) {
     }
   }
 
-  // Extract contact tags from workspace settings
-  const contactTags = ((workspace as { settings?: Record<string, unknown> }).settings)?.contact_tags as string[] || []
+  // Extract contact tags, main form fields, and field scores from workspace settings
+  const workspaceSettings = (workspace as { settings?: Record<string, unknown> }).settings
+  const contactTags = workspaceSettings?.contact_tags as string[] || []
+  const mainFormFields = workspaceSettings?.main_form_fields as string[] || MOCK_MAIN_FORM_FIELDS
+  const fieldScores = workspaceSettings?.form_field_scores as Record<string, number> || MOCK_FIELD_SCORES
 
   // Map Convex members to expected TeamMember structure
   const teamMembers: TeamMember[] = members.map((m: Record<string, unknown>) => {
@@ -134,6 +156,8 @@ export function useWorkspaceSettings(workspaceId: string | null) {
     data: {
       teamMembers,
       contactTags,
+      mainFormFields,
+      fieldScores,
     },
     isLoading: false,
   }

@@ -87,10 +87,19 @@ interface DatabaseClientProps {
 const PAGE_SIZE = 25
 
 export function DatabaseClient({ workspace }: DatabaseClientProps) {
-  const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>(() => loadFiltersFromStorage().activeStatus)
-  const [selectedTags, setSelectedTags] = useState<string[]>(() => loadFiltersFromStorage().selectedTags)
-  const [assignedTo, setAssignedTo] = useState<string>(() => loadFiltersFromStorage().assignedTo)
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(() => loadFiltersFromStorage().visibleColumns)
+  // Lazy initialization: only load from localStorage on first render (client-side)
+  const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>(() =>
+    typeof window !== 'undefined' ? loadFiltersFromStorage().activeStatus : 'all'
+  )
+  const [selectedTags, setSelectedTags] = useState<string[]>(() =>
+    typeof window !== 'undefined' ? loadFiltersFromStorage().selectedTags : []
+  )
+  const [assignedTo, setAssignedTo] = useState<string>(() =>
+    typeof window !== 'undefined' ? loadFiltersFromStorage().assignedTo : 'all'
+  )
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
+    typeof window !== 'undefined' ? loadFiltersFromStorage().visibleColumns : DEFAULT_COLUMNS
+  )
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null)
@@ -110,13 +119,16 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   const totalCount = contactsData?.total ?? 0
   const teamMembers = settingsData?.teamMembers ?? []
   const contactTags = settingsData?.contactTags ?? []
+  const mainFormFields = settingsData?.mainFormFields ?? []
+  const fieldScores = settingsData?.fieldScores ?? {}
 
   // TanStack Query mutations
   const updateMutation = useUpdateContact(workspace.id)
   const deleteMutation = useDeleteContact(workspace.id)
 
-  // Persist filters to localStorage
+  // Persist filters to localStorage whenever they change
   useEffect(() => {
+    if (typeof window === 'undefined') return
     const filters: DatabaseFilters = { activeStatus, selectedTags, assignedTo, visibleColumns }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filters))
   }, [activeStatus, selectedTags, assignedTo, visibleColumns])
@@ -184,9 +196,6 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
     setCurrentPage(page)
   }, [currentPage])
 
-  // Calculate total pages
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
-
   // Loading state for page transitions (not initial load)
   const isLoadingPage = isFetching
 
@@ -230,14 +239,7 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
     )
   }
 
-  // Count contacts by status
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: contacts.length }
-    LEAD_STATUSES.forEach((status) => {
-      counts[status] = contacts.filter((c) => c.lead_status === status).length
-    })
-    return counts
-  }, [contacts])
+  // Status counts removed - no longer needed for UI
 
   // Toggle tag selection
   const toggleTag = (tag: string) => {
@@ -281,6 +283,22 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
     return filtered
   }, [contacts, activeStatus, selectedTags, assignedTo])
 
+  // Calculate total pages based on filtered results
+  const totalPages = Math.ceil(filteredContacts.length / PAGE_SIZE)
+
+  // Reset to page 1 when filters change
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeStatus, selectedTags, assignedTo])
+
+  // Paginate filtered contacts
+  const paginatedContacts = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE
+    const endIndex = startIndex + PAGE_SIZE
+    return filteredContacts.slice(startIndex, endIndex)
+  }, [filteredContacts, currentPage])
+
   const handleRowClick = (contact: Contact) => {
     if (mergeMode) {
       setSelectedForMerge(prev => {
@@ -311,8 +329,8 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
         <div>
           <h1 className="text-2xl font-semibold">Database</h1>
           <p className="text-muted-foreground">
-            {totalCount} contact{totalCount !== 1 ? 's' : ''}
-            {filteredContacts.length !== contacts.length && ` (${filteredContacts.length} shown after filter)`}
+            {filteredContacts.length} contact{filteredContacts.length !== 1 ? 's' : ''}
+            {filteredContacts.length !== totalCount && ` (filtered from ${totalCount})`}
           </p>
         </div>
         {/* Merge Duplicates button hidden - feature not needed for now */}
@@ -329,9 +347,6 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
             <Button variant="outline" size="sm" className="h-9">
               <Filter className="h-4 w-4 mr-2" />
               {activeStatus === 'all' ? 'All Status' : LEAD_STATUS_CONFIG[activeStatus].label}
-              <span className="ml-2 text-xs bg-muted px-1.5 py-0.5 rounded">
-                {activeStatus === 'all' ? statusCounts.all : statusCounts[activeStatus]}
-              </span>
               <ChevronDown className="h-4 w-4 ml-2" />
             </Button>
           </DropdownMenuTrigger>
@@ -341,7 +356,6 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
               onCheckedChange={() => setActiveStatus('all')}
             >
               All Status
-              <span className="ml-auto text-xs text-muted-foreground">{statusCounts.all}</span>
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
             {LEAD_STATUSES.map((status) => {
@@ -357,9 +371,6 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
                     style={{ backgroundColor: config.color }}
                   />
                   {config.label}
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    {statusCounts[status]}
-                  </span>
                 </DropdownMenuCheckboxItem>
               )
             })}
@@ -534,7 +545,7 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
       {/* Data Table */}
       <DataTable
         columns={columns}
-        data={filteredContacts}
+        data={paginatedContacts}
         searchPlaceholder="Search contacts..."
         onRowClick={handleRowClick}
       />
@@ -611,6 +622,8 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
         onOpenChange={setIsDetailOpen}
         contactTags={contactTags}
         teamMembers={teamMembers}
+        mainFormFields={mainFormFields}
+        fieldScores={fieldScores}
       />
 
       {/* Delete Confirmation Dialog */}

@@ -209,6 +209,7 @@ export const seedAriConfig = mutation({
 
 /**
  * Get all flow stages for a workspace, ordered by stage_order.
+ * Includes outcomes for each stage.
  */
 export const getFlowStages = query({
   args: {
@@ -222,7 +223,22 @@ export const getFlowStages = query({
       .withIndex("by_workspace_order", (q) => q.eq("workspace_id", args.workspace_id as any))
       .collect();
 
-    return stages;
+    // Fetch outcomes for each stage
+    const stagesWithOutcomes = await Promise.all(
+      stages.map(async (stage) => {
+        const outcomes = await ctx.db
+          .query("ariFlowStageOutcomes")
+          .withIndex("by_stage_order", (q) => q.eq("stage_id", stage._id))
+          .collect();
+
+        return {
+          ...stage,
+          outcomes,
+        };
+      })
+    );
+
+    return stagesWithOutcomes;
   },
 });
 
@@ -299,7 +315,7 @@ export const updateFlowStage = mutation({
 });
 
 /**
- * Delete a flow stage.
+ * Delete a flow stage and its outcomes.
  */
 export const deleteFlowStage = mutation({
   args: {
@@ -314,7 +330,87 @@ export const deleteFlowStage = mutation({
       throw new Error("Stage not found");
     }
 
+    // Delete all outcomes for this stage
+    const outcomes = await ctx.db
+      .query("ariFlowStageOutcomes")
+      .withIndex("by_stage", (q) => q.eq("stage_id", args.stage_id as any))
+      .collect();
+
+    for (const outcome of outcomes) {
+      await ctx.db.delete(outcome._id);
+    }
+
     await ctx.db.delete(args.stage_id as any);
+    return { success: true };
+  },
+});
+
+/**
+ * Get outcomes for a specific flow stage.
+ */
+export const getFlowStageOutcomes = query({
+  args: {
+    stage_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const outcomes = await ctx.db
+      .query("ariFlowStageOutcomes")
+      .withIndex("by_stage_order", (q) => q.eq("stage_id", args.stage_id as any))
+      .collect();
+
+    return outcomes;
+  },
+});
+
+/**
+ * Sync outcomes for a stage (create/update/delete).
+ * Replaces all outcomes for a stage with the new list.
+ */
+export const syncFlowStageOutcomes = mutation({
+  args: {
+    stage_id: v.string(),
+    workspace_id: v.string(),
+    outcomes: v.array(v.object({
+      id: v.optional(v.string()),
+      description: v.string(),
+      points: v.number(),
+      keywords: v.optional(v.string()),
+    })),
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    const stage = await ctx.db.get(args.stage_id as any);
+    if (!stage || stage.workspace_id !== args.workspace_id) {
+      throw new Error("Stage not found");
+    }
+
+    // Delete all existing outcomes
+    const existingOutcomes = await ctx.db
+      .query("ariFlowStageOutcomes")
+      .withIndex("by_stage", (q) => q.eq("stage_id", args.stage_id as any))
+      .collect();
+
+    for (const outcome of existingOutcomes) {
+      await ctx.db.delete(outcome._id);
+    }
+
+    // Create new outcomes
+    const now = Date.now();
+    for (let i = 0; i < args.outcomes.length; i++) {
+      const outcome = args.outcomes[i];
+      await ctx.db.insert("ariFlowStageOutcomes", {
+        stage_id: args.stage_id as any,
+        workspace_id: args.workspace_id as any,
+        description: outcome.description,
+        points: outcome.points,
+        keywords: outcome.keywords,
+        outcome_order: i,
+        created_at: now,
+        updated_at: now,
+      });
+    }
+
     return { success: true };
   },
 });

@@ -12,17 +12,17 @@ import type { Id } from 'convex/_generated/dataModel'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
-// Mock stats for offline dev mode - matches /api/contacts MOCK_CONTACTS
+// Mock stats for offline dev mode - matches /api/contacts MOCK_CONTACTS (50 contacts)
 const MOCK_STATS = {
-  totalContacts: 5,
-  totalConversations: 2,
-  activeConversations: 2,
+  totalContacts: 50,
+  totalConversations: 5,
+  activeConversations: 3,
   statusBreakdown: {
-    new: 1,
-    hot: 2,
-    warm: 1,
-    cold: 1,
-    won: 0,
+    new: 7,
+    hot: 17,
+    warm: 17,
+    cold: 9,
+    client: 0,
     lost: 0,
   },
   hasContacts: true,

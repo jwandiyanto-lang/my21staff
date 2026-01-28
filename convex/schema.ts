@@ -384,6 +384,22 @@ export default defineSchema({
     .index("by_workspace_order", ["workspace_id", "stage_order"]),
 
   // ============================================
+  // ARI FLOW STAGE OUTCOMES (Scoring outcomes per stage)
+  // ============================================
+  ariFlowStageOutcomes: defineTable({
+    stage_id: v.id("ariFlowStages"),
+    workspace_id: v.id("workspaces"),
+    description: v.string(),
+    points: v.number(),
+    keywords: v.optional(v.string()),
+    outcome_order: v.number(),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_stage", ["stage_id"])
+    .index("by_stage_order", ["stage_id", "outcome_order"]),
+
+  // ============================================
   // ARI KNOWLEDGE CATEGORIES (Knowledge base categories)
   // ============================================
   ariKnowledgeCategories: defineTable({

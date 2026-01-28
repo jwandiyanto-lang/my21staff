@@ -27,14 +27,39 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Dev mode: return mock stages without auth
     if (isDevMode() && workspaceId === 'demo') {
-      const mockStages = DEFAULT_FLOW_STAGES.map((stage, index) => ({
-        id: `mock-stage-${index}`,
-        workspace_id: workspaceId,
-        ...stage,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }))
-      return NextResponse.json({ stages: mockStages, isDefault: true })
+      const mockStages = DEFAULT_FLOW_STAGES.map((stage, index) => {
+        // Add dummy outcomes based on stage
+        let outcomes: any[] = []
+
+        if (stage.name === 'Greeting') {
+          outcomes = [
+            { id: 'out-1', stage_id: `mock-stage-${index}`, description: 'Located in Australia', points: 15, keywords: 'australia, sydney, melbourne', outcome_order: 0 },
+            { id: 'out-2', stage_id: `mock-stage-${index}`, description: 'Located in UK', points: 10, keywords: 'uk, london, united kingdom', outcome_order: 1 },
+            { id: 'out-3', stage_id: `mock-stage-${index}`, description: 'Located in Indonesia', points: 5, keywords: 'indonesia, jakarta', outcome_order: 2 },
+          ]
+        } else if (stage.name === 'Qualifying') {
+          outcomes = [
+            { id: 'out-4', stage_id: `mock-stage-${index}`, description: 'IELTS 6.5+', points: 10, keywords: 'ielts 6.5, ielts 7, ielts 8', outcome_order: 0 },
+            { id: 'out-5', stage_id: `mock-stage-${index}`, description: 'Budget 300-500 juta', points: 12, keywords: '300 juta, 400 juta, 500 juta', outcome_order: 1 },
+            { id: 'out-6', stage_id: `mock-stage-${index}`, description: 'Timeline <6 months', points: 15, keywords: '3 bulan, 6 bulan, soon', outcome_order: 2 },
+          ]
+        } else if (stage.name === 'Scoring') {
+          outcomes = [
+            { id: 'out-7', stage_id: `mock-stage-${index}`, description: 'All documents ready', points: 20, keywords: 'passport, cv, transcript, ready', outcome_order: 0 },
+            { id: 'out-8', stage_id: `mock-stage-${index}`, description: 'Working professional', points: 15, keywords: 'working, professional, employee', outcome_order: 1 },
+          ]
+        }
+
+        return {
+          id: `mock-stage-${index}`,
+          workspace_id: workspaceId,
+          ...stage,
+          outcomes,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+      })
+      return NextResponse.json({ stages: mockStages, isDefault: false })
     }
 
     // Verify user has access to workspace
@@ -54,17 +79,55 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // If no stages exist, return defaults (not saved to DB)
     if (!stages || stages.length === 0) {
-      const defaultStages = DEFAULT_FLOW_STAGES.map((stage, index) => ({
-        id: `default-${index}`,
-        workspace_id: workspaceId,
-        ...stage,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }))
-      return NextResponse.json({ stages: defaultStages, isDefault: true })
+      const defaultStages = DEFAULT_FLOW_STAGES.map((stage, index) => {
+        // Add dummy outcomes based on stage
+        let outcomes: any[] = []
+
+        if (stage.name === 'Greeting') {
+          outcomes = [
+            { id: 'out-1', stage_id: `default-${index}`, description: 'Located in Australia', points: 15, keywords: 'australia, sydney, melbourne', outcome_order: 0 },
+            { id: 'out-2', stage_id: `default-${index}`, description: 'Located in UK', points: 10, keywords: 'uk, london, united kingdom', outcome_order: 1 },
+            { id: 'out-3', stage_id: `default-${index}`, description: 'Located in Indonesia', points: 5, keywords: 'indonesia, jakarta', outcome_order: 2 },
+          ]
+        } else if (stage.name === 'Qualifying') {
+          outcomes = [
+            { id: 'out-4', stage_id: `default-${index}`, description: 'IELTS 6.5+', points: 10, keywords: 'ielts 6.5, ielts 7, ielts 8', outcome_order: 0 },
+            { id: 'out-5', stage_id: `default-${index}`, description: 'Budget 300-500 juta', points: 12, keywords: '300 juta, 400 juta, 500 juta', outcome_order: 1 },
+            { id: 'out-6', stage_id: `default-${index}`, description: 'Timeline <6 months', points: 15, keywords: '3 bulan, 6 bulan, soon', outcome_order: 2 },
+          ]
+        } else if (stage.name === 'Scoring') {
+          outcomes = [
+            { id: 'out-7', stage_id: `default-${index}`, description: 'All documents ready', points: 20, keywords: 'passport, cv, transcript, ready', outcome_order: 0 },
+            { id: 'out-8', stage_id: `default-${index}`, description: 'Working professional', points: 15, keywords: 'working, professional, employee', outcome_order: 1 },
+          ]
+        }
+
+        return {
+          id: `default-${index}`,
+          workspace_id: workspaceId,
+          ...stage,
+          outcomes,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+      })
+      return NextResponse.json({ stages: defaultStages, isDefault: false })
     }
 
-    return NextResponse.json({ stages, isDefault: false })
+    // Add outcomes to each stage
+    const stagesWithOutcomes = await Promise.all(
+      stages.map(async (stage: any) => {
+        const outcomes = await fetchQuery(api.ari.getFlowStageOutcomes, {
+          stage_id: stage._id,
+        })
+        return {
+          ...stage,
+          outcomes: outcomes || [],
+        }
+      })
+    )
+
+    return NextResponse.json({ stages: stagesWithOutcomes, isDefault: false })
   } catch (error) {
     console.error('Error in flow-stages GET:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -137,6 +200,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       is_active: body.is_active ?? true,
     })
 
+    // Sync outcomes if provided
+    if (body.outcomes && Array.isArray(body.outcomes) && body.outcomes.length > 0) {
+      await fetchMutation(api.ari.syncFlowStageOutcomes, {
+        stage_id: stage._id,
+        workspace_id: workspace._id,
+        outcomes: body.outcomes.map((o: any) => ({
+          description: o.description,
+          points: o.points,
+          keywords: o.keywords || undefined,
+        })),
+      })
+    }
+
     return NextResponse.json({ stage }, { status: 201 })
   } catch (error) {
     console.error('Error in flow-stages POST:', error)
@@ -152,11 +228,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Dev mode: return mock success without auth
     if (isDevMode() && workspaceId === 'demo') {
       const body = await request.json()
+
+      // For batch reorder, just return success
+      if (body.stages && Array.isArray(body.stages)) {
+        return NextResponse.json({ success: true })
+      }
+
+      // For single stage update, return the updated stage
       return NextResponse.json({
         stage: {
           id: body.id || `mock-stage-${Date.now()}`,
           workspace_id: workspaceId,
           ...body,
+          outcomes: body.outcomes || [],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -225,6 +309,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       exit_criteria: body.exit_criteria !== undefined ? (body.exit_criteria?.trim() || undefined) : undefined,
       is_active: body.is_active,
     })
+
+    // Sync outcomes if provided
+    if (body.outcomes !== undefined && Array.isArray(body.outcomes)) {
+      await fetchMutation(api.ari.syncFlowStageOutcomes, {
+        stage_id: body.id,
+        workspace_id: workspace._id,
+        outcomes: body.outcomes.map((o: any) => ({
+          description: o.description,
+          points: o.points,
+          keywords: o.keywords || undefined,
+        })),
+      })
+    }
 
     return NextResponse.json({ stage })
   } catch (error) {

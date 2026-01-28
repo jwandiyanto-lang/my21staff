@@ -53,6 +53,16 @@ interface FlowStage {
   is_active: boolean
   created_at: string
   updated_at: string
+  outcomes?: FlowStageOutcome[]
+}
+
+interface FlowStageOutcome {
+  id: string
+  stage_id: string
+  description: string
+  points: number
+  keywords: string
+  outcome_order: number
 }
 
 interface StageFormData {
@@ -60,6 +70,14 @@ interface StageFormData {
   goal: string
   sample_script: string
   exit_criteria: string
+  outcomes: OutcomeFormData[]
+}
+
+interface OutcomeFormData {
+  id?: string
+  description: string
+  points: number
+  keywords: string
 }
 
 const emptyFormData: StageFormData = {
@@ -67,6 +85,7 @@ const emptyFormData: StageFormData = {
   goal: '',
   sample_script: '',
   exit_criteria: '',
+  outcomes: [],
 }
 
 export function FlowTab({ workspaceId }: FlowTabProps) {
@@ -133,6 +152,11 @@ export function FlowTab({ workspaceId }: FlowTabProps) {
           goal: newStageData.goal.trim(),
           sample_script: newStageData.sample_script.trim() || null,
           exit_criteria: newStageData.exit_criteria.trim() || null,
+          outcomes: newStageData.outcomes.filter(o => o.description.trim()).map(o => ({
+            description: o.description.trim(),
+            points: o.points,
+            keywords: o.keywords.trim() || '',
+          })),
         }),
       })
 
@@ -174,6 +198,12 @@ export function FlowTab({ workspaceId }: FlowTabProps) {
           goal: editFormData.goal.trim(),
           sample_script: editFormData.sample_script.trim() || null,
           exit_criteria: editFormData.exit_criteria.trim() || null,
+          outcomes: editFormData.outcomes.filter(o => o.description.trim()).map(o => ({
+            id: o.id,
+            description: o.description.trim(),
+            points: o.points,
+            keywords: o.keywords.trim() || '',
+          })),
         }),
       })
 
@@ -266,6 +296,12 @@ export function FlowTab({ workspaceId }: FlowTabProps) {
       goal: stage.goal,
       sample_script: stage.sample_script || '',
       exit_criteria: stage.exit_criteria || '',
+      outcomes: (stage.outcomes || []).map(o => ({
+        id: o.id,
+        description: o.description,
+        points: o.points,
+        keywords: o.keywords,
+      })),
     })
     setExpandedStage(stage.id)
   }
@@ -294,24 +330,15 @@ export function FlowTab({ workspaceId }: FlowTabProps) {
           <div>
             <h2 className="text-lg font-semibold">Conversation Flow</h2>
             <p className="text-sm text-muted-foreground">
-              Define stages your intern follows during conversations
+              Define stages with scorable outcomes for each conversation step
             </p>
           </div>
         </div>
-        <Button onClick={() => setIsAddDialogOpen(true)} disabled={isDefault}>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Add Stage
         </Button>
       </div>
-
-      {/* Default notice */}
-      {isDefault && (
-        <div className="bg-muted/50 rounded-lg p-4 text-sm">
-          <p className="text-muted-foreground">
-            These are the default conversation stages. Add a custom stage to start configuring your own flow.
-          </p>
-        </div>
-      )}
 
       {/* Stages list */}
       <div className="space-y-3">
@@ -336,37 +363,30 @@ export function FlowTab({ workspaceId }: FlowTabProps) {
               >
                 {/* Drag handle / reorder buttons */}
                 <div className="flex flex-col gap-0.5">
-                  {!isDefault && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5"
-                        disabled={isFirst || isReordering}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleReorder(stage.id, 'up')
-                        }}
-                      >
-                        <ArrowUp className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5"
-                        disabled={isLast || isReordering}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleReorder(stage.id, 'down')
-                        }}
-                      >
-                        <ArrowDown className="w-3 h-3" />
-                      </Button>
-                    </>
-                  )}
-                  {isDefault && (
-                    <GripVertical className="w-4 h-4 text-muted-foreground/50" />
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5"
+                    disabled={isFirst || isReordering}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleReorder(stage.id, 'up')
+                    }}
+                  >
+                    <ArrowUp className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5"
+                    disabled={isLast || isReordering}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleReorder(stage.id, 'down')
+                    }}
+                  >
+                    <ArrowDown className="w-3 h-3" />
+                  </Button>
                 </div>
 
                 {/* Stage number badge */}
@@ -374,44 +394,52 @@ export function FlowTab({ workspaceId }: FlowTabProps) {
                   {index + 1}
                 </div>
 
-                {/* Stage name */}
-                <div className="flex-1">
+                {/* Stage name and info */}
+                <div className="flex-1 min-w-0">
                   <p className="font-medium">{stage.name}</p>
                   {!isExpanded && (
-                    <p className="text-sm text-muted-foreground line-clamp-1">
-                      {stage.goal}
-                    </p>
+                    <div className="space-y-0.5 mt-1">
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        <span className="font-medium">Goal:</span> {stage.goal}
+                      </p>
+                      {stage.exit_criteria && (
+                        <p className="text-sm text-muted-foreground line-clamp-1">
+                          <span className="font-medium">Exit:</span> {stage.exit_criteria}
+                        </p>
+                      )}
+                      {stage.outcomes && stage.outcomes.length > 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-medium">Score:</span> {stage.outcomes.reduce((sum, o) => sum + o.points, 0)} pts total ({stage.outcomes.length} outcomes)
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-1">
-                  {!isDefault && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          startEditing(stage)
-                        }}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setDeleteStageId(stage.id)
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      startEditing(stage)
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setDeleteStageId(stage.id)
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                   {isExpanded ? (
                     <ChevronDown className="w-5 h-5 text-muted-foreground" />
                   ) : (
@@ -474,6 +502,93 @@ export function FlowTab({ workspaceId }: FlowTabProps) {
                         />
                       </div>
 
+                      {/* Scoring Outcomes */}
+                      <div className="space-y-3 pt-6 border-t mt-4">
+                        <div className="flex items-center justify-between pt-2">
+                          <div>
+                            <Label>Scoring Outcomes</Label>
+                            <p className="text-xs text-muted-foreground">Define achievements and their point values</p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditFormData({
+                                ...editFormData,
+                                outcomes: [...editFormData.outcomes, { description: '', points: 0, keywords: '' }]
+                              })
+                            }}
+                          >
+                            <Plus className="w-3 h-3 mr-1" />
+                            Add Outcome
+                          </Button>
+                        </div>
+
+                        {editFormData.outcomes.length > 0 ? (
+                          <div className="space-y-2">
+                            {editFormData.outcomes.map((outcome, idx) => (
+                              <div key={idx} className="flex items-start gap-2 p-3 border rounded-lg">
+                                <div className="flex-1 space-y-2">
+                                  <Input
+                                    value={outcome.description}
+                                    onChange={(e) => {
+                                      const newOutcomes = [...editFormData.outcomes]
+                                      newOutcomes[idx].description = e.target.value
+                                      setEditFormData({ ...editFormData, outcomes: newOutcomes })
+                                    }}
+                                    placeholder="e.g., Located in Australia"
+                                    className="text-sm"
+                                  />
+                                  <div className="flex gap-2">
+                                    <div className="flex items-center gap-1 flex-1">
+                                      <Input
+                                        type="number"
+                                        value={outcome.points}
+                                        onChange={(e) => {
+                                          const newOutcomes = [...editFormData.outcomes]
+                                          newOutcomes[idx].points = parseInt(e.target.value) || 0
+                                          setEditFormData({ ...editFormData, outcomes: newOutcomes })
+                                        }}
+                                        placeholder="Points"
+                                        className="w-20 text-sm"
+                                      />
+                                      <span className="text-xs text-muted-foreground">pts</span>
+                                    </div>
+                                    <Input
+                                      value={outcome.keywords}
+                                      onChange={(e) => {
+                                        const newOutcomes = [...editFormData.outcomes]
+                                        newOutcomes[idx].keywords = e.target.value
+                                        setEditFormData({ ...editFormData, outcomes: newOutcomes })
+                                      }}
+                                      placeholder="Keywords (optional, comma-separated)"
+                                      className="flex-1 text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive"
+                                  onClick={() => {
+                                    const newOutcomes = editFormData.outcomes.filter((_, i) => i !== idx)
+                                    setEditFormData({ ...editFormData, outcomes: newOutcomes })
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-3 text-sm text-muted-foreground border rounded-lg border-dashed">
+                            No scoring outcomes defined. Click "Add Outcome" to create one.
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex justify-end gap-2 pt-2">
                         <Button variant="outline" onClick={cancelEditing}>
                           Cancel
@@ -520,6 +635,22 @@ export function FlowTab({ workspaceId }: FlowTabProps) {
                           <p className="text-sm mt-1">{stage.exit_criteria}</p>
                         </div>
                       )}
+
+                      {stage.outcomes && stage.outcomes.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground mb-2">
+                            Scoring Outcomes
+                          </p>
+                          <div className="space-y-1.5">
+                            {stage.outcomes.map((outcome) => (
+                              <div key={outcome.id} className="flex items-center justify-between text-sm p-2 bg-muted/50 rounded">
+                                <span>{outcome.description}</span>
+                                <span className="font-medium text-green-600">+{outcome.points} pts</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -533,9 +664,10 @@ export function FlowTab({ workspaceId }: FlowTabProps) {
       <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
         <p className="font-medium text-foreground mb-1">How It Works</p>
         <ul className="list-disc list-inside space-y-1">
-          <li>Each stage defines a step in the conversation journey</li>
+          <li>Each stage defines a step in the conversation journey with scorable outcomes</li>
           <li>Your intern uses the goal and sample script as guidance</li>
           <li>Exit criteria determine when to advance to the next stage</li>
+          <li>Scoring outcomes award points when specific achievements are detected in conversations</li>
         </ul>
       </div>
 
@@ -600,6 +732,89 @@ export function FlowTab({ workspaceId }: FlowTabProps) {
                 placeholder="When to move to the next stage..."
                 rows={2}
               />
+            </div>
+
+            {/* Scoring Outcomes */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Scoring Outcomes (Optional)</Label>
+                  <p className="text-xs text-muted-foreground">Define achievements and their point values</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setNewStageData({
+                      ...newStageData,
+                      outcomes: [...newStageData.outcomes, { description: '', points: 0, keywords: '' }]
+                    })
+                  }}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  Add
+                </Button>
+              </div>
+
+              {newStageData.outcomes.length > 0 && (
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {newStageData.outcomes.map((outcome, idx) => (
+                    <div key={idx} className="flex items-start gap-2 p-2 border rounded">
+                      <div className="flex-1 space-y-2">
+                        <Input
+                          value={outcome.description}
+                          onChange={(e) => {
+                            const newOutcomes = [...newStageData.outcomes]
+                            newOutcomes[idx].description = e.target.value
+                            setNewStageData({ ...newStageData, outcomes: newOutcomes })
+                          }}
+                          placeholder="e.g., Located in Australia"
+                          className="text-sm"
+                        />
+                        <div className="flex gap-2">
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="number"
+                              value={outcome.points}
+                              onChange={(e) => {
+                                const newOutcomes = [...newStageData.outcomes]
+                                newOutcomes[idx].points = parseInt(e.target.value) || 0
+                                setNewStageData({ ...newStageData, outcomes: newOutcomes })
+                              }}
+                              placeholder="Pts"
+                              className="w-16 text-sm"
+                            />
+                            <span className="text-xs text-muted-foreground">pts</span>
+                          </div>
+                          <Input
+                            value={outcome.keywords}
+                            onChange={(e) => {
+                              const newOutcomes = [...newStageData.outcomes]
+                              newOutcomes[idx].keywords = e.target.value
+                              setNewStageData({ ...newStageData, outcomes: newOutcomes })
+                            }}
+                            placeholder="Keywords (optional)"
+                            className="flex-1 text-sm"
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive"
+                        onClick={() => {
+                          const newOutcomes = newStageData.outcomes.filter((_, i) => i !== idx)
+                          setNewStageData({ ...newStageData, outcomes: newOutcomes })
+                        }}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
