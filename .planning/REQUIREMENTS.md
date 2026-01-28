@@ -28,10 +28,10 @@ Requirements for Kapso Inbox Integration milestone. Each maps to roadmap phases.
 
 ### ARI Flow Integration
 
-- [ ] **ARI-01**: New leads receive automatic AI response (AI-first)
+- [x] **ARI-01**: New leads receive automatic AI response (AI-first)
 - [x] **ARI-02**: User can toggle AI/Human mode per conversation in Inbox
-- [ ] **ARI-03**: Your Intern configuration changes reflect in ARI behavior
-- [ ] **ARI-04**: Complete flow works (new lead → ARI greeting → qualification → handover)
+- [x] **ARI-03**: Your Intern configuration changes reflect in ARI behavior
+- [x] **ARI-04**: Complete flow works (new lead → ARI greeting → qualification → handover)
 
 ### Development Workflow
 
@@ -83,10 +83,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTERN-05 | 3 | Pending |
 | INTERN-06 | 3 | Pending |
 | INTERN-07 | 3 | Complete |
-| ARI-01 | 6 | Pending |
+| ARI-01 | 6 | Complete |
 | ARI-02 | 5 | Complete |
-| ARI-03 | 6 | Pending |
-| ARI-04 | 6 | Pending |
+| ARI-03 | 6 | Complete |
+| ARI-04 | 6 | Complete |
 
 **Coverage:**
 - v3.4 requirements: 18 total
@@ -96,4 +96,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 
 *Requirements defined: 2026-01-27*
-*Last updated: 2026-01-27 — Phase 5 requirements complete (INBOX-04, ARI-02)*
+*Last updated: 2026-01-28 — Phase 6 requirements complete (ARI-01, ARI-03, ARI-04)*

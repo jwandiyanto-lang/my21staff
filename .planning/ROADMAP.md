@@ -227,10 +227,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Wire Mouth to read latest Persona/Flow config from workspace.settings (no caching)
-- [ ] 06-02-PLAN.md — Wire Brain to use workspace scoring_rules; add next_action field to schema
-- [ ] 06-03-PLAN.md — Wire routing logic to respect consultation_slots config (offers available times)
-- [ ] 06-04-PLAN.md — End-to-end test: new lead -> greeting -> Q1 -> answer -> Q2 -> scoring -> routing (via demo mode)
+- [x] 06-01-PLAN.md — Wire Mouth to read latest Persona/Flow config from workspace.settings (no caching)
+- [x] 06-02-PLAN.md — Wire Brain to use workspace scoring_rules; add next_action field to schema
+- [x] 06-03-PLAN.md — Wire routing logic to respect consultation_slots config (offers available times)
+- [x] 06-04-PLAN.md — End-to-end test: new lead -> greeting -> Q1 -> answer -> Q2 -> scoring -> routing (via demo mode)
 
 ## Progress
 
@@ -245,9 +245,9 @@ Phases execute sequentially: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Your Intern Config | v3.4 | 2/2 | Complete | 2026-01-27 |
 | 4. Inbox UI & Filtering | v3.4 | 3/3 | Complete | 2026-01-27 |
 | 5. Real-time & Handover | v3.4 | 3/3 | Complete | 2026-01-27 |
-| 6. ARI Flow Integration | v3.4 | 0/4 | Not started | - |
+| 6. ARI Flow Integration | v3.4 | 4/4 | Complete | 2026-01-28 |
 
 ---
 
 *Roadmap created: 2026-01-27*
-*Last updated: 2026-01-27 — Phase 5 complete*
+*Last updated: 2026-01-28 — Phase 6 complete*
