@@ -44,7 +44,6 @@ const COLUMN_OPTIONS = [
   { id: 'email', label: 'Email' },
   { id: 'lead_status', label: 'Status' },
   { id: 'tags', label: 'Tags' },
-  { id: 'assigned_to', label: 'Assigned to' },
   { id: 'lead_score', label: 'Score' },
   { id: 'created_at', label: 'Created' },
 ] as const

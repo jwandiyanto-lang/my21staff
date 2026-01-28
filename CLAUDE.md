@@ -26,6 +26,7 @@ WhatsApp CRM + AI team for Indonesian SMEs.
 
 | Resource | Path |
 |----------|------|
+| Development Rules | [docs/DEVELOPMENT-RULES.md](docs/DEVELOPMENT-RULES.md) ⚠️ |
 | Brand Guidelines | [business/brand/docs/BRAND.md](business/brand/docs/BRAND.md) |
 | Business Plan | [business/brand/docs/BUSINESS-PLAN.md](business/brand/docs/BUSINESS-PLAN.md) |
 | Pricing | [business/brand/docs/PRICING.md](business/brand/docs/PRICING.md) |
@@ -125,6 +126,24 @@ if (isDevMode) return MOCK_DATA
 ```
 
 **Full guide:** [docs/LOCAL-DEVELOPMENT.md](docs/LOCAL-DEVELOPMENT.md)
+
+---
+
+## Code Quality & Best Practices
+
+**IMPORTANT:** Before committing code, run:
+
+```bash
+npm run pre-commit  # Runs lint + type-check
+```
+
+**Common errors and solutions:** [docs/DEVELOPMENT-RULES.md](docs/DEVELOPMENT-RULES.md)
+
+This document contains:
+- How to prevent "Cannot access before initialization" errors
+- Hydration mismatch solutions
+- Pre-commit workflow
+- ESLint rules explained
 
 ---
 
