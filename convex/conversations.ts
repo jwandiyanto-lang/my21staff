@@ -648,3 +648,34 @@ export const getConversationCountsByStatus = query({
     return counts;
   },
 });
+
+/**
+ * Mark conversation as read (reset unread count).
+ *
+ * Called when user clicks on a conversation to view it.
+ * Immediately resets unread_count to 0 for instant badge removal.
+ *
+ * @param conversation_id - The conversation ID to mark as read
+ * @returns The updated conversation document
+ */
+export const markAsRead = mutation({
+  args: {
+    conversation_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversation_id as any);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    // Only update if there are unread messages
+    if ((conversation as any).unread_count > 0) {
+      await ctx.db.patch(args.conversation_id as any, {
+        unread_count: 0,
+        updated_at: Date.now(),
+      });
+    }
+
+    return await ctx.db.get(args.conversation_id as any);
+  },
+});

@@ -19,8 +19,8 @@ export async function POST(
 
     // Mark conversation as read via Convex
     const result = await fetchMutation(
-      api.conversations.markConversationRead,
-      { id: conversationId }
+      api.conversations.markAsRead,
+      { conversation_id: conversationId }
     )
 
     return NextResponse.json({

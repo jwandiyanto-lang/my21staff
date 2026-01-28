@@ -50,6 +50,19 @@ function getInitials(name: string | null | undefined, phone: string): string {
   return phone.slice(-2)
 }
 
+// Avatar color based on phone (matches database) - stable color that doesn't change
+function getAvatarColor(phone: string): string {
+  const colors = [
+    'bg-orange-500', 'bg-emerald-500', 'bg-blue-500', 'bg-purple-500',
+    'bg-pink-500', 'bg-yellow-500', 'bg-cyan-500', 'bg-rose-500'
+  ]
+  let hash = 0
+  for (let i = 0; i < phone.length; i++) {
+    hash = phone.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return colors[Math.abs(hash) % colors.length]
+}
+
 export function ConversationList({
   conversations,
   selectedId,
@@ -91,12 +104,9 @@ export function ConversationList({
               }`}
             >
               <div className="flex gap-3 pr-6 relative">
-                {/* Avatar */}
-                <Avatar className="h-12 w-12 shrink-0">
-                  <AvatarFallback
-                    className="text-base font-medium"
-                    style={{ backgroundColor: statusConfig.bgColor, color: statusConfig.color }}
-                  >
+                {/* Avatar - phone-based color (matches database) */}
+                <Avatar className={cn('h-12 w-12 shrink-0', getAvatarColor(contact.phone))}>
+                  <AvatarFallback className="text-base font-medium text-white bg-transparent">
                     {getInitials(contact.name || contact.kapso_name, contact.phone)}
                   </AvatarFallback>
                 </Avatar>
@@ -129,15 +139,20 @@ export function ConversationList({
 
                   {/* Row 3: Status tag + Mode badge */}
                   <div className="flex items-center gap-2">
-                    <span
-                      className="text-xs px-2 py-0.5 rounded"
-                      style={{
-                        color: statusConfig.color,
-                        backgroundColor: statusConfig.bgColor,
-                      }}
-                    >
-                      {statusConfig.label}
-                    </span>
+                    {/* Status display - matches database (shows "---" for prospect/default status) */}
+                    {status === 'prospect' ? (
+                      <span className="text-xs text-muted-foreground">---</span>
+                    ) : (
+                      <Badge
+                        className="text-xs"
+                        style={{
+                          color: statusConfig.color,
+                          backgroundColor: statusConfig.bgColor,
+                        }}
+                      >
+                        {statusConfig.label}
+                      </Badge>
+                    )}
                     {/* AI/Human mode badge */}
                     <Badge
                       variant="outline"

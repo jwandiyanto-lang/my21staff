@@ -23,14 +23,23 @@ export async function GET(request: NextRequest) {
     const workspaceId = searchParams.get('workspace')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '25')
+    const search = searchParams.get('search')?.toLowerCase()
 
     if (!workspaceId) {
       return NextResponse.json({ error: 'Workspace required' }, { status: 400 })
     }
 
     if (isDevMode()) {
-      // Dev mode: return mock contacts
-      return NextResponse.json({ contacts: MOCK_CONTACTS, total: MOCK_CONTACTS.length })
+      // Dev mode: return mock contacts with search filter
+      let filteredContacts = MOCK_CONTACTS
+      if (search) {
+        filteredContacts = MOCK_CONTACTS.filter(contact =>
+          contact.name?.toLowerCase().includes(search) ||
+          contact.phone?.toLowerCase().includes(search) ||
+          contact.email?.toLowerCase().includes(search)
+        )
+      }
+      return NextResponse.json({ contacts: filteredContacts.slice(0, limit), total: filteredContacts.length })
     }
 
     // Verify authentication via Clerk
@@ -53,10 +62,19 @@ export async function GET(request: NextRequest) {
     // Get all contacts for this workspace using internal query (auth handled above)
     // Pass high limit to fetch all contacts - pagination is done in this API layer
     // @ts-ignore - workspace_id is Id type
-    const contacts = await fetchQuery(api.contacts.listByWorkspaceInternal, {
+    let contacts = await fetchQuery(api.contacts.listByWorkspaceInternal, {
       workspace_id: workspace._id as any,
       limit: 10000, // Fetch all contacts, paginate in API layer
     })
+
+    // Apply search filter if provided
+    if (search) {
+      contacts = contacts.filter((contact: any) =>
+        contact.name?.toLowerCase().includes(search) ||
+        contact.phone?.toLowerCase().includes(search) ||
+        contact.email?.toLowerCase().includes(search)
+      )
+    }
 
     // Apply pagination
     const from = (page - 1) * limit
