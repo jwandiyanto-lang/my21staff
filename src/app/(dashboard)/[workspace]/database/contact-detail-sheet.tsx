@@ -1051,6 +1051,7 @@ export function ContactDetailSheet({
 
                     {/* Form Score Tab */}
                     <TabsContent value="form" className="mt-3 space-y-3">
+                      {/* Questionnaire Score */}
                       <div className="flex items-center justify-between">
                         <h4 className="text-xs font-medium text-muted-foreground">Questionnaire Score</h4>
                         <span

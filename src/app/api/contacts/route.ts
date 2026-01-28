@@ -8,89 +8,11 @@ import {
   logQuery,
   logQuerySummary,
 } from '@/lib/instrumentation/with-timing'
+import { MOCK_CONTACTS } from '@/lib/mock-data'
 
 function isDevMode(): boolean {
   return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 }
-
-// Mock contacts for dev mode
-const MOCK_CONTACTS = [
-  {
-    id: 'contact-001',
-    workspace_id: 'dev-workspace-001',
-    phone: '+6281234567890',
-    phone_normalized: '+6281234567890',
-    name: 'Budi Santoso',
-    email: 'budi@gmail.com',
-    lead_score: 85,
-    lead_status: 'hot',
-    tags: ['Student', 'Hot Lead'],
-    assigned_to: 'dev-user-001',
-    metadata: { source: 'Website' },
-    created_at: '2026-01-15T10:00:00Z',
-    updated_at: '2026-01-20T14:30:00Z',
-  },
-  {
-    id: 'contact-002',
-    workspace_id: 'dev-workspace-001',
-    phone: '+6282345678901',
-    phone_normalized: '+6282345678901',
-    name: 'Siti Rahayu',
-    email: 'siti.rahayu@yahoo.com',
-    lead_score: 60,
-    lead_status: 'warm',
-    tags: ['Parent', 'Follow Up'],
-    assigned_to: null,
-    metadata: { source: 'WhatsApp' },
-    created_at: '2026-01-18T09:00:00Z',
-    updated_at: '2026-01-22T11:00:00Z',
-  },
-  {
-    id: 'contact-003',
-    workspace_id: 'dev-workspace-001',
-    phone: '+6283456789012',
-    phone_normalized: '+6283456789012',
-    name: 'Ahmad Wijaya',
-    email: null,
-    lead_score: 40,
-    lead_status: 'new',
-    tags: ['Student'],
-    assigned_to: null,
-    metadata: { source: 'Facebook' },
-    created_at: '2026-01-20T15:00:00Z',
-    updated_at: '2026-01-20T15:00:00Z',
-  },
-  {
-    id: 'contact-004',
-    workspace_id: 'dev-workspace-001',
-    phone: '+6284567890123',
-    phone_normalized: '+6284567890123',
-    name: 'Dewi Lestari',
-    email: 'dewi.lestari@gmail.com',
-    lead_score: 75,
-    lead_status: 'hot',
-    tags: ['Hot Lead', 'Student'],
-    assigned_to: 'dev-user-001',
-    metadata: { source: 'Webinar' },
-    created_at: '2026-01-10T08:00:00Z',
-    updated_at: '2026-01-25T16:00:00Z',
-  },
-  {
-    id: 'contact-005',
-    workspace_id: 'dev-workspace-001',
-    phone: '+6285678901234',
-    phone_normalized: '+6285678901234',
-    name: 'Rizky Pratama',
-    email: 'rizky.p@outlook.com',
-    lead_score: 20,
-    lead_status: 'cold',
-    tags: [],
-    assigned_to: null,
-    metadata: { source: 'Referral' },
-    created_at: '2026-01-05T12:00:00Z',
-    updated_at: '2026-01-05T12:00:00Z',
-  },
-]
 
 // GET /api/contacts - Get paginated contacts for a workspace
 export async function GET(request: NextRequest) {
