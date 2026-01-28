@@ -1,458 +1,355 @@
-# Stack Research: v3.1 Convex + Clerk Migration
+# Production Deployment Stack
 
-**Project:** my21staff
-**Researched:** 2026-01-23
-**Confidence:** HIGH (verified with official docs)
+**Project:** my21staff v3.5
+**Researched:** 2026-01-28
+**Overall confidence:** HIGH
 
----
+## Executive Summary
 
-## Current Stack
+my21staff is production-ready for deployment to a custom domain (not Vercel due to billing freeze). The application uses Next.js 15 with Clerk authentication and Convex database — both services already deployed and configured. Deployment requires:
 
-### Already in Place (Keep These)
+1. **Domain pointing to manual hosting** (Docker, cloud provider, or self-hosted)
+2. **Environment variable configuration** for production Clerk instance, Convex credentials, and API keys
+3. **Disabling dev mode** (NEXT_PUBLIC_DEV_MODE must be false in production)
+4. **Webhook configuration** for Kapso incoming messages and Clerk user sync events
+5. **Build optimization** and build secrets management
 
-| Package | Current Version | Purpose |
-|---------|-----------------|---------|
-| `convex` | 1.31.5 | Data layer, real-time subscriptions |
-| `@convex-dev/auth` | 0.0.90 | Auth utilities (will change usage pattern) |
-| `next` | 16.1.1 | App framework |
-| `react` | 19.2.3 | UI library |
+The validated tech stack is already in place. No new libraries needed. Focus is on environment setup and deployment mechanics.
 
-### To Remove
+## Recommended Stack
 
-| Package | Current Version | Reason |
-|---------|-----------------|--------|
-| `@supabase/ssr` | 0.8.0 | Replacing auth with Clerk |
-| `@supabase/supabase-js` | 2.90.1 | Replacing data with Convex |
+### Core Framework
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Next.js | 16.1.1 | Web framework & routing | Validates in v3.4 localhost. API routes handle webhooks (Kapso, Clerk, n8n). Server actions for workspace mutations. |
+| React | 19.2.3 | UI framework | Validated in v3.4. Shipping with Error Boundaries and Suspense for resilience. |
+| TypeScript | ^5 | Type safety | Complete typed codebase (47,745 lines). Production safety. |
 
-### Convex Schema (Already Migrated in v3.0)
+### Authentication & Authorization
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Clerk | 6.36.9 (production keys) | User auth & organizations | Live instance with Eagle Overseas org. JWT template configured. svix webhooks for user sync. |
+| Next.js Middleware | 16.1.1 | Route protection | Clerk middleware guards dashboard routes. Public routes: `/`, `/sign-in`, `/sign-up`, `/pricing`, `/articles`, webhooks. |
 
-Tables already in Convex:
-- `workspaces`
-- `workspaceMembers`
-- `contacts`
-- `conversations`
-- `messages`
-- `contactNotes`
-- `ariConfig`
-- `ariConversations`
-- `ariMessages`
-- `tickets`
-- `ticketComments`
-- `ticketStatusHistory`
+### Database & Real-time
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Convex | 1.31.6 | Database + subscriptions | Production deployment: `intent-otter-212.convex.cloud`. Schema complete with RLS. Achieves 37ms P95 (25.4x faster than Supabase). |
+| Convex HTTP Actions | 1.31.6 | Webhook endpoints | Kapso webhooks, n8n lead creation, Clerk user sync — all via `convex/http.ts` |
 
----
+### UI & Styling
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Shadcn/ui | latest | Component library | Pre-built, styled components for dashboard. Dark mode via next-themes. |
+| Tailwind CSS | 4 | Utility CSS | Single source of styling. Validated in v3.4. |
+| Framer Motion | 12.26.2 | Animations | Smooth UI transitions (inbox, compose). |
 
-## Required Changes
+### External Services
+| Service | API Version | Purpose | Status |
+|---------|------------|---------|--------|
+| Kapso (WhatsApp) | v1 (Meta/WhatsApp Business API) | Incoming & outgoing messages | Webhooks: `POST /api/webhook/kapso`, `GET /api/webhook/kapso` for verification |
+| Resend | v1 (HTTP) | Transactional email | Invitation emails, support notifications. RESEND_API_KEY required. |
+| Grok (x.ai) | OpenAI-compatible | AI responses | GROK_API_KEY required. |
+| Sea-Lion (Ollama) | Local HTTP | AI fallback | OLLAMA_BASE_URL = http://100.113.96.25:11434 (optional) |
 
-### 1. ADD: Clerk Packages
+### Supporting Libraries
+| Library | Version | Purpose |
+|---------|---------|---------|
+| @tanstack/react-query | 5.90.19 | Data caching (stale-while-revalidate) |
+| @tanstack/react-table | 8.21.3 | Table rendering (contacts, leads, tickets) |
+| libphonenumber-js | 1.12.34 | Indonesian E.164 phone normalization |
+| date-fns | 4.1.0 | WIB timezone (UTC+7), appointment scheduling |
+| zod | 4.3.5 | Schema validation (forms, API requests) |
+| react-hook-form | 7.71.1 | Form state management |
+| papaparse | 5.5.3 | CSV import/export |
+| sonner | 2.0.7 | Toast notifications (user feedback) |
+
+## Environment Variables (Production) 
+
+### CRITICAL: Must Set Before Deployment
+
+**Dev Mode - MUST BE FALSE:**
+```
+NEXT_PUBLIC_DEV_MODE=false
+```
+
+**Clerk Authentication (Production Keys):**
+```
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
+CLERK_SECRET_KEY=sk_live_...
+CLERK_WEBHOOK_SECRET=whsec_...
+CLERK_JWT_ISSUER_DOMAIN=https://my21staff.clerk.accounts.dev
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+```
+
+**Convex (Production):**
+```
+NEXT_PUBLIC_CONVEX_URL=https://intent-otter-212.convex.cloud
+CONVEX_DEPLOYMENT=prod:intent-otter-212
+CONVEX_DEPLOY_KEY=prod:intent-otter-212|...
+```
+
+**Kapso WhatsApp:**
+```
+KAPSO_API_KEY=your-kapso-api-key
+KAPSO_WEBHOOK_SECRET=your-webhook-secret
+NEXT_PUBLIC_KAPSO_PHONE_NUMBER=+1234567890
+```
+
+**Encryption:**
+```
+ENCRYPTION_KEY=<openssl rand -base64 32>
+```
+
+**Email & AI:**
+```
+RESEND_API_KEY=re_...
+GROK_API_KEY=xai-...
+SEALION_API_KEY=sk-... (optional)
+OLLAMA_BASE_URL=http://100.113.96.25:11434 (optional)
+```
+
+**Deployment:**
+```
+NODE_ENV=production
+NEXTAUTH_URL=https://my21staff.com
+```
+
+### Environment Variable Safety Rules
+
+1. **NEVER commit secrets to git** — use platform secrets (Vercel, GitHub, Docker)
+2. **ENCRYPTION_KEY must be unique per environment** — generate fresh
+3. **CLERK_WEBHOOK_SECRET enables Clerk→Convex sync** — missing = broken user registration
+4. **NEXT_PUBLIC_ variables are public** (browser) — safe for Clerk publishable key
+5. **All other variables are private** (server-only) — never exposed to browser
+6. **NEXT_PUBLIC_DEV_MODE=false is the production safety gate**
+
+## Deployment Architecture
+
+### Build & Deploy Flow
+```
+Source Code (git)
+    ↓
+npm run build (generates .next/)
+    ↓
+Docker build OR direct platform deploy
+    ↓
+Environment variables injected
+    ↓
+npm start (NODE_ENV=production)
+    ↓
+Next.js listens on port 3000
+    ↓
+Reverse proxy/load balancer → your domain
+    ↓
+HTTPS TLS termination at edge
+```
+
+### Webhook Flow in Production
+
+**Incoming WhatsApp Message:**
+```
+Kapso detects message
+    ↓
+POST https://my21staff.com/api/webhook/kapso (signature verified)
+    ↓
+Next.js API route processes message
+    ↓
+ConvexHttpClient creates Contact/Conversation/Message records
+    ↓
+ARI processor queries Grok for bot response
+    ↓
+Kapso API sends reply to WhatsApp
+    ↓
+User sees bot response
+```
+
+**Clerk User Sync:**
+```
+Clerk event (user.created, user.updated, user.deleted)
+    ↓
+POST to Convex webhook (signed with svix, verified)
+    ↓
+Convex creates/updates user record
+    ↓
+App can read user on next login
+```
+
+## Build & Deployment Steps
+
+### Pre-Deployment Checklist
+
+- [ ] **Disable dev mode**
+  ```bash
+  grep NEXT_PUBLIC_DEV_MODE .env.production
+  # Must output: false or empty
+  ```
+
+- [ ] **Verify all required env vars**
+  ```bash
+  for var in CLERK_SECRET_KEY CONVEX_DEPLOYMENT ENCRYPTION_KEY KAPSO_WEBHOOK_SECRET RESEND_API_KEY GROK_API_KEY; do
+    [ -z "${!var}" ] && echo "MISSING: $var"
+  done
+  ```
+
+- [ ] **Test build locally**
+  ```bash
+  npm run build  # Must succeed
+  npm start
+  # Visit http://localhost:3000/sign-in — should show Clerk login, NOT mock data
+  ```
+
+- [ ] **Verify webhook endpoints**
+  ```bash
+  curl https://my21staff.com/api/webhook/kapso
+  curl -X POST https://my21staff.com/api/webhook/kapso
+  ```
+
+- [ ] **Clerk configuration**
+  - Dashboard: https://dashboard.clerk.com → my21staff → Production
+  - Add domain to Allowed Origins
+  - Copy Webhook Signing Secret to CLERK_WEBHOOK_SECRET
+
+- [ ] **Kapso webhook config**
+  - Update webhook URL: `https://my21staff.com/api/webhook/kapso`
+  - Copy signing secret to KAPSO_WEBHOOK_SECRET
+  - Test GET verification
+
+- [ ] **Verify Convex accessibility**
+  ```bash
+  curl https://intent-otter-212.convex.cloud
+  ```
+
+### Build Command
 
 ```bash
-npm install @clerk/nextjs@^6.36.8 svix@^1.84.1
+npm run build
 ```
 
-| Package | Version | Purpose | Why This Version |
-|---------|---------|---------|------------------|
-| `@clerk/nextjs` | ^6.36.8 | Clerk integration for Next.js 15 | Current stable (published 2026-01-20), compatible with Next.js 15 + React 19 |
-| `svix` | ^1.84.1 | Webhook signature verification | Required for Clerk user sync webhooks |
+Generates `.next/static/`, `.next/server/`, `.next/standalone/`
 
-**DO NOT INSTALL:**
-- `@clerk/clerk-react` - Redundant, `@clerk/nextjs` includes all React components
-- `@clerk/backend` - Redundant, included in `@clerk/nextjs`
-- `@clerk/themes` - Use Shadcn styling instead
-
-### 2. UPDATE: Convex Auth Config
-
-Replace `convex/auth.config.ts`:
-
-```typescript
-// BEFORE (Supabase JWT):
-export default {
-  providers: [
-    {
-      type: "customJwt",
-      applicationID: process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1]?.split(".")[0] || "",
-      issuer: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1`,
-      jwks: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/.well-known/jwks.json`,
-      algorithm: "RS256",
-    },
-  ],
-} satisfies AuthConfig;
-
-// AFTER (Clerk JWT):
-import { AuthConfig } from "convex/server";
-
-export default {
-  providers: [
-    {
-      domain: process.env.CLERK_JWT_ISSUER_DOMAIN!,
-      applicationID: "convex",
-    },
-  ],
-} satisfies AuthConfig;
-```
-
-### 3. ADD: Convex Users Table
-
-New schema addition for storing Clerk user data:
-
-```typescript
-// convex/schema.ts - ADD to existing schema
-users: defineTable({
-  clerkId: v.string(),          // Clerk user ID (user_xxx format)
-  email: v.string(),
-  name: v.optional(v.string()),
-  imageUrl: v.optional(v.string()),
-  created_at: v.number(),
-  updated_at: v.number(),
-})
-  .index("by_clerk_id", ["clerkId"])
-  .index("by_email", ["email"]),
-```
-
-**Why:** Clerk user data must be stored in Convex for:
-- Displaying user names/avatars across the app
-- Looking up other users (not just current user)
-- Avoiding rate limits on Clerk's backend API
-
-### 4. ADD: Remaining Supabase Tables to Convex
-
-Tables still in Supabase that need migration:
-
-| Table | Priority | Notes |
-|-------|----------|-------|
-| `profiles` | HIGH | Replace with `users` table synced from Clerk |
-| `ari_appointments` | HIGH | Booking system for Eagle |
-| `consultant_slots` | HIGH | Scheduling availability |
-| `workspace_invitations` | HIGH | Team invite flow |
-| `user_todos` | MEDIUM | Task management |
-| `ari_knowledge_categories` | MEDIUM | Knowledge base structure |
-| `ari_knowledge_entries` | MEDIUM | Knowledge base content |
-| `knowledge_base` | MEDIUM | FAQ matching |
-| `ari_destinations` | MEDIUM | Eagle-specific university data |
-| `ari_payments` | LOW | Payment records (deferred feature) |
-| `ari_ai_comparison` | LOW | AI model analytics |
-| `flows` | LOW | Automation (future) |
-| `form_templates` | LOW | Forms (future) |
-
-### 5. REMOVE: Supabase Packages (After Migration)
+### Start Command
 
 ```bash
-npm uninstall @supabase/ssr @supabase/supabase-js
+NODE_ENV=production npm start
 ```
 
----
+Starts server on port 3000. Use with Docker, Railway, Render, or reverse proxy.
 
-## Environment Variables
+### Docker Example
 
-### ADD (Clerk)
-
-```env
-# Clerk API Keys (from clerk.com dashboard)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_xxx  # or pk_test_xxx for dev
-CLERK_SECRET_KEY=sk_live_xxx                    # or sk_test_xxx for dev
-
-# Clerk JWT Issuer for Convex (from Clerk JWT template)
-CLERK_JWT_ISSUER_DOMAIN=https://your-clerk-instance.clerk.accounts.dev
-
-# Clerk Webhook Secret (from Clerk webhooks dashboard)
-CLERK_WEBHOOK_SECRET=whsec_xxx
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY .next .next/
+COPY public public/
+ENV NODE_ENV=production
+EXPOSE 3000
+CMD ["npm", "start"]
 ```
 
-### Convex Dashboard Environment Variables
-
-Add to Convex dashboard (Settings > Environment Variables):
-- `CLERK_JWT_ISSUER_DOMAIN` - Same as above
-- `CLERK_WEBHOOK_SECRET` - For webhook verification in HTTP actions
-
-### REMOVE (After migration complete)
-
-```env
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY
-```
-
----
-
-## Integration Points
-
-### 1. Clerk + Convex Provider Setup
-
-Create `src/app/ConvexClientProvider.tsx`:
-
-```typescript
-"use client";
-
-import { ClerkProvider, useAuth } from "@clerk/nextjs";
-import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { ConvexReactClient } from "convex/react";
-
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
-export function ConvexClientProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <ClerkProvider>
-      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-        {children}
-      </ConvexProviderWithClerk>
-    </ClerkProvider>
-  );
-}
-```
-
-**Key points:**
-- `ConvexProviderWithClerk` must be inside `ClerkProvider`
-- Uses `convex/react-clerk` (built into convex package)
-- Pass Clerk's `useAuth` hook to the provider
-
-### 2. Middleware Migration
-
-Replace Supabase middleware with Clerk:
-
-```typescript
-// src/middleware.ts
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/login(.*)",
-  "/signup(.*)",
-  "/pricing",
-  "/articles/(.*)",
-  "/webinars/(.*)",
-  "/api/webhook/(.*)",  // Webhooks must be public
-  "/api/leads",         // Public lead capture
-  "/portal/(.*)",       // Public support portal
-]);
-
-export default clerkMiddleware((auth, req) => {
-  if (!isPublicRoute(req)) {
-    auth.protect();
-  }
-});
-
-export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
-};
-```
-
-### 3. Clerk Webhook HTTP Action
-
-Add to Convex HTTP router (`convex/http.ts`):
-
-```typescript
-import { httpRouter } from "convex/server";
-import { httpAction } from "./_generated/server";
-import { Webhook } from "svix";
-import { internal } from "./_generated/api";
-
-const http = httpRouter();
-
-// Clerk webhook endpoint for user sync
-http.route({
-  path: "/clerk-users-webhook",
-  method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    const webhookSecret = process.env.CLERK_WEBHOOK_SECRET!;
-
-    const svix = new Webhook(webhookSecret);
-    const headers = {
-      "svix-id": request.headers.get("svix-id")!,
-      "svix-timestamp": request.headers.get("svix-timestamp")!,
-      "svix-signature": request.headers.get("svix-signature")!,
-    };
-
-    const body = await request.text();
-
-    try {
-      const event = svix.verify(body, headers) as any;
-
-      switch (event.type) {
-        case "user.created":
-        case "user.updated":
-          await ctx.runMutation(internal.users.upsertFromClerk, {
-            clerkId: event.data.id,
-            email: event.data.email_addresses[0]?.email_address ?? "",
-            name: `${event.data.first_name || ""} ${event.data.last_name || ""}`.trim() || null,
-            imageUrl: event.data.image_url || null,
-          });
-          break;
-        case "user.deleted":
-          await ctx.runMutation(internal.users.deleteByClerkId, {
-            clerkId: event.data.id,
-          });
-          break;
-      }
-
-      return new Response(null, { status: 200 });
-    } catch (err) {
-      console.error("Webhook verification failed:", err);
-      return new Response("Webhook verification failed", { status: 400 });
-    }
-  }),
-});
-
-export default http;
-```
-
-### 4. Auth in Convex Functions
-
-Replace current auth pattern:
-
-```typescript
-// BEFORE (using @convex-dev/auth):
-import { getAuthUserId } from "@convex-dev/auth/server";
-const userId = await getAuthUserId(ctx);
-
-// AFTER (using ctx.auth directly with Clerk):
-const identity = await ctx.auth.getUserIdentity();
-if (!identity) throw new Error("Unauthorized");
-const clerkId = identity.subject; // This is the Clerk user ID
-```
-
-### 5. User ID Migration Strategy
-
-**Critical consideration:** Current schema uses Supabase UUIDs for `user_id` fields (format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`). Clerk uses different IDs (format: `user_xxxxxxxxxxxxxx`).
-
-**Recommended approach: Use Clerk IDs directly**
-
-1. Add new `clerk_user_id` field to affected tables
-2. Update all new records to use Clerk IDs
-3. Migrate existing records with mapping
-4. Remove old `user_id` field
-
-**Tables with user_id references:**
-- `workspaces.owner_id`
-- `workspaceMembers.user_id`
-- `contacts.assigned_to`
-- `conversations.assigned_to`
-- `messages.sender_id`
-- `contactNotes.user_id`
-- `tickets.requester_id`, `tickets.assigned_to`
-- `ticketComments.author_id`
-- `ticketStatusHistory.changed_by`
-
-### 6. n8n Webhook to Convex HTTP Action
-
-For Eagle leads from n8n:
-
-```typescript
-// convex/http.ts - ADD route
-http.route({
-  path: "/n8n-lead",
-  method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    // Verify webhook secret (simple token-based)
-    const authHeader = request.headers.get("Authorization");
-    const expectedToken = process.env.N8N_WEBHOOK_SECRET;
-
-    if (authHeader !== `Bearer ${expectedToken}`) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-
-    const body = await request.json();
-
-    // Create contact in Convex
-    await ctx.runMutation(internal.contacts.createFromWebhook, {
-      workspaceId: body.workspace_id,
-      phone: body.phone,
-      name: body.name,
-      email: body.email,
-      source: "n8n",
-      metadata: body.metadata || {},
-    });
-
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  }),
-});
-```
-
----
-
-## Not Adding (And Why)
-
-| Package | Why Not |
-|---------|---------|
-| `@clerk/clerk-react` | Redundant - `@clerk/nextjs` includes all React components |
-| `@clerk/backend` | Redundant - `@clerk/nextjs` includes backend utilities |
-| `@clerk/themes` | Not needed - use Shadcn styling for consistency |
-| `@auth/core` | Wrong library - we're using Clerk, not Auth.js |
-| Any Supabase package | Removing Supabase entirely |
-| `@convex-dev/auth` | Keep but change usage - built-in `ctx.auth` is sufficient for Clerk |
-
----
-
-## Installation Commands
-
-### Phase 1: Add Clerk (before removing Supabase)
-
-```bash
-npm install @clerk/nextjs@^6.36.8 svix@^1.84.1
-```
-
-### Phase 2: Remove Supabase (after migration complete)
-
-```bash
-npm uninstall @supabase/ssr @supabase/supabase-js
-```
-
----
-
-## Clerk Dashboard Setup
-
-### 1. Create Clerk Application
-
-1. Go to clerk.com and create new application
-2. Choose "Next.js" as framework
-3. Enable authentication methods:
-   - Email + Password (required)
-   - Optional: Google OAuth for convenience
-
-### 2. Create JWT Template for Convex
-
-1. Navigate to JWT Templates in Clerk dashboard
-2. Click "New Template" > Select "Convex"
-3. **DO NOT rename the template** - must stay as "convex"
-4. Copy the Issuer URL (this is `CLERK_JWT_ISSUER_DOMAIN`)
-
-### 3. Create Webhook Endpoint
-
-1. Navigate to Webhooks in Clerk dashboard
-2. Add endpoint URL: `https://intent-otter-212.convex.site/clerk-users-webhook`
-3. Select events:
-   - `user.created`
-   - `user.updated`
-   - `user.deleted`
-4. Copy signing secret (this is `CLERK_WEBHOOK_SECRET`)
-
----
-
-## Migration Sequence
-
-1. Install Clerk packages (can run alongside Supabase temporarily)
-2. Add `users` table to Convex schema
-3. Set up Clerk webhook in Convex HTTP router
-4. Update `ConvexClientProvider` to use `ClerkProvider` + `ConvexProviderWithClerk`
-5. Update `middleware.ts` to use `clerkMiddleware`
-6. Update `convex/auth.config.ts` for Clerk JWT
-7. Migrate remaining Supabase tables to Convex schema
-8. Update all Convex function auth checks (use `ctx.auth.getUserIdentity()`)
-9. Update user ID references across all tables
-10. Migrate existing users (script or manual)
-11. Test all auth flows
-12. Remove Supabase packages and environment variables
-
----
+## Deployment Platform Options
+
+| Platform | Effort | Cost | Notes |
+|----------|--------|------|-------|
+| Vercel | Low | ~$0-20/mo | Best for Next.js, but blocked (billing freeze) |
+| Railway | Low | ~$5-50/mo | Simple, good for single instance |
+| Render | Low | ~$7-50/mo | Similar to Railway, free tier available |
+| Fly.io | Low | $0-50/mo | Global edge, excellent for WhatsApp scale |
+| Docker + Self-Hosted | High | Server cost | Full control, most complex |
+| AWS Lambda + CloudFront | High | ~$10-200/mo | Serverless, infinite scale |
+| Google Cloud Run | Medium | $0-50/mo | Serverless, pay-per-request |
+
+**Recommendation:** Use **Railway** or **Render** for simplicity.
+
+## Security Checklist
+
+- [ ] **Secrets in platform, not in code**
+  - [ ] ENCRYPTION_KEY → Platform secrets
+  - [ ] CLERK_SECRET_KEY → Platform secrets
+  - [ ] CONVEX_DEPLOY_KEY → Platform secrets
+  - [ ] KAPSO_WEBHOOK_SECRET → Platform secrets
+  - [ ] RESEND_API_KEY → Platform secrets
+  - [ ] GROK_API_KEY → Platform secrets
+
+- [ ] **HTTPS enforced**
+  - [ ] Domain uses HTTPS
+  - [ ] Webhooks accept HTTPS only
+  - [ ] Clerk production keys require HTTPS
+
+- [ ] **Webhook signature verification enabled**
+  - [ ] Kapso: `verifyKapsoSignature()` validates every message
+  - [ ] Clerk: `verifySvixSignature()` validates events
+
+- [ ] **Dev mode disabled**
+  - [ ] `NEXT_PUBLIC_DEV_MODE=false`
+  - [ ] Mock data only on localhost
+  - [ ] Clerk auth enforced for dashboard
+
+- [ ] **Middleware authentication active**
+  - [ ] `middleware.ts` checks localhost only
+  - [ ] Production domain protected by Clerk
+
+- [ ] **Security headers set** (in `next.config.ts`)
+  - [ ] X-Frame-Options: DENY
+  - [ ] X-Content-Type-Options: nosniff
+  - [ ] Referrer-Policy: strict-origin-when-cross-origin
+
+## Troubleshooting
+
+### "Production Keys are only allowed for domain..."
+- Clerk keys restricted to domain
+- **Fix:** Verify NEXTAUTH_URL matches your domain (case-sensitive)
+
+### "Invalid signature" on Kapso webhook
+- Webhook signature validation failed
+- **Fix:** Verify KAPSO_WEBHOOK_SECRET matches Kapso dashboard
+
+### "CLERK_WEBHOOK_SECRET not set"
+- Clerk user sync disabled
+- **Fix:** Get secret from https://dashboard.clerk.com → Webhooks
+
+### "No workspace for phone_number_id"
+- Webhook received but workspace not found
+- **Fix:** Verify Eagle Overseas workspace has kapso_phone_id set
+
+### "ENCRYPTION_KEY not set"
+- Can't decrypt workspace credentials
+- **Fix:** Generate: `openssl rand -base64 32`, set in platform secrets
+
+### Messages not appearing
+- Check: Webhook logs, Convex mutations, Frontend subscriptions
+- **Fix:** Enable debug logs, test with curl
+
+## Ready for Production?
+
+- [ ] All env vars set (use .env.example)
+- [ ] Dev mode explicitly disabled
+- [ ] Build succeeds: `npm run build`
+- [ ] Production build starts: `npm start`
+- [ ] Clerk domain whitelisted
+- [ ] Kapso webhook URL updated
+- [ ] Clerk webhook secret configured
+- [ ] All secrets in platform (not git)
+- [ ] HTTPS enforced
+- [ ] Health check passes
+- [ ] First user can signup/login
+- [ ] First message triggers bot response
 
 ## Sources
 
-- [Clerk + Convex Integration (Clerk Docs)](https://clerk.com/docs/guides/development/integrations/databases/convex) - Updated 2026-01-14
-- [Convex + Clerk Guide (Convex Docs)](https://docs.convex.dev/auth/clerk)
-- [Storing Users in Convex (Convex Docs)](https://docs.convex.dev/auth/database-auth)
-- [Clerk Webhooks Data Sync](https://clerk.com/blog/webhooks-data-sync-convex)
-- [@clerk/nextjs npm](https://www.npmjs.com/package/@clerk/nextjs) - v6.36.8 (published 2026-01-20)
-- [convex npm](https://www.npmjs.com/package/convex) - v1.31.5 (published 2026-01-20)
-- [svix npm](https://www.npmjs.com/package/svix) - v1.84.1 (published 2026-01-05)
+**Verified in Codebase:**
+- Project codebase (47,745 lines TypeScript)
+- Current Clerk instance (production keys exist)
+- Convex deployment (intent-otter-212.convex.cloud active)
+- Kapso webhooks (v3.4 localhost verified)
+- Environment variables (.env.example complete)
+
+---
+
+**Last Updated:** 2026-01-28 (v3.5 production deployment research)
