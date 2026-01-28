@@ -39,7 +39,7 @@ export function TagFilterDropdown({
 
   // Fetch workspace for tags
   const workspace = useQuery(
-    api.workspaces.get,
+    api.workspaces.getById,
     isDevMode() ? "skip" : { id: workspaceId }
   )
 
