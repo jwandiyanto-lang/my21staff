@@ -4,17 +4,25 @@
 
 **No system = Can't grow. I help you build that system.**
 
-WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-tenant admin, AI-powered WhatsApp responses, comprehensive lead management, team collaboration, support ticketing, and client-first trust-building features.
+WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-tenant admin, AI-powered WhatsApp responses, comprehensive lead management, team collaboration, support ticketing, and client-first trust-building features with complete bot configuration and real-time automation.
 
 ## Core Value
 
 The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
-## Current State (v3.2 Shipped)
+## Current State (v3.4 Shipped)
 
 **Production URL:** https://my21staff.com (blocked — Vercel billing freeze)
 
 **Convex Deployment:** https://intent-otter-212.convex.cloud
+
+**Shipped in v3.4:**
+- Agent Skills Infrastructure — Kapso agent-skills with 5 skill sets and MCP server
+- Your Intern Admin Interface — Global AI toggle, error boundaries, 5 config tabs working
+- Inbox Modernization — WhatsApp-first UI with status filtering, real-time sync, AI/Human toggle per conversation
+- Configuration Hot-Reload — Complete ARI flow with workspace config applied on every message without restart
+- Two-Level AI Gating — Global toggle (ariConfig.enabled) + per-conversation toggle (conversation.status)
+- End-to-End Automation — New lead → AI greeting → qualification → routing → consultation booking complete
 
 **Shipped in v3.2:**
 - Supabase completely removed (packages + code)
@@ -31,14 +39,15 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - n8n webhook integration for lead flow
 - API routes migrated to Convex
 
-**Tech Stack (v3.2):**
-- ~45,500 lines TypeScript
+**Tech Stack (v3.4):**
+- ~47,745 lines TypeScript (34,931 src + 12,814 convex)
 - Next.js 15 + React 19
 - Clerk (Authentication)
 - Convex (Database + Real-time)
 - Shadcn/ui + Tailwind CSS
 - Kapso API for WhatsApp
 - Resend for transactional email
+- Grok API + Sea-Lion (Ollama) for AI
 
 **First Client:** Eagle Overseas Education (ready for deployment)
 
@@ -86,20 +95,25 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - ✓ **WhatsApp Inbox** — v2.0 filter bar with Active/All toggle, Status/Tags filters — v3.2
 - ✓ **Dashboard** — Stats cards, activity feed, quick actions — v3.2
 - ✓ **Settings** — Team management via Clerk OrganizationProfile — v3.2
+- ✓ **Agent Skills Infrastructure** — Kapso agent-skills with 5 skill sets and MCP server — v3.4
+- ✓ **Your Intern Debug** — Page loads without errors, error boundaries, dev mode bypass — v3.4
+- ✓ **Global AI Toggle** — Master on/off control for bot behavior — v3.4
+- ✓ **Inbox Modernization** — WhatsApp-first UI with status filtering — v3.4
+- ✓ **Real-time Message Sync** — Convex subscriptions for instant updates — v3.4
+- ✓ **AI/Human Handover** — Per-conversation toggle with mode indicators — v3.4
+- ✓ **Configuration Hot-Reload** — Workspace config applied without restart — v3.4
+- ✓ **Complete ARI Flow** — New lead → greeting → qualification → routing → booking — v3.4
 
 ### Active
 
-**v3.4 Current Milestone:**
-- [ ] Replace Inbox with Kapso's whatsapp-cloud-inbox UI
-- [ ] Enhanced status filtering integrated with Convex
-- [ ] Fix Your Intern page crashes
-- [ ] Install agent-skills MCP for development
-
 **Future Milestones:**
-- [ ] Production deployment optimization
+- [ ] Production deployment optimization (unblock Vercel billing)
 - [ ] Payment Integration (Midtrans)
 - [ ] AI Model Selection UI
 - [ ] Kapso broadcasts for newsletter distribution
+- [ ] Template message support (quick replies)
+- [ ] Interactive button responses
+- [ ] Broadcast messaging capability
 
 ### Out of Scope
 
@@ -112,6 +126,10 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - Voice note transcription — future version
 - Document upload handling — future version
 - Video call support — use external platforms
+- Complete Kapso Inbox replacement — using as UI pattern reference only
+- WhatsApp Flows (multi-step forms) — requires Meta approval
+- Voice agent integration — defer to v4.0+
+- Custom bot training UI — Persona/Flow tabs sufficient
 
 ## Context
 
@@ -122,7 +140,12 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 **Organizations (Clerk):**
 - Eagle Overseas: `org_38fXP0PN0rgNQ2coi1KsqozLJYb` (first paying client)
 
-**Known Issues (Deferred to Production):**
+**Known Issues (v3.4 Tech Debt):**
+- MCP connection failure (Kapso endpoint unreachable — skills installed, code works)
+- Phase 4 missing formal verification (UAT performed, integration confirmed)
+- Sea-Lion local LLM disabled (Grok fallback working)
+
+**Deferred to Production:**
 - Webhook E2E testing deferred (ngrok issues, will test in production)
 - n8n sync count verification deferred (webhook verified working)
 - Vercel deployment blocked (billing freeze)
@@ -165,24 +188,29 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | Clean slate approach for v3.2 | Delete Supabase, rebuild fresh | ✓ Good — clean codebase |
 | UI revert to v2.0 style | User preference for original design | ✓ Good — familiar UX |
 | Webhook testing deferred to production | ngrok connectivity issues | — Pending production deployment |
+| Agent-skills for progressive disclosure | Complex Kapso API needs contextual docs | ✓ Good — v3.4 pattern |
+| MCP server at user scope | Available across all projects | ✓ Good — v3.4 setup |
+| Two-level AI gating | Global + per-conversation control | ✓ Good — v3.4 feature |
+| Configuration hot-reload via mutation | No caching, fresh on every call | ✓ Good — v3.4 pattern |
+| Toast notifications for config saves | User feedback on state changes | ✓ Good — v3.4 UX |
+| Dropdown status filter (reverted redesign) | User preference for original layout | ✓ Good — v3.4 decision |
 
-## Current Milestone: v3.4 Kapso Inbox Integration
+## Next Milestone: v3.5 (Planning)
 
-**Goal:** Replace current Inbox with Kapso's WhatsApp Cloud Inbox UI and fix Your Intern page crashes for production use.
+**Goal:** Production deployment and payment integration
 
 **Target features:**
-- Replace Inbox with Kapso's whatsapp-cloud-inbox (Next.js 15 + shadcn/ui)
-- Enhanced status filtering (hot/warm/cold/new/client/lost)
-- Fix Your Intern page application errors in production
-- Keep Your Intern as separate sidebar item
-- Install agent-skills MCP for development workflow
+- Unblock Vercel deployment (resolve billing freeze)
+- Production testing with Eagle Overseas
+- Payment Integration (Midtrans)
+- AI Model Selection UI
+- Close Phase 4 verification gap
 
 **Success criteria:**
-- Inbox displays conversations using Kapso UI components
-- Status filter works with Convex lead statuses
-- Real-time updates continue working via Convex subscriptions
-- Your Intern page loads without errors on my21staff.com
-- All 5 tabs functional (Persona, Flow, Database, Scoring, Slots)
+- Production URL accessible with live Kapso webhooks
+- E2E ARI flow tested with real WhatsApp leads
+- Payment flow working for Eagle billing
+- User can choose between Grok and Sea-Lion
 
 ---
-*Last updated: 2026-01-27 after v3.4 milestone started*
+*Last updated: 2026-01-28 after v3.4 milestone completed*

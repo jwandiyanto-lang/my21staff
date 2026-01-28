@@ -1,5 +1,38 @@
 # Project Milestones: my21staff
 
+## v3.4 Kapso Inbox Integration (Shipped: 2026-01-28)
+
+**Delivered:** Modern WhatsApp-first Inbox UI with AI configuration hot-reload. Complete bot admin interface with real-time filtering, AI/Human handover toggle, and end-to-end automation flow from new lead to consultation booking.
+
+**Phases completed:** 1-6 (15 plans total)
+
+**Key accomplishments:**
+
+- Agent Skills Infrastructure — Kapso agent-skills with 5 skill sets and MCP server (26 API tools)
+- Your Intern Admin Interface — Global AI toggle, error boundaries, 5 config tabs (Persona, Flow, Database, Scoring, Slots)
+- Inbox Modernization — WhatsApp-first UI with status filtering, real-time sync, AI/Human toggle per conversation
+- Configuration Hot-Reload — Complete ARI flow with workspace config applied on every message without restart
+- Two-Level AI Gating — Global toggle (ariConfig.enabled) + per-conversation toggle (conversation.status)
+- End-to-End Automation — New lead → AI greeting → qualification → routing → consultation booking complete
+
+**Stats:**
+
+- 120+ files modified
+- 47,745 lines of TypeScript (34,931 src + 12,814 convex)
+- 6 phases, 15 plans
+- 2 days (Jan 27 → Jan 28, 2026)
+
+**Git range:** `feat(06-01)` → `docs(06)`
+
+**Tech debt noted (non-blocking):**
+- MCP connection failure (Kapso endpoint unreachable — skills installed, code works)
+- Phase 4 missing formal verification (UAT performed, integration confirmed)
+- Sea-Lion local LLM disabled (Grok fallback working)
+
+**What's next:** Production deployment with live Kapso webhooks, payment integration
+
+---
+
 ## v3.2 CRM Core Fresh (Shipped: 2026-01-25)
 
 **Delivered:** Complete CRM rebuild on Convex with Supabase entirely removed. Contact Database, WhatsApp Inbox, Dashboard, and Settings — all with real-time updates.
@@ -214,4 +247,4 @@
 
 ---
 
-*Total shipped:* 193 plans across 8 milestones
+*Total shipped:* 208 plans across 9 milestones
