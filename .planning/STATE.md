@@ -6,24 +6,24 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
-**Current focus:** Phase 1 - Localhost Polish
+**Current focus:** Phase 2 - Production Deployment Preparation
 
 ## Current Position
 
 Milestone: v3.5 Production Go-Live
-Phase: 1 of 3 (Localhost Polish) - COMPLETE
-Plan: 3 of 3 in Phase 1 (all plans complete)
-Status: Phase 1 complete, ready for Phase 2 (Production Deployment Preparation)
-Last activity: 2026-01-28 — Completed 01-03-PLAN.md (Localhost Polish Verification)
+Phase: 2 of 3 (Production Deployment Preparation) - IN PROGRESS
+Plan: 1 of 3 in Phase 2 (02-01 complete)
+Status: Build preparation complete, ready for environment setup
+Last activity: 2026-01-28 — Completed 02-01-PLAN.md (Production Build Preparation)
 
-Progress: [███░░░░░░░] 33% (1 of 3 phases complete, 3 plans complete in Phase 1)
+Progress: [████░░░░░░] 40% (1 of 3 phases complete + 1 of 3 plans in Phase 2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18 (15 from v3.4 + 3 from v3.5)
+- Total plans completed: 19 (15 from v3.4 + 4 from v3.5)
 - v3.4 execution: 6 phases, 15 plans, ~76 min (2 days: Jan 27 → Jan 28)
-- v3.5 execution: Phase 1 complete - 3 plans, ~12 min total (5 min + 2 min + 5 min)
+- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 in progress (1 of 3 plans, 6 min)
 
 **By Milestone:**
 
@@ -64,6 +64,8 @@ Recent decisions affecting current work:
 - v3.5 (01-03): React hooks compliance verified using ternary pattern for dev mode checks
 - v3.5 (01-03): Production build verified to succeed without NEXT_PUBLIC_DEV_MODE
 - v3.5 (01-03): Complete localhost polish approved - Phase 1 ready for deployment prep
+- v3.5 (02-01): Environment template in repository with placeholder values (no security risk)
+- v3.5 (02-01): Clerk JWT template verification documented as critical manual step
 
 ### Pending Todos
 
@@ -79,32 +81,38 @@ None yet.
 **Production deployment readiness:**
 - Vercel billing freeze (user will deploy to Railway/Render/Fly.io instead)
 - Webhook E2E testing deferred to production (ngrok issues)
-- 13 environment variables must be configured before deployment
+- ✅ 13 environment variables documented in .env.production template
+- ⚠️ Clerk JWT template requires manual verification (org_id claim)
 - 24-hour monitoring required for Phase 9 stability verification
 
 **From v3.5 Phase 1 (COMPLETE):**
-- NONE - Phase 1 Localhost Polish complete
 - ✅ All /demo pages working correctly (LOCALHOST-03)
 - ✅ All 5 Your Intern tabs functional (LOCALHOST-04)
 - ✅ Dev mode audit complete, no production leaks (LOCALHOST-06)
 - ✅ React hooks compliance verified (LOCALHOST-07)
 - ✅ UI polish confirmed acceptable (LOCALHOST-08)
-- Ready for Phase 2 (Production Deployment Preparation)
+
+**From v3.5 Phase 2 (IN PROGRESS):**
+- ✅ Production build compiles successfully (02-01)
+- ✅ Environment variables documented (02-01)
+- ✅ Clerk JWT template requirement documented (02-01)
+- Next: Environment setup and verification (02-02)
 
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Phase 1 complete + Database architecture rules established
-Resume file: .planning/PAUSE-CONTEXT.md
+Stopped at: Completed 02-01-PLAN.md (Production Build Preparation)
+Resume file: None
+Next plan: 02-02 (Environment Setup & Verification)
 
 **What happened this session:**
-- Fixed database page errors (variable initialization, hydration mismatches)
-- Removed assigned_to column and staff filter (~160 lines)
-- Added ESLint protections and development rules documentation
-- Established "Database as Single Source of Truth" architecture rule
+- Fixed 3 TypeScript build errors (calculatedScore, InfoSidebar props, MOCK constants)
+- Created .env.production template with all 13 required variables
+- Documented Clerk JWT template requirement (critical manual verification)
+- Production build now compiles successfully
 
-**Next action:** Begin Phase 2 (Production Deployment Preparation) - `/gsd:plan-phase 2`
+**Next action:** Execute 02-02-PLAN.md (Environment Setup & Verification)
 
 ---
 
-*Last updated: 2026-01-28 — v3.5 Production Go-Live roadmap created*
+*Last updated: 2026-01-28 — v3.5 Phase 2 Plan 01 complete*
