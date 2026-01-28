@@ -5,8 +5,10 @@
  * Supabase Row Level Security (RLS) policies with server-side authorization.
  */
 
-import { query, mutation } from "../_generated/server";
-import type { QueryCtx, MutationCtx } from "../_generated/server";
+import { query } from "../_generated/server";
+import type { QueryCtx } from "../_generated/server";
+
+// v1.0.2 - Fixed auth check to prevent db.insert in query context
 
 /**
  * Verifies that a user is authenticated using Clerk.
@@ -26,7 +28,7 @@ export async function requireAuthentication(
 }
 
 /**
- * Verifies that a user is a member of the specified workspace.
+ * Verifies that a user is a member of specified workspace.
  *
  * This is the primary authorization check for workspace-scoped data access.
  * It replaces Supabase RLS policies that check workspace membership.
@@ -48,19 +50,19 @@ export async function requireWorkspaceMembership(
   const clerkId = identity.subject;
 
   // Look up user by Clerk ID to get their Convex user document
-  let user = await ctx.db
+  const user = await ctx.db
     .query("users")
     .withIndex("by_clerk_id", (q: any) => q.eq("clerk_id", clerkId))
     .first();
 
   // For queries, if user doesn't exist, throw Unauthorized
-  // User will be auto-created when calling a mutation or when Clerk webhook fires
+  // User will be auto-created by Clerk webhooks
   // This prevents "db.insert" calls from query context
   if (!user) {
     throw new Error("Unauthorized: User not found. Please sign out and sign back in.");
   }
 
-  // Verify the workspace exists
+  // Verify workspace exists
   const workspace = await ctx.db.get(workspaceId as any);
   if (!workspace) {
     throw new Error("Workspace not found");
