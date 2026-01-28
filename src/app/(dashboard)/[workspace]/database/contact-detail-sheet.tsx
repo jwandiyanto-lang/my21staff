@@ -970,88 +970,125 @@ export function ContactDetailSheet({
 
                 {/* Lead Score with Tabs */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                      Lead Score
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {isUpdatingScore && (
-                        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                      )}
-                      <span
-                        className="text-xl font-semibold tabular-nums"
-                        style={{ color: getScoreColor(displayScore) }}
-                      >
-                        {displayScore}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="h-3 flex-1 rounded-full bg-muted overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{
-                          width: `${Math.min(displayScore, 100)}%`,
-                          backgroundColor: getScoreColor(displayScore),
-                        }}
-                      />
-                    </div>
-                    <Slider
-                      value={[displayScore]}
-                      onValueChange={handleScoreChange}
-                      min={0}
-                      max={100}
-                      step={1}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>0</span>
-                      <span>50</span>
-                      <span>100</span>
-                    </div>
-                  </div>
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                    Lead Score
+                  </h3>
 
                   {/* Score Type Tabs */}
-                  <Tabs defaultValue="form" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 h-9">
-                      <TabsTrigger value="form" className="text-xs">Form Score</TabsTrigger>
-                      <TabsTrigger value="chat" className="text-xs">Chat Score</TabsTrigger>
+                  <Tabs defaultValue="total" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 h-9">
+                      <TabsTrigger value="total" className="text-xs">Total</TabsTrigger>
+                      <TabsTrigger value="form" className="text-xs">Form</TabsTrigger>
+                      <TabsTrigger value="chat" className="text-xs">Chat</TabsTrigger>
                     </TabsList>
 
+                    {/* Total Score Tab */}
+                    <TabsContent value="total" className="mt-3 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-medium text-muted-foreground">Combined Score</h4>
+                        <div className="flex items-center gap-2">
+                          {isUpdatingScore && (
+                            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                          )}
+                          <span
+                            className="text-2xl font-semibold tabular-nums"
+                            style={{ color: getScoreColor(displayScore) }}
+                          >
+                            {displayScore}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="h-3 flex-1 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{
+                              width: `${Math.min(displayScore, 100)}%`,
+                              backgroundColor: getScoreColor(displayScore),
+                            }}
+                          />
+                        </div>
+                        <Slider
+                          value={[displayScore]}
+                          onValueChange={handleScoreChange}
+                          min={0}
+                          max={100}
+                          step={1}
+                          className="w-full"
+                        />
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>0</span>
+                          <span>50</span>
+                          <span>100</span>
+                        </div>
+                      </div>
+
+                      {/* Score Components */}
+                      <div className="space-y-2 pt-2">
+                        <h4 className="text-xs font-medium text-muted-foreground">Score Components</h4>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Form Score</span>
+                            <span className="font-medium" style={{ color: getScoreColor(calculatedScore) }}>
+                              {calculatedScore} pts
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Chat Score</span>
+                            <span className="font-medium" style={{ color: getScoreColor(35) }}>
+                              35 pts
+                            </span>
+                          </div>
+                          <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
+                            <span>Average</span>
+                            <span style={{ color: getScoreColor(displayScore) }}>
+                              {displayScore} pts
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+
                     {/* Form Score Tab */}
-                    <TabsContent value="form" className="mt-3 space-y-2">
+                    <TabsContent value="form" className="mt-3 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-medium text-muted-foreground">Questionnaire Score</h4>
+                        <span
+                          className="text-2xl font-semibold tabular-nums"
+                          style={{ color: getScoreColor(calculatedScore) }}
+                        >
+                          {calculatedScore}
+                        </span>
+                      </div>
                       {scoreBreakdown.length > 0 ? (
-                        <>
-                          <h4 className="text-xs font-medium text-muted-foreground">Questionnaire Breakdown</h4>
-                          <div className="space-y-1.5">
-                            {scoreBreakdown.map((item) => (
-                              <div key={item.label} className="flex items-center justify-between text-sm">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground">{item.label}</span>
-                                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                                    {item.value}
-                                  </span>
-                                </div>
-                                <span className={cn(
-                                  "font-medium tabular-nums",
-                                  item.points < 0 ? "text-red-500" :
-                                  item.points >= item.maxPoints ? "text-green-600" : "text-foreground"
-                                )}>
-                                  {item.points > 0 ? '+' : ''}{item.points}
-                                  {item.maxPoints > 0 && (
-                                    <span className="text-muted-foreground text-xs">/{item.maxPoints}</span>
-                                  )}
+                        <div className="space-y-1.5">
+                          {scoreBreakdown.map((item) => (
+                            <div key={item.label} className="flex items-center justify-between text-sm">
+                              <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">{item.label}</span>
+                                <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                                  {item.value}
                                 </span>
                               </div>
-                            ))}
-                            <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
-                              <span>Total</span>
-                              <span style={{ color: getScoreColor(calculatedScore) }}>
-                                {calculatedScore} pts
+                              <span className={cn(
+                                "font-medium tabular-nums",
+                                item.points < 0 ? "text-red-500" :
+                                item.points >= item.maxPoints ? "text-green-600" : "text-foreground"
+                              )}>
+                                {item.points > 0 ? '+' : ''}{item.points}
+                                {item.maxPoints > 0 && (
+                                  <span className="text-muted-foreground text-xs">/{item.maxPoints}</span>
+                                )}
                               </span>
                             </div>
+                          ))}
+                          <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
+                            <span>Total</span>
+                            <span style={{ color: getScoreColor(calculatedScore) }}>
+                              {calculatedScore} pts
+                            </span>
                           </div>
-                        </>
+                        </div>
                       ) : (
                         <div className="text-center py-4">
                           <p className="text-sm text-muted-foreground">No questionnaire data available</p>
@@ -1060,15 +1097,63 @@ export function ContactDetailSheet({
                     </TabsContent>
 
                     {/* Chat Score Tab */}
-                    <TabsContent value="chat" className="mt-3 space-y-2">
-                      <h4 className="text-xs font-medium text-muted-foreground">Bot Conversation Analysis</h4>
-                      <div className="text-center py-6">
-                        <MessageCircle className="mx-auto h-8 w-8 text-muted-foreground/50 mb-2" />
-                        <p className="text-sm text-muted-foreground">Chat scoring coming soon</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Scores will be calculated based on bot conversation quality
-                        </p>
+                    <TabsContent value="chat" className="mt-3 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-medium text-muted-foreground">Bot Conversation Score</h4>
+                        <span
+                          className="text-2xl font-semibold tabular-nums"
+                          style={{ color: getScoreColor(35) }}
+                        >
+                          35
+                        </span>
                       </div>
+
+                      {/* Dummy Chat Score Breakdown */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Response Quality</span>
+                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                              Good
+                            </span>
+                          </div>
+                          <span className="font-medium tabular-nums text-foreground">
+                            +15<span className="text-muted-foreground text-xs">/20</span>
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Engagement Level</span>
+                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                              Medium
+                            </span>
+                          </div>
+                          <span className="font-medium tabular-nums text-foreground">
+                            +10<span className="text-muted-foreground text-xs">/15</span>
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Intent Clarity</span>
+                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                              High
+                            </span>
+                          </div>
+                          <span className="font-medium tabular-nums text-green-600">
+                            +10<span className="text-muted-foreground text-xs">/10</span>
+                          </span>
+                        </div>
+                        <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
+                          <span>Total</span>
+                          <span style={{ color: getScoreColor(35) }}>
+                            35 pts
+                          </span>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-muted-foreground italic text-center pt-2">
+                        * Dummy data - real scoring coming soon
+                      </p>
                     </TabsContent>
                   </Tabs>
                 </div>
