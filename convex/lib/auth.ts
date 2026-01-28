@@ -6,24 +6,23 @@
  */
 
 import { query, mutation } from "../_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
 import type { QueryCtx, MutationCtx } from "../_generated/server";
 
 /**
- * Verifies that a user is authenticated.
+ * Verifies that a user is authenticated using Clerk.
  *
  * @param ctx - Query or mutation context
- * @returns The authenticated user's ID (Supabase UUID)
+ * @returns The authenticated user's ID (Clerk user ID)
  * @throws Error if not authenticated
  */
 export async function requireAuthentication(
   ctx: QueryCtx | MutationContext
 ): Promise<string> {
-  const userId = await getAuthUserId(ctx);
-  if (!userId) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
     throw new Error("Unauthorized");
   }
-  return userId;
+  return identity.subject;
 }
 
 /**
@@ -41,10 +40,12 @@ export async function requireWorkspaceMembership(
   ctx: QueryCtx | MutationContext,
   workspaceId: string
 ): Promise<{ userId: string; membership: any }> {
-  const userId = await getAuthUserId(ctx);
-  if (!userId) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
     throw new Error("Unauthorized");
   }
+
+  const userId = identity.subject;
 
   const membership = await ctx.db
     .query("workspaceMembers")
