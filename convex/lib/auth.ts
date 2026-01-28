@@ -68,11 +68,21 @@ export async function requireWorkspaceMembership(
     }
   }
 
-  // Check workspace membership using the user's Convex ID
+  // Find the organization that owns this workspace
+  const organization = await ctx.db
+    .query("organizations")
+    .withIndex("by_workspace", (q: any) => q.eq("workspace_id", workspaceId))
+    .first();
+
+  if (!organization) {
+    throw new Error("Workspace not linked to an organization");
+  }
+
+  // Check if user is a member of this organization (Clerk-based membership)
   const membership = await ctx.db
-    .query("workspaceMembers")
-    .withIndex("by_user_workspace", (q: any) =>
-      q.eq("user_id", user._id).eq("workspace_id", workspaceId)
+    .query("organizationMembers")
+    .withIndex("by_org_user", (q: any) =>
+      q.eq("organization_id", organization._id).eq("clerk_user_id", clerkId)
     )
     .first();
 
