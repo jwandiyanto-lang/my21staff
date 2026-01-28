@@ -20,16 +20,14 @@ import { requireWorkspaceMembership } from "./lib/auth";
  */
 export const getAriConfig = query({
   args: {
-    workspace_id: v.string(),
+    workspace_id: v.id("workspaces"),
   },
   handler: async (ctx, args) => {
-    // TEMPORARY: Skip workspace membership check to fix production settings page
-    // Will be re-enabled once proper auth sync is implemented
-    // await requireWorkspaceMembership(ctx, args.workspace_id);
+    await requireWorkspaceMembership(ctx, args.workspace_id);
 
     const config = await ctx.db
       .query("ariConfig")
-      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
       .first();
 
     return config;

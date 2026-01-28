@@ -53,19 +53,11 @@ export async function requireWorkspaceMembership(
     .withIndex("by_clerk_id", (q: any) => q.eq("clerk_id", clerkId))
     .first();
 
-  // Auto-create user if doesn't exist (handles webhook delays or missing webhooks)
+  // For queries, if user doesn't exist, throw Unauthorized
+  // User will be auto-created when calling a mutation or when Clerk webhook fires
+  // This prevents "db.insert" calls from query context
   if (!user) {
-    const now = Date.now();
-    const userId = await ctx.db.insert("users", {
-      clerk_id: clerkId,
-      workspace_id: undefined,
-      created_at: now,
-      updated_at: now,
-    });
-    user = await ctx.db.get(userId);
-    if (!user) {
-      throw new Error("Failed to create user");
-    }
+    throw new Error("Unauthorized: User not found. Please sign out and sign back in.");
   }
 
   // Verify the workspace exists

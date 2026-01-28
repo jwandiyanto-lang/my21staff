@@ -113,7 +113,7 @@ export default defineSchema({
   // ARI CONFIG (AI Response Intelligence)
   // ============================================
   ariConfig: defineTable({
-    workspace_id: v.id("workspaces"),
+    workspace_id: v.string(), // Using string to match query args type
     enabled: v.optional(v.boolean()), // AI toggle - true by default if not set
     bot_name: v.string(),
     greeting_style: v.string(), // 'professional', 'friendly', 'casual'
@@ -129,8 +129,8 @@ export default defineSchema({
   // ARI CONVERSATIONS (AI bot state per contact)
   // ============================================
   ariConversations: defineTable({
-    workspace_id: v.id("workspaces"),
-    contact_id: v.id("contacts"),
+    workspace_id: v.string(),
+    contact_id: v.string(),
     state: v.string(), // 'greeting', 'qualifying', 'scheduling', 'handoff', 'ended'
     lead_score: v.number(),
     lead_temperature: v.optional(v.string()), // 'hot', 'warm', 'cold'
@@ -151,8 +151,8 @@ export default defineSchema({
   // ARI MESSAGES (AI conversation history)
   // ============================================
   ariMessages: defineTable({
-    ari_conversation_id: v.id("ariConversations"),
-    workspace_id: v.id("workspaces"),
+    ari_conversation_id: v.string(),
+    workspace_id: v.string(),
     role: v.string(), // 'user', 'assistant', 'system'
     content: v.string(),
     ai_model: v.optional(v.string()),
@@ -290,7 +290,7 @@ export default defineSchema({
   // ARI DESTINATIONS (University knowledge base)
   // ============================================
   ariDestinations: defineTable({
-    workspace_id: v.id("workspaces"),
+    workspace_id: v.string(),
     country: v.string(),
     city: v.optional(v.string()),
     university_name: v.string(),
@@ -331,9 +331,9 @@ export default defineSchema({
   // ARI APPOINTMENTS (Consultation scheduling)
   // ============================================
   ariAppointments: defineTable({
-    ari_conversation_id: v.id("ariConversations"),
-    workspace_id: v.id("workspaces"),
-    payment_id: v.optional(v.id("ariPayments")),
+    ari_conversation_id: v.string(),
+    workspace_id: v.string(),
+    payment_id: v.optional(v.string()),
     consultant_id: v.optional(v.string()), // Clerk user ID
     scheduled_at: v.number(),
     duration_minutes: v.number(), // Default: 60
@@ -370,7 +370,7 @@ export default defineSchema({
   // ARI FLOW STAGES (Custom conversation stages)
   // ============================================
   ariFlowStages: defineTable({
-    workspace_id: v.id("workspaces"),
+    workspace_id: v.string(),
     name: v.string(),
     goal: v.string(),
     sample_script: v.optional(v.string()),
@@ -387,8 +387,8 @@ export default defineSchema({
   // ARI FLOW STAGE OUTCOMES (Scoring outcomes per stage)
   // ============================================
   ariFlowStageOutcomes: defineTable({
-    stage_id: v.id("ariFlowStages"),
-    workspace_id: v.id("workspaces"),
+    stage_id: v.string(),
+    workspace_id: v.string(),
     description: v.string(),
     points: v.number(),
     keywords: v.optional(v.string()),
@@ -403,7 +403,7 @@ export default defineSchema({
   // ARI KNOWLEDGE CATEGORIES (Knowledge base categories)
   // ============================================
   ariKnowledgeCategories: defineTable({
-    workspace_id: v.id("workspaces"),
+    workspace_id: v.string(),
     name: v.string(),
     description: v.optional(v.string()),
     display_order: v.number(),
@@ -417,8 +417,8 @@ export default defineSchema({
   // ARI KNOWLEDGE ENTRIES (Knowledge base entries)
   // ============================================
   ariKnowledgeEntries: defineTable({
-    workspace_id: v.id("workspaces"),
-    category_id: v.optional(v.id("ariKnowledgeCategories")),
+    workspace_id: v.string(),
+    category_id: v.optional(v.string()),
     title: v.string(),
     content: v.string(),
     is_active: v.boolean(),
@@ -432,7 +432,7 @@ export default defineSchema({
   // ARI SCORING CONFIG (Scoring thresholds)
   // ============================================
   ariScoringConfig: defineTable({
-    workspace_id: v.id("workspaces"),
+    workspace_id: v.string(),
     hot_threshold: v.number(), // Default: 70
     warm_threshold: v.number(), // Default: 40
     weight_basic: v.number(), // Default: 25
@@ -448,7 +448,7 @@ export default defineSchema({
   // CONSULTANT SLOTS (Booking availability)
   // ============================================
   consultantSlots: defineTable({
-    workspace_id: v.id("workspaces"),
+    workspace_id: v.string(),
     consultant_id: v.optional(v.string()), // Clerk user ID
     day_of_week: v.number(), // 0-6 (Sunday-Saturday)
     start_time: v.string(), // HH:MM format

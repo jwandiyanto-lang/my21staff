@@ -243,7 +243,7 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   // Fetch AI config on client side with Clerk auth context
   const ariConfig = useQuery(
     api.ari.getAriConfig,
-    isDevMode ? 'skip' : { workspace_id: workspace.id }
+    isDevMode ? 'skip' : { workspace_id: workspace.id as any }
   )
 
   // In dev mode, default to enabled. In production, wait for query result.
