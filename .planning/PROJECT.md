@@ -158,6 +158,7 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - **AI Models**: Grok API + Sea-Lion (Ollama at 100.113.96.25:11434)
 - **Deployment**: Vercel (blocked) + Convex Cloud (active)
 - **Performance**: Convex achieves 37ms P95, 25.4x faster than Supabase
+- **Architecture**: Database is single source of truth - Dashboard, Inbox, and all features MUST read from Database API (no parallel data stores)
 
 ## Key Decisions
 
@@ -194,6 +195,8 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | Configuration hot-reload via mutation | No caching, fresh on every call | ✓ Good — v3.4 pattern |
 | Toast notifications for config saves | User feedback on state changes | ✓ Good — v3.4 UX |
 | Dropdown status filter (reverted redesign) | User preference for original layout | ✓ Good — v3.4 decision |
+| Database as single source of truth | All features (Dashboard, Inbox) derive from Database API | ✓ Good — v3.5 architecture |
+| Remove assigned_to column | Simplify database view, remove unused staff management | ✓ Good — v3.5 simplification |
 
 ## Current Milestone: v3.5 Production Go-Live
 

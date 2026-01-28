@@ -1,5 +1,59 @@
 # Development Rules
 
+## ⚠️ CRITICAL: Database as Single Source of Truth
+
+**THE DATABASE IS THE SOURCE OF EVERYTHING.**
+
+All data displayed in the application MUST originate from the Database page/API. No other page should create or store its own data.
+
+### Architecture Rule
+
+```
+Database (Contact List)
+    ↓
+    ├── Dashboard (reads from Database, displays stats/summaries)
+    ├── Inbox (reads from Database, shows conversations)
+    └── Any future feature (reads from Database)
+```
+
+### Implementation Requirements
+
+1. **Dashboard Page**
+   - ✅ MUST read contacts from Database API
+   - ❌ MUST NOT have its own contact storage
+   - ✅ MUST calculate stats from Database data
+   - Example: Total contacts, status breakdown, recent activity
+
+2. **Inbox Page**
+   - ✅ MUST read conversations linked to Database contacts
+   - ❌ MUST NOT create standalone conversations
+   - ✅ MUST sync conversation data with Database contact records
+   - Example: Message history tied to contact.id
+
+3. **Future Features**
+   - ✅ MUST query Database API for contact data
+   - ❌ MUST NOT duplicate contact information
+   - ✅ MUST update Database when contact data changes
+   - Example: Reports, analytics, exports all source from Database
+
+### Why This Matters
+
+- **Single source of truth** - No data inconsistencies
+- **Easier maintenance** - Update data in one place
+- **Better UX** - Changes instantly reflect everywhere
+- **Simpler debugging** - One place to check data issues
+
+### Before Adding New Features
+
+Ask yourself:
+1. "Does this feature need contact data?" → Use Database API
+2. "Should this data appear in Database?" → Yes, store it there
+3. "Can users manage this in Database?" → Make it editable in Database
+
+**NEVER create parallel data stores.** If Dashboard or Inbox needs new data, add it to the Database schema first.
+
+---
+
 ## Code Quality Checks
 
 ### Before Committing Code

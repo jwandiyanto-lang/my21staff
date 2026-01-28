@@ -59,6 +59,24 @@ Kapso API for WhatsApp
 
 ---
 
+## ⚠️ Architecture: Database as Single Source of Truth
+
+**THE DATABASE IS THE SOURCE OF EVERYTHING.**
+
+```
+Database (Contact List) → Dashboard, Inbox, All Features
+```
+
+**Rules:**
+- Dashboard MUST read from Database (no separate contact storage)
+- Inbox MUST link to Database contacts (no standalone conversations)
+- All new features MUST query Database API for contact data
+- NEVER create parallel data stores
+
+**Full details:** [docs/DEVELOPMENT-RULES.md](docs/DEVELOPMENT-RULES.md)
+
+---
+
 ## Commands
 
 | Command | Purpose |
