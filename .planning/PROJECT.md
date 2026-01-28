@@ -195,22 +195,22 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | Toast notifications for config saves | User feedback on state changes | ✓ Good — v3.4 UX |
 | Dropdown status filter (reverted redesign) | User preference for original layout | ✓ Good — v3.4 decision |
 
-## Next Milestone: v3.5 (Planning)
+## Current Milestone: v3.5 Production Go-Live
 
-**Goal:** Production deployment and payment integration
+**Goal:** Deploy v3.4 features to production and activate live Kapso bot with Eagle Overseas.
 
 **Target features:**
-- Unblock Vercel deployment (resolve billing freeze)
-- Production testing with Eagle Overseas
-- Payment Integration (Midtrans)
-- AI Model Selection UI
-- Close Phase 4 verification gap
+- Localhost polish (UI details, dev mode bugs, complete flow testing)
+- Production deployment (manual deploy, environment setup, feature parity verification)
+- Live bot integration (Kapso webhooks, ARI responding to real WhatsApp leads, complete automation)
 
 **Success criteria:**
-- Production URL accessible with live Kapso webhooks
-- E2E ARI flow tested with real WhatsApp leads
-- Payment flow working for Eagle billing
-- User can choose between Grok and Sea-Lion
+- All localhost flows work correctly in /demo workspace
+- Production deployment matches localhost feature parity
+- Kapso webhooks deliver messages to production
+- ARI bot responds to real WhatsApp conversations
+- Complete lead flow works: greeting → qualification → routing → booking
+- All Your Intern settings tabs active and functional in production
 
 ---
-*Last updated: 2026-01-28 after v3.4 milestone completed*
+*Last updated: 2026-01-28 after v3.5 milestone started*

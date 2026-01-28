@@ -2,18 +2,18 @@
 
 ## Project Reference
 
-See: planning/PROJECT.md (updated 2026-01-27)
+See: planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** The system that lets you grow
-**Current focus:** v3.4 Kapso Inbox Integration
+**Current focus:** v3.5 Production Go-Live
 
 ## Current Position
 
-Milestone: v3.4 Kapso Inbox Integration
-Phase: 6 of 6 (ARI Flow Integration)
-Plan: 4 of 4 in phase
-Status: PHASE COMPLETE - End-to-end ARI flow integration verified
-Last activity: 2026-01-28 — Completed 06-04-PLAN.md (End-to-end verification)
+Milestone: v3.5 Production Go-Live
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-01-28 — Milestone v3.5 started
 
 Progress: v1.0 ██████████ | v2.0 ██████████ | v2.1 ██████████ | v2.2 ██████████ | v3.0 ██████████ | v3.1 ██████████ | v3.2 ██████████ | v3.3 ██████████ | v3.4 ██████████ (100%)
 
