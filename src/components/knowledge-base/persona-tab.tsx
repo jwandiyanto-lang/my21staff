@@ -84,12 +84,15 @@ export function PersonaTab({ workspaceId }: PersonaTabProps) {
   }
 
   async function handleSave() {
+    console.log('[PersonaTab] handleSave called')
+
     // Validate bot name
     if (!botName.trim()) {
       toast.error("Your intern's name is required")
       return
     }
 
+    console.log('[PersonaTab] Saving:', { botName, toneDescription, greetingTemplate, communityLink })
     setIsSaving(true)
     try {
       const res = await fetch(`/api/workspaces/${workspaceId}/ari-config`, {
@@ -105,8 +108,12 @@ export function PersonaTab({ workspaceId }: PersonaTabProps) {
 
       if (!res.ok) {
         const data = await res.json()
+        console.error('[PersonaTab] Save failed:', data)
         throw new Error(data.error || 'Failed to save')
       }
+
+      const responseData = await res.json()
+      console.log('[PersonaTab] Save successful:', responseData)
 
       // Update original values to reflect saved state
       setOriginalValues({
