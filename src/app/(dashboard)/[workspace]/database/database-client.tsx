@@ -31,7 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ChevronDown, ChevronLeft, ChevronRight, Filter, Tag, SlidersHorizontal, X, Loader2, User } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Filter, Tag, SlidersHorizontal, X, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useContacts, useUpdateContact, useDeleteContact } from '@/lib/queries/use-contacts'
 import { useWorkspaceSettings } from '@/lib/queries/use-workspace-settings'
@@ -54,13 +54,12 @@ const DEFAULT_COLUMNS = COLUMN_OPTIONS.map((col) => col.id)
 interface DatabaseFilters {
   activeStatus: LeadStatus | 'all'
   selectedTags: string[]
-  assignedTo: string // 'all' | 'unassigned' | user_id
   visibleColumns: string[]
 }
 
 function loadFiltersFromStorage(): DatabaseFilters {
   if (typeof window === 'undefined') {
-    return { activeStatus: 'all', selectedTags: [], assignedTo: 'all', visibleColumns: DEFAULT_COLUMNS }
+    return { activeStatus: 'all', selectedTags: [], visibleColumns: DEFAULT_COLUMNS }
   }
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
@@ -69,14 +68,13 @@ function loadFiltersFromStorage(): DatabaseFilters {
       return {
         activeStatus: parsed.activeStatus || 'all',
         selectedTags: parsed.selectedTags || [],
-        assignedTo: parsed.assignedTo || 'all',
         visibleColumns: parsed.visibleColumns || DEFAULT_COLUMNS,
       }
     }
   } catch {
     // Ignore parse errors
   }
-  return { activeStatus: 'all', selectedTags: [], assignedTo: 'all', visibleColumns: DEFAULT_COLUMNS }
+  return { activeStatus: 'all', selectedTags: [], visibleColumns: DEFAULT_COLUMNS }
 }
 
 interface DatabaseClientProps {
@@ -92,9 +90,6 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   )
   const [selectedTags, setSelectedTags] = useState<string[]>(() =>
     typeof window !== 'undefined' ? loadFiltersFromStorage().selectedTags : []
-  )
-  const [assignedTo, setAssignedTo] = useState<string>(() =>
-    typeof window !== 'undefined' ? loadFiltersFromStorage().assignedTo : 'all'
   )
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
     typeof window !== 'undefined' ? loadFiltersFromStorage().visibleColumns : DEFAULT_COLUMNS
@@ -128,9 +123,9 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   // Persist filters to localStorage whenever they change
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const filters: DatabaseFilters = { activeStatus, selectedTags, assignedTo, visibleColumns }
+    const filters: DatabaseFilters = { activeStatus, selectedTags, visibleColumns }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filters))
-  }, [activeStatus, selectedTags, assignedTo, visibleColumns])
+  }, [activeStatus, selectedTags, visibleColumns])
 
   // Handle inline status change using mutation
   const handleStatusChange = useCallback((contactId: string, newStatus: LeadStatus) => {
@@ -139,21 +134,6 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
       {
         onError: () => {
           toast.error('Failed to update status')
-        },
-      }
-    )
-  }, [updateMutation])
-
-  // Handle inline assignee change using mutation
-  const handleAssigneeChange = useCallback((contactId: string, assigneeId: string | null) => {
-    updateMutation.mutate(
-      { contactId, updates: { assigned_to: assigneeId } },
-      {
-        onSuccess: () => {
-          toast.success(assigneeId ? 'Contact assigned' : 'Contact unassigned')
-        },
-        onError: () => {
-          toast.error('Failed to update assignee')
         },
       }
     )
@@ -211,13 +191,12 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   const allColumns = useMemo(
     () => createColumns({
       onStatusChange: handleStatusChange,
-      onAssigneeChange: handleAssigneeChange,
       onTagsChange: handleTagsChange,
       onDelete: setContactToDelete,
       teamMembers: columnTeamMembers,
       contactTags,
     }),
-    [handleStatusChange, handleAssigneeChange, handleTagsChange, columnTeamMembers, contactTags]
+    [handleStatusChange, handleTagsChange, columnTeamMembers, contactTags]
   )
 
   const columns = useMemo(
@@ -249,12 +228,6 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
     )
   }
 
-  // Get assigned member name helper
-  const getAssignedMemberName = (userId: string) => {
-    const member = teamMembers.find(m => m.user_id === userId)
-    return member?.profile?.full_name || member?.profile?.email || 'Unknown'
-  }
-
   const filteredContacts = useMemo(() => {
     let filtered = contacts
 
@@ -270,17 +243,8 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
       )
     }
 
-    // Filter by assigned to
-    if (assignedTo !== 'all') {
-      if (assignedTo === 'unassigned') {
-        filtered = filtered.filter((contact) => !contact.assigned_to)
-      } else {
-        filtered = filtered.filter((contact) => contact.assigned_to === assignedTo)
-      }
-    }
-
     return filtered
-  }, [contacts, activeStatus, selectedTags, assignedTo])
+  }, [contacts, activeStatus, selectedTags])
 
   // Calculate total pages based on filtered results
   const totalPages = Math.ceil(filteredContacts.length / PAGE_SIZE)
@@ -289,7 +253,7 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setCurrentPage(1)
-  }, [activeStatus, selectedTags, assignedTo])
+  }, [activeStatus, selectedTags])
 
   // Paginate filtered contacts
   const paginatedContacts = useMemo(() => {
@@ -422,50 +386,6 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
           </Popover>
         )}
 
-        {/* Assigned To Filter Dropdown */}
-        {teamMembers.length > 0 && (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9">
-                <User className="h-4 w-4 mr-2" />
-                {assignedTo === 'all' ? 'All Staff' : assignedTo === 'unassigned' ? 'Unassigned' : getAssignedMemberName(assignedTo)}
-                <ChevronDown className="h-4 w-4 ml-2" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-56 p-2">
-              <div className="space-y-1">
-                <div
-                  className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-                  onClick={() => setAssignedTo('all')}
-                >
-                  <Checkbox checked={assignedTo === 'all'} />
-                  <span className="text-sm">All Staff</span>
-                </div>
-                <div
-                  className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-                  onClick={() => setAssignedTo('unassigned')}
-                >
-                  <Checkbox checked={assignedTo === 'unassigned'} />
-                  <span className="text-sm">Unassigned</span>
-                </div>
-                <DropdownMenuSeparator />
-                {teamMembers.map((member) => {
-                  const isSelected = assignedTo === member.user_id
-                  return (
-                    <div
-                      key={member.user_id}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-                      onClick={() => setAssignedTo(member.user_id)}
-                    >
-                      <Checkbox checked={isSelected} />
-                      <span className="text-sm">{member.profile?.full_name || member.profile?.email || 'Unknown'}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            </PopoverContent>
-          </Popover>
-        )}
 
         {/* Column Visibility Dropdown */}
         <Popover>
@@ -496,7 +416,7 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
         </Popover>
 
         {/* Active filter badges */}
-        {(activeStatus !== 'all' || selectedTags.length > 0 || assignedTo !== 'all') && (
+        {(activeStatus !== 'all' || selectedTags.length > 0) && (
           <div className="flex items-center gap-2 ml-2">
             {activeStatus !== 'all' && (
               <span
@@ -525,16 +445,6 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
                 />
               </span>
             ))}
-            {assignedTo !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                <User className="h-3 w-3" />
-                {assignedTo === 'unassigned' ? 'Unassigned' : getAssignedMemberName(assignedTo)}
-                <X
-                  className="h-3 w-3 cursor-pointer hover:opacity-70"
-                  onClick={() => setAssignedTo('all')}
-                />
-              </span>
-            )}
           </div>
         )}
       </div>

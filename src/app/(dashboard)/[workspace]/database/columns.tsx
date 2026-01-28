@@ -25,14 +25,13 @@ interface TeamMember {
 
 interface ColumnsConfig {
   onStatusChange?: (contactId: string, newStatus: LeadStatus) => void
-  onAssigneeChange?: (contactId: string, assigneeId: string | null) => void
   onTagsChange?: (contactId: string, tags: string[]) => void
   onDelete?: (contact: Contact) => void
   teamMembers?: TeamMember[]
   contactTags?: string[]
 }
 
-export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, onDelete, teamMembers = [], contactTags = [] }: ColumnsConfig = {}): ColumnDef<Contact>[] {
+export function createColumns({ onStatusChange, onTagsChange, onDelete, teamMembers = [], contactTags = [] }: ColumnsConfig = {}): ColumnDef<Contact>[] {
   return [
   {
     accessorKey: 'name',
@@ -220,79 +219,6 @@ export function createColumns({ onStatusChange, onAssigneeChange, onTagsChange, 
                 </DropdownMenuItem>
               )
             })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
-  },
-  {
-    accessorKey: 'assigned_to',
-    header: 'Assigned to',
-    cell: ({ row }) => {
-      const contact = row.original
-      const contactId = contact.id // Capture ID in local variable to avoid closure issues
-      const assignedTo = row.getValue('assigned_to') as string | null
-      const assignedMember = teamMembers.find((m) => m.id === assignedTo)
-
-      if (!onAssigneeChange) {
-        return assignedMember ? (
-          <Badge variant="outline" className="text-xs">
-            {assignedMember.name || 'Unnamed'}
-          </Badge>
-        ) : (
-          <span className="text-muted-foreground">---</span>
-        )
-      }
-
-      return (
-        <DropdownMenu key={contactId}>
-          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            {assignedTo && assignedMember ? (
-              <button
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-muted text-foreground hover:opacity-80 transition-opacity"
-              >
-                {assignedMember.name || 'Unnamed'}
-                <ChevronDown className="h-3 w-3" />
-              </button>
-            ) : (
-              <button
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground hover:bg-muted transition-colors"
-              >
-                ---
-                <ChevronDown className="h-3 w-3" />
-              </button>
-            )}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
-            <DropdownMenuItem
-              onClick={() => onAssigneeChange(contactId, null)}
-              className={!assignedTo ? 'bg-muted' : ''}
-            >
-              <span className="w-2 h-2 rounded-full mr-2 bg-muted-foreground" />
-              Unassigned
-            </DropdownMenuItem>
-            {teamMembers.length > 0 ? (
-              <>
-                <DropdownMenuSeparator />
-                {teamMembers.map((member) => (
-                  <DropdownMenuItem
-                    key={member.id}
-                    onClick={() => onAssigneeChange(contactId, member.id)}
-                    className={assignedTo === member.id ? 'bg-muted' : ''}
-                  >
-                    <span className="w-2 h-2 rounded-full mr-2 bg-primary" />
-                    {member.name || 'Unnamed'}
-                  </DropdownMenuItem>
-                ))}
-              </>
-            ) : (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem disabled className="text-muted-foreground text-xs">
-                  No team members. Add in Settings.
-                </DropdownMenuItem>
-              </>
-            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )
