@@ -62,9 +62,9 @@
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Interactive audit to identify issues
-- [ ] 01-02-PLAN.md — Add missing Slots tab and fix audit issues
-- [ ] 01-03-PLAN.md — Hooks compliance, production build verification, final check
+- [x] 01-01-PLAN.md — Interactive audit to identify issues
+- [x] 01-02-PLAN.md — Add missing Slots tab and fix audit issues
+- [x] 01-03-PLAN.md — Hooks compliance, production build verification, final check
 
 ---
 
@@ -85,10 +85,12 @@ Plans:
 6. Production matches localhost feature parity (all v3.4 features work identically)
 7. Eagle Overseas workspace is accessible with real Convex data (no mock data visible)
 
-**Plans:** TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 08-01: TBD (plan-phase will create)
+- [ ] 02-01-PLAN.md — Fix build errors and prepare environment configuration
+- [ ] 02-02-PLAN.md — Deploy to hosting platform with environment variables
+- [ ] 02-03-PLAN.md — Verify production feature parity and generate verification report
 
 ---
 
@@ -130,7 +132,7 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | 5. AI/Human Handover | v3.4 | 2/2 | Complete | 2026-01-28 |
 | 6. ARI Flow Integration | v3.4 | 2/2 | Complete | 2026-01-28 |
 | 1. Localhost Polish | v3.5 | 3/3 | Complete | 2026-01-28 |
-| 2. Production Deployment | v3.5 | 0/? | Not started | - |
+| 2. Production Deployment | v3.5 | 0/3 | Not started | - |
 | 3. Live Bot Integration | v3.5 | 0/? | Not started | - |
 
 ---
