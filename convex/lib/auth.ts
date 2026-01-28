@@ -48,13 +48,24 @@ export async function requireWorkspaceMembership(
   const clerkId = identity.subject;
 
   // Look up user by Clerk ID to get their Convex user document
-  const user = await ctx.db
+  let user = await ctx.db
     .query("users")
     .withIndex("by_clerk_id", (q: any) => q.eq("clerk_id", clerkId))
     .first();
 
+  // Auto-create user if doesn't exist (handles webhook delays or missing webhooks)
   if (!user) {
-    throw new Error("User not found in database");
+    const now = Date.now();
+    const userId = await ctx.db.insert("users", {
+      clerk_id: clerkId,
+      workspace_id: undefined,
+      created_at: now,
+      updated_at: now,
+    });
+    user = await ctx.db.get(userId);
+    if (!user) {
+      throw new Error("Failed to create user");
+    }
   }
 
   // Check workspace membership using the user's Convex ID
