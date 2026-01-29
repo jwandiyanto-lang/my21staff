@@ -61,16 +61,18 @@ export async function PATCH(
     }
 
     // Update workspace via Convex
-    await convex.mutation(api.workspaces.updateSettings, {
+    const result = await convex.mutation(api.workspaces.updateSettings, {
       workspace_id: workspaceId,
-      ...updates
+      settings: updates.settings as any,
+      kapso_phone_id: updates.kapso_phone_id as string | undefined,
     })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, result })
   } catch (error) {
     console.error('Error in workspace settings API:', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     )
   }
