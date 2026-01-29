@@ -43,39 +43,26 @@ interface MessageBubbleProps {
 export function MessageBubble({ message, onReply }: MessageBubbleProps) {
   const isOutbound = message.direction === 'outbound'
   const isOptimistic = message.isOptimistic || false
-  const [isHovered, setIsHovered] = useState(false)
-
-  // DEBUG: Log message details
-  if (message.content && message.content.length < 50) {
-    console.log('[MessageBubble] Rendering:', {
-      content: message.content.substring(0, 20),
-      direction: message.direction,
-      isOutbound,
-      sender_type: message.sender_type,
-      kapso_id: (message as any).kapso_message_id
-    })
-  }
 
   const handleReply = () => {
+    console.log('[MessageBubble] Reply clicked for message:', message._id)
     onReply?.(message)
   }
 
   return (
     <div
       className={cn(
-        'flex group transition-opacity duration-200 animate-in fade-in slide-in-from-bottom-2',
+        'flex group relative transition-opacity duration-200 animate-in fade-in slide-in-from-bottom-2',
         isOutbound ? 'justify-end' : 'justify-start',
         isOptimistic && 'opacity-70'
       )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Reply button - left side for outbound, shows on hover */}
-      {isOutbound && isHovered && (
+      {/* Reply button - left side for outbound, shows on group hover */}
+      {isOutbound && (
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 mr-1 self-end mb-1 z-10 hover:bg-gray-100"
+          className="h-7 w-7 mr-1 self-end mb-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100"
           onClick={handleReply}
           title="Reply"
         >
@@ -162,12 +149,12 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
         </div>
       </div>
 
-      {/* Reply button - right side for inbound, shows on hover */}
-      {!isOutbound && isHovered && (
+      {/* Reply button - right side for inbound, shows on group hover */}
+      {!isOutbound && (
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 ml-1 self-end mb-1 z-10 hover:bg-gray-100"
+          className="h-7 w-7 ml-1 self-end mb-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100"
           onClick={handleReply}
           title="Reply"
         >
