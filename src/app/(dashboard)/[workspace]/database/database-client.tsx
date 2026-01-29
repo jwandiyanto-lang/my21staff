@@ -5,6 +5,7 @@ import { DataTable } from '@/components/ui/data-table'
 import { createColumns } from './columns'
 import { ContactDetailSheet } from './contact-detail-sheet'
 import { MergeContactsDialog } from './merge-contacts-dialog'
+import { AddContactDialog } from '@/components/database/add-contact-dialog'
 import { TableSkeleton } from '@/components/skeletons/table-skeleton'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { Button } from '@/components/ui/button'
@@ -31,7 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ChevronDown, ChevronLeft, ChevronRight, Filter, Tag, SlidersHorizontal, X, Loader2 } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Filter, Tag, SlidersHorizontal, X, Loader2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useContacts, useUpdateContact, useDeleteContact } from '@/lib/queries/use-contacts'
 import { useWorkspaceSettings } from '@/lib/queries/use-workspace-settings'
@@ -101,6 +102,7 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   const [mergeMode, setMergeMode] = useState(false)
   const [selectedForMerge, setSelectedForMerge] = useState<Contact[]>([])
   const [showMergeDialog, setShowMergeDialog] = useState(false)
+  const [showAddDialog, setShowAddDialog] = useState(false)
 
   // TanStack Query for contacts with pagination
   const { data: contactsData, isLoading: isLoadingContacts, isFetching } = useContacts(workspace.id, currentPage)
@@ -296,9 +298,11 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
             {filteredContacts.length !== totalCount && ` (filtered from ${totalCount})`}
           </p>
         </div>
-        {/* Merge Duplicates button hidden - feature not needed for now */}
         <div className="flex items-center gap-2">
-          {/* Future: Add bulk actions here */}
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Contact
+          </Button>
         </div>
       </div>
 
@@ -578,6 +582,13 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
           }}
         />
       )}
+
+      {/* Add Contact Dialog */}
+      <AddContactDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        workspaceId={workspace.id}
+      />
     </div>
   )
 }

@@ -477,6 +477,81 @@ export const updateContact = mutation({
 });
 
 /**
+ * Create a new contact.
+ *
+ * Used by Add Contact dialog in database view.
+ * Does NOT auto-tag with "google-form" (Issue #17 fix).
+ * Tags default to empty array unless explicitly provided.
+ *
+ * @param workspace_id - The workspace ID
+ * @param name - Contact name
+ * @param phone - Phone number
+ * @param email - Optional email address
+ * @param lead_status - Lead status (default: "new")
+ * @param tags - Optional tags array (default: empty)
+ * @returns Created contact ID
+ */
+export const create = mutation({
+  args: {
+    workspace_id: v.string(),
+    name: v.string(),
+    phone: v.string(),
+    email: v.optional(v.string()),
+    lead_status: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Normalize phone number (remove whitespace, ensure + prefix)
+    let normalizedPhone = args.phone.replace(/[\s\-\(\)]/g, "");
+    if (normalizedPhone.startsWith("0")) {
+      normalizedPhone = "+62" + normalizedPhone.substring(1);
+    } else if (normalizedPhone.startsWith("62")) {
+      normalizedPhone = "+" + normalizedPhone;
+    } else if (!normalizedPhone.startsWith("+")) {
+      normalizedPhone = "+" + normalizedPhone;
+    }
+
+    // Check for duplicate by phone
+    const existing = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace_phone", (q) =>
+        q.eq("workspace_id", args.workspace_id as any).eq("phone", normalizedPhone)
+      )
+      .first();
+
+    if (existing) {
+      throw new Error("Contact with this phone number already exists");
+    }
+
+    // Create contact
+    const contactId = await ctx.db.insert("contacts", {
+      workspace_id: args.workspace_id as any,
+      phone: normalizedPhone,
+      phone_normalized: normalizedPhone,
+      name: args.name,
+      kapso_name: undefined,
+      email: args.email,
+      lead_score: 0, // Default lead score
+      lead_status: args.lead_status || "new",
+      tags: args.tags || [], // Empty by default (Issue #17 fix)
+      assigned_to: undefined,
+      source: "manual", // Manual entry via UI
+      metadata: {},
+      cache_updated_at: undefined,
+      created_at: now,
+      updated_at: now,
+      supabaseId: "", // No Supabase ID for new contacts
+    });
+
+    console.log("[Contacts] Created contact:", contactId);
+
+    return contactId;
+  },
+});
+
+/**
  * Merge two contacts with user-selected field values.
  *
  * User selects which value to keep for each field (name, email, phone, status, etc).
