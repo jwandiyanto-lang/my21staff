@@ -34,6 +34,12 @@ export async function PATCH(
     const authResult = await requireWorkspaceMembership(workspaceId)
     if (authResult instanceof NextResponse) return authResult
 
+    // Fetch workspace by slug to get Convex ID
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
     // Build update object
     const updates: Record<string, unknown> = {}
 
@@ -43,11 +49,7 @@ export async function PATCH(
 
     if (body.settings !== undefined) {
       // Merge with existing settings
-      const existing = await fetchQuery(api.workspaces.getById, {
-        id: workspaceId
-      }) as { settings?: Record<string, unknown> } | null
-
-      const existingSettings = (existing?.settings as Record<string, unknown>) || {}
+      const existingSettings = (workspace.settings as Record<string, unknown>) || {}
       const newSettings = { ...body.settings }
 
       // Encrypt API key if provided
@@ -61,9 +63,9 @@ export async function PATCH(
       }
     }
 
-    // Update workspace via Convex
+    // Update workspace via Convex using Convex ID as string
     const result = await fetchMutation(api.workspaces.updateSettings, {
-      workspace_id: workspaceId,
+      workspace_id: workspace._id,
       settings: updates.settings as any,
       kapso_phone_id: updates.kapso_phone_id as string | undefined,
     })

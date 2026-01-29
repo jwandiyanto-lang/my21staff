@@ -13,7 +13,7 @@ export interface AuthResult {
 }
 
 export async function requireWorkspaceMembership(
-  workspaceId: string
+  workspaceSlug: string
 ): Promise<AuthResult | NextResponse> {
   const { userId } = await auth()
 
@@ -27,9 +27,15 @@ export async function requireWorkspaceMembership(
     return NextResponse.json({ error: 'User not found' }, { status: 401 })
   }
 
-  // Check workspace membership via Convex
+  // Fetch workspace by slug to get Convex ID
+  const workspace = await convex.query(api.workspaces.getBySlug, { slug: workspaceSlug })
+  if (!workspace) {
+    return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+  }
+
+  // Check workspace membership via Convex using workspace ID
   const member = await convex.query(api.workspaces.getMembership, {
-    workspace_id: workspaceId,
+    workspace_id: workspace._id,
     user_id: userId,
   })
 
@@ -42,7 +48,7 @@ export async function requireWorkspaceMembership(
 
   return {
     user: { id: userId, email: '' }, // Email not stored in Convex, get from Clerk if needed
-    workspaceId,
+    workspaceId: workspace._id, // Return Convex ID, not slug
     role: member.role as WorkspaceRole
   }
 }

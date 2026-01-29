@@ -95,9 +95,12 @@ export const setDefaultContactTags = mutation({
 
     const defaultTags = ['Hot Lead', 'Warm Lead', 'Cold Lead', 'Student', 'Parent', 'Follow Up', 'Community', '1on1'];
 
+    // Type cast needed because ctx.db.get returns union of all table types
+    const existingSettings = ((workspace as any).settings as Record<string, unknown>) || {};
+
     await ctx.db.patch(workspace._id, {
       settings: {
-        ...workspace.settings,
+        ...existingSettings,
         contact_tags: defaultTags,
       },
     });
@@ -121,9 +124,12 @@ export const setContactTags = mutation({
       throw new Error("Workspace not found");
     }
 
+    // Type cast needed because ctx.db.get returns union of all table types
+    const existingSettings = ((workspace as any).settings as Record<string, unknown>) || {};
+
     await ctx.db.patch(workspace._id, {
       settings: {
-        ...workspace.settings,
+        ...existingSettings,
         contact_tags: args.tags,
       },
     });
