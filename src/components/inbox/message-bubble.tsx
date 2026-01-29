@@ -52,7 +52,7 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
   return (
     <div
       className={cn(
-        'flex group transition-opacity duration-200',
+        'flex group transition-opacity duration-200 animate-in fade-in slide-in-from-bottom-2',
         isOutbound ? 'justify-end' : 'justify-start',
         isOptimistic && 'opacity-70'
       )}

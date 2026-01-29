@@ -247,11 +247,22 @@ export function MessageThread({
       setLastMessageCount(allMessages.length)
 
       if (isAtBottom) {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        // Use requestAnimationFrame for smoother scroll
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        })
         setShowNewIndicator(false)
       }
     }
   }, [allMessages, isAtBottom, lastMessageCount])
+
+  // Smooth scroll to bottom function
+  const scrollToBottom = () => {
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    })
+    setShowNewIndicator(false)
+  }
 
   // Scroll to bottom on initial load
   useEffect(() => {
@@ -413,13 +424,10 @@ export function MessageThread({
               {/* New messages indicator - appears when scrolled up with new messages */}
               {showNewIndicator && (
                 <button
-                  onClick={() => {
-                    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-                    setShowNewIndicator(false)
-                  }}
-                  className="sticky bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-full shadow-lg hover:bg-emerald-600 transition-all"
+                  onClick={scrollToBottom}
+                  className="sticky bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-full shadow-lg hover:bg-emerald-600 transition-all animate-in fade-in slide-in-from-bottom-4 duration-300"
                 >
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="w-4 h-4 animate-bounce" />
                   <span className="text-sm font-medium">New messages</span>
                 </button>
               )}

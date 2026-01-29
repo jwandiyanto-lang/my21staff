@@ -127,8 +127,19 @@ function ComposeInputDev({ workspaceId, conversationId, disabled }: ComposeInput
         onClick={handleSend}
         disabled={!content.trim() || isSending || disabled}
         size="icon"
+        className={cn(
+          'transition-all duration-200',
+          content.trim() && !isSending && 'scale-105 shadow-md'
+        )}
       >
-        {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        {isSending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Send className={cn(
+            'h-4 w-4 transition-transform',
+            content.trim() && 'scale-110'
+          )} />
+        )}
       </Button>
     </div>
   )
@@ -296,8 +307,19 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
         onClick={handleSend}
         disabled={!content.trim() || isSending || disabled}
         size="icon"
+        className={cn(
+          'transition-all duration-200',
+          content.trim() && !isSending && 'scale-105 shadow-md'
+        )}
       >
-        {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        {isSending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Send className={cn(
+            'h-4 w-4 transition-transform',
+            content.trim() && 'scale-110'
+          )} />
+        )}
       </Button>
     </div>
   )
