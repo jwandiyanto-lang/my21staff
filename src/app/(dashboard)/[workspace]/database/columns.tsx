@@ -79,13 +79,13 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, contactT
       const contact = row.original
       const contactId = contact.id // Capture ID in local variable to avoid closure issues
       const status = row.getValue('lead_status') as LeadStatus
+      // Check if status is blank/unset
+      const isBlankStatus = !status || status === ''
       const config = statusMap[status] || { label: status, color: '#6B7280', bgColor: '#F3F4F6' }
-      // Check if this is the first status (default status)
-      const isDefaultStatus = statusConfig.length > 0 && status === statusConfig[0].key
 
       if (!onStatusChange) {
-        // Show "---" for default/unassigned status
-        if (isDefaultStatus) {
+        // Show "---" for blank/unassigned status
+        if (isBlankStatus) {
           return <span className="text-muted-foreground">---</span>
         }
         return (
@@ -101,9 +101,9 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, contactT
       }
 
       return (
-        <DropdownMenu key={contactId}>
+        <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            {isDefaultStatus ? (
+            {isBlankStatus ? (
               <button
                 className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground hover:bg-muted transition-colors"
               >

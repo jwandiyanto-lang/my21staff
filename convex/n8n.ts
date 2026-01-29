@@ -86,11 +86,7 @@ export const createLead = mutation({
       };
     }
 
-    // Get workspace to determine default lead status
-    const workspace = await ctx.db.get(args.workspace_id);
-    const defaultStatus = workspace?.settings?.lead_stages?.[0]?.key || "new";
-
-    // Create new contact
+    // Create new contact (no default status - user must set manually)
     const contactId = await ctx.db.insert("contacts", {
       workspace_id: args.workspace_id,
       phone: normalizedPhone,
@@ -99,7 +95,7 @@ export const createLead = mutation({
       kapso_name: undefined,
       email: args.email,
       lead_score: args.lead_score,
-      lead_status: defaultStatus,
+      lead_status: undefined,
       tags: [],
       assigned_to: undefined,
       source: "n8n",

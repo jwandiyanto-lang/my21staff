@@ -1288,10 +1288,6 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
                   <CardTitle className="text-lg">Lead Stages</CardTitle>
                   <CardDescription>
                     Organize your contacts into stages. Colors are assigned automatically (cold → hot).
-                    <br />
-                    <span className="text-xs text-muted-foreground mt-1 inline-block">
-                      Note: The first status in the list is used as the default for all new leads.
-                    </span>
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-4">

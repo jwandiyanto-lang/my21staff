@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       name,
       phone,
       email: email || undefined,
-      lead_status: workspaceData.settings?.lead_stages?.[0]?.key || 'new',
+      lead_status: undefined, // No default status - user must set manually
       tags: [],
     })
     logQuery(metrics, 'convex.contacts.create', Math.round(performance.now() - mutStart))
