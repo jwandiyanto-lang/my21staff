@@ -37,7 +37,8 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
   useEffect(() => {
     async function fetchAiStatus() {
       try {
-        const res = await fetch(`/api/workspaces/${workspace.id}/ari-config`)
+        // Use slug instead of id for API endpoint (route expects slug)
+        const res = await fetch(`/api/workspaces/${workspace.slug}/ari-config`)
         if (!res.ok) return
         const data = await res.json()
         setAiEnabled(data.config?.enabled ?? true)
@@ -46,7 +47,7 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
       }
     }
     fetchAiStatus()
-  }, [workspace.id])
+  }, [workspace.slug])
 
   return (
     <div className="p-8 space-y-8">
@@ -59,7 +60,7 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
       </div>
 
       {/* Global AI Toggle */}
-      <AIToggle workspaceId={workspace.id} initialEnabled={aiEnabled} />
+      <AIToggle workspaceId={workspace.slug} initialEnabled={aiEnabled} />
 
       {/* Tabs for different sections */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -84,25 +85,25 @@ export function KnowledgeBaseClient({ workspace, teamMembers }: KnowledgeBaseCli
 
         <TabsContent value="persona" className="space-y-6">
           <TabErrorBoundary tabName="Persona">
-            <PersonaTab workspaceId={workspace.id} />
+            <PersonaTab workspaceId={workspace.slug} />
           </TabErrorBoundary>
         </TabsContent>
 
         <TabsContent value="flow" className="space-y-6">
           <TabErrorBoundary tabName="Flow">
-            <FlowTab workspaceId={workspace.id} />
+            <FlowTab workspaceId={workspace.slug} />
           </TabErrorBoundary>
         </TabsContent>
 
         <TabsContent value="database" className="space-y-6">
           <TabErrorBoundary tabName="Database">
-            <DatabaseTab workspaceId={workspace.id} />
+            <DatabaseTab workspaceId={workspace.slug} />
           </TabErrorBoundary>
         </TabsContent>
 
         <TabsContent value="slots" className="space-y-6">
           <TabErrorBoundary tabName="Slots">
-            <SlotManager workspaceId={workspace.id} teamMembers={teamMembers} />
+            <SlotManager workspaceId={workspace.slug} teamMembers={teamMembers} />
           </TabErrorBoundary>
         </TabsContent>
       </Tabs>
