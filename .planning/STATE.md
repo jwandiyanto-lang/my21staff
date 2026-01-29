@@ -12,18 +12,18 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 Milestone: v3.5 Production Go-Live
 Phase: 2 of 3 (Production Deployment Preparation) - IN PROGRESS
-Plan: 1 of 3 in Phase 2 (02-01 complete)
-Status: Build preparation complete, ready for environment setup
-Last activity: 2026-01-28 — Completed 02-01-PLAN.md (Production Build Preparation)
+Plan: 2 of 3 in Phase 2 (02-01, 02-02 complete)
+Status: Production deployment complete, ready for smoke testing
+Last activity: 2026-01-29 — Completed 02-02-PLAN.md (Production Deployment)
 
-Progress: [████░░░░░░] 40% (1 of 3 phases complete + 1 of 3 plans in Phase 2)
+Progress: [████░░░░░░] 47% (1 of 3 phases complete + 2 of 3 plans in Phase 2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19 (15 from v3.4 + 4 from v3.5)
+- Total plans completed: 20 (15 from v3.4 + 5 from v3.5)
 - v3.4 execution: 6 phases, 15 plans, ~76 min (2 days: Jan 27 → Jan 28)
-- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 in progress (1 of 3 plans, 6 min)
+- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 in progress (2 of 3 plans, 6 min)
 
 **By Milestone:**
 
@@ -66,6 +66,9 @@ Recent decisions affecting current work:
 - v3.5 (01-03): Complete localhost polish approved - Phase 1 ready for deployment prep
 - v3.5 (02-01): Environment template in repository with placeholder values (no security risk)
 - v3.5 (02-01): Clerk JWT template verification documented as critical manual step
+- v3.5 (02-02): Production deployment to Vercel complete - https://www.my21staff.com live
+- v3.5 (02-02): Custom domain my21staff.com configured with HTTPS auto-certificate
+- v3.5 (02-02): All 23 environment variables configured (13 required + 10 extras)
 
 ### Pending Todos
 
@@ -99,7 +102,10 @@ None yet.
 - ✅ Auth race condition fixed - useEnsureUser hook created (2026-01-29)
 - ✅ Settings page working on production (2026-01-29)
 - ✅ All dashboard pages protected from auth race conditions (2026-01-29)
-- Next: Complete environment setup and verification (02-02)
+- ✅ Production deployment complete - https://www.my21staff.com live (02-02)
+- ✅ Custom domain configured with HTTPS (02-02)
+- ✅ All 23 environment variables configured (02-02)
+- Next: Smoke testing and production verification (02-03)
 
 ## Quick Tasks Completed
 
@@ -112,25 +118,25 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Fixed production Settings page auth race condition
+Stopped at: Completed production deployment (02-02)
 Resume file: .planning/phases/02-production-deployment/.continue-here.md
-Next action: Continue v3.5 Phase 2 - Complete environment setup (02-02)
+Next action: Continue v3.5 Phase 2 - Smoke testing (02-03)
 
 **What happened this session:**
-- Fixed auth syntax error preventing Convex deployment (escaped template literal)
-- Fixed type error in admin.ts (workspace lookup)
-- Implemented auto-user creation in requireWorkspaceMembership (mutation context)
-- Created useEnsureUser hook to prevent auth race conditions
-- Applied hook to all dashboard pages (Settings, Dashboard, Inbox)
-- Documented pattern in DEVELOPMENT-RULES.md (mandatory for all future pages)
-- Settings page now works on production ✅
-- Deployed 3 times to production (commits: 55f8c65, b26e886, e017501)
+- Completed 02-02-PLAN.md (Production Deployment)
+- User deployed application to Vercel manually
+- Production URL: https://www.my21staff.com
+- Custom domain: my21staff.com → www.my21staff.com
+- All 23 environment variables configured
+- HTTPS enabled with automatic certificate
+- Auto-deployment from GitHub master branch enabled
+- Build completed successfully in 51 seconds
 
 **Key decisions:**
-- useEnsureUser hook pattern mandatory for all authenticated pages
-- Queries must skip until userInitialized is true
-- Fallback for missing Clerk webhooks implemented
+- Platform: Vercel (billing freeze resolved)
+- Custom domain configured with www redirect
+- 23 total environment variables (13 required + 10 extras for Grok AI, Resend, etc.)
 
 ---
 
-*Last updated: 2026-01-29 — Auth race condition resolved*
+*Last updated: 2026-01-29 — Production deployment complete (02-02)*
