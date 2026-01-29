@@ -11,12 +11,12 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 ## Current Position
 
 Milestone: v3.5 Production Go-Live
-Phase: 3 of 4 (Live Bot Integration) - PLANNING
-Plan: Not yet planned
-Status: Phase 2.1 deferred (3 of 8 plans complete), proceeding to Phase 3 per user decision
-Last activity: 2026-01-29 — User decision to skip remaining Phase 2.1 bug fixes, proceed to Phase 3
+Phase: 3 of 4 (Live Bot Integration) - IN PROGRESS
+Plan: 03-01 of 04 (ARI Config API Fix)
+Status: Phase 3 started, first plan complete (workspace auth resolution fixed)
+Last activity: 2026-01-29 — Completed 03-01-PLAN.md (ARI Config API workspace resolution)
 
-Progress: [████░░░░░░] 50% (2 complete phases, Phase 2.1 partially complete, starting Phase 3)
+Progress: [█████░░░░░] 52% (2 complete phases, Phase 2.1 partially complete, Phase 3 plan 1/4 complete)
 
 ## Performance Metrics
 
@@ -113,6 +113,11 @@ Recent decisions affecting current work:
 - v3.5 (2026-01-29): **Phase 2.1 deferred** - User decision to skip remaining 5 plans and proceed to Phase 3
 - v3.5 (2026-01-29): Deferred bugs: ARI Config API (already fixed), quick replies, contact merge, i18n issues
 - v3.5 (2026-01-29): Known production issues remain: Your Intern tabs may be broken, quick replies non-functional
+- v3.5 (03-01): Auth function resolves workspace by slug internally (callers pass slug, function returns ID)
+- v3.5 (03-01): API routes fetch workspace by slug to get Convex ID for database operations
+- v3.5 (03-01): Convex schema stores workspace_id as v.string(), queries accept v.string() (auto-converts)
+- v3.5 (03-01): Workspace resolution pattern: slug (route) → fetch workspace → use _id for queries
+- v3.5 (03-01): Settings API fixed to follow same workspace resolution pattern as ARI Config API
 
 ### Pending Todos
 
@@ -171,7 +176,14 @@ None yet.
 - ✅ Issues #3, #4 resolved - Inbox filter tabs working, InfoSidebar remains clickable (2.1-03)
 - ✅ Filter-then-paginate pattern prevents empty results on filtered queries (2.1-03)
 - ✅ Z-index hierarchy established: Base UI (z-10) < Dropdowns (z-50) < Overlays (z-60) (2.1-03)
-- Next: Complete Phase 2.1 bug remediation (1 plan remaining - 2.1-08 final verification)
+
+**From v3.5 Phase 3 (IN PROGRESS):**
+- ✅ Plan 03-01 complete - Workspace slug→ID resolution fixed (2026-01-29)
+- ✅ requireWorkspaceMembership() resolves slug internally (2026-01-29)
+- ✅ Settings API and ARI Config API use consistent workspace resolution pattern (2026-01-29)
+- ⚠️ Pre-existing TypeScript build error in convex/lib/auth.ts:61 still present (blocks clean builds)
+- ⚠️ Manual production testing required to verify Your Intern functionality
+- Next: Complete Phase 3 bot integration plans (3 plans remaining)
 
 ## Quick Tasks Completed
 
@@ -300,6 +312,38 @@ Next action: Plan Phase 3 (Live Bot Integration) - /gsd:plan-phase 3
 - Filter counts accurate (post-filtering totals)
 - Z-index hierarchy established for overlay components
 
+**03-01 - ARI Config API Fix (7m):**
+- Fixed requireWorkspaceMembership to resolve workspace by slug internally
+- Updated Settings API to fetch workspace before querying/updating
+- Fixed admin.ts TypeScript errors with explicit type casts
+- Verified Convex schema consistency (all ARI functions use workspace_id: v.string())
+- Created comprehensive test protocol for manual production verification
+
+**Changes:**
+- workspace-auth.ts: Fetch workspace by slug, check membership with ID
+- settings route: Use workspace.slug→ID pattern like ARI Config API
+- admin.ts: Add type casts for workspace.settings access
+
+**Impact:**
+- Workspace slug→ID resolution centralized in auth layer
+- Settings API now properly resolves slugs before database operations
+- Type-safe workspace ID handling across all API routes
+- Test protocol ready for production verification
+
 ---
 
-*Last updated: 2026-01-29 — Completed 2.1-03 (Inbox Filter Tabs & Activities)*
+## Session Continuity
+
+Last session: 2026-01-29
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None
+Next action: Continue Phase 3 execution or plan Phase 3 remaining plans
+
+**Phase 3 Status:**
+- Plan 03-01 completed (ARI Config API Fix)
+- 3 plans remaining in Phase 3
+- Manual testing required to verify Your Intern functionality
+
+---
+
+*Last updated: 2026-01-29 — Completed 03-01 (ARI Config API Fix)*
