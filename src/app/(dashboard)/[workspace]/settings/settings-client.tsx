@@ -233,6 +233,12 @@ const DEFAULT_QUICK_REPLIES: QuickReply[] = []
 export function SettingsClient({ workspace }: SettingsClientProps) {
   const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
+  // Prevent hydration mismatch by only rendering after client mount
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Track which field is expanded in Form Fields accordion
   const [expandedField, setExpandedField] = useState<string | null>(null)
 
@@ -242,18 +248,20 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
 
   // Fetch AI config on client side with Clerk auth context
   // IMPORTANT: Skip query until user is initialized to avoid race condition
+  // In dev mode, skip Convex queries entirely
   const ariConfig = useQuery(
     api.ari.getAriConfig,
-    !userInitialized ? 'skip' : { workspace_id: workspace.id as any }
+    (isDevMode || !userInitialized) ? 'skip' : { workspace_id: workspace.id as any }
   )
 
   // In dev mode, default to enabled. In production, wait for query result.
   const aiEnabled = isDevMode ? true : (ariConfig?.enabled !== false)
 
   // Fetch quick replies from Convex
+  // In dev mode, skip Convex queries entirely
   const quickRepliesData = useQuery(
     api.quickReplies.list,
-    !userInitialized ? 'skip' : { workspace_id: workspace.id as any }
+    (isDevMode || !userInitialized) ? 'skip' : { workspace_id: workspace.id as any }
   )
 
   // Convex mutations for quick replies
@@ -442,14 +450,19 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
     if (!newReply.shortcut.trim() || !newReply.message.trim()) return
     setIsSavingReplies(true)
     try {
-      await createQuickReply({
-        workspace_id: workspace.id as any,
-        shortcut: newReply.shortcut.trim(),
-        message: newReply.message.trim(),
-      })
+      if (isDevMode) {
+        // In dev mode, quick replies are not persisted (no mock implementation)
+        toast.success('Quick reply added (dev mode - not persisted)')
+      } else {
+        await createQuickReply({
+          workspace_id: workspace.id as any,
+          shortcut: newReply.shortcut.trim(),
+          message: newReply.message.trim(),
+        })
+        toast.success('Quick reply added')
+      }
       setNewReply({ shortcut: '', message: '' })
       setIsAddingReply(false)
-      toast.success('Quick reply added')
     } catch (error: any) {
       console.error('Failed to add quick reply:', error)
       toast.error(error?.message || 'Failed to add quick reply')
@@ -462,13 +475,18 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
     if (!editingReply || !editingReply.shortcut.trim() || !editingReply.message.trim()) return
     setIsSavingReplies(true)
     try {
-      await updateQuickReply({
-        id: editingReply._id,
-        shortcut: editingReply.shortcut.trim(),
-        message: editingReply.message.trim(),
-      })
+      if (isDevMode) {
+        // In dev mode, quick replies are not persisted (no mock implementation)
+        toast.success('Quick reply updated (dev mode - not persisted)')
+      } else {
+        await updateQuickReply({
+          id: editingReply._id,
+          shortcut: editingReply.shortcut.trim(),
+          message: editingReply.message.trim(),
+        })
+        toast.success('Quick reply updated')
+      }
       setEditingReply(null)
-      toast.success('Quick reply updated')
     } catch (error: any) {
       console.error('Failed to update quick reply:', error)
       toast.error(error?.message || 'Failed to update quick reply')
@@ -480,8 +498,13 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   const handleDeleteReply = async (id: string) => {
     setIsSavingReplies(true)
     try {
-      await deleteQuickReply({ id: id as any })
-      toast.success('Quick reply deleted')
+      if (isDevMode) {
+        // In dev mode, quick replies are not persisted (no mock implementation)
+        toast.success('Quick reply deleted (dev mode - not persisted)')
+      } else {
+        await deleteQuickReply({ id: id as any })
+        toast.success('Quick reply deleted')
+      }
     } catch (error: any) {
       console.error('Failed to delete quick reply:', error)
       toast.error(error?.message || 'Failed to delete quick reply')
@@ -833,6 +856,15 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   const handleCancelImport = () => {
     setImportPreview(null)
     setImportResult(null)
+  }
+
+  // Prevent hydration mismatch: wait for client-side mount
+  if (!mounted) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
   }
 
   return (
