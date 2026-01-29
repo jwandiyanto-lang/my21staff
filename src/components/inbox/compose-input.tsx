@@ -33,7 +33,7 @@ interface ComposeInputProps {
 }
 
 // Dev mode version without Clerk
-function ComposeInputDev({ workspaceId, conversationId, disabled }: ComposeInputProps) {
+function ComposeInputDev({ workspaceId, conversationId, disabled, replyTo, onClearReply }: ComposeInputProps) {
   const [content, setContent] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [quickReplyOpen, setQuickReplyOpen] = useState(false)
