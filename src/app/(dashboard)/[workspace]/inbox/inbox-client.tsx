@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { MessageSquare } from 'lucide-react'
 import { FilterTabs } from '@/components/inbox/filter-tabs'
+import { WindowStatusFilter } from '@/components/inbox/window-status-filter'
 import { TagFilterDropdown } from '@/components/inbox/tag-filter-dropdown'
 import { ConversationList } from '@/components/inbox/conversation-list'
 import { MessageThread } from '@/components/inbox/message-thread'
@@ -135,6 +136,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
   const [tagFilter, setTagFilter] = useState<string[]>([])
+  const [windowFilter, setWindowFilter] = useState<'active' | 'all'>('all')
   const [showInfoSidebar, setShowInfoSidebar] = useState(false)
 
   // Track conversation status changes in dev mode
@@ -230,8 +232,31 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
       })
     }
 
+    // Filter by 24-hour window status
+    if (windowFilter === 'active') {
+      const now = Date.now()
+      const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000
+      filtered = filtered.filter((conv: any) => {
+        const lastMessageAt = conv.last_message_at
+        if (!lastMessageAt) return false
+        return (now - lastMessageAt) < TWENTY_FOUR_HOURS
+      })
+    }
+
     return filtered
-  }, [data?.conversations, searchQuery, statusFilter, tagFilter, conversationStatusOverrides])
+  }, [data?.conversations, searchQuery, statusFilter, tagFilter, windowFilter, conversationStatusOverrides])
+
+  // Calculate active conversations count (within 24 hours)
+  const activeCount = useMemo(() => {
+    if (!data?.conversations) return 0
+    const now = Date.now()
+    const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000
+    return data.conversations.filter((conv: any) => {
+      const lastMessageAt = conv.last_message_at
+      if (!lastMessageAt) return false
+      return (now - lastMessageAt) < TWENTY_FOUR_HOURS
+    }).length
+  }, [data?.conversations])
 
   // Get the selected conversation and contact
   const selectedConversation = useMemo(() => {
@@ -353,6 +378,14 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     <div className="flex h-[calc(100vh-4rem)] relative">
       {/* Left sidebar - Conversation list */}
       <div className="w-80 border-r bg-background flex flex-col">
+        {/* Window status filter */}
+        <WindowStatusFilter
+          value={windowFilter}
+          onChange={setWindowFilter}
+          activeCount={activeCount}
+          totalCount={data?.conversations?.length || 0}
+        />
+
         {/* Search and filter header */}
         <div className="p-4 border-b space-y-3">
           {/* Search at top */}
