@@ -117,12 +117,12 @@ Plans:
 
 Plans:
 - [ ] 2.1-01-PLAN.md — Fix ARI Config API and restore Your Intern functionality
-- [ ] 2.1-02-PLAN.md — Fix database mutations (update, delete, status toggle)
-- [ ] 2.1-03-PLAN.md — Fix Inbox filter tabs and activities sidebar
+- [x] 2.1-02-PLAN.md — Fix database mutations (update, delete, status toggle)
+- [x] 2.1-03-PLAN.md — Fix Inbox filter tabs and activities sidebar
 - [ ] 2.1-04-PLAN.md — Implement quick replies end-to-end
 - [ ] 2.1-05-PLAN.md — Fix merge contacts and lead score display
 - [ ] 2.1-06-PLAN.md — Fix i18n, WhatsApp UI, Settings forms, Clerk deprecation
-- [ ] 2.1-07-PLAN.md — Add tags column, Add Contact feature, fix auto-tag and status sync
+- [x] 2.1-07-PLAN.md — Add tags column, Add Contact feature, fix auto-tag and status sync
 - [ ] 2.1-08-PLAN.md — Comprehensive production re-verification
 
 **Details:**
@@ -188,7 +188,7 @@ Phases execute in numeric order: 1 -> 2 -> 2.1 -> 3
 | 6. ARI Flow Integration | v3.4 | 2/2 | Complete | 2026-01-28 |
 | 1. Localhost Polish | v3.5 | 3/3 | Complete | 2026-01-28 |
 | 2. Production Deployment | v3.5 | 3/3 | Complete | 2026-01-29 |
-| 2.1. Production Bug Remediation | v3.5 | 0/8 | Not started (URGENT) | - |
+| 2.1. Production Bug Remediation | v3.5 | 3/8 | In progress (data fixes done) | - |
 | 3. Live Bot Integration | v3.5 | 0/? | Blocked by 2.1 | - |
 
 ---
