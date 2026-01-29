@@ -513,24 +513,20 @@ export const listWithFilters = query({
       });
     }
 
-    // Get total count before pagination
+    // Get all conversations before filtering
     const allConversations = await q.collect();
-    const totalCount = allConversations.length;
 
-    // Apply pagination
-    const conversations = allConversations.slice(offset, offset + limit);
-
-    // Fetch contacts in parallel
-    const contactIds = conversations.map((c) => c.contact_id);
-    const contacts = await Promise.all(
-      contactIds.map((id) => ctx.db.get(id))
+    // Fetch ALL contacts first so we can filter before pagination
+    const allContactIds = allConversations.map((c) => c.contact_id);
+    const allContacts = await Promise.all(
+      allContactIds.map((id) => ctx.db.get(id))
     );
 
-    // Filter by lead status client-side (since lead_status is on contacts, not conversations)
-    let filteredConversations = conversations;
+    // Filter by lead status BEFORE pagination (since lead_status is on contacts, not conversations)
+    let filteredConversations = allConversations;
     if (args.statusFilters && args.statusFilters.length > 0) {
       filteredConversations = filteredConversations.filter((conv) => {
-        const contact = contacts.find((c) => c?._id === conv.contact_id);
+        const contact = allContacts.find((c) => c?._id === conv.contact_id);
         if (!contact) return false;
         const leadStatus = contact.lead_status || "new";
         // Include if contact has any of the requested lead statuses
@@ -538,41 +534,45 @@ export const listWithFilters = query({
       });
     }
 
-    // Filter by tags client-side (since tags are on contacts, not conversations)
+    // Filter by tags BEFORE pagination (since tags are on contacts, not conversations)
     if (args.tagFilters && args.tagFilters.length > 0) {
       filteredConversations = filteredConversations.filter((conv) => {
-        const contact = contacts.find((c) => c?._id === conv.contact_id);
+        const contact = allContacts.find((c) => c?._id === conv.contact_id);
         if (!contact || !contact.tags) return false;
         // Include if contact has any of the requested tags
         return args.tagFilters!.some((tag) => contact.tags!.includes(tag));
       });
     }
 
-    // Build result with contact data
-    const conversationsWithContacts = filteredConversations.map((conv) => ({
+    // Get total count AFTER filtering
+    const totalCount = filteredConversations.length;
+
+    // Apply pagination AFTER filtering
+    const paginatedConversations = filteredConversations.slice(offset, offset + limit);
+
+    // Get just the contacts we need for the paginated results
+    const contactIds = paginatedConversations.map((c) => c.contact_id);
+    const contacts = allContacts.filter((c) => c && contactIds.includes(c._id));
+
+    // Build result with contact data (using paginated conversations)
+    const conversationsWithContacts = paginatedConversations.map((conv) => ({
       ...conv,
       contact: contacts.find((c) => c?._id === conv.contact_id) || null,
     }));
 
-    // Get members in parallel
-    const [members, allContacts] = await Promise.all([
-      ctx.db
-        .query("workspaceMembers")
-        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
-        .collect(),
-      ctx.db
-        .query("contacts")
-        .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
-        .collect(),
-    ]);
+    // Get members (allContacts already fetched above, so just get members)
+    const members = await ctx.db
+      .query("workspaceMembers")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
+      .collect();
 
-    // Calculate active count (unread conversations)
+    // Calculate active count (unread conversations from original unfiltered set)
     const activeCount = allConversations.filter((c) => c.unread_count > 0).length;
 
-    // Collect unique tags
+    // Collect unique tags from all contacts (null-safe)
     const tagSet = new Set<string>();
     for (const contact of allContacts) {
-      if (contact.tags) {
+      if (contact && contact.tags) {
         for (const tag of contact.tags) {
           tagSet.add(tag);
         }
