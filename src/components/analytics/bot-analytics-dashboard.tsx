@@ -72,7 +72,7 @@ export function BotAnalyticsDashboard({ workspaceId, timeFilter }: BotAnalyticsD
           <div>
             <CardTitle className="text-base">ARI Performance</CardTitle>
             <CardDescription className="text-xs">
-              {data.totalConversations} conversations • {data.conversionRate}% qualified
+              {data.totalConversations} AI conversations • {data.qualifiedHandoffs} handovers
             </CardDescription>
           </div>
           {isExpanded ? (
@@ -89,21 +89,21 @@ export function BotAnalyticsDashboard({ workspaceId, timeFilter }: BotAnalyticsD
           {/* Simple Metrics Grid */}
           <div className="grid grid-cols-3 gap-4 pb-4 border-b">
             <div>
-              <div className="text-xs text-muted-foreground">Qualified</div>
+              <div className="text-xs text-muted-foreground">Total AI Conversations</div>
+              <div className="text-2xl font-bold tabular-nums">
+                {data.totalConversations}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Quality</div>
               <div className="text-2xl font-bold text-green-600 tabular-nums">
                 {data.qualifiedHandoffs}
               </div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Not Quality</div>
-              <div className="text-2xl font-bold text-muted-foreground tabular-nums">
-                {data.notQualityHandoffs}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">Avg Age</div>
+              <div className="text-xs text-muted-foreground">Successful Handover</div>
               <div className="text-2xl font-bold tabular-nums">
-                {data.averageAge || '-'}
+                {data.qualifiedHandoffs}
               </div>
             </div>
           </div>
