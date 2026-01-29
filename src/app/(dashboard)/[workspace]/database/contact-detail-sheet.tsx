@@ -572,15 +572,8 @@ export function ContactDetailSheet({
 
   // Filter form responses to show only main fields in Form Score tab
   const mainFormResponses = mainFormFields.length > 0
-    ? formResponses.filter(([key]) => {
-        console.log('Checking field:', key, 'in mainFormFields:', mainFormFields, 'included:', mainFormFields.includes(key))
-        return mainFormFields.includes(key)
-      })
+    ? formResponses.filter(([key]) => mainFormFields.includes(key))
     : formResponses
-
-  console.log('Form responses:', formResponses)
-  console.log('Main form fields:', mainFormFields)
-  console.log('Filtered main responses:', mainFormResponses)
 
   // Field labels mapping (from Settings)
   const FIELD_LABELS: Record<string, string> = {
@@ -1170,9 +1163,18 @@ export function ContactDetailSheet({
                           </div>
                         </div>
                       ) : (
-                        <div className="text-center py-4">
-                          <p className="text-sm text-muted-foreground">No questionnaire data available</p>
-                        </div>
+                        <>
+                          {/* Show 0 score when no form data */}
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-medium text-muted-foreground">Questionnaire Score</h4>
+                            <span className="text-2xl font-semibold tabular-nums text-muted-foreground">
+                              0
+                            </span>
+                          </div>
+                          <div className="text-center py-4 border rounded-lg bg-muted/30">
+                            <p className="text-sm text-muted-foreground">No questionnaire data available</p>
+                          </div>
+                        </>
                       )}
                     </TabsContent>
 

@@ -11,6 +11,52 @@ function isDevMode(): boolean {
   return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 }
 
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Dev mode: return mock settings
+    if (isDevMode()) {
+      return NextResponse.json({
+        settings: {
+          contact_tags: [],
+          main_form_fields: [],
+          form_field_scores: {}
+        }
+      })
+    }
+
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { id: workspaceId } = await params
+
+    // Verify workspace access
+    const authResult = await requireWorkspaceMembership(workspaceId)
+    if (authResult instanceof NextResponse) return authResult
+
+    // Get workspace settings from Convex
+    const workspace = await convex.query(api.workspaces.getById, {
+      id: workspaceId
+    }) as { settings?: Record<string, unknown> } | null
+
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ settings: workspace.settings || {} })
+  } catch (error) {
+    console.error('Error in workspace settings GET API:', error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
