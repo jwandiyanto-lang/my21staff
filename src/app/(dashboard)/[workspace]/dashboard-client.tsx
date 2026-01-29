@@ -80,15 +80,12 @@ export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientP
         onTimeFilterChange={setTimeFilter}
       />
 
-      {/* Bot Analytics */}
+      {/* ARI Analytics (Collapsible) */}
       {aiEnabled && (
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl font-semibold">Bot Performance</h2>
-            <p className="text-sm text-muted-foreground">AI assistant analytics and insights</p>
-          </div>
-          <BotAnalyticsDashboard workspaceId={workspaceId as string} />
-        </div>
+        <BotAnalyticsDashboard
+          workspaceId={workspaceId as string}
+          timeFilter={timeFilter}
+        />
       )}
 
       {/* Quick Actions - disabled for now */}
