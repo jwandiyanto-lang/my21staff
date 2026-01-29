@@ -12,11 +12,11 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 Milestone: v3.5 Production Go-Live
 Phase: 3 of 4 (Live Bot Integration) - IN PROGRESS
-Plan: 03-01 of 04 (ARI Config API Fix)
-Status: Phase 3 started, first plan complete (workspace auth resolution fixed)
-Last activity: 2026-01-29 — Completed 03-01-PLAN.md (ARI Config API workspace resolution)
+Plan: 03-03 of 04 (Kapso Historical Data Sync)
+Status: Phase 3 in progress, 2 plans complete (workspace auth + historical sync)
+Last activity: 2026-01-29 — Completed 03-03-PLAN-REVISED.md (Kapso historical data sync)
 
-Progress: [█████░░░░░] 52% (2 complete phases, Phase 2.1 partially complete, Phase 3 plan 1/4 complete)
+Progress: [██████░░░░] 58% (2 complete phases, Phase 2.1 partially complete, Phase 3 plan 2/4 complete)
 
 ## Performance Metrics
 
@@ -118,6 +118,10 @@ Recent decisions affecting current work:
 - v3.5 (03-01): Convex schema stores workspace_id as v.string(), queries accept v.string() (auto-converts)
 - v3.5 (03-01): Workspace resolution pattern: slug (route) → fetch workspace → use _id for queries
 - v3.5 (03-01): Settings API fixed to follow same workspace resolution pattern as ARI Config API
+- v3.5 (03-03): Historical data sync uses Kapso API directly (not MCP tools) for reliability
+- v3.5 (03-03): Contact names prioritize kapso_name over name field (WhatsApp profile names)
+- v3.5 (03-03): Message deduplication by kapso_message_id ensures idempotent sync operations
+- v3.5 (03-03): Sync script fetches last 50 messages per conversation (configurable limit)
 
 ### Pending Todos
 
@@ -181,9 +185,13 @@ None yet.
 - ✅ Plan 03-01 complete - Workspace slug→ID resolution fixed (2026-01-29)
 - ✅ requireWorkspaceMembership() resolves slug internally (2026-01-29)
 - ✅ Settings API and ARI Config API use consistent workspace resolution pattern (2026-01-29)
+- ✅ Plan 03-03 complete - Kapso historical data sync script created (2026-01-29)
+- ✅ Contact name display fixed - kapso_name prioritized in message thread (2026-01-29)
+- ✅ Sync script created with comprehensive documentation (2026-01-29)
 - ⚠️ Pre-existing TypeScript build error in convex/lib/auth.ts:61 still present (blocks clean builds)
 - ⚠️ Manual production testing required to verify Your Intern functionality
-- Next: Complete Phase 3 bot integration plans (3 plans remaining)
+- ⚠️ Historical sync script needs to be run for production workspace
+- Next: Complete Phase 3 bot integration plans (2 plans remaining)
 
 ## Quick Tasks Completed
 
@@ -319,31 +327,42 @@ Next action: Plan Phase 3 (Live Bot Integration) - /gsd:plan-phase 3
 - Verified Convex schema consistency (all ARI functions use workspace_id: v.string())
 - Created comprehensive test protocol for manual production verification
 
+**03-03 - Kapso Historical Data Sync (4m 10s):**
+- Created sync-kapso-mcp.js script to import historical conversations from Kapso
+- Added syncKapsoConversation mutation to convex/admin.ts
+- Fixed message thread header to prioritize kapso_name over name field
+- Created comprehensive sync documentation in scripts/README-SYNC.md
+- Script fetches all conversations and last 50 messages per conversation
+- Deduplication by kapso_message_id ensures safe re-runs
+
 **Changes:**
-- workspace-auth.ts: Fetch workspace by slug, check membership with ID
-- settings route: Use workspace.slug→ID pattern like ARI Config API
-- admin.ts: Add type casts for workspace.settings access
+- scripts/sync-kapso-mcp.js: Historical data sync script (348 lines)
+- scripts/README-SYNC.md: Comprehensive usage documentation (187 lines)
+- convex/admin.ts: Added syncKapsoConversation mutation (+161 lines)
+- message-thread.tsx: Fixed displayName priority to kapso_name first
 
 **Impact:**
-- Workspace slug→ID resolution centralized in auth layer
-- Settings API now properly resolves slugs before database operations
-- Type-safe workspace ID handling across all API routes
-- Test protocol ready for production verification
+- Historical conversations can now be imported from Kapso
+- Contact names display correctly from WhatsApp profiles (not phone numbers)
+- Sync script is idempotent and safe to run multiple times
+- Ready for production historical data import
 
 ---
 
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 03-01-PLAN.md
+Stopped at: Completed 03-03-PLAN-REVISED.md (Kapso Historical Data Sync)
 Resume file: None
 Next action: Continue Phase 3 execution or plan Phase 3 remaining plans
 
 **Phase 3 Status:**
 - Plan 03-01 completed (ARI Config API Fix)
-- 3 plans remaining in Phase 3
+- Plan 03-03 completed (Kapso Historical Data Sync)
+- 2 plans remaining in Phase 3
 - Manual testing required to verify Your Intern functionality
+- Historical sync script ready to run for production workspace
 
 ---
 
-*Last updated: 2026-01-29 — Completed 03-01 (ARI Config API Fix)*
+*Last updated: 2026-01-29 — Completed 03-03 (Kapso Historical Data Sync)*
