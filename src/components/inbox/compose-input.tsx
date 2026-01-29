@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { Button } from '@/components/ui/button'
-import { Send, Loader2, Zap } from 'lucide-react'
+import { Send, Loader2, Zap, X, Reply } from 'lucide-react'
 import { useAuth } from '@clerk/nextjs'
 import { toast } from 'sonner'
 import { useQuery } from 'convex/react'
@@ -18,10 +18,18 @@ import { cn } from '@/lib/utils'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
+interface ReplyContext {
+  messageId: string
+  content: string
+  senderType: string
+}
+
 interface ComposeInputProps {
   workspaceId: string
   conversationId: string
   disabled?: boolean
+  replyTo?: ReplyContext | null
+  onClearReply?: () => void
 }
 
 // Dev mode version without Clerk
@@ -66,7 +74,33 @@ function ComposeInputDev({ workspaceId, conversationId, disabled }: ComposeInput
   }
 
   return (
-    <div className="flex items-end gap-2 p-4 border-t bg-background">
+    <div className="border-t bg-background">
+      {/* Reply context banner */}
+      {replyTo && (
+        <div className="px-4 pt-3 pb-2 border-b bg-muted/30">
+          <div className="flex items-start gap-2 text-sm">
+            <Reply className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground font-medium mb-1">
+                Replying to {replyTo.senderType === 'contact' ? 'customer' : 'you'}
+              </p>
+              <p className="text-sm text-foreground truncate">
+                {replyTo.content}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 flex-shrink-0"
+              onClick={onClearReply}
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-end gap-2 p-4">
       <Popover open={quickReplyOpen} onOpenChange={setQuickReplyOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -142,12 +176,13 @@ function ComposeInputDev({ workspaceId, conversationId, disabled }: ComposeInput
           )} />
         )}
       </Button>
+      </div>
     </div>
   )
 }
 
 // Production version with Clerk auth
-function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInputProps) {
+function ComposeInputProd({ workspaceId, conversationId, disabled, replyTo, onClearReply }: ComposeInputProps) {
   const [content, setContent] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [quickReplyOpen, setQuickReplyOpen] = useState(false)
@@ -160,7 +195,15 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
   // Clear content when conversation changes
   useEffect(() => {
     setContent('')
-  }, [conversationId])
+    onClearReply?.()
+  }, [conversationId, onClearReply])
+
+  // Focus textarea when replying
+  useEffect(() => {
+    if (replyTo) {
+      textareaRef.current?.focus()
+    }
+  }, [replyTo])
 
   const handleSend = useCallback(async () => {
     if (!content.trim() || isSending || !userId) return
@@ -214,6 +257,9 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
         detail: { tempId, realMessage: result.message }
       }))
 
+      // Clear reply context after successful send
+      onClearReply?.()
+
       // Success feedback (subtle, no intrusive toast)
     } catch (error) {
       console.error('Send error:', error)
@@ -245,7 +291,33 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
   }
 
   return (
-    <div className="flex items-end gap-2 p-4 border-t bg-background">
+    <div className="border-t bg-background">
+      {/* Reply context banner */}
+      {replyTo && (
+        <div className="px-4 pt-3 pb-2 border-b bg-muted/30">
+          <div className="flex items-start gap-2 text-sm">
+            <Reply className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground font-medium mb-1">
+                Replying to {replyTo.senderType === 'contact' ? 'customer' : 'you'}
+              </p>
+              <p className="text-sm text-foreground truncate">
+                {replyTo.content}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 flex-shrink-0"
+              onClick={onClearReply}
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-end gap-2 p-4">
       <Popover open={quickReplyOpen} onOpenChange={setQuickReplyOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -322,6 +394,7 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
           )} />
         )}
       </Button>
+      </div>
     </div>
   )
 }

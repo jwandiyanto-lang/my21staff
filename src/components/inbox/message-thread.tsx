@@ -101,13 +101,16 @@ export function MessageThread({
 
   // Handle reply to message
   const handleReply = (message: any) => {
-    // In dev mode, just log
-    if (isDevMode()) {
-      console.log('Reply to message:', message)
-      return
-    }
-    // In production, would scroll to compose and populate with reply context
-    console.log('Reply to message:', message)
+    setReplyTo({
+      messageId: message._id,
+      content: message.content || '[Media]',
+      senderType: message.sender_type,
+    })
+  }
+
+  // Clear reply context
+  const handleClearReply = () => {
+    setReplyTo(null)
   }
 
   // Handle AI/Human handover toggle - show confirmation dialog first
@@ -191,6 +194,9 @@ export function MessageThread({
 
   // Optimistic messages state for instant feedback
   const [optimisticMessages, setOptimisticMessages] = useState<any[]>([])
+
+  // Reply context state
+  const [replyTo, setReplyTo] = useState<{ messageId: string; content: string; senderType: string } | null>(null)
 
   // Listen for optimistic message events
   useEffect(() => {
@@ -442,6 +448,8 @@ export function MessageThread({
         workspaceId={workspaceId}
         conversationId={conversationId}
         disabled={isAiActive}
+        replyTo={replyTo}
+        onClearReply={handleClearReply}
       />
 
       {/* Confirmation dialog for mode toggle */}
