@@ -9,6 +9,7 @@ import { StatsCards } from '@/components/dashboard/stats-cards'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { ActivityFeed } from '@/components/dashboard/activity-feed'
 import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist'
+import { BotAnalyticsDashboard } from '@/components/analytics/bot-analytics-dashboard'
 import type { Id } from 'convex/_generated/dataModel'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
@@ -49,7 +50,14 @@ export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientP
     isDevMode || !userInitialized ? 'skip' : { workspace_id: workspaceId as any, time_filter: timeFilter }
   )
 
+  // Check if AI is enabled
+  const ariConfig = useQuery(
+    api.ari.getAriConfig,
+    isDevMode || !userInitialized ? 'skip' : { workspace_id: workspaceId as any }
+  )
+
   const stats = isDevMode ? MOCK_STATS : convexStats
+  const aiEnabled = isDevMode ? true : (ariConfig?.enabled !== false)
 
   if (stats === undefined) {
     return <DashboardSkeleton />
@@ -71,6 +79,17 @@ export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientP
         timeFilter={timeFilter}
         onTimeFilterChange={setTimeFilter}
       />
+
+      {/* Bot Analytics */}
+      {aiEnabled && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold">Bot Performance</h2>
+            <p className="text-sm text-muted-foreground">AI assistant analytics and insights</p>
+          </div>
+          <BotAnalyticsDashboard workspaceId={workspaceId as string} />
+        </div>
+      )}
 
       {/* Quick Actions - disabled for now */}
       {/* <QuickActions workspaceSlug={workspaceSlug} /> */}
