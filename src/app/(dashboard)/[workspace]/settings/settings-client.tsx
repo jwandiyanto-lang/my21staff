@@ -374,11 +374,13 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
       const settings = getMockWorkspaceSettings()
       const newMainFields = settings?.main_form_fields || DEFAULT_MAIN_FIELDS
       const newFieldScores = settings?.form_field_scores || DEFAULT_FIELD_SCORES
+      const newLeadStatuses = settings?.lead_statuses || DEFAULT_LEAD_STATUSES
 
       setMainFormFields(newMainFields)
       setOriginalMainFormFields(newMainFields)
       setFieldScores(newFieldScores)
       setOriginalFieldScores(newFieldScores)
+      setLeadStatuses(newLeadStatuses)
     }
 
     window.addEventListener('mockWorkspaceSettingsUpdated', handleSettingsUpdate)
