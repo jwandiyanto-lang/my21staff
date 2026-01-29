@@ -100,6 +100,62 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// POST /api/contacts - Create a new contact
+export async function POST(request: NextRequest) {
+  const metrics = createRequestMetrics()
+
+  try {
+    const body = await request.json()
+    const { workspace, name, phone, email } = body
+
+    if (!workspace || !name || !phone) {
+      return NextResponse.json(
+        { error: 'Workspace, name, and phone are required' },
+        { status: 400 }
+      )
+    }
+
+    // Verify authentication via Clerk
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Fetch workspace from Convex
+    let queryStart = performance.now()
+    const workspaceData = await fetchQuery(api.workspaces.getById, {
+      id: workspace,
+    })
+    logQuery(metrics, 'convex.workspaces.getById', Math.round(performance.now() - queryStart))
+
+    if (!workspaceData) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    // Create contact via Convex mutation
+    let mutStart = performance.now()
+    const contactId = await fetchMutation(api.contacts.create, {
+      workspace_id: workspaceData._id as any,
+      name,
+      phone,
+      email: email || undefined,
+      lead_status: workspaceData.settings?.lead_stages?.[0]?.key || 'new',
+      tags: [],
+    })
+    logQuery(metrics, 'convex.contacts.create', Math.round(performance.now() - mutStart))
+
+    logQuerySummary('/api/contacts', metrics)
+    return NextResponse.json({ success: true, contactId })
+  } catch (error) {
+    console.error('POST /api/contacts error:', error)
+    logQuerySummary('/api/contacts', metrics)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 // DELETE /api/contacts?id=xxx&workspace=yyy - Delete a contact (owner only)
 export async function DELETE(request: NextRequest) {
   const metrics = createRequestMetrics()
@@ -153,4 +209,5 @@ export async function DELETE(request: NextRequest) {
 
 // Export wrapped handlers with timing instrumentation
 export const GET_TIMED = withTiming('/api/contacts', GET)
+export const POST_TIMED = withTiming('/api/contacts', POST)
 export const DELETE_TIMED = withTiming('/api/contacts', DELETE)

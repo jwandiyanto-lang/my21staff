@@ -76,6 +76,30 @@ export function useUpdateContact(workspaceId: string) {
   })
 }
 
+// Mutation for creating contact
+export function useCreateContact(workspaceId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (newContact: { name: string; phone: string; email?: string }) => {
+      const response = await fetch('/api/contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newContact, workspace: workspaceId }),
+      })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create contact')
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      // Invalidate all contact queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['contacts', workspaceId] })
+    },
+  })
+}
+
 // Mutation for deleting contact
 export function useDeleteContact(workspaceId: string) {
   const queryClient = useQueryClient()
