@@ -482,7 +482,7 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
         toast.success('Quick reply updated (dev mode - not persisted)')
       } else {
         await updateQuickReply({
-          id: editingReply._id,
+          id: editingReply._id as any,
           shortcut: editingReply.shortcut.trim(),
           message: editingReply.message.trim(),
         })
