@@ -75,7 +75,7 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 transition-opacity mr-1 self-end mb-1"
+          className="h-7 w-7 mr-1 self-end mb-1 z-10 hover:bg-gray-100"
           onClick={handleReply}
           title="Reply"
         >
@@ -167,7 +167,7 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 transition-opacity ml-1 self-end mb-1"
+          className="h-7 w-7 ml-1 self-end mb-1 z-10 hover:bg-gray-100"
           onClick={handleReply}
           title="Reply"
         >
