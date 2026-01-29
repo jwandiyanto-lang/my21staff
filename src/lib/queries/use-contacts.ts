@@ -50,15 +50,17 @@ export function useUpdateContact(workspaceId: string) {
       // Snapshot previous values
       const previousQueries = queryClient.getQueriesData({ queryKey: ['contacts', workspaceId] })
 
-      // Optimistically update all cached pages
-      queryClient.setQueriesData({ queryKey: ['contacts', workspaceId] }, (old: ContactsResponse | undefined) => {
-        if (!old) return old
-        return {
-          ...old,
-          contacts: old.contacts.map((c) =>
-            c.id === contactId ? { ...c, ...updates } : c
-          ),
-        }
+      // Optimistically update only the specific contact across all cached pages
+      previousQueries.forEach(([queryKey]) => {
+        queryClient.setQueryData(queryKey, (old: ContactsResponse | undefined) => {
+          if (!old) return old
+          return {
+            ...old,
+            contacts: old.contacts.map((c) =>
+              c.id === contactId ? { ...c, ...updates } : c
+            ),
+          }
+        })
       })
 
       return { previousQueries }
@@ -97,13 +99,15 @@ export function useDeleteContact(workspaceId: string) {
       const previousQueries = queryClient.getQueriesData({ queryKey: ['contacts', workspaceId] })
 
       // Optimistically remove from all cached pages
-      queryClient.setQueriesData({ queryKey: ['contacts', workspaceId] }, (old: ContactsResponse | undefined) => {
-        if (!old) return old
-        return {
-          ...old,
-          contacts: old.contacts.filter((c) => c.id !== contactId),
-          total: old.total - 1,
-        }
+      previousQueries.forEach(([queryKey]) => {
+        queryClient.setQueryData(queryKey, (old: ContactsResponse | undefined) => {
+          if (!old) return old
+          return {
+            ...old,
+            contacts: old.contacts.filter((c) => c.id !== contactId),
+            total: old.total - 1,
+          }
+        })
       })
 
       return { previousQueries }
