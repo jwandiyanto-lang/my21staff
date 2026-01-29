@@ -106,8 +106,10 @@ export function MergeContactsDialog({
   })
 
   const handleMerge = () => {
-    // Ensure all fields have selections
-    const unselectedFields = MERGE_FIELDS.filter(f => !selections[f.key])
+    // Ensure all fields have selections (except tags and activity which are auto-merged)
+    const unselectedFields = MERGE_FIELDS.filter(f =>
+      f.key !== 'tags' && f.key !== 'activity' && !selections[f.key]
+    )
     if (unselectedFields.length > 0) {
       toast.error(`Please select a value for: ${unselectedFields.map(f => f.label).join(', ')}`)
       return
@@ -122,21 +124,33 @@ export function MergeContactsDialog({
     const mergedFields: Record<string, any> = {}
     for (const field of MERGE_FIELDS) {
       if (field.key === 'activity') continue // Skip activity field (not a real contact field)
+      if (field.key === 'tags') continue // Tags auto-merged (union of both)
 
       const source = selections[field.key] === '1' ? contact1 : contact2
       mergedFields[field.key] = source[field.key as keyof Contact]
     }
 
-    // Merge metadata (combine both, contact1 takes precedence)
+    // Tags: union of both contacts (automatic merge)
+    const tags1 = contact1.tags || []
+    const tags2 = contact2.tags || []
+    mergedFields.tags = [...new Set([...tags1, ...tags2])]
+
+    // Merge metadata (combine both, primary takes precedence)
     const metadata1 = contact1.metadata && typeof contact1.metadata === 'object' ? contact1.metadata as Record<string, any> : {}
     const metadata2 = contact2.metadata && typeof contact2.metadata === 'object' ? contact2.metadata as Record<string, any> : {}
-    mergedFields.metadata = { ...metadata2, ...metadata1 }
 
-    const deletedContact = selections['name'] === '1' ? contact2 : contact1
+    // Determine which contact is primary based on user's name selection
+    const primaryContact = selections['name'] === '1' ? contact1 : contact2
+    const secondaryContact = selections['name'] === '1' ? contact2 : contact1
+
+    // Primary metadata takes precedence
+    const primaryMeta = primaryContact.metadata && typeof primaryContact.metadata === 'object' ? primaryContact.metadata as Record<string, any> : {}
+    const secondaryMeta = secondaryContact.metadata && typeof secondaryContact.metadata === 'object' ? secondaryContact.metadata as Record<string, any> : {}
+    mergedFields.metadata = { ...secondaryMeta, ...primaryMeta }
 
     mergeMutation.mutate({
-      primaryId: contact1.id,
-      secondaryId: contact2.id,
+      primaryId: primaryContact.id,
+      secondaryId: secondaryContact.id,
       fields: mergedFields,
     })
   }
@@ -156,40 +170,54 @@ export function MergeContactsDialog({
             {MERGE_FIELDS.map((field) => (
               <div key={field.key} className="grid grid-cols-[120px_1fr] gap-4 items-start">
                 <Label className="font-medium pt-2">{field.label}</Label>
-                <RadioGroup
-                  value={selections[field.key]}
-                  onValueChange={(value) => setSelections(prev => ({ ...prev, [field.key]: value as '1' | '2' }))}
-                  className="grid grid-cols-2 gap-4"
-                >
-                  <label
-                    htmlFor={`${field.key}-1`}
-                    className={cn(
-                      "flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors",
-                      selections[field.key] === '1'
-                        ? "bg-primary/10 border-primary"
-                        : "hover:bg-muted/50"
-                    )}
+                {field.key === 'tags' ? (
+                  // Tags auto-merged (union)
+                  <div className="p-3 border rounded-lg bg-muted/30">
+                    <p className="text-sm text-muted-foreground">
+                      Auto-merged: {(() => {
+                        const tags1 = contact1.tags || []
+                        const tags2 = contact2.tags || []
+                        const merged = [...new Set([...tags1, ...tags2])]
+                        return merged.length > 0 ? merged.join(', ') : 'None'
+                      })()}
+                    </p>
+                  </div>
+                ) : (
+                  <RadioGroup
+                    value={selections[field.key]}
+                    onValueChange={(value) => setSelections(prev => ({ ...prev, [field.key]: value as '1' | '2' }))}
+                    className="grid grid-cols-2 gap-4"
                   >
-                    <RadioGroupItem value="1" id={`${field.key}-1`} />
-                    <span className="flex-1 text-sm">
-                      {getDisplayValue(contact1, field.key)}
-                    </span>
-                  </label>
-                  <label
-                    htmlFor={`${field.key}-2`}
-                    className={cn(
-                      "flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors",
-                      selections[field.key] === '2'
-                        ? "bg-primary/10 border-primary"
-                        : "hover:bg-muted/50"
-                    )}
-                  >
-                    <RadioGroupItem value="2" id={`${field.key}-2`} />
-                    <span className="flex-1 text-sm">
-                      {getDisplayValue(contact2, field.key)}
-                    </span>
-                  </label>
-                </RadioGroup>
+                    <label
+                      htmlFor={`${field.key}-1`}
+                      className={cn(
+                        "flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors",
+                        selections[field.key] === '1'
+                          ? "bg-primary/10 border-primary"
+                          : "hover:bg-muted/50"
+                      )}
+                    >
+                      <RadioGroupItem value="1" id={`${field.key}-1`} />
+                      <span className="flex-1 text-sm">
+                        {getDisplayValue(contact1, field.key)}
+                      </span>
+                    </label>
+                    <label
+                      htmlFor={`${field.key}-2`}
+                      className={cn(
+                        "flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors",
+                        selections[field.key] === '2'
+                          ? "bg-primary/10 border-primary"
+                          : "hover:bg-muted/50"
+                      )}
+                    >
+                      <RadioGroupItem value="2" id={`${field.key}-2`} />
+                      <span className="flex-1 text-sm">
+                        {getDisplayValue(contact2, field.key)}
+                      </span>
+                    </label>
+                  </RadioGroup>
+                )}
               </div>
             ))}
           </div>
