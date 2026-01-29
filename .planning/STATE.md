@@ -6,17 +6,17 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
-**Current focus:** Phase 2 - Production Deployment Preparation
+**Current focus:** Phase 3 - Live Bot Integration
 
 ## Current Position
 
 Milestone: v3.5 Production Go-Live
-Phase: 2.1 of 4 (Production Bug Remediation) - IN PROGRESS
-Plan: 3 of 8 in Phase 2.1 (2.1-02, 2.1-03, 2.1-07 complete - data-focused subset)
-Status: Core database, inbox, dashboard fixes complete - Your Intern and final verification pending
-Last activity: 2026-01-29 — Completed subset execution (database/inbox/dashboard fixes)
+Phase: 3 of 4 (Live Bot Integration) - PLANNING
+Plan: Not yet planned
+Status: Phase 2.1 deferred (3 of 8 plans complete), proceeding to Phase 3 per user decision
+Last activity: 2026-01-29 — User decision to skip remaining Phase 2.1 bug fixes, proceed to Phase 3
 
-Progress: [████░░░░░░] 38% (2 phases + 3 of 8 plans in Phase 2.1)
+Progress: [████░░░░░░] 50% (2 complete phases, Phase 2.1 partially complete, starting Phase 3)
 
 ## Performance Metrics
 
@@ -110,6 +110,9 @@ Recent decisions affecting current work:
 - v3.5 (2.1-03): InfoSidebar z-index must be above dropdowns (z-60 > z-50) to prevent overlay blocking
 - v3.5 (2.1-03): React key on InfoSidebar forces remount on contact change (prevents stale handlers)
 - v3.5 (2.1-03): Issues #3, #4 resolved - Inbox filters working, InfoSidebar remains clickable
+- v3.5 (2026-01-29): **Phase 2.1 deferred** - User decision to skip remaining 5 plans and proceed to Phase 3
+- v3.5 (2026-01-29): Deferred bugs: ARI Config API (already fixed), quick replies, contact merge, i18n issues
+- v3.5 (2026-01-29): Known production issues remain: Your Intern tabs may be broken, quick replies non-functional
 
 ### Pending Todos
 
@@ -204,9 +207,14 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 2.1-03 (Inbox Filter Tabs & Activities)
+Stopped at: User decision to skip Phase 2.1 and proceed to Phase 3
 Resume file: None
-Next action: Complete Phase 2.1 - Plan 2.1-08 (Final Verification)
+Next action: Plan Phase 3 (Live Bot Integration) - /gsd:plan-phase 3
+
+**Phase 2.1 Status (Deferred):**
+- 3 of 8 plans completed (2.1-02, 2.1-03, 2.1-07)
+- 5 plans skipped (2.1-01, 2.1-04, 2.1-05, 2.1-06, 2.1-08)
+- Known issues remain in production (deferred to future fix)
 
 **What happened this session (Wave 2 - Parallel Execution):**
 
