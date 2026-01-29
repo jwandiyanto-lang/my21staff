@@ -435,7 +435,26 @@ async function processWorkspaceMessages(
       metadata.reply_to_from = message.context.from;
     }
 
-    // Create message
+    // CRITICAL: Check if message already exists (race condition with send API)
+    // The send API might have already created this as outbound before webhook arrives
+    const existingMsg = await ctx.db
+      .query("messages")
+      .withIndex("by_kapso_message_id", (q: any) => q.eq("kapso_message_id", message.id))
+      .first();
+
+    if (existingMsg) {
+      console.log(`[Kapso] Message ${message.id} already exists (direction: ${existingMsg.direction}), skipping webhook creation`);
+      // Don't create duplicate - the send API already created it as outbound
+      // Update conversation timestamp and continue to next message
+      await ctx.db.patch(conversation._id, {
+        last_message_at: now,
+        last_message_preview: content?.substring(0, 100) || "",
+        updated_at: now,
+      });
+      return; // Skip this message
+    }
+
+    // Create message (only if it doesn't exist yet)
     await ctx.db.insert("messages", {
       conversation_id: conversation._id,
       workspace_id: workspaceId,
