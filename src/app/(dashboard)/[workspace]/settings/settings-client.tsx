@@ -240,19 +240,34 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   // Track which field is expanded in Form Fields accordion
   const [expandedField, setExpandedField] = useState<string | null>(null)
 
+  // Track if user has been initialized
+  const [userInitialized, setUserInitialized] = useState(false)
+
   // Ensure current user exists in database (fallback for when webhooks aren't set up)
   const ensureUser = useMutation(api.users.ensureCurrentUser)
 
   useEffect(() => {
-    if (!isDevMode) {
-      ensureUser().catch(console.error)
+    if (!isDevMode && !userInitialized) {
+      ensureUser()
+        .then(() => {
+          console.log('[Settings] User initialized successfully')
+          setUserInitialized(true)
+        })
+        .catch((err) => {
+          console.error('[Settings] Failed to initialize user:', err)
+          // Still set to true to allow queries to run (user might already exist)
+          setUserInitialized(true)
+        })
+    } else if (isDevMode) {
+      setUserInitialized(true)
     }
-  }, [ensureUser, isDevMode])
+  }, [ensureUser, isDevMode, userInitialized])
 
   // Fetch AI config on client side with Clerk auth context
+  // IMPORTANT: Skip query until user is initialized to avoid race condition
   const ariConfig = useQuery(
     api.ari.getAriConfig,
-    isDevMode ? 'skip' : { workspace_id: workspace.id as any }
+    !userInitialized ? 'skip' : { workspace_id: workspace.id as any }
   )
 
   // In dev mode, default to enabled. In production, wait for query result.
