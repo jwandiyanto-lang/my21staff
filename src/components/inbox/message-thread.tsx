@@ -399,6 +399,7 @@ export function MessageThread({
       <ComposeInput
         workspaceId={workspaceId}
         conversationId={conversationId}
+        disabled={isAiActive}
       />
 
       {/* Confirmation dialog for mode toggle */}
