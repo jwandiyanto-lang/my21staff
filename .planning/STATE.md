@@ -12,9 +12,9 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 Milestone: v3.5 Production Go-Live
 Phase: 2.1 of 4 (Production Bug Remediation) - IN PROGRESS
-Plan: 8 of 8 in Phase 2.1 (2.1-01, 2.1-02, 2.1-03, 2.1-04, 2.1-05, 2.1-06, 2.1-07 complete)
-Status: Wave 3 complete - Inbox filters fixed, 1 plan remaining (2.1-08 verification)
-Last activity: 2026-01-29 — Completed 2.1-03 (Inbox Filter Tabs & Activities)
+Plan: 7 of 8 in Phase 2.1 (2.1-01, 2.1-02, 2.1-04, 2.1-05, 2.1-06, 2.1-07 complete)
+Status: Wave 3 in progress - Database features complete, 1 plan remaining
+Last activity: 2026-01-29 — Completed 2.1-07 (Database Features & Status Management)
 
 Progress: [████████░░] 73% (2 phases + 8 plans in Phase 2.1)
 
