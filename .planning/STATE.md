@@ -12,9 +12,9 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 Milestone: v3.5 Production Go-Live
 Phase: 2.1 of 4 (Production Bug Remediation) - IN PROGRESS
-Plan: 5 of 8 in Phase 2.1 (2.1-01 through 2.1-05 complete)
-Status: Contact merge working, lead score UI cleaned (no dummy data)
-Last activity: 2026-01-29 — Completed 2.1-05 (Contact Merge & Lead Score Fixes)
+Plan: 5 of 8 in Phase 2.1 (2.1-01, 2.1-02, 2.1-04, 2.1-05 complete)
+Status: Wave 2 complete - Quick replies + Contact merge functional
+Last activity: 2026-01-29 — Completed 2.1-04 (Quick Replies) and 2.1-05 (Contact Merge)
 
 Progress: [██████░░░░] 62% (2 phases + 5 plans in Phase 2.1)
 
@@ -23,7 +23,7 @@ Progress: [██████░░░░] 62% (2 phases + 5 plans in Phase 2.1)
 **Velocity:**
 - Total plans completed: 26 (15 from v3.4 + 11 from v3.5)
 - v3.4 execution: 6 phases, 15 plans, ~76 min (2 days: Jan 27 → Jan 28)
-- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (5 of 8 plans, ~16 min)
+- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (5 of 8 plans, ~21 min)
 
 **By Milestone:**
 
@@ -87,6 +87,10 @@ Recent decisions affecting current work:
 - v3.5 (2.1-02): Fixed critical status toggle bug - TanStack Query setQueriesData pattern corrected
 - v3.5 (2.1-02): Status toggle now affects only selected contact (data integrity bug resolved)
 - v3.5 (2.1-02): Issues #8, #9, #10 resolved - contact update/delete/status operations working
+- v3.5 (2.1-04): Quick replies stored in dedicated Convex table instead of workspace.settings JSON
+- v3.5 (2.1-04): Use "shortcut" and "message" field names (clearer than "label" and "text")
+- v3.5 (2.1-04): Popover selector UI instead of slash command autocomplete (better discoverability)
+- v3.5 (2.1-04): Issues #11, #12 resolved - quick replies CRUD + Inbox selector working
 - v3.5 (2.1-05): Tags automatically merged (union of both contacts) instead of user selection
 - v3.5 (2.1-05): Primary contact determined by user's name field selection in merge dialog
 - v3.5 (2.1-05): Chat score removed until Phase 3 bot integration (was dummy data)
@@ -154,23 +158,34 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 2.1-05 (Contact Merge & Lead Score Fixes)
-Resume file: None (execution complete)
-Next action: Continue Phase 2.1 - Plan 06, 07, or 08 (remaining bug fixes)
+Stopped at: Completed 2.1-04 (Quick Replies) and 2.1-05 (Contact Merge) - Wave 2 parallel execution
+Resume file: None (both executions complete)
+Next action: Continue Phase 2.1 - Plan 03, 06, 07, or 08 (remaining bug fixes)
 
-**What happened this session:**
-- Completed 2.1-05-PLAN.md (Contact Merge & Lead Score Fixes)
+**What happened this session (Wave 2 - Parallel Execution):**
+
+**2.1-04 - Quick Replies (5m 21s):**
+- Created Convex quickReplies table with CRUD mutations
+- Updated Settings UI to use Convex instead of workspace.settings API
+- Added quick reply selector with Popover in Inbox compose area
+- Implemented character limits (50 for shortcut, 1000 for message)
+- Added keyboard navigation and accessibility features
+
+**2.1-05 - Contact Merge & Lead Score:**
 - Fixed contact merge to respect primary contact selection based on user's name choice
 - Implemented tags auto-merge (union of both contacts) instead of user selection
 - Removed all dummy chat score data (was hardcoded to 47 pts with fake outcomes)
 - Lead score now shows real form score only, placeholder for unavailable chat score
 
 **Bugs resolved:**
-- ✅ Issue #5: Merge contacts fails with error (CRITICAL)
-- ✅ Issue #6: Lead score chat component shows dummy data
+- ✅ Issue #11: Quick replies cannot be saved in Settings (2.1-04)
+- ✅ Issue #12: Quick replies don't appear in Inbox compose (2.1-04)
+- ✅ Issue #5: Merge contacts fails with error (CRITICAL) (2.1-05)
+- ✅ Issue #6: Lead score chat component shows dummy data (2.1-05)
 
 **Impact:**
-- 2 bugs resolved (7 → 5 critical remaining)
+- 4 bugs resolved (9 → 5 critical remaining)
+- Quick replies feature fully functional end-to-end (efficiency win)
 - Contact merge workflow fully functional (duplicate consolidation works correctly)
 - Lead scoring display accurate (form score only until Phase 3 bot integration)
 - Tags union pattern established for merge operations
