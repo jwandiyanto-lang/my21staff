@@ -363,20 +363,20 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
             className="w-full"
           />
 
-          {/* Status filter dropdown */}
-          <FilterTabs
-            value={statusFilter}
-            onChange={setStatusFilter}
-            workspaceId={workspaceId}
-            activeOnly={false}
-          />
-
-          {/* Tag filter */}
-          <TagFilterDropdown
-            value={tagFilter}
-            onChange={setTagFilter}
-            workspaceId={workspaceId}
-          />
+          {/* Status and Tags filters side by side */}
+          <div className="flex items-center gap-2">
+            <FilterTabs
+              value={statusFilter}
+              onChange={setStatusFilter}
+              workspaceId={workspaceId}
+              activeOnly={false}
+            />
+            <TagFilterDropdown
+              value={tagFilter}
+              onChange={setTagFilter}
+              workspaceId={workspaceId}
+            />
+          </div>
         </div>
 
         {/* Conversation list */}

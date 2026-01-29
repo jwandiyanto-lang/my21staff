@@ -101,10 +101,10 @@ export function FilterTabs({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="h-9 w-full">
+        <Button variant="outline" size="sm" className="h-9 flex-1">
           <Filter className="h-4 w-4 mr-2" />
           {displayLabel}
-          <ChevronDown className="h-4 w-4 ml-2" />
+          <ChevronDown className="h-4 w-4 ml-auto" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
