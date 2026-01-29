@@ -3,7 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { api } from 'convex/_generated/api'
 import { sendMessage as kapsoSendMessage } from '@/lib/kapso/client'
-import { decrypt } from '@/lib/crypto'
+import { safeDecrypt } from '@/lib/crypto'
 import {
   withTiming,
   createRequestMetrics,
@@ -91,8 +91,8 @@ async function postHandler(request: NextRequest) {
       )
     }
 
-    // 5. Decrypt Kapso API key
-    const apiKey = decrypt(workspace.meta_access_token)
+    // 5. Decrypt Kapso API key (safeDecrypt handles both encrypted and plain text)
+    const apiKey = safeDecrypt(workspace.meta_access_token)
 
     // 6. Send via Kapso
     queryStart = performance.now()
