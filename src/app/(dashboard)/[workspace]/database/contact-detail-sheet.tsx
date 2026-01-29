@@ -572,8 +572,15 @@ export function ContactDetailSheet({
 
   // Filter form responses to show only main fields in Form Score tab
   const mainFormResponses = mainFormFields.length > 0
-    ? formResponses.filter(([key]) => mainFormFields.includes(key))
+    ? formResponses.filter(([key]) => {
+        console.log('Checking field:', key, 'in mainFormFields:', mainFormFields, 'included:', mainFormFields.includes(key))
+        return mainFormFields.includes(key)
+      })
     : formResponses
+
+  console.log('Form responses:', formResponses)
+  console.log('Main form fields:', mainFormFields)
+  console.log('Filtered main responses:', mainFormResponses)
 
   // Field labels mapping (from Settings)
   const FIELD_LABELS: Record<string, string> = {

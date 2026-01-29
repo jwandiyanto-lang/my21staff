@@ -594,11 +594,51 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
     }
   }
 
-  const handleToggleField = (fieldKey: string) => {
+  const handleToggleField = async (fieldKey: string) => {
     const updated = mainFormFields.includes(fieldKey)
       ? mainFormFields.filter(f => f !== fieldKey)
       : [...mainFormFields, fieldKey]
+
+    // Optimistic update
+    const previousFields = mainFormFields
     setMainFormFields(updated)
+    setIsSavingFields(true)
+
+    try {
+      // In dev mode, update mock workspace settings
+      if (isDevMode) {
+        updateMockWorkspaceSettings({ main_form_fields: updated })
+        setOriginalMainFormFields(updated)
+        toast.success('Field visibility updated')
+        return
+      }
+
+      const response = await fetch(`/api/workspaces/${workspace.id}/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: {
+            ...workspace.settings,
+            main_form_fields: updated
+          },
+        }),
+      })
+
+      if (!response.ok) {
+        // Revert on error
+        setMainFormFields(previousFields)
+        toast.error('Failed to update field visibility')
+      } else {
+        setOriginalMainFormFields(updated)
+        toast.success('Field visibility updated')
+      }
+    } catch (error) {
+      // Revert on error
+      setMainFormFields(previousFields)
+      toast.error('Failed to update field visibility')
+    } finally {
+      setIsSavingFields(false)
+    }
   }
 
   const saveFieldScores = async (scores: Record<string, number>) => {
