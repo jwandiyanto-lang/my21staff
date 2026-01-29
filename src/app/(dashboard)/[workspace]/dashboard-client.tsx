@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
+import { useEnsureUser } from '@/hooks/use-ensure-user'
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton'
 import { StatsCards } from '@/components/dashboard/stats-cards'
 import { QuickActions } from '@/components/dashboard/quick-actions'
@@ -38,10 +39,14 @@ interface DashboardClientProps {
 export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientProps) {
   const [timeFilter, setTimeFilter] = useState<'week' | 'month' | 'all'>('all')
 
+  // Ensure current user exists before running queries
+  const userInitialized = useEnsureUser()
+
   // Skip Convex query in dev mode - use mock data
+  // Also skip until user is initialized to prevent race conditions
   const convexStats = useQuery(
     api.dashboard.getStats,
-    isDevMode ? 'skip' : { workspace_id: workspaceId as any, time_filter: timeFilter }
+    isDevMode || !userInitialized ? 'skip' : { workspace_id: workspaceId as any, time_filter: timeFilter }
   )
 
   const stats = isDevMode ? MOCK_STATS : convexStats

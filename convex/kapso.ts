@@ -9,17 +9,19 @@
  * - Updating conversation unread counts and last message info
  *
  * Processing is done in batches for efficiency.
+ *
+ * Kapso v2 Payload Format:
+ * {
+ *   "message": { id, from, type, text, timestamp, ... },
+ *   "conversation": { id, phone_number, status, last_active_at, ... },
+ *   "phone_number_id": "..."
+ * }
  */
 
 // @ts-nocheck - Schema types mismatch with generated Convex types
 import { mutation, internalMutation, internalAction, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
-import type {
-  MetaWebhookPayload,
-  MetaWebhookMessage,
-  MetaWebhookContact,
-} from "./http/kapso";
 
 // ============================================
 // Helper: Normalize Phone Number
@@ -30,6 +32,13 @@ import type {
  * This ensures consistent phone matching across Kapso and database.
  */
 function normalizePhone(phone: string): string {
+  return phone.replace(/\D/g, "");
+}
+
+/**
+ * Normalize Kapso v2 phone format (+62 823-9250-8490 -> 6282392508490)
+ */
+function normalizeKapsoPhone(phone: string): string {
   return phone.replace(/\D/g, "");
 }
 
@@ -56,64 +65,129 @@ export const processWebhook = internalMutation({
     const { payload, receivedAt } = args;
     const startTime = Date.now();
 
-    const webhookPayload = payload as MetaWebhookPayload;
-
     // Collect all messages grouped by workspace and phone
     const workspaceMessages = new Map<
       string,
-      Map<string, { message: MetaWebhookMessage; contactInfo?: MetaWebhookContact }[]>
+      Map<string, { message: any; contactInfo?: any }[]>
     >();
 
-    // Iterate over entry -> changes -> messages
-    for (const entry of webhookPayload.entry) {
-      for (const change of entry.changes) {
-        if (change.field !== "messages") continue;
+    // Handle Kapso v2 payload format: { message, conversation, phone_number_id }
+    if (!payload.entry || !Array.isArray(payload.entry)) {
+      // Kapso v2 format
+      const kapsoPayload = payload as any;
 
-        const value = change.value;
-        const phoneNumberId = value.metadata?.phone_number_id;
-        if (!phoneNumberId) {
-          console.log("[Kapso] No phone_number_id in metadata");
-          continue;
-        }
+      if (!kapsoPayload.message) {
+        console.log("[Kapso] No message in payload");
+        return;
+      }
 
-        // Find workspace by kapso_phone_id
-        const workspace = await ctx.db
-          .query("workspaces")
-          .withIndex("by_kapso_phone", (q) =>
-            q.eq("kapso_phone_id", phoneNumberId)
-          )
-          .first();
+      const phoneNumberId = kapsoPayload.phone_number_id;
+      if (!phoneNumberId) {
+        console.log("[Kapso] No phone_number_id in payload");
+        return;
+      }
 
-        if (!workspace) {
-          console.log(
-            `[Kapso] No workspace for phone_number_id: ${phoneNumberId}`
-          );
-          continue;
-        }
+      // Find workspace by kapso_phone_id
+      const workspace = await ctx.db
+        .query("workspaces")
+        .withIndex("by_kapso_phone", (q) =>
+          q.eq("kapso_phone_id", phoneNumberId)
+        )
+        .first();
 
-        const workspaceId = workspace._id;
-        const contacts = value.contacts || [];
-        const messages = value.messages || [];
+      if (!workspace) {
+        console.log(
+          `[Kapso] No workspace for phone_number_id: ${phoneNumberId}`
+        );
+        return;
+      }
 
-        if (messages.length === 0) continue;
+      const workspaceId = workspace._id;
 
-        // Initialize workspace map if needed
-        if (!workspaceMessages.has(workspaceId)) {
-          workspaceMessages.set(workspaceId, new Map());
-        }
+      // Initialize workspace map if needed
+      if (!workspaceMessages.has(workspaceId)) {
+        workspaceMessages.set(workspaceId, new Map());
+      }
 
-        // Group messages by phone number
-        for (const message of messages) {
-          const phone = message.from;
-          if (!workspaceMessages.get(workspaceId)!.has(phone)) {
-            workspaceMessages.get(workspaceId)!.set(phone, []);
+      // Map Kapso v2 message to internal format
+      const message = kapsoPayload.message;
+      const conversation = kapsoPayload.conversation;
+
+      const phone = message.from || conversation?.phone_number;
+
+      if (!phone) {
+        console.log("[Kapso] No phone number in message/conversation");
+        return;
+      }
+
+      if (!workspaceMessages.get(workspaceId)!.has(phone)) {
+        workspaceMessages.get(workspaceId)!.set(phone, []);
+      }
+
+      // Build contact info from conversation.kapso data
+      const contactInfo = conversation?.kapso?.contact_name
+        ? { wa_id: phone, profile: { name: conversation.kapso.contact_name } }
+        : undefined;
+
+      workspaceMessages.get(workspaceId)!.get(phone)!.push({
+        message,
+        contactInfo,
+      });
+    } else {
+      // Legacy Meta format (if ever needed)
+      const webhookPayload = payload as MetaWebhookPayload;
+
+      // Iterate over entry -> changes -> messages
+      for (const entry of webhookPayload.entry) {
+        for (const change of entry.changes) {
+          if (change.field !== "messages") continue;
+
+          const value = change.value;
+          const phoneNumberId = value.metadata?.phone_number_id;
+          if (!phoneNumberId) {
+            console.log("[Kapso] No phone_number_id in metadata");
+            continue;
           }
 
-          const contactInfo = contacts.find((c) => c.wa_id === phone);
-          workspaceMessages.get(workspaceId)!.get(phone)!.push({
-            message,
-            contactInfo,
-          });
+          // Find workspace by kapso_phone_id
+          const workspace = await ctx.db
+            .query("workspaces")
+            .withIndex("by_kapso_phone", (q) =>
+              q.eq("kapso_phone_id", phoneNumberId)
+            )
+            .first();
+
+          if (!workspace) {
+            console.log(
+              `[Kapso] No workspace for phone_number_id: ${phoneNumberId}`
+            );
+            continue;
+          }
+
+          const workspaceId = workspace._id;
+          const contacts = value.contacts || [];
+          const messages = value.messages || [];
+
+          if (messages.length === 0) continue;
+
+          // Initialize workspace map if needed
+          if (!workspaceMessages.has(workspaceId)) {
+            workspaceMessages.set(workspaceId, new Map());
+          }
+
+          // Group messages by phone number
+          for (const message of messages) {
+            const phone = message.from;
+            if (!workspaceMessages.get(workspaceId)!.has(phone)) {
+              workspaceMessages.get(workspaceId)!.set(phone, []);
+            }
+
+            const contactInfo = contacts.find((c) => c.wa_id === phone);
+            workspaceMessages.get(workspaceId)!.get(phone)!.push({
+              message,
+              contactInfo,
+            });
+          }
         }
       }
     }

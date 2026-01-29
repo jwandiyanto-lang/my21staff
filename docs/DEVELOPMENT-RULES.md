@@ -1,5 +1,64 @@
 # Development Rules
 
+## ⚠️ CRITICAL: User Initialization Required
+
+**ALWAYS ensure users exist before running Convex queries.**
+
+### The Problem
+
+Convex queries that use `requireWorkspaceMembership` will fail if the user document doesn't exist in the database. This happens when:
+- Clerk webhooks aren't set up
+- User signs in for the first time
+- Webhook processing is delayed
+
+### The Solution
+
+**Use the `useEnsureUser` hook in ALL client components that use Convex queries:**
+
+```tsx
+import { useEnsureUser } from '@/hooks/use-ensure-user'
+import { useQuery } from 'convex/react'
+import { api } from 'convex/_generated/api'
+
+export function MyComponent() {
+  // STEP 1: Ensure user exists BEFORE running queries
+  const userInitialized = useEnsureUser()
+
+  // STEP 2: Skip queries until user is initialized
+  const data = useQuery(
+    api.something.get,
+    !userInitialized ? 'skip' : { workspace_id }
+  )
+
+  // Rest of component...
+}
+```
+
+### Why This Works
+
+1. `useEnsureUser()` calls `api.users.ensureCurrentUser` mutation
+2. Mutation auto-creates user if they don't exist
+3. Returns `true` when user is guaranteed to exist
+4. Queries skip until `userInitialized` is `true`
+5. No more race conditions!
+
+### Files That Already Use This Pattern
+
+- ✅ `src/app/(dashboard)/[workspace]/settings/settings-client.tsx`
+- ✅ `src/app/(dashboard)/[workspace]/dashboard-client.tsx`
+- ✅ `src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx`
+
+### When Adding New Pages
+
+If your page uses `useQuery` with workspace-scoped data:
+1. Import `useEnsureUser` hook
+2. Call it at the top of your component
+3. Skip queries until `userInitialized` is `true`
+
+**Failure to do this will cause "Server Error" on production!**
+
+---
+
 ## ⚠️ CRITICAL: Database as Single Source of Truth
 
 **THE DATABASE IS THE SOURCE OF EVERYTHING.**

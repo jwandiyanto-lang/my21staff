@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from 'convex/_generated/api'
+import { useEnsureUser } from '@/hooks/use-ensure-user'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Mail, MailOpen, MessageSquare } from 'lucide-react'
@@ -141,13 +142,17 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   // Track conversation status changes in dev mode
   const [conversationStatusOverrides, setConversationStatusOverrides] = useState<Record<string, string>>({})
 
+  // Ensure current user exists before running queries
+  const userInitialized = useEnsureUser()
+
   // Mutation to mark conversation as read
   const markAsRead = useMutation(api.conversations.markAsRead)
 
   // Skip Convex query in dev mode - use mock data
+  // Also skip until user is initialized to prevent race conditions
   const convexData = useQuery(
     api.conversations.listWithFilters,
-    isDevMode() ? 'skip' : {
+    isDevMode() || !userInitialized ? 'skip' : {
       workspace_id: workspaceId as any,
       active: viewMode === 'active',
       statusFilters: statusFilter.length > 0 ? statusFilter : undefined,

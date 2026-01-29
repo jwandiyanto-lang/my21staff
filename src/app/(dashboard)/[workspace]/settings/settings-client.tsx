@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from 'convex/_generated/api'
+import { useEnsureUser } from '@/hooks/use-ensure-user'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -240,28 +241,9 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   // Track which field is expanded in Form Fields accordion
   const [expandedField, setExpandedField] = useState<string | null>(null)
 
-  // Track if user has been initialized
-  const [userInitialized, setUserInitialized] = useState(false)
-
-  // Ensure current user exists in database (fallback for when webhooks aren't set up)
-  const ensureUser = useMutation(api.users.ensureCurrentUser)
-
-  useEffect(() => {
-    if (!isDevMode && !userInitialized) {
-      ensureUser()
-        .then(() => {
-          console.log('[Settings] User initialized successfully')
-          setUserInitialized(true)
-        })
-        .catch((err) => {
-          console.error('[Settings] Failed to initialize user:', err)
-          // Still set to true to allow queries to run (user might already exist)
-          setUserInitialized(true)
-        })
-    } else if (isDevMode) {
-      setUserInitialized(true)
-    }
-  }, [ensureUser, isDevMode, userInitialized])
+  // Ensure current user exists in database before running queries
+  // This prevents race conditions where queries run before user document exists
+  const userInitialized = useEnsureUser()
 
   // Fetch AI config on client side with Clerk auth context
   // IMPORTANT: Skip query until user is initialized to avoid race condition
