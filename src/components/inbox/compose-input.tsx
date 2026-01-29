@@ -186,10 +186,7 @@ function ComposeInputProd({ workspaceId, conversationId, disabled, replyTo, onCl
   const [content, setContent] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [quickReplyOpen, setQuickReplyOpen] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [filePreview, setFilePreview] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const { userId } = useAuth()
 
   // Fetch quick replies from Convex
