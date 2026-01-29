@@ -107,6 +107,32 @@ export const setDefaultContactTags = mutation({
 });
 
 /**
+ * Set custom contact tags for a workspace.
+ * Used by Settings page to update tags.
+ */
+export const setContactTags = mutation({
+  args: {
+    workspaceId: v.string(),
+    tags: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId as any);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    await ctx.db.patch(workspace._id, {
+      settings: {
+        ...workspace.settings,
+        contact_tags: args.tags,
+      },
+    });
+
+    return { success: true, tags: args.tags };
+  },
+});
+
+/**
  * List all workspaces with their Kapso config.
  */
 export const listWorkspaces = query({

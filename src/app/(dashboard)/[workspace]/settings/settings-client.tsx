@@ -525,22 +525,22 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
         return
       }
 
-      const response = await fetch(`/api/workspaces/${workspace.id}/settings`, {
+      const response = await fetch(`/api/workspaces/${workspace.id}/tags`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          settings: {
-            ...workspace.settings,
-            contact_tags: tags
-          },
-        }),
+        body: JSON.stringify({ tags }),
       })
-      if (!response.ok) throw new Error('Failed to save')
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to save')
+      }
+
       setContactTags(tags)
       toast.success('Tags updated')
     } catch (error) {
       console.error('Failed to save contact tags:', error)
-      toast.error('Failed to save tags')
+      toast.error(error instanceof Error ? error.message : 'Failed to save tags')
     } finally {
       setIsSavingTags(false)
     }
