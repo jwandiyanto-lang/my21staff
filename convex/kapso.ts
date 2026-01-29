@@ -352,19 +352,24 @@ async function processWorkspaceMessages(
   );
 
   // Check for existing messages to avoid duplicates
-  const messageIds = allMessages.map((m) => m.message.id);
-  const existingMessages = await ctx.db
-    .query("messages")
-    .withIndex("by_workspace", (q: any) => q.eq("workspace_id", workspaceId))
-    .collect();
+  // IMPROVED: Check individually before each insert to handle race conditions
+  const newMessages: typeof allMessages = [];
 
-  const existingIds = new Set(
-    existingMessages
-      .filter((m: any) => m.kapso_message_id)
-      .map((m: any) => m.kapso_message_id)
-  );
+  for (const messageData of allMessages) {
+    const kapsoId = messageData.message.id;
 
-  const newMessages = allMessages.filter((m) => !existingIds.has(m.message.id));
+    // Query for this specific message ID using dedicated index
+    const existingMessage = await ctx.db
+      .query("messages")
+      .withIndex("by_kapso_message_id", (q: any) => q.eq("kapso_message_id", kapsoId))
+      .first();
+
+    if (!existingMessage) {
+      newMessages.push(messageData);
+    } else {
+      console.log(`[Kapso] Message ${kapsoId} already exists (direction: ${existingMessage.direction}), skipping`);
+    }
+  }
 
   if (newMessages.length === 0) {
     console.log(`[Kapso] All ${allMessages.length} messages already exist, skipping`);
