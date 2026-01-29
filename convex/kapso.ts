@@ -220,7 +220,7 @@ export const processWebhook = internalMutation({
 async function processWorkspaceMessages(
   ctx: any,
   workspaceId: string,
-  phoneMessages: Map<string, { message: MetaWebhookMessage; contactInfo?: MetaWebhookContact }[]>
+  phoneMessages: Map<string, { message: any; contactInfo?: any }[]>
 ): Promise<void> {
   // Get unique phone numbers
   const phones = Array.from(phoneMessages.keys());
@@ -232,12 +232,12 @@ async function processWorkspaceMessages(
     const contactInfo = messages[0]?.contactInfo;
 
     // Try to find existing contact by normalized phone
-    const normalized = normalizePhone(phone);
+    const normalized = normalizeKapsoPhone(phone);
 
     const existing = await ctx.db
       .query("contacts")
       .withIndex("by_workspace_phone", (q) =>
-        q.eq("workspace_id", workspaceId).eq("phone", phone)
+        q.eq("workspace_id", workspaceId).eq("phone", normalized)
       )
       .first();
 
@@ -251,6 +251,7 @@ async function processWorkspaceMessages(
         cache_updated_at: now,
       };
 
+      // Kapso v2: contact name from contactInfo.profile.name or contactInfo.kapso?.contact_name
       if (contactInfo?.profile?.name && contactInfo.profile.name !== existing.kapso_name) {
         updates.kapso_name = contactInfo.profile.name;
         if (!existing.name) {
@@ -264,7 +265,7 @@ async function processWorkspaceMessages(
       // Create new contact
       const contactId = await ctx.db.insert("contacts", {
         workspace_id: workspaceId,
-        phone,
+        phone: normalized,
         phone_normalized: normalized,
         name: contactInfo?.profile?.name || undefined,
         kapso_name: contactInfo?.profile?.name || undefined,
@@ -346,7 +347,7 @@ async function processWorkspaceMessages(
     const conversation = conversationMap.get(phone);
     if (!conversation) continue;
 
-    // Extract message content based on type
+    // Extract message content based on type (Kapso v2 format)
     let content: string | undefined;
     let mediaUrl: string | undefined;
     const messageType = message.type || "text";
@@ -356,19 +357,19 @@ async function processWorkspaceMessages(
         content = message.text?.body;
         break;
       case "image":
-        mediaUrl = message.image?.id;
+        mediaUrl = message.image?.id || message.image?.url;
         content = message.image?.caption || "[Image]";
         break;
       case "audio":
-        mediaUrl = message.audio?.id;
+        mediaUrl = message.audio?.id || message.audio?.url;
         content = "[Audio message]";
         break;
       case "video":
-        mediaUrl = message.video?.id;
+        mediaUrl = message.video?.id || message.video?.url;
         content = message.video?.caption || "[Video]";
         break;
       case "document":
-        mediaUrl = message.document?.id;
+        mediaUrl = message.document?.id || message.document?.url;
         content =
           message.document?.caption ||
           `[Document: ${message.document?.filename || "file"}]`;
@@ -392,7 +393,7 @@ async function processWorkspaceMessages(
       workspace_id: workspaceId,
       direction: "inbound",
       sender_type: "contact",
-      sender_id: message.from,
+      sender_id: phone, // Kapso v2: phone from conversation.phone_number
       content,
       message_type: messageType,
       media_url: mediaUrl,
