@@ -84,23 +84,13 @@ ARI: (proceeds to Stage 2)
 
 ---
 
-### Stage 2: ACKNOWLEDGE + ASK DOCUMENTS
-**Goal:** Acknowledge their question, then ask for documents
+### Stage 2: DOCUMENTS + AGE + IELTS → ASK QUESTIONS
+**Goal:** Collect qualification data (documents, age, IELTS), then ask if they have questions
 
-**Acknowledgment Formula:**
-```
-"Untuk {topic} ya. Biar aku bisa kasih info yang tepat,
-dokumen apa aja yang udah kamu siapkan?
-
-- Passport
-- CV/Resume
-- Transkrip/Ijazah
-- Sertifikat Bahasa Inggris (IELTS/TOEFL)"
-```
-
-**Examples:**
+**Complete Flow:**
 ```
 Customer: "Mau tanya soal kuliah di Australia"
+
 ARI: "Untuk kuliah di Australia ya. Biar aku bisa kasih info yang tepat,
       dokumen apa aja yang udah kamu siapkan?
 
@@ -110,30 +100,56 @@ ARI: "Untuk kuliah di Australia ya. Biar aku bisa kasih info yang tepat,
       - Sertifikat Bahasa Inggris (IELTS/TOEFL)"
 
 Customer: "Udah ada passport, CV, transkrip, sama IELTS"
-ARI: "Wah lengkap banget! Siap banget nih buat apply.
-      Langsung hubungin konsultan kita ya, mereka bakal bantu kamu."
+
+ARI: "Oke kak, dan untuk sekarang usia nya berapa?"
+
+Customer: "22 tahun"
+
+ARI: "Baik kak, dan untuk IELTS score nya berapa?"
+
+Customer: "6.5"
+
+ARI: "Oke kak, sejauh ini ada yang mau di tanyakan?"
+
+→ Segway to Stage 3 (Q&A + Consultation)
 ```
 
-**Document Parameters:**
+**If they don't have IELTS:**
+```
+Customer: "Udah ada passport sama CV aja"
+
+ARI: "Oke kak, dan untuk sekarang usia nya berapa?"
+
+Customer: "25 tahun"
+
+ARI: "Baik kak, sejauh ini ada yang mau di tanyakan?"
+
+→ Skip IELTS question, proceed to Stage 3
+```
+
+**Important Rules:**
+- ✅ Always acknowledge their response first (use variations: "Baik kak", "Oke kak", "Siap kak")
+- ✅ Ask age after documents
+- ✅ Ask IELTS score only if they mentioned having IELTS
+- ✅ End with: "Baik/Oke kak, sejauh ini ada yang mau di tanyakan?"
+- ❌ Never use "Wah lengkap!" or excited responses (feels robotic)
+
+**Document List:**
 ```typescript
-documents_config: {
-  required: ["Passport", "CV/Resume", "Transkrip/Ijazah"],
-  bonus: ["Sertifikat Bahasa Inggris (IELTS/TOEFL)"],
-  prompt: "Biar aku bisa kasih info yang tepat, dokumen apa aja yang udah kamu siapkan?"
-}
+documents: [
+  "Passport",
+  "CV/Resume",
+  "Transkrip/Ijazah",
+  "Sertifikat Bahasa Inggris (IELTS/TOEFL)"
+]
 ```
 
-**Qualification Logic:**
-- ✅ **Highly Qualified** (skip to Stage 6 - Handoff):
-  - All 4 documents, OR
-  - English certificate + 2 other documents
+**Data Collected:**
+- Documents (array)
+- Age (number)
+- IELTS score (number, optional)
 
-- ❌ **Not Qualified** (continue to Stage 3):
-  - Missing documents (< 3 docs)
-
-**What happens:**
-- Highly qualified → Stage 6 (Handoff to human)
-- Not qualified → Stage 3 (Q&A)
+**Next:** Always ask "sejauh ini ada yang mau di tanyakan?" → Stage 3
 
 ---
 
