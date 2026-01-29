@@ -133,6 +133,59 @@ export const setContactTags = mutation({
 });
 
 /**
+ * Remove "google-form" tag from all contacts in a workspace.
+ * One-time cleanup operation.
+ */
+export const removeGoogleFormTags = mutation({
+  args: {
+    workspaceId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const contacts = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspaceId as any))
+      .collect();
+
+    let updatedCount = 0;
+    for (const contact of contacts) {
+      if (contact.tags && contact.tags.includes("google-form")) {
+        const newTags = contact.tags.filter(t => t !== "google-form");
+        await ctx.db.patch(contact._id, { tags: newTags });
+        updatedCount++;
+      }
+    }
+
+    return { success: true, updatedCount };
+  },
+});
+
+/**
+ * Clear ALL tags from all contacts in a workspace.
+ * One-time cleanup operation.
+ */
+export const clearAllTags = mutation({
+  args: {
+    workspaceId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const contacts = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspaceId as any))
+      .collect();
+
+    let updatedCount = 0;
+    for (const contact of contacts) {
+      if (contact.tags && contact.tags.length > 0) {
+        await ctx.db.patch(contact._id, { tags: [] });
+        updatedCount++;
+      }
+    }
+
+    return { success: true, updatedCount };
+  },
+});
+
+/**
  * List all workspaces with their Kapso config.
  */
 export const listWorkspaces = query({

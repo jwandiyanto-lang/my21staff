@@ -40,7 +40,7 @@ function normalizePhone(phone: string): string {
  * PUBLIC MUTATION - No auth required (called from HTTP webhook).
  *
  * Checks for duplicate contacts by phone number and skips if exists.
- * Creates new contact with source="n8n" and tags=["google-form"].
+ * Creates new contact with source="n8n" and no tags (empty array).
  *
  * @param workspace_id - The workspace ID (resolved from slug in HTTP handler)
  * @param name - Contact name
@@ -96,7 +96,7 @@ export const createLead = mutation({
       email: args.email,
       lead_score: args.lead_score,
       lead_status: "new",
-      tags: ["google-form"],
+      tags: [],
       assigned_to: undefined,
       source: "n8n",
       metadata: args.metadata || {},
