@@ -54,13 +54,12 @@ async function setupBotConfiguration() {
     console.log("   Community:", botConfig.community_link);
     console.log("   Status:", botConfig.enabled ? "✅ ENABLED" : "❌ DISABLED");
 
-    // TODO: Create mutation to upsert ariConfig
-    // await client.mutation(api.ari.upsertConfig, botConfig);
+    // Use seedAriConfig (no auth required)
+    console.log("\n📤 Applying configuration to database...");
+    await client.mutation(api.ari.seedAriConfig, botConfig as any);
 
-    console.log("\n✅ Bot configuration ready!");
-    console.log("\n⚠️  Note: Mutation not yet implemented. Next steps:");
-    console.log("   1. Create convex/ari.ts::upsertConfig mutation");
-    console.log("   2. Re-run this script to apply config");
+    console.log("\n✅ Bot configuration applied successfully!");
+    console.log("🤖 ARI is now ENABLED for Eagle Overseas workspace");
 
   } catch (error) {
     console.error("❌ Failed to set up bot configuration:", error);
