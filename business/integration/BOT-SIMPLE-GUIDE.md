@@ -137,7 +137,7 @@ documents_config: {
 
 ---
 
-### Stage 3: Q&A + CONSULTATION OFFER
+### Stage 3: Q&A + CONSULTATION OFFER (STEP BY STEP)
 **Goal:** Answer questions, share program template, offer 1-on-1 consultation
 
 **When they ask about universities/programs:**
@@ -196,35 +196,72 @@ Customer: "Mahal ya" / "Nggak dulu deh"
 ARI: → Go to Stage 4 (Objection handling)
 ```
 
+**Complete Stage 3 Flow (WhatsApp Format - No Lists):**
+
+**Step 1: Share template → WAIT**
+```
+Customer: "Universitas mana yang bagus?"
+ARI: "Oh ya kak untuk itu saya izin share ya"
+     (Sends formatted template with 3 age tiers)
+→ WAIT for response
+```
+
+**Step 2A: If they just nod/acknowledge**
+```
+Customer: "Oke", "Terima kasih", "Wah lengkap"
+ARI: "Gimana kak mana yang cocok?"
+→ WAIT for them to ask a question
+```
+
+**Step 2B: If they ask a question**
+```
+Customer: "Berapa lama prosesnya?" / "IELTS minimal berapa?"
+ARI: "Proses biasanya 3-6 bulan kak dari apply sampai visa keluar. Untuk lebih detail saya saranin untuk konsultasi 1 on 1 ya kak. Karena banyak murid yang ikut konsultasi ini dan mereka lebih jelas tentang program yang cocok sama profil mereka. Kakak tertarik?"
+→ WAIT for response
+```
+
+**Step 3: If they ask about price**
+```
+Customer: "Berapa biayanya?"
+ARI: "Oh ya untuk biaya is 500k"
+→ WAIT for response
+```
+
+**Step 4A: If YES to consultation**
+```
+Customer: "Oke boleh"
+ARI: "Okay nanti saya atur jadwal nya dulu ya, kira kira kakak kosong hari apa?"
+→ FLAG FOR HANDOFF (human consultant takes over immediately)
+```
+
+**Step 4B: If NO to consultation**
+```
+Customer: "Nggak dulu deh" / "Mahal"
+ARI: "Oke kak no problem, mungkin lebih cocok join komunitas kita dulu ya. Di sini kakak bisa dapat update live dan webinar, bisa tanya langsung. Mau join?"
+→ WAIT
+
+Customer: "Boleh"
+ARI: "Ini link nya ya kak. https://whatsapp.com/channel/0029Vb72LoyLSmbcJvDunX1U"
+ARI: "Oh ya kak, keberetan nga kalau kasih tau kenapa ga cocok dengan 1 on 1 kita, mungkin karena kurang jelas atau gimana kak"
+→ WAIT and store objection response
+```
+
 **Stage 3 Parameters:**
 ```typescript
 stage3_config: {
-  // Program recommendation template
-  program_template: `1️⃣ FRESH GRAD / GAP YEAR...`,
-
-  // Template triggers
+  program_template: `1️⃣ FRESH GRAD / GAP YEAR (Usia 18 - 24)...`,
   triggers: ["universitas", "program", "rekomendasi", "cocok", "jurusan"],
-
-  // Consultation offer
-  consultation: {
-    price: "IDR 500,000",
-    benefits: [
-      "Profile Evaluation – Identify strengths and suitable opportunities",
-      "Visa & Certification Guidance – Explore visa requirements",
-      "CV & LinkedIn Optimization – Expert feedback untuk visibility",
-      "Career Roadmap – Clear action plan for international career goals"
-    ],
-    offer_text: "Kalau mau diskusi lebih detail tentang program yang cocok, kamu bisa ikut konsultasi 1 on 1 sama konsultan kita."
-  },
-
-  // When to offer
-  max_questions_before_offer: 2  // After 1-2 questions
+  consultation_price: "500k",
+  consultation_offer: "Untuk lebih detail saya saranin untuk konsultasi 1 on 1 ya kak. Karena banyak murid yang ikut konsultasi ini dan mereka lebih jelas tentang program yang cocok sama profil mereka. Kakak tertarik?",
+  handoff_message: "Okay nanti saya atur jadwal nya dulu ya, kira kira kakak kosong hari apa?",
+  community_link: "https://whatsapp.com/channel/0029Vb72LoyLSmbcJvDunX1U",
+  objection_question: "Oh ya kak, keberetan nga kalau kasih tau kenapa ga cocok dengan 1 on 1 kita, mungkin karena kurang jelas atau gimana kak"
 }
 ```
 
-**What happens after 1-2 questions:**
-- If YES to consultation → Stage 6 (Handoff)
-- If NO to consultation → Stage 4 (Objection)
+**What happens:**
+- If YES to consultation → Flag handoff (human takes over)
+- If NO to consultation → Offer community + capture objection
 
 ---
 
