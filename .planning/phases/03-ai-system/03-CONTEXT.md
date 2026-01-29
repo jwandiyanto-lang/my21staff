@@ -15,6 +15,13 @@ Complete Kapso platform integration focused on Inbox - making my21staff Inbox sh
 <decisions>
 ## Implementation Decisions
 
+### Architecture (CRITICAL - Cost Optimization)
+- **Webhook handling via Convex HTTP endpoints, NOT Next.js API routes**
+- Reason: Avoid Vercel serverless function invocation costs
+- Kapso webhooks → Convex HTTP endpoint → Convex mutations → Real-time UI updates
+- All Kapso API calls handled server-side in Convex (not from Next.js)
+- Next.js frontend only handles UI rendering and user interactions
+
 ### Inbox Interface Parity
 - Keep existing my21staff Inbox UI layout and branding
 - Sync message content exactly from Kapso (full conversation history via webhooks)
@@ -54,6 +61,11 @@ Complete Kapso platform integration focused on Inbox - making my21staff Inbox sh
 - Phase 6 (v2.0): Kapso live integration patterns in `.planning/phases-v2.0-archive/06-kapso-live/`
 - Phase 18 (v2.0): Bot setup context in `.planning/phases-v2.0-archive/18-kapso-bot-setup/`
 - Phase 2 (v3.x): Recent Kapso credentials work in `.planning/phases/02-kapso-integration/`
+
+**Existing infrastructure:**
+- Convex webhook endpoint already exists: `convex/http.ts` at `/webhook/kapso`
+- Kapso utilities already exist: `convex/kapso.ts`
+- Build on existing foundation, don't rebuild from scratch
 
 **Use Kapso agents/tools as implementation helpers:**
 - Leverage Kapso's agent features to accelerate Phase 3 development
