@@ -173,15 +173,7 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
         throw new Error(error.error || 'Failed to send message')
       }
 
-      const result = await response.json()
-
-      // Show warning if Kapso failed but message was saved
-      if (result.kapso_warning) {
-        toast.warning('Message saved but not sent to WhatsApp (24-hour window expired)')
-      } else {
-        toast.success('Message sent')
-      }
-
+      toast.success('Message sent')
       setContent('')
     } catch (error) {
       console.error('Send error:', error)
