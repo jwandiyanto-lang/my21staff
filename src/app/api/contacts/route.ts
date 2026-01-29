@@ -39,7 +39,12 @@ export async function GET(request: NextRequest) {
           contact.email?.toLowerCase().includes(search)
         )
       }
-      return NextResponse.json({ contacts: filteredContacts.slice(0, limit), total: filteredContacts.length })
+      // Map _id to id for consistency
+      const contactsWithId = filteredContacts.slice(0, limit).map(contact => ({
+        ...contact,
+        id: contact._id,
+      }))
+      return NextResponse.json({ contacts: contactsWithId, total: filteredContacts.length })
     }
 
     // Verify authentication via Clerk
@@ -81,8 +86,14 @@ export async function GET(request: NextRequest) {
     const to = from + limit
     const paginatedContacts = contacts.slice(from, to)
 
+    // Map Convex _id to id for frontend compatibility
+    const contactsWithId = paginatedContacts.map((contact: any) => ({
+      ...contact,
+      id: contact._id,
+    }))
+
     logQuerySummary('/api/contacts', metrics)
-    return NextResponse.json({ contacts: paginatedContacts, total: contacts.length })
+    return NextResponse.json({ contacts: contactsWithId, total: contacts.length })
   } catch (error) {
     console.error('GET /api/contacts error:', error)
     logQuerySummary('/api/contacts', metrics)
