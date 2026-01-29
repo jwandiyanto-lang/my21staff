@@ -20,14 +20,14 @@ import { requireWorkspaceMembership } from "./lib/auth";
  */
 export const getAriConfig = query({
   args: {
-    workspace_id: v.id("workspaces"),
+    workspace_id: v.string(), // Changed from v.id("workspaces") to match schema (workspace_id is stored as string)
   },
   handler: async (ctx, args) => {
     await requireWorkspaceMembership(ctx, args.workspace_id);
 
     const config = await ctx.db
       .query("ariConfig")
-      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id))
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
       .first();
 
     return config;

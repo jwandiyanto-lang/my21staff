@@ -66,8 +66,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Get existing config from Convex
+    // Note: workspace_id in ariConfig schema is stored as string, not Convex ID
     const config = await fetchQuery(api.ari.getAriConfig, {
-      workspace_id: workspace._id,
+      workspace_id: workspace._id as unknown as string,
     })
 
     // Return existing config or defaults
@@ -191,8 +192,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Upsert config in Convex
+    // Note: workspace_id in ariConfig schema is stored as string, not Convex ID
     const config = await fetchMutation(api.ari.upsertAriConfig, {
-      workspace_id: workspace._id,
+      workspace_id: workspace._id as unknown as string,
       bot_name: body.bot_name || DEFAULT_CONFIG.bot_name,
       greeting_style: DEFAULT_CONFIG.greeting_style,
       language: DEFAULT_CONFIG.language,
@@ -244,8 +246,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     // Toggle AI enabled
+    // Note: workspace_id in ariConfig schema is stored as string, not Convex ID
     const config = await fetchMutation(api.ari.toggleAiEnabled, {
-      workspace_id: workspace._id,
+      workspace_id: workspace._id as unknown as string,
       enabled: body.enabled,
     })
 
