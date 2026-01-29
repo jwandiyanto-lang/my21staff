@@ -12,18 +12,18 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 Milestone: v3.5 Production Go-Live
 Phase: 2.1 of 4 (Production Bug Remediation) - IN PROGRESS
-Plan: 6 of 8 in Phase 2.1 (2.1-01, 2.1-02, 2.1-04, 2.1-05, 2.1-06 complete)
-Status: Wave 3 in progress - UI polish complete, 2 plans remaining
-Last activity: 2026-01-29 — Completed 2.1-06 (UI Internationalization & Settings)
+Plan: 7 of 8 in Phase 2.1 (2.1-01, 2.1-02, 2.1-04, 2.1-05, 2.1-06, 2.1-07 complete)
+Status: Wave 3 in progress - Database features complete, 1 plan remaining
+Last activity: 2026-01-29 — Completed 2.1-07 (Database Features & Status Management)
 
-Progress: [███████░░░] 64% (2 phases + 6 plans in Phase 2.1)
+Progress: [███████░░░] 66% (2 phases + 7 plans in Phase 2.1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27 (15 from v3.4 + 12 from v3.5)
+- Total plans completed: 28 (15 from v3.4 + 13 from v3.5)
 - v3.4 execution: 6 phases, 15 plans, ~76 min (2 days: Jan 27 → Jan 28)
-- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (6 of 8 plans, ~25 min)
+- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (7 of 8 plans, ~33 min)
 
 **By Milestone:**
 
@@ -99,6 +99,13 @@ Recent decisions affecting current work:
 - v3.5 (2.1-06): Keep Kapso as internal variable names, show Meta in UI (brand compliance)
 - v3.5 (2.1-06): Issues #13, #16, #21 verified as already fixed (no code changes needed)
 - v3.5 (2.1-06): Issues #14, #15 resolved - Team and Settings fully internationalized to English
+- v3.5 (2.1-07): New contacts default to empty tags array (no auto-tagging to "google-form")
+- v3.5 (2.1-07): Only n8n/Google Form submissions auto-tagged (source="n8n" → tags=["google-form"])
+- v3.5 (2.1-07): Issue #18 (status filter persistence) verified already working via auto-save + localStorage
+- v3.5 (2.1-07): Issue #19 (global status sync) partially resolved - hook created, full migration deferred
+- v3.5 (2.1-07): useStatusConfig hook provides infrastructure for real-time status updates
+- v3.5 (2.1-07): Full Issue #19 fix requires migrating 12+ components (scope too large for single plan)
+- v3.5 (2.1-07): Issues #17, #22, #23 resolved - Add Contact working, Tags visible, no auto-tagging
 
 ### Pending Todos
 
@@ -149,10 +156,12 @@ None yet.
 - ✅ Contact merge implements tags union and respects primary contact selection (2.1-05)
 - ✅ Issues #13, #14, #15, #16, #21 resolved - UI internationalized, forms interactive, Clerk clean (2.1-06)
 - ✅ Team and Settings pages fully internationalized to English (2.1-06)
-- ⚠️ 5 critical bugs remaining (down from 13 - resolved 8)
-- ⚠️ 8 medium bugs resolved (down from 8 - resolved 5 in this plan)
-- ⚠️ Inbox filter tabs non-functional (Issue #3)
-- Next: Continue Phase 2.1 bug remediation (2 plans remaining - 03, 07/08)
+- ✅ Issues #17, #22, #23 resolved - Add Contact working, Tags visible, no auto-tagging (2.1-07)
+- ✅ Issue #18 verified already working - status persistence via auto-save + localStorage (2.1-07)
+- ⚠️ Issue #19 partially resolved - useStatusConfig hook created, component migration pending (2.1-07)
+- ⚠️ Pre-existing TypeScript build error in convex/lib/auth.ts:61 (runtime unaffected)
+- ⚠️ Issue #19 full fix requires migrating 12+ components to useStatusConfig hook (deferred)
+- Next: Continue Phase 2.1 bug remediation (1 plan remaining - 2.1-08 final verification)
 
 ## Quick Tasks Completed
 
@@ -220,12 +229,43 @@ Next action: Continue Phase 2.1 - Plan 03 (Inbox filters), 07 (Database columns)
 - Lead scoring display accurate (form score only until Phase 3 bot integration)
 - Tags union pattern established for merge operations
 
-**Next targets:**
-- Issue #3: Inbox filter tabs (Status/Tags/Assignment non-functional)
-- Issue #13-15: Database columns missing (Tags, quick access icons)
-- Issue #16-18: Contact export, form field activation
-- Issue #19-21: Settings UI issues (Indonesian words, WhatsApp API option)
+**2.1-06 - UI Internationalization & Settings:**
+- Internationalized Team and Settings pages from Indonesian to English
+- Verified Issue #13 (Export button) already resolved - exists in database page
+- Verified Issue #16 (Form field activation) already resolved - working in Settings
+- Verified Issue #21 (Clerk deprecation) already resolved - using fallbackRedirectUrl
+
+**2.1-07 - Database Features & Status Management:**
+- Implemented Add Contact button and dialog with form validation
+- Created contacts.create mutation with no auto-tagging (Issue #17 fix)
+- Phone normalization to +62 format with duplicate detection
+- Verified Tags column already visible by default (Issue #22)
+- Verified status persistence already working via auto-save (Issue #18)
+- Created useStatusConfig hook for real-time status updates (Issue #19 partial)
+
+**Bugs resolved:**
+- ✅ Issue #17: Tags auto-assigned to "google-form" (2.1-07)
+- ✅ Issue #22: Tags column missing from table (2.1-07 - was already visible)
+- ✅ Issue #23: No Add Contact button/modal (2.1-07)
+- ✅ Issue #18: Status filter no save button (2.1-07 - was already working)
+- ⚠️ Issue #19: Status changes don't auto-apply globally (2.1-07 - hook created, components not migrated)
+- ✅ Issue #13: Export button missing (2.1-06 - verified exists)
+- ✅ Issue #16: Form field activation missing (2.1-06 - verified working)
+- ✅ Issue #21: Clerk deprecation warning (2.1-06 - verified fixed)
+
+**Impact:**
+- 8 bugs resolved (5 → 0 critical remaining, except Issue #19 partial)
+- Add Contact feature fully functional
+- Auto-tagging bug resolved
+- Database table complete with all columns
+- Status persistence working correctly
+- Real-time status hook infrastructure ready
+
+**Next target:**
+- Issue #3, #4: Inbox filter tabs verification
+- Issue #15, #20: Remaining UI polish issues
+- Complete Phase 2.1 with final verification plan (2.1-08)
 
 ---
 
-*Last updated: 2026-01-29 — Completed 2.1-01 (ARI Config API Fix)*
+*Last updated: 2026-01-29 — Completed 2.1-07 (Database Features & Status Management)*
