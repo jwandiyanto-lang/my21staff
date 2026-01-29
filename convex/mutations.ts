@@ -983,7 +983,7 @@ export const createOutboundMessage = mutation({
       media_url: args.media_url || null,
       kapso_message_id: args.kapso_message_id || null,
       created_at: now,
-      updated_at: now,
+      supabaseId: "", // Required by schema
     });
 
     // Update conversation last_message_at

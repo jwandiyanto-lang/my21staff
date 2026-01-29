@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { fetchMutation, fetchQuery } from 'convex/nextjs'
+import { ConvexHttpClient } from 'convex/browser'
 import { api } from 'convex/_generated/api'
 import { sendMessage as kapsoSendMessage } from '@/lib/kapso/client'
 import { safeDecrypt } from '@/lib/crypto'
@@ -21,13 +21,20 @@ async function postHandler(request: NextRequest) {
   try {
     console.log('[MessagesSend] Step 1: Starting send request')
 
-    // 1. Authenticate via Clerk
-    const { userId } = await auth()
+    // 1. Authenticate via Clerk and get token
+    const { userId, getToken } = await auth()
     if (!userId) {
       console.log('[MessagesSend] Step 1: Auth failed - no userId')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    console.log('[MessagesSend] Step 1: Auth success, userId:', userId)
+
+    // Get Clerk JWT for Convex authentication
+    const token = await getToken({ template: 'convex' })
+    console.log('[MessagesSend] Step 1: Auth success, userId:', userId, 'token:', token ? 'present' : 'missing')
+
+    // Create authenticated Convex client
+    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+    convex.setAuth(token!)
 
     // 2. Parse request body
     const body = await request.json()
@@ -47,7 +54,7 @@ async function postHandler(request: NextRequest) {
     // 3. Get conversation and contact
     console.log('[MessagesSend] Step 3: Fetching conversation...')
     let queryStart = performance.now()
-    const conversationResult = await fetchQuery(
+    const conversationResult = await convex.query(
       api.conversations.getByIdInternal,
       { conversation_id }
     )
@@ -67,7 +74,7 @@ async function postHandler(request: NextRequest) {
 
     console.log('[MessagesSend] Step 4: Fetching contact...')
     queryStart = performance.now()
-    const contactResult = await fetchQuery(
+    const contactResult = await convex.query(
       api.contacts.getByIdInternal,
       { contact_id: conversation.contact_id }
     )
@@ -88,7 +95,7 @@ async function postHandler(request: NextRequest) {
     // 4. Get workspace with Kapso credentials
     console.log('[MessagesSend] Step 5: Fetching workspace...')
     queryStart = performance.now()
-    const workspaceResult = await fetchQuery(
+    const workspaceResult = await convex.query(
       api.workspaces.getByIdInternal,
       { workspace_id }
     )
@@ -126,7 +133,7 @@ async function postHandler(request: NextRequest) {
     console.log('[MessagesSend] Step 8: Storing in Convex...')
     console.log('[MessagesSend] → Creating OUTBOUND message with kapso_id:', kapsoResult.messages?.[0]?.id)
     queryStart = performance.now()
-    const message = await fetchMutation(
+    const message = await convex.mutation(
       api.mutations.createOutboundMessage,
       {
         workspace_id,
