@@ -73,20 +73,25 @@ function ComposeInputDev({ workspaceId, conversationId, disabled }: ComposeInput
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80 p-2" align="start" side="top">
-          <div className="space-y-1">
+          <div className="space-y-1 max-h-96 overflow-y-auto">
             <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
               Quick Replies
             </div>
             {mockQuickReplies.length === 0 ? (
-              <div className="px-2 py-4 text-center text-sm text-muted-foreground">
-                No quick replies yet. Create them in Settings.
+              <div className="px-2 py-6 text-center">
+                <Zap className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">No quick replies yet</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Create them in Settings → Quick Replies
+                </p>
               </div>
             ) : (
               mockQuickReplies.map((reply) => (
                 <button
                   key={reply._id}
                   onClick={() => insertQuickReply(reply.message)}
-                  className="w-full text-left px-2 py-2 rounded-lg hover:bg-muted transition-colors"
+                  className="w-full text-left px-2 py-2 rounded-lg hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                  tabIndex={0}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant="secondary" className="text-xs font-mono">
@@ -195,20 +200,25 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80 p-2" align="start" side="top">
-          <div className="space-y-1">
+          <div className="space-y-1 max-h-96 overflow-y-auto">
             <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
               Quick Replies
             </div>
             {!quickReplies || quickReplies.length === 0 ? (
-              <div className="px-2 py-4 text-center text-sm text-muted-foreground">
-                No quick replies yet. Create them in Settings.
+              <div className="px-2 py-6 text-center">
+                <Zap className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">No quick replies yet</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Create them in Settings → Quick Replies
+                </p>
               </div>
             ) : (
               quickReplies.map((reply) => (
                 <button
                   key={reply._id}
                   onClick={() => insertQuickReply(reply.message)}
-                  className="w-full text-left px-2 py-2 rounded-lg hover:bg-muted transition-colors"
+                  className="w-full text-left px-2 py-2 rounded-lg hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                  tabIndex={0}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant="secondary" className="text-xs font-mono">

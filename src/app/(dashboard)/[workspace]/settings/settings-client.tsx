@@ -1023,23 +1023,33 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
               {isAddingReply && (
                 <div className="border rounded-lg p-4 space-y-3 bg-muted/50">
                   <div className="space-y-2">
-                    <Label>Shortcut</Label>
+                    <Label htmlFor="new-shortcut">Shortcut</Label>
                     <Input
+                      id="new-shortcut"
                       placeholder="e.g., /greeting, /followup"
                       value={newReply.shortcut}
                       onChange={(e) => setNewReply({ ...newReply, shortcut: e.target.value })}
+                      maxLength={50}
+                      autoFocus
                     />
                     <p className="text-xs text-muted-foreground">
                       Start with "/" for easy typing (e.g., /hi, /thanks)
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label>Message</Label>
+                    <Label htmlFor="new-message">
+                      Message
+                      <span className="text-xs text-muted-foreground ml-2">
+                        ({newReply.message.length}/1000)
+                      </span>
+                    </Label>
                     <Textarea
+                      id="new-message"
                       placeholder="Enter your message template..."
                       value={newReply.message}
                       onChange={(e) => setNewReply({ ...newReply, message: e.target.value })}
                       rows={3}
+                      maxLength={1000}
                     />
                   </div>
                   <div className="flex gap-2">
@@ -1063,18 +1073,28 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
                     {editingReply?._id === reply._id ? (
                       <div className="space-y-3">
                         <div className="space-y-2">
-                          <Label>Shortcut</Label>
+                          <Label htmlFor="edit-shortcut">Shortcut</Label>
                           <Input
+                            id="edit-shortcut"
                             value={editingReply.shortcut}
                             onChange={(e) => setEditingReply({ ...editingReply, shortcut: e.target.value })}
+                            maxLength={50}
+                            autoFocus
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Message</Label>
+                          <Label htmlFor="edit-message">
+                            Message
+                            <span className="text-xs text-muted-foreground ml-2">
+                              ({editingReply.message.length}/1000)
+                            </span>
+                          </Label>
                           <Textarea
+                            id="edit-message"
                             value={editingReply.message}
                             onChange={(e) => setEditingReply({ ...editingReply, message: e.target.value })}
                             rows={3}
+                            maxLength={1000}
                           />
                         </div>
                         <div className="flex gap-2">
