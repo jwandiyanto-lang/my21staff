@@ -52,48 +52,84 @@ Store in database
 ## 2. How ARI Talks to Clients (5 Main Stages)
 
 ### Stage 1: GREETING
-**Goal:** Welcome and ask if they filled the form
+**Goal:** Greet warmly and wait for their question
+
+**Greeting Formula:**
+```
+{time_of_day} kak {name}! Gimana kabarnya?
+```
+
+**Examples:**
+```
+Morning (00:00-11:59):   "Pagi kak Sarah! Gimana kabarnya?"
+Afternoon (12:00-17:59): "Siang kak Sarah! Gimana kabarnya?"
+Evening (18:00-23:59):   "Malam kak Sarah! Gimana kabarnya?"
+
+Without name:            "Siang kak! Gimana kabarnya?"
+```
+
+**Handling Responses:**
+- ❌ **Short/Generic** ("Hi", "Halo", "Test", < 3 words) → **Repeat greeting**
+- ❌ **Inappropriate** content → **Repeat greeting**
+- ✅ **Real question** → **Go to Stage 2**
 
 **Example:**
 ```
-Customer: "Halo, mau tanya soal kuliah"
-ARI: "Siang kak! Wah tertarik kuliah di luar negeri ya?
-      Udah isi form kita belum?"
-```
+Customer: "Halo"
+ARI: "Siang kak! Gimana kabarnya?" (repeats)
 
-**What happens:**
-- If YES → Go to Stage 2 (Qualification)
-- If NO → Still go to Stage 2 (Qualification)
+Customer: "Mau tanya soal kuliah di Australia"
+ARI: (proceeds to Stage 2)
+```
 
 ---
 
-### Stage 2: QUALIFICATION
-**Goal:** Collect age + documents to qualify the lead
+### Stage 2: ACKNOWLEDGE + ASK DOCUMENTS
+**Goal:** Acknowledge their question, then ask for documents
 
-**Example:**
+**Acknowledgment Formula:**
 ```
-ARI: "Oke, buat bantu kamu lebih baik, boleh tau:
-      1. Umur kamu berapa?
-      2. Dokumen apa aja yang udah kamu siapkan?
-         - Passport
-         - CV/Resume
-         - Transkrip/Ijazah
-         - Sertifikat Bahasa Inggris (IELTS/TOEFL)"
+"Untuk {topic} ya. Biar aku bisa kasih info yang tepat,
+dokumen apa aja yang udah kamu siapkan?
 
-Customer: "Umur 22 tahun. Udah ada passport, CV, transkrip, sama IELTS"
+- Passport
+- CV/Resume
+- Transkrip/Ijazah
+- Sertifikat Bahasa Inggris (IELTS/TOEFL)"
+```
 
-ARI: "Wah lengkap banget! Umur segitu plus dokumen lengkap,
-      siap banget nih buat apply. Langsung hubungin konsultan
-      kita ya, mereka bakal bantu kamu."
+**Examples:**
+```
+Customer: "Mau tanya soal kuliah di Australia"
+ARI: "Untuk kuliah di Australia ya. Biar aku bisa kasih info yang tepat,
+      dokumen apa aja yang udah kamu siapkan?
+
+      - Passport
+      - CV/Resume
+      - Transkrip/Ijazah
+      - Sertifikat Bahasa Inggris (IELTS/TOEFL)"
+
+Customer: "Udah ada passport, CV, transkrip, sama IELTS"
+ARI: "Wah lengkap banget! Siap banget nih buat apply.
+      Langsung hubungin konsultan kita ya, mereka bakal bantu kamu."
+```
+
+**Document Parameters:**
+```typescript
+documents_config: {
+  required: ["Passport", "CV/Resume", "Transkrip/Ijazah"],
+  bonus: ["Sertifikat Bahasa Inggris (IELTS/TOEFL)"],
+  prompt: "Biar aku bisa kasih info yang tepat, dokumen apa aja yang udah kamu siapkan?"
+}
 ```
 
 **Qualification Logic:**
 - ✅ **Highly Qualified** (skip to Stage 6 - Handoff):
-  - Age ≤ 25 + All 4 documents, OR
+  - All 4 documents, OR
   - English certificate + 2 other documents
 
 - ❌ **Not Qualified** (continue to Stage 3):
-  - Missing documents or older age
+  - Missing documents (< 3 docs)
 
 **What happens:**
 - Highly qualified → Stage 6 (Handoff to human)
