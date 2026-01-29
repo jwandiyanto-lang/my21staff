@@ -754,3 +754,238 @@ export const verifyContactByPhone = query({
     };
   },
 });
+
+// ============================================
+// KAPSO HISTORICAL DATA SYNC
+// ============================================
+
+/**
+ * Normalize phone number (remove all non-digit characters)
+ */
+function normalizePhone(phone: string): string {
+  return phone.replace(/\D/g, "");
+}
+
+/**
+ * Sync a single Kapso conversation with its messages to Convex.
+ * Called by the sync-kapso-mcp.js script.
+ *
+ * This mutation:
+ * 1. Creates/updates the contact with kapso_name
+ * 2. Creates the conversation if it doesn't exist
+ * 3. Inserts messages (deduplicates by kapso_message_id)
+ * 4. Updates conversation metadata (last_message_at, unread_count)
+ *
+ * @param workspace_id - The workspace ID
+ * @param conversation - Kapso conversation object
+ * @param messages - Array of Kapso message objects
+ */
+export const syncKapsoConversation = mutation({
+  args: {
+    workspace_id: v.id("workspaces"),
+    conversation: v.any(),
+    messages: v.array(v.any()),
+  },
+  handler: async (ctx, args) => {
+    const { workspace_id, conversation, messages } = args;
+    const now = Date.now();
+
+    // Extract phone number from conversation
+    const phone = normalizePhone(conversation.phone_number || conversation.from || "");
+    if (!phone) {
+      return { success: false, error: "No phone number in conversation" };
+    }
+
+    // Extract contact name from Kapso data
+    const contactName = conversation.kapso?.contact_name || conversation.name || undefined;
+
+    // Step 1: Create/update contact
+    let contact = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace_phone", (q) =>
+        q.eq("workspace_id", workspace_id).eq("phone", phone)
+      )
+      .first();
+
+    let contactCreated = false;
+
+    if (contact) {
+      // Update existing contact with kapso_name if available
+      const updates: any = {
+        updated_at: now,
+        phone_normalized: phone,
+        cache_updated_at: now,
+      };
+
+      if (contactName && contactName !== contact.kapso_name) {
+        updates.kapso_name = contactName;
+        if (!contact.name) {
+          updates.name = contactName;
+        }
+      }
+
+      await ctx.db.patch(contact._id, updates);
+    } else {
+      // Create new contact
+      const contactId = await ctx.db.insert("contacts", {
+        workspace_id,
+        phone,
+        phone_normalized: phone,
+        name: contactName,
+        kapso_name: contactName,
+        lead_score: 0,
+        lead_status: "new",
+        tags: [],
+        source: "whatsapp",
+        metadata: {},
+        cache_updated_at: now,
+        created_at: now,
+        updated_at: now,
+        supabaseId: "",
+      });
+      contact = await ctx.db.get(contactId);
+      contactCreated = true;
+    }
+
+    if (!contact) {
+      return { success: false, error: "Failed to create/update contact" };
+    }
+
+    // Step 2: Create/get conversation
+    let conv = await ctx.db
+      .query("conversations")
+      .withIndex("by_contact", (q) => q.eq("contact_id", contact._id))
+      .first();
+
+    let conversationCreated = false;
+
+    if (!conv) {
+      const convId = await ctx.db.insert("conversations", {
+        workspace_id,
+        contact_id: contact._id,
+        status: "open",
+        unread_count: 0,
+        created_at: now,
+        updated_at: now,
+        supabaseId: "",
+      });
+      conv = await ctx.db.get(convId);
+      conversationCreated = true;
+    }
+
+    if (!conv) {
+      return { success: false, error: "Failed to create conversation" };
+    }
+
+    // Step 3: Import messages (deduplicate by kapso_message_id)
+    const existingMessages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversation_time", (q) =>
+        q.eq("conversation_id", conv._id)
+      )
+      .collect();
+
+    const existingIds = new Set(
+      existingMessages
+        .filter((m) => m.kapso_message_id)
+        .map((m) => m.kapso_message_id)
+    );
+
+    const newMessages = messages.filter(
+      (msg) => msg.id && !existingIds.has(msg.id)
+    );
+
+    let messagesImported = 0;
+    let lastMessageAt = conv.last_message_at || now;
+    let lastMessagePreview = conv.last_message_preview || "";
+
+    for (const msg of newMessages) {
+      // Determine message direction
+      const direction = msg.from === phone ? "inbound" : "outbound";
+      const senderType = direction === "inbound" ? "contact" : "bot";
+
+      // Extract content based on message type
+      let content: string | undefined;
+      let mediaUrl: string | undefined;
+      const messageType = msg.type || "text";
+
+      switch (messageType) {
+        case "text":
+          content = msg.text?.body;
+          break;
+        case "image":
+          mediaUrl = msg.image?.url || msg.image?.id;
+          content = msg.image?.caption || null;
+          break;
+        case "audio":
+          mediaUrl = msg.audio?.url || msg.audio?.id;
+          content = "[Audio message]";
+          break;
+        case "video":
+          mediaUrl = msg.video?.url || msg.video?.id;
+          content = msg.video?.caption || "[Video]";
+          break;
+        case "document":
+          mediaUrl = msg.document?.url || msg.document?.id;
+          content = msg.document?.caption || `[Document: ${msg.document?.filename || "file"}]`;
+          break;
+        default:
+          content = `[${messageType}]`;
+      }
+
+      // Parse timestamp (Kapso sends Unix timestamp in seconds)
+      const messageTimestamp = msg.timestamp
+        ? parseInt(msg.timestamp) * 1000
+        : now;
+
+      // Build metadata for reply context
+      const metadata: any = {};
+      if (msg.context) {
+        metadata.reply_to_kapso_id = msg.context.id;
+        metadata.reply_to_from = msg.context.from;
+      }
+
+      // Insert message
+      await ctx.db.insert("messages", {
+        conversation_id: conv._id,
+        workspace_id,
+        direction,
+        sender_type: senderType,
+        sender_id: msg.from || phone,
+        content,
+        message_type: messageType,
+        media_url: mediaUrl,
+        kapso_message_id: msg.id,
+        metadata,
+        created_at: messageTimestamp,
+        supabaseId: "",
+      });
+
+      messagesImported++;
+
+      // Track latest message for conversation update
+      if (messageTimestamp > lastMessageAt) {
+        lastMessageAt = messageTimestamp;
+        lastMessagePreview = content?.substring(0, 200) || "[media]";
+      }
+    }
+
+    // Step 4: Update conversation metadata
+    if (messagesImported > 0) {
+      await ctx.db.patch(conv._id, {
+        last_message_at: lastMessageAt,
+        last_message_preview: lastMessagePreview,
+        updated_at: now,
+      });
+    }
+
+    return {
+      success: true,
+      contactCreated,
+      conversationCreated,
+      messagesImported,
+      contactName,
+      phone,
+    };
+  },
+});
