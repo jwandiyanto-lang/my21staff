@@ -12,18 +12,18 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 Milestone: v3.5 Production Go-Live
 Phase: 2.1 of 4 (Production Bug Remediation) - IN PROGRESS
-Plan: 7 of 8 in Phase 2.1 (2.1-01, 2.1-02, 2.1-04, 2.1-05, 2.1-06, 2.1-07 complete)
-Status: Wave 3 in progress - Database features complete, 1 plan remaining
-Last activity: 2026-01-29 — Completed 2.1-07 (Database Features & Status Management)
+Plan: 8 of 8 in Phase 2.1 (2.1-01, 2.1-02, 2.1-03, 2.1-04, 2.1-05, 2.1-06, 2.1-07 complete)
+Status: Wave 3 complete - Inbox filters fixed, 1 plan remaining (2.1-08 verification)
+Last activity: 2026-01-29 — Completed 2.1-03 (Inbox Filter Tabs & Activities)
 
-Progress: [███████░░░] 66% (2 phases + 7 plans in Phase 2.1)
+Progress: [████████░░] 73% (2 phases + 8 plans in Phase 2.1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 28 (15 from v3.4 + 13 from v3.5)
+- Total plans completed: 29 (15 from v3.4 + 14 from v3.5)
 - v3.4 execution: 6 phases, 15 plans, ~76 min (2 days: Jan 27 → Jan 28)
-- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (7 of 8 plans, ~33 min)
+- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (8 of 8 plans, ~37 min)
 
 **By Milestone:**
 
@@ -106,6 +106,10 @@ Recent decisions affecting current work:
 - v3.5 (2.1-07): useStatusConfig hook provides infrastructure for real-time status updates
 - v3.5 (2.1-07): Full Issue #19 fix requires migrating 12+ components (scope too large for single plan)
 - v3.5 (2.1-07): Issues #17, #22, #23 resolved - Add Contact working, Tags visible, no auto-tagging
+- v3.5 (2.1-03): Filter conversations before pagination (not after) to avoid empty filtered results
+- v3.5 (2.1-03): InfoSidebar z-index must be above dropdowns (z-60 > z-50) to prevent overlay blocking
+- v3.5 (2.1-03): React key on InfoSidebar forces remount on contact change (prevents stale handlers)
+- v3.5 (2.1-03): Issues #3, #4 resolved - Inbox filters working, InfoSidebar remains clickable
 
 ### Pending Todos
 
@@ -161,7 +165,10 @@ None yet.
 - ⚠️ Issue #19 partially resolved - useStatusConfig hook created, component migration pending (2.1-07)
 - ⚠️ Pre-existing TypeScript build error in convex/lib/auth.ts:61 (runtime unaffected)
 - ⚠️ Issue #19 full fix requires migrating 12+ components to useStatusConfig hook (deferred)
-- Next: Continue Phase 2.1 bug remediation (1 plan remaining - 2.1-08 final verification)
+- ✅ Issues #3, #4 resolved - Inbox filter tabs working, InfoSidebar remains clickable (2.1-03)
+- ✅ Filter-then-paginate pattern prevents empty results on filtered queries (2.1-03)
+- ✅ Z-index hierarchy established: Base UI (z-10) < Dropdowns (z-50) < Overlays (z-60) (2.1-03)
+- Next: Complete Phase 2.1 bug remediation (1 plan remaining - 2.1-08 final verification)
 
 ## Quick Tasks Completed
 
@@ -197,9 +204,9 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 2.1-06 (UI Internationalization & Settings)
+Stopped at: Completed 2.1-03 (Inbox Filter Tabs & Activities)
 Resume file: None
-Next action: Continue Phase 2.1 - Plan 03 (Inbox filters), 07 (Database columns), or 08 (Form activation)
+Next action: Complete Phase 2.1 - Plan 2.1-08 (Final Verification)
 
 **What happened this session (Wave 2 - Parallel Execution):**
 
@@ -266,6 +273,25 @@ Next action: Continue Phase 2.1 - Plan 03 (Inbox filters), 07 (Database columns)
 - Issue #15, #20: Remaining UI polish issues
 - Complete Phase 2.1 with final verification plan (2.1-08)
 
+**2.1-03 - Inbox Filter Tabs & Activities (4m):**
+- Fixed filter-then-paginate logic in Convex conversation queries
+- Root cause: Filters applied after pagination (slice first, filter second) showed 0 results
+- Solution: Fetch all contacts, apply filters, THEN paginate
+- Fixed InfoSidebar freeze after tab navigation
+- Root cause: Dropdown overlays (z-50) covered sidebar (z-10), blocking clicks
+- Solution: Increased sidebar z-index to z-60, added React key for proper remount
+
+**Bugs resolved:**
+- ✅ Issue #3: Inbox filter tabs don't work (2.1-03)
+- ✅ Issue #4: Activities not clickable after tab navigation (2.1-03)
+
+**Impact:**
+- 2 bugs resolved (21 → 19 remaining from 23 total)
+- Inbox filtering fully functional (status, tags, assignment filters work)
+- InfoSidebar remains interactive after filter changes
+- Filter counts accurate (post-filtering totals)
+- Z-index hierarchy established for overlay components
+
 ---
 
-*Last updated: 2026-01-29 — Completed 2.1-07 (Database Features & Status Management)*
+*Last updated: 2026-01-29 — Completed 2.1-03 (Inbox Filter Tabs & Activities)*
