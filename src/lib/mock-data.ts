@@ -2201,9 +2201,29 @@ export const getMockAriConversation = (contactId: string): MockARIConversation |
 // RUNTIME MOCK WORKSPACE SETTINGS (for dev mode state management)
 // =============================================================================
 
+const MOCK_SETTINGS_STORAGE_KEY = 'my21staff-mock-workspace-settings'
+
+// Initialize from localStorage or use defaults
+function initializeMockSettings() {
+  if (typeof window === 'undefined') {
+    return { ...MOCK_CONVEX_WORKSPACE.settings }
+  }
+
+  try {
+    const stored = localStorage.getItem(MOCK_SETTINGS_STORAGE_KEY)
+    if (stored) {
+      return JSON.parse(stored)
+    }
+  } catch (error) {
+    console.error('Failed to load mock settings from localStorage:', error)
+  }
+
+  return { ...MOCK_CONVEX_WORKSPACE.settings }
+}
+
 // Mutable store for workspace settings in dev mode
 // This allows Settings page updates to reflect in Database page
-let runtimeMockSettings = { ...MOCK_CONVEX_WORKSPACE.settings }
+let runtimeMockSettings = initializeMockSettings()
 
 export const getMockWorkspaceSettings = () => {
   return runtimeMockSettings
@@ -2212,12 +2232,28 @@ export const getMockWorkspaceSettings = () => {
 export const updateMockWorkspaceSettings = (updates: Partial<typeof runtimeMockSettings>) => {
   runtimeMockSettings = { ...runtimeMockSettings, ...updates }
 
-  // Dispatch event to notify components of settings change
+  // Persist to localStorage
   if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(MOCK_SETTINGS_STORAGE_KEY, JSON.stringify(runtimeMockSettings))
+    } catch (error) {
+      console.error('Failed to save mock settings to localStorage:', error)
+    }
+
+    // Dispatch event to notify components of settings change
     window.dispatchEvent(new CustomEvent('mockWorkspaceSettingsUpdated', { detail: runtimeMockSettings }))
   }
 }
 
 export const resetMockWorkspaceSettings = () => {
   runtimeMockSettings = { ...MOCK_CONVEX_WORKSPACE.settings }
+
+  // Clear from localStorage
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(MOCK_SETTINGS_STORAGE_KEY)
+    } catch (error) {
+      console.error('Failed to clear mock settings from localStorage:', error)
+    }
+  }
 }
