@@ -185,7 +185,7 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, contactT
       }
 
       return (
-        <DropdownMenu key={contactId}>
+        <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
             {tags.length === 0 ? (
               <button className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground hover:bg-muted transition-colors">
@@ -211,7 +211,10 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, contactT
             {tags.length > 0 && (
               <>
                 <DropdownMenuItem
-                  onClick={() => onTagsChange(contactId, [])}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onTagsChange(contactId, [])
+                  }}
                   className="text-destructive"
                 >
                   Clear All Tags
@@ -224,7 +227,10 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, contactT
               return (
                 <DropdownMenuItem
                   key={tag}
-                  onClick={() => toggleTag(tag)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toggleTag(tag)
+                  }}
                   className="flex items-center gap-2"
                 >
                   <Checkbox checked={isSelected} className="h-4 w-4" />
