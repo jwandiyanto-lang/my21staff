@@ -1282,3 +1282,86 @@ export const getPromotedDestinations = query({
     return args.limit ? promoted.slice(0, args.limit) : promoted;
   },
 });
+
+// ============================================
+// ANALYTICS
+// ============================================
+
+/**
+ * Get bot analytics for a workspace.
+ * Returns metrics for dashboard display.
+ */
+export const getBotAnalytics = query({
+  args: {
+    workspace_id: v.string(),
+    date_range_days: v.optional(v.number()), // Filter by last N days (optional)
+  },
+  handler: async (ctx, args) => {
+    await requireWorkspaceMembership(ctx, args.workspace_id);
+
+    // Get all ARI conversations for workspace
+    const allConversations = await ctx.db
+      .query("ariConversations")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspace_id as any))
+      .collect();
+
+    // Filter by date range if provided
+    const conversations = args.date_range_days
+      ? allConversations.filter(c => {
+          const cutoff = Date.now() - (args.date_range_days! * 24 * 60 * 60 * 1000);
+          return c.created_at >= cutoff;
+        })
+      : allConversations;
+
+    const totalConversations = conversations.length;
+
+    // Count qualified handoffs (state === "handoff")
+    const qualifiedHandoffs = conversations.filter(c => c.state === "handoff").length;
+
+    // Calculate conversion rate
+    const conversionRate = totalConversations > 0
+      ? Math.round((qualifiedHandoffs / totalConversations) * 100)
+      : 0;
+
+    // Calculate average age from context
+    const agesCollected = conversations
+      .filter(c => c.context?.qualification?.age)
+      .map(c => c.context.qualification.age);
+
+    const averageAge = agesCollected.length > 0
+      ? Math.round(agesCollected.reduce((sum, age) => sum + age, 0) / agesCollected.length)
+      : 0;
+
+    // Document distribution
+    const documentDistribution = {
+      passport: 0,
+      cv: 0,
+      transcript: 0,
+      english_cert: 0,
+    };
+
+    conversations.forEach(c => {
+      const docs = c.context?.qualification?.documents || [];
+      if (docs.includes("passport") || docs.includes("Passport")) documentDistribution.passport++;
+      if (docs.includes("cv") || docs.includes("CV")) documentDistribution.cv++;
+      if (docs.includes("transcript") || docs.includes("Transkrip") || docs.includes("Ijazah")) documentDistribution.transcript++;
+      if (docs.includes("english_cert") || docs.includes("IELTS") || docs.includes("TOEFL") || docs.includes("Sertifikat Bahasa Inggris")) documentDistribution.english_cert++;
+    });
+
+    // Count "NOT QUALITY" handoffs
+    const notQualityHandoffs = conversations.filter(c =>
+      c.state === "handoff" &&
+      c.handoff_reason?.includes("NOT QUALITY")
+    ).length;
+
+    return {
+      totalConversations,
+      qualifiedHandoffs,
+      notQualityHandoffs,
+      conversionRate,
+      averageAge,
+      documentDistribution,
+      dateRangeDays: args.date_range_days || null,
+    };
+  },
+});
