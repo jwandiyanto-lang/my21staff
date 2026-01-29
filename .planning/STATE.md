@@ -96,7 +96,10 @@ None yet.
 - ✅ Production build compiles successfully (02-01)
 - ✅ Environment variables documented (02-01)
 - ✅ Clerk JWT template requirement documented (02-01)
-- Next: Environment setup and verification (02-02)
+- ✅ Auth race condition fixed - useEnsureUser hook created (2026-01-29)
+- ✅ Settings page working on production (2026-01-29)
+- ✅ All dashboard pages protected from auth race conditions (2026-01-29)
+- Next: Complete environment setup and verification (02-02)
 
 ## Quick Tasks Completed
 
@@ -108,22 +111,26 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-28
-Stopped at: Completed pricing page redesign
-Resume file: None
-Next action: Continue v3.5 Phase 2 - Environment Setup & Verification
+Last session: 2026-01-29
+Stopped at: Fixed production Settings page auth race condition
+Resume file: .planning/phases/02-production-deployment/.continue-here.md
+Next action: Continue v3.5 Phase 2 - Complete environment setup (02-02)
 
 **What happened this session:**
-- Redesigned pricing page with new 4-section structure
-- Added Two Bots differentiation (Mouth + Brain)
-- Added 3-step process with compact cards
-- Updated pricing to IDR (Rp3,900,000/Rp7,900,000)
-- Updated ECONOMICS.md with new pricing
-- Added free 1st month promotion
-- Added Solo vs Team feature unlock (3mo vs 1mo)
-- Created clean Enterprise upsell box
-- Committed: 4c28573
+- Fixed auth syntax error preventing Convex deployment (escaped template literal)
+- Fixed type error in admin.ts (workspace lookup)
+- Implemented auto-user creation in requireWorkspaceMembership (mutation context)
+- Created useEnsureUser hook to prevent auth race conditions
+- Applied hook to all dashboard pages (Settings, Dashboard, Inbox)
+- Documented pattern in DEVELOPMENT-RULES.md (mandatory for all future pages)
+- Settings page now works on production ✅
+- Deployed 3 times to production (commits: 55f8c65, b26e886, e017501)
+
+**Key decisions:**
+- useEnsureUser hook pattern mandatory for all authenticated pages
+- Queries must skip until userInitialized is true
+- Fallback for missing Clerk webhooks implemented
 
 ---
 
-*Last updated: 2026-01-28 — Quick task 001 complete*
+*Last updated: 2026-01-29 — Auth race condition resolved*
