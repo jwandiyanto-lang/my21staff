@@ -52,6 +52,12 @@ export function FilterTabs({
   workspaceId,
   activeOnly = false,
 }: FilterTabsProps) {
+  // Fetch workspace status config (custom or default)
+  const statusConfig = useQuery(
+    api.workspaces.getStatusConfig,
+    isDevMode() ? "skip" : { workspaceId }
+  )
+
   // Fetch real-time counts from Convex
   const counts = useQuery(
     api.conversations.getConversationCountsByStatus,
@@ -80,13 +86,18 @@ export function FilterTabs({
       }
     : null
 
+  // Use workspace status config or fall back to default LEAD_STATUSES
+  const workspaceStatuses = isDevMode()
+    ? LEAD_STATUSES.map(key => LEAD_STATUS_CONFIG[key])
+    : statusConfig || LEAD_STATUSES.map(key => LEAD_STATUS_CONFIG[key])
+
   // Current counts (real or mock)
   const currentCounts = isDevMode() ? mockCounts : counts
 
   // Current selection as tab key
   const selectedKey: StatusTabKey = value.length === 0 ? "all" : (value[0] as StatusTabKey)
 
-  const handleSelect = (key: StatusTabKey) => {
+  const handleSelect = (key: string) => {
     if (key === "all") {
       onChange([])
     } else {
@@ -95,8 +106,8 @@ export function FilterTabs({
   }
 
   // Get current selection label
-  const selectedTab = STATUS_TABS.find((tab) => tab.key === selectedKey)
-  const displayLabel = selectedKey === "all" ? "All Status" : selectedTab?.label || "All Status"
+  const selectedStatus = workspaceStatuses.find((s) => s.key === selectedKey)
+  const displayLabel = selectedKey === "all" ? "All Status" : selectedStatus?.label || "All Status"
 
   return (
     <DropdownMenu>
@@ -115,20 +126,19 @@ export function FilterTabs({
           All Status
         </DropdownMenuCheckboxItem>
         <DropdownMenuSeparator />
-        {LEAD_STATUSES.map((status) => {
-          const config = LEAD_STATUS_CONFIG[status]
-          const isChecked = selectedKey === status
+        {workspaceStatuses.map((status) => {
+          const isChecked = selectedKey === status.key
           return (
             <DropdownMenuCheckboxItem
-              key={status}
+              key={status.key}
               checked={isChecked}
-              onCheckedChange={() => handleSelect(status as StatusTabKey)}
+              onCheckedChange={() => handleSelect(status.key)}
             >
               <span
                 className="w-2 h-2 rounded-full mr-2"
-                style={{ backgroundColor: config.color }}
+                style={{ backgroundColor: status.color }}
               />
-              {config.label}
+              {status.label}
             </DropdownMenuCheckboxItem>
           )
         })}
