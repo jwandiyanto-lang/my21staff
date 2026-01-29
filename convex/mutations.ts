@@ -1001,8 +1001,8 @@ export const createOutboundMessage = mutation({
         sender_type: "user",
         sender_id: args.sender_id,
         message_type: args.message_type || "text",
-        media_url: args.media_url || null,
-        kapso_message_id: args.kapso_message_id || null,
+        media_url: args.media_url, // undefined is OK for optional fields, null is not
+        kapso_message_id: args.kapso_message_id,
         created_at: now,
         supabaseId: "", // Required by schema
       });
