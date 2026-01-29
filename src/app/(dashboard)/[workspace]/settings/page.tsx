@@ -12,8 +12,9 @@ interface SettingsPageProps {
 // Settings type matching SettingsClient interface
 interface WorkspaceSettings {
   kapso_api_key?: string
-  quick_replies?: { id: string; label: string; text: string }[]
   contact_tags?: string[]
+  main_form_fields?: string[]
+  form_field_scores?: Record<string, number>
 }
 
 export default async function SettingsPage({ params }: SettingsPageProps) {
