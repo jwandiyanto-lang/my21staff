@@ -30,8 +30,9 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, Users, Bot, Palette, ChevronUp, ChevronDown } from 'lucide-react'
+import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, Users, Bot, Palette, ChevronUp, ChevronDown, BarChart3 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
+import { BotAnalyticsDashboard } from '@/components/analytics/bot-analytics-dashboard'
 import { useRef } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDistanceToNow } from 'date-fns'
@@ -943,6 +944,12 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
             <Settings className="h-4 w-4" />
             Integrations
           </TabsTrigger>
+          {aiEnabled && (
+            <TabsTrigger value="bot-analytics" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Bot Analytics
+            </TabsTrigger>
+          )}
           <TabsTrigger value="quick-replies" className="gap-2">
             <Zap className="h-4 w-4" />
             Quick Replies
@@ -1085,6 +1092,13 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Bot Analytics Tab */}
+        {aiEnabled && (
+          <TabsContent value="bot-analytics" className="space-y-6">
+            <BotAnalyticsDashboard workspaceId={workspace.id} />
+          </TabsContent>
+        )}
 
         {/* Quick Replies Tab */}
         <TabsContent value="quick-replies" className="space-y-6">
