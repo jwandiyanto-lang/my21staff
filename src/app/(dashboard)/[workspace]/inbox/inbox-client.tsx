@@ -6,8 +6,7 @@ import { api } from 'convex/_generated/api'
 import { useEnsureUser } from '@/hooks/use-ensure-user'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Mail, MailOpen, MessageSquare } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { MessageSquare } from 'lucide-react'
 import { FilterTabs } from '@/components/inbox/filter-tabs'
 import { TagFilterDropdown } from '@/components/inbox/tag-filter-dropdown'
 import { ConversationList } from '@/components/inbox/conversation-list'
@@ -135,7 +134,6 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   const [selectedConversationId, setSelectedConversationId] = useState<Id<'conversations'> | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<LeadStatus[]>([])
-  const [viewMode, setViewMode] = useState<'active' | 'all'>('active')
   const [tagFilter, setTagFilter] = useState<string[]>([])
   const [showInfoSidebar, setShowInfoSidebar] = useState(false)
 
@@ -154,7 +152,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     api.conversations.listWithFilters,
     isDevMode() || !userInitialized ? 'skip' : {
       workspace_id: workspaceId as any,
-      active: viewMode === 'active',
+      active: false,
       statusFilters: statusFilter.length > 0 ? statusFilter : undefined,
       tagFilters: tagFilter.length > 0 ? tagFilter : undefined,
     }
@@ -163,10 +161,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   const data = isDevMode() ? MOCK_INBOX_DATA : convexData
 
   // Extract data from query response
-  const activeCount = useMemo(() => {
-    if (!data?.conversations) return 0
-    return data.conversations.filter((c) => c.unread_count > 0).length
-  }, [data?.conversations])
+  // Note: activeCount removed - no longer needed without Active/All toggle
 
   const contactTags = useMemo(() => {
     if (!data?.conversations) return []
@@ -201,11 +196,6 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
 
     // In dev mode, apply filters client-side (production filters via Convex query)
     if (isDevMode()) {
-      // Filter by view mode (active = has unread messages)
-      if (viewMode === 'active') {
-        filtered = filtered.filter((conv: any) => conv.unread_count > 0 || conv.status === 'open')
-      }
-
       // Filter by lead status
       if (statusFilter.length > 0) {
         filtered = filtered.filter((conv: any) => {
@@ -241,7 +231,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     }
 
     return filtered
-  }, [data?.conversations, searchQuery, statusFilter, tagFilter, viewMode, conversationStatusOverrides])
+  }, [data?.conversations, searchQuery, statusFilter, tagFilter, conversationStatusOverrides])
 
   // Get the selected conversation and contact
   const selectedConversation = useMemo(() => {
@@ -378,51 +368,15 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
             value={statusFilter}
             onChange={setStatusFilter}
             workspaceId={workspaceId}
-            activeOnly={viewMode === 'active'}
+            activeOnly={false}
           />
 
-          {/* Active/All toggle + Tag filter in one row */}
-          <div className="flex items-center gap-2">
-            {/* Active/All toggle */}
-            <div className="flex items-center rounded-full bg-muted p-1 shrink-0">
-              <button
-                onClick={() => setViewMode('active')}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                  viewMode === 'active'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                <Mail className="h-3.5 w-3.5" />
-                Active
-                {activeCount > 0 && (
-                  <Badge variant="default" className="ml-1 px-1.5 py-0 text-[10px] h-5">
-                    {activeCount}
-                  </Badge>
-                )}
-              </button>
-              <button
-                onClick={() => setViewMode('all')}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                  viewMode === 'all'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                <MailOpen className="h-3.5 w-3.5" />
-                All
-              </button>
-            </div>
-
-            {/* Tag filter dropdown */}
-            <TagFilterDropdown
-              value={tagFilter}
-              onChange={setTagFilter}
-              workspaceId={workspaceId}
-            />
-          </div>
+          {/* Tag filter */}
+          <TagFilterDropdown
+            value={tagFilter}
+            onChange={setTagFilter}
+            workspaceId={workspaceId}
+          />
         </div>
 
         {/* Conversation list */}
