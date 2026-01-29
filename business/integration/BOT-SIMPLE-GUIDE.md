@@ -138,23 +138,88 @@ documents_config: {
 ---
 
 ### Stage 3: Q&A + CONSULTATION OFFER
-**Goal:** Answer questions, build trust, offer free consultation
+**Goal:** Answer questions, share program template, offer 1-on-1 consultation
 
-**Example:**
+**When they ask about universities/programs:**
 ```
-Customer: "Universitas mana yang bagus buat IT?"
+Customer: "Universitas mana yang bagus?"
+          "Program apa yang cocok buat saya?"
 
-ARI: "Buat IT, University of Melbourne sama UNSW Sydney
-      top banget. IELTS minimal 6.5 ya. Mau konsultasi
-      gratis sama konsultan kita? Bisa bahas detail
-      universitas yang cocok buat kamu."
+ARI: "Oh ya kak untuk itu saya izin share ya"
 
-Customer: "Hmm, berapa biaya konsultasinya?"
+(Sends formatted template):
 
-ARI: "Konsultasi pertama gratis kok kak! No obligation.
-      Konsultan kita bakal review profil kamu, kasih
-      rekomendasi universitas yang pas, dan bantu planning
-      timeline. Tertarik?"
+1️⃣ FRESH GRAD / GAP YEAR (Usia 18 - 24)
+Status: Lulusan SMA/Kuliah baru
+Rekomendasi: Cert III/IV atau Diploma
+Modal Awal: ± IDR 200 Juta
+Fokus: Eksplorasi skill baru / Gap Year
+
+2️⃣ YOUNG PRO (Usia 25 - 35)
+Status: Pengalaman kerja 2-5 tahun
+Rekomendasi: Adv. Diploma / Graduate Diploma
+Modal Awal: ± IDR 300 Juta
+Fokus: Career Upgrade / Upskilling (Wajib linier dengan kerjaan)
+
+3️⃣ MATURE / EXECUTIVE (Usia 36 - 50)
+Status: Senior level / Business Owner
+Rekomendasi: Specialized Management / Leadership
+Modal Awal: ± IDR 350 - 400 Juta
+Fokus: Strategic Leadership (Dokumen GTE/SOP harus sangat kuat)
+
+⚠️ NOTE: Semua kategori di atas Wajib POF Rp 450 Juta dan
+saat ini belum bisa membawa pasangan di awal.
+```
+
+**After sharing template, offer consultation:**
+```
+ARI: "Kalau mau diskusi lebih detail tentang program yang cocok,
+      kamu bisa ikut konsultasi 1 on 1 sama konsultan kita.
+
+      💰 One on One Consultation - IDR 500,000
+
+      Yang kamu dapat:
+      ✅ Profile Evaluation – Identify strengths and suitable opportunities
+      ✅ Visa & Certification Guidance – Explore visa requirements
+      ✅ CV & LinkedIn Optimization – Expert feedback untuk visibility
+      ✅ Career Roadmap – Clear action plan for international career goals
+
+      Tertarik?"
+```
+
+**Customer response options:**
+```
+Customer: "Oke boleh"
+ARI: → Go to Stage 6 (Handoff to consultant)
+
+Customer: "Mahal ya" / "Nggak dulu deh"
+ARI: → Go to Stage 4 (Objection handling)
+```
+
+**Stage 3 Parameters:**
+```typescript
+stage3_config: {
+  // Program recommendation template
+  program_template: `1️⃣ FRESH GRAD / GAP YEAR...`,
+
+  // Template triggers
+  triggers: ["universitas", "program", "rekomendasi", "cocok", "jurusan"],
+
+  // Consultation offer
+  consultation: {
+    price: "IDR 500,000",
+    benefits: [
+      "Profile Evaluation – Identify strengths and suitable opportunities",
+      "Visa & Certification Guidance – Explore visa requirements",
+      "CV & LinkedIn Optimization – Expert feedback untuk visibility",
+      "Career Roadmap – Clear action plan for international career goals"
+    ],
+    offer_text: "Kalau mau diskusi lebih detail tentang program yang cocok, kamu bisa ikut konsultasi 1 on 1 sama konsultan kita."
+  },
+
+  // When to offer
+  max_questions_before_offer: 2  // After 1-2 questions
+}
 ```
 
 **What happens after 1-2 questions:**
