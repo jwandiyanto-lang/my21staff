@@ -88,9 +88,64 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Fix build errors and prepare environment configuration
-- [ ] 02-02-PLAN.md — Deploy to hosting platform with environment variables
-- [ ] 02-03-PLAN.md — Verify production feature parity and generate verification report
+- [x] 02-01-PLAN.md — Fix build errors and prepare environment configuration
+- [x] 02-02-PLAN.md — Deploy to hosting platform with environment variables
+- [x] 02-03-PLAN.md — Verify production feature parity and generate verification report
+
+---
+
+### Phase 2.1: Production Bug Remediation (INSERTED)
+
+**Goal:** Fix 23 critical and medium bugs discovered during Phase 2 production verification to restore feature parity.
+
+**Depends on:** Phase 2 (Production Deployment)
+
+**Requirements:** BUG-01 through BUG-23 (derived from 02-03 verification report)
+
+**Success Criteria** (what must be TRUE):
+1. ARI Config API restored and Your Intern tabs functional
+2. Database operations working (update, delete, status toggle)
+3. Status toggle affects only selected contact (not all contacts)
+4. Quick replies save and display correctly
+5. Inbox filter tabs filter conversations properly
+6. Merge contacts feature working without errors
+7. All 13 critical bugs resolved
+8. All 8 medium priority bugs resolved
+9. Verification report confirms feature parity with localhost
+
+**Plans:** 8 plans
+
+Plans:
+- [ ] 2.1-01-PLAN.md — Fix ARI Config API and restore Your Intern functionality
+- [ ] 2.1-02-PLAN.md — Fix database mutations (update, delete, status toggle)
+- [ ] 2.1-03-PLAN.md — Fix Inbox filter tabs and activities sidebar
+- [ ] 2.1-04-PLAN.md — Implement quick replies end-to-end
+- [ ] 2.1-05-PLAN.md — Fix merge contacts and lead score display
+- [ ] 2.1-06-PLAN.md — Fix i18n, WhatsApp UI, Settings forms, Clerk deprecation
+- [ ] 2.1-07-PLAN.md — Add tags column, Add Contact feature, fix auto-tag and status sync
+- [ ] 2.1-08-PLAN.md — Comprehensive production re-verification
+
+**Details:**
+
+This urgent phase addresses 23 bugs found during 02-03 production verification:
+- 13 critical bugs (blocking core workflows)
+- 8 medium priority bugs (degraded functionality)
+- 2 missing features (tags column, Add Contact button)
+
+Root causes identified:
+- ARI Config API broken (affects Your Intern completely)
+- Database mutation endpoints failing
+- Status toggle affects all contacts simultaneously
+- Quick replies storage and retrieval broken
+- Inbox filter tabs non-functional
+- Merge contacts feature broken
+- UI internationalization incomplete
+
+**Wave structure:**
+- Wave 1 (parallel): Plans 01-02 — Root causes (ARI Config, database mutations)
+- Wave 2 (parallel): Plans 03-05 — Feature completeness (Inbox, quick replies, merge)
+- Wave 3 (parallel): Plans 06-07 — UI polish and missing features
+- Wave 4 (sequential): Plan 08 — Comprehensive re-verification
 
 ---
 
@@ -98,7 +153,7 @@ Plans:
 
 **Goal:** Kapso webhooks connected to production, ARI bot responding to real WhatsApp messages, complete automation verified stable.
 
-**Depends on:** Phase 2 (Production Deployment)
+**Depends on:** Phase 2.1 (Production Bug Remediation)
 
 **Requirements:** BOT-01, BOT-02, BOT-03, BOT-04, BOT-05, BOT-06, BOT-07
 
@@ -121,7 +176,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3
+Phases execute in numeric order: 1 -> 2 -> 2.1 -> 3
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -132,9 +187,10 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | 5. AI/Human Handover | v3.4 | 2/2 | Complete | 2026-01-28 |
 | 6. ARI Flow Integration | v3.4 | 2/2 | Complete | 2026-01-28 |
 | 1. Localhost Polish | v3.5 | 3/3 | Complete | 2026-01-28 |
-| 2. Production Deployment | v3.5 | 0/3 | Not started | - |
-| 3. Live Bot Integration | v3.5 | 0/? | Not started | - |
+| 2. Production Deployment | v3.5 | 3/3 | Complete | 2026-01-29 |
+| 2.1. Production Bug Remediation | v3.5 | 0/8 | Not started (URGENT) | - |
+| 3. Live Bot Integration | v3.5 | 0/? | Blocked by 2.1 | - |
 
 ---
 
-*Last updated: 2026-01-28*
+*Last updated: 2026-01-29*
