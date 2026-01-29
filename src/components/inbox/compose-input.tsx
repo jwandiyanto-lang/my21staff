@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { Button } from '@/components/ui/button'
 import { Send, Loader2, Zap } from 'lucide-react'
@@ -36,6 +36,11 @@ function ComposeInputDev({ workspaceId, conversationId, disabled }: ComposeInput
     { _id: '1', shortcut: '/hi', message: 'Hello! How can I help you today?' },
     { _id: '2', shortcut: '/thanks', message: 'Thank you for contacting us!' },
   ]
+
+  // Clear content when conversation changes
+  useEffect(() => {
+    setContent('')
+  }, [conversationId])
 
   const handleSend = useCallback(async () => {
     if (!content.trim() || isSending) return
@@ -140,6 +145,11 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
   // Fetch quick replies from Convex
   const quickReplies = useQuery(api.quickReplies.list, { workspace_id: workspaceId })
 
+  // Clear content when conversation changes
+  useEffect(() => {
+    setContent('')
+  }, [conversationId])
+
   const handleSend = useCallback(async () => {
     if (!content.trim() || isSending || !userId) return
 
@@ -161,6 +171,15 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
       if (!response.ok) {
         const error = await response.json()
         throw new Error(error.error || 'Failed to send message')
+      }
+
+      const result = await response.json()
+
+      // Show warning if Kapso failed but message was saved
+      if (result.kapso_warning) {
+        toast.warning('Message saved but not sent to WhatsApp (24-hour window expired)')
+      } else {
+        toast.success('Message sent')
       }
 
       setContent('')

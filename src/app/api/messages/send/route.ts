@@ -94,16 +94,7 @@ async function postHandler(request: NextRequest) {
     // 5. Decrypt Kapso API key (safeDecrypt handles both encrypted and plain text)
     const apiKey = safeDecrypt(workspace.meta_access_token)
 
-    // 6. Send via Kapso
-    queryStart = performance.now()
-    const kapsoResult = await kapsoSendMessage(
-      { apiKey, phoneId: workspace.kapso_phone_id },
-      contact.phone,
-      content
-    )
-    logQuery(metrics, 'kapso.sendMessage', Math.round(performance.now() - queryStart))
-
-    // 7. Store message in Convex
+    // 6. Store message in Convex FIRST (so it appears in UI even if Kapso fails)
     queryStart = performance.now()
     const message = await fetchMutation(
       api.mutations.createOutboundMessage,
@@ -113,15 +104,34 @@ async function postHandler(request: NextRequest) {
         sender_id: userId,
         content,
         message_type,
-        kapso_message_id: kapsoResult.messages?.[0]?.id,
+        kapso_message_id: null, // Will update after Kapso send
       }
     )
     logQuery(metrics, 'convex.mutations.createOutboundMessage', Math.round(performance.now() - queryStart))
 
+    // 7. Try to send via Kapso (non-blocking - message already saved)
+    let kapsoMessageId = null
+    let kapsoError = null
+    try {
+      queryStart = performance.now()
+      const kapsoResult = await kapsoSendMessage(
+        { apiKey, phoneId: workspace.kapso_phone_id },
+        contact.phone,
+        content
+      )
+      logQuery(metrics, 'kapso.sendMessage', Math.round(performance.now() - queryStart))
+      kapsoMessageId = kapsoResult.messages?.[0]?.id
+    } catch (error: any) {
+      // Log but don't fail - message is already saved in Convex
+      console.warn('[MessagesSend] Kapso send failed (message saved in Convex):', error.message)
+      kapsoError = error.message
+    }
+
     return NextResponse.json({
       success: true,
       message,
-      kapso_message_id: kapsoResult.messages?.[0]?.id,
+      kapso_message_id: kapsoMessageId,
+      kapso_warning: kapsoError, // Include warning if Kapso failed
     })
 
   } catch (error) {
