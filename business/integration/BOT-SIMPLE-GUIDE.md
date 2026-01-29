@@ -187,29 +187,22 @@ Fokus: Strategic Leadership (Dokumen GTE/SOP harus sangat kuat)
 saat ini belum bisa membawa pasangan di awal.
 ```
 
-**After sharing template, offer consultation:**
+**After answering questions, offer consultation (step by step):**
 ```
-ARI: "Kalau mau diskusi lebih detail tentang program yang cocok,
-      kamu bisa ikut konsultasi 1 on 1 sama konsultan kita.
-
-      💰 One on One Consultation - IDR 500,000
-
-      Yang kamu dapat:
-      ✅ Profile Evaluation – Identify strengths and suitable opportunities
-      ✅ Visa & Certification Guidance – Explore visa requirements
-      ✅ CV & LinkedIn Optimization – Expert feedback untuk visibility
-      ✅ Career Roadmap – Clear action plan for international career goals
-
-      Tertarik?"
+Step 1: Answer their question → WAIT
+Step 2: "Oke kak, untuk detail nya saya saranin konsultasi 1 on 1, sudah pernah dengar sebelumnya?" → WAIT
+Step 3A: If NO → Explain pricing + benefits → WAIT
+Step 3B: If YES → "Oh udah tau ya. Tertarik untuk coba kak?" → WAIT
+Step 4: Customer responds YES or NO
 ```
 
 **Customer response options:**
 ```
-Customer: "Oke boleh"
-ARI: → Go to Stage 6 (Handoff to consultant)
+Customer: "Oke boleh" / "Tertarik"
+ARI: → Go to handoff
 
 Customer: "Mahal ya" / "Nggak dulu deh"
-ARI: → Go to Stage 4 (Objection handling)
+ARI: → Offer community + capture objection
 ```
 
 **Complete Stage 3 Flow (WhatsApp Format - No Lists):**
@@ -232,14 +225,25 @@ ARI: "Gimana kak mana yang cocok?"
 **Step 2B: If they ask a question**
 ```
 Customer: "Berapa lama prosesnya?" / "IELTS minimal berapa?"
-ARI: "Proses biasanya 3-6 bulan kak dari apply sampai visa keluar. Untuk lebih detail saya saranin untuk konsultasi 1 on 1 ya kak. Karena banyak murid yang ikut konsultasi ini dan mereka lebih jelas tentang program yang cocok sama profil mereka. Kakak tertarik?"
+ARI: "Proses biasanya 3-6 bulan kak dari apply sampai visa keluar."
+→ WAIT for response
+
+Customer: "Oh gitu" / "Oke"
+ARI: "Oke kak, untuk detail nya saya saranin konsultasi 1 on 1, sudah pernah dengar sebelumnya?"
 → WAIT for response
 ```
 
-**Step 3: If they ask about price**
+**Step 3A: If they haven't heard about consultation**
 ```
-Customer: "Berapa biayanya?"
-ARI: "Oh ya untuk biaya is 500k"
+Customer: "Belum" / "Apa itu?"
+ARI: "Untuk konsultasi kita itu berbayar 500k selama satu jam dan kakak akan dapatkan profile evaluation supaya tau kekuatan kakak dan peluang yang cocok, guidance untuk visa sama sertifikasi yang dibutuhin, optimasi CV dan LinkedIn biar lebih menarik, sama career roadmap yang jelas untuk kuliah di luar negeri. Tertarik kak?"
+→ WAIT for response
+```
+
+**Step 3B: If they already know about consultation**
+```
+Customer: "Udah pernah dengar"
+ARI: "Oh udah tau ya. Tertarik untuk coba kak?"
 → WAIT for response
 ```
 
@@ -258,7 +262,7 @@ ARI: "Oke kak no problem, mungkin lebih cocok join komunitas kita dulu ya. Di si
 
 Customer: "Boleh"
 ARI: "Ini link nya ya kak. https://whatsapp.com/channel/0029Vb72LoyLSmbcJvDunX1U"
-ARI: "Oh ya kak, keberetan nga kalau kasih tau kenapa ga cocok dengan 1 on 1 kita, mungkin karena kurang jelas atau gimana kak"
+ARI: "Oh ya kak, keberatan nga kalau kasih tau kenapa ga cocok dengan 1 on 1 kita, mungkin karena kurang jelas atau gimana kak"
 → WAIT and store objection response
 ```
 
@@ -268,10 +272,12 @@ stage3_config: {
   program_template: `1️⃣ FRESH GRAD / GAP YEAR (Usia 18 - 24)...`,
   triggers: ["universitas", "program", "rekomendasi", "cocok", "jurusan"],
   consultation_price: "500k",
-  consultation_offer: "Untuk lebih detail saya saranin untuk konsultasi 1 on 1 ya kak. Karena banyak murid yang ikut konsultasi ini dan mereka lebih jelas tentang program yang cocok sama profil mereka. Kakak tertarik?",
+  consultation_intro: "Oke kak, untuk detail nya saya saranin konsultasi 1 on 1, sudah pernah dengar sebelumnya?",
+  consultation_benefits: "Untuk konsultasi kita itu berbayar 500k selama satu jam dan kakak akan dapatkan profile evaluation supaya tau kekuatan kakak dan peluang yang cocok, guidance untuk visa sama sertifikasi yang dibutuhin, optimasi CV dan LinkedIn biar lebih menarik, sama career roadmap yang jelas untuk kuliah di luar negeri. Tertarik kak?",
+  consultation_followup: "Oh udah tau ya. Tertarik untuk coba kak?",
   handoff_message: "Okay nanti saya atur jadwal nya dulu ya, kira kira kakak kosong hari apa?",
   community_link: "https://whatsapp.com/channel/0029Vb72LoyLSmbcJvDunX1U",
-  objection_question: "Oh ya kak, keberetan nga kalau kasih tau kenapa ga cocok dengan 1 on 1 kita, mungkin karena kurang jelas atau gimana kak"
+  objection_question: "Oh ya kak, keberatan nga kalau kasih tau kenapa ga cocok dengan 1 on 1 kita, mungkin karena kurang jelas atau gimana kak"
 }
 ```
 
