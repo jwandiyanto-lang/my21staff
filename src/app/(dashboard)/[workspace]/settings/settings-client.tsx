@@ -96,7 +96,7 @@ const FORM_FIELD_CONFIGS: FormFieldConfig[] = [
     label: 'Current Activity',
     type: 'dropdown',
     choices: [
-      { value: 'kuliah', label: 'Kuliah', defaultScore: 5 },
+      { value: 'kuliah', label: 'Currently Studying', defaultScore: 5 },
       { value: 'gap_year', label: 'Gap Year', defaultScore: 8 },
       { value: 'working', label: 'Working', defaultScore: 15 },
       { value: 'fresh_graduate', label: 'Fresh Graduate', defaultScore: 12 },
@@ -114,12 +114,12 @@ const FORM_FIELD_CONFIGS: FormFieldConfig[] = [
     label: 'Budget Range',
     type: 'dropdown',
     choices: [
-      { value: '<100jt', label: '<100 Juta', defaultScore: 4 },
-      { value: '100-300jt', label: '100-300 Juta', defaultScore: 8 },
-      { value: '300-500jt', label: '300-500 Juta', defaultScore: 12 },
-      { value: '500jt-1m', label: '500 Juta - 1 Miliar', defaultScore: 16 },
-      { value: '>1m', label: '>1 Miliar', defaultScore: 20 },
-      { value: 'beasiswa', label: 'Mencari Beasiswa', defaultScore: 4 },
+      { value: '<100jt', label: '<100 Million IDR', defaultScore: 4 },
+      { value: '100-300jt', label: '100-300 Million IDR', defaultScore: 8 },
+      { value: '300-500jt', label: '300-500 Million IDR', defaultScore: 12 },
+      { value: '500jt-1m', label: '500 Million - 1 Billion IDR', defaultScore: 16 },
+      { value: '>1m', label: '>1 Billion IDR', defaultScore: 20 },
+      { value: 'beasiswa', label: 'Looking for Scholarship', defaultScore: 4 },
     ]
   },
   {
@@ -127,11 +127,11 @@ const FORM_FIELD_CONFIGS: FormFieldConfig[] = [
     label: 'Target Departure',
     type: 'dropdown',
     choices: [
-      { value: '<3bulan', label: '<3 Bulan', defaultScore: 15 },
-      { value: '3-6bulan', label: '3-6 Bulan', defaultScore: 12 },
-      { value: '6-12bulan', label: '6-12 Bulan', defaultScore: 9 },
-      { value: '1-2tahun', label: '1-2 Tahun', defaultScore: 6 },
-      { value: 'fleksibel', label: 'Fleksibel', defaultScore: 3 },
+      { value: '<3bulan', label: '<3 Months', defaultScore: 15 },
+      { value: '3-6bulan', label: '3-6 Months', defaultScore: 12 },
+      { value: '6-12bulan', label: '6-12 Months', defaultScore: 9 },
+      { value: '1-2tahun', label: '1-2 Years', defaultScore: 6 },
+      { value: 'fleksibel', label: 'Flexible', defaultScore: 3 },
     ]
   },
   {
@@ -139,11 +139,11 @@ const FORM_FIELD_CONFIGS: FormFieldConfig[] = [
     label: 'English Level',
     type: 'dropdown',
     choices: [
-      { value: 'pemula', label: 'Pemula', defaultScore: 5 },
-      { value: 'menengah', label: 'Menengah', defaultScore: 10 },
-      { value: 'mahir', label: 'Mahir', defaultScore: 15 },
+      { value: 'pemula', label: 'Beginner', defaultScore: 5 },
+      { value: 'menengah', label: 'Intermediate', defaultScore: 10 },
+      { value: 'mahir', label: 'Advanced', defaultScore: 15 },
       { value: 'native', label: 'Native/Bilingual', defaultScore: 25 },
-      { value: 'skor', label: 'Sudah Ada Skor IELTS/TOEFL', defaultScore: 25 },
+      { value: 'skor', label: 'Have IELTS/TOEFL Score', defaultScore: 25 },
     ]
   },
   {

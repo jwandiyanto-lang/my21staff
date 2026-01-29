@@ -72,10 +72,10 @@ export default function TeamPage() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Anggota Tim
+            Team Members
           </CardTitle>
           <CardDescription>
-            Undang anggota baru, kelola role, dan atur akses tim
+            Invite new members, manage roles, and configure team access
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
