@@ -49,7 +49,7 @@ Store in database
 
 ---
 
-## 2. How ARI Talks to Clients (5 Main Stages)
+## 2. How ARI Talks to Clients (4 Main Stages)
 
 ### Stage 1: GREETING
 **Goal:** Greet warmly and wait for their question
@@ -199,10 +199,10 @@ Step 4: Customer responds YES or NO
 **Customer response options:**
 ```
 Customer: "Oke boleh" / "Tertarik"
-ARI: → Go to handoff
+ARI: → Ask schedule → Handoff (QUALIFIED LEAD)
 
 Customer: "Mahal ya" / "Nggak dulu deh"
-ARI: → Offer community + capture objection
+ARI: → Polite close → Handoff (NOT QUALITY)
 ```
 
 **Complete Stage 3 Flow (WhatsApp Format - No Lists):**
@@ -249,21 +249,19 @@ ARI: "Oh udah tau ya. Tertarik untuk coba kak?"
 
 **Step 4A: If YES to consultation**
 ```
-Customer: "Oke boleh"
-ARI: "Okay nanti saya atur jadwal nya dulu ya, kira kira kakak kosong hari apa?"
-→ FLAG FOR HANDOFF (human consultant takes over immediately)
+Customer: "Oke boleh" / "Tertarik"
+ARI: "Okay kak, kira kira kakak kosong hari apa?"
+→ FLAG FOR HANDOFF with note: "QUALIFIED LEAD - Interested in consultation"
+→ Human consultant takes over immediately
 ```
 
 **Step 4B: If NO to consultation**
 ```
-Customer: "Nggak dulu deh" / "Mahal"
-ARI: "Oke kak no problem, mungkin lebih cocok join komunitas kita dulu ya. Di sini kakak bisa dapat update live dan webinar, bisa tanya langsung. Mau join?"
-→ WAIT
-
-Customer: "Boleh"
-ARI: "Ini link nya ya kak. https://whatsapp.com/channel/0029Vb72LoyLSmbcJvDunX1U"
-ARI: "Oh ya kak, keberatan nga kalau kasih tau kenapa ga cocok dengan 1 on 1 kita, mungkin karena kurang jelas atau gimana kak"
-→ WAIT and store objection response
+Customer: "Nggak dulu deh" / "Mahal" / "Belum tertarik"
+ARI: "Baik kak nanti kalau ada yang mau di tanyakan lagi boleh di sesi kita ya"
+→ DONE
+→ FLAG FOR HANDOFF with note: "NOT QUALITY - Declined consultation"
+→ Human can review but marked as low priority
 ```
 
 **Stage 3 Parameters:**
@@ -275,115 +273,47 @@ stage3_config: {
   consultation_intro: "Oke kak, untuk detail nya saya saranin konsultasi 1 on 1, sudah pernah dengar sebelumnya?",
   consultation_benefits: "Untuk konsultasi kita itu berbayar 500k selama satu jam dan kakak akan dapatkan profile evaluation supaya tau kekuatan kakak dan peluang yang cocok, guidance untuk visa sama sertifikasi yang dibutuhin, optimasi CV dan LinkedIn biar lebih menarik, sama career roadmap yang jelas untuk kuliah di luar negeri. Tertarik kak?",
   consultation_followup: "Oh udah tau ya. Tertarik untuk coba kak?",
-  handoff_message: "Okay nanti saya atur jadwal nya dulu ya, kira kira kakak kosong hari apa?",
-  community_link: "https://whatsapp.com/channel/0029Vb72LoyLSmbcJvDunX1U",
-  objection_question: "Oh ya kak, keberatan nga kalau kasih tau kenapa ga cocok dengan 1 on 1 kita, mungkin karena kurang jelas atau gimana kak"
+  handoff_yes: "Okay kak, kira kira kakak kosong hari apa?",
+  handoff_no: "Baik kak nanti kalau ada yang mau di tanyakan lagi boleh di sesi kita ya",
+  handoff_note_qualified: "QUALIFIED LEAD - Interested in consultation",
+  handoff_note_not_quality: "NOT QUALITY - Declined consultation"
 }
 ```
 
 **What happens:**
-- If YES to consultation → Flag handoff (human takes over)
-- If NO to consultation → Offer community + capture objection
+- If YES to consultation → Flag handoff as "QUALIFIED LEAD" (human takes over)
+- If NO to consultation → Flag handoff as "NOT QUALITY" (low priority review)
 
 ---
 
-### Stage 4: OBJECTION CAPTURE + COMMUNITY OFFER
-**Goal:** Understand why they declined, offer community, try ONE gentle circle back
+### Stage 4: HANDOFF (Route to Human)
+**Goal:** Hand over to human consultant with proper tagging
 
-**Example:**
+**Scenario A: QUALIFIED LEAD (Interested in Consultation)**
 ```
-Customer: "Nggak dulu deh, masih mikir-mikir"
+Customer: "Oke boleh" / "Tertarik"
+ARI: "Okay kak, kira kira kakak kosong hari apa?"
 
-ARI: "Oke, santai aja kak. Kita ada komunitas WhatsApp
-      loh, isinya update info kuliah dan bisa tanya-tanya
-      di sana. Mau aku kirim link-nya?"
-
-Customer: "Boleh"
-
-ARI: "Nih linknya: [community link]
-
-      Btw, boleh tau nggak kenapa belum mau konsultasi?
-      Feedback kamu penting buat kita supaya bisa improve
-      layanan."
-
-Customer: "Soalnya mahal kayaknya"
-
-ARI: "Oh gitu. Sebenernya banyak yang awalnya concern
-      soal harga juga, tapi setelah konsultasi gratis mereka
-      ngerasa worth it buat planning kuliah. Udah pasti
-      nggak mau coba dulu?"
-```
-
-**Objection Types:**
-- **Can overcome** (try circle back): price, timing, not_ready, need_info
-- **Can't overcome** (respect it): no_money, already_has_advisor, prefer_self_study
-
-**What happens:**
-- Can overcome → Stage 5 (Circle Back - one attempt)
-- Can't overcome → Stage 7 (Community link and goodbye)
-
----
-
-### Stage 5: CIRCLE BACK (One Attempt Only)
-**Goal:** Make ONE gentle attempt to change their mind
-
-**Example:**
-```
-ARI: "Yakin nggak mau coba kak? Konsultasinya beneran
-      gratis dan nggak ada komitmen. Banyak yang terbantu
-      buat planning timeline sama pilih universitas yang
-      tepat."
-
-Customer (Option A - Changed mind): "Ya udah deh, coba aja"
-→ ARI: "Oke siap! Nanti konsultan kita hubungi ya kak."
-→ Stage 6 (Handoff)
-
-Customer (Option B - Still no): "Nggak deh, nanti aja"
-→ ARI: "Oke kak, no problem! Join komunitas kita aja ya,
-        banyak info bermanfaat di sana. Sukses buat kuliahnya!"
-→ Stage 7 (Community fallback)
-```
-
-**Important:** Only ONE attempt. If they say no again, accept gracefully.
-
----
-
-### Stage 6: HANDOFF (Route to Human)
-**Goal:** Connect qualified lead to human consultant
-
-**Example:**
-```
-ARI: "Mantap! Aku hubungin konsultan kita ya kak. Mereka
-      bakal bantu kamu dengan aplikasi universitasnya.
-      Ditunggu aja sebentar."
-```
-
-**What happens:**
+What happens:
 - Set conversation status = "handover"
-- Tag contact as "hot_lead"
+- Tag contact with note: "QUALIFIED LEAD - Interested in consultation"
 - Mark lead_status = "hot"
 - Stop bot responses
-- Human consultant takes over
-
----
-
-### Stage 7: COMMUNITY FALLBACK (Final State)
-**Goal:** Keep relationship warm with community, end positively
-
-**Example:**
-```
-ARI: "Oke kak, no problem sama sekali! Ini link komunitas
-      kita: https://whatsapp.com/channel/0029Vb72LoyLSmbcJvDunX1U
-
-      Bisa join kapan aja, banyak update info kuliah dan
-      bisa tanya-tanya di sana. Good luck buat aplikasinya!"
+- Human consultant takes over immediately
 ```
 
-**What happens:**
-- Send community link
-- Tag contact with objection type
-- Store objection details for product improvement
-- End conversation (status = "ended")
+**Scenario B: NOT QUALITY (Declined Consultation)**
+```
+Customer: "Nggak dulu deh" / "Mahal" / "Belum tertarik"
+ARI: "Baik kak nanti kalau ada yang mau di tanyakan lagi boleh di sesi kita ya"
+
+What happens:
+- Set conversation status = "handover"
+- Tag contact with note: "NOT QUALITY - Declined consultation"
+- Mark lead_status = "warm" (low priority)
+- Stop bot responses
+- Human can review but marked as low priority
+```
 
 ---
 
@@ -628,15 +558,9 @@ Create FAQ entries in database:
 
 ### Bot Flow Diagram
 ```
-greeting → qualification
-              ├─ (qualified) → handoff ✅
-              └─ (not qualified) → q_and_a
-                                     ├─ (yes) → handoff ✅
-                                     └─ (no) → objection_handling
-                                                  ├─ (can overcome) → circle_back
-                                                  │                      ├─ (yes) → handoff ✅
-                                                  │                      └─ (no) → community_fallback 👋
-                                                  └─ (can't overcome) → community_fallback 👋
+greeting → qualification → q_and_a
+                              ├─ (yes to consultation) → handoff (QUALIFIED) ✅
+                              └─ (no to consultation) → handoff (NOT QUALITY) 🔶
 ```
 
 ### Key Files
