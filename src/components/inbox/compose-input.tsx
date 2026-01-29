@@ -58,6 +58,8 @@ function ComposeInputDev({ workspaceId, conversationId, disabled, replyTo, onCle
     toast.success('Message sent (dev mode - not actually sent)')
     setContent('')
     setIsSending(false)
+    // Return focus to textarea for next message
+    textareaRef.current?.focus()
   }, [content, isSending])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -274,6 +276,8 @@ function ComposeInputProd({ workspaceId, conversationId, disabled, replyTo, onCl
       toast.error('Failed to send message')
     } finally {
       setIsSending(false)
+      // Return focus to textarea for next message
+      textareaRef.current?.focus()
     }
   }, [content, workspaceId, conversationId, userId, isSending])
 
