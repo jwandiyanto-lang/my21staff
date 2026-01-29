@@ -14,6 +14,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
