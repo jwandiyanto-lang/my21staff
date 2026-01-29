@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { Button } from '@/components/ui/button'
-import { Send, Loader2, Zap, X, Reply } from 'lucide-react'
+import { Send, Loader2, Zap, X, Reply, Paperclip, Image as ImageIcon } from 'lucide-react'
 import { useAuth } from '@clerk/nextjs'
 import { toast } from 'sonner'
 import { useQuery } from 'convex/react'
@@ -186,7 +186,10 @@ function ComposeInputProd({ workspaceId, conversationId, disabled, replyTo, onCl
   const [content, setContent] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [quickReplyOpen, setQuickReplyOpen] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [filePreview, setFilePreview] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const { userId } = useAuth()
 
   // Fetch quick replies from Convex
