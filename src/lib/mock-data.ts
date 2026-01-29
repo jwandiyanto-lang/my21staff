@@ -28,7 +28,7 @@ export type MockConvexWorkspace = {
       key: string
       label: string
       color: string
-      enabled: boolean
+      bgColor: string
     }[]
   } | null
   created_at: number
