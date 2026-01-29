@@ -166,10 +166,13 @@ Root causes identified:
 6. Complete automation verified end-to-end (new lead -> greeting -> qualification -> routing -> booking)
 7. 24-hour monitoring confirms stability (no webhook failures, no integration errors)
 
-**Plans:** TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 09-01: TBD (plan-phase will create)
+- [ ] 03-01-PLAN.md — Fix ARI Config API for Your Intern functionality
+- [ ] 03-02-PLAN.md — Configure Kapso webhook to production and verify signature
+- [ ] 03-03-PLAN.md — Test complete bot automation flow (greeting → booking)
+- [ ] 03-04-PLAN.md — Monitor bot stability for 24 hours
 
 ---
 
