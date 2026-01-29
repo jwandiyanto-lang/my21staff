@@ -4,6 +4,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/../convex/_generated/api";
 import { Id } from "@/../convex/_generated/dataModel";
 import { DEFAULT_LEAD_STATUSES } from "@/lib/lead-status";
+import { getMockWorkspaceSettings, updateMockWorkspaceSettings } from "@/lib/mock-data";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -15,9 +16,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Dev mode: return default statuses
+  // Dev mode: return statuses from runtime mock settings
   if (isDevMode()) {
-    return NextResponse.json(DEFAULT_LEAD_STATUSES);
+    const mockSettings = getMockWorkspaceSettings();
+    return NextResponse.json(mockSettings?.lead_statuses || DEFAULT_LEAD_STATUSES);
   }
 
   const { userId } = await auth();
@@ -45,8 +47,15 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Dev mode: just return success (no DB to update)
+  // Dev mode: update runtime mock settings
   if (isDevMode()) {
+    const body = await request.json();
+    const { leadStatuses } = body;
+
+    if (Array.isArray(leadStatuses)) {
+      updateMockWorkspaceSettings({ lead_statuses: leadStatuses });
+    }
+
     return NextResponse.json({ success: true });
   }
 
