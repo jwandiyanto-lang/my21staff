@@ -148,28 +148,31 @@ async function postHandler(request: NextRequest) {
     console.log('[MessagesSend] ✓ Created OUTBOUND message:', {
       id: message._id,
       direction: message.direction,
-      kapso_id: message.kapso_message_id,
+      kapso_id: (message as any).kapso_message_id,
       content: content.substring(0, 30)
     })
 
     return NextResponse.json({
       success: true,
       message,
-      kapso_message_id: kapsoResult.messages?.[0]?.id,
+      kapso_message_id: (kapsoResult.messages?.[0]?.id || (message as any).kapso_message_id),
     })
 
   } catch (error) {
-    console.error('[MessagesSend] Full error details:', {
+    console.error('[MessagesSend] ERROR:', {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
-      error: error,
+      name: error instanceof Error ? error.name : undefined,
+      cause: error instanceof Error ? (error as any).cause : undefined,
+      full: JSON.stringify(error, Object.getOwnPropertyNames(error)),
     })
 
     const errorMessage = error instanceof Error ? error.message : 'Failed to send message'
     return NextResponse.json(
       {
         error: errorMessage,
-        details: process.env.NODE_ENV === 'development' ? error : undefined
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     )

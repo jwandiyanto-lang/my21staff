@@ -968,33 +968,64 @@ export const createOutboundMessage = mutation({
     kapso_message_id: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Skip auth check - already authenticated at API route level
-    // const { membership } = await requireWorkspaceMembership(ctx, args.workspace_id);
-
-    const now = Date.now();
-
-    const messageId = await ctx.db.insert("messages", {
-      workspace_id: args.workspace_id as any,
-      conversation_id: args.conversation_id as any,
-      content: args.content,
-      direction: "outbound",
-      sender_type: "user",
+    console.log('[Convex:createOutboundMessage] Starting with args:', {
+      workspace_id: args.workspace_id,
+      conversation_id: args.conversation_id,
       sender_id: args.sender_id,
-      message_type: args.message_type || "text",
-      media_url: args.media_url || null,
-      kapso_message_id: args.kapso_message_id || null,
-      created_at: now,
-      supabaseId: "", // Required by schema
+      content_length: args.content.length,
+      kapso_message_id: args.kapso_message_id,
     });
 
-    // Update conversation last_message_at
-    await ctx.db.patch(args.conversation_id as any, {
-      last_message_at: now,
-      last_message_preview: args.content.substring(0, 100),
-      updated_at: now,
-    });
+    try {
+      const now = Date.now();
 
-    return await ctx.db.get(messageId);
+      // Validate IDs exist
+      const workspace = await ctx.db.get(args.workspace_id as any);
+      if (!workspace) {
+        console.error('[Convex:createOutboundMessage] Workspace not found:', args.workspace_id);
+        throw new Error('Workspace not found');
+      }
+
+      const conversation = await ctx.db.get(args.conversation_id as any);
+      if (!conversation) {
+        console.error('[Convex:createOutboundMessage] Conversation not found:', args.conversation_id);
+        throw new Error('Conversation not found');
+      }
+
+      console.log('[Convex:createOutboundMessage] Inserting message with workspace._id:', workspace._id, 'conversation._id:', conversation._id);
+      const messageId = await ctx.db.insert("messages", {
+        workspace_id: workspace._id,
+        conversation_id: conversation._id,
+        content: args.content,
+        direction: "outbound",
+        sender_type: "user",
+        sender_id: args.sender_id,
+        message_type: args.message_type || "text",
+        media_url: args.media_url || null,
+        kapso_message_id: args.kapso_message_id || null,
+        created_at: now,
+        supabaseId: "", // Required by schema
+      });
+
+      console.log('[Convex:createOutboundMessage] Message inserted:', messageId);
+
+      // Update conversation last_message_at
+      await ctx.db.patch(conversation._id, {
+        last_message_at: now,
+        last_message_preview: args.content.substring(0, 100),
+        updated_at: now,
+      });
+
+      const message = await ctx.db.get(messageId);
+      console.log('[Convex:createOutboundMessage] ✓ Success, returning message with direction:', message?.direction);
+      return message;
+    } catch (error) {
+      console.error('[Convex:createOutboundMessage] ERROR:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      throw error;
+    }
   },
 });
 

@@ -52,7 +52,7 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
       direction: message.direction,
       isOutbound,
       sender_type: message.sender_type,
-      kapso_id: message.kapso_message_id
+      kapso_id: (message as any).kapso_message_id
     })
   }
 
