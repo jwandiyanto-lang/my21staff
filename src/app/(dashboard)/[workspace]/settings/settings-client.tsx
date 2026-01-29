@@ -708,9 +708,10 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   const saveLeadStatuses = async (statuses: LeadStatusConfig[]) => {
     setIsSavingStatuses(true)
     try {
-      // In dev mode, just update local state (no API)
+      // In dev mode, update local state AND mock workspace settings
       if (isDevMode) {
         setLeadStatuses(statuses)
+        updateMockWorkspaceSettings({ lead_statuses: statuses })
         return
       }
       const res = await fetch(`/api/workspaces/${workspace.id}/status-config`, {
