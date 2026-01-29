@@ -793,8 +793,9 @@ export function ContactDetailSheet({
     return total + (breakdown?.points || 0)
   }, 0)
 
-  // Chat score from conversation outcomes (dummy data for now)
-  const chatScore = 47
+  // Chat score from conversation outcomes
+  // TODO: Calculate from ARI bot conversation metadata when bot goes live (Phase 3)
+  const chatScore = 0 // Not yet calculated - requires live bot integration
 
   // Total lead score = Form Score + Chat Score
   const calculatedTotalScore = mainFieldsFormScore + chatScore
@@ -1067,8 +1068,8 @@ export function ContactDetailSheet({
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Chat Score</span>
-                            <span className="font-medium" style={{ color: getScoreColor(47) }}>
-                              47 pts
+                            <span className="font-medium text-muted-foreground/50">
+                              Not calculated
                             </span>
                           </div>
                           <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
@@ -1170,79 +1171,19 @@ export function ContactDetailSheet({
 
                     {/* Chat Score Tab */}
                     <TabsContent value="chat" className="mt-3 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-medium text-muted-foreground">Bot Conversation Score</h4>
-                        <span
-                          className="text-2xl font-semibold tabular-nums"
-                          style={{ color: getScoreColor(47) }}
-                        >
-                          47
-                        </span>
-                      </div>
-
-                      {/* Chat Score Breakdown - Flow Stage Outcomes */}
-                      <div className="space-y-1.5">
-                        {/* Greeting Stage Outcome */}
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-muted-foreground">Located in Australia</span>
-                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded truncate">
-                              Greeting
-                            </span>
+                      <div className="flex items-center justify-center py-8">
+                        <div className="text-center space-y-3">
+                          <MessageCircle className="h-12 w-12 mx-auto text-muted-foreground/30" />
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Chat scoring not yet available
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Will be calculated after bot conversations in Phase 3
+                            </p>
                           </div>
-                          <span className="font-medium tabular-nums shrink-0 text-green-600">
-                            +15
-                          </span>
-                        </div>
-
-                        {/* Qualifying Stage Outcomes */}
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-muted-foreground">IELTS 6.5+</span>
-                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded truncate">
-                              Qualifying
-                            </span>
-                          </div>
-                          <span className="font-medium tabular-nums shrink-0 text-green-600">
-                            +10
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-muted-foreground">Budget 300-500 juta</span>
-                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded truncate">
-                              Qualifying
-                            </span>
-                          </div>
-                          <span className="font-medium tabular-nums shrink-0 text-green-600">
-                            +12
-                          </span>
-                        </div>
-
-                        {/* Scoring Stage Outcome */}
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-muted-foreground">Working professional</span>
-                            <span className="text-xs bg-muted px-1.5 py-0.5 rounded truncate">
-                              Scoring
-                            </span>
-                          </div>
-                          <span className="font-medium tabular-nums shrink-0 text-foreground">
-                            +10
-                          </span>
-                        </div>
-
-                        <div className="pt-2 border-t flex items-center justify-between text-sm font-medium">
-                          <span>Total</span>
-                          <span style={{ color: getScoreColor(47) }}>
-                            47 pts
-                          </span>
                         </div>
                       </div>
-
-                      <p className="text-xs text-muted-foreground italic text-center pt-2">
-                        * Dummy data - real scoring coming soon
-                      </p>
                     </TabsContent>
                   </Tabs>
                 </div>
