@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
 
     if (isDevMode()) {
       // Dev mode: return mock contacts with search filter
+      // MOCK_CONTACTS already have 'id' fields, no mapping needed
       let filteredContacts = MOCK_CONTACTS
       if (search) {
         filteredContacts = MOCK_CONTACTS.filter(contact =>
@@ -39,12 +40,7 @@ export async function GET(request: NextRequest) {
           contact.email?.toLowerCase().includes(search)
         )
       }
-      // Map _id to id for consistency
-      const contactsWithId = filteredContacts.slice(0, limit).map(contact => ({
-        ...contact,
-        id: contact._id,
-      }))
-      return NextResponse.json({ contacts: contactsWithId, total: filteredContacts.length })
+      return NextResponse.json({ contacts: filteredContacts.slice(0, limit), total: filteredContacts.length })
     }
 
     // Verify authentication via Clerk
