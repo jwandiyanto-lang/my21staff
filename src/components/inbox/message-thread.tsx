@@ -229,7 +229,8 @@ export function MessageThread({
   // Group messages by date for separator insertion
   const groupedMessages = messages ? groupMessagesByDate(messages) : new Map()
 
-  const displayName = contact.name || contact.kapso_name || contact.phone || 'Unknown'
+  // Kapso v2 provides kapso_name directly, prioritize it over name/phone
+  const displayName = contact.kapso_name || contact.name || contact.phone || 'Unknown'
   const status = (contact.lead_status || 'prospect') as LeadStatus
   const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.new || { label: 'Unknown', color: '#6B7280', bgColor: '#F3F4F6' }
 
