@@ -11,19 +11,19 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 ## Current Position
 
 Milestone: v3.5 Production Go-Live
-Phase: 2.1 of 4 (Production Bug Remediation) - NOT STARTED (URGENT)
-Plan: 0 of ? in Phase 2.1 (planning needed)
-Status: Phase 2.1 inserted to address 23 production bugs before Phase 3
-Last activity: 2026-01-29 — Inserted Phase 2.1 after Phase 2 verification
+Phase: 2.1 of 4 (Production Bug Remediation) - IN PROGRESS
+Plan: 1 of 8 in Phase 2.1 (2.1-02 complete)
+Status: Database mutation fixes complete - 3 critical bugs resolved
+Last activity: 2026-01-29 — Completed 2.1-02 (Database Mutations Fix)
 
-Progress: [██████░░░░] 60% (2 of 4 phases complete, Phase 2.1 urgent insertion)
+Progress: [██████░░░░] 61% (2 phases + 1 plan in Phase 2.1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21 (15 from v3.4 + 6 from v3.5)
+- Total plans completed: 22 (15 from v3.4 + 7 from v3.5)
 - v3.4 execution: 6 phases, 15 plans, ~76 min (2 days: Jan 27 → Jan 28)
-- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, 6 min verification-only)
+- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (1 of 8 plans, ~2 min)
 
 **By Milestone:**
 
@@ -81,6 +81,9 @@ Recent decisions affecting current work:
 - v3.5 (02-03): Database operations broken (update/delete/status toggle all failing)
 - v3.5 (02-03): Quick replies feature completely non-functional (save + display broken)
 - v3.5 (02-03): Phase 2.1 recommended for bug remediation before Phase 3
+- v3.5 (2.1-02): Fixed critical status toggle bug - TanStack Query setQueriesData pattern corrected
+- v3.5 (2.1-02): Status toggle now affects only selected contact (data integrity bug resolved)
+- v3.5 (2.1-02): Issues #8, #9, #10 resolved - contact update/delete/status operations working
 
 ### Pending Todos
 
@@ -118,11 +121,17 @@ None yet.
 - ✅ Custom domain configured with HTTPS (02-02)
 - ✅ All 23 environment variables configured (02-02)
 - ✅ Production verification complete (02-03)
-- ⚠️ 23 bugs found during verification - Phase 2.1 needed
+- ⚠️ 23 bugs found during verification - Phase 2.1 in progress
+
+**From v3.5 Phase 2.1 (IN PROGRESS):**
+- ✅ Issues #8, #9, #10 resolved - database mutations working (2.1-02)
+- ✅ Critical data integrity bug fixed - status toggle affects only selected contact (2.1-02)
+- ✅ TanStack Query optimistic update pattern corrected (2.1-02)
+- ⚠️ 10 critical bugs remaining (down from 13)
 - ⚠️ ARI Config API broken (blocking Your Intern)
-- ⚠️ Database operations broken (update/delete/status toggle)
 - ⚠️ Quick replies completely non-functional
-- Next: Phase 2.1 bug remediation or proceed to Phase 3 with known issues
+- ⚠️ Inbox filter tabs non-functional
+- Next: Continue Phase 2.1 bug remediation (7 plans remaining)
 
 ## Quick Tasks Completed
 
@@ -135,30 +144,33 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed production verification (02-03) - 23 bugs found
-Resume file: None (Phase 2 complete)
-Next action: Decision needed - Phase 2.1 bug remediation or proceed to Phase 3 with known issues
+Stopped at: Completed 2.1-02 (Database Mutations Fix)
+Resume file: None (execution complete)
+Next action: Continue Phase 2.1 - Plan 03 (Inbox Filter Tabs) or Plan 04 (Quick Replies)
 
 **What happened this session:**
-- Completed 02-03-PLAN.md (Production Verification)
-- User performed comprehensive 9-step verification at https://www.my21staff.com
-- Found 23 bugs (13 critical, 8 medium, 2 missing features)
-- Core functionality works (auth, conversations, persistence)
-- Significant feature gaps identified requiring remediation
+- Completed 2.1-02-PLAN.md (Database Mutation Fixes)
+- Fixed critical data integrity bug (Issue #10): Status toggle affecting all contacts
+- Root cause: TanStack Query `setQueriesData` applying mutation globally
+- Solution: Iterate `previousQueries` and update each cache entry independently
+- Verified contact update/delete API routes and Convex mutations working correctly
 
-**Key findings:**
-- ARI Config API broken - root cause for Your Intern failures
-- Database operations broken - can't update/delete contacts
-- Status toggle affects all contacts simultaneously (critical bug)
-- Quick replies completely non-functional
-- Inbox filter tabs don't work
-- Merge contacts fails with error
+**Bugs resolved:**
+- ✅ Issue #8: Contact update (PATCH) operations working
+- ✅ Issue #9: Contact delete (DELETE) operations working
+- ✅ Issue #10: Status toggle now affects only selected contact (CRITICAL)
 
-**Recommendation:**
-- Phase 2.1 for bug remediation before Phase 3
-- Production deployed but not feature-complete
-- Core workflows blocked by critical bugs
+**Impact:**
+- 3 critical bugs resolved (13 → 10 critical remaining)
+- Contact management workflows safe for production use
+- Data integrity bug eliminated
+- TanStack Query optimistic update pattern corrected
+
+**Next targets:**
+- Issue #3: Inbox filter tabs (Status/Tags/Assignment non-functional)
+- Issue #11 & #12: Quick replies (save + display broken)
+- Issue #1: ARI Config API 500 error (blocks Your Intern)
 
 ---
 
-*Last updated: 2026-01-29 — Production deployment complete (02-02)*
+*Last updated: 2026-01-29 — Completed 2.1-02 (Database Mutations Fix)*
