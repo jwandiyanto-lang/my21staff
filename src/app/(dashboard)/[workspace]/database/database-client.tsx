@@ -7,7 +7,8 @@ import { ContactDetailSheet } from './contact-detail-sheet'
 import { MergeContactsDialog } from './merge-contacts-dialog'
 import { AddContactDialog } from '@/components/database/add-contact-dialog'
 import { TableSkeleton } from '@/components/skeletons/table-skeleton'
-import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
+import { type LeadStatus } from '@/lib/lead-status'
+import { useStatusConfig } from '@/lib/queries/use-status-config'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -36,9 +37,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, Filter, Tag, SlidersHorizontal,
 import { toast } from 'sonner'
 import { useContacts, useUpdateContact, useDeleteContact } from '@/lib/queries/use-contacts'
 import { useWorkspaceSettings } from '@/lib/queries/use-workspace-settings'
-import type { Contact, Workspace, WorkspaceMember, Profile } from '@/types/database'
-
-type TeamMember = WorkspaceMember & { profile: Profile | null }
+import type { Contact, Workspace } from '@/types/database'
 
 const COLUMN_OPTIONS = [
   { id: 'name', label: 'Name' },
@@ -108,7 +107,10 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   const { data: contactsData, isLoading: isLoadingContacts, isFetching } = useContacts(workspace.id, currentPage)
 
   // TanStack Query for workspace settings (team members, tags)
-  const { data: settingsData, isLoading: isLoadingSettings } = useWorkspaceSettings(workspace.id)
+  const { data: settingsData } = useWorkspaceSettings(workspace.id)
+
+  // Fetch dynamic status config from Settings
+  const { statuses: statusConfig, statusMap } = useStatusConfig(workspace.id)
 
   // Extract data from queries
   const contacts = contactsData?.contacts ?? []
@@ -180,25 +182,17 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
   // Loading state for page transitions (not initial load)
   const isLoadingPage = isFetching
 
-  // Convert team members to column format
-  const columnTeamMembers = useMemo(
-    () => teamMembers.map((m) => ({
-      id: m.user_id,
-      name: m.profile?.full_name || m.profile?.email || null,
-    })),
-    [teamMembers]
-  )
-
   // Create columns with status change handler, filtered by visibility
   const allColumns = useMemo(
     () => createColumns({
       onStatusChange: handleStatusChange,
       onTagsChange: handleTagsChange,
       onDelete: setContactToDelete,
-      teamMembers: columnTeamMembers,
       contactTags,
+      statusConfig,
+      statusMap,
     }),
-    [handleStatusChange, handleTagsChange, columnTeamMembers, contactTags]
+    [handleStatusChange, handleTagsChange, contactTags, statusConfig, statusMap]
   )
 
   const columns = useMemo(
@@ -313,7 +307,7 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-9">
               <Filter className="h-4 w-4 mr-2" />
-              {activeStatus === 'all' ? 'All Status' : LEAD_STATUS_CONFIG[activeStatus].label}
+              {activeStatus === 'all' ? 'All Status' : (statusMap[activeStatus]?.label || activeStatus)}
               <ChevronDown className="h-4 w-4 ml-2" />
             </Button>
           </DropdownMenuTrigger>
@@ -325,19 +319,18 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
               All Status
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
-            {LEAD_STATUSES.map((status) => {
-              const config = LEAD_STATUS_CONFIG[status]
+            {statusConfig.map((status) => {
               return (
                 <DropdownMenuCheckboxItem
-                  key={status}
-                  checked={activeStatus === status}
-                  onCheckedChange={() => setActiveStatus(status)}
+                  key={status.key}
+                  checked={activeStatus === status.key}
+                  onCheckedChange={() => setActiveStatus(status.key as LeadStatus)}
                 >
                   <span
                     className="w-2 h-2 rounded-full mr-2"
-                    style={{ backgroundColor: config.color }}
+                    style={{ backgroundColor: status.color }}
                   />
-                  {config.label}
+                  {status.label}
                 </DropdownMenuCheckboxItem>
               )
             })}
@@ -422,15 +415,15 @@ export function DatabaseClient({ workspace }: DatabaseClientProps) {
         {/* Active filter badges */}
         {(activeStatus !== 'all' || selectedTags.length > 0) && (
           <div className="flex items-center gap-2 ml-2">
-            {activeStatus !== 'all' && (
+            {activeStatus !== 'all' && statusMap[activeStatus] && (
               <span
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
                 style={{
-                  backgroundColor: LEAD_STATUS_CONFIG[activeStatus].bgColor,
-                  color: LEAD_STATUS_CONFIG[activeStatus].color,
+                  backgroundColor: statusMap[activeStatus].bgColor,
+                  color: statusMap[activeStatus].color,
                 }}
               >
-                {LEAD_STATUS_CONFIG[activeStatus].label}
+                {statusMap[activeStatus].label}
                 <X
                   className="h-3 w-3 cursor-pointer hover:opacity-70"
                   onClick={() => setActiveStatus('all')}

@@ -13,25 +13,27 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Checkbox } from '@/components/ui/checkbox'
-import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
-import { cn } from '@/lib/utils'
+import { type LeadStatus } from '@/lib/lead-status'
 import type { Contact } from '@/types/database'
 import { formatDistanceToNow } from 'date-fns'
 
-interface TeamMember {
-  id: string
-  name: string | null
+interface StatusConfig {
+  key: string
+  label: string
+  color: string
+  bgColor: string
 }
 
 interface ColumnsConfig {
   onStatusChange?: (contactId: string, newStatus: LeadStatus) => void
   onTagsChange?: (contactId: string, tags: string[]) => void
   onDelete?: (contact: Contact) => void
-  teamMembers?: TeamMember[]
   contactTags?: string[]
+  statusConfig?: StatusConfig[]
+  statusMap?: Record<string, StatusConfig>
 }
 
-export function createColumns({ onStatusChange, onTagsChange, onDelete, teamMembers = [], contactTags = [] }: ColumnsConfig = {}): ColumnDef<Contact>[] {
+export function createColumns({ onStatusChange, onTagsChange, onDelete, contactTags = [], statusConfig = [], statusMap = {} }: ColumnsConfig = {}): ColumnDef<Contact>[] {
   return [
   {
     accessorKey: 'name',
@@ -77,11 +79,12 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, teamMemb
       const contact = row.original
       const contactId = contact.id // Capture ID in local variable to avoid closure issues
       const status = row.getValue('lead_status') as LeadStatus
-      const config = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.new || { label: 'Unknown', color: '#6B7280', bgColor: '#F3F4F6' }
-      const isDefaultStatus = status === 'prospect'
+      const config = statusMap[status] || { label: status, color: '#6B7280', bgColor: '#F3F4F6' }
+      // Check if this is the first status (default status)
+      const isDefaultStatus = statusConfig.length > 0 && status === statusConfig[0].key
 
       if (!onStatusChange) {
-        // Show "---" for prospect (default/unassigned status)
+        // Show "---" for default/unassigned status
         if (isDefaultStatus) {
           return <span className="text-muted-foreground">---</span>
         }
@@ -121,20 +124,19 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, teamMemb
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
-            {LEAD_STATUSES.map((s) => {
-              const sConfig = LEAD_STATUS_CONFIG[s]
-              const isSelected = s === status
+            {statusConfig.map((s) => {
+              const isSelected = s.key === status
               return (
                 <DropdownMenuItem
-                  key={s}
-                  onClick={() => onStatusChange(contactId, s)}
+                  key={s.key}
+                  onClick={() => onStatusChange(contactId, s.key as LeadStatus)}
                   className={isSelected ? 'bg-muted' : ''}
                 >
                   <span
                     className="w-2 h-2 rounded-full mr-2"
-                    style={{ backgroundColor: sConfig.color }}
+                    style={{ backgroundColor: s.color }}
                   />
-                  {sConfig.label}
+                  {s.label}
                 </DropdownMenuItem>
               )
             })}
@@ -206,6 +208,17 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, teamMemb
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
+            {tags.length > 0 && (
+              <>
+                <DropdownMenuItem
+                  onClick={() => onTagsChange(contactId, [])}
+                  className="text-destructive"
+                >
+                  Clear All Tags
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             {contactTags.map((tag) => {
               const isSelected = tags.includes(tag)
               return (
