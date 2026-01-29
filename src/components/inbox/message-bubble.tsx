@@ -27,6 +27,7 @@ interface Message {
   message_type: string
   media_url?: string
   created_at: number
+  isOptimistic?: boolean // For optimistic UI updates
   metadata?: {
     status?: 'sent' | 'delivered' | 'read'
     filename?: string
@@ -41,6 +42,7 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message, onReply }: MessageBubbleProps) {
   const isOutbound = message.direction === 'outbound'
+  const isOptimistic = message.isOptimistic || false
   const [isHovered, setIsHovered] = useState(false)
 
   const handleReply = () => {
@@ -49,7 +51,11 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
 
   return (
     <div
-      className={cn('flex group', isOutbound ? 'justify-end' : 'justify-start')}
+      className={cn(
+        'flex group transition-opacity duration-200',
+        isOutbound ? 'justify-end' : 'justify-start',
+        isOptimistic && 'opacity-70'
+      )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -136,7 +142,12 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
           >
             {format(new Date(message.created_at), 'HH:mm')}
           </span>
-          {isOutbound && <MessageStatus status={message.metadata?.status} />}
+          {isOutbound && !isOptimistic && <MessageStatus status={message.metadata?.status} />}
+          {isOptimistic && (
+            <span className={cn('text-xs', isOutbound ? 'text-white/70' : 'text-gray-500')}>
+              Sending...
+            </span>
+          )}
         </div>
       </div>
 

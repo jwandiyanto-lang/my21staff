@@ -153,7 +153,29 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
   const handleSend = useCallback(async () => {
     if (!content.trim() || isSending || !userId) return
 
+    const messageContent = content.trim()
+    const tempId = `temp-${Date.now()}`
+
+    // Optimistic: Clear input immediately for snappy UX
+    setContent('')
     setIsSending(true)
+
+    // Create optimistic message event for instant feedback
+    window.dispatchEvent(new CustomEvent('optimistic-message', {
+      detail: {
+        _id: tempId,
+        conversation_id: conversationId,
+        workspace_id: workspaceId,
+        direction: 'outbound',
+        sender_type: 'user',
+        sender_id: userId,
+        content: messageContent,
+        message_type: 'text',
+        created_at: Date.now(),
+        isOptimistic: true,
+      }
+    }))
+
     try {
       const response = await fetch('/api/messages/send', {
         method: 'POST',
@@ -163,7 +185,7 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
         body: JSON.stringify({
           workspace_id: workspaceId,
           conversation_id: conversationId,
-          content: content.trim(),
+          content: messageContent,
           sender_id: userId,
         }),
       })
@@ -173,10 +195,24 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
         throw new Error(error.error || 'Failed to send message')
       }
 
-      toast.success('Message sent')
-      setContent('')
+      const result = await response.json()
+
+      // Replace optimistic message with real one
+      window.dispatchEvent(new CustomEvent('replace-optimistic-message', {
+        detail: { tempId, realMessage: result.message }
+      }))
+
+      // Success feedback (subtle, no intrusive toast)
     } catch (error) {
       console.error('Send error:', error)
+
+      // Remove optimistic message on error
+      window.dispatchEvent(new CustomEvent('remove-optimistic-message', {
+        detail: { tempId }
+      }))
+
+      // Restore content so user can retry
+      setContent(messageContent)
       toast.error('Failed to send message')
     } finally {
       setIsSending(false)

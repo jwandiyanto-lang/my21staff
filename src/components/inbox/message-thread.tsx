@@ -189,6 +189,40 @@ export function MessageThread({
   const [showNewIndicator, setShowNewIndicator] = useState(false)
   const [lastMessageCount, setLastMessageCount] = useState(0)
 
+  // Optimistic messages state for instant feedback
+  const [optimisticMessages, setOptimisticMessages] = useState<any[]>([])
+
+  // Listen for optimistic message events
+  useEffect(() => {
+    const handleOptimisticMessage = (e: CustomEvent) => {
+      setOptimisticMessages(prev => [...prev, e.detail])
+    }
+
+    const handleReplaceOptimistic = (e: CustomEvent) => {
+      const { tempId } = e.detail
+      setOptimisticMessages(prev => prev.filter(m => m._id !== tempId))
+      // Real message will come via Convex subscription
+    }
+
+    const handleRemoveOptimistic = (e: CustomEvent) => {
+      const { tempId } = e.detail
+      setOptimisticMessages(prev => prev.filter(m => m._id !== tempId))
+    }
+
+    window.addEventListener('optimistic-message', handleOptimisticMessage as EventListener)
+    window.addEventListener('replace-optimistic-message', handleReplaceOptimistic as EventListener)
+    window.addEventListener('remove-optimistic-message', handleRemoveOptimistic as EventListener)
+
+    return () => {
+      window.removeEventListener('optimistic-message', handleOptimisticMessage as EventListener)
+      window.removeEventListener('replace-optimistic-message', handleReplaceOptimistic as EventListener)
+      window.removeEventListener('remove-optimistic-message', handleRemoveOptimistic as EventListener)
+    }
+  }, [])
+
+  // Merge real messages with optimistic ones
+  const allMessages = [...(messages || []), ...optimisticMessages].sort((a, b) => a.created_at - b.created_at)
+
   // Track if user is at bottom of scroll container
   const handleScroll = () => {
     if (!containerRef.current) return
@@ -205,29 +239,29 @@ export function MessageThread({
 
   // Auto-scroll to bottom when messages change (only if user was at bottom)
   useEffect(() => {
-    if (messages && messages.length > 0) {
+    if (allMessages && allMessages.length > 0) {
       // Track if new messages arrived
-      if (messages.length > lastMessageCount && !isAtBottom) {
+      if (allMessages.length > lastMessageCount && !isAtBottom) {
         setShowNewIndicator(true)
       }
-      setLastMessageCount(messages.length)
+      setLastMessageCount(allMessages.length)
 
       if (isAtBottom) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
         setShowNewIndicator(false)
       }
     }
-  }, [messages, isAtBottom])
+  }, [allMessages, isAtBottom, lastMessageCount])
 
   // Scroll to bottom on initial load
   useEffect(() => {
-    if (messages && messages.length > 0) {
+    if (allMessages && allMessages.length > 0) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
     }
   }, [conversationId]) // Re-run when conversation changes
 
   // Group messages by date for separator insertion
-  const groupedMessages = messages ? groupMessagesByDate(messages) : new Map()
+  const groupedMessages = allMessages ? groupMessagesByDate(allMessages) : new Map()
 
   // Kapso v2 provides kapso_name directly, prioritize it over name/phone
   const displayName = contact.kapso_name || contact.name || contact.phone || 'Unknown'
