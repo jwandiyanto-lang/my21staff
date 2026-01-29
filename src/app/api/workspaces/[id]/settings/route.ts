@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { ConvexHttpClient } from 'convex/browser'
+import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { api } from '@/../convex/_generated/api'
 import { requireWorkspaceMembership } from '@/lib/auth/workspace-auth'
 import { safeEncrypt } from '@/lib/crypto'
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 function isDevMode(): boolean {
   return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
@@ -45,7 +43,7 @@ export async function PATCH(
 
     if (body.settings !== undefined) {
       // Merge with existing settings
-      const existing = await convex.query(api.workspaces.getById, {
+      const existing = await fetchQuery(api.workspaces.getById, {
         id: workspaceId
       }) as { settings?: Record<string, unknown> } | null
 
@@ -64,7 +62,7 @@ export async function PATCH(
     }
 
     // Update workspace via Convex
-    const result = await convex.mutation(api.workspaces.updateSettings, {
+    const result = await fetchMutation(api.workspaces.updateSettings, {
       workspace_id: workspaceId,
       settings: updates.settings as any,
       kapso_phone_id: updates.kapso_phone_id as string | undefined,
