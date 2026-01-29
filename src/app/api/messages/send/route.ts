@@ -19,17 +19,23 @@ import {
  */
 async function postHandler(request: NextRequest) {
   try {
+    console.log('[MessagesSend] Step 1: Starting send request')
+
     // 1. Authenticate via Clerk
     const { userId } = await auth()
     if (!userId) {
+      console.log('[MessagesSend] Step 1: Auth failed - no userId')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    console.log('[MessagesSend] Step 1: Auth success, userId:', userId)
 
     // 2. Parse request body
     const body = await request.json()
     const { workspace_id, conversation_id, content, message_type = 'text' } = body
+    console.log('[MessagesSend] Step 2: Parsed body:', { workspace_id, conversation_id, content, message_type })
 
     if (!workspace_id || !conversation_id || !content) {
+      console.log('[MessagesSend] Step 2: Missing required fields')
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -39,6 +45,7 @@ async function postHandler(request: NextRequest) {
     const metrics = createRequestMetrics()
 
     // 3. Get conversation and contact
+    console.log('[MessagesSend] Step 3: Fetching conversation...')
     let queryStart = performance.now()
     const conversationResult = await fetchQuery(
       api.conversations.getByIdInternal,
@@ -48,14 +55,17 @@ async function postHandler(request: NextRequest) {
 
     // Type assertion - getByIdInternal returns conversation type
     const conversation = conversationResult as { contact_id: string } | null
+    console.log('[MessagesSend] Step 3: Conversation result:', conversation)
 
     if (!conversation) {
+      console.log('[MessagesSend] Step 3: Conversation not found')
       return NextResponse.json(
         { error: 'Conversation not found' },
         { status: 404 }
       )
     }
 
+    console.log('[MessagesSend] Step 4: Fetching contact...')
     queryStart = performance.now()
     const contactResult = await fetchQuery(
       api.contacts.getByIdInternal,
@@ -65,8 +75,10 @@ async function postHandler(request: NextRequest) {
 
     // Type assertion - getByIdInternal returns contact type
     const contact = contactResult as { phone: string } | null
+    console.log('[MessagesSend] Step 4: Contact result:', contact)
 
     if (!contact) {
+      console.log('[MessagesSend] Step 4: Contact not found')
       return NextResponse.json(
         { error: 'Contact not found' },
         { status: 404 }
@@ -74,6 +86,7 @@ async function postHandler(request: NextRequest) {
     }
 
     // 4. Get workspace with Kapso credentials
+    console.log('[MessagesSend] Step 5: Fetching workspace...')
     queryStart = performance.now()
     const workspaceResult = await fetchQuery(
       api.workspaces.getByIdInternal,
@@ -83,8 +96,10 @@ async function postHandler(request: NextRequest) {
 
     // Type assertion - getByIdInternal returns workspace type
     const workspace = workspaceResult as { kapso_phone_id?: string; meta_access_token?: string } | null
+    console.log('[MessagesSend] Step 5: Workspace result:', { hasWorkspace: !!workspace, hasPhoneId: !!workspace?.kapso_phone_id, hasToken: !!workspace?.meta_access_token })
 
     if (!workspace || !workspace.kapso_phone_id || !workspace.meta_access_token) {
+      console.log('[MessagesSend] Step 5: Kapso not configured')
       return NextResponse.json(
         { error: 'Kapso not configured for this workspace' },
         { status: 400 }
@@ -92,9 +107,12 @@ async function postHandler(request: NextRequest) {
     }
 
     // 5. Decrypt Kapso API key (safeDecrypt handles both encrypted and plain text)
+    console.log('[MessagesSend] Step 6: Decrypting API key...')
     const apiKey = safeDecrypt(workspace.meta_access_token)
+    console.log('[MessagesSend] Step 6: API key decrypted, length:', apiKey?.length)
 
     // 6. Send via Kapso FIRST
+    console.log('[MessagesSend] Step 7: Sending via Kapso...', { phoneId: workspace.kapso_phone_id, toPhone: contact.phone })
     queryStart = performance.now()
     const kapsoResult = await kapsoSendMessage(
       { apiKey, phoneId: workspace.kapso_phone_id },
@@ -102,8 +120,10 @@ async function postHandler(request: NextRequest) {
       content
     )
     logQuery(metrics, 'kapso.sendMessage', Math.round(performance.now() - queryStart))
+    console.log('[MessagesSend] Step 7: Kapso result:', kapsoResult)
 
     // 7. Store message in Convex with kapso_message_id
+    console.log('[MessagesSend] Step 8: Storing in Convex...')
     queryStart = performance.now()
     const message = await fetchMutation(
       api.mutations.createOutboundMessage,
@@ -117,6 +137,7 @@ async function postHandler(request: NextRequest) {
       }
     )
     logQuery(metrics, 'convex.mutations.createOutboundMessage', Math.round(performance.now() - queryStart))
+    console.log('[MessagesSend] Step 8: Convex result:', message)
 
     return NextResponse.json({
       success: true,
