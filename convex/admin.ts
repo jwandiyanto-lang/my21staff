@@ -105,7 +105,7 @@ export const listAriConfigs = query({
     const results = [];
 
     for (const config of configs) {
-      const workspace = await ctx.db.get(config.workspace_id as any);
+      const workspace = await ctx.db.get(config.workspace_id as any) as any;
       results.push({
         _id: config._id,
         workspace_id: config.workspace_id,
