@@ -1,11 +1,19 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { Button } from '@/components/ui/button'
-import { Send, Loader2 } from 'lucide-react'
+import { Send, Loader2, Zap } from 'lucide-react'
 import { useAuth } from '@clerk/nextjs'
 import { toast } from 'sonner'
+import { useQuery } from 'convex/react'
+import { api } from 'convex/_generated/api'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Badge } from '@/components/ui/badge'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
@@ -19,7 +27,15 @@ interface ComposeInputProps {
 function ComposeInputDev({ workspaceId, conversationId, disabled }: ComposeInputProps) {
   const [content, setContent] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [quickReplyOpen, setQuickReplyOpen] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const userId = 'dev-user-001'
+
+  // Mock quick replies for dev mode
+  const mockQuickReplies = [
+    { _id: '1', shortcut: '/hi', message: 'Hello! How can I help you today?' },
+    { _id: '2', shortcut: '/thanks', message: 'Thank you for contacting us!' },
+  ]
 
   const handleSend = useCallback(async () => {
     if (!content.trim() || isSending) return
@@ -37,9 +53,57 @@ function ComposeInputDev({ workspaceId, conversationId, disabled }: ComposeInput
     }
   }
 
+  const insertQuickReply = (message: string) => {
+    setContent(message)
+    setQuickReplyOpen(false)
+    textareaRef.current?.focus()
+  }
+
   return (
     <div className="flex items-end gap-2 p-4 border-t bg-background">
+      <Popover open={quickReplyOpen} onOpenChange={setQuickReplyOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={disabled || isSending}
+            className="flex-shrink-0"
+          >
+            <Zap className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80 p-2" align="start" side="top">
+          <div className="space-y-1">
+            <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+              Quick Replies
+            </div>
+            {mockQuickReplies.length === 0 ? (
+              <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                No quick replies yet. Create them in Settings.
+              </div>
+            ) : (
+              mockQuickReplies.map((reply) => (
+                <button
+                  key={reply._id}
+                  onClick={() => insertQuickReply(reply.message)}
+                  className="w-full text-left px-2 py-2 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="secondary" className="text-xs font-mono">
+                      {reply.shortcut}
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-muted-foreground line-clamp-2">
+                    {reply.message}
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
       <TextareaAutosize
+        ref={textareaRef}
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -64,7 +128,12 @@ function ComposeInputDev({ workspaceId, conversationId, disabled }: ComposeInput
 function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInputProps) {
   const [content, setContent] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [quickReplyOpen, setQuickReplyOpen] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { userId } = useAuth()
+
+  // Fetch quick replies from Convex
+  const quickReplies = useQuery(api.quickReplies.list, { workspace_id: workspaceId })
 
   const handleSend = useCallback(async () => {
     if (!content.trim() || isSending || !userId) return
@@ -105,9 +174,58 @@ function ComposeInputProd({ workspaceId, conversationId, disabled }: ComposeInpu
     }
   }
 
+  const insertQuickReply = (message: string) => {
+    setContent(message)
+    setQuickReplyOpen(false)
+    textareaRef.current?.focus()
+  }
+
   return (
     <div className="flex items-end gap-2 p-4 border-t bg-background">
+      <Popover open={quickReplyOpen} onOpenChange={setQuickReplyOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={disabled || isSending}
+            className="flex-shrink-0"
+            title="Quick replies"
+          >
+            <Zap className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80 p-2" align="start" side="top">
+          <div className="space-y-1">
+            <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+              Quick Replies
+            </div>
+            {!quickReplies || quickReplies.length === 0 ? (
+              <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                No quick replies yet. Create them in Settings.
+              </div>
+            ) : (
+              quickReplies.map((reply) => (
+                <button
+                  key={reply._id}
+                  onClick={() => insertQuickReply(reply.message)}
+                  className="w-full text-left px-2 py-2 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="secondary" className="text-xs font-mono">
+                      {reply.shortcut}
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-muted-foreground line-clamp-2">
+                    {reply.message}
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
       <TextareaAutosize
+        ref={textareaRef}
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={handleKeyDown}
