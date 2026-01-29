@@ -42,6 +42,37 @@ function normalizeKapsoPhone(phone: string): string {
   return phone.replace(/\D/g, "");
 }
 
+/**
+ * Fetch actual media URL from Kapso API using media ID.
+ * Kapso v2 webhook only sends media.id, not full URL.
+ */
+async function fetchMediaUrl(
+  mediaId: string,
+  phoneNumberId: string,
+  accessToken: string
+): Promise<string | undefined> {
+  try {
+    const apiUrl = `https://api.kapso.ai/meta/whatsapp/v24.0/${phoneNumberId}/media/${mediaId}`;
+    const response = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        "X-API-Key": accessToken,
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`[Kapso] Failed to fetch media ${mediaId}: ${response.status}`);
+      return undefined;
+    }
+
+    const data = await response.json();
+    return data.url || data.media_url || data.download_url;
+  } catch (error) {
+    console.error(`[Kapso] Error fetching media ${mediaId}:`, error);
+    return undefined;
+  }
+}
+
 // ============================================
 // Internal Mutation: Process Kapso Webhook
 // ============================================
@@ -343,6 +374,11 @@ async function processWorkspaceMessages(
   // Group by conversation for conversation updates
   const conversationUpdates = new Map<string, { count: number; lastPreview: string }>();
 
+  // Get workspace for access token
+  const workspace = await ctx.db.get(workspaceId);
+  const phoneNumberId = workspace?.kapso_phone_id;
+  const accessToken = workspace?.meta_access_token;
+
   for (const { phone, message } of newMessages) {
     const conversation = conversationMap.get(phone);
     if (!conversation) continue;
@@ -357,8 +393,15 @@ async function processWorkspaceMessages(
         content = message.text?.body;
         break;
       case "image":
-        mediaUrl = message.image?.id || message.image?.url;
-        content = message.image?.caption || "[Image]";
+        // Kapso v2: media_url from image.id or image.url (from Kapso API)
+        // If we have a URL, use it. Otherwise, fetch from Kapso media API.
+        if (message.image?.url) {
+          mediaUrl = message.image.url;
+        } else if (message.image?.id && phoneNumberId && accessToken) {
+          mediaUrl = await fetchMediaUrl(message.image.id, phoneNumberId, accessToken);
+        }
+        // Store caption in content field for display above image
+        content = message.image?.caption || null;
         break;
       case "audio":
         mediaUrl = message.audio?.id || message.audio?.url;

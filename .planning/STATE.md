@@ -11,12 +11,12 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 ## Current Position
 
 Milestone: v3.5 Production Go-Live
-Phase: 2 of 3 (Production Deployment Preparation) - COMPLETE (with issues)
-Plan: 3 of 3 in Phase 2 (all complete)
-Status: Production verification complete - 23 bugs found, Phase 2.1 recommended
-Last activity: 2026-01-29 — Completed 02-03-PLAN.md (Production Verification)
+Phase: 2.1 of 4 (Production Bug Remediation) - NOT STARTED (URGENT)
+Plan: 0 of ? in Phase 2.1 (planning needed)
+Status: Phase 2.1 inserted to address 23 production bugs before Phase 3
+Last activity: 2026-01-29 — Inserted Phase 2.1 after Phase 2 verification
 
-Progress: [██████░░░░] 67% (1 of 3 phases complete + Phase 2 complete with issues)
+Progress: [██████░░░░] 60% (2 of 4 phases complete, Phase 2.1 urgent insertion)
 
 ## Performance Metrics
 
@@ -45,6 +45,13 @@ Progress: [██████░░░░] 67% (1 of 3 phases complete + Phase 2
 *Will be updated after each v3.5 plan completion*
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 2.1 inserted after Phase 2: Production Bug Remediation (URGENT)
+  - Reason: 23 bugs discovered during Phase 2 production verification
+  - Impact: Must complete before Phase 3 (Live Bot Integration)
+  - Critical bugs block core workflows (ARI Config, database operations, status toggle)
 
 ### Decisions
 

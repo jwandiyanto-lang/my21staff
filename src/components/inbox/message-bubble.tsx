@@ -76,13 +76,24 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
       >
         {/* Content based on message_type */}
         {message.message_type === 'image' && message.media_url && (
-          <div className="mb-2 overflow-hidden rounded-lg">
-            <img
-              src={message.media_url}
-              alt="Image"
-              className="max-w-full h-auto cursor-pointer hover:opacity-95 transition-opacity"
-              style={{ maxWidth: '280px' }}
-            />
+          <>
+            {message.content && (
+              <p className="mb-2 whitespace-pre-wrap break-words text-sm">{message.content}</p>
+            )}
+            <div className="mb-2 overflow-hidden rounded-lg">
+              <img
+                src={message.media_url}
+                alt="Image"
+                className="max-w-full h-auto cursor-pointer hover:opacity-95 transition-opacity"
+                style={{ maxWidth: '280px' }}
+              />
+            </div>
+          </>
+        )}
+        {message.message_type === 'image' && !message.media_url && (
+          <div className="mb-2 p-4 rounded-lg bg-muted border border-border">
+            <p className="text-sm font-medium">Image attached</p>
+            <p className="text-xs text-muted-foreground mt-1">View on your phone to see the image</p>
           </div>
         )}
 

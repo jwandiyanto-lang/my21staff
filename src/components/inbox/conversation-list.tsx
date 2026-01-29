@@ -88,7 +88,8 @@ export function ConversationList({
           const contact = conversation.contact
           if (!contact) return null
 
-          const displayName = contact.name || contact.kapso_name || contact.phone
+          // Kapso v2 provides kapso.contact_name directly, prioritize it over name/phone
+          const displayName = contact.kapso_name || contact.name || contact.phone
           const status = (contact.lead_status || 'prospect') as LeadStatus
           const statusConfig = LEAD_STATUS_CONFIG[status] || LEAD_STATUS_CONFIG.new || { label: 'Unknown', color: '#6B7280', bgColor: '#F3F4F6' }
 
