@@ -12,18 +12,18 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 Milestone: v3.5 Production Go-Live
 Phase: 2.1 of 4 (Production Bug Remediation) - IN PROGRESS
-Plan: 2 of 8 in Phase 2.1 (2.1-01, 2.1-02 complete)
-Status: ARI Config API restored - Your Intern fully functional
-Last activity: 2026-01-29 — Completed 2.1-01 (ARI Config API Fix)
+Plan: 5 of 8 in Phase 2.1 (2.1-01 through 2.1-05 complete)
+Status: Contact merge working, lead score UI cleaned (no dummy data)
+Last activity: 2026-01-29 — Completed 2.1-05 (Contact Merge & Lead Score Fixes)
 
-Progress: [██████░░░░] 62% (2 phases + 2 plans in Phase 2.1)
+Progress: [██████░░░░] 62% (2 phases + 5 plans in Phase 2.1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 23 (15 from v3.4 + 8 from v3.5)
+- Total plans completed: 26 (15 from v3.4 + 11 from v3.5)
 - v3.4 execution: 6 phases, 15 plans, ~76 min (2 days: Jan 27 → Jan 28)
-- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (2 of 8 plans, ~8 min)
+- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (5 of 8 plans, ~16 min)
 
 **By Milestone:**
 
@@ -87,6 +87,10 @@ Recent decisions affecting current work:
 - v3.5 (2.1-02): Fixed critical status toggle bug - TanStack Query setQueriesData pattern corrected
 - v3.5 (2.1-02): Status toggle now affects only selected contact (data integrity bug resolved)
 - v3.5 (2.1-02): Issues #8, #9, #10 resolved - contact update/delete/status operations working
+- v3.5 (2.1-05): Tags automatically merged (union of both contacts) instead of user selection
+- v3.5 (2.1-05): Primary contact determined by user's name field selection in merge dialog
+- v3.5 (2.1-05): Chat score removed until Phase 3 bot integration (was dummy data)
+- v3.5 (2.1-05): Issues #5, #6 resolved - contact merge working, lead score shows real data only
 
 ### Pending Todos
 
@@ -132,10 +136,12 @@ None yet.
 - ✅ Issues #8, #9, #10 resolved - database mutations working (2.1-02)
 - ✅ Critical data integrity bug fixed - status toggle affects only selected contact (2.1-02)
 - ✅ TanStack Query optimistic update pattern corrected (2.1-02)
-- ⚠️ 7 critical bugs remaining (down from 13 - resolved 6)
-- ⚠️ Quick replies completely non-functional (Issues #11, #12)
+- ✅ Issues #11, #12 resolved - quick replies save and display working (2.1-04)
+- ✅ Issues #5, #6 resolved - contact merge working, lead score shows real data (2.1-05)
+- ✅ Contact merge implements tags union and respects primary contact selection (2.1-05)
+- ⚠️ 5 critical bugs remaining (down from 13 - resolved 8)
 - ⚠️ Inbox filter tabs non-functional (Issue #3)
-- Next: Continue Phase 2.1 bug remediation (6 plans remaining)
+- Next: Continue Phase 2.1 bug remediation (3 plans remaining)
 
 ## Quick Tasks Completed
 
@@ -148,34 +154,32 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 2.1-01 (ARI Config API Fix)
+Stopped at: Completed 2.1-05 (Contact Merge & Lead Score Fixes)
 Resume file: None (execution complete)
-Next action: Continue Phase 2.1 - Plan 03 (Inbox Filter Tabs) or Plan 04 (Quick Replies)
+Next action: Continue Phase 2.1 - Plan 06, 07, or 08 (remaining bug fixes)
 
 **What happened this session:**
-- Completed 2.1-01-PLAN.md (ARI Config API Fix)
-- Fixed workspace ID/slug type mismatch causing 500 errors
-- Root cause: Convex query expected v.string() but received v.id("workspaces")
-- Secondary issue: Frontend passing workspace._id instead of workspace.slug
-- Solution: Changed query args to v.string(), updated frontend to use workspace.slug
-- Verified Your Intern tabs load successfully and configuration saves work
+- Completed 2.1-05-PLAN.md (Contact Merge & Lead Score Fixes)
+- Fixed contact merge to respect primary contact selection based on user's name choice
+- Implemented tags auto-merge (union of both contacts) instead of user selection
+- Removed all dummy chat score data (was hardcoded to 47 pts with fake outcomes)
+- Lead score now shows real form score only, placeholder for unavailable chat score
 
 **Bugs resolved:**
-- ✅ Issue #1: ARI Config API 500 error (CRITICAL)
-- ✅ Issue #2: Your Intern Persona tab "Failed to load persona settings" error
-- ✅ Issue #7: Your Intern configuration saves failing
+- ✅ Issue #5: Merge contacts fails with error (CRITICAL)
+- ✅ Issue #6: Lead score chat component shows dummy data
 
 **Impact:**
-- 3 critical bugs resolved (10 → 7 critical remaining)
-- Your Intern page fully functional (all 5 tabs working)
-- Bot personality configuration ready for Phase 3 (Live Bot Integration)
-- Type safety pattern established: API routes use slug, Convex queries match schema types
+- 2 bugs resolved (7 → 5 critical remaining)
+- Contact merge workflow fully functional (duplicate consolidation works correctly)
+- Lead scoring display accurate (form score only until Phase 3 bot integration)
+- Tags union pattern established for merge operations
 
 **Next targets:**
 - Issue #3: Inbox filter tabs (Status/Tags/Assignment non-functional)
-- Issue #11 & #12: Quick replies (save + display broken)
 - Issue #13-15: Database columns missing (Tags, quick access icons)
-- Issue #16-18: Contact merge, export, lead scoring
+- Issue #16-18: Contact export, form field activation
+- Issue #19-21: Settings UI issues (Indonesian words, WhatsApp API option)
 
 ---
 
