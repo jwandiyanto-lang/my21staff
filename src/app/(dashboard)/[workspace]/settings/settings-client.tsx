@@ -517,6 +517,14 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   const saveContactTags = async (tags: string[]) => {
     setIsSavingTags(true)
     try {
+      // In dev mode, update mock data and local state
+      if (isDevMode) {
+        updateMockWorkspaceSettings({ contact_tags: tags })
+        setContactTags(tags)
+        toast.success('Tags updated')
+        return
+      }
+
       const response = await fetch(`/api/workspaces/${workspace.id}/settings`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -529,8 +537,10 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
       })
       if (!response.ok) throw new Error('Failed to save')
       setContactTags(tags)
+      toast.success('Tags updated')
     } catch (error) {
       console.error('Failed to save contact tags:', error)
+      toast.error('Failed to save tags')
     } finally {
       setIsSavingTags(false)
     }

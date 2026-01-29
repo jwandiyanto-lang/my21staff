@@ -80,6 +80,33 @@ export const toggleAri = mutation({
 // ============================================
 
 /**
+ * Set default contact tags for a workspace.
+ * Used to initialize tags for production workspaces.
+ */
+export const setDefaultContactTags = mutation({
+  args: {
+    workspaceId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId as any);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    const defaultTags = ['Hot Lead', 'Warm Lead', 'Cold Lead', 'Student', 'Parent', 'Follow Up', 'Community', '1on1'];
+
+    await ctx.db.patch(workspace._id, {
+      settings: {
+        ...workspace.settings,
+        contact_tags: defaultTags,
+      },
+    });
+
+    return { success: true, tags: defaultTags };
+  },
+});
+
+/**
  * List all workspaces with their Kapso config.
  */
 export const listWorkspaces = query({
