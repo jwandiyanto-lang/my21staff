@@ -21,7 +21,6 @@ export type MockConvexWorkspace = {
     kapso_api_key?: string
     whatsapp_number?: string
     whatsapp_name?: string
-    quick_replies?: { id: string; label: string; text: string }[]
     contact_tags?: string[]
     main_form_fields?: string[]
     form_field_scores?: Record<string, number>
@@ -47,10 +46,6 @@ export const MOCK_CONVEX_WORKSPACE: MockConvexWorkspace = {
     kapso_api_key: 'mock-api-key',
     whatsapp_number: '+62 xxx xxxx xxxx',
     whatsapp_name: 'Jonathan Wandiyanto',
-    quick_replies: [
-      { id: '1', label: 'Greeting', text: 'Halo! Ada yang bisa saya bantu?' },
-      { id: '2', label: 'Thanks', text: 'Terima kasih sudah menghubungi kami!' },
-    ],
     contact_tags: ['Hot Lead', 'Student', 'Parent', 'Follow Up'],
     main_form_fields: ['Pendidikan', 'Jurusan', 'Aktivitas', 'Negara Tujuan', 'Budget', 'Target Berangkat', 'Level Bahasa Inggris', 'Goals'],
     form_field_scores: {
