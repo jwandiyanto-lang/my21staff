@@ -11,25 +11,8 @@ function isDevMode(): boolean {
   return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    // This endpoint isn't used by the app (settings loaded via server component)
-    // but Next.js/browser may try to prefetch it, so return a simple success
-    return NextResponse.json({
-      success: true,
-      message: 'Settings are loaded via server component, not this endpoint'
-    })
-  } catch (error) {
-    console.error('Error in workspace settings GET API:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
+// NOTE: No GET handler - settings are loaded via server component, not this API
+// If browser/Next.js tries to GET this route, Clerk middleware will handle it
 
 export async function PATCH(
   request: Request,
