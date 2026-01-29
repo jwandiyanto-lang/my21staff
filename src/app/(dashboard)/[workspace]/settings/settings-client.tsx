@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useQuery } from 'convex/react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -239,6 +239,15 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
 
   // Track which field is expanded in Form Fields accordion
   const [expandedField, setExpandedField] = useState<string | null>(null)
+
+  // Ensure current user exists in database (fallback for when webhooks aren't set up)
+  const ensureUser = useMutation(api.users.ensureCurrentUser)
+
+  useEffect(() => {
+    if (!isDevMode) {
+      ensureUser().catch(console.error)
+    }
+  }, [ensureUser, isDevMode])
 
   // Fetch AI config on client side with Clerk auth context
   const ariConfig = useQuery(

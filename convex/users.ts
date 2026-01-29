@@ -7,7 +7,7 @@
  */
 
 import { v } from "convex/values";
-import { query, internalMutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 
 // ============================================
 // QUERIES
@@ -26,6 +26,53 @@ export const getUserByClerkId = query({
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerk_id", args.clerk_id))
       .unique();
+  },
+});
+
+// ============================================
+// PUBLIC MUTATIONS
+// ============================================
+
+/**
+ * Ensure current user exists in database.
+ *
+ * This is a fallback for when Clerk webhooks aren't set up.
+ * Call this on app initialization to create the user if needed.
+ *
+ * @returns The user ID
+ */
+export const ensureCurrentUser = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const clerkId = identity.subject;
+
+    // Check if user already exists
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerk_id", clerkId))
+      .unique();
+
+    if (existing) {
+      console.log(`[Users] User ${clerkId} already exists`);
+      return existing._id;
+    }
+
+    // Create user
+    const now = Date.now();
+    const userId = await ctx.db.insert("users", {
+      clerk_id: clerkId,
+      workspace_id: undefined, // Will be set when user joins/creates workspace
+      created_at: now,
+      updated_at: now,
+    });
+
+    console.log(`[Users] Auto-created user ${clerkId}`);
+    return userId;
   },
 });
 

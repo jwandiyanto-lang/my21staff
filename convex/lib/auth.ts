@@ -8,8 +8,6 @@
 import { query } from "../_generated/server";
 import type { QueryCtx } from "../_generated/server";
 
-// v1.0.2 - Fixed auth check to prevent db.insert in query context
-
 /**
  * Verifies that a user is authenticated using Clerk.
  *
@@ -50,16 +48,34 @@ export async function requireWorkspaceMembership(
   const clerkId = identity.subject;
 
   // Look up user by Clerk ID to get their Convex user document
-  const user = await ctx.db
+  let user = await ctx.db
     .query("users")
     .withIndex("by_clerk_id", (q: any) => q.eq("clerk_id", clerkId))
     .first();
 
-  // For queries, if user doesn't exist, throw Unauthorized
-  // User will be auto-created by Clerk webhooks
-  // This prevents "db.insert" calls from query context
+  // Auto-create user if they don't exist (fallback for when webhooks aren't set up)
+  // This will only work in mutation context - queries will throw an error
   if (!user) {
-    throw new Error("Unauthorized: User not found. Please sign out and sign back in.");
+    try {
+      const now = Date.now();
+      const userId = await ctx.db.insert("users", {
+        clerk_id: clerkId,
+        workspace_id: undefined,
+        created_at: now,
+        updated_at: now,
+      });
+      console.log(`[Auth] Auto-created user ${clerkId} (webhooks not configured)`);
+
+      // Fetch the newly created user
+      user = await ctx.db.get(userId);
+      if (!user) {
+        throw new Error("Failed to create user");
+      }
+    } catch (e) {
+      // We're in a query context (db.insert not allowed)
+      // Or some other error occurred
+      throw new Error("Unauthorized: User not found. Please sign out and sign back in.");
+    }
   }
 
   // Verify workspace exists
@@ -83,4 +99,4 @@ export async function requireWorkspaceMembership(
  * Type alias for MutationContext since it's not exported directly
  * from generated files
  */
-export type MutationContext = MutationCtx;
+export type MutationContext = import("../_generated/server").MutationCtx;
