@@ -56,9 +56,14 @@ export async function requireWorkspaceMembership(
   // Auto-create user if they don't exist (fallback for when webhooks aren't set up)
   // This will only work in mutation context - queries will throw an error
   if (!user) {
+    // Check if we're in a mutation context (has insert method)
+    if (typeof (ctx.db as any).insert !== 'function') {
+      throw new Error(`User ${clerkId} not found. Please sign in again or contact support.`);
+    }
+
     try {
       const now = Date.now();
-      const userId = await ctx.db.insert("users", {
+      const userId = await (ctx.db as any).insert("users", {
         clerk_id: clerkId,
         workspace_id: undefined,
         created_at: now,
@@ -67,7 +72,7 @@ export async function requireWorkspaceMembership(
       console.log(`[Auth] Auto-created user ${clerkId} (webhooks not configured)`);
 
       // Fetch the newly created user
-      user = await ctx.db.get(userId);
+      user = await (ctx.db as any).get(userId);
       if (!user) {
         throw new Error("Failed to create user");
       }
