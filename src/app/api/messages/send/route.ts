@@ -125,9 +125,18 @@ async function postHandler(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('[MessagesSend] Error:', error)
+    console.error('[MessagesSend] Full error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      error: error,
+    })
+
+    const errorMessage = error instanceof Error ? error.message : 'Failed to send message'
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to send message' },
+      {
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? error : undefined
+      },
       { status: 500 }
     )
   }
