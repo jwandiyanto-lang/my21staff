@@ -12,18 +12,18 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 
 Milestone: v3.5 Production Go-Live
 Phase: 2.1 of 4 (Production Bug Remediation) - IN PROGRESS
-Plan: 1 of 8 in Phase 2.1 (2.1-02 complete)
-Status: Database mutation fixes complete - 3 critical bugs resolved
-Last activity: 2026-01-29 — Completed 2.1-02 (Database Mutations Fix)
+Plan: 2 of 8 in Phase 2.1 (2.1-01, 2.1-02 complete)
+Status: ARI Config API restored - Your Intern fully functional
+Last activity: 2026-01-29 — Completed 2.1-01 (ARI Config API Fix)
 
-Progress: [██████░░░░] 61% (2 phases + 1 plan in Phase 2.1)
+Progress: [██████░░░░] 62% (2 phases + 2 plans in Phase 2.1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22 (15 from v3.4 + 7 from v3.5)
+- Total plans completed: 23 (15 from v3.4 + 8 from v3.5)
 - v3.4 execution: 6 phases, 15 plans, ~76 min (2 days: Jan 27 → Jan 28)
-- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (1 of 8 plans, ~2 min)
+- v3.5 execution: Phase 1 complete (3 plans, ~12 min), Phase 2 complete (3 plans, ~6 min), Phase 2.1 in progress (2 of 8 plans, ~8 min)
 
 **By Milestone:**
 
@@ -81,6 +81,9 @@ Recent decisions affecting current work:
 - v3.5 (02-03): Database operations broken (update/delete/status toggle all failing)
 - v3.5 (02-03): Quick replies feature completely non-functional (save + display broken)
 - v3.5 (02-03): Phase 2.1 recommended for bug remediation before Phase 3
+- v3.5 (2.1-01): ARI Config API workspace_id type mismatch fixed (v.string() vs v.id())
+- v3.5 (2.1-01): Frontend changed from workspace.id to workspace.slug for API calls
+- v3.5 (2.1-01): Issues #1, #2, #7 resolved - Your Intern fully functional
 - v3.5 (2.1-02): Fixed critical status toggle bug - TanStack Query setQueriesData pattern corrected
 - v3.5 (2.1-02): Status toggle now affects only selected contact (data integrity bug resolved)
 - v3.5 (2.1-02): Issues #8, #9, #10 resolved - contact update/delete/status operations working
@@ -124,14 +127,15 @@ None yet.
 - ⚠️ 23 bugs found during verification - Phase 2.1 in progress
 
 **From v3.5 Phase 2.1 (IN PROGRESS):**
+- ✅ Issues #1, #2, #7 resolved - ARI Config API working, Your Intern fully functional (2.1-01)
+- ✅ Workspace ID/slug type mismatch fixed in API routes and Convex queries (2.1-01)
 - ✅ Issues #8, #9, #10 resolved - database mutations working (2.1-02)
 - ✅ Critical data integrity bug fixed - status toggle affects only selected contact (2.1-02)
 - ✅ TanStack Query optimistic update pattern corrected (2.1-02)
-- ⚠️ 10 critical bugs remaining (down from 13)
-- ⚠️ ARI Config API broken (blocking Your Intern)
-- ⚠️ Quick replies completely non-functional
-- ⚠️ Inbox filter tabs non-functional
-- Next: Continue Phase 2.1 bug remediation (7 plans remaining)
+- ⚠️ 7 critical bugs remaining (down from 13 - resolved 6)
+- ⚠️ Quick replies completely non-functional (Issues #11, #12)
+- ⚠️ Inbox filter tabs non-functional (Issue #3)
+- Next: Continue Phase 2.1 bug remediation (6 plans remaining)
 
 ## Quick Tasks Completed
 
@@ -144,33 +148,35 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 2.1-02 (Database Mutations Fix)
+Stopped at: Completed 2.1-01 (ARI Config API Fix)
 Resume file: None (execution complete)
 Next action: Continue Phase 2.1 - Plan 03 (Inbox Filter Tabs) or Plan 04 (Quick Replies)
 
 **What happened this session:**
-- Completed 2.1-02-PLAN.md (Database Mutation Fixes)
-- Fixed critical data integrity bug (Issue #10): Status toggle affecting all contacts
-- Root cause: TanStack Query `setQueriesData` applying mutation globally
-- Solution: Iterate `previousQueries` and update each cache entry independently
-- Verified contact update/delete API routes and Convex mutations working correctly
+- Completed 2.1-01-PLAN.md (ARI Config API Fix)
+- Fixed workspace ID/slug type mismatch causing 500 errors
+- Root cause: Convex query expected v.string() but received v.id("workspaces")
+- Secondary issue: Frontend passing workspace._id instead of workspace.slug
+- Solution: Changed query args to v.string(), updated frontend to use workspace.slug
+- Verified Your Intern tabs load successfully and configuration saves work
 
 **Bugs resolved:**
-- ✅ Issue #8: Contact update (PATCH) operations working
-- ✅ Issue #9: Contact delete (DELETE) operations working
-- ✅ Issue #10: Status toggle now affects only selected contact (CRITICAL)
+- ✅ Issue #1: ARI Config API 500 error (CRITICAL)
+- ✅ Issue #2: Your Intern Persona tab "Failed to load persona settings" error
+- ✅ Issue #7: Your Intern configuration saves failing
 
 **Impact:**
-- 3 critical bugs resolved (13 → 10 critical remaining)
-- Contact management workflows safe for production use
-- Data integrity bug eliminated
-- TanStack Query optimistic update pattern corrected
+- 3 critical bugs resolved (10 → 7 critical remaining)
+- Your Intern page fully functional (all 5 tabs working)
+- Bot personality configuration ready for Phase 3 (Live Bot Integration)
+- Type safety pattern established: API routes use slug, Convex queries match schema types
 
 **Next targets:**
 - Issue #3: Inbox filter tabs (Status/Tags/Assignment non-functional)
 - Issue #11 & #12: Quick replies (save + display broken)
-- Issue #1: ARI Config API 500 error (blocks Your Intern)
+- Issue #13-15: Database columns missing (Tags, quick access icons)
+- Issue #16-18: Contact merge, export, lead scoring
 
 ---
 
-*Last updated: 2026-01-29 — Completed 2.1-02 (Database Mutations Fix)*
+*Last updated: 2026-01-29 — Completed 2.1-01 (ARI Config API Fix)*
