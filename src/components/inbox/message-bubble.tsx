@@ -45,6 +45,17 @@ export function MessageBubble({ message, onReply }: MessageBubbleProps) {
   const isOptimistic = message.isOptimistic || false
   const [isHovered, setIsHovered] = useState(false)
 
+  // DEBUG: Log message details
+  if (message.content && message.content.length < 50) {
+    console.log('[MessageBubble] Rendering:', {
+      content: message.content.substring(0, 20),
+      direction: message.direction,
+      isOutbound,
+      sender_type: message.sender_type,
+      kapso_id: message.kapso_message_id
+    })
+  }
+
   const handleReply = () => {
     onReply?.(message)
   }

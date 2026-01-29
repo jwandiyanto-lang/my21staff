@@ -443,7 +443,7 @@ async function processWorkspaceMessages(
       .first();
 
     if (existingMsg) {
-      console.log(`[Kapso] Message ${message.id} already exists (direction: ${existingMsg.direction}), skipping webhook creation`);
+      console.log(`[Kapso] ✓ Message ${message.id} already exists (direction: ${existingMsg.direction}), skipping webhook creation`);
       // Don't create duplicate - the send API already created it as outbound
       // Update conversation timestamp and continue to next message
       await ctx.db.patch(conversation._id, {
@@ -455,6 +455,7 @@ async function processWorkspaceMessages(
     }
 
     // Create message (only if it doesn't exist yet)
+    console.log(`[Kapso] → Creating new INBOUND message ${message.id}: ${content?.substring(0, 30)}`);
     await ctx.db.insert("messages", {
       conversation_id: conversation._id,
       workspace_id: workspaceId,

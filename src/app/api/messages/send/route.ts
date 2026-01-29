@@ -124,6 +124,7 @@ async function postHandler(request: NextRequest) {
 
     // 7. Store message in Convex with kapso_message_id
     console.log('[MessagesSend] Step 8: Storing in Convex...')
+    console.log('[MessagesSend] → Creating OUTBOUND message with kapso_id:', kapsoResult.messages?.[0]?.id)
     queryStart = performance.now()
     const message = await fetchMutation(
       api.mutations.createOutboundMessage,
@@ -137,7 +138,12 @@ async function postHandler(request: NextRequest) {
       }
     )
     logQuery(metrics, 'convex.mutations.createOutboundMessage', Math.round(performance.now() - queryStart))
-    console.log('[MessagesSend] Step 8: Convex result:', message)
+    console.log('[MessagesSend] ✓ Created OUTBOUND message:', {
+      id: message._id,
+      direction: message.direction,
+      kapso_id: message.kapso_message_id,
+      content: content.substring(0, 30)
+    })
 
     return NextResponse.json({
       success: true,
