@@ -167,19 +167,16 @@ This document contains:
 
 ## Git & Deployment
 
-**🚫 VERCEL DEPLOYMENT BLOCKED - BILLING FREEZE 🚫**
-
-- **NEVER push to GitHub** - triggers Vercel deployment
-- **NEVER deploy to Vercel** - billing is too high
-- Keep all work **LOCAL ONLY** (localhost:3000)
-- Make atomic commits locally as normal
-- User will create a fresh Vercel project when ready
+**Vercel deployment enabled** - automatic deployments on push to master.
 
 ```bash
-# BLOCKED - DO NOT RUN:
-git push origin master   # ← NO
-vercel deploy            # ← NO
+# Standard workflow:
+git add [files]
+git commit -m "message"
+git push origin master   # Triggers Vercel deployment
 ```
+
+**Production URL:** TBD (will be set after initial deployment)
 
 ---
 
