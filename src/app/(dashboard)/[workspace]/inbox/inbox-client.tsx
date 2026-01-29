@@ -458,10 +458,11 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
         )}
       </div>
 
-      {/* Right sidebar - Contact info (overlay) */}
+      {/* Right sidebar - Contact info (overlay) - z-[60] to stay above dropdowns (z-50) */}
       {showInfoSidebar && selectedConversationId && contactForSidebar && (
-        <div className="absolute right-0 top-0 h-full z-10 shadow-lg">
+        <div className="absolute right-0 top-0 h-full z-[60] shadow-lg">
           <InfoSidebar
+            key={contactForSidebar.id}
             contact={contactForSidebar}
             messagesCount={messagesCount}
             lastActivity={selectedConversation?.last_message_at
