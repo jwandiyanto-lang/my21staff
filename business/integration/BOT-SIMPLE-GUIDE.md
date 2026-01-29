@@ -1,0 +1,497 @@
+# Eagle Overseas Bot - Simple Guide
+
+**Date:** 2026-01-29
+**Purpose:** Simple explanation of bot persona, conversation flow, and implementation
+
+---
+
+## 1. Bot Persona & Technical Setup
+
+### Who is ARI?
+
+**Name:** ARI
+**Role:** Virtual education consultant for Eagle Overseas
+**Language:** Bahasa Indonesia (casual, friendly)
+**Tone:** Supportive + Clear + Encouraging
+
+**Communication Rules:**
+- ✅ Short messages (1-2 sentences)
+- ✅ NO emojis
+- ✅ Casual language ("saya/kamu" not formal)
+- ✅ Mirror customer's language
+
+**Example:** *"Siang kak! Wah tertarik kuliah di luar negeri ya? Udah isi form kita belum?"*
+
+---
+
+### Technical Setup
+
+**AI Model:**
+- Primary: **Grok** (via xAI API)
+- Alternative: **Sea-Lion** (local via Ollama)
+- Selection: 50/50 A/B testing (deterministic by contact ID)
+
+**Kapso Connection:**
+```
+Webhook: POST /api/webhook/kapso
+↓
+Process message → Check if AI enabled
+↓
+If enabled → Call ARI bot
+↓
+Generate response → Send via Kapso API
+↓
+Store in database
+```
+
+**Kapso Phone Number:** Eagle Overseas WhatsApp Business Number
+**Workspace ID:** `js7b1cwpdpadcgds1cr8dqw7dh7zv3a3`
+
+---
+
+## 2. How ARI Talks to Clients (5 Main Stages)
+
+### Stage 1: GREETING
+**Goal:** Welcome and ask if they filled the form
+
+**Example:**
+```
+Customer: "Halo, mau tanya soal kuliah"
+ARI: "Siang kak! Wah tertarik kuliah di luar negeri ya?
+      Udah isi form kita belum?"
+```
+
+**What happens:**
+- If YES → Go to Stage 2 (Qualification)
+- If NO → Still go to Stage 2 (Qualification)
+
+---
+
+### Stage 2: QUALIFICATION
+**Goal:** Collect age + documents to qualify the lead
+
+**Example:**
+```
+ARI: "Oke, buat bantu kamu lebih baik, boleh tau:
+      1. Umur kamu berapa?
+      2. Dokumen apa aja yang udah kamu siapkan?
+         - Passport
+         - CV/Resume
+         - Transkrip/Ijazah
+         - Sertifikat Bahasa Inggris (IELTS/TOEFL)"
+
+Customer: "Umur 22 tahun. Udah ada passport, CV, transkrip, sama IELTS"
+
+ARI: "Wah lengkap banget! Umur segitu plus dokumen lengkap,
+      siap banget nih buat apply. Langsung hubungin konsultan
+      kita ya, mereka bakal bantu kamu."
+```
+
+**Qualification Logic:**
+- ✅ **Highly Qualified** (skip to Stage 6 - Handoff):
+  - Age ≤ 25 + All 4 documents, OR
+  - English certificate + 2 other documents
+
+- ❌ **Not Qualified** (continue to Stage 3):
+  - Missing documents or older age
+
+**What happens:**
+- Highly qualified → Stage 6 (Handoff to human)
+- Not qualified → Stage 3 (Q&A)
+
+---
+
+### Stage 3: Q&A + CONSULTATION OFFER
+**Goal:** Answer questions, build trust, offer free consultation
+
+**Example:**
+```
+Customer: "Universitas mana yang bagus buat IT?"
+
+ARI: "Buat IT, University of Melbourne sama UNSW Sydney
+      top banget. IELTS minimal 6.5 ya. Mau konsultasi
+      gratis sama konsultan kita? Bisa bahas detail
+      universitas yang cocok buat kamu."
+
+Customer: "Hmm, berapa biaya konsultasinya?"
+
+ARI: "Konsultasi pertama gratis kok kak! No obligation.
+      Konsultan kita bakal review profil kamu, kasih
+      rekomendasi universitas yang pas, dan bantu planning
+      timeline. Tertarik?"
+```
+
+**What happens after 1-2 questions:**
+- If YES to consultation → Stage 6 (Handoff)
+- If NO to consultation → Stage 4 (Objection)
+
+---
+
+### Stage 4: OBJECTION CAPTURE + COMMUNITY OFFER
+**Goal:** Understand why they declined, offer community, try ONE gentle circle back
+
+**Example:**
+```
+Customer: "Nggak dulu deh, masih mikir-mikir"
+
+ARI: "Oke, santai aja kak. Kita ada komunitas WhatsApp
+      loh, isinya update info kuliah dan bisa tanya-tanya
+      di sana. Mau aku kirim link-nya?"
+
+Customer: "Boleh"
+
+ARI: "Nih linknya: [community link]
+
+      Btw, boleh tau nggak kenapa belum mau konsultasi?
+      Feedback kamu penting buat kita supaya bisa improve
+      layanan."
+
+Customer: "Soalnya mahal kayaknya"
+
+ARI: "Oh gitu. Sebenernya banyak yang awalnya concern
+      soal harga juga, tapi setelah konsultasi gratis mereka
+      ngerasa worth it buat planning kuliah. Udah pasti
+      nggak mau coba dulu?"
+```
+
+**Objection Types:**
+- **Can overcome** (try circle back): price, timing, not_ready, need_info
+- **Can't overcome** (respect it): no_money, already_has_advisor, prefer_self_study
+
+**What happens:**
+- Can overcome → Stage 5 (Circle Back - one attempt)
+- Can't overcome → Stage 7 (Community link and goodbye)
+
+---
+
+### Stage 5: CIRCLE BACK (One Attempt Only)
+**Goal:** Make ONE gentle attempt to change their mind
+
+**Example:**
+```
+ARI: "Yakin nggak mau coba kak? Konsultasinya beneran
+      gratis dan nggak ada komitmen. Banyak yang terbantu
+      buat planning timeline sama pilih universitas yang
+      tepat."
+
+Customer (Option A - Changed mind): "Ya udah deh, coba aja"
+→ ARI: "Oke siap! Nanti konsultan kita hubungi ya kak."
+→ Stage 6 (Handoff)
+
+Customer (Option B - Still no): "Nggak deh, nanti aja"
+→ ARI: "Oke kak, no problem! Join komunitas kita aja ya,
+        banyak info bermanfaat di sana. Sukses buat kuliahnya!"
+→ Stage 7 (Community fallback)
+```
+
+**Important:** Only ONE attempt. If they say no again, accept gracefully.
+
+---
+
+### Stage 6: HANDOFF (Route to Human)
+**Goal:** Connect qualified lead to human consultant
+
+**Example:**
+```
+ARI: "Mantap! Aku hubungin konsultan kita ya kak. Mereka
+      bakal bantu kamu dengan aplikasi universitasnya.
+      Ditunggu aja sebentar."
+```
+
+**What happens:**
+- Set conversation status = "handover"
+- Tag contact as "hot_lead"
+- Mark lead_status = "hot"
+- Stop bot responses
+- Human consultant takes over
+
+---
+
+### Stage 7: COMMUNITY FALLBACK (Final State)
+**Goal:** Keep relationship warm with community, end positively
+
+**Example:**
+```
+ARI: "Oke kak, no problem sama sekali! Ini link komunitas
+      kita: https://whatsapp.com/channel/0029Vb72LoyLSmbcJvDunX1U
+
+      Bisa join kapan aja, banyak update info kuliah dan
+      bisa tanya-tanya di sana. Good luck buat aplikasinya!"
+```
+
+**What happens:**
+- Send community link
+- Tag contact with objection type
+- Store objection details for product improvement
+- End conversation (status = "ended")
+
+---
+
+## 3. Implementation Steps
+
+### Prerequisites
+- ✅ Kapso account with WhatsApp Business API access
+- ✅ Eagle Overseas phone number connected to Kapso
+- ✅ Grok API key (xAI) or Ollama setup for Sea-Lion
+- ✅ Convex database deployed
+
+---
+
+### Step 1: Update Database Schema
+Add extended context fields to `ariConversations` table:
+
+```typescript
+// In convex/schema.ts
+context: v.optional(v.any()) // Will store:
+{
+  qualification: {
+    age: number,
+    documents: string[],
+    documentCount: number,
+    isQualified: boolean,
+    qualifiedReason: string
+  },
+  sales: {
+    questionsAnswered: number,
+    qaHistory: [...],
+    consultationOffered: boolean,
+    consultationInterest: boolean,
+    objection: string,
+    objectionDetails: string,
+    circleBackAttempts: number
+  },
+  analytics: {
+    stateTransitions: string[],
+    finalOutcome: 'handoff' | 'community' | 'disengaged'
+  }
+}
+```
+
+---
+
+### Step 2: Create Helper Functions
+In `convex/ai/context.ts`:
+
+```typescript
+// Qualification logic
+export function evaluateQualification(context) {
+  const { age, documents } = context.qualification;
+
+  // Highly qualified criteria
+  if (age <= 25 && documents.length >= 4) {
+    return { qualified: true, reason: 'all_docs_young_age' };
+  }
+
+  if (documents.includes('english_cert') && documents.length >= 2) {
+    return { qualified: true, reason: 'english_plus_two' };
+  }
+
+  return { qualified: false, reason: 'not_qualified' };
+}
+
+// Objection handling
+export function canOvercomeObjection(objection: string): boolean {
+  const canOvercome = ['price', 'timing', 'not_ready', 'need_info'];
+  return canOvercome.includes(objection);
+}
+```
+
+---
+
+### Step 3: Create State-Specific Prompts
+In `convex/ai/mouth.ts`, add prompts for each stage:
+
+```typescript
+const STATE_PROMPTS = {
+  greeting: `Kamu ARI, asisten Eagle Overseas. Sapa hangat dan tanyakan
+             "Udah isi form kita belum?"`,
+
+  qualification: `Tanya umur dan dokumen yang udah disiapkan. List:
+                  Passport, CV, Transkrip, IELTS. Singkat dan jelas.`,
+
+  q_and_a: `Jawab pertanyaan seputar universitas. Setelah 1-2 pertanyaan,
+            tawarkan konsultasi gratis. Jangan pushy.`,
+
+  objection_handling: `Tangkap alasan kenapa nggak mau konsultasi.
+                       Tawarkan komunitas. Tetap ramah dan respect pilihan mereka.`,
+
+  circle_back: `Coba SATU kali lagi dengan gentle. Jelaskan value konsultasi gratis.
+                Kalau tetap no, terima dengan baik.`,
+
+  handoff: `Bilang "Konsultan kita bakal hubungi sebentar lagi". STOP responding.`,
+
+  community_fallback: `Kirim link komunitas, ucapkan good luck. END dengan positif.`
+};
+```
+
+---
+
+### Step 4: Create Mutations
+In `convex/ari.ts`:
+
+```typescript
+// 1. Store qualification data
+export const updateQualificationData = mutation({
+  args: {
+    ariConversationId: v.id("ariConversations"),
+    age: v.number(),
+    documents: v.array(v.string())
+  },
+  handler: async (ctx, args) => {
+    // Evaluate if qualified
+    // Update context
+    // Return next state
+  }
+});
+
+// 2. Track Q&A and offer consultation
+export const trackQAAndOfferConsultation = mutation({...});
+
+// 3. Capture objection
+export const captureObjection = mutation({...});
+
+// 4. Handle circle back
+export const handleCircleBack = mutation({...});
+
+// 5. Mark for handoff
+export const markForHandoff = mutation({...});
+```
+
+---
+
+### Step 5: Update Kapso Webhook Handler
+In `src/app/api/webhook/kapso/route.ts`:
+
+```typescript
+// After receiving message:
+1. Normalize phone number
+2. Find/create contact
+3. Get/create ariConversation
+4. Load conversation history
+5. Build system prompt based on current state
+6. Call AI model (Grok or Sea-Lion)
+7. Parse response & extract data (age, documents, objection, etc.)
+8. Update ariConversation context
+9. Determine next state
+10. Send response via Kapso
+11. Update conversation state
+```
+
+---
+
+### Step 6: Configure Bot
+Run setup script:
+
+```bash
+npx tsx scripts/setup-eagle-bot.ts
+```
+
+This configures:
+- Bot name: ARI
+- Style: casual
+- Language: Bahasa Indonesia
+- Tone: supportive + clear + encouraging
+- Community link
+
+---
+
+### Step 7: Seed Knowledge Base (Optional but Recommended)
+Create FAQ entries in database:
+
+**Topics:**
+- Services (consultation, pricing, timeline)
+- Universities (which countries, programs, rankings)
+- Requirements (documents, IELTS, GPA)
+- Process (how long, success rate)
+
+---
+
+### Step 8: Test the Bot
+
+**Test Scenarios:**
+
+1. **Highly Qualified Path:**
+   ```
+   User: "Halo"
+   Bot: [Greeting]
+   User: "Umur 22, ada passport, CV, transkrip, IELTS"
+   Bot: [Qualification → Handoff immediately]
+   Expected: Bot marks as hot lead, stops responding
+   ```
+
+2. **Standard Path with Consultation Yes:**
+   ```
+   User: "Halo"
+   Bot: [Greeting]
+   User: "Umur 24, ada passport sama CV"
+   Bot: [Q&A stage]
+   User: "Berapa biayanya?"
+   Bot: [Answers, offers consultation]
+   User: "Oke boleh"
+   Bot: [Handoff]
+   Expected: Consultant gets notification
+   ```
+
+3. **Objection Path:**
+   ```
+   User: "Halo"
+   Bot: [Greeting]
+   User: "23 tahun, punya passport"
+   Bot: [Q&A stage]
+   Bot: [Offers consultation]
+   User: "Nggak dulu deh"
+   Bot: [Captures objection, offers community]
+   User: "Mahal soalnya"
+   Bot: [Circle back once]
+   User: "Tetap nggak mau"
+   Bot: [Community link, goodbye]
+   Expected: Objection logged, community link sent
+   ```
+
+---
+
+### Step 9: Monitor & Iterate
+
+**Check daily:**
+- How many conversations started?
+- How many qualified handoffs?
+- What are the common objections?
+
+**Adjust based on data:**
+- If too many "price" objections → Consider payment plans
+- If too many "timing" objections → Create urgency campaigns
+- If low qualification rate → Adjust criteria
+
+---
+
+## Quick Reference
+
+### Bot Flow Diagram
+```
+greeting → qualification
+              ├─ (qualified) → handoff ✅
+              └─ (not qualified) → q_and_a
+                                     ├─ (yes) → handoff ✅
+                                     └─ (no) → objection_handling
+                                                  ├─ (can overcome) → circle_back
+                                                  │                      ├─ (yes) → handoff ✅
+                                                  │                      └─ (no) → community_fallback 👋
+                                                  └─ (can't overcome) → community_fallback 👋
+```
+
+### Key Files
+- **Strategy:** `business/integration/BOT-STRATEGY.md`
+- **Implementation Plan:** `business/integration/BOT-IMPLEMENTATION-PLAN.md`
+- **Technical Journey:** `business/clients/eagle/eagle-ari-journey.md`
+- **Setup Script:** `scripts/setup-eagle-bot.ts`
+
+### Key Metrics
+- **Qualified Lead Rate Target:** > 30%
+- **Response Time Target:** < 5 seconds
+- **Conversation Duration Target:** < 10 minutes to handoff
+- **Data Capture Rate Target:** > 90% (age + documents)
+
+---
+
+*Last updated: 2026-01-29*
+*For Eagle Overseas WhatsApp Bot Implementation*
