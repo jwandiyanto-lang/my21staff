@@ -498,13 +498,8 @@ export const listWithFilters = query({
       q = q.filter((q) => q.gt(q.field("unread_count"), 0));
     }
 
-    // Apply status filters
-    if (args.statusFilters && args.statusFilters.length > 0) {
-      q = q.filter((q) => {
-        const status = q.field("status");
-        return args.statusFilters!.some((s) => (status as any).value === s);
-      });
-    }
+    // Note: statusFilters are for contact.lead_status (not conversation.status)
+    // Applied client-side after fetching contacts (see below, same pattern as tags)
 
     // Apply assignment filter
     if (args.assignedTo && args.assignedTo !== "all") {
@@ -531,10 +526,21 @@ export const listWithFilters = query({
       contactIds.map((id) => ctx.db.get(id))
     );
 
-    // Filter by tags client-side (since tags are on contacts, not conversations)
+    // Filter by lead status client-side (since lead_status is on contacts, not conversations)
     let filteredConversations = conversations;
+    if (args.statusFilters && args.statusFilters.length > 0) {
+      filteredConversations = filteredConversations.filter((conv) => {
+        const contact = contacts.find((c) => c?._id === conv.contact_id);
+        if (!contact) return false;
+        const leadStatus = contact.lead_status || "new";
+        // Include if contact has any of the requested lead statuses
+        return args.statusFilters!.includes(leadStatus);
+      });
+    }
+
+    // Filter by tags client-side (since tags are on contacts, not conversations)
     if (args.tagFilters && args.tagFilters.length > 0) {
-      filteredConversations = conversations.filter((conv) => {
+      filteredConversations = filteredConversations.filter((conv) => {
         const contact = contacts.find((c) => c?._id === conv.contact_id);
         if (!contact || !contact.tags) return false;
         // Include if contact has any of the requested tags

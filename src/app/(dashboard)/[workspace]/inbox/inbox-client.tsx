@@ -179,7 +179,9 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     return Array.from(tags).sort()
   }, [data?.conversations])
 
-  // Filter conversations by search query, status, and tags (client-side for dev mode)
+  // Filter conversations by search query (client-side)
+  // Note: status and tag filters are handled by Convex query in production
+  // In dev mode, we apply all filters client-side since we use mock data
   const filteredConversations = useMemo(() => {
     if (!data?.conversations) return []
 
@@ -197,12 +199,34 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
       })
     }
 
-    // Filter by view mode (active = has unread messages)
-    if (viewMode === 'active') {
-      filtered = filtered.filter((conv: any) => conv.unread_count > 0 || conv.status === 'open')
+    // In dev mode, apply filters client-side (production filters via Convex query)
+    if (isDevMode()) {
+      // Filter by view mode (active = has unread messages)
+      if (viewMode === 'active') {
+        filtered = filtered.filter((conv: any) => conv.unread_count > 0 || conv.status === 'open')
+      }
+
+      // Filter by lead status
+      if (statusFilter.length > 0) {
+        filtered = filtered.filter((conv: any) => {
+          const contact = conv.contact
+          if (!contact) return false
+          const contactStatus = (contact.lead_status || 'prospect') as LeadStatus
+          return statusFilter.includes(contactStatus)
+        })
+      }
+
+      // Filter by tags
+      if (tagFilter.length > 0) {
+        filtered = filtered.filter((conv: any) => {
+          const contact = conv.contact
+          if (!contact?.tags) return false
+          return tagFilter.some((tag: string) => contact.tags?.includes(tag))
+        })
+      }
     }
 
-    // Filter by search query
+    // Filter by search query (always client-side for instant feedback)
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter((conv: any) => {
@@ -213,25 +237,6 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
           contact.kapso_name?.toLowerCase().includes(query) ||
           contact.phone.toLowerCase().includes(query)
         )
-      })
-    }
-
-    // Filter by lead status
-    if (statusFilter.length > 0) {
-      filtered = filtered.filter((conv: any) => {
-        const contact = conv.contact
-        if (!contact) return false
-        const contactStatus = (contact.lead_status || 'prospect') as LeadStatus
-        return statusFilter.includes(contactStatus)
-      })
-    }
-
-    // Filter by tags
-    if (tagFilter.length > 0) {
-      filtered = filtered.filter((conv: any) => {
-        const contact = conv.contact
-        if (!contact?.tags) return false
-        return tagFilter.some((tag: string) => contact.tags?.includes(tag))
       })
     }
 

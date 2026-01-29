@@ -520,4 +520,18 @@ export default defineSchema({
     .index("by_webinar", ["webinar_id"])
     .index("by_contact", ["contact_id"])
     .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // QUICK REPLIES (Message templates)
+  // ============================================
+  quickReplies: defineTable({
+    workspace_id: v.string(),
+    shortcut: v.string(),      // e.g., "/greeting"
+    message: v.string(),        // e.g., "Hello! How can I help?"
+    created_by: v.string(),     // Clerk user ID
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_shortcut", ["workspace_id", "shortcut"]),
 });

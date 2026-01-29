@@ -38,11 +38,12 @@ import { formatDistanceToNow } from 'date-fns'
 import { DEFAULT_LEAD_STATUSES } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
 import { updateMockWorkspaceSettings, getMockWorkspaceSettings } from '@/lib/mock-data'
+import { toast } from 'sonner'
 
 interface QuickReply {
-  id: string
-  label: string
-  text: string
+  _id: string
+  shortcut: string
+  message: string
 }
 
 interface WorkspaceSettings {
@@ -226,14 +227,8 @@ function getStageColor(index: number, total: number): { color: string; bgColor: 
   return STAGE_COLORS[Math.min(colorIndex, STAGE_COLORS.length - 1)]
 }
 
-// Default quick replies
-const DEFAULT_QUICK_REPLIES: QuickReply[] = [
-  { id: '1', label: 'Greeting', text: 'Hello! Thank you for contacting us. How can we help you?' },
-  { id: '2', label: 'Follow Up', text: 'Hello, we wanted to follow up on our previous conversation. Do you have any questions we can help with?' },
-  { id: '3', label: 'Thank You', text: 'Thank you so much! If you have any other questions, feel free to reach out to us again.' },
-  { id: '4', label: 'Busy', text: 'Thank you for reaching out. We are currently busy but will get back to you as soon as possible.' },
-  { id: '5', label: 'Schedule', text: 'Would you be available to schedule a call? Please let us know your available times.' },
-]
+// Default quick replies (for display only - not used when fetching from DB)
+const DEFAULT_QUICK_REPLIES: QuickReply[] = []
 
 export function SettingsClient({ workspace }: SettingsClientProps) {
   const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
@@ -255,6 +250,17 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   // In dev mode, default to enabled. In production, wait for query result.
   const aiEnabled = isDevMode ? true : (ariConfig?.enabled !== false)
 
+  // Fetch quick replies from Convex
+  const quickRepliesData = useQuery(
+    api.quickReplies.list,
+    !userInitialized ? 'skip' : { workspace_id: workspace.id as any }
+  )
+
+  // Convex mutations for quick replies
+  const createQuickReply = useMutation(api.quickReplies.create)
+  const updateQuickReply = useMutation(api.quickReplies.update)
+  const deleteQuickReply = useMutation(api.quickReplies.remove)
+
   // WhatsApp settings state
   const [phoneId, setPhoneId] = useState(workspace.kapso_phone_id || '')
   const [apiKey, setApiKey] = useState(workspace.settings?.kapso_api_key || '')
@@ -265,11 +271,9 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   const [isTogglingAi, setIsTogglingAi] = useState(false)
 
   // Quick replies state
-  const [quickReplies, setQuickReplies] = useState<QuickReply[]>(
-    workspace.settings?.quick_replies || DEFAULT_QUICK_REPLIES
-  )
+  const quickReplies = quickRepliesData || DEFAULT_QUICK_REPLIES
   const [editingReply, setEditingReply] = useState<QuickReply | null>(null)
-  const [newReply, setNewReply] = useState({ label: '', text: '' })
+  const [newReply, setNewReply] = useState({ shortcut: '', message: '' })
   const [isAddingReply, setIsAddingReply] = useState(false)
   const [isSavingReplies, setIsSavingReplies] = useState(false)
 
@@ -434,50 +438,56 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   }
 
   // Quick replies handlers
-  const saveQuickReplies = async (replies: QuickReply[]) => {
+  const handleAddReply = async () => {
+    if (!newReply.shortcut.trim() || !newReply.message.trim()) return
     setIsSavingReplies(true)
     try {
-      const response = await fetch(`/api/workspaces/${workspace.id}/settings`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          settings: {
-            ...workspace.settings,
-            quick_replies: replies
-          },
-        }),
+      await createQuickReply({
+        workspace_id: workspace.id as any,
+        shortcut: newReply.shortcut.trim(),
+        message: newReply.message.trim(),
       })
-      if (!response.ok) throw new Error('Failed to save')
-      setQuickReplies(replies)
-    } catch (error) {
-      console.error('Failed to save quick replies:', error)
+      setNewReply({ shortcut: '', message: '' })
+      setIsAddingReply(false)
+      toast.success('Quick reply added')
+    } catch (error: any) {
+      console.error('Failed to add quick reply:', error)
+      toast.error(error?.message || 'Failed to add quick reply')
     } finally {
       setIsSavingReplies(false)
     }
   }
 
-  const handleAddReply = async () => {
-    if (!newReply.label.trim() || !newReply.text.trim()) return
-    const reply: QuickReply = {
-      id: Date.now().toString(),
-      label: newReply.label.trim(),
-      text: newReply.text.trim(),
-    }
-    await saveQuickReplies([...quickReplies, reply])
-    setNewReply({ label: '', text: '' })
-    setIsAddingReply(false)
-  }
-
   const handleUpdateReply = async () => {
-    if (!editingReply || !editingReply.label.trim() || !editingReply.text.trim()) return
-    const updated = quickReplies.map(r => r.id === editingReply.id ? editingReply : r)
-    await saveQuickReplies(updated)
-    setEditingReply(null)
+    if (!editingReply || !editingReply.shortcut.trim() || !editingReply.message.trim()) return
+    setIsSavingReplies(true)
+    try {
+      await updateQuickReply({
+        id: editingReply._id,
+        shortcut: editingReply.shortcut.trim(),
+        message: editingReply.message.trim(),
+      })
+      setEditingReply(null)
+      toast.success('Quick reply updated')
+    } catch (error: any) {
+      console.error('Failed to update quick reply:', error)
+      toast.error(error?.message || 'Failed to update quick reply')
+    } finally {
+      setIsSavingReplies(false)
+    }
   }
 
   const handleDeleteReply = async (id: string) => {
-    const updated = quickReplies.filter(r => r.id !== id)
-    await saveQuickReplies(updated)
+    setIsSavingReplies(true)
+    try {
+      await deleteQuickReply({ id: id as any })
+      toast.success('Quick reply deleted')
+    } catch (error: any) {
+      console.error('Failed to delete quick reply:', error)
+      toast.error(error?.message || 'Failed to delete quick reply')
+    } finally {
+      setIsSavingReplies(false)
+    }
   }
 
   // Contact tags handlers
@@ -1013,19 +1023,22 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
               {isAddingReply && (
                 <div className="border rounded-lg p-4 space-y-3 bg-muted/50">
                   <div className="space-y-2">
-                    <Label>Label</Label>
+                    <Label>Shortcut</Label>
                     <Input
-                      placeholder="e.g., Greeting, Follow Up"
-                      value={newReply.label}
-                      onChange={(e) => setNewReply({ ...newReply, label: e.target.value })}
+                      placeholder="e.g., /greeting, /followup"
+                      value={newReply.shortcut}
+                      onChange={(e) => setNewReply({ ...newReply, shortcut: e.target.value })}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Start with "/" for easy typing (e.g., /hi, /thanks)
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label>Message</Label>
                     <Textarea
                       placeholder="Enter your message template..."
-                      value={newReply.text}
-                      onChange={(e) => setNewReply({ ...newReply, text: e.target.value })}
+                      value={newReply.message}
+                      onChange={(e) => setNewReply({ ...newReply, message: e.target.value })}
                       rows={3}
                     />
                   </div>
@@ -1035,7 +1048,7 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
                     </Button>
                     <Button variant="outline" onClick={() => {
                       setIsAddingReply(false)
-                      setNewReply({ label: '', text: '' })
+                      setNewReply({ shortcut: '', message: '' })
                     }}>
                       Cancel
                     </Button>
@@ -1046,21 +1059,21 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
               {/* List of quick replies */}
               <div className="space-y-3">
                 {quickReplies.map((reply) => (
-                  <div key={reply.id} className="border rounded-lg p-4">
-                    {editingReply?.id === reply.id ? (
+                  <div key={reply._id} className="border rounded-lg p-4">
+                    {editingReply?._id === reply._id ? (
                       <div className="space-y-3">
                         <div className="space-y-2">
-                          <Label>Label</Label>
+                          <Label>Shortcut</Label>
                           <Input
-                            value={editingReply.label}
-                            onChange={(e) => setEditingReply({ ...editingReply, label: e.target.value })}
+                            value={editingReply.shortcut}
+                            onChange={(e) => setEditingReply({ ...editingReply, shortcut: e.target.value })}
                           />
                         </div>
                         <div className="space-y-2">
                           <Label>Message</Label>
                           <Textarea
-                            value={editingReply.text}
-                            onChange={(e) => setEditingReply({ ...editingReply, text: e.target.value })}
+                            value={editingReply.message}
+                            onChange={(e) => setEditingReply({ ...editingReply, message: e.target.value })}
                             rows={3}
                           />
                         </div>
@@ -1076,9 +1089,13 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
                     ) : (
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium">{reply.label}</p>
-                          <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
-                            {reply.text}
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="secondary" className="font-mono text-xs">
+                              {reply.shortcut}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                            {reply.message}
                           </p>
                         </div>
                         <div className="flex gap-1">
@@ -1094,7 +1111,7 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive"
-                            onClick={() => handleDeleteReply(reply.id)}
+                            onClick={() => handleDeleteReply(reply._id)}
                             disabled={isSavingReplies}
                           >
                             <Trash2 className="h-4 w-4" />
