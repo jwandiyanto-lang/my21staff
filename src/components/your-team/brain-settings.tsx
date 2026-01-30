@@ -51,18 +51,36 @@ const DEFAULT_BRAIN_CONFIG = {
 export type BrainConfig = typeof DEFAULT_BRAIN_CONFIG
 
 interface BrainSettingsProps {
+  workspaceId: string
   workspaceSlug: string
 }
 
-export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
+export function BrainSettings({ workspaceId, workspaceSlug }: BrainSettingsProps) {
   const [config, setConfig] = useState<BrainConfig>(DEFAULT_BRAIN_CONFIG)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [botName, setBotName] = useState("Grok") // Dynamic bot name
   const [openCards, setOpenCards] = useState({
     summary: true,
     scoring: false,
     triggers: false,
   })
+
+  // Load bot name
+  useEffect(() => {
+    async function loadBotName() {
+      try {
+        const res = await fetch(`/api/workspaces/${workspaceId}/bot-config`)
+        if (res.ok) {
+          const data = await res.json()
+          setBotName(data.brain_name || "Grok")
+        }
+      } catch (error) {
+        console.error("Failed to load bot name:", error)
+      }
+    }
+    loadBotName()
+  }, [workspaceId])
 
   const toggleCard = (card: keyof typeof openCards) => {
     setOpenCards(prev => ({ ...prev, [card]: !prev[card] }))
@@ -184,7 +202,7 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
                 <ChevronDown className={`w-5 h-5 transition-transform ${openCards.summary ? '' : 'rotate-180'}`} />
               </CardTitle>
               <CardDescription>
-                Configure daily summaries and reporting from Grok Manager Bot
+                Configure daily summaries and reporting from {botName} Manager Bot
               </CardDescription>
             </CardHeader>
           </CollapsibleTrigger>
@@ -198,7 +216,7 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
               </div>
               <div>
                 <p className="font-medium">Bot Name</p>
-                <p className="text-sm text-muted-foreground">Grok (Brain)</p>
+                <p className="text-sm text-muted-foreground">{botName} (Brain)</p>
               </div>
             </div>
             <Button variant="outline" size="sm" asChild>
@@ -396,72 +414,96 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="weightBasic">Basic Info (name, contact)</Label>
-                <span className="text-sm text-muted-foreground">
-                  {config.scoring.weights.basicInfo}%
-                </span>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="weightBasic"
+                    type="number"
+                    value={config.scoring.weights.basicInfo}
+                    onChange={(e) => updateScoringWeight("basicInfo", parseInt(e.target.value) || 0)}
+                    onBlur={(e) => {
+                      const value = parseInt(e.target.value) || 0
+                      if (value < 0) updateScoringWeight("basicInfo", 0)
+                      if (value > 100) updateScoringWeight("basicInfo", 100)
+                    }}
+                    min={0}
+                    max={100}
+                    className="w-20 text-right"
+                  />
+                  <span className="text-sm text-muted-foreground">%</span>
+                </div>
               </div>
-              <Slider
-                id="weightBasic"
-                value={[config.scoring.weights.basicInfo]}
-                onValueChange={([value]) => updateScoringWeight("basicInfo", value)}
-                min={0}
-                max={100}
-                step={5}
-              />
             </div>
 
             {/* Qualification */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="weightQualification">Qualification (education, goals)</Label>
-                <span className="text-sm text-muted-foreground">
-                  {config.scoring.weights.qualification}%
-                </span>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="weightQualification"
+                    type="number"
+                    value={config.scoring.weights.qualification}
+                    onChange={(e) => updateScoringWeight("qualification", parseInt(e.target.value) || 0)}
+                    onBlur={(e) => {
+                      const value = parseInt(e.target.value) || 0
+                      if (value < 0) updateScoringWeight("qualification", 0)
+                      if (value > 100) updateScoringWeight("qualification", 100)
+                    }}
+                    min={0}
+                    max={100}
+                    className="w-20 text-right"
+                  />
+                  <span className="text-sm text-muted-foreground">%</span>
+                </div>
               </div>
-              <Slider
-                id="weightQualification"
-                value={[config.scoring.weights.qualification]}
-                onValueChange={([value]) => updateScoringWeight("qualification", value)}
-                min={0}
-                max={100}
-                step={5}
-              />
             </div>
 
             {/* Document */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="weightDocument">Document Readiness (passport, etc.)</Label>
-                <span className="text-sm text-muted-foreground">
-                  {config.scoring.weights.document}%
-                </span>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="weightDocument"
+                    type="number"
+                    value={config.scoring.weights.document}
+                    onChange={(e) => updateScoringWeight("document", parseInt(e.target.value) || 0)}
+                    onBlur={(e) => {
+                      const value = parseInt(e.target.value) || 0
+                      if (value < 0) updateScoringWeight("document", 0)
+                      if (value > 100) updateScoringWeight("document", 100)
+                    }}
+                    min={0}
+                    max={100}
+                    className="w-20 text-right"
+                  />
+                  <span className="text-sm text-muted-foreground">%</span>
+                </div>
               </div>
-              <Slider
-                id="weightDocument"
-                value={[config.scoring.weights.document]}
-                onValueChange={([value]) => updateScoringWeight("document", value)}
-                min={0}
-                max={100}
-                step={5}
-              />
             </div>
 
             {/* Engagement */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="weightEngagement">Engagement (response rate, activity)</Label>
-                <span className="text-sm text-muted-foreground">
-                  {config.scoring.weights.engagement}%
-                </span>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="weightEngagement"
+                    type="number"
+                    value={config.scoring.weights.engagement}
+                    onChange={(e) => updateScoringWeight("engagement", parseInt(e.target.value) || 0)}
+                    onBlur={(e) => {
+                      const value = parseInt(e.target.value) || 0
+                      if (value < 0) updateScoringWeight("engagement", 0)
+                      if (value > 100) updateScoringWeight("engagement", 100)
+                    }}
+                    min={0}
+                    max={100}
+                    className="w-20 text-right"
+                  />
+                  <span className="text-sm text-muted-foreground">%</span>
+                </div>
               </div>
-              <Slider
-                id="weightEngagement"
-                value={[config.scoring.weights.engagement]}
-                onValueChange={([value]) => updateScoringWeight("engagement", value)}
-                min={0}
-                max={100}
-                step={5}
-              />
             </div>
           </div>
             </CardContent>
@@ -482,7 +524,7 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
                 <ChevronDown className={`w-5 h-5 transition-transform ${openCards.triggers ? '' : 'rotate-180'}`} />
               </CardTitle>
               <CardDescription>
-                Configure when Grok performs lead analysis
+                Configure when {botName} performs lead analysis
               </CardDescription>
             </CardHeader>
           </CollapsibleTrigger>
@@ -605,7 +647,7 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
           <div className="flex-1">
             <p className="font-medium text-destructive">Scoring weights must total 100%</p>
             <p className="text-sm text-muted-foreground">
-              Current total: {totalWeight}%. Please adjust the sliders above.
+              Current total: {totalWeight}%. Please adjust the values above.
             </p>
           </div>
         </div>
