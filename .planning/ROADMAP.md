@@ -242,28 +242,67 @@ Convex (state storage for dashboard)
 
 ## Phase 5: Grok Manager Bot
 
-**Goal:** Grok 2 analyzes leads, generates summaries, scores quality, suggests actions.
+**Goal:** Brain (Grok 4.1-fast) analyzes leads, generates summaries, scores quality, and suggests actions.
+
+**Architecture:** Brain runs as Convex actions with Grok 4.1-fast API. Daily summaries via cron, !summary via HTTP endpoint called by Kapso workflow.
+
+**Note:** Uses Grok 4.1-fast (not Grok 2 or 3) for cost-effectiveness: $0.20/$0.50 per million tokens.
 
 **Requirements:**
 - MGR-01, MGR-02, MGR-03, MGR-04, MGR-05, MGR-06, MGR-07
 
 **Success Criteria:**
-1. Grok 2 integration handles deep analysis requests
-2. "!summary" command generates daily lead digest
-3. Lead quality scoring: hot/warm/cold based on engagement + data
-4. Action items list prioritizes follow-ups (who needs contact)
-5. Content recommendations suggest FAQs from real questions
-6. Conversation insights surface patterns, objections, interests
+1. Grok 4.1-fast integration handles analysis requests
+2. "!summary" command generates conversational lead digest (<800 chars)
+3. Daily summary runs automatically via Convex cron (09:00 WIB)
+4. Lead quality scoring: hot (70+), warm (40-69), cold (0-39)
+5. Action items list prioritizes follow-ups with weighted algorithm
+6. Pattern analysis detects trending topics, objections, rejection reasons
 7. Summary command works via Kapso workflow trigger
 
 **Deliverables:**
-- Grok 2 API integration
-- !Summary command handler (triggered by Kapso workflow)
-- Lead scoring algorithm (engagement + completeness)
-- Action items generator (prioritization logic)
-- Content recommendation engine (topic clustering)
-- Conversation insights analyzer (pattern detection)
-- Daily summary scheduler
+- Convex tables: brainSummaries, brainInsights, brainActions
+- Grok 4.1-fast API integration (OpenAI-compatible)
+- Daily summary cron job
+- !summary HTTP endpoint for Kapso
+- Action recommendation engine (priority scoring)
+- Pattern analysis (topics, objections, rejections)
+- Kapso workflow update for !summary command
+
+**Plans:** 6 plans
+- [ ] 05-01-PLAN.md — Brain analytics schema (summaries, insights, actions tables)
+- [ ] 05-02-PLAN.md — Summary generation with Grok API and daily cron
+- [ ] 05-03-PLAN.md — Action recommendations with priority scoring
+- [ ] 05-04-PLAN.md — Conversation pattern analysis
+- [ ] 05-05-PLAN.md — HTTP endpoint for !summary command
+- [ ] 05-06-PLAN.md — Kapso workflow integration and verification (checkpoint)
+
+**Status:** Planning complete — ready for execution
+
+**Architecture Flow:**
+```
+Daily Summary:
+  Convex Cron (01:00 UTC / 09:00 WIB)
+      ↓
+  brainAnalysis.generateDailySummary
+      ↓ (for each workspace with Brain enabled)
+  Fetch lead stats + hot leads
+      ↓
+  Call Grok 4.1-fast API
+      ↓
+  Store in brainSummaries table
+
+!summary Command:
+  User sends "!summary" via WhatsApp
+      ↓
+  Kapso AI Decide → brain_summary path
+      ↓
+  Function Node → POST /brain/summary
+      ↓
+  Convex generates summary via Grok
+      ↓
+  Send Message Node → User receives summary
+```
 
 ---
 
@@ -440,4 +479,4 @@ Phase 3      Phase 4
 ---
 
 *Roadmap created: 2026-01-30*
-*Last updated: 2026-01-30*
+*Last updated: 2026-01-31*
