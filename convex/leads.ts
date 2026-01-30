@@ -1,4 +1,4 @@
-import { mutation, internalMutation } from "./_generated/server";
+import { mutation, internalMutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 // Valid status transitions
@@ -154,5 +154,138 @@ export const syncSarahData = internalMutation({
 
     await ctx.db.patch(contactId, updates);
     return { success: true };
+  },
+});
+
+/**
+ * Get leads by status for dashboard filtering
+ */
+export const getLeadsByStatus = query({
+  args: {
+    workspaceId: v.id("workspaces"),
+    status: v.optional(v.union(
+      v.literal("new"),
+      v.literal("qualified"),
+      v.literal("contacted"),
+      v.literal("converted"),
+      v.literal("archived")
+    )),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const { workspaceId, status, limit = 50 } = args;
+
+    let query = ctx.db
+      .query("contacts")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", workspaceId));
+
+    const contacts = await query.order("desc").take(limit);
+
+    // Filter by status in memory (Convex doesn't support compound index filters well)
+    const filtered = status
+      ? contacts.filter((c) => c.leadStatus === status)
+      : contacts;
+
+    return filtered.map((c) => ({
+      _id: c._id,
+      phone: c.phone,
+      name: c.name || c.kapso_name || "Unknown",
+      leadStatus: c.leadStatus || "new",
+      leadScore: c.leadScore || c.lead_score || 0,
+      leadTemperature: c.leadTemperature || "cold",
+      businessType: c.businessType,
+      painPoints: c.painPoints,
+      lastActivityAt: c.lastActivityAt || c.updated_at,
+      lastContactAt: c.lastContactAt,
+      created_at: c.created_at,
+    }));
+  },
+});
+
+/**
+ * Get leads needing follow-up (no contact in X days, qualified status)
+ */
+export const getLeadsNeedingFollowUp = query({
+  args: {
+    workspaceId: v.id("workspaces"),
+    daysSinceContact: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const { workspaceId, daysSinceContact = 7 } = args;
+    const cutoffTime = Date.now() - daysSinceContact * 24 * 60 * 60 * 1000;
+
+    const contacts = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", workspaceId))
+      .collect();
+
+    // Filter: qualified status AND (no lastContactAt OR lastContactAt < cutoff)
+    const needFollowUp = contacts.filter((c) => {
+      const isQualified = c.leadStatus === "qualified";
+      const noRecentContact = !c.lastContactAt || c.lastContactAt < cutoffTime;
+      return isQualified && noRecentContact;
+    });
+
+    // Sort by lead score (highest priority first)
+    needFollowUp.sort((a, b) => (b.leadScore || 0) - (a.leadScore || 0));
+
+    return needFollowUp.map((c) => ({
+      _id: c._id,
+      phone: c.phone,
+      name: c.name || c.kapso_name || "Unknown",
+      leadScore: c.leadScore || c.lead_score || 0,
+      leadTemperature: c.leadTemperature || "cold",
+      businessType: c.businessType,
+      lastActivityAt: c.lastActivityAt || c.updated_at,
+      lastContactAt: c.lastContactAt,
+      daysSinceContact: c.lastContactAt
+        ? Math.floor((Date.now() - c.lastContactAt) / (24 * 60 * 60 * 1000))
+        : null,
+    }));
+  },
+});
+
+/**
+ * Get lead statistics for dashboard
+ */
+export const getLeadStats = query({
+  args: {
+    workspaceId: v.id("workspaces"),
+  },
+  handler: async (ctx, args) => {
+    const contacts = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspaceId))
+      .collect();
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayMs = today.getTime();
+
+    const thisWeekMs = todayMs - 7 * 24 * 60 * 60 * 1000;
+    const thisMonthMs = todayMs - 30 * 24 * 60 * 60 * 1000;
+
+    return {
+      total: contacts.length,
+      byStatus: {
+        new: contacts.filter((c) => c.leadStatus === "new" || !c.leadStatus).length,
+        qualified: contacts.filter((c) => c.leadStatus === "qualified").length,
+        contacted: contacts.filter((c) => c.leadStatus === "contacted").length,
+        converted: contacts.filter((c) => c.leadStatus === "converted").length,
+        archived: contacts.filter((c) => c.leadStatus === "archived").length,
+      },
+      byTemperature: {
+        hot: contacts.filter((c) => c.leadTemperature === "hot").length,
+        warm: contacts.filter((c) => c.leadTemperature === "warm").length,
+        lukewarm: contacts.filter((c) => c.leadTemperature === "lukewarm").length,
+        cold: contacts.filter((c) => c.leadTemperature === "cold" || !c.leadTemperature).length,
+      },
+      newToday: contacts.filter((c) => c.created_at >= todayMs).length,
+      newThisWeek: contacts.filter((c) => c.created_at >= thisWeekMs).length,
+      newThisMonth: contacts.filter((c) => c.created_at >= thisMonthMs).length,
+      avgScore: contacts.length > 0
+        ? Math.round(contacts.reduce((sum, c) => sum + (c.leadScore || c.lead_score || 0), 0) / contacts.length)
+        : 0,
+    };
   },
 });
