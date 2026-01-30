@@ -465,7 +465,43 @@ handoff → completed (consultant accepts)
 
 ---
 
-## 9. CONFIGURATION CHECKLIST
+## 9. GEMINI API KEY SETUP
+
+### 9.1 Get Your API Key
+
+1. Go to **Google AI Studio**: https://aistudio.google.com/apikey
+2. Sign in with your Google account
+3. Click **"Create API Key"**
+4. Copy the generated API key
+
+### 9.2 Add to Kapso Project Secrets
+
+1. Log in to **Kapso Dashboard**: https://app.kapso.ai
+2. Open the **my21staff** project
+3. Navigate to **Settings** → **Secrets**
+4. Click **"Add New Secret"**
+5. Enter:
+   - **Name:** `GEMINI_API_KEY`
+   - **Value:** [Paste your API key from Google AI Studio]
+6. Click **Save**
+
+### 9.3 Configure in Agent Node
+
+1. In Kapso workflow builder, add an **Agent Node**
+2. Select **Model:** `gemini-2.5-flash` (or latest available)
+3. In the **API Key** field, reference the secret:
+   ```
+   {{secrets.GEMINI_API_KEY}}
+   ```
+4. The Agent node will now use your Gemini API for Sarah's responses
+
+### 9.4 Verify Configuration
+
+Send a test message to your WhatsApp number. Sarah should respond using Gemini 2.5 Flash.
+
+---
+
+## 10. CONFIGURATION CHECKLIST
 
 Before activating Sarah in production:
 
@@ -483,7 +519,7 @@ Before activating Sarah in production:
 
 ---
 
-## 10. QUICK REFERENCE CARD
+## 11. QUICK REFERENCE CARD
 
 **For Kapso Dashboard - Copy/Paste:**
 
