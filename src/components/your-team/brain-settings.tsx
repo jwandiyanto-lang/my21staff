@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import { Brain, TrendingUp, AlertCircle, Calendar, ExternalLink, BarChart3 } from "lucide-react"
+import { backupSettings } from "@/lib/settings-backup"
 
 // Default brain configuration
 const DEFAULT_BRAIN_CONFIG = {
@@ -93,6 +94,9 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
       toast.success("Settings saved", {
         description: "Your Brain configuration has been updated.",
       })
+
+      // Create backup after successful save
+      await backupSettings(workspaceSlug, "brain_config", newConfig)
     } catch (error) {
       console.error("Failed to save config:", error)
       toast.error("Failed to save settings", {

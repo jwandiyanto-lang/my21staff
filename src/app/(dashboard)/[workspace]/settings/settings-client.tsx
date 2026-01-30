@@ -39,6 +39,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { DEFAULT_LEAD_STATUSES } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
 import { updateMockWorkspaceSettings, getMockWorkspaceSettings } from '@/lib/mock-data'
+import { backupSettings } from '@/lib/settings-backup'
 import { toast } from 'sonner'
 
 interface QuickReply {
@@ -891,6 +892,12 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
       setOriginalBotNames(botNames)
       setBotNamesSaved(true)
       setTimeout(() => setBotNamesSaved(false), 3000)
+
+      // Create backup after successful save
+      await backupSettings(workspace.id, 'bot_names', {
+        intern_name: botNames.internName.trim(),
+        brain_name: botNames.brainName.trim(),
+      })
     } catch (error) {
       console.error('Failed to save bot names:', error)
       toast.error('Failed to save bot names')

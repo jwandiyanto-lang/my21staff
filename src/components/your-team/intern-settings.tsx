@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import { Bot, Clock, MessageSquare, Settings2, Zap, Plus, X, ExternalLink } from "lucide-react"
+import { backupSettings } from "@/lib/settings-backup"
 
 // Default intern configuration
 const DEFAULT_INTERN_CONFIG = {
@@ -97,6 +98,9 @@ export function InternSettings({ workspaceSlug }: InternSettingsProps) {
       toast.success("Settings saved", {
         description: "Your Intern configuration has been updated.",
       })
+
+      // Create backup after successful save
+      await backupSettings(workspaceSlug, "intern_config", newConfig)
     } catch (error) {
       console.error("Failed to save config:", error)
       toast.error("Failed to save settings", {
