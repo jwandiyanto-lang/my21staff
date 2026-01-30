@@ -150,7 +150,9 @@ Sidebar:
 
 **Goal:** Sarah (Gemini 2.5 Flash) handles natural WhatsApp conversation with 5-slot data extraction and lead scoring.
 
-**Architecture:** Sarah runs in **Kapso workflow** (Agent/Function nodes calling Gemini API), with Convex storing conversation state for dashboard display.
+**Architecture:** Sarah runs in **Kapso workflow** (Agent node with Gemini + Function nodes for state logic), with Convex storing conversation state for dashboard display.
+
+**IMPORTANT:** Sarah is NOT a Next.js API. Sarah lives IN Kapso workflow.
 
 **Requirements:**
 - SARA-01, SARA-02, SARA-03, SARA-04, SARA-05, SARA-06, SARA-07
@@ -159,28 +161,45 @@ Sidebar:
 1. Sarah responds to WhatsApp messages via Kapso workflow
 2. Sarah persona: warm, Indonesian-first, under 140 chars, max 1-2 emoji
 3. Extracts 5 fields: Name, Business Type, Team Size, Pain Points, Goals
-4. Language detection: auto-switch between Indonesian and English
-5. Remembers conversation context across messages (Convex state)
-6. Lead scoring: 0-100 with hot/warm/cold classification
-7. Detects handoff triggers (score >= 70 or keywords)
+4. Handles photo/image messages (acknowledge + continue)
+5. Language detection: auto-switch between Indonesian and English
+6. Remembers conversation context across messages (Convex state)
+7. Lead scoring: 0-100 with hot/warm/cold classification
+8. Detects handoff triggers (score >= 70 or keywords)
+9. Never gives specific prices (deflects to consultant)
 
 **Deliverables:**
-- Gemini 2.5 Flash API integration
-- Sarah persona prompt + structured output schema
-- State machine: greeting → qualifying → scoring → handoff/completed
-- 5-field extraction logic with merge (never overwrites with null)
-- Lead scoring algorithm (0-100 points)
-- Language detection (Indonesian/English)
-- Conversation memory in Convex ariConversations table
-- API endpoint for Kapso workflow integration
+- Kapso workflow "Sarah Chat Bot" with Gemini Agent node
+- Sarah persona prompt documentation for Kapso
+- Function nodes for state management, scoring, Convex calls
+- Convex HTTP endpoints for state persistence
+- Dashboard query functions for lead display
 
 **Plans:** 4 plans
-- [ ] 03-01-PLAN.md — Gemini integration + Sarah prompts
-- [ ] 03-02-PLAN.md — State machine + scoring + extraction
-- [ ] 03-03-PLAN.md — Kapso workflow integration + Convex state
+- [ ] 03-01-PLAN.md — Sarah prompts + Gemini API key setup (documentation for Kapso)
+- [ ] 03-02-PLAN.md — Convex schema + HTTP endpoints for state storage
+- [ ] 03-03-PLAN.md — Build Sarah workflow in Kapso (Agent + Function nodes)
 - [ ] 03-04-PLAN.md — End-to-end verification (checkpoint)
 
-**Status:** Planning complete — ready for execution
+**Status:** Planning revised — ready for execution
+
+**Architecture Flow:**
+```
+Inbound WhatsApp Message
+    ↓
+Kapso Rules Engine Workflow
+    ↓ (ai_fallback path)
+Kapso Sarah Chat Bot Workflow
+    ├─ Function: Get state from Convex
+    ├─ Function: Check keywords (handoff, price, not interested)
+    ├─ Agent Node (Gemini 2.5 Flash + Sarah persona)
+    ├─ Function: Extract data + calculate score
+    ├─ Function: Determine next state
+    ├─ Function: Save state to Convex
+    └─ Send Message Node
+    ↓
+Convex (state storage for dashboard)
+```
 
 ---
 
