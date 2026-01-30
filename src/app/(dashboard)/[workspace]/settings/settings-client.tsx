@@ -338,6 +338,12 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
   const [newStatusName, setNewStatusName] = useState('')
   const [isAddingStatus, setIsAddingStatus] = useState(false)
 
+  // Bot names state
+  const [botNames, setBotNames] = useState({ internName: 'Sarah', brainName: 'Grok' })
+  const [originalBotNames, setOriginalBotNames] = useState({ internName: 'Sarah', brainName: 'Grok' })
+  const [isSavingBotNames, setIsSavingBotNames] = useState(false)
+  const [botNamesSaved, setBotNamesSaved] = useState(false)
+
   const isConnected = !!workspace.kapso_phone_id && !!workspace.settings?.kapso_api_key
 
   // Load lead statuses on mount (use defaults if API fails or returns empty)
@@ -364,6 +370,29 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
       }
     }
     loadStatuses()
+  }, [workspace.id])
+
+  // Load bot names on mount
+  useEffect(() => {
+    const loadBotNames = async () => {
+      try {
+        const res = await fetch(`/api/workspaces/${workspace.id}/bot-config`)
+        if (res.ok) {
+          const data = await res.json()
+          setBotNames({
+            internName: data.intern_name || 'Sarah',
+            brainName: data.brain_name || 'Grok',
+          })
+          setOriginalBotNames({
+            internName: data.intern_name || 'Sarah',
+            brainName: data.brain_name || 'Grok',
+          })
+        }
+      } catch (error) {
+        console.error('Failed to load bot names:', error)
+      }
+    }
+    loadBotNames()
   }, [workspace.id])
 
   // Sync with mock settings updates in dev mode
@@ -834,6 +863,41 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
     await saveLeadStatuses(updated)
   }
 
+  // Bot names handlers
+  const handleSaveBotNames = async () => {
+    if (!botNames.internName.trim() || !botNames.brainName.trim()) {
+      toast.error('Bot names cannot be empty')
+      return
+    }
+
+    setIsSavingBotNames(true)
+    setBotNamesSaved(false)
+
+    try {
+      const response = await fetch(`/api/workspaces/${workspace.id}/bot-config`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          intern_name: botNames.internName.trim(),
+          brain_name: botNames.brainName.trim(),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save bot names')
+      }
+
+      setOriginalBotNames(botNames)
+      setBotNamesSaved(true)
+      setTimeout(() => setBotNamesSaved(false), 3000)
+    } catch (error) {
+      console.error('Failed to save bot names:', error)
+      toast.error('Failed to save bot names')
+    } finally {
+      setIsSavingBotNames(false)
+    }
+  }
+
   // Import handlers
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -1081,6 +1145,66 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
                   onCheckedChange={handleToggleAi}
                   disabled={isTogglingAi}
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Bot Names Configuration */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <Bot className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Bot Names</CardTitle>
+                    <CardDescription>
+                      Configure your AI team member names
+                    </CardDescription>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="intern-name">Intern Name (Chat Bot)</Label>
+                <Input
+                  id="intern-name"
+                  placeholder="Sarah"
+                  value={botNames.internName}
+                  onChange={(e) => setBotNames({ ...botNames, internName: e.target.value })}
+                  disabled={isSavingBotNames}
+                />
+                <p className="text-xs text-muted-foreground">
+                  This name appears in conversations with the AI chat bot
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="brain-name">Brain Name (Manager Bot)</Label>
+                <Input
+                  id="brain-name"
+                  placeholder="Grok"
+                  value={botNames.brainName}
+                  onChange={(e) => setBotNames({ ...botNames, brainName: e.target.value })}
+                  disabled={isSavingBotNames}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Used for summaries, analysis, and management decisions
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <Button onClick={handleSaveBotNames} disabled={isSavingBotNames}>
+                  {isSavingBotNames ? 'Saving...' : 'Save Changes'}
+                </Button>
+                {botNamesSaved && (
+                  <span className="text-sm text-green-600 flex items-center gap-1">
+                    <Check className="w-4 h-4" />
+                    Bot names updated
+                  </span>
+                )}
               </div>
             </CardContent>
           </Card>
