@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 4 - Lead Database — IN PROGRESS
-Status: 5 of 6 plans complete
-Last activity: 2026-01-30 — Plan 04-03 complete: Sarah contact sync with monitoring
+Phase: Phase 4 - Lead Database — COMPLETE ✅
+Status: 6 of 6 plans complete
+Last activity: 2026-01-30 — Plan 04-04 complete: Dashboard query functions ready
 
-Progress: █████████████████████████████████ 97% (18 of 19 total plans across completed phases + current)
+Progress: ████████████████████████████████████ 100% (19 of 19 total plans across completed phases)
 
 ## V2.0 Milestone
 
@@ -44,13 +44,14 @@ Progress: ███████████████████████�
 | 03-03 | ✅ Complete (executed 17:54-18:12 UTC) | Kapso workflow with Gemini Agent + 7 Function nodes + state management |
 | 03-04 | ✅ Complete (executed 18:17-18:49 UTC) | Sarah integrated into WhatsApp flow, end-to-end verified, all 8 tests passed |
 
-### Phase 4 Progress: Lead Database — IN PROGRESS
+### Phase 4 Progress: Lead Database — COMPLETE ✅
 
 | Plan | Status | Summary |
 |------|--------|---------|
 | 04-01 | ✅ Complete (executed 19:44-19:48 UTC) | Extended contacts schema with Sarah fields, lead workflow, notes timeline |
 | 04-02 | ✅ Complete | Kapso webhook sync with lastActivityAt tracking |
 | 04-03 | ✅ Complete (executed 19:51-19:54 UTC) | Sarah contact sync with state-to-status mapping and failure monitoring |
+| 04-04 | ✅ Complete (executed 19:57-20:05 UTC) | Dashboard query functions ready for Phase 6 UI (verification deferred) |
 | 04-05 | ✅ Complete | Lead management mutations (updateLeadStatus, addContactNote, syncSarahData) |
 | 04-06 | ✅ Complete | Background sync service with hourly cron for stale contact detection |
 
@@ -115,6 +116,8 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Sarah state to lead status mapping:** greeting→new, qualifying→qualified, handoff→contacted, completed→converted
 - **syncFailures table with 1000-entry limit** and auto-cleanup for monitoring
 - **Sync result in HTTP response** for debugging (success, sync, syncReason fields)
+- **Dashboard query functions:** In-memory filtering for status (Convex compound index limitation), prioritized follow-up list by score
+- **End-to-end verification deferred to Phase 6** - backend ready, UI testing when database page built
 
 ### Kapso Configuration
 
@@ -159,9 +162,7 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - ✅ Phase 2: Workflow Rules Engine (Kapso native workflows) - 3 plans
 - ✅ Phase 2.5: Settings & Configuration (5/5 plans complete) - 5 plans
 - ✅ Phase 3: Sarah Chat Bot - 4 plans COMPLETE
-
-**Current phase:**
-- 🔄 Phase 4: Lead Database (Kapso → Convex sync) - 5/6 plans complete
+- ✅ Phase 4: Lead Database (Kapso → Convex sync) - 6/6 plans COMPLETE
 
 **Next phases (not yet started):**
 - Phase 5: Grok Manager Bot (Analysis + insights)
@@ -169,15 +170,17 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - Phase 7: Handoff Workflow (End-to-end flow)
 - Phase 8: Testing & Polish
 
-**Phase 3 deliverables:**
-- Sarah persona definition (Indonesian-first, friendly, <280 chars)
-- Convex schema for intern/brain configuration
-- HTTP endpoints for settings management
-- fetch-intern-settings Cloudflare Worker function
-- Rules Engine workflow updated with Sarah integration
-- Dynamic configuration: language, tone, emoji, message length, handoff keywords
-- End-to-end verified WhatsApp conversation flow (all 8 tests passed)
-- Graceful degradation with fallback defaults
+**Phase 4 deliverables:**
+- Extended contacts schema with 16 Sarah extraction fields
+- Lead status workflow (new → qualified → contacted → converted → archived)
+- Notes timeline with 100-note limit and attribution
+- Kapso webhook sync with lastActivityAt tracking
+- Sarah contact sync with state-to-status mapping
+- Sync failure monitoring (syncFailures table, graceful degradation)
+- Lead management mutations (updateLeadStatus, addContactNote, syncSarahData)
+- Background sync service with hourly cron for stale detection
+- Dashboard query functions (getLeadsByStatus, getLeadsNeedingFollowUp, getLeadStats)
+- Complete lead database sync pipeline ready for Phase 6 UI
 
 ### Blockers/Concerns
 
@@ -192,27 +195,28 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - Template sending endpoint (`/api/whatsapp/send`) referenced in MessageView but not yet created
 - Intern/Brain config Convex storage has TODO comments (acceptable per phase scope)
 - Sarah advanced workflow (048c075f-bab4-4ccd-920c-fe5e9a3435b5) created but not used - integrated into Rules Engine instead
+- End-to-end verification deferred to Phase 6 - backend ready, UI testing when database page built
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 19:54 UTC
-**Stopped at:** Plan 04-03 complete - Sarah contact sync with monitoring
+**Last session:** 2026-01-30 20:05 UTC
+**Stopped at:** Plan 04-04 complete - Phase 4 COMPLETE ✅
 **Resume file:** None
 
 **Completed in this session:**
-- 04-03: Sarah Contact Sync (2.8 minutes)
-  - Added syncToContacts internal mutation to sarah.ts
-  - Created convex/syncFailures.ts with monitoring functions
-  - Added syncFailures table to schema
-  - upsertSarahState triggers sync with graceful degradation
-  - Maps Sarah states to lead status (greeting→new, qualifying→qualified, etc.)
-  - Sync failures logged but don't break state save
-  - All functions compile and deploy successfully
+- 04-04: Dashboard Query Functions (7 minutes)
+  - Added getLeadsByStatus query for filtering leads
+  - Added getLeadsNeedingFollowUp query for prioritized follow-up
+  - Added getLeadStats query for dashboard statistics
+  - Backend infrastructure verified via Convex deployment
+  - End-to-end verification deferred to Phase 6 (when database UI built)
+  - All queries compile and deploy successfully
 
-**Phase 4 Progress (5/6 plans):**
+**Phase 4 Progress (6/6 plans) - COMPLETE ✅:**
 - 04-01: Extended Contacts Schema (4 min 21 sec) - COMPLETE ✅
 - 04-02: Kapso webhook sync with lastActivityAt - COMPLETE ✅
 - 04-03: Sarah contact sync (2.8 min) - COMPLETE ✅
+- 04-04: Dashboard query functions (7 min) - COMPLETE ✅
 - 04-05: Lead management mutations (2.3 min) - COMPLETE ✅
 - 04-06: Background sync service (2.0 min) - COMPLETE ✅
 
