@@ -6,16 +6,16 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 3 - Sarah Chat Bot workflow execution
+**Current focus:** Phase 4 - Lead Database (Kapso → Convex sync)
 
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 3 - Sarah Chat Bot — COMPLETE ✅
-Status: 4 of 4 plans complete
-Last activity: 2026-01-30 — Plan 03-04 complete: Sarah integrated into WhatsApp flow
+Phase: Phase 4 - Lead Database — IN PROGRESS
+Status: 1 of 7 plans complete
+Last activity: 2026-01-30 — Plan 04-05 complete: Lead management mutations
 
-Progress: ████████████████████████████████ 100% (12 of 12 total plans across all phases)
+Progress: █████████████████████████████░░░ 87% (13 of 15 total plans across completed phases)
 
 ## V2.0 Milestone
 
@@ -43,6 +43,12 @@ Progress: ███████████████████████�
 | 03-02 | ✅ Complete | Convex schema and HTTP endpoints for Sarah state storage |
 | 03-03 | ✅ Complete (executed 17:54-18:12 UTC) | Kapso workflow with Gemini Agent + 7 Function nodes + state management |
 | 03-04 | ✅ Complete (executed 18:17-18:49 UTC) | Sarah integrated into WhatsApp flow, end-to-end verified, all 8 tests passed |
+
+### Phase 4 Progress: Lead Database — IN PROGRESS
+
+| Plan | Status | Summary |
+|------|--------|---------|
+| 04-05 | ✅ Complete (executed 19:46-19:48 UTC) | Lead management mutations: status, notes, Sarah sync |
 
 ## V1.0.0 Archive Summary
 
@@ -98,6 +104,9 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Dynamic configuration via function nodes** - fetch settings from Convex on every message
 - **Cloudflare Workers for external API calls** in Kapso workflows
 - **Fallback defaults for graceful degradation** when Convex unreachable
+- **Lead status state machine** with flexible transitions (new→qualified→contacted→converted→archived, with backwards movement)
+- **Notes timeline array with 100-note limit** to prevent unbounded growth
+- **Internal mutation for Sarah sync** with phase-to-status mapping (A→new, B/C→qualified, D→contacted)
 
 ### Kapso Configuration
 
@@ -143,8 +152,10 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - ✅ Phase 2.5: Settings & Configuration (5/5 plans complete) - 5 plans
 - ✅ Phase 3: Sarah Chat Bot - 4 plans COMPLETE
 
+**Current phase:**
+- 🔄 Phase 4: Lead Database (Kapso → Convex sync) - 1/7 plans complete
+
 **Next phases (not yet started):**
-- Phase 4: Lead Database (Kapso → Convex sync)
 - Phase 5: Grok Manager Bot (Analysis + insights)
 - Phase 6: Dashboard (Lead list + analytics)
 - Phase 7: Handoff Workflow (End-to-end flow)
@@ -176,24 +187,21 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 18:49 UTC
-**Stopped at:** Phase 3 COMPLETE - Sarah live on WhatsApp
+**Last session:** 2026-01-30 19:48 UTC
+**Stopped at:** Plan 04-05 complete - Lead management mutations
 **Resume file:** None
 
 **Completed in this session:**
-- 03-04: Sarah WhatsApp Integration (31 minutes)
-  - Created fetch-intern-settings Cloudflare Worker function
-  - Updated Rules Engine workflow with settings fetch node
-  - Modified AI agent system prompt with Handlebars templates for dynamic config
-  - End-to-end verification: all 8 WhatsApp tests passed
-  - Sarah now responds on ai_fallback path with configurable persona
+- 04-05: Lead Management Mutations (2.3 minutes)
+  - Created convex/leads.ts with 3 mutations
+  - updateLeadStatus: validates status transitions
+  - addContactNote: timeline array with 100-note limit
+  - syncSarahData: internal mutation for Sarah bot sync
+  - All functions compile and deploy successfully
 
-**Phase 3 Summary (4 plans, all complete):**
-- 03-01: Sarah persona and prompts (3 min)
-- 03-02: Convex schema and HTTP endpoints
-- 03-03: Advanced Sarah workflow (18 min) - draft, not used
-- 03-04: Sarah integration into Rules Engine (31 min) - LIVE ✅
+**Phase 4 Progress (1/7 plans):**
+- 04-05: Lead management mutations (2.3 min) - COMPLETE ✅
 
 ---
 
-*Last updated: 2026-01-30 — Phase 3 COMPLETE ✅, 12/12 total plans (100%)*
+*Last updated: 2026-01-30 — Phase 4 IN PROGRESS, 13/15 total plans (87%)*
