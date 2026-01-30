@@ -4,12 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Bot, Brain, Users } from 'lucide-react'
-import { SlotManager } from '@/components/knowledge-base/slot-manager'
-import { PersonaTab } from '@/components/knowledge-base/persona-tab'
-import { FlowTab } from '@/components/knowledge-base/flow-tab'
-import { DatabaseTab } from '@/components/knowledge-base/database-tab'
 import { TabErrorBoundary } from '@/components/error-boundaries/tab-error-boundary'
-import { AIToggle } from '@/components/knowledge-base/ai-toggle'
 import { InternSettings } from '@/components/your-team/intern-settings'
 import { BrainSettings } from '@/components/your-team/brain-settings'
 
@@ -31,7 +26,6 @@ interface YourTeamClientProps {
 
 export function YourTeamClient({ workspace, teamMembers, activeTab: initialTab }: YourTeamClientProps) {
   const [activeTab, setActiveTab] = useState(initialTab)
-  const [aiEnabled, setAiEnabled] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -42,21 +36,6 @@ export function YourTeamClient({ workspace, teamMembers, activeTab: initialTab }
     params.set('tab', tab)
     router.push(`?${params.toString()}`, { scroll: false })
   }
-
-  // Fetch initial AI enabled state
-  useEffect(() => {
-    async function fetchAiStatus() {
-      try {
-        const res = await fetch(`/api/workspaces/${workspace.slug}/ari-config`)
-        if (!res.ok) return
-        const data = await res.json()
-        setAiEnabled(data.config?.enabled ?? true)
-      } catch (error) {
-        console.error('Failed to fetch AI status:', error)
-      }
-    }
-    fetchAiStatus()
-  }, [workspace.slug])
 
   return (
     <div className="p-8 space-y-8">
@@ -81,7 +60,7 @@ export function YourTeamClient({ workspace, teamMembers, activeTab: initialTab }
           </TabsTrigger>
         </TabsList>
 
-        {/* Intern Tab - Contains existing knowledge-base content */}
+        {/* Intern Tab - Sarah Chat Bot configuration */}
         <TabsContent value="intern" className="space-y-6">
           <div className="space-y-4">
             <div>
@@ -90,17 +69,14 @@ export function YourTeamClient({ workspace, teamMembers, activeTab: initialTab }
                 Intern
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Your AI assistant for handling conversations and answering questions
+                Sarah Chat Bot - Conversational AI for lead qualification
               </p>
             </div>
 
-            {/* AI Toggle for Intern */}
-            <AIToggle workspaceId={workspace.slug} initialEnabled={aiEnabled} />
-
-            {/* Sub-tabs for Intern configuration */}
-            <div className="pt-4">
-              <InternTabs workspace={workspace} teamMembers={teamMembers} />
-            </div>
+            {/* Intern Settings Component */}
+            <TabErrorBoundary tabName="Intern Settings">
+              <InternSettings workspaceSlug={workspace.slug} />
+            </TabErrorBoundary>
           </div>
         </TabsContent>
 
@@ -128,68 +104,3 @@ export function YourTeamClient({ workspace, teamMembers, activeTab: initialTab }
   )
 }
 
-// Sub-component for Intern tabs (reuses existing knowledge-base structure)
-function InternTabs({ workspace, teamMembers }: {
-  workspace: { id: string; name: string; slug: string }
-  teamMembers: TeamMember[]
-}) {
-  const [activeSubTab, setActiveSubTab] = useState('settings')
-
-  return (
-    <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-5 max-w-2xl h-auto">
-        <TabsTrigger value="settings" className="flex items-center gap-2 py-2">
-          <Bot className="w-4 h-4 shrink-0" />
-          <span className="hidden sm:inline">Settings</span>
-        </TabsTrigger>
-        <TabsTrigger value="persona" className="flex items-center gap-2 py-2">
-          <Bot className="w-4 h-4 shrink-0" />
-          <span className="hidden sm:inline">Persona</span>
-        </TabsTrigger>
-        <TabsTrigger value="flow" className="flex items-center gap-2 py-2">
-          <Bot className="w-4 h-4 shrink-0" />
-          <span className="hidden sm:inline">Flow</span>
-        </TabsTrigger>
-        <TabsTrigger value="database" className="flex items-center gap-2 py-2">
-          <Users className="w-4 h-4 shrink-0" />
-          <span className="hidden sm:inline">Database</span>
-        </TabsTrigger>
-        <TabsTrigger value="slots" className="flex items-center gap-2 py-2">
-          <Bot className="w-4 h-4 shrink-0" />
-          <span className="hidden sm:inline">Slots</span>
-        </TabsTrigger>
-      </TabsList>
-
-      {/* Quick Settings Tab - NEW */}
-      <TabsContent value="settings" className="space-y-6">
-        <TabErrorBoundary tabName="Settings">
-          <InternSettings workspaceSlug={workspace.slug} />
-        </TabErrorBoundary>
-      </TabsContent>
-
-      <TabsContent value="persona" className="space-y-6">
-        <TabErrorBoundary tabName="Persona">
-          <PersonaTab workspaceId={workspace.slug} />
-        </TabErrorBoundary>
-      </TabsContent>
-
-      <TabsContent value="flow" className="space-y-6">
-        <TabErrorBoundary tabName="Flow">
-          <FlowTab workspaceId={workspace.slug} />
-        </TabErrorBoundary>
-      </TabsContent>
-
-      <TabsContent value="database" className="space-y-6">
-        <TabErrorBoundary tabName="Database">
-          <DatabaseTab workspaceId={workspace.slug} />
-        </TabErrorBoundary>
-      </TabsContent>
-
-      <TabsContent value="slots" className="space-y-6">
-        <TabErrorBoundary tabName="Slots">
-          <SlotManager workspaceId={workspace.slug} teamMembers={teamMembers} />
-        </TabErrorBoundary>
-      </TabsContent>
-    </Tabs>
-  )
-}
