@@ -1,0 +1,261 @@
+{
+  "nodes": [
+    {
+      "id": "start",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 100 },
+      "data": {
+        "node_type": "start",
+        "config": {},
+        "display_name": "Start"
+      }
+    },
+    {
+      "id": "get_state",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 200 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "function_id": "66e7c93f-b4f0-456e-8ea1-982b2bbf2705"
+        },
+        "display_name": "Get Conversation State"
+      }
+    },
+    {
+      "id": "check_keywords",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 320 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "function_id": "aee56b67-81f1-4817-831e-3f9164a8ebaf"
+        },
+        "display_name": "Check Keywords"
+      }
+    },
+    {
+      "id": "route_decision",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 440 },
+      "data": {
+        "node_type": "decide",
+        "config": {
+          "decision_type": "ai",
+          "conditions": [
+            {
+              "id": "handoff_condition",
+              "label": "handoff",
+              "description": "User wants handoff (check nodes.check_keywords.wants_handoff)"
+            },
+            {
+              "id": "not_interested_condition",
+              "label": "not_interested",
+              "description": "User is not interested (check nodes.check_keywords.not_interested)"
+            },
+            {
+              "id": "continue_condition",
+              "label": "continue",
+              "description": "Continue with Sarah - default path"
+            }
+          ],
+          "llm_configuration": {},
+          "provider_model_id": "a3a3c61e-786f-42da-91c3-823c951fb8b4",
+          "provider_model_name": "gemini-2.5-flash-preview-05-20",
+          "llm_temperature": "0.3",
+          "llm_max_tokens": null
+        },
+        "display_name": "Route Decision"
+      }
+    },
+    {
+      "id": "send_handoff",
+      "type": "flow-node",
+      "position": { "x": 0, "y": 560 },
+      "data": {
+        "node_type": "send_text",
+        "config": {
+          "message": "Siap! Saya hubungkan ke konsultan kami ya. Mereka akan segera menghubungi kakak.",
+          "delay_seconds": 0
+        },
+        "display_name": "Send Handoff Message"
+      }
+    },
+    {
+      "id": "mark_handoff",
+      "type": "flow-node",
+      "position": { "x": 0, "y": 680 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "function_id": "6236c2b4-49ff-427b-a04b-e633dd07f7c4"
+        },
+        "display_name": "Mark Handoff State"
+      }
+    },
+    {
+      "id": "send_not_interested",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 560 },
+      "data": {
+        "node_type": "send_text",
+        "config": {
+          "message": "Oke siap, ga masalah. Kalau suatu saat butuh bantuan, langsung chat aja ya!",
+          "delay_seconds": 0
+        },
+        "display_name": "Send Not Interested"
+      }
+    },
+    {
+      "id": "mark_completed",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 680 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "function_id": "c009a3ef-9962-4300-8059-9e05f6149ddb"
+        },
+        "display_name": "Mark Completed State"
+      }
+    },
+    {
+      "id": "sarah_agent",
+      "type": "flow-node",
+      "position": { "x": 300, "y": 560 },
+      "data": {
+        "node_type": "agent",
+        "config": {
+          "provider_model_id": "a3a3c61e-786f-42da-91c3-823c951fb8b4",
+          "provider_model_name": "gemini-2.5-flash-preview-05-20",
+          "system_prompt": "You are Sarah, a friendly AI assistant for my21staff - a WhatsApp CRM for Indonesian SMEs.\n\nPERSONALITY:\n- Warm, helpful, like chatting with a knowledgeable friend\n- Indonesian by default (casual: Halo, Hai, Sip, Kakak)\n- Switch to English if user messages in English\n- Professional but casual - like a capable intern\n- Not pushy or salesy - genuinely want to understand and help\n\nMESSAGE RULES:\n- Keep responses under 140 characters (WhatsApp best practice)\n- Maximum 1-2 emoji per message (sparingly)\n- ONE question per message - wait for response before asking next\n- Show empathy: \"Wah paham banget...\" \"Betul tuh...\"\n\nCURRENT STATE: {{nodes.get_state.state}}\nEXTRACTED DATA: {{nodes.get_state.extracted_data}}\nLANGUAGE: {{nodes.get_state.language}}\nIS IMAGE: {{nodes.check_keywords.is_image}}\n\nBased on the state, respond appropriately:\n\n**greeting state:**\n- Use time greeting: \"Selamat pagi/siang/sore/malam\"\n- Introduce: \"Saya Sarah dari my21staff.\"\n- Ask ONE question: \"Bisnis kakak ngelola sendiri atau ada team ya?\"\n\n**qualifying state:**\nAsk for NEXT missing field:\n1. Name: \"Boleh tau nama siapa?\"\n2. Business: \"Bisnisnya di bidang apa kak?\"\n3. Team size: \"Kalau handle chat/CS, tim ada berapa orang?\"\n4. Pain points: \"Ada challenge yang sering ketemu? Misal slow response, miss message?\"\n5. Goals: \"Harapannya apa sih pakai layanan kita?\"\n\nOnly ask missing fields. Skip if exists in EXTRACTED DATA.\n\n**scoring state:**\n- Answer questions helpfully (1-2 sentences max)\n- Stay conversational\n\n**handoff state:**\n- Say: \"Sip! Konsultan kami akan segera hubungi kakak ya.\"\n\n**completed state:**\n- Say: \"Terima kasih! Kalau ada yang mau ditanyakan lagi, langsung aja ya.\"\n\nSPECIAL CASES:\n\n**If IS_IMAGE true:**\n- Acknowledge: \"Sip, terima fotonya.\"\n- Continue qualifying\n\n**If user asks PRICE:**\n- NEVER give specific prices\n- Say: \"Untuk harga, nanti konsultan kita yang jelasin ya kak.\"\n- Continue conversation\n\n**Language:**\n- If user writes English, switch to English\n- Keep same friendly tone",
+          "temperature": 0.7,
+          "max_tokens": 150,
+          "max_iterations": 5,
+          "enabled_default_tools": [
+            "send_notification_to_user",
+            "get_current_datetime"
+          ]
+        },
+        "display_name": "Sarah (Gemini)"
+      }
+    },
+    {
+      "id": "extract_and_score",
+      "type": "flow-node",
+      "position": { "x": 300, "y": 780 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "function_id": "dcf57c34-2bc8-4cf4-befb-fa565e3b32cc"
+        },
+        "display_name": "Extract and Score"
+      }
+    },
+    {
+      "id": "determine_state",
+      "type": "flow-node",
+      "position": { "x": 300, "y": 900 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "function_id": "e2b1804f-661e-47a4-94f9-654cde79eb02"
+        },
+        "display_name": "Determine Next State"
+      }
+    },
+    {
+      "id": "save_state",
+      "type": "flow-node",
+      "position": { "x": 300, "y": 1020 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "function_id": "a97c31a8-44dc-4029-8c3c-9a15163e309e"
+        },
+        "display_name": "Save State to Convex"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_start_to_get_state",
+      "source": "start",
+      "target": "get_state",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_get_state_to_check_keywords",
+      "source": "get_state",
+      "target": "check_keywords",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_check_keywords_to_route",
+      "source": "check_keywords",
+      "target": "route_decision",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_route_to_handoff",
+      "source": "route_decision",
+      "target": "send_handoff",
+      "label": "handoff",
+      "type": "default",
+      "flow_condition_id": "handoff_condition"
+    },
+    {
+      "id": "edge_handoff_to_mark",
+      "source": "send_handoff",
+      "target": "mark_handoff",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_route_to_not_interested",
+      "source": "route_decision",
+      "target": "send_not_interested",
+      "label": "not_interested",
+      "type": "default",
+      "flow_condition_id": "not_interested_condition"
+    },
+    {
+      "id": "edge_not_interested_to_mark",
+      "source": "send_not_interested",
+      "target": "mark_completed",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_route_to_sarah",
+      "source": "route_decision",
+      "target": "sarah_agent",
+      "label": "continue",
+      "type": "default",
+      "flow_condition_id": "continue_condition"
+    },
+    {
+      "id": "edge_sarah_to_extract",
+      "source": "sarah_agent",
+      "target": "extract_and_score",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_extract_to_determine",
+      "source": "extract_and_score",
+      "target": "determine_state",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_determine_to_save",
+      "source": "determine_state",
+      "target": "save_state",
+      "label": "next",
+      "type": "default"
+    }
+  ]
+}

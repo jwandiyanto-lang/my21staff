@@ -1,0 +1,180 @@
+{
+  "workflow_name": "Sarah Chat Bot",
+  "description": "AI-powered lead qualification with Gemini 2.5 Flash for Indonesian SMEs",
+  "project_id": "1fda0f3d-a913-4a82-bc1f-a07e1cb5213c",
+  "trigger": {
+    "type": "inbound_whatsapp_message",
+    "phone_config_id": "827ce387-4f0a-4ca7-9e5a-0a3af01c9320"
+  },
+  "nodes": [
+    {
+      "id": "get_state",
+      "type": "function",
+      "name": "Get Conversation State from Convex",
+      "position": { "x": 100, "y": 100 },
+      "config": {
+        "runtime": "nodejs20.x",
+        "timeout_seconds": 10,
+        "code": "async function get_state({ trigger, vars, env }) {\n  const phone = trigger.contact.phone;\n  const convexUrl = env.CONVEX_DEPLOYMENT_URL || 'https://intent-otter-212.convex.cloud';\n  \n  try {\n    const response = await fetch(`${convexUrl}/sarah/state?contact_phone=${encodeURIComponent(phone)}`);\n    const state = await response.json();\n    \n    return {\n      state: state.state || 'greeting',\n      extracted_data: state.extracted_data || {},\n      lead_score: state.lead_score || 0,\n      lead_temperature: state.lead_temperature || 'cold',\n      language: state.language || 'id',\n      message_count: state.message_count || 0\n    };\n  } catch (error) {\n    console.error('Failed to get state:', error);\n    // Default state for new conversations\n    return {\n      state: 'greeting',\n      extracted_data: {},\n      lead_score: 0,\n      lead_temperature: 'cold',\n      language: 'id',\n      message_count: 0\n    };\n  }\n}"
+      },
+      "next": "check_keywords"
+    },
+    {
+      "id": "check_keywords",
+      "type": "function",
+      "name": "Check for Handoff/Price Keywords",
+      "position": { "x": 100, "y": 200 },
+      "config": {
+        "runtime": "nodejs20.x",
+        "timeout_seconds": 5,
+        "code": "async function check_keywords({ trigger, vars, env }) {\n  const message = (trigger.message.content || '').toLowerCase();\n  \n  // Handoff triggers\n  const handoffKeywords = ['human', 'manusia', 'person', 'sales', 'consultant', 'talk to someone', 'operator', 'cs', 'customer service'];\n  const wantsHandoff = handoffKeywords.some(k => message.includes(k));\n  \n  // Price question detection\n  const priceKeywords = ['harga', 'price', 'biaya', 'berapa', 'cost', 'pricing', 'fee'];\n  const askingPrice = priceKeywords.some(k => message.includes(k));\n  \n  // Not interested detection\n  const notInterestedKeywords = ['not interested', 'tidak tertarik', 'no thanks', 'ga jadi', 'nggak dulu'];\n  const notInterested = notInterestedKeywords.some(k => message.includes(k));\n  \n  return {\n    wants_handoff: wantsHandoff,\n    asking_price: askingPrice,\n    not_interested: notInterested,\n    is_image: trigger.message.type === 'image'\n  };\n}"
+      },
+      "next": "route_decision"
+    },
+    {
+      "id": "route_decision",
+      "type": "decide",
+      "name": "Route to Handoff or Sarah",
+      "position": { "x": 100, "y": 300 },
+      "config": {
+        "decision_type": "condition",
+        "conditions": [
+          {
+            "id": "handoff_condition",
+            "label": "handoff",
+            "expression": "{{nodes.check_keywords.wants_handoff}} === true"
+          },
+          {
+            "id": "not_interested_condition",
+            "label": "not_interested",
+            "expression": "{{nodes.check_keywords.not_interested}} === true"
+          },
+          {
+            "id": "continue_condition",
+            "label": "continue",
+            "expression": "true"
+          }
+        ]
+      },
+      "edges": {
+        "handoff": "send_handoff_message",
+        "not_interested": "send_not_interested_message",
+        "continue": "sarah_agent"
+      }
+    },
+    {
+      "id": "send_handoff_message",
+      "type": "send_text",
+      "name": "Send Handoff Message",
+      "position": { "x": 0, "y": 400 },
+      "config": {
+        "message": "Siap! Saya hubungkan ke konsultan kami ya. Mereka akan segera menghubungi kakak.",
+        "to_phone_number": "{{trigger.contact.phone}}"
+      },
+      "next": "mark_handoff_state"
+    },
+    {
+      "id": "mark_handoff_state",
+      "type": "function",
+      "name": "Mark as Handoff State",
+      "position": { "x": 0, "y": 500 },
+      "config": {
+        "runtime": "nodejs20.x",
+        "code": "async function mark_handoff({ trigger, nodes, env }) {\n  const phone = trigger.contact.phone;\n  const convexUrl = env.CONVEX_DEPLOYMENT_URL || 'https://intent-otter-212.convex.cloud';\n  \n  await fetch(`${convexUrl}/sarah/state`, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({\n      contact_phone: phone,\n      state: 'handoff',\n      lead_score: nodes.get_state.lead_score,\n      lead_temperature: 'hot',\n      extracted_data: nodes.get_state.extracted_data,\n      language: nodes.get_state.language,\n      message_count: nodes.get_state.message_count + 1\n    })\n  });\n  \n  return { saved: true };\n}"
+      }
+    },
+    {
+      "id": "send_not_interested_message",
+      "type": "send_text",
+      "name": "Send Not Interested Message",
+      "position": { "x": 50, "y": 400 },
+      "config": {
+        "message": "Oke siap, ga masalah. Kalau suatu saat butuh bantuan, langsung chat aja ya!",
+        "to_phone_number": "{{trigger.contact.phone}}"
+      },
+      "next": "mark_completed_state"
+    },
+    {
+      "id": "mark_completed_state",
+      "type": "function",
+      "name": "Mark as Completed State",
+      "position": { "x": 50, "y": 500 },
+      "config": {
+        "runtime": "nodejs20.x",
+        "code": "async function mark_completed({ trigger, nodes, env }) {\n  const phone = trigger.contact.phone;\n  const convexUrl = env.CONVEX_DEPLOYMENT_URL || 'https://intent-otter-212.convex.cloud';\n  \n  await fetch(`${convexUrl}/sarah/state`, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({\n      contact_phone: phone,\n      state: 'completed',\n      lead_score: nodes.get_state.lead_score,\n      lead_temperature: 'cold',\n      extracted_data: nodes.get_state.extracted_data,\n      language: nodes.get_state.language,\n      message_count: nodes.get_state.message_count + 1\n    })\n  });\n  \n  return { saved: true };\n}"
+      }
+    },
+    {
+      "id": "sarah_agent",
+      "type": "agent",
+      "name": "Sarah (Gemini 2.5 Flash)",
+      "position": { "x": 200, "y": 400 },
+      "config": {
+        "provider_model_name": "google/gemini-2.5-flash",
+        "system_prompt": "You are Sarah, a friendly AI assistant for my21staff - a WhatsApp CRM for Indonesian SMEs.\n\nPERSONALITY:\n- Warm, helpful, like chatting with a knowledgeable friend\n- Indonesian by default (casual: Halo, Hai, Sip, Kakak)\n- Switch to English if user messages in English\n- Professional but casual - like a capable intern\n- Not pushy or salesy - genuinely want to understand and help\n\nMESSAGE RULES:\n- Keep responses under 140 characters (WhatsApp best practice)\n- Maximum 1-2 emoji per message (sparingly)\n- ONE question per message - wait for response before asking next\n- Show empathy: \"Wah paham banget...\" \"Betul tuh...\"\n\nCURRENT STATE: {{nodes.get_state.state}}\nEXTRACTED DATA: {{nodes.get_state.extracted_data}}\nLANGUAGE: {{nodes.get_state.language}}\nIS IMAGE: {{nodes.check_keywords.is_image}}\n\nBased on the state, respond appropriately:\n\n**greeting state:**\n- Use time-based greeting (Selamat pagi/siang/sore/malam based on time)\n- Introduce yourself: \"Saya Sarah dari my21staff.\"\n- Ask ONE open question: \"Bisnis kakak ngelola sendiri atau ada team ya?\"\n\n**qualifying state:**\nAsk for the NEXT missing field in this order:\n1. Name: \"Boleh tau nama siapa?\"\n2. Business type: \"Bisnisnya di bidang apa kak?\"\n3. Team size: \"Kalau handle chat/CS, tim ada berapa orang?\"\n4. Pain points: \"Ada nggak challenge yang sering ketemu? Misal slow response, miss message, dll?\"\n5. Goals: \"Terus harapannya apa sih pakai layanan kita?\"\n\nOnly ask for missing fields. If field exists in EXTRACTED DATA, skip it.\n\n**scoring state:**\n- Answer any questions helpfully (1-2 sentences max)\n- Stay conversational and friendly\n- Don't push for more data\n\n**handoff state:**\n- Say: \"Sip! Data sudah lengkap. Konsultan kami akan segera hubungi kakak ya.\"\n\n**completed state:**\n- Say goodbye warmly: \"Terima kasih sudah chat! Kalau ada yang mau ditanyakan lagi, langsung aja ya.\"\n\nSPECIAL CASES:\n\n**If IS_IMAGE is true:**\n- Acknowledge: \"Sip, saya terima fotonya.\"\n- If it looks like a product: \"Produknya keren! Bisnisnya jualan apa kak?\"\n- Continue the qualifying flow\n\n**If user asks about PRICE:**\n- NEVER give specific prices\n- Say: \"Untuk harga, nanti konsultan kita yang jelasin lebih detail ya kak.\"\n- Continue conversation\n\n**Language detection:**\n- If user writes in English, switch to English\n- Keep same friendly tone in English\n- Update language preference for future messages",
+        "temperature": 0.7,
+        "max_tokens": 150,
+        "api_key_secret": "GEMINI_API_KEY",
+        "enabled_default_tools": [
+          "send_notification_to_user",
+          "get_current_datetime"
+        ]
+      },
+      "next": "extract_and_score"
+    },
+    {
+      "id": "extract_and_score",
+      "type": "function",
+      "name": "Extract Data and Calculate Lead Score",
+      "position": { "x": 200, "y": 500 },
+      "config": {
+        "runtime": "nodejs20.x",
+        "timeout_seconds": 10,
+        "code": "async function extract_and_score({ trigger, nodes, env }) {\n  const message = trigger.message.content || '';\n  const currentData = nodes.get_state.extracted_data || {};\n  \n  // Simple extraction from user message\n  let extracted = { ...currentData };\n  \n  // Name extraction (if greeting and looks like a name)\n  if (!extracted.name && nodes.get_state.state === 'greeting') {\n    const words = message.trim().split(/\\s+/);\n    if (words.length <= 3) {\n      extracted.name = message.trim();\n    }\n  }\n  \n  // Business type extraction (common patterns)\n  const businessPatterns = [\n    /bisnis\\s+(.+)/i,\n    /jualan\\s+(.+)/i,\n    /toko\\s+(.+)/i,\n    /restaurant|cafe|f&b|food|spa|wellness|fashion|online shop|e-commerce/i\n  ];\n  if (!extracted.business_type) {\n    for (const pattern of businessPatterns) {\n      const match = message.match(pattern);\n      if (match) {\n        extracted.business_type = match[1] || match[0];\n        break;\n      }\n    }\n  }\n  \n  // Team size extraction\n  const teamMatch = message.match(/(\\d+)\\s*(orang|people|person)/i);\n  if (teamMatch && !extracted.team_size) {\n    extracted.team_size = parseInt(teamMatch[1]);\n  }\n  \n  // Pain points extraction (keywords)\n  const painKeywords = {\n    high: ['kewalahan', 'overwhelmed', 'miss message', 'slow response', 'lambat', 'complaint', 'lost customer'],\n    medium: ['busy', 'sibuk', 'need help', 'growth', 'growing', 'expanding', 'manual'],\n    low: ['curious', 'penasaran', 'checking', 'lihat-lihat', 'maybe', 'mungkin']\n  };\n  \n  if (!extracted.pain_points) {\n    extracted.pain_points = [];\n  }\n  \n  const lowerMessage = message.toLowerCase();\n  let urgency = 'low';\n  \n  for (const [level, keywords] of Object.entries(painKeywords)) {\n    for (const keyword of keywords) {\n      if (lowerMessage.includes(keyword)) {\n        if (!extracted.pain_points.includes(keyword)) {\n          extracted.pain_points.push(keyword);\n        }\n        if (level === 'high') urgency = 'high';\n        else if (level === 'medium' && urgency !== 'high') urgency = 'medium';\n      }\n    }\n  }\n  \n  // Goals extraction (if they mention \"want\", \"need\", \"hope\")\n  const goalPatterns = [\n    /pengen\\s+(.+)/i,\n    /mau\\s+(.+)/i,\n    /butuh\\s+(.+)/i,\n    /harapan\\s+(.+)/i,\n    /want\\s+(.+)/i,\n    /need\\s+(.+)/i\n  ];\n  \n  if (!extracted.goals) {\n    for (const pattern of goalPatterns) {\n      const match = message.match(pattern);\n      if (match) {\n        extracted.goals = match[1];\n        break;\n      }\n    }\n  }\n  \n  // Calculate score (0-100)\n  let score = 0;\n  \n  // Basic data (25 points)\n  if (extracted.name) score += 5;\n  if (extracted.business_type) score += 10;\n  if (extracted.goals) score += 10;\n  \n  // Team size (20 points)\n  if (extracted.team_size >= 3) score += 20;\n  else if (extracted.team_size === 2) score += 15;\n  else if (extracted.team_size === 1) score += 10;\n  \n  // Pain points urgency (30 points)\n  if (urgency === 'high') score += 30;\n  else if (urgency === 'medium') score += 20;\n  else if (extracted.pain_points.length > 0) score += 10;\n  \n  // Engagement (15 points default for responding)\n  score += 15;\n  \n  // Determine temperature\n  let temperature = 'cold';\n  if (score >= 70) temperature = 'hot';\n  else if (score >= 40) temperature = 'warm';\n  \n  return {\n    extracted_data: extracted,\n    lead_score: Math.min(score, 100),\n    lead_temperature: temperature,\n    urgency: urgency\n  };\n}"
+      },
+      "next": "determine_state"
+    },
+    {
+      "id": "determine_state",
+      "type": "function",
+      "name": "Determine Next State",
+      "position": { "x": 200, "y": 600 },
+      "config": {
+        "runtime": "nodejs20.x",
+        "timeout_seconds": 5,
+        "code": "async function determine_state({ nodes }) {\n  const current = nodes.get_state.state;\n  const data = nodes.extract_and_score.extracted_data;\n  const score = nodes.extract_and_score.lead_score;\n  \n  // State machine logic\n  switch (current) {\n    case 'greeting':\n      return { next_state: 'qualifying' };\n    \n    case 'qualifying':\n      // Check if all 5 fields collected\n      const hasAll = data.name && \n                     data.business_type && \n                     data.team_size !== undefined && \n                     data.pain_points && data.pain_points.length > 0 && \n                     data.goals;\n      \n      return { next_state: hasAll ? 'scoring' : 'qualifying' };\n    \n    case 'scoring':\n      // Auto-handoff for hot leads\n      if (score >= 70) return { next_state: 'handoff' };\n      // Auto-complete for cold leads\n      if (score < 40) return { next_state: 'completed' };\n      // Warm leads stay in scoring (continue conversation)\n      return { next_state: 'scoring' };\n    \n    default:\n      // Terminal states (handoff, completed)\n      return { next_state: current };\n  }\n}"
+      },
+      "next": "save_state"
+    },
+    {
+      "id": "save_state",
+      "type": "function",
+      "name": "Save State to Convex",
+      "position": { "x": 200, "y": 700 },
+      "config": {
+        "runtime": "nodejs20.x",
+        "timeout_seconds": 10,
+        "code": "async function save_state({ trigger, nodes, env }) {\n  const phone = trigger.contact.phone;\n  const convexUrl = env.CONVEX_DEPLOYMENT_URL || 'https://intent-otter-212.convex.cloud';\n  \n  // Detect language from message\n  const message = (trigger.message.content || '').toLowerCase();\n  const indonesianPatterns = /halo|hai|selamat|ada|nggak|gak|ya|yah|sih|deh|dong|lah|kakak/;\n  const englishPatterns = /hi|hello|hey|yeah|okay|sure|thanks|please/;\n  \n  let language = nodes.get_state.language || 'id';\n  if (englishPatterns.test(message) && !indonesianPatterns.test(message)) {\n    language = 'en';\n  } else if (indonesianPatterns.test(message)) {\n    language = 'id';\n  }\n  \n  try {\n    await fetch(`${convexUrl}/sarah/state`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({\n        contact_phone: phone,\n        state: nodes.determine_state.next_state,\n        lead_score: nodes.extract_and_score.lead_score,\n        lead_temperature: nodes.extract_and_score.lead_temperature,\n        extracted_data: nodes.extract_and_score.extracted_data,\n        language: language,\n        message_count: nodes.get_state.message_count + 1\n      })\n    });\n    \n    return { saved: true };\n  } catch (error) {\n    console.error('Failed to save state:', error);\n    return { saved: false, error: error.message };\n  }\n}"
+      }
+    }
+  ],
+  "environment_variables": {
+    "CONVEX_DEPLOYMENT_URL": "https://intent-otter-212.convex.cloud",
+    "GEMINI_API_KEY": "{{secrets.GEMINI_API_KEY}}"
+  },
+  "setup_instructions": {
+    "prerequisites": [
+      "Gemini API key from https://aistudio.google.com/apikey",
+      "Kapso project access (my21staff)",
+      "Convex deployment with Sarah endpoints"
+    ],
+    "steps": [
+      "1. Add Gemini API key to Kapso Project Settings → Secrets → GEMINI_API_KEY",
+      "2. Create workflow via Kapso Dashboard or API",
+      "3. Add all nodes in the order specified above",
+      "4. Wire nodes according to the 'next' and 'edges' properties",
+      "5. Test with manual message trigger",
+      "6. Connect to existing Rules Engine workflow's 'ai_fallback' path"
+    ]
+  }
+}

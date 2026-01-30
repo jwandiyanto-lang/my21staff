@@ -1,0 +1,270 @@
+{
+  "nodes": [
+    {
+      "id": "start",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 100 },
+      "data": {
+        "node_type": "start",
+        "config": {},
+        "display_name": "Start"
+      }
+    },
+    {
+      "id": "get_state",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 200 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "code": "async function get_state({ trigger, vars, env }) {\n  const phone = trigger.contact.phone;\n  const convexUrl = env.CONVEX_DEPLOYMENT_URL || 'https://intent-otter-212.convex.cloud';\n  \n  try {\n    const response = await fetch(`${convexUrl}/sarah/state?contact_phone=${encodeURIComponent(phone)}`);\n    const state = await response.json();\n    \n    return {\n      state: state.state || 'greeting',\n      extracted_data: state.extracted_data || {},\n      lead_score: state.lead_score || 0,\n      lead_temperature: state.lead_temperature || 'cold',\n      language: state.language || 'id',\n      message_count: state.message_count || 0\n    };\n  } catch (error) {\n    console.error('Failed to get state:', error);\n    return {\n      state: 'greeting',\n      extracted_data: {},\n      lead_score: 0,\n      lead_temperature: 'cold',\n      language: 'id',\n      message_count: 0\n    };\n  }\n}",
+          "runtime_environment": "nodejs20.x",
+          "timeout_seconds": 10
+        },
+        "display_name": "Get Conversation State"
+      }
+    },
+    {
+      "id": "check_keywords",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 320 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "code": "async function check_keywords({ trigger }) {\n  const message = (trigger.message.content || '').toLowerCase();\n  \n  const handoffKeywords = ['human', 'manusia', 'person', 'sales', 'consultant', 'talk to someone', 'operator', 'cs', 'customer service'];\n  const wantsHandoff = handoffKeywords.some(k => message.includes(k));\n  \n  const notInterestedKeywords = ['not interested', 'tidak tertarik', 'no thanks', 'ga jadi', 'nggak dulu'];\n  const notInterested = notInterestedKeywords.some(k => message.includes(k));\n  \n  return {\n    wants_handoff: wantsHandoff,\n    not_interested: notInterested,\n    is_image: trigger.message.type === 'image'\n  };\n}",
+          "runtime_environment": "nodejs20.x",
+          "timeout_seconds": 5
+        },
+        "display_name": "Check Keywords"
+      }
+    },
+    {
+      "id": "route_decision",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 440 },
+      "data": {
+        "node_type": "decide",
+        "config": {
+          "decision_type": "condition",
+          "conditions": [
+            {
+              "id": "handoff_condition",
+              "label": "handoff",
+              "description": "User wants to speak to human"
+            },
+            {
+              "id": "not_interested_condition",
+              "label": "not_interested",
+              "description": "User is not interested"
+            },
+            {
+              "id": "continue_condition",
+              "label": "continue",
+              "description": "Continue with Sarah"
+            }
+          ]
+        },
+        "display_name": "Route Decision"
+      }
+    },
+    {
+      "id": "send_handoff",
+      "type": "flow-node",
+      "position": { "x": 0, "y": 560 },
+      "data": {
+        "node_type": "send_text",
+        "config": {
+          "message": "Siap! Saya hubungkan ke konsultan kami ya. Mereka akan segera menghubungi kakak.",
+          "delay_seconds": 0
+        },
+        "display_name": "Send Handoff Message"
+      }
+    },
+    {
+      "id": "mark_handoff",
+      "type": "flow-node",
+      "position": { "x": 0, "y": 680 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "code": "async function mark_handoff({ trigger, nodes, env }) {\n  const phone = trigger.contact.phone;\n  const convexUrl = env.CONVEX_DEPLOYMENT_URL || 'https://intent-otter-212.convex.cloud';\n  \n  await fetch(`${convexUrl}/sarah/state`, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({\n      contact_phone: phone,\n      state: 'handoff',\n      lead_score: nodes.get_state.lead_score,\n      lead_temperature: 'hot',\n      extracted_data: nodes.get_state.extracted_data,\n      language: nodes.get_state.language,\n      message_count: nodes.get_state.message_count + 1\n    })\n  });\n  \n  return { saved: true };\n}",
+          "runtime_environment": "nodejs20.x",
+          "timeout_seconds": 10
+        },
+        "display_name": "Mark Handoff State"
+      }
+    },
+    {
+      "id": "send_not_interested",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 560 },
+      "data": {
+        "node_type": "send_text",
+        "config": {
+          "message": "Oke siap, ga masalah. Kalau suatu saat butuh bantuan, langsung chat aja ya!",
+          "delay_seconds": 0
+        },
+        "display_name": "Send Not Interested"
+      }
+    },
+    {
+      "id": "mark_completed",
+      "type": "flow-node",
+      "position": { "x": 100, "y": 680 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "code": "async function mark_completed({ trigger, nodes, env }) {\n  const phone = trigger.contact.phone;\n  const convexUrl = env.CONVEX_DEPLOYMENT_URL || 'https://intent-otter-212.convex.cloud';\n  \n  await fetch(`${convexUrl}/sarah/state`, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({\n      contact_phone: phone,\n      state: 'completed',\n      lead_score: nodes.get_state.lead_score,\n      lead_temperature: 'cold',\n      extracted_data: nodes.get_state.extracted_data,\n      language: nodes.get_state.language,\n      message_count: nodes.get_state.message_count + 1\n    })\n  });\n  \n  return { saved: true };\n}",
+          "runtime_environment": "nodejs20.x",
+          "timeout_seconds": 10
+        },
+        "display_name": "Mark Completed State"
+      }
+    },
+    {
+      "id": "sarah_agent",
+      "type": "flow-node",
+      "position": { "x": 300, "y": 560 },
+      "data": {
+        "node_type": "agent",
+        "config": {
+          "provider_model_id": "a3a3c61e-786f-42da-91c3-823c951fb8b4",
+          "provider_model_name": "gemini-2.5-flash-preview-05-20",
+          "system_prompt": "You are Sarah, a friendly AI assistant for my21staff - a WhatsApp CRM for Indonesian SMEs.\n\nPERSONALITY:\n- Warm, helpful, like chatting with a knowledgeable friend\n- Indonesian by default (casual: Halo, Hai, Sip, Kakak)\n- Switch to English if user messages in English\n- Professional but casual - like a capable intern\n- Not pushy or salesy - genuinely want to understand and help\n\nMESSAGE RULES:\n- Keep responses under 140 characters (WhatsApp best practice)\n- Maximum 1-2 emoji per message (sparingly)\n- ONE question per message - wait for response before asking next\n- Show empathy: \"Wah paham banget...\" \"Betul tuh...\"\n\nCURRENT STATE: {{nodes.get_state.state}}\nEXTRACTED DATA: {{nodes.get_state.extracted_data}}\nLANGUAGE: {{nodes.get_state.language}}\nIS IMAGE: {{nodes.check_keywords.is_image}}\n\nBased on the state, respond appropriately:\n\n**greeting state:**\n- Use time greeting: \"Selamat pagi/siang/sore/malam\"\n- Introduce: \"Saya Sarah dari my21staff.\"\n- Ask ONE question: \"Bisnis kakak ngelola sendiri atau ada team ya?\"\n\n**qualifying state:**\nAsk for NEXT missing field:\n1. Name: \"Boleh tau nama siapa?\"\n2. Business: \"Bisnisnya di bidang apa kak?\"\n3. Team size: \"Kalau handle chat/CS, tim ada berapa orang?\"\n4. Pain points: \"Ada challenge yang sering ketemu? Misal slow response, miss message?\"\n5. Goals: \"Harapannya apa sih pakai layanan kita?\"\n\nOnly ask missing fields. Skip if exists in EXTRACTED DATA.\n\n**scoring state:**\n- Answer questions helpfully (1-2 sentences max)\n- Stay conversational\n\n**handoff state:**\n- Say: \"Sip! Konsultan kami akan segera hubungi kakak ya.\"\n\n**completed state:**\n- Say: \"Terima kasih! Kalau ada yang mau ditanyakan lagi, langsung aja ya.\"\n\nSPECIAL CASES:\n\n**If IS_IMAGE true:**\n- Acknowledge: \"Sip, terima fotonya.\"\n- Continue qualifying\n\n**If user asks PRICE:**\n- NEVER give specific prices\n- Say: \"Untuk harga, nanti konsultan kita yang jelasin ya kak.\"\n- Continue conversation\n\n**Language:**\n- If user writes English, switch to English\n- Keep same friendly tone",
+          "temperature": 0.7,
+          "max_tokens": 150,
+          "max_iterations": 5,
+          "enabled_default_tools": [
+            "send_notification_to_user",
+            "get_current_datetime"
+          ]
+        },
+        "display_name": "Sarah (Gemini)"
+      }
+    },
+    {
+      "id": "extract_and_score",
+      "type": "flow-node",
+      "position": { "x": 300, "y": 780 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "code": "async function extract_and_score({ trigger, nodes }) {\n  const message = trigger.message.content || '';\n  const currentData = nodes.get_state.extracted_data || {};\n  let extracted = { ...currentData };\n  \n  if (!extracted.name && nodes.get_state.state === 'greeting') {\n    const words = message.trim().split(/\\s+/);\n    if (words.length <= 3) extracted.name = message.trim();\n  }\n  \n  const businessPatterns = [\n    /bisnis\\s+(.+)/i,\n    /jualan\\s+(.+)/i,\n    /toko\\s+(.+)/i,\n    /restaurant|cafe|f&b|food|spa|wellness|fashion|online shop|e-commerce/i\n  ];\n  if (!extracted.business_type) {\n    for (const pattern of businessPatterns) {\n      const match = message.match(pattern);\n      if (match) {\n        extracted.business_type = match[1] || match[0];\n        break;\n      }\n    }\n  }\n  \n  const teamMatch = message.match(/(\\d+)\\s*(orang|people|person)/i);\n  if (teamMatch && !extracted.team_size) {\n    extracted.team_size = parseInt(teamMatch[1]);\n  }\n  \n  const painKeywords = {\n    high: ['kewalahan', 'overwhelmed', 'miss message', 'slow response', 'lambat', 'complaint'],\n    medium: ['busy', 'sibuk', 'need help', 'growth', 'growing', 'manual'],\n    low: ['curious', 'penasaran', 'checking', 'lihat-lihat', 'maybe']\n  };\n  \n  if (!extracted.pain_points) extracted.pain_points = [];\n  \n  const lowerMessage = message.toLowerCase();\n  let urgency = 'low';\n  \n  for (const [level, keywords] of Object.entries(painKeywords)) {\n    for (const keyword of keywords) {\n      if (lowerMessage.includes(keyword)) {\n        if (!extracted.pain_points.includes(keyword)) extracted.pain_points.push(keyword);\n        if (level === 'high') urgency = 'high';\n        else if (level === 'medium' && urgency !== 'high') urgency = 'medium';\n      }\n    }\n  }\n  \n  const goalPatterns = [/pengen\\s+(.+)/i, /mau\\s+(.+)/i, /butuh\\s+(.+)/i, /want\\s+(.+)/i, /need\\s+(.+)/i];\n  if (!extracted.goals) {\n    for (const pattern of goalPatterns) {\n      const match = message.match(pattern);\n      if (match) {\n        extracted.goals = match[1];\n        break;\n      }\n    }\n  }\n  \n  let score = 0;\n  if (extracted.name) score += 5;\n  if (extracted.business_type) score += 10;\n  if (extracted.goals) score += 10;\n  if (extracted.team_size >= 3) score += 20;\n  else if (extracted.team_size === 2) score += 15;\n  else if (extracted.team_size === 1) score += 10;\n  if (urgency === 'high') score += 30;\n  else if (urgency === 'medium') score += 20;\n  else if (extracted.pain_points.length > 0) score += 10;\n  score += 15;\n  \n  let temperature = 'cold';\n  if (score >= 70) temperature = 'hot';\n  else if (score >= 40) temperature = 'warm';\n  \n  return {\n    extracted_data: extracted,\n    lead_score: Math.min(score, 100),\n    lead_temperature: temperature\n  };\n}",
+          "runtime_environment": "nodejs20.x",
+          "timeout_seconds": 10
+        },
+        "display_name": "Extract and Score"
+      }
+    },
+    {
+      "id": "determine_state",
+      "type": "flow-node",
+      "position": { "x": 300, "y": 900 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "code": "async function determine_state({ nodes }) {\n  const current = nodes.get_state.state;\n  const data = nodes.extract_and_score.extracted_data;\n  const score = nodes.extract_and_score.lead_score;\n  \n  switch (current) {\n    case 'greeting':\n      return { next_state: 'qualifying' };\n    case 'qualifying':\n      const hasAll = data.name && data.business_type && data.team_size !== undefined && data.pain_points && data.pain_points.length > 0 && data.goals;\n      return { next_state: hasAll ? 'scoring' : 'qualifying' };\n    case 'scoring':\n      if (score >= 70) return { next_state: 'handoff' };\n      if (score < 40) return { next_state: 'completed' };\n      return { next_state: 'scoring' };\n    default:\n      return { next_state: current };\n  }\n}",
+          "runtime_environment": "nodejs20.x",
+          "timeout_seconds": 5
+        },
+        "display_name": "Determine Next State"
+      }
+    },
+    {
+      "id": "save_state",
+      "type": "flow-node",
+      "position": { "x": 300, "y": 1020 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "code": "async function save_state({ trigger, nodes, env }) {\n  const phone = trigger.contact.phone;\n  const convexUrl = env.CONVEX_DEPLOYMENT_URL || 'https://intent-otter-212.convex.cloud';\n  \n  const message = (trigger.message.content || '').toLowerCase();\n  const indonesianPatterns = /halo|hai|selamat|ada|nggak|gak|ya|yah|sih|kakak/;\n  const englishPatterns = /hi|hello|hey|yeah|okay|sure|thanks/;\n  \n  let language = nodes.get_state.language || 'id';\n  if (englishPatterns.test(message) && !indonesianPatterns.test(message)) {\n    language = 'en';\n  } else if (indonesianPatterns.test(message)) {\n    language = 'id';\n  }\n  \n  try {\n    await fetch(`${convexUrl}/sarah/state`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({\n        contact_phone: phone,\n        state: nodes.determine_state.next_state,\n        lead_score: nodes.extract_and_score.lead_score,\n        lead_temperature: nodes.extract_and_score.lead_temperature,\n        extracted_data: nodes.extract_and_score.extracted_data,\n        language: language,\n        message_count: nodes.get_state.message_count + 1\n      })\n    });\n    return { saved: true };\n  } catch (error) {\n    console.error('Save failed:', error);\n    return { saved: false };\n  }\n}",
+          "runtime_environment": "nodejs20.x",
+          "timeout_seconds": 10
+        },
+        "display_name": "Save State to Convex"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_start_to_get_state",
+      "source": "start",
+      "target": "get_state",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_get_state_to_check_keywords",
+      "source": "get_state",
+      "target": "check_keywords",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_check_keywords_to_route",
+      "source": "check_keywords",
+      "target": "route_decision",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_route_to_handoff",
+      "source": "route_decision",
+      "target": "send_handoff",
+      "label": "handoff",
+      "type": "default",
+      "flow_condition_id": "handoff_condition"
+    },
+    {
+      "id": "edge_handoff_to_mark",
+      "source": "send_handoff",
+      "target": "mark_handoff",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_route_to_not_interested",
+      "source": "route_decision",
+      "target": "send_not_interested",
+      "label": "not_interested",
+      "type": "default",
+      "flow_condition_id": "not_interested_condition"
+    },
+    {
+      "id": "edge_not_interested_to_mark",
+      "source": "send_not_interested",
+      "target": "mark_completed",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_route_to_sarah",
+      "source": "route_decision",
+      "target": "sarah_agent",
+      "label": "continue",
+      "type": "default",
+      "flow_condition_id": "continue_condition"
+    },
+    {
+      "id": "edge_sarah_to_extract",
+      "source": "sarah_agent",
+      "target": "extract_and_score",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_extract_to_determine",
+      "source": "extract_and_score",
+      "target": "determine_state",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_determine_to_save",
+      "source": "determine_state",
+      "target": "save_state",
+      "label": "next",
+      "type": "default"
+    }
+  ]
+}
