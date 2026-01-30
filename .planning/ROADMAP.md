@@ -44,24 +44,26 @@
 
 ## Phase 2: Workflow Rules Engine
 
-**Goal:** Kapso workflows handle keyword triggers and conditional routing before AI.
+**Goal:** Kapso's native workflow engine handles keyword triggers and conditional routing before AI.
+
+**Note:** This phase uses **Kapso's built-in workflow system** — no custom code. We configure workflows in Kapso dashboard to handle rule-based automation before AI processes unmatched messages.
 
 **Requirements:**
 - RULE-01, RULE-02, RULE-03, RULE-04, RULE-05
 
 **Success Criteria:**
-1. Keyword "human"/"agent" triggers handoff flow
-2. "!summary" command triggers Grok manager bot
-3. New leads vs returning leads are detected and routed differently
-4. FAQ responses (pricing, services, hours) work via fixed templates
-5. Rules are checked first, unmatched messages pass to AI
+1. Keyword "human"/"agent" triggers handoff flow via Kapso workflow
+2. "!summary" command triggers Grok manager bot via Kapso workflow
+3. New leads vs returning leads are detected and routed differently via Kapso
+4. FAQ responses (pricing, services, hours) work via Kapso template responses
+5. Rules are checked first in Kapso workflow, unmatched messages pass to AI
 
 **Deliverables:**
-- Kapso workflow with keyword triggers
-- Lead routing logic (new vs returning detection)
-- FAQ template responses
-- Conditional routing: rules → AI fallback
-- Workflow testing verified
+- Kapso workflow configured with keyword triggers (in Kapso dashboard)
+- Lead routing logic in Kapso workflow (new vs returning detection)
+- FAQ template responses in Kapso workflow
+- Conditional routing in Kapso workflow: rules → AI webhook fallback
+- Workflow testing verified via Kapso UI
 
 ---
 

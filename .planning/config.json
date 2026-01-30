@@ -8,5 +8,14 @@
     "research": true,
     "plan_check": true,
     "verifier": true
+  },
+  "research_rules": {
+    "primary_sources": [
+      "Kapso documentation (docs.kapso.ai)",
+      "Kapso GitHub repo (github.com/gokapso)",
+      "Kapso MCP agent skills (available in CLI)"
+    ],
+    "approach": "recommend_first",
+    "description": "Always research Kapso's native capabilities first. Recommend what already exists in Kapso before building custom solutions. Claude should tell the user what will work best based on Kapso's features, not the other way around."
   }
 }
