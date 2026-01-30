@@ -457,3 +457,22 @@ export const updateKapsoCredentials = mutation({
     return { success: true };
   },
 });
+
+/**
+ * Get workspace with Kapso settings for API routes.
+ *
+ * Used by Kapso API routes (/api/kapso/*) to get workspace credentials.
+ * Returns workspace with settings including kapso_api_key.
+ *
+ * @param workspaceId - The workspace ID (string format)
+ * @returns Workspace document with settings or null if not found
+ */
+export const getForKapso = query({
+  args: {
+    workspaceId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId as any);
+    return workspace;
+  },
+});
