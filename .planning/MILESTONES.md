@@ -1,5 +1,42 @@
 # Project Milestones: my21staff
 
+## v3.5 Production Go-Live (Shipped: 2026-01-30) — PIVOTED
+
+**Delivered:** Production deployment achieved at my21staff.com with critical bug fixes and infrastructure foundation. Work halted mid-stream to pivot to new architectural approach.
+
+**Phases completed:** 1-3 partial (12 of 18 plans, 6 deferred)
+
+**Key accomplishments:**
+
+- Production deployment at my21staff.com with custom domain and HTTPS
+- Localhost demo mode fully functional with zero errors across all pages
+- Critical database data integrity bug fixed (status toggle no longer affects all contacts)
+- Workspace authentication resolution pattern established (slug→ID)
+- Historical WhatsApp data sync capability created (Kapso integration)
+- 10 production bugs resolved (ARI Config, database operations, inbox filters)
+
+**Stats:**
+
+- 150+ files modified
+- 52,664 lines of TypeScript total
+- 4 phases (including inserted 2.1), 12 plans complete, 6 deferred
+- 2 days (Jan 28 → Jan 30, 2026)
+
+**Git range:** `e58329c` (v3.4 complete) → `b6887de` (latest)
+
+**Incomplete work (pivoted):**
+- 5 bug remediation plans deferred (quick replies, merge contacts, UI polish)
+- Live bot not configured with Kapso webhooks
+- No 24-hour stability monitoring performed
+- Phase 2.1 only 3/8 plans complete
+- Phase 3 only 3/4 plans complete
+
+**Why pivoted:** User decided to fundamentally change the technical approach mid-milestone, making completion of remaining work obsolete.
+
+**What's next:** v4.0 — New architectural approach (TBD)
+
+---
+
 ## v3.4 Kapso Inbox Integration (Shipped: 2026-01-28)
 
 **Delivered:** Modern WhatsApp-first Inbox UI with AI configuration hot-reload. Complete bot admin interface with real-time filtering, AI/Human handover toggle, and end-to-end automation flow from new lead to consultation booking.
@@ -247,4 +284,4 @@
 
 ---
 
-*Total shipped:* 208 plans across 9 milestones
+*Total shipped:* 220 plans across 10 milestones (12 from v3.5 partial completion)

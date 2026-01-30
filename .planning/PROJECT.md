@@ -10,37 +10,34 @@ WhatsApp CRM SaaS for Indonesian SMEs. Production-ready application with multi-t
 
 The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
-## Current State (v3.4 Shipped)
+## Current State (v3.5 Partial — Pivoted)
 
-**Production URL:** https://my21staff.com (blocked — Vercel billing freeze)
+**Production URL:** https://www.my21staff.com (live but incomplete)
 
 **Convex Deployment:** https://intent-otter-212.convex.cloud
 
-**Shipped in v3.4:**
-- Agent Skills Infrastructure — Kapso agent-skills with 5 skill sets and MCP server
-- Your Intern Admin Interface — Global AI toggle, error boundaries, 5 config tabs working
-- Inbox Modernization — WhatsApp-first UI with status filtering, real-time sync, AI/Human toggle per conversation
-- Configuration Hot-Reload — Complete ARI flow with workspace config applied on every message without restart
-- Two-Level AI Gating — Global toggle (ariConfig.enabled) + per-conversation toggle (conversation.status)
-- End-to-End Automation — New lead → AI greeting → qualification → routing → consultation booking complete
+**v3.5 Status:** Partial completion (12/18 plans). User pivoted to new architectural approach mid-milestone.
 
-**Shipped in v3.2:**
-- Supabase completely removed (packages + code)
-- Contact Database rebuilt fresh with merge functionality
-- WhatsApp Inbox with v2.0 filter bar (Active/All toggle, Status/Tags filters)
-- Dashboard with stats cards, activity feed, and quick actions
-- Settings with team management via Clerk OrganizationProfile
-- Real-time updates throughout via Convex subscriptions
+**What was shipped in v3.5:**
+- Production deployment at my21staff.com with custom domain and HTTPS
+- Critical database bug fixes (status toggle data integrity restored)
+- Workspace authentication patterns (slug→ID resolution)
+- Historical WhatsApp data sync capability
+- 10 production bugs resolved
 
-**Shipped in v3.1:**
-- Clerk authentication (replaced Supabase auth)
-- User migration with ID mapping
-- Organization migration for Eagle Overseas
-- n8n webhook integration for lead flow
-- API routes migrated to Convex
+**What was deferred from v3.5:**
+- Live Kapso bot integration (webhooks never configured)
+- 13 bugs remain unresolved (ARI Config, quick replies, merge contacts, UI polish)
+- Bot stability monitoring never performed
 
-**Tech Stack (v3.4):**
-- ~47,745 lines TypeScript (34,931 src + 12,814 convex)
+**Previous milestones:**
+- v3.4: Kapso Inbox Integration — Modern Inbox UI with AI configuration hot-reload
+- v3.2: CRM Core Fresh — Complete rebuild on Convex, Supabase removed
+- v3.1: Convex + Clerk API Layer — Authentication and data layer migration
+- v3.0: Performance & Speed — 25.4x speedup with hybrid architecture
+
+**Tech Stack (v3.5):**
+- ~52,664 lines TypeScript total
 - Next.js 15 + React 19
 - Clerk (Authentication)
 - Convex (Database + Real-time)
@@ -49,7 +46,7 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - Resend for transactional email
 - Grok API + Sea-Lion (Ollama) for AI
 
-**First Client:** Eagle Overseas Education (ready for deployment)
+**First Client:** Eagle Overseas Education (production deployed, bot not live)
 
 ## Requirements
 
@@ -103,11 +100,16 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 - ✓ **AI/Human Handover** — Per-conversation toggle with mode indicators — v3.4
 - ✓ **Configuration Hot-Reload** — Workspace config applied without restart — v3.4
 - ✓ **Complete ARI Flow** — New lead → greeting → qualification → routing → booking — v3.4
+- ✓ **Production deployment** — Live at my21staff.com with custom domain and HTTPS — v3.5
+- ✓ **Localhost polish** — All /demo pages working, 5 Your Intern tabs functional — v3.5
+- ✓ **Critical bug fixes** — Database data integrity (status toggle), inbox filters — v3.5 (partial)
 
 ### Active
 
-**Future Milestones:**
-- [ ] Production deployment optimization (unblock Vercel billing)
+**v4.0 Planning (New Approach):**
+- [ ] Define new architectural direction (reason for v3.5 pivot)
+- [ ] Complete deferred v3.5 bugs (13 remaining: ARI Config, quick replies, merge, UI polish)
+- [ ] Live Kapso bot integration (webhooks, bot activation, monitoring)
 - [ ] Payment Integration (Midtrans)
 - [ ] AI Model Selection UI
 - [ ] Kapso broadcasts for newsletter distribution
@@ -140,15 +142,17 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 **Organizations (Clerk):**
 - Eagle Overseas: `org_38fXP0PN0rgNQ2coi1KsqozLJYb` (first paying client)
 
-**Known Issues (v3.4 Tech Debt):**
-- MCP connection failure (Kapso endpoint unreachable — skills installed, code works)
-- Phase 4 missing formal verification (UAT performed, integration confirmed)
-- Sea-Lion local LLM disabled (Grok fallback working)
+**Known Issues (v3.5 Tech Debt):**
+- 13 production bugs remain unresolved (ARI Config, quick replies, merge contacts, UI polish)
+- Live bot never activated (webhooks not configured)
+- Pre-existing TypeScript build error in convex/lib/auth.ts:61 (runtime unaffected)
+- Your Intern tabs may be broken in production (ARI Config API fix deferred)
+- No 24-hour stability monitoring performed
 
-**Deferred to Production:**
-- Webhook E2E testing deferred (ngrok issues, will test in production)
-- n8n sync count verification deferred (webhook verified working)
-- Vercel deployment blocked (billing freeze)
+**v3.5 Pivot Context:**
+- User decided to fundamentally change technical approach mid-milestone
+- Work halted after 12 of 18 plans to start fresh with v4.0
+- Production deployed but incomplete (partial feature parity)
 
 ## Constraints
 
@@ -197,23 +201,30 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 | Dropdown status filter (reverted redesign) | User preference for original layout | ✓ Good — v3.4 decision |
 | Database as single source of truth | All features (Dashboard, Inbox) derive from Database API | ✓ Good — v3.5 architecture |
 | Remove assigned_to column | Simplify database view, remove unused staff management | ✓ Good — v3.5 simplification |
+| Production deployment on Vercel | Billing freeze resolved, native Next.js support | ✓ Good — v3.5 deployment |
+| Workspace slug→ID resolution pattern | Prevent mixing slugs and IDs in database queries | ✓ Good — v3.5 auth layer |
+| Filter-then-paginate queries | Apply filters before pagination to avoid empty results | ✓ Good — v3.5 pattern |
+| Z-index hierarchy (Base < Dropdowns < Overlays) | Prevent dropdown overlays from blocking sidebar clicks | ✓ Good — v3.5 UI pattern |
+| Iterate queries for cache updates | TanStack Query setQueryData per query vs setQueriesData | ✓ Good — v3.5 bug fix |
+| Pivot v3.5 mid-milestone | Fundamental architectural change needed | — Pending — v3.5 decision |
 
-## Current Milestone: v3.5 Production Go-Live
+## Next Milestone: v4.0 (TBD — New Approach)
 
-**Goal:** Deploy v3.4 features to production and activate live Kapso bot with Eagle Overseas.
+**Status:** Planning phase (v3.5 pivoted mid-stream)
 
-**Target features:**
-- Localhost polish (UI details, dev mode bugs, complete flow testing)
-- Production deployment (manual deploy, environment setup, feature parity verification)
-- Live bot integration (Kapso webhooks, ARI responding to real WhatsApp leads, complete automation)
+**Reason for pivot:** User decided to fundamentally change the technical approach
 
-**Success criteria:**
-- All localhost flows work correctly in /demo workspace
-- Production deployment matches localhost feature parity
-- Kapso webhooks deliver messages to production
-- ARI bot responds to real WhatsApp conversations
-- Complete lead flow works: greeting → qualification → routing → booking
-- All Your Intern settings tabs active and functional in production
+**To be defined:**
+- New architectural direction
+- Requirements for v4.0
+- Roadmap phases
+
+**Deferred from v3.5:**
+- Live Kapso bot integration (webhooks, activation, monitoring)
+- 13 production bugs (ARI Config, quick replies, merge contacts, UI polish)
+- Full feature parity verification
+
+**Use `/gsd:new-milestone` to start v4.0 planning**
 
 ---
-*Last updated: 2026-01-28 after v3.5 milestone started*
+*Last updated: 2026-01-30 after v3.5 milestone completion (pivoted)*
