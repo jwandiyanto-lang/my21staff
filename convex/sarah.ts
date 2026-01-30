@@ -1,5 +1,6 @@
 import { query, mutation, internalQuery, internalMutation, httpAction } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 
 // ============================================
 // INTERNAL QUERIES (used by HTTP actions)
@@ -64,6 +65,105 @@ export const update = internalMutation({
   handler: async (ctx, args) => {
     const { id, ...data } = args;
     await ctx.db.patch(id, data);
+  },
+});
+
+/**
+ * Sync Sarah conversation data to contacts table
+ * Called after each Sarah state update to keep lead data current
+ */
+export const syncToContacts = internalMutation({
+  args: {
+    contact_phone: v.string(),
+    workspace_id: v.optional(v.string()),
+    state: v.string(),
+    lead_score: v.number(),
+    lead_temperature: v.string(),
+    extracted_data: v.any(),
+    language: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const {
+      contact_phone,
+      workspace_id,
+      state,
+      lead_score,
+      lead_temperature,
+      extracted_data,
+      language,
+    } = args;
+
+    // Normalize phone for contact lookup
+    const normalizedPhone = contact_phone.replace(/\D/g, "");
+
+    // Find contact by phone (search all workspaces if workspace_id not provided)
+    let contact;
+    if (workspace_id) {
+      // @ts-ignore - workspace_id is string from Kapso, contacts use Id
+      contact = await ctx.db
+        .query("contacts")
+        .filter((q) => q.eq(q.field("phone"), normalizedPhone))
+        .first();
+    } else {
+      contact = await ctx.db
+        .query("contacts")
+        .filter((q) => q.eq(q.field("phone"), normalizedPhone))
+        .first();
+    }
+
+    if (!contact) {
+      console.log(`[Sarah Sync] No contact found for phone: ${normalizedPhone}`);
+      return { synced: false, reason: "contact_not_found" };
+    }
+
+    // Map Sarah state to lead status
+    // Sarah states: 'greeting' | 'qualifying' | 'scoring' | 'handoff' | 'completed'
+    const stateToStatus: Record<string, string> = {
+      greeting: "new",
+      qualifying: "qualified",
+      scoring: "qualified",
+      handoff: "contacted",
+      completed: "converted",
+    };
+
+    // Validate lead temperature
+    const validTemps = ["hot", "warm", "lukewarm", "cold"];
+    const safeTemperature = validTemps.includes(lead_temperature)
+      ? lead_temperature
+      : "cold";
+
+    const now = Date.now();
+
+    // Build updates object with Sarah data
+    const updates: Record<string, any> = {
+      // Sarah Phase 1 fields
+      businessType: extracted_data?.business_type,
+      // Sarah Phase 2 fields
+      painPoints: extracted_data?.pain_points,
+      // Sarah Phase 3 fields
+      leadScore: lead_score,
+      leadTemperature: safeTemperature,
+      // Language
+      sarahLanguage: language,
+      // Status
+      leadStatus: stateToStatus[state] || contact.leadStatus || "new",
+      statusChangedAt: now,
+      statusChangedBy: "sarah-bot",
+      // Timestamps
+      lastActivityAt: now,
+      updated_at: now,
+    };
+
+    // Only set name if extracted and contact doesn't have one
+    if (extracted_data?.name && !contact.name) {
+      updates.name = extracted_data.name;
+    }
+
+    // Patch contact with Sarah data
+    await ctx.db.patch(contact._id, updates);
+
+    console.log(`[Sarah Sync] Synced data to contact ${contact._id}: score=${lead_score}, status=${updates.leadStatus}`);
+    return { synced: true, contactId: contact._id };
   },
 });
 
