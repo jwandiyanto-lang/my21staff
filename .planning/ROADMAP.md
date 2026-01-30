@@ -6,7 +6,7 @@
 
 ## Overview
 
-**7 phases** | **52 requirements** | **Hybrid AI + Rules architecture**
+**7 phases** | **57 requirements** | **Hybrid AI + Rules architecture**
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
@@ -15,7 +15,7 @@
 | 3 | Sarah Chat Bot | Gemini 2.5 integration + persona + 4-slot extraction | 7 |
 | 4 | Lead Database | Kapso → Convex sync + custom fields | 7 |
 | 5 | Grok Manager Bot | Analysis + scoring + insights | 7 |
-| 6 | Dashboard | Lead list + AI insights + analytics | 19 |
+| 6 | Dashboard | Lead list + AI insights + analytics + WhatsApp inbox | 24 |
 | 7 | Handoff Workflow | End-to-end handoff flow + notifications | 6 |
 
 ---
@@ -155,12 +155,13 @@
 
 ## Phase 6: Dashboard
 
-**Goal:** CRM dashboard displays leads, insights, analytics with instant load from Convex.
+**Goal:** CRM dashboard displays leads, insights, analytics, and WhatsApp inbox with instant load from Convex + Kapso integration.
 
 **Requirements:**
 - DBLD-01 to DBLD-07 (7)
 - DBLI-01 to DBLI-06 (6)
 - DBLA-01 to DBLA-06 (6)
+- INBX-01 to INBX-05 (5)
 
 **Success Criteria:**
 
@@ -189,12 +190,20 @@
 18. Common questions/topics trending (from Grok)
 19. Conversation volume chart over time
 
+**WhatsApp Inbox (whatsapp-cloud-inbox):**
+20. whatsapp-cloud-inbox integrated into dashboard
+21. Styled to match my21staff brand (black/white, Geist Mono)
+22. Kapso branding removed (fully custom UI)
+23. Connected to Kapso API with workspace credentials
+24. Send/receive messages, templates, media, and interactive buttons work
+
 **Deliverables:**
 - Dashboard UI (Shadcn/ui components)
 - Lead list page with filters + search
 - Lead detail page with conversation history
 - AI insights page with summaries + scores
 - Analytics page with charts
+- WhatsApp inbox page (whatsapp-cloud-inbox integrated)
 - Convex real-time queries for instant load
 - Refresh functionality for insights
 
@@ -265,13 +274,15 @@ Phase 3      Phase 4
 3. Leads are captured in database with extracted info (4 slots)
 4. Grok generates daily summaries and scores leads
 5. Dashboard shows all leads with instant load
-6. Handoff workflow triggers for qualified leads
-7. Business owner receives notifications for handoffs
+6. WhatsApp inbox (whatsapp-cloud-inbox) integrated with custom branding
+7. Handoff workflow triggers for qualified leads
+8. Business owner receives notifications for handoffs
 
 **Definition of Done:**
-- All 52 requirements marked complete
+- All 57 requirements marked complete
 - End-to-end flow tested: Lead messages → Sarah qualifies → Handoff → Notification
 - Dashboard accessible with real-time data
+- WhatsApp inbox sends/receives with templates and media
 - No critical bugs in production
 
 ---

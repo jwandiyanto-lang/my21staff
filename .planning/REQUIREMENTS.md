@@ -81,6 +81,14 @@ Requirements for v2.0 milestone. Hybrid AI + Rules architecture using Kapso work
 - [ ] **DBLA-05**: Common questions/topics trending (from Grok analysis)
 - [ ] **DBLA-06**: Conversation volume over time (chart)
 
+### Dashboard - WhatsApp Inbox (whatsapp-cloud-inbox)
+
+- [ ] **INBX-01**: Integrate gokapso/whatsapp-cloud-inbox into dashboard
+- [ ] **INBX-02**: Customize styling to match my21staff brand (black/white, Geist Mono)
+- [ ] **INBX-03**: Remove Kapso branding (MIT license, fully custom)
+- [ ] **INBX-04**: Connect to Kapso API using workspace credentials
+- [ ] **INBX-05**: Enable send/receive messages, templates, media, interactive buttons
+
 ### Handoff Workflow (Combo Approach)
 
 - [ ] **HAND-01**: Trigger detection via Kapso workflow (4 slots filled OR user keywords)
@@ -186,6 +194,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DBLA-04 | Phase 6 | Pending |
 | DBLA-05 | Phase 6 | Pending |
 | DBLA-06 | Phase 6 | Pending |
+| INBX-01 | Phase 6 | Pending |
+| INBX-02 | Phase 6 | Pending |
+| INBX-03 | Phase 6 | Pending |
+| INBX-04 | Phase 6 | Pending |
+| INBX-05 | Phase 6 | Pending |
 | HAND-01 | Phase 7 | Pending |
 | HAND-02 | Phase 7 | Pending |
 | HAND-03 | Phase 7 | Pending |
@@ -194,8 +207,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HAND-06 | Phase 7 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 52 total
-- Mapped to phases: 52
+- v2.0 requirements: 57 total
+- Mapped to phases: 57
 - Unmapped: 0 ✓
 
 ---
