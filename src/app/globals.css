@@ -355,33 +355,45 @@ html {
   body {
     @apply bg-background text-foreground;
   }
+}
 
-  /* Better input/textarea/select borders - thicker and more visible */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="number"],
-  textarea {
-    @apply border-2 focus:border-ring transition-colors;
-    border-color: oklch(0.35 0.08 145 / 0.3) !important; /* Darker green border */
-  }
+/* =============================================================================
+   INPUT & DROPDOWN BORDERS - Consistent thick borders everywhere
+   ============================================================================= */
 
-  /* Make select dropdowns even more distinct with thicker border */
-  select,
-  [role="combobox"],
-  button[role="combobox"] {
-    @apply border-[3px] focus:border-ring transition-colors;
-    border-color: oklch(0.35 0.08 145 / 0.4) !important; /* Even darker for dropdowns */
-  }
+/* All text inputs - 2px border */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="time"],
+input[data-slot="input"],
+textarea {
+  border-width: 2px !important;
+  border-color: oklch(0.35 0.08 145 / 0.35) !important;
+  transition: all 0.2s ease !important;
+}
 
-  /* Focus states - orange ring for visibility */
-  input:focus,
-  textarea:focus,
-  select:focus,
-  [role="combobox"]:focus {
-    @apply ring-2 ring-crm-orange/30;
-    border-color: oklch(0.35 0.08 145) !important;
-  }
+/* All dropdowns/selects - 3px border (thicker to differentiate) */
+select,
+button[role="combobox"],
+button[data-slot="select-trigger"],
+[data-slot="select-trigger"] {
+  border-width: 3px !important;
+  border-color: oklch(0.35 0.08 145 / 0.45) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Focus states - orange ring for visibility */
+input:focus,
+input[data-slot="input"]:focus,
+textarea:focus,
+select:focus,
+button[role="combobox"]:focus,
+button[data-slot="select-trigger"]:focus,
+[data-slot="select-trigger"]:focus {
+  border-color: oklch(0.35 0.08 145) !important;
+  box-shadow: 0 0 0 3px oklch(0.70 0.16 45 / 0.2) !important; /* Orange glow */
 }
 
 /* Hide Clerk keyless mode indicator */
