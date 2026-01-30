@@ -40,6 +40,13 @@
 - Workflow trigger configured in Kapso
 - Test message verified in logs
 
+**Plans:**
+- [ ] 01-01-PLAN.md — Kapso workspace & Indonesian number provisioning
+- [ ] 01-02-PLAN.md — Webhook endpoint development
+- [ ] 01-03-PLAN.md — Workflow trigger & verification
+
+**Status:** Planning complete — ready for execution
+
 ---
 
 ## Phase 2: Workflow Rules Engine
