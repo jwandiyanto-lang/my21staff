@@ -12,10 +12,10 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: Phase 4 - Lead Database — IN PROGRESS
-Status: 1 of 7 plans complete
-Last activity: 2026-01-30 — Plan 04-01 complete: Extended contacts schema with Sarah fields
+Status: 6 of 7 plans complete
+Last activity: 2026-01-30 — Plan 04-06 complete: Background sync service with hourly cron
 
-Progress: █████████████████████████████░░░ 87% (13 of 15 total plans across completed phases)
+Progress: ████████████████████████████████ 96% (18 of 19 total plans across completed phases + current)
 
 ## V2.0 Milestone
 
@@ -49,6 +49,11 @@ Progress: ███████████████████████�
 | Plan | Status | Summary |
 |------|--------|---------|
 | 04-01 | ✅ Complete (executed 19:44-19:48 UTC) | Extended contacts schema with Sarah fields, lead workflow, notes timeline |
+| 04-02 | ✅ Complete | Kapso webhook sync with lastActivityAt tracking |
+| 04-03 | ✅ Complete | syncFailures monitoring system |
+| 04-04 | ✅ Complete | Sarah sync mutation maps chat phase to leadStatus |
+| 04-05 | ✅ Complete | Lead management mutations (updateLeadStatus, addContactNote, syncSarahData) |
+| 04-06 | ✅ Complete (executed 19:51-19:53 UTC) | Background sync service with hourly cron for stale contact detection |
 
 ## V1.0.0 Archive Summary
 
@@ -187,30 +192,28 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 19:48 UTC
-**Stopped at:** Plan 04-05 complete - Lead management mutations
+**Last session:** 2026-01-30 19:53 UTC
+**Stopped at:** Plan 04-06 complete - Background sync service
 **Resume file:** None
 
 **Completed in this session:**
-- 04-05: Lead Management Mutations (2.3 minutes)
-  - Created convex/leads.ts with 3 mutations
-  - updateLeadStatus: validates status transitions
-  - addContactNote: timeline array with 100-note limit
-  - syncSarahData: internal mutation for Sarah bot sync
+- 04-06: Background Sync Service (2.0 minutes)
+  - Created convex/backgroundSync.ts with reconciliation logic
+  - Created convex/crons.ts for hourly scheduled sync
+  - Added syncHealth table to schema for monitoring
+  - reconcileContacts flags stale contacts (>1hr no activity)
+  - reconcileAllWorkspaces runs across all active workspaces
+  - getSyncHealth query for sync run history
   - All functions compile and deploy successfully
 
-**Phase 4 Progress (1/7 plans):**
+**Phase 4 Progress (6/7 plans):**
+- 04-01: Extended Contacts Schema (4 min 21 sec) - COMPLETE ✅
+- 04-02: Kapso webhook sync with lastActivityAt - COMPLETE ✅
+- 04-03: syncFailures monitoring system - COMPLETE ✅
+- 04-04: Sarah sync mutation - COMPLETE ✅
 - 04-05: Lead management mutations (2.3 min) - COMPLETE ✅
+- 04-06: Background sync service (2.0 min) - COMPLETE ✅
 
 ---
 
-*Last updated: 2026-01-30 — Phase 4 IN PROGRESS, 13/15 total plans (87%)*
-
-**Phase 4 Progress:**
-- 04-01: Extended Contacts Schema (4 min 21 sec)
-  - Added 16 Sarah extraction fields to contacts table
-  - Added lead workflow status (new → qualified → contacted → converted → archived)
-  - Added notes timeline array with bot/human attribution
-  - Added activity timestamps (lastContactAt, lastActivityAt)
-  - Fixed blocking Convex validator errors in brainConfig.ts and internConfig.ts
-  - Schema validation passed, deployed to Convex cloud
+*Last updated: 2026-01-30 — Phase 4 IN PROGRESS, 18/19 total plans (96%)*
