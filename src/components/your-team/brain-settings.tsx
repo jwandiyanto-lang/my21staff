@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -369,17 +368,26 @@ export function BrainSettings({ workspaceId, workspaceSlug }: BrainSettingsProps
             <CardContent className="space-y-6">
           {/* Hot Threshold */}
           <div className="space-y-3">
-            <Label htmlFor="hotThreshold">
-              Hot Lead Threshold: {config.scoring.hotThreshold}+
-            </Label>
-            <Slider
-              id="hotThreshold"
-              value={[config.scoring.hotThreshold]}
-              onValueChange={([value]) => updateScoring("hotThreshold", value)}
-              min={50}
-              max={100}
-              step={5}
-            />
+            <div className="flex items-center justify-between">
+              <Label htmlFor="hotThreshold">Hot Lead Threshold</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="hotThreshold"
+                  type="number"
+                  value={config.scoring.hotThreshold}
+                  onChange={(e) => updateScoring("hotThreshold", parseInt(e.target.value) || 50)}
+                  onBlur={(e) => {
+                    const value = parseInt(e.target.value) || 50
+                    if (value < 50) updateScoring("hotThreshold", 50)
+                    if (value > 100) updateScoring("hotThreshold", 100)
+                  }}
+                  min={50}
+                  max={100}
+                  className="w-20 text-right"
+                />
+                <span className="text-sm text-muted-foreground">+</span>
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground">
               Leads scoring above this value are marked as Hot
             </p>
@@ -389,17 +397,26 @@ export function BrainSettings({ workspaceId, workspaceSlug }: BrainSettingsProps
 
           {/* Warm Threshold */}
           <div className="space-y-3">
-            <Label htmlFor="warmThreshold">
-              Warm Lead Threshold: {config.scoring.warmThreshold}+
-            </Label>
-            <Slider
-              id="warmThreshold"
-              value={[config.scoring.warmThreshold]}
-              onValueChange={([value]) => updateScoring("warmThreshold", value)}
-              min={10}
-              max={50}
-              step={5}
-            />
+            <div className="flex items-center justify-between">
+              <Label htmlFor="warmThreshold">Warm Lead Threshold</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="warmThreshold"
+                  type="number"
+                  value={config.scoring.warmThreshold}
+                  onChange={(e) => updateScoring("warmThreshold", parseInt(e.target.value) || 10)}
+                  onBlur={(e) => {
+                    const value = parseInt(e.target.value) || 10
+                    if (value < 10) updateScoring("warmThreshold", 10)
+                    if (value > 50) updateScoring("warmThreshold", 50)
+                  }}
+                  min={10}
+                  max={50}
+                  className="w-20 text-right"
+                />
+                <span className="text-sm text-muted-foreground">+</span>
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground">
               Leads scoring between warm and hot thresholds are marked as Warm
             </p>
@@ -417,7 +434,7 @@ export function BrainSettings({ workspaceId, workspaceSlug }: BrainSettingsProps
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              Weights must add up to 100%. Adjust sliders to balance scoring.
+              Weights must add up to 100%. Adjust values to balance scoring.
             </p>
 
             {/* Basic Info */}
