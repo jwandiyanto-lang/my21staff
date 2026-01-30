@@ -604,4 +604,16 @@ export default defineSchema({
   })
     .index("by_workspace", ["workspace_id"])
     .index("by_shortcut", ["workspace_id", "shortcut"]),
+
+  // ============================================
+  // BOT CONFIG (Intern and Brain bot names per workspace)
+  // ============================================
+  botConfig: defineTable({
+    workspace_id: v.id("workspaces"),
+    intern_name: v.string(),      // Default: "Sarah"
+    brain_name: v.string(),       // Default: "Grok"
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"]),
 });
