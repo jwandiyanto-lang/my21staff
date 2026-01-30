@@ -50,7 +50,7 @@ export function MessageView({ workspaceId, conversationId }: MessageViewProps) {
 
       // Dev mode: use mock data
       if (isDevMode()) {
-        setMessages(getMockMessages(conversationId))
+        setMessages(getMockMessages(conversationId) as Message[])
         setLoading(false)
         return
       }
@@ -66,7 +66,7 @@ export function MessageView({ workspaceId, conversationId }: MessageViewProps) {
       console.error('Failed to fetch messages:', err)
       setError(err instanceof Error ? err.message : 'Unknown error')
       // Fall back to mock data on error
-      setMessages(getMockMessages(conversationId))
+      setMessages(getMockMessages(conversationId) as Message[])
     } finally {
       setLoading(false)
     }

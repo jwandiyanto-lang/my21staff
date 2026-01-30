@@ -14,7 +14,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS = [
     messagesCount: 5,
     lastMessage: {
       content: 'Terima kasih untuk infonya!',
-      direction: 'inbound',
+      direction: 'inbound' as const,
       type: 'text',
     },
   },
@@ -27,7 +27,7 @@ export const MOCK_WHATSAPP_CONVERSATIONS = [
     messagesCount: 12,
     lastMessage: {
       content: 'Kapan bisa mulai?',
-      direction: 'inbound',
+      direction: 'inbound' as const,
       type: 'text',
     },
   },
@@ -40,13 +40,21 @@ export const MOCK_WHATSAPP_CONVERSATIONS = [
     messagesCount: 3,
     lastMessage: {
       content: 'Halo, saya tertarik dengan layanan Anda',
-      direction: 'inbound',
+      direction: 'inbound' as const,
       type: 'text',
     },
   },
 ]
 
-export function getMockMessages(conversationId: string) {
+export function getMockMessages(conversationId: string): Array<{
+  id: string
+  conversationId: string
+  direction: 'inbound' | 'outbound'
+  content: string
+  timestamp: string
+  type: string
+  status: string
+}> {
   // Return mock message history based on conversation ID
   return [
     {
