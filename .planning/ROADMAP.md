@@ -87,100 +87,62 @@
 
 ## Phase 2.5: Settings & Configuration
 
-**Goal:** CRM settings page allows viewing and editing all workflows, triggers, bot personas, and configurations with immediate sync to Kapso via API.
+**Goal:** Build the CRM UI for Kapso integration with 3-tab structure: Inbox (WhatsApp), Your Team (bot configuration), and Settings (general config).
 
-**Note:** This phase builds the **Settings UI** that connects to Kapso's API. Users can see and modify everything that Phase 2 configured — no more dashboard-only setup. Changes apply immediately via "Apply" button.
+**Note:** Simplified scope per 02_5-CONTEXT.md. Focus on Inbox enhancement, bot configuration UI (Intern & Brain), and settings backup. Deferred: Plain Language wizard, configuration history, test panel.
 
 **Requirements:**
-- CONF-01 to CONF-10 (10 requirements)
+- CONF-01 to CONF-10 (10 requirements - adjusted scope)
 
 **Success Criteria:**
-1. Settings page accessible in dashboard (/settings route)
-2. Workflow list displays all configured workflows (from Kapso API)
-3. Create/edit/delete workflows via Settings UI (syncs to Kapso API)
-4. Keyword trigger management with test panel
-5. FAQ template editor with live preview
-6. Bot persona configuration (Sarah & Grok prompts editable in UI)
-7. Lead routing rules UI with conditional logic builder
-8. "Apply Changes" button syncs all edits to Kapso immediately
-9. Configuration history with rollback capability
-10. Test panel sends test messages and verifies responses
+1. Sidebar shows "Your Team" with Intern and Brain sub-tabs
+2. Intern tab: Bot persona, behavior rules, response settings, slot extraction
+3. Brain tab: Summary settings, scoring config, analysis triggers
+4. Settings tab: Bot name configuration (applies to both bots)
+5. Inbox: Kapso API integration for real-time WhatsApp messaging
+6. Sync status indicator in Settings header
+7. Settings backup to Convex (recoverable configurations)
+8. Dev mode works offline with mock data
+9. Styling: black/white, Geist Mono, my21staff brand
+10. Auto-save with toast notifications
 
 **Deliverables:**
-- Settings page UI (Shadcn/ui components, black/white, Geist Mono)
-- Kapso API integration layer (workflows, triggers, templates CRUD)
-- Workflow configuration UI (list, create, edit, delete)
-- Keyword trigger manager (add/edit/delete, test)
-- FAQ template editor (pricing, services, hours, custom)
-- Bot persona configuration forms (Sarah prompt, Grok prompt)
-- Lead routing rules UI (new vs returning logic builder)
-- Apply button with sync status indicator
-- Configuration history viewer (past versions, rollback)
-- Test panel (send test message, trigger workflow, verify)
-- Convex storage for settings backup
-- Sync status indicator (shows last sync time, errors)
+- Your Team page with Intern/Brain tabs
+- InternSettings component (persona, behavior, response, slots)
+- BrainSettings component (summary, scoring, triggers)
+- Bot name configuration in Settings
+- Kapso client library for WhatsApp operations
+- Inbox connected to Kapso API (conversations, messages, send)
+- Settings backup table in Convex
+- Sync status indicator component
+- Dev mode mock data support
 
-**Key Features:**
+**UI Structure:**
 ```
-+-------------------------------------------------------------+
-|  Settings                                          Synced v |
-+-------------------------------------------------------------+
-|                                                              |
-|  Workflows                                                   |
-|  +------------------------------------------------------+   |
-|  | Keyword Triggers                     Edit | Delete    |   |
-|  | - "human" -> Handoff to human                         |   |
-|  | - "!summary" -> Generate daily summary                |   |
-|  | - [Add New Trigger]                                   |   |
-|  +------------------------------------------------------+   |
-|                                                              |
-|  FAQ Templates                                               |
-|  +------------------------------------------------------+   |
-|  | Pricing Response                      Edit | Delete   |   |
-|  | "Our services start from $500/month..."               |   |
-|  | - [Add New Template]                                  |   |
-|  +------------------------------------------------------+   |
-|                                                              |
-|  Bot Personas                                                |
-|  +------------------------------------------------------+   |
-|  | Sarah (Chat Bot)                                      |   |
-|  | Prompt: [You are Sarah, warm and efficient...]        |   |
-|  |                                                       |   |
-|  | Grok (Manager Bot)                                    |   |
-|  | Prompt: [Analyze leads and generate insights...]      |   |
-|  +------------------------------------------------------+   |
-|                                                              |
-|  Lead Routing Rules                                          |
-|  +------------------------------------------------------+   |
-|  | If new phone number -> [Start fresh conversation]     |   |
-|  | If returning -> [Resume with context]                 |   |
-|  +------------------------------------------------------+   |
-|                                                              |
-|  Test Panel                                                  |
-|  +------------------------------------------------------+   |
-|  | Send test message to: [+62xxx...]                     |   |
-|  | [Send Test]                                           |   |
-|  +------------------------------------------------------+   |
-|                                                              |
-|                                        [Apply Changes]       |
-+-------------------------------------------------------------+
+Sidebar:
+├── Dashboard
+├── Inbox           (Kapso WhatsApp conversations)
+├── Database
+├── Your Team       (NEW - replaces "Your Intern")
+│   ├── Intern      (Sarah chat bot settings)
+│   └── Brain       (Grok manager bot settings)
+└── Settings        (Bot names, integrations, etc.)
 ```
 
-**API Endpoints Used:**
-```
-GET    /workflows                    # List all workflows
-POST   /workflows                    # Create workflow
-PATCH  /workflows/{id}               # Update workflow
-DELETE /workflows/{id}               # Delete workflow
+**Plans:** 5 plans
+- [x] 02_5-01-PLAN.md — Your Team navigation & layout
+- [x] 02_5-02-PLAN.md — Bot name configuration in Settings
+- [x] 02_5-03-PLAN.md — Bot configuration components (Intern & Brain)
+- [x] 02_5-04-PLAN.md — Kapso inbox integration
+- [x] 02_5-05-PLAN.md — Settings backup & sync status
 
-GET    /workflow_triggers            # List triggers
-POST   /workflow_triggers            # Create trigger
-PATCH  /workflow_triggers/{id}       # Update trigger
-DELETE /workflow_triggers/{id}       # Delete trigger
+**Status:** ✅ COMPLETE (2026-01-30)
 
-POST   /workflows/{id}/executions    # Test workflow
-GET    /workflow_executions/{id}     # Get execution result
-```
+**Deferred to Future Phase:**
+- Plain Language wizard (conversational config)
+- Configuration history with rollback
+- Test panel for workflow triggers
+- Bulk workflow operations
 
 ---
 

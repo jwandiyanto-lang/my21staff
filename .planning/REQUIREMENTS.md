@@ -25,16 +25,16 @@ Requirements for v2.0 milestone. Hybrid AI + Rules architecture using Kapso work
 
 ### Settings & Configuration Management
 
-- [ ] **CONF-01**: Settings page in dashboard (Shadcn/ui, black/white, Geist Mono)
-- [ ] **CONF-02**: Workflow configuration UI (list, create, edit, delete via Kapso API)
-- [ ] **CONF-03**: Keyword trigger management (add/edit/delete triggers, test in UI)
-- [ ] **CONF-04**: FAQ template editor (pricing, services, hours, custom responses)
-- [ ] **CONF-05**: Bot persona configuration (Sarah & Grok prompts, tone, constraints)
-- [ ] **CONF-06**: Lead routing rules UI (new vs returning detection logic)
-- [ ] **CONF-07**: Apply changes button (syncs edits to Kapso API immediately)
-- [ ] **CONF-08**: Configuration history (view past versions, rollback if needed)
-- [ ] **CONF-09**: Test panel (send test message, trigger workflows, verify responses)
-- [ ] **CONF-10**: Settings stored in Convex (backup, sync status indicator)
+- [x] **CONF-01**: Settings page in dashboard (Shadcn/ui, black/white, Geist Mono)
+- [x] **CONF-02**: Your Team navigation with Intern and Brain sub-tabs
+- [x] **CONF-03**: Intern configuration (persona, behavior, response, slots)
+- [x] **CONF-04**: Brain configuration (summary, scoring, triggers)
+- [x] **CONF-05**: Bot name configuration in Settings (applies to both bots)
+- [x] **CONF-06**: Kapso API integration for WhatsApp inbox
+- [x] **CONF-07**: Sync status indicator in Settings header
+- [x] **CONF-08**: Settings backup to Convex (recoverable configurations)
+- [x] **CONF-09**: Dev mode offline support with mock data
+- [x] **CONF-10**: Auto-save with toast notifications
 
 ### Sarah Chat Bot (Gemini 2.5)
 
@@ -172,16 +172,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RULE-03 | Phase 2 | Pending |
 | RULE-04 | Phase 2 | Pending |
 | RULE-05 | Phase 2 | Pending |
-| CONF-01 | Phase 2.5 | Pending |
-| CONF-02 | Phase 2.5 | Pending |
-| CONF-03 | Phase 2.5 | Pending |
-| CONF-04 | Phase 2.5 | Pending |
-| CONF-05 | Phase 2.5 | Pending |
-| CONF-06 | Phase 2.5 | Pending |
-| CONF-07 | Phase 2.5 | Pending |
-| CONF-08 | Phase 2.5 | Pending |
-| CONF-09 | Phase 2.5 | Pending |
-| CONF-10 | Phase 2.5 | Pending |
+| CONF-01 | Phase 2.5 | Complete |
+| CONF-02 | Phase 2.5 | Complete |
+| CONF-03 | Phase 2.5 | Complete |
+| CONF-04 | Phase 2.5 | Complete |
+| CONF-05 | Phase 2.5 | Complete |
+| CONF-06 | Phase 2.5 | Complete |
+| CONF-07 | Phase 2.5 | Complete |
+| CONF-08 | Phase 2.5 | Complete |
+| CONF-09 | Phase 2.5 | Complete |
+| CONF-10 | Phase 2.5 | Complete |
 | SARA-01 | Phase 3 | Pending |
 | SARA-02 | Phase 3 | Pending |
 | SARA-03 | Phase 3 | Pending |
