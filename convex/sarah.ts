@@ -285,7 +285,46 @@ export const upsertSarahState = httpAction(async (ctx, request) => {
     });
   }
 
-  return new Response(JSON.stringify({ success: true }), {
+  // NEW: Sync to contacts table for dashboard
+  let syncResult = { synced: false, reason: "not_attempted" };
+  try {
+    syncResult = await ctx.runMutation(internal.sarah.syncToContacts, {
+      contact_phone,
+      workspace_id: body.workspace_id,
+      state: state || "greeting",
+      lead_score: lead_score || 0,
+      lead_temperature: lead_temperature || "cold",
+      extracted_data: extracted_data || {},
+      language: language || "id",
+    });
+  } catch (syncError) {
+    // Log failure for monitoring but don't break Sarah state save
+    syncResult = { synced: false, reason: String(syncError) };
+    console.error("[Sarah] Contact sync failed:", syncError);
+
+    // Log to syncFailures table for visibility
+    try {
+      await ctx.runMutation(internal.syncFailures.logSyncFailure, {
+        source: "sarah",
+        contact_phone,
+        error: String(syncError),
+        payload: JSON.stringify({
+          state: state || "greeting",
+          lead_score: lead_score || 0,
+          lead_temperature: lead_temperature || "cold",
+        }),
+      });
+    } catch (logError) {
+      // Don't fail if logging fails
+      console.error("[Sarah] Failed to log sync failure:", logError);
+    }
+  }
+
+  return new Response(JSON.stringify({
+    success: true,
+    sync: syncResult.synced,
+    syncReason: syncResult.reason
+  }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
