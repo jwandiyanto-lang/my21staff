@@ -6,17 +6,17 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 2.5 - Settings & Configuration (redoing Plan 04 - Inbox redesign with whatsapp-cloud-inbox)
+**Current focus:** Phase 2.5 - Settings & Configuration (Plan 04 - WhatsApp Inbox - just completed)
 
 ## Current Position
 
 Milestone: v2.0
 Phase: Phase 2.5 - Settings & Configuration
-Plan: 3 of 5 plans complete (Plan 04 needs redo)
+Plan: 4 of 5 plans complete
 Status: Phase 2.5 IN PROGRESS 🔄
-Last activity: 2026-01-30 — Plan 04 marked for redo (fork whatsapp-cloud-inbox instead of enhancing Eagle inbox)
+Last activity: 2026-01-30 — Plan 04 completed: WhatsApp Inbox with Kapso API integration
 
-Progress: ██████████████░░░░░░░░░░░░░░░░ 50% (6 of 12 total plans across all phases)
+Progress: ███████████████░░░░░░░░░░░░░░ 58% (7 of 12 total plans across all phases)
 
 ## V2.0 Milestone
 
@@ -26,7 +26,7 @@ Progress: ██████████████░░░░░░░░░�
 **Phases Planned:**
 1. Foundation (Kapso workspace + webhook) - COMPLETED (1 plan)
 2. Workflow Rules Engine (Kapso native workflows + Grok) - ✅ COMPLETED (3 plans)
-2.5. Settings & Configuration (Kapso workflow management UI) - 🔄 IN PROGRESS (3 of 5 plans, Plan 04 needs redo)
+2.5. Settings & Configuration (Kapso workflow management UI) - 🔄 IN PROGRESS (4 of 5 plans complete)
 3. Sarah Chat Bot (Gemini 2.5 + persona) - PLANNING
 4. Lead Database (Kapso → Convex sync)
 5. Grok Manager Bot (Analysis + insights)
@@ -72,7 +72,7 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Bot names stored in separate Convex table** (botConfig) for type safety and queryability
 - **Default bot names: Sarah (Intern), Grok (Brain)** to match existing brand persona
 - **Kapso API direct integration** for inbox (not Convex mirror)
-- **5-second polling** for real-time inbox updates (Kapso doesn't support WebSocket)
+- **10-second conversation polling / 5-second message polling** for real-time updates (Kapso doesn't support WebSocket)
 - **Next.js API routes** proxy Kapso operations for auth and CORS handling
 - **Bot settings auto-save on change** (no submit button) for better UX
 - **localStorage persistence for dev mode** bot configurations
@@ -81,6 +81,10 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Settings backup non-blocking pattern** - saves succeed even if backup fails
 - **Dev mode shows "Offline Mode" indicator** and skips backup network calls
 - **Sync status tracked per-workspace** with last sync time, status, and error fields
+- **Two-panel inbox layout** (conversation list + message view) with my21staff green/orange branding
+- **Geist Mono font** for inbox data fields (phone numbers, timestamps, message content)
+- **Optimistic message sending** with rollback on error for better UX
+- **TypeScript literal types** for message direction to ensure type safety
 
 ### Kapso Configuration
 
@@ -106,25 +110,25 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 ### Pending Todos
 
 **Phase 2.5: 🔄 IN PROGRESS**
-Plans completed (3 of 5):
+Plans completed (4 of 5):
 - ✅ Your Team Navigation & Layout
 - ✅ Bot Name Configuration
 - ✅ Bot Configuration Components (Intern & Brain)
-- ❌ Kapso Inbox Integration (NEEDS REDO - fork whatsapp-cloud-inbox, not enhance Eagle inbox)
+- ✅ WhatsApp Inbox (Kapso API integration, template/interactive messages)
 - ✅ Settings Backup & Sync Status
 
-**Current focus:** Redoing Plan 04 - Fork whatsapp-cloud-inbox and apply my21staff branding
+**Next:** Plan 05 - Final Phase 2.5 plan (TBD)
 
 ### Blockers/Concerns
 
-**Plan 04 incorrectly executed:** Plan enhanced old Eagle inbox instead of forking whatsapp-cloud-inbox repo. Old Eagle inbox removed, Plan 04 needs complete rewrite and re-execution.
+**Production WhatsApp sending not yet functional:** Requires workspace settings table to store Kapso API credentials. Template sending endpoint (`/api/whatsapp/send`) referenced in MessageView but not yet created.
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 19:15 UTC
-**Stopped at:** Phase 2.5 Plan 04 marked for redo - Old Eagle inbox removed, preparing to fork whatsapp-cloud-inbox
+**Last session:** 2026-01-30 15:27 UTC
+**Stopped at:** Phase 2.5 Plan 04 completed - WhatsApp Inbox fully functional with dev mode support
 **Resume file:** None
 
 ---
 
-*Last updated: 2026-01-30 — Phase 2.5 IN PROGRESS 🔄 (3/5 plans, Plan 04 needs redo), 6/12 total plans (50%)*
+*Last updated: 2026-01-30 — Phase 2.5 IN PROGRESS 🔄 (4/5 plans), 7/12 total plans (58%)*
