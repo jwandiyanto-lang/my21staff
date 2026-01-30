@@ -13,7 +13,7 @@ export async function GET(
   // Dev mode: return mock messages
   if (isDevMode()) {
     const messages = getMockMessages(conversationId)
-    return NextResponse.json({ messages, reactionMap: {} })
+    return NextResponse.json({ data: messages })
   }
 
   // Production: fetch from Kapso
@@ -34,8 +34,8 @@ export async function GET(
       limit: 100,
     })
 
-    // Transform to match whatsapp-cloud-inbox format
-    return NextResponse.json({ messages: result.data, reactionMap: {} })
+    // Return in Kapso inbox format
+    return NextResponse.json({ data: result.data })
   } catch (error) {
     console.error('Failed to fetch messages:', error)
     return NextResponse.json(

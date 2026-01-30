@@ -7,7 +7,7 @@ import { isDevMode, MOCK_WHATSAPP_CONVERSATIONS } from '@/lib/mock-whatsapp-data
 export async function GET(request: Request) {
   // Dev mode: return mock data
   if (isDevMode()) {
-    return NextResponse.json({ conversations: MOCK_WHATSAPP_CONVERSATIONS })
+    return NextResponse.json({ data: MOCK_WHATSAPP_CONVERSATIONS })
   }
 
   // Production: fetch from Kapso
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       limit: 50,
     })
 
-    return NextResponse.json({ conversations: result.data })
+    return NextResponse.json({ data: result.data })
   } catch (error) {
     console.error('Failed to fetch conversations:', error)
     return NextResponse.json(
