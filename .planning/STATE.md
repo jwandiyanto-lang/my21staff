@@ -12,9 +12,9 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: Phase 2.5 - Settings & Configuration
-Plan: 4 of 5 plans complete
-Status: Phase 2.5 IN PROGRESS
-Last activity: 2026-01-30 — Completed Plan 03: Bot Configuration Components (Intern & Brain)
+Plan: 5 of 5 plans complete
+Status: Phase 2.5 COMPLETE ✅
+Last activity: 2026-01-30 — Completed Plan 05: Settings Backup & Sync Status
 
 Progress: ████████████░░░░░░░░░░░░░░░░░░ 55% (6 of 11 total plans across all phases)
 
@@ -78,6 +78,9 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **localStorage persistence for dev mode** bot configurations
 - **Deep merge utility** preserves nested config structure during updates
 - **Brain scoring weights must total 100%** with validation warning
+- **Settings backup non-blocking pattern** - saves succeed even if backup fails
+- **Dev mode shows "Offline Mode" indicator** and skips backup network calls
+- **Sync status tracked per-workspace** with last sync time, status, and error fields
 
 ### Kapso Configuration
 
@@ -116,10 +119,10 @@ None — ready to continue Phase 2.5.
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 13:53 UTC
-**Stopped at:** Completed Phase 2.5 Plan 03 (Bot Configuration Components)
+**Last session:** 2026-01-30 18:15 UTC
+**Stopped at:** Completed Phase 2.5 Plan 05 (Settings Backup & Sync Status)
 **Resume file:** None
 
 ---
 
-*Last updated: 2026-01-30 — Phase 2.5 Plan 03 COMPLETE ✅, 6/11 total plans (55%)*
+*Last updated: 2026-01-30 — Phase 2.5 COMPLETE ✅, 5/5 plans (100%), 6/11 total plans (55%)*
