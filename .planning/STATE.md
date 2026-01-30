@@ -6,17 +6,17 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 1 - Foundation (Kapso workspace setup)
+**Current focus:** Phase 2 - Workflow Rules Engine (rule-first message processing)
 
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 1 - Foundation
-Plan: 2/7 plans complete
+Phase: Phase 2 - Workflow Rules Engine
+Plan: 1/5 plans complete
 Status: In progress
-Last activity: 2026-01-30 — Completed 01-02 webhook endpoint
+Last activity: 2026-01-30 — Completed 02-01 workflow rules engine core
 
-Progress: ██████░░░░░░░░░░░░░░░░░░░░░░ 28% (2 of 7 plans)
+Progress: █░░░░░░░░░░░░░░░░░░░░░░░░░░░ 11% (1 of 9 total plans across all phases)
 
 ## V2.0 Milestone
 
@@ -24,8 +24,8 @@ Progress: ██████░░░░░░░░░░░░░░░░░�
 **Goal:** Build WhatsApp CRM with dual-agent AI (Sarah chat + Grok manager) using Kapso workflows + Convex database
 
 **Phases Planned:**
-1. Foundation (Kapso workspace + webhook) - IN PROGRESS
-2. Workflow Rules Engine (Kapso triggers + routing)
+1. Foundation (Kapso workspace + webhook) - COMPLETED
+2. Workflow Rules Engine (Kapso triggers + routing) - IN PROGRESS
 3. Sarah Chat Bot (Gemini 2.5 + persona)
 4. Lead Database (Kapso → Convex sync)
 5. Grok Manager Bot (Analysis + insights)
@@ -64,25 +64,27 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - Rule-first, AI-fallback approach (keyword triggers checked first)
 - Background sync for buttery smooth dashboard (no loading delays)
 - Production-only webhook signature verification (dev mode bypasses for testing)
+- All workflow configuration values are placeholders (configured in Phase 2.5 Settings UI)
 
 ### Pending Todos
 
-**Phase 1 execution:**
-- Create new my21staff workspace in Kapso
-- Provision Indonesian WhatsApp number
-- Configure webhook endpoint - COMPLETED (01-02)
-- Test message reception
+**Phase 2 execution:**
+- 02-01 Workflow Rules Engine Core - COMPLETED
+- 02-02 Webhook integration with rules engine
+- 02-03 Kapso workflow triggers
+- 02-04 Settings UI for workflow configuration
+- 02-05 Testing and refinement
 
 ### Blockers/Concerns
 
-None — ready to continue Phase 1.
+None — ready to continue Phase 2.
 
 ### Session Continuity
 
 **Last session:** 2026-01-30
-**Stopped at:** Completed 01-02-PLAN.md (webhook endpoint)
+**Stopped at:** Completed 02-01-PLAN.md (workflow rules engine core)
 **Resume file:** None
 
 ---
 
-*Last updated: 2026-01-30 — Completed 01-02 webhook endpoint, 2/7 plans in Phase 1*
+*Last updated: 2026-01-30 — Completed 02-01 workflow rules engine core, 1/9 total plans (11%)*
