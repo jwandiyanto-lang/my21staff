@@ -54,10 +54,60 @@ export default defineSchema({
     created_at: v.number(),
     updated_at: v.number(),
     supabaseId: v.string(), // For migration reference
+
+    // Sarah Phase 1 (Gathering) fields
+    businessType: v.optional(v.string()),
+    domisili: v.optional(v.string()),
+    businessDuration: v.optional(v.string()),
+    story: v.optional(v.string()),
+    sarahLanguage: v.optional(v.string()), // 'id' | 'en' - renamed to avoid conflict
+
+    // Sarah Phase 2 (Interest) fields
+    painPoints: v.optional(v.array(v.string())),
+    interestMotivation: v.optional(v.string()),
+    priority: v.optional(v.string()),
+    urgencyLevel: v.optional(v.string()),
+
+    // Sarah Phase 3 (Closing) fields
+    leadScore: v.optional(v.number()), // 0-100, separate from existing lead_score for Sarah-specific
+    leadTemperature: v.optional(v.union(
+      v.literal("hot"),
+      v.literal("warm"),
+      v.literal("lukewarm"),
+      v.literal("cold")
+    )),
+    closingTechnique: v.optional(v.string()),
+    objectionRaised: v.optional(v.string()),
+
+    // Status workflow fields
+    leadStatus: v.optional(v.union(
+      v.literal("new"),
+      v.literal("qualified"),
+      v.literal("contacted"),
+      v.literal("converted"),
+      v.literal("archived")
+    )),
+    statusChangedAt: v.optional(v.number()),
+    statusChangedBy: v.optional(v.string()), // "sarah-bot" | "grok-bot" | user email
+
+    // Notes timeline array
+    notes: v.optional(v.array(
+      v.object({
+        content: v.string(),
+        addedBy: v.string(), // "sarah-bot" | "grok-bot" | user email
+        addedAt: v.number(),
+      })
+    )),
+
+    // Timestamp fields
+    lastContactAt: v.optional(v.number()), // Last human outreach (outbound)
+    lastActivityAt: v.optional(v.number()), // Any interaction (message, status, note)
   })
     .index("by_workspace_phone", ["workspace_id", "phone"])
     .index("by_workspace", ["workspace_id"])
-    .index("by_assigned", ["workspace_id", "assigned_to"]),
+    .index("by_assigned", ["workspace_id", "assigned_to"])
+    .index("by_workspace_status", ["workspace_id", "leadStatus"])
+    .index("by_workspace_temperature", ["workspace_id", "leadTemperature"]),
 
   // ============================================
   // CONVERSATIONS
@@ -669,4 +719,90 @@ export default defineSchema({
   })
     .index("by_workspace", ["workspace_id"])
     .index("by_workspace_type", ["workspace_id", "backup_type"]),
+
+  // ============================================
+  // INTERN CONFIG (Sarah Chat Bot settings)
+  // ============================================
+  internConfig: defineTable({
+    workspace_id: v.id("workspaces"),
+    // Persona settings
+    persona: v.object({
+      greetingStyle: v.string(), // 'professional' | 'friendly' | 'casual'
+      language: v.string(), // 'indonesian' | 'english'
+      tone: v.array(v.string()), // ['supportive', 'clear', 'encouraging', 'professional', 'warm']
+      customPrompt: v.optional(v.string()), // Custom system prompt override
+    }),
+    // Behavior settings
+    behavior: v.object({
+      autoRespondNewLeads: v.boolean(),
+      handoffKeywords: v.array(v.string()), // ['human', 'operator', 'manager', ...]
+      quietHoursEnabled: v.boolean(),
+      quietHoursStart: v.string(), // '22:00'
+      quietHoursEnd: v.string(), // '08:00'
+      maxMessagesBeforeHuman: v.number(), // 3-20
+    }),
+    // Response settings
+    response: v.object({
+      maxMessageLength: v.number(), // 50-500 chars
+      emojiUsage: v.string(), // 'never' | 'minimal' | 'moderate' | 'frequent'
+      priceMentions: v.string(), // 'never' | 'ranges' | 'exact'
+      responseDelay: v.string(), // 'instant' | '2-5sec' | '5-10sec'
+    }),
+    // Slot extraction settings
+    slotExtraction: v.object({
+      enabled: v.boolean(),
+      slots: v.object({
+        name: v.object({ enabled: v.boolean(), required: v.boolean() }),
+        serviceInterest: v.object({ enabled: v.boolean(), required: v.boolean() }),
+        budgetRange: v.object({ enabled: v.boolean(), required: v.boolean() }),
+        timeline: v.object({ enabled: v.boolean(), required: v.boolean() }),
+      }),
+      customSlots: v.array(v.string()), // ['current school', 'work experience', ...]
+    }),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // BRAIN CONFIG (Grok Manager Bot settings)
+  // ============================================
+  brainConfig: defineTable({
+    workspace_id: v.id("workspaces"),
+    // Summary settings
+    summary: v.object({
+      enabled: v.boolean(),
+      time: v.string(), // '09:00'
+      format: v.string(), // 'bullet' | 'paragraph' | 'detailed'
+      includeMetrics: v.object({
+        newLeads: v.boolean(),
+        conversions: v.boolean(),
+        responseTimes: v.boolean(),
+        topSources: v.boolean(),
+      }),
+    }),
+    // Scoring settings
+    scoring: v.object({
+      hotThreshold: v.number(), // 50-100
+      warmThreshold: v.number(), // 10-50
+      weights: v.object({
+        basicInfo: v.number(), // 0-100
+        qualification: v.number(), // 0-100
+        document: v.number(), // 0-100
+        engagement: v.number(), // 0-100
+      }),
+    }),
+    // Trigger settings
+    triggers: v.object({
+      onHandoff: v.boolean(),
+      onKeyword: v.boolean(),
+      keyword: v.string(), // '!summary'
+      onSchedule: v.boolean(),
+      schedule: v.string(), // Cron format '0 9 * * *'
+      analysisDepth: v.string(), // 'quick' | 'standard' | 'deep'
+    }),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"]),
 });
