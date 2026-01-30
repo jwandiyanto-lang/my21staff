@@ -6,17 +6,19 @@
 
 ## Overview
 
-**7 phases** | **57 requirements** | **Hybrid AI + Rules architecture**
+**8 phases** | **69 requirements** | **Hybrid AI + Rules architecture**
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
 | 1 | Foundation | Kapso workspace setup + webhook infrastructure | 5 |
 | 2 | Workflow Rules Engine | Kapso workflow triggers + conditional routing | 5 |
+| 2.5 | Settings & Configuration | CRM settings UI with Kapso API integration | 10 |
 | 3 | Sarah Chat Bot | Gemini 2.5 integration + persona + 4-slot extraction | 7 |
 | 4 | Lead Database | Kapso → Convex sync + custom fields | 7 |
 | 5 | Grok Manager Bot | Analysis + scoring + insights | 7 |
 | 6 | Dashboard | Lead list + AI insights + analytics + WhatsApp inbox | 24 |
 | 7 | Handoff Workflow | End-to-end handoff flow + notifications | 6 |
+| 8 | Testing & Polish | End-to-end testing, bug fixes, performance | 2 |
 
 ---
 
@@ -66,11 +68,110 @@
 5. Rules are checked first in Kapso workflow, unmatched messages pass to AI
 
 **Deliverables:**
-- Kapso workflow configured with keyword triggers (in Kapso dashboard)
+- Kapso workflow configured with keyword triggers (via Settings UI)
 - Lead routing logic in Kapso workflow (new vs returning detection)
 - FAQ template responses in Kapso workflow
 - Conditional routing in Kapso workflow: rules → AI webhook fallback
-- Workflow testing verified via Kapso UI
+- Workflow testing verified via Settings UI test panel
+
+---
+
+## Phase 2.5: Settings & Configuration
+
+**Goal:** CRM settings page allows viewing and editing all workflows, triggers, bot personas, and configurations with immediate sync to Kapso via API.
+
+**Note:** This phase builds the **Settings UI** that connects to Kapso's API. Users can see and modify everything that Phase 2 configured — no more dashboard-only setup. Changes apply immediately via "Apply" button.
+
+**Requirements:**
+- CONF-01 to CONF-10 (10 requirements)
+
+**Success Criteria:**
+1. Settings page accessible in dashboard (/settings route)
+2. Workflow list displays all configured workflows (from Kapso API)
+3. Create/edit/delete workflows via Settings UI (syncs to Kapso API)
+4. Keyword trigger management with test panel
+5. FAQ template editor with live preview
+6. Bot persona configuration (Sarah & Grok prompts editable in UI)
+7. Lead routing rules UI with conditional logic builder
+8. "Apply Changes" button syncs all edits to Kapso immediately
+9. Configuration history with rollback capability
+10. Test panel sends test messages and verifies responses
+
+**Deliverables:**
+- Settings page UI (Shadcn/ui components, black/white, Geist Mono)
+- Kapso API integration layer (workflows, triggers, templates CRUD)
+- Workflow configuration UI (list, create, edit, delete)
+- Keyword trigger manager (add/edit/delete, test)
+- FAQ template editor (pricing, services, hours, custom)
+- Bot persona configuration forms (Sarah prompt, Grok prompt)
+- Lead routing rules UI (new vs returning logic builder)
+- Apply button with sync status indicator
+- Configuration history viewer (past versions, rollback)
+- Test panel (send test message, trigger workflow, verify)
+- Convex storage for settings backup
+- Sync status indicator (shows last sync time, errors)
+
+**Key Features:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Settings                                          Synced ✓ │
+├─────────────────────────────────────────────────────────────┤
+│                                                                │
+│  Workflows                                                     │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ 🔄 Keyword Triggers                    Edit │ Delete  │   │
+│  │ • "human" → Handoff to human                            │   │
+│  │ • "!summary" → Generate daily summary                   │   │
+│  │ • [Add New Trigger]                                     │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                                │
+│  FAQ Templates                                                │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ 💬 Pricing Response                     Edit │ Delete  │   │
+│  │ "Our services start from $500/month..."                │   │
+│  │ • [Add New Template]                                   │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                                │
+│  Bot Personas                                                 │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ 🤖 Sarah (Chat Bot)                                  │   │
+│  │ Prompt: [You are Sarah, warm and efficient...]        │   │
+│  │                                                        │   │
+│  │ 🧠 Grok (Manager Bot)                                │   │
+│  │ Prompt: [Analyze leads and generate insights...]      │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                                │
+│  Lead Routing Rules                                           │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ If new phone number → [Start fresh conversation]      │   │
+│  │ If returning → [Resume with context]                  │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                                │
+│  Test Panel                                                   │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ Send test message to: [+62xxx...]                    │   │
+│  │ [Send Test]                                          │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                                │
+│                                        [Apply Changes]        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**API Endpoints Used:**
+```
+GET    /workflows                    # List all workflows
+POST   /workflows                    # Create workflow
+PATCH  /workflows/{id}               # Update workflow
+DELETE /workflows/{id}               # Delete workflow
+
+GET    /workflow_triggers            # List triggers
+POST   /workflow_triggers            # Create trigger
+PATCH  /workflow_triggers/{id}       # Update trigger
+DELETE /workflow_triggers/{id}       # Delete trigger
+
+POST   /workflows/{id}/executions    # Test workflow
+GET    /workflow_executions/{id}     # Get execution result
+```
 
 ---
 
@@ -242,6 +343,9 @@ Phase 1 (Foundation)
     ▼
 Phase 2 (Workflow Rules)
     │
+    ▼
+Phase 2.5 (Settings & Configuration)
+    │
     ├─────────────┐
     ▼             ▼
 Phase 3      Phase 4
@@ -252,17 +356,50 @@ Phase 3      Phase 4
     Phase 5 (Grok Manager)
            │
            ▼
-    Phase 6 (Dashboard)
+    Phase 6 (Dashboard + Inbox)
            │
            ▼
     Phase 7 (Handoff)
+           │
+           ▼
+    Phase 8 (Testing & Polish)
 ```
 
-**Critical Path:** Phase 1 → 2 → 3 → 6 → 7 (Sarah bot + Dashboard core)
+**Critical Path:** Phase 1 → 2 → 2.5 → 3 → 6 → 7 → 8 (Foundation → Settings → Sarah → Dashboard → Handoff → Test)
 
 **Can Parallelize:**
-- Phase 3 (Sarah) + Phase 4 (Database) — independent after Phase 2
+- Phase 3 (Sarah) + Phase 4 (Database) — independent after Phase 2.5
 - Phase 5 (Grok) can start once Phase 4 database is ready
+
+**Why Phase 2.5 Between 2 and 3:**
+- After workflows are built (Phase 2), build the UI to see/edit them (Phase 2.5)
+- Before building AI bots (Phase 3+), have the Settings UI ready to configure personas
+- Each subsequent feature can be configured in Settings as it's built
+
+---
+
+## Phase 8: Testing & Polish
+
+**Goal:** End-to-end testing of all features, bug fixes, performance optimization, production readiness.
+
+**Requirements:**
+- TEST-01: End-to-end flow testing (new lead → Sarah → handoff → notification)
+- TEST-02: Performance optimization (dashboard load time, sync latency)
+
+**Success Criteria:**
+1. Complete user journey tested and working
+2. Dashboard loads under 2 seconds
+3. Message sync latency under 5 seconds
+4. No critical bugs in production
+5. Settings UI applies changes correctly
+6. WhatsApp inbox sends/receives reliably
+7. Handoff notifications fire consistently
+
+**Deliverables:**
+- Test plan documentation
+- Bug fixes applied
+- Performance benchmarks met
+- Production deployment verified
 
 ---
 
@@ -270,18 +407,20 @@ Phase 3      Phase 4
 
 **v2.0 is complete when:**
 1. New my21staff workspace is live with Indonesian number
-2. Sarah responds to leads 24/7 with warm, contextual messages
-3. Leads are captured in database with extracted info (4 slots)
-4. Grok generates daily summaries and scores leads
-5. Dashboard shows all leads with instant load
-6. WhatsApp inbox (whatsapp-cloud-inbox) integrated with custom branding
-7. Handoff workflow triggers for qualified leads
-8. Business owner receives notifications for handoffs
+2. Settings UI allows viewing and editing all configurations
+3. Sarah responds to leads 24/7 with warm, contextual messages
+4. Leads are captured in database with extracted info (4 slots)
+5. Grok generates daily summaries and scores leads
+6. Dashboard shows all leads with instant load
+7. WhatsApp inbox (whatsapp-cloud-inbox) integrated with custom branding
+8. Handoff workflow triggers for qualified leads
+9. Business owner receives notifications for handoffs
 
 **Definition of Done:**
-- All 57 requirements marked complete
+- All 69 requirements marked complete
 - End-to-end flow tested: Lead messages → Sarah qualifies → Handoff → Notification
 - Dashboard accessible with real-time data
+- Settings UI applies changes to Kapso immediately
 - WhatsApp inbox sends/receives with templates and media
 - No critical bugs in production
 
