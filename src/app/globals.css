@@ -86,7 +86,7 @@ html {
   --destructive: oklch(0.577 0.245 27.325);
 
   /* Borders and inputs */
-  --border: oklch(0.35 0.08 145 / 0.10);          /* Subtle dark green border */
+  --border: oklch(0.35 0.08 145 / 0.15);          /* Slightly stronger border */
   --input: oklch(0.99 0 0);
   --ring: oklch(0.35 0.08 145);
 
@@ -354,6 +354,16 @@ html {
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Better input/textarea borders */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    @apply border-2 border-border/40 focus:border-ring transition-colors;
   }
 }
 

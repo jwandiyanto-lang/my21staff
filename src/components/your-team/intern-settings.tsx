@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { Bot, Clock, MessageSquare, Settings2, Zap, Plus, X, ExternalLink } from "lucide-react"
+import { Bot, Clock, MessageSquare, Settings2, Zap, Plus, X, ExternalLink, ChevronDown } from "lucide-react"
 import { backupSettings } from "@/lib/settings-backup"
 
 // Default intern configuration
@@ -61,6 +62,16 @@ export function InternSettings({ workspaceSlug }: InternSettingsProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [newCustomSlot, setNewCustomSlot] = useState("")
+  const [openCards, setOpenCards] = useState({
+    persona: true,
+    behavior: false,
+    response: false,
+    slots: false,
+  })
+
+  const toggleCard = (card: keyof typeof openCards) => {
+    setOpenCards(prev => ({ ...prev, [card]: !prev[card] }))
+  }
 
   // Load configuration
   useEffect(() => {
@@ -205,17 +216,24 @@ export function InternSettings({ workspaceSlug }: InternSettingsProps) {
   return (
     <div className="space-y-6">
       {/* Card 1: Persona */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="w-5 h-5" />
-            Persona
-          </CardTitle>
-          <CardDescription>
-            Configure how the Intern (Sarah) presents herself to leads
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <Collapsible open={openCards.persona} onOpenChange={() => toggleCard('persona')}>
+        <Card>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bot className="w-5 h-5" />
+                  Persona
+                </div>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openCards.persona ? '' : 'rotate-180'}`} />
+              </CardTitle>
+              <CardDescription>
+                Configure how the Intern (Sarah) presents herself to leads
+              </CardDescription>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="space-y-6">
           {/* Bot Name Display */}
           <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
             <div className="flex items-center gap-3">
@@ -303,21 +321,30 @@ export function InternSettings({ workspaceSlug }: InternSettingsProps) {
               Add specific instructions for Sarah&apos;s behavior and knowledge base
             </p>
           </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Card 2: Behavior Rules */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings2 className="w-5 h-5" />
-            Behavior Rules
-          </CardTitle>
-          <CardDescription>
-            Control when and how the Intern responds to conversations
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <Collapsible open={openCards.behavior} onOpenChange={() => toggleCard('behavior')}>
+        <Card>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Settings2 className="w-5 h-5" />
+                  Behavior Rules
+                </div>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openCards.behavior ? '' : 'rotate-180'}`} />
+              </CardTitle>
+              <CardDescription>
+                Control when and how the Intern responds to conversations
+              </CardDescription>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="space-y-6">
           {/* Auto-respond to new leads */}
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -458,21 +485,30 @@ export function InternSettings({ workspaceSlug }: InternSettingsProps) {
               Automatically suggest human handoff after this many messages
             </p>
           </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Card 3: Response Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
-            Response Settings
-          </CardTitle>
-          <CardDescription>
-            Control how the Intern generates and delivers responses
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <Collapsible open={openCards.response} onOpenChange={() => toggleCard('response')}>
+        <Card>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  Response Settings
+                </div>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openCards.response ? '' : 'rotate-180'}`} />
+              </CardTitle>
+              <CardDescription>
+                Control how the Intern generates and delivers responses
+              </CardDescription>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="space-y-6">
           {/* Max Message Length */}
           <div className="space-y-3">
             <Label htmlFor="maxLength">
@@ -549,21 +585,30 @@ export function InternSettings({ workspaceSlug }: InternSettingsProps) {
               Adding slight delays makes responses feel more natural
             </p>
           </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Card 4: Slot Extraction */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="w-5 h-5" />
-            Slot Extraction
-          </CardTitle>
-          <CardDescription>
-            Configure what information to extract from conversations
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <Collapsible open={openCards.slots} onOpenChange={() => toggleCard('slots')}>
+        <Card>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-5 h-5" />
+                  Slot Extraction
+                </div>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openCards.slots ? '' : 'rotate-180'}`} />
+              </CardTitle>
+              <CardDescription>
+                Configure what information to extract from conversations
+              </CardDescription>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="space-y-6">
           {/* Enable/Disable */}
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -647,8 +692,10 @@ export function InternSettings({ workspaceSlug }: InternSettingsProps) {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
     </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
@@ -11,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { Brain, TrendingUp, AlertCircle, Calendar, ExternalLink, BarChart3 } from "lucide-react"
+import { Brain, TrendingUp, AlertCircle, Calendar, ExternalLink, BarChart3, ChevronDown } from "lucide-react"
 import { backupSettings } from "@/lib/settings-backup"
 
 // Default brain configuration
@@ -57,6 +58,15 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
   const [config, setConfig] = useState<BrainConfig>(DEFAULT_BRAIN_CONFIG)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [openCards, setOpenCards] = useState({
+    summary: true,
+    scoring: false,
+    triggers: false,
+  })
+
+  const toggleCard = (card: keyof typeof openCards) => {
+    setOpenCards(prev => ({ ...prev, [card]: !prev[card] }))
+  }
 
   // Load configuration
   useEffect(() => {
