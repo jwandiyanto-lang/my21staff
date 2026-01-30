@@ -40,14 +40,14 @@ export type MockConvexWorkspace = {
 export const MOCK_CONVEX_WORKSPACE: MockConvexWorkspace = {
   _id: 'demo',  // Must match API route dev mode check: isDevMode() && workspaceId === 'demo'
   _creationTime: Date.now(),
-  name: 'Eagle Overseas Education',
+  name: 'my21staff',
   slug: 'demo',
   owner_id: 'dev-user-001',
-  kapso_phone_id: '647015955153740',
+  kapso_phone_id: '827ce387-4f0a-4ca7-9e5a-0a3af01c9320',
   settings: {
     kapso_api_key: 'mock-api-key',
-    whatsapp_number: '+62 xxx xxxx xxxx',
-    whatsapp_name: 'Jonathan Wandiyanto',
+    whatsapp_number: '+62 813-1859-025',
+    whatsapp_name: 'my21staff',
     contact_tags: ['Hot Lead', 'Student', 'Parent', 'Follow Up'],
     main_form_fields: ['Pendidikan', 'Jurusan', 'Aktivitas', 'Negara Tujuan', 'Budget', 'Target Berangkat', 'Level Bahasa Inggris', 'Goals'],
     form_field_scores: {
