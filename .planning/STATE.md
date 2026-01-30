@@ -11,12 +11,12 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 2 - Workflow Rules Engine
-Plan: 3/3 plans complete
-Status: Phase 2 COMPLETE ✅
-Last activity: 2026-01-30 — Completed Kapso workflow with Grok AI, tested and verified
+Phase: Phase 2.5 - Settings & Configuration
+Plan: 1 of X plans in progress
+Status: Phase 2.5 STARTED
+Last activity: 2026-01-30 — Completed Plan 01: Your Team Navigation & Layout
 
-Progress: ████████░░░░░░░░░░░░░░░░░░░░░░ 33% (3 of 9 total plans across all phases)
+Progress: ████████░░░░░░░░░░░░░░░░░░░░░░ 33% (4 of 12 total plans across all phases)
 
 ## V2.0 Milestone
 
@@ -24,15 +24,16 @@ Progress: ████████░░░░░░░░░░░░░░░�
 **Goal:** Build WhatsApp CRM with dual-agent AI (Sarah chat + Grok manager) using Kapso workflows + Convex database
 
 **Phases Planned:**
-1. Foundation (Kapso workspace + webhook) - COMPLETED
-2. Workflow Rules Engine (Kapso native workflows + Grok) - ✅ COMPLETED
+1. Foundation (Kapso workspace + webhook) - COMPLETED (1 plan)
+2. Workflow Rules Engine (Kapso native workflows + Grok) - ✅ COMPLETED (3 plans)
 3. Sarah Chat Bot (Gemini 2.5 + persona) - PLANNING
 4. Lead Database (Kapso → Convex sync)
 5. Grok Manager Bot (Analysis + insights)
 6. Dashboard (Lead list + analytics)
 7. Handoff Workflow (End-to-end flow)
+8. Settings & Configuration (Kapso workflow management UI) - IN PROGRESS (1/X plans)
 
-**Total Requirements:** 52
+**Total Requirements:** 52+
 
 ## V1.0.0 Archive Summary
 
@@ -65,6 +66,9 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **AI decide node** for intent classification (handoff, manager, FAQs, general)
 - **Agent node** for AI fallback (Sarah persona)
 - Rule-first, AI-fallback approach (keyword triggers checked first)
+- **"Your Team" navigation** with Intern (Sarah) and Brain (Grok) tabs for dual-bot configuration
+- **URL-based tab state** (?tab=intern|brain) for shareable links
+- **Backwards-compatible redirect** from /knowledge-base to /your-team
 
 ### Kapso Configuration
 
@@ -89,22 +93,22 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Pending Todos
 
-**Phase 2.5 (Next):**
-- Settings UI for Kapso workflow management
-- API integration to read/modify Kapso workflows
-- Workflow configuration editor
+**Phase 2.5 (In Progress):**
+- ~~Your Team Navigation & Layout~~ ✅ COMPLETED
+- Kapso Workflow API Integration (next)
+- Bot Configuration UI
 - Test panel for workflow triggers
 
 ### Blockers/Concerns
 
-None — ready to start Phase 2.5.
+None — ready to continue Phase 2.5.
 
 ### Session Continuity
 
-**Last session:** 2026-01-30
-**Stopped at:** Phase 2 complete with Kapso workflow tested and verified
+**Last session:** 2026-01-30 13:25 UTC
+**Stopped at:** Completed Phase 2.5 Plan 01 (Your Team Navigation & Layout)
 **Resume file:** None
 
 ---
 
-*Last updated: 2026-01-30 — Phase 2 COMPLETE ✅, 3/9 total plans (33%)*
+*Last updated: 2026-01-30 — Phase 2.5 Plan 01 COMPLETE ✅, 4/12 total plans (33%)*
