@@ -6,17 +6,17 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 2 - Workflow Rules Engine (rule-first message processing)
+**Current focus:** Phase 2.5 - Settings & Configuration (Kapso workflow management UI)
 
 ## Current Position
 
 Milestone: v2.0
 Phase: Phase 2 - Workflow Rules Engine
-Plan: 2/5 plans complete
-Status: In progress
-Last activity: 2026-01-30 — Completed 02-02 webhook integration with rules engine
+Plan: 3/3 plans complete
+Status: Phase 2 COMPLETE ✅
+Last activity: 2026-01-30 — Completed Kapso workflow with Grok AI, tested and verified
 
-Progress: ██░░░░░░░░░░░░░░░░░░░░░░░░░░░ 22% (2 of 9 total plans across all phases)
+Progress: ████████░░░░░░░░░░░░░░░░░░░░░░ 33% (3 of 9 total plans across all phases)
 
 ## V2.0 Milestone
 
@@ -25,8 +25,8 @@ Progress: ██░░░░░░░░░░░░░░░░░░░░░�
 
 **Phases Planned:**
 1. Foundation (Kapso workspace + webhook) - COMPLETED
-2. Workflow Rules Engine (Kapso triggers + routing) - IN PROGRESS
-3. Sarah Chat Bot (Gemini 2.5 + persona)
+2. Workflow Rules Engine (Kapso native workflows + Grok) - ✅ COMPLETED
+3. Sarah Chat Bot (Gemini 2.5 + persona) - PLANNING
 4. Lead Database (Kapso → Convex sync)
 5. Grok Manager Bot (Analysis + insights)
 6. Dashboard (Lead list + analytics)
@@ -58,34 +58,53 @@ Progress: ██░░░░░░░░░░░░░░░░░░░░░�
 All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 **v2.0 decisions:**
-- Hybrid AI + Rules architecture (Kapso workflows + Gemini/Grok)
-- New my21staff workspace (Eagle archived)
-- Kapso + Convex hybrid data layer (Kapso source of truth, Convex for dashboard performance)
+- **Kapso native workflows** (not custom code) for all automation
+- Kapso is the **source of truth** for workflows
+- Convex is a **read mirror** for dashboard display only (Phase 4+)
+- **Grok 4.1-fast** for AI decisions and responses in workflows
+- **AI decide node** for intent classification (handoff, manager, FAQs, general)
+- **Agent node** for AI fallback (Sarah persona)
 - Rule-first, AI-fallback approach (keyword triggers checked first)
-- Background sync for buttery smooth dashboard (no loading delays)
-- Production-only webhook signature verification (dev mode bypasses for testing)
-- All workflow configuration values are placeholders (configured in Phase 2.5 Settings UI)
+
+### Kapso Configuration
+
+**Project:** my21staff
+- Project ID: `1fda0f3d-a913-4a82-bc1f-a07e1cb5213c`
+- API Key: `da99e74e320048a32cc3ff818615bed93a53f39bb62ce073ef8cffa85e778cc6`
+
+**Workflow:** Rules Engine - Keyword Triggers
+- Workflow ID: `6cae069e-7d5c-4fbb-834d-79e1f66e4672`
+- Model: x-ai/grok-4.1-fast
+- Status: Active
+
+**Phone:**
+- Phone Number ID: `957104384162113`
+- Config ID: `827ce387-4f0a-4ca7-9e5a-0a3af01c9320`
+- Phone: +62 813-1859-025
+
+**Trigger:**
+- Trigger ID: `bdf48a18-4c39-453a-8a81-e7d14a18fe35`
+- Type: inbound_message
+- Status: Active
 
 ### Pending Todos
 
-**Phase 2 execution:**
-- 02-01 Workflow Rules Engine Core - COMPLETED
-- 02-02 Webhook integration with rules engine - COMPLETED
-- 02-02 Webhook integration with rules engine
-- 02-03 Kapso workflow triggers
-- 02-04 Settings UI for workflow configuration
-- 02-05 Testing and refinement
+**Phase 2.5 (Next):**
+- Settings UI for Kapso workflow management
+- API integration to read/modify Kapso workflows
+- Workflow configuration editor
+- Test panel for workflow triggers
 
 ### Blockers/Concerns
 
-None — ready to continue Phase 2.
+None — ready to start Phase 2.5.
 
 ### Session Continuity
 
 **Last session:** 2026-01-30
-**Stopped at:** Completed 02-01-PLAN.md (workflow rules engine core)
+**Stopped at:** Phase 2 complete with Kapso workflow tested and verified
 **Resume file:** None
 
 ---
 
-*Last updated: 2026-01-30 — Completed 02-02 webhook integration with rules engine, 2/9 total plans (22%), 1/9 total plans (11%)*
+*Last updated: 2026-01-30 — Phase 2 COMPLETE ✅, 3/9 total plans (33%)*

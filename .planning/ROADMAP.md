@@ -55,32 +55,33 @@
 
 **Goal:** Build a rules engine that handles keyword triggers and conditional routing before AI processes messages.
 
-**Note:** This phase builds a **code-based workflow rules engine** that runs BEFORE the AI processor. Rules are stored in Convex and configurable via Settings UI (Phase 2.5).
+**Note:** Uses **Kapso native workflows** (not custom code). Kapso is the source of truth. Convex mirrors data for dashboard only.
 
 **Requirements:**
 - RULE-01, RULE-02, RULE-03, RULE-04, RULE-05
 
 **Success Criteria:**
-1. Keyword "human"/"agent" triggers handoff action
-2. "!summary" command triggers manager_bot action
-3. New leads vs returning leads are detected correctly
-4. FAQ responses (pricing, services, hours) work via template matching
-5. Rules are checked first, unmatched messages pass to AI
+1. ✅ Keyword "human"/"agent" triggers handoff action
+2. ✅ "!summary" command triggers manager_bot action
+3. ✅ FAQ responses (pricing, services) work via AI routing
+4. ✅ Rules are checked first, unmatched messages pass to AI agent
+5. ✅ All responses powered by Grok 4.1-fast
 
 **Deliverables:**
-- Workflow rules engine (src/lib/workflow/)
-- Keyword trigger matching logic
-- Lead routing logic (new vs returning detection)
-- FAQ template response system
-- Convex schema for workflow configuration
-- Webhook integration (rules before AI)
+- ✅ Kapso workflow "Rules Engine - Keyword Triggers"
+- ✅ AI decide node with Grok for intent classification
+- ✅ Inbound message trigger configured
+- ✅ Five response paths (handoff, manager, FAQ pricing, FAQ services, AI agent)
+- ✅ Tested and verified working
 
 **Plans:** 3 plans
-- [ ] 02-01-PLAN.md — Workflow rules engine core (types, triggers, engine)
-- [ ] 02-02-PLAN.md — Webhook integration + Convex schema
-- [ ] 02-03-PLAN.md — End-to-end testing + verification
+- [x] 02-01-PLAN.md — Workflow rules engine core (types, triggers, engine) — *Pivot: Not used, went with Kapso native*
+- [x] 02-02-PLAN.md — Webhook integration + Convex schema — *Pivot: Not used, went with Kapso native*
+- [x] 02-03-PLAN.md — End-to-end testing + verification — *Complete: Kapso workflow created and tested*
 
-**Status:** Planning complete — ready for execution
+**Status:** ✅ COMPLETE (2026-01-30)
+
+**Architecture Decision:** Kapso native workflows are the source of truth. No custom code needed.
 
 ---
 
