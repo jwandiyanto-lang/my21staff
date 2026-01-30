@@ -6,12 +6,12 @@
  * - Scrollable message area with WhatsApp-style background
  * - Smart auto-scroll (only when user is at bottom)
  * - Date separators between message groups
- * - Placeholder for compose area (filled in Plan 03)
+ * - Kapso API integration for fetching and sending messages
  */
 
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from '@/../convex/_generated/api'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -56,6 +56,85 @@ const getMockMessagesForConversation = (conversationId: string) => {
     }))
 }
 
+// =============================================================================
+// KAPSO API INTEGRATION
+// =============================================================================
+
+/**
+ * Hook to fetch messages from Kapso API with polling
+ *
+ * In production mode, fetches from /api/kapso/conversations/[id] every 5 seconds
+ * In dev mode, returns mock data immediately
+ */
+function useKapsoMessages(conversationId: string, workspaceId: string) {
+  const [messages, setMessages] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  useEffect(() => {
+    // In dev mode, use mock data
+    if (isDevMode()) {
+      const mockMessages = getMockMessagesForConversation(conversationId)
+      setMessages(mockMessages)
+      setLoading(false)
+      return
+    }
+
+    // Production mode: fetch from Kapso API
+    let isMounted = true
+
+    async function fetchMessages() {
+      try {
+        const res = await fetch(`/api/kapso/conversations/${conversationId}?workspace=${workspaceId}`)
+        if (!res.ok) {
+          throw new Error(`Failed to fetch: ${res.statusText}`)
+        }
+        const data = await res.json()
+
+        if (isMounted) {
+          // Format Kapso messages to match Convex message structure
+          const formattedMessages = (data.messages || []).map((m: any) => ({
+            _id: m.id,
+            conversation_id: conversationId,
+            workspace_id: workspaceId,
+            direction: m.direction,
+            sender_type: m.senderType || (m.direction === 'inbound' ? 'contact' : 'user'),
+            sender_id: m.senderId,
+            content: m.content,
+            message_type: m.messageType || 'text',
+            media_url: m.mediaUrl,
+            created_at: new Date(m.timestamp).getTime(),
+            status: m.status || 'sent',
+          }))
+          setMessages(formattedMessages)
+          setError(null)
+        }
+      } catch (err) {
+        console.error('Error fetching Kapso messages:', err)
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error('Unknown error'))
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchMessages()
+
+    // Poll for updates every 5 seconds
+    const interval = setInterval(fetchMessages, 5000)
+
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+    }
+  }, [conversationId, workspaceId])
+
+  return { messages, loading, error }
+}
+
 interface Contact {
   name?: string
   kapso_name?: string
@@ -82,15 +161,24 @@ export function MessageThread({
   showInfoSidebar = true,
   onToggleSidebar,
 }: MessageThreadProps) {
-  // Skip Convex query in dev mode - use mock messages
+  // Use Kapso API for messages in production, mock data in dev mode
+  const { messages: kapsoMessages, loading: kapsoLoading } = useKapsoMessages(conversationId, workspaceId)
+
+  // Skip Convex query in dev mode or if Kapso data is available
   const convexMessages = useQuery(
     api.messages.listByConversationAsc,
-    isDevMode() ? 'skip' : {
+    isDevMode() || kapsoMessages.length > 0 ? 'skip' : {
       conversation_id: conversationId,
       workspace_id: workspaceId,
     }
   )
-  const messages = isDevMode() ? getMockMessagesForConversation(conversationId) : convexMessages
+
+  // Use Kapso messages if available, otherwise fall back to Convex or mock
+  const messages = isDevMode()
+    ? getMockMessagesForConversation(conversationId)
+    : (kapsoMessages.length > 0 ? kapsoMessages : convexMessages)
+
+  const isLoadingMessages = kapsoLoading && !isDevMode() && kapsoMessages.length === 0
 
   // Handover toggle state
   const [isToggling, setIsToggling] = useState(false)
@@ -372,7 +460,7 @@ export function MessageThread({
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto bg-muted/30 py-4"
       >
-        {!messages ? (
+        {isLoadingMessages || !messages ? (
           // Loading skeleton
           <div className="space-y-4 px-4">
             {[1, 2, 3, 4, 5].map((i) => (

@@ -236,7 +236,7 @@ function ComposeInputProd({ workspaceId, conversationId, disabled, replyTo, onCl
     }))
 
     try {
-      const response = await fetch('/api/messages/send', {
+      const response = await fetch('/api/kapso/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
