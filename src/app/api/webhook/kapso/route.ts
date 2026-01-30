@@ -5,6 +5,8 @@ import { api } from '@/../convex/_generated/api'
 import { verifyKapsoSignature } from '@/lib/kapso/verify-signature'
 import { normalizePhone } from '@/lib/phone/normalize'
 import { processWithARI } from '@/lib/ari/processor'
+import { processWithRules } from '@/lib/workflow/rules-engine'
+import { sendMessage } from '@/lib/kapso/client'
 import { safeDecrypt } from '@/lib/crypto'
 import type { Json } from '@/types/database'
 
@@ -41,6 +43,7 @@ interface MessageData {
   message: MetaWebhookMessage
   contactInfo?: MetaWebhookContact
   workspaceId: string
+  handledByRules?: boolean
 }
 
 // Meta/WhatsApp Business API webhook payload types
@@ -340,12 +343,115 @@ async function processWorkspaceMessages(
 
   console.log(`[Webhook] Saved ${newMessages.length} messages, updated ${conversationUpdates.size} conversations`)
 
+  // === RULES ENGINE PROCESSING ===
+  // Process with rules engine BEFORE AI (for keyword triggers, FAQs)
+  for (const messageData of newMessages) {
+    const contact = contactMap.get(messageData.phone)
+    if (!contact) continue
+
+    // Get message content
+    const messageContent = messageData.message.text?.body || ''
+    if (!messageContent) continue // Skip non-text for rules engine
+
+    const rulesStartTime = Date.now()
+
+    try {
+      const rulesResult = await processWithRules({
+        workspaceId,
+        contactId: contact._id,
+        contactPhone: messageData.phone,
+        message: messageContent,
+      })
+
+      const rulesProcessingTime = Date.now() - rulesStartTime
+
+      // Log execution for analytics
+      const conversation = conversationMap.get(messageData.phone)
+      await convex.mutation(api.workflows.logExecution, {
+        workspace_id: workspaceId as any,
+        contact_id: contact._id as any,
+        conversation_id: conversation?._id as any,
+        message_content: messageContent.substring(0, 500), // Truncate for storage
+        rule_matched: rulesResult.matched_rule,
+        action_taken: rulesResult.handled
+          ? rulesResult.action
+          : 'ai_fallback',
+        lead_type: rulesResult.lead_type,
+        response_sent: rulesResult.response?.substring(0, 500),
+        processing_time_ms: rulesProcessingTime,
+      })
+
+      // If rules handled it, send response and skip AI
+      if (rulesResult.handled && rulesResult.response) {
+        // Get Kapso credentials for sending
+        const credentials = await convex.query(api.workspaces.getKapsoCredentials, {
+          workspace_id: workspaceId,
+        })
+
+        if (credentials?.meta_access_token && credentials?.kapso_phone_id) {
+          const apiKey = safeDecrypt(credentials.meta_access_token)
+          await sendMessage(
+            { apiKey, phoneId: credentials.kapso_phone_id },
+            messageData.phone,
+            rulesResult.response
+          )
+          console.log(`[Webhook] Rules engine sent response: ${rulesResult.action}`)
+        }
+
+        // If handoff triggered, update conversation status
+        if (rulesResult.should_handoff) {
+          console.log(`[Webhook] Handoff triggered for ${messageData.phone}`)
+          // TODO: Implement handoff flow (Phase 7)
+        }
+
+        // If manager bot triggered, send placeholder response (observable for testing)
+        // TODO: Implement Grok manager (Phase 5)
+        if (rulesResult.should_trigger_manager) {
+          console.log(`[Webhook] Manager bot triggered for ${messageData.phone}`)
+
+          // Send observable placeholder response so tests can verify trigger
+          const credentials = await convex.query(api.workspaces.getKapsoCredentials, {
+            workspace_id: workspaceId,
+          })
+
+          if (credentials?.meta_access_token && credentials?.kapso_phone_id) {
+            const apiKey = safeDecrypt(credentials.meta_access_token)
+            const placeholderResponse = '[Manager Bot] Summary feature coming in Phase 5! Your request has been logged.'
+            await sendMessage(
+              { apiKey, phoneId: credentials.kapso_phone_id },
+              messageData.phone,
+              placeholderResponse
+            )
+            console.log(`[Webhook] Manager bot placeholder response sent`)
+          }
+        }
+
+        // Mark this message as handled by rules (skip ARI later)
+        messageData.handledByRules = true
+        continue
+      }
+
+      // Rules didn't handle - will pass to AI below
+      console.log(`[Webhook] Rules engine: pass to AI for ${messageData.phone}`)
+
+    } catch (rulesError) {
+      console.error('[Webhook] Rules engine error:', rulesError)
+      // On error, continue to AI processing
+    }
+  }
+
   // === ARI PROCESSING ===
   // Process with ARI for each new text message
   // Collect promises to await them all (required for waitUntil to work)
   const ariPromises: Promise<void>[] = []
 
   for (const messageData of newMessages) {
+    // Skip messages already handled by rules engine
+    if (messageData.handledByRules) {
+      console.log(`[Webhook] Skipping ARI for message already handled by rules`)
+      continue
+    }
+
     const contact = contactMap.get(messageData.phone)
     if (!contact) continue
 
