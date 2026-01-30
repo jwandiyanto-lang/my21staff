@@ -48,6 +48,11 @@ interface WorkspaceSidebarProps {
 
 const operationsNav = [
   {
+    title: 'Inbox',
+    icon: MessageSquare,
+    href: '/inbox',
+  },
+  {
     title: 'Your Team',
     icon: Users,
     href: '/your-team',
@@ -64,7 +69,7 @@ const adminNav = [
 
 export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSidebarProps) {
   const pathname = usePathname()
-  const unreadCount = 0 // Disabled until inbox is rebuilt with Convex
+  const unreadCount = 0 // TODO: Implement real unread count from Kapso API
   const [collapsed, setCollapsed] = useState(false)
 
   const isActive = (href: string) => {
