@@ -63,9 +63,9 @@ const operationsNav = [
     href: '/database',
   },
   {
-    title: 'Your Intern',
-    icon: Bot,
-    href: '/knowledge-base',
+    title: 'Your Team',
+    icon: Users,
+    href: '/your-team',
   },
 ]
 
