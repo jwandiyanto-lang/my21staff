@@ -393,3 +393,59 @@ html {
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+/* =============================================================================
+   INBOX STYLING - Geist Mono for data fields
+   ============================================================================= */
+
+/* Inbox-specific data styling with Geist Mono */
+.inbox-data {
+  font-family: var(--font-mono);
+}
+
+/* Message content uses Geist Mono */
+.message-content {
+  font-family: var(--font-mono);
+}
+
+/* Phone numbers, timestamps in mono */
+.inbox-phone,
+.inbox-timestamp,
+.inbox-meta {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+/* Message bubble styling overrides for black/white branding */
+.message-bubble-inbound {
+  background-color: oklch(0.97 0.002 90); /* #F5F5F4 muted */
+  color: oklch(0.22 0.02 60); /* #2D2A26 text */
+  border-radius: 1rem 1rem 1rem 0.25rem;
+}
+
+.message-bubble-outbound {
+  background-color: oklch(0.35 0.08 145); /* #284b31 primary dark green */
+  color: oklch(0.99 0 0); /* white text */
+  border-radius: 1rem 1rem 0.25rem 1rem;
+}
+
+/* Orange accent for unread badges and active indicators */
+.inbox-unread-badge {
+  background-color: oklch(0.70 0.16 45); /* #F7931A orange */
+  color: white;
+}
+
+.inbox-active-indicator {
+  background-color: oklch(0.70 0.16 45); /* #F7931A orange */
+  box-shadow: 0 0 8px oklch(0.70 0.16 45 / 0.5);
+}
+
+/* Conversation item hover state */
+.conversation-item:hover {
+  background-color: oklch(0.97 0.002 90); /* #F5F5F4 muted */
+}
+
+.conversation-item-active {
+  background-color: oklch(0.92 0.02 145); /* #dce8dc sage */
+  border-left: 3px solid oklch(0.70 0.16 45); /* orange accent */
+}
