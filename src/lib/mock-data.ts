@@ -30,6 +30,8 @@ export type MockConvexWorkspace = {
       color: string
       bgColor: string
     }[]
+    intern_name?: string
+    brain_name?: string
   } | null
   created_at: number
   updated_at: number
@@ -95,6 +97,8 @@ export const MOCK_CONVEX_WORKSPACE: MockConvexWorkspace = {
       { key: 'client', label: 'Client', color: '#10B981', bgColor: '#D1FAE5' },
       { key: 'lost', label: 'Lost', color: '#4B5563', bgColor: '#E5E7EB' },
     ],
+    intern_name: 'Sarah',
+    brain_name: 'Grok',
   },
   created_at: Date.now(),
   updated_at: Date.now(),
