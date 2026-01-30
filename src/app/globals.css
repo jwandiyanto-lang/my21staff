@@ -58,12 +58,12 @@ html {
   --background: oklch(0.985 0.002 90);            /* #FBFBFA pure off-white */
   --foreground: oklch(0.22 0.02 60);              /* #2D2A26 text-main */
 
-  /* Card/Panel - White */
-  --card: oklch(1 0 0);                           /* #ffffff white */
+  /* Card/Panel - Subtle Grey */
+  --card: oklch(0.97 0.002 90);                   /* #F5F5F4 subtle grey */
   --card-foreground: oklch(0.22 0.02 60);
 
-  /* Popover - White */
-  --popover: oklch(1 0 0);
+  /* Popover - Subtle Grey */
+  --popover: oklch(0.97 0.002 90);
   --popover-foreground: oklch(0.22 0.02 60);
 
   /* Primary - Dark Green */
