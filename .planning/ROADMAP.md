@@ -14,7 +14,7 @@
 | 2 | Workflow Rules Engine | Kapso workflow triggers + conditional routing | 5 |
 | 2.5 | Settings & Configuration | CRM settings UI with Kapso API integration | 10 |
 | 3 | Sarah Chat Bot | Gemini 2.5 integration + persona + 5-slot extraction | 7 |
-| 4 | Lead Database | Kapso → Convex sync + custom fields | 7 |
+| 4 | Lead Database | Kapso -> Convex sync + custom fields | 7 |
 | 5 | Grok Manager Bot | Analysis + scoring + insights | 7 |
 | 6 | Dashboard | Lead list + AI insights + analytics + WhatsApp inbox | 24 |
 | 7 | Handoff Workflow | End-to-end handoff flow + notifications | 6 |
@@ -61,25 +61,25 @@
 - RULE-01, RULE-02, RULE-03, RULE-04, RULE-05
 
 **Success Criteria:**
-1. ✅ Keyword "human"/"agent" triggers handoff action
-2. ✅ "!summary" command triggers manager_bot action
-3. ✅ FAQ responses (pricing, services) work via AI routing
-4. ✅ Rules are checked first, unmatched messages pass to AI agent
-5. ✅ All responses powered by Grok 4.1-fast
+1. Keyword "human"/"agent" triggers handoff action
+2. "!summary" command triggers manager_bot action
+3. FAQ responses (pricing, services) work via AI routing
+4. Rules are checked first, unmatched messages pass to AI agent
+5. All responses powered by Grok 4.1-fast
 
 **Deliverables:**
-- ✅ Kapso workflow "Rules Engine - Keyword Triggers"
-- ✅ AI decide node with Grok for intent classification
-- ✅ Inbound message trigger configured
-- ✅ Five response paths (handoff, manager, FAQ pricing, FAQ services, AI agent)
-- ✅ Tested and verified working
+- Kapso workflow "Rules Engine - Keyword Triggers"
+- AI decide node with Grok for intent classification
+- Inbound message trigger configured
+- Five response paths (handoff, manager, FAQ pricing, FAQ services, AI agent)
+- Tested and verified working
 
 **Plans:** 3 plans
 - [x] 02-01-PLAN.md — Workflow rules engine core (types, triggers, engine) — *Pivot: Not used, went with Kapso native*
 - [x] 02-02-PLAN.md — Webhook integration + Convex schema — *Pivot: Not used, went with Kapso native*
 - [x] 02-03-PLAN.md — End-to-end testing + verification — *Complete: Kapso workflow created and tested*
 
-**Status:** ✅ COMPLETE (2026-01-30)
+**Status:** COMPLETE (2026-01-30)
 
 **Architecture Decision:** Kapso native workflows are the source of truth. No custom code needed.
 
@@ -136,7 +136,7 @@ Sidebar:
 - [x] 02_5-04-PLAN.md — Kapso inbox integration
 - [x] 02_5-05-PLAN.md — Settings backup & sync status
 
-**Status:** ✅ COMPLETE (2026-01-30)
+**Status:** COMPLETE (2026-01-30)
 
 **Deferred to Future Phase:**
 - Plain Language wizard (conversational config)
@@ -176,12 +176,12 @@ Sidebar:
 - Dashboard query functions for lead display
 
 **Plans:** 4 plans
-- [ ] 03-01-PLAN.md — Sarah prompts + Gemini API key setup (documentation for Kapso)
-- [ ] 03-02-PLAN.md — Convex schema + HTTP endpoints for state storage
-- [ ] 03-03-PLAN.md — Build Sarah workflow in Kapso (Agent + Function nodes)
-- [ ] 03-04-PLAN.md — End-to-end verification (checkpoint)
+- [x] 03-01-PLAN.md — Sarah prompts + Gemini API key setup (documentation for Kapso)
+- [x] 03-02-PLAN.md — Convex schema + HTTP endpoints for state storage
+- [x] 03-03-PLAN.md — Build Sarah workflow in Kapso (Agent + Function nodes)
+- [x] 03-04-PLAN.md — End-to-end verification (checkpoint)
 
-**Status:** Planning revised — ready for execution
+**Status:** COMPLETE (2026-01-30)
 
 **Architecture Flow:**
 ```
@@ -205,7 +205,7 @@ Convex (state storage for dashboard)
 
 ## Phase 4: Lead Database
 
-**Goal:** Kapso contacts and messages sync to Convex for instant dashboard access.
+**Goal:** Kapso contacts and messages sync to Convex for instant dashboard access with Sarah-extracted data.
 
 **Requirements:**
 - LEAD-01, LEAD-02, LEAD-03, LEAD-04, LEAD-05, LEAD-06, LEAD-07
@@ -220,12 +220,19 @@ Convex (state storage for dashboard)
 7. Kapso remains source of truth, Convex is read replica for dashboard
 
 **Deliverables:**
-- Convex schema: contacts, messages, leads tables
-- Kapso -> Convex sync service (background job)
-- Custom fields in Convex schema
-- Lead status state machine
-- Timestamp tracking implementation
-- Conflict resolution strategy (Kapso wins)
+- Extended contacts schema with Sarah extraction fields
+- Webhook timestamp tracking (lastActivityAt, lastContactAt)
+- Sarah-to-contacts sync on state updates
+- Lead status state machine with validation
+- Dashboard query functions (by status, needing follow-up, stats)
+
+**Plans:** 4 plans
+- [ ] 04-01-PLAN.md — Extend contacts schema + lead status mutations
+- [ ] 04-02-PLAN.md — Webhook timestamp enhancements
+- [ ] 04-03-PLAN.md — Sarah state sync to contacts
+- [ ] 04-04-PLAN.md — Dashboard queries + end-to-end verification
+
+**Status:** Planning complete — ready for execution
 
 ---
 
