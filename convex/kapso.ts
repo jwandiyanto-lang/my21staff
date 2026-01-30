@@ -96,6 +96,54 @@ export const processWebhook = internalMutation({
     const { payload, receivedAt } = args;
     const startTime = Date.now();
 
+    // Handle Kapso contact.updated events (profile name changes)
+    if (payload.type === "contact.updated" || payload.event_type === "contact.updated") {
+      const phoneNumberId = payload.phone_number_id;
+      const contactData = payload.contact || payload.data;
+
+      if (!phoneNumberId || !contactData) {
+        console.log("[Kapso] Invalid contact.updated payload");
+        return;
+      }
+
+      // Find workspace
+      const workspace = await ctx.db
+        .query("workspaces")
+        .withIndex("by_kapso_phone", (q) =>
+          q.eq("kapso_phone_id", phoneNumberId)
+        )
+        .first();
+
+      if (!workspace) {
+        console.log(`[Kapso] No workspace for phone_number_id: ${phoneNumberId}`);
+        return;
+      }
+
+      // Find and update contact
+      const phone = contactData.phone_number || contactData.wa_id;
+      if (phone) {
+        const normalized = phone.replace(/\D/g, "");
+        const existing = await ctx.db
+          .query("contacts")
+          .withIndex("by_workspace_phone", (q) =>
+            q.eq("workspace_id", workspace._id).eq("phone", normalized)
+          )
+          .first();
+
+        if (existing) {
+          const now = Date.now();
+          await ctx.db.patch(existing._id, {
+            kapso_name: contactData.display_name || contactData.profile?.name,
+            name: existing.name || contactData.display_name || contactData.profile?.name,
+            lastActivityAt: now,
+            updated_at: now,
+          });
+          console.log(`[Kapso] Updated contact profile: ${normalized}`);
+        }
+      }
+      return;
+    }
+
     // Collect all messages grouped by workspace and phone
     const workspaceMessages = new Map<
       string,
@@ -280,6 +328,7 @@ async function processWorkspaceMessages(
         updated_at: now,
         phone_normalized: normalized,
         cache_updated_at: now,
+        lastActivityAt: now, // NEW: Track all message activity
       };
 
       // Kapso v2: contact name from contactInfo.profile.name or contactInfo.kapso?.contact_name
@@ -303,11 +352,13 @@ async function processWorkspaceMessages(
         email: undefined,
         lead_score: 0,
         lead_status: "new",
+        leadStatus: "new", // NEW: Initialize lead status
         tags: [],
         assigned_to: undefined,
         source: "whatsapp",
         metadata: {},
         cache_updated_at: now,
+        lastActivityAt: now, // NEW: Track activity from creation
         created_at: now,
         updated_at: now,
         supabaseId: "",
@@ -470,6 +521,7 @@ async function processWorkspaceMessages(
       created_at: now,
       supabaseId: "",
     });
+    console.log(`[Kapso Sync] Message synced: direction=inbound, kapso_id=${message.id}`);
 
     // Track conversation update
     const existing = conversationUpdates.get(conversation._id) || {
@@ -980,6 +1032,7 @@ export const logOutboundMessage = internalMutation({
       created_at: now,
       supabaseId: "",
     });
+    console.log(`[Kapso Sync] Message synced: direction=outbound, kapso_id=${args.kapso_message_id}`);
 
     // Update conversation
     await ctx.db.patch(conversation._id, {
@@ -987,6 +1040,16 @@ export const logOutboundMessage = internalMutation({
       last_message_preview: args.content.substring(0, 200),
       updated_at: now,
     });
+
+    // Update contact timestamps for outbound message
+    const contact = await ctx.db.get(args.contact_id);
+    if (contact) {
+      await ctx.db.patch(args.contact_id, {
+        lastContactAt: now, // Human/bot reached out
+        lastActivityAt: now, // Any activity
+        updated_at: now,
+      });
+    }
   },
 });
 
