@@ -10,13 +10,13 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 ## Current Position
 
-Milestone: v2.0 (TBD — fresh start)
-Phase: N/A (ready for planning)
-Plan: N/A
-Status: V1.0.0 archived, infrastructure preserved, features reset
-Last activity: 2026-01-30 — Archived V1.0.0, prepared for V2.0
+Milestone: v2.0
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-01-30 — Milestone v2.0 started
 
-Progress: Clean slate for feature planning
+Progress: Gathering requirements
 
 ## V1.0.0 Archive Summary
 
@@ -59,18 +59,4 @@ None - ready for v2.0 planning.
 
 ---
 
-## Next Steps
-
-**Ready for v2.0:**
-
-Use `/gsd:new-project` or `/gsd:new-milestone` to start fresh milestone with new feature approach.
-
-**What to define in v2.0:**
-- Core feature set (rebuild from scratch)
-- Workspace strategy (without Eagle)
-- Implementation roadmap
-- Fresh requirements
-
----
-
-*Last updated: 2026-01-30 — V1.0.0 archived, V2.0 fresh start*
+*Last updated: 2026-01-30 — V2.0 milestone started*

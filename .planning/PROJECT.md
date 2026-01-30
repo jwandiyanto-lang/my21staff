@@ -159,22 +159,16 @@ See `.planning/archive/v1.0.0/` for previous milestone history.
 | Combo handoff workflow | Dashboard alert + WhatsApp notification + auto-reply vs single channel | — Pending |
 | Keep Convex + Clerk + Vercel | Infrastructure proven and working | ✓ Good |
 
-## Next Milestone: v2.0
+## Current Milestone: v2.0
 
-**Status:** Requirements defined, ready for roadmap
+**Goal:** Build WhatsApp CRM with dual-bot AI (Sarah chat + Grok manager) for Indonesian SME lead management.
 
-**Core Features:**
+**Target features:**
 - Kapso workspace + WhatsApp number provisioning
 - Dual-bot AI (Sarah chat + Grok manager)
 - Lead database with message sync
 - Dashboard with insights, analytics, recommendations
 - Handoff workflow (combo approach)
 
-**Next Steps:**
-1. Research Kapso Platform API + WhatsApp Cloud API patterns
-2. Create detailed requirements document (REQUIREMENTS.md)
-3. Generate roadmap with phases
-4. Begin Phase 1 implementation
-
 ---
-*Last updated: 2026-01-30 — V2.0 requirements defined*
+*Last updated: 2026-01-30 — V2.0 milestone started*
