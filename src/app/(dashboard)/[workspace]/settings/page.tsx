@@ -24,13 +24,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
   if (shouldUseMockData(workspaceSlug)) {
     return (
       <SettingsClient
-        workspace={{
-          id: MOCK_CONVEX_WORKSPACE._id as Id<'workspaces'>,
-          name: MOCK_CONVEX_WORKSPACE.name,
-          slug: MOCK_CONVEX_WORKSPACE.slug,
-          kapso_phone_id: MOCK_CONVEX_WORKSPACE.kapso_phone_id,
-          settings: MOCK_CONVEX_WORKSPACE.settings as WorkspaceSettings,
-        }}
+        workspaceId={MOCK_CONVEX_WORKSPACE._id}
+        workspaceSlug={MOCK_CONVEX_WORKSPACE.slug}
       />
     )
   }
@@ -46,13 +41,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
   return (
     <SettingsClient
-      workspace={{
-        id: workspace._id,
-        name: workspace.name,
-        slug: workspace.slug,
-        kapso_phone_id: workspace.kapso_phone_id || null,
-        settings: (workspace.settings as WorkspaceSettings) || null,
-      }}
+      workspaceId={workspace._id}
+      workspaceSlug={workspace.slug}
     />
   )
 }

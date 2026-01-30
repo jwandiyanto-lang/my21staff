@@ -104,7 +104,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
             Manage your workspace configuration
           </p>
         </div>
-        <SyncStatusIndicator workspaceId={workspaceId} workspaceSlug={workspaceSlug} />
+        <SyncStatusIndicator workspaceId={workspaceId} />
       </div>
 
       {/* Bot Names Configuration */}
