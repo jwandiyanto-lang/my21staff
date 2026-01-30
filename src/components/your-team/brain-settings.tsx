@@ -172,17 +172,24 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
   return (
     <div className="space-y-6">
       {/* Card 1: Summary Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
-            Summary Settings
-          </CardTitle>
-          <CardDescription>
-            Configure daily summaries and reporting from Grok Manager Bot
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <Collapsible open={openCards.summary} onOpenChange={() => toggleCard('summary')}>
+        <Card>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Summary Settings
+                </div>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openCards.summary ? '' : 'rotate-180'}`} />
+              </CardTitle>
+              <CardDescription>
+                Configure daily summaries and reporting from Grok Manager Bot
+              </CardDescription>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="space-y-6">
           {/* Bot Name Display */}
           <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
             <div className="flex items-center gap-3">
@@ -308,21 +315,30 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Card 2: Scoring Configuration */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            Scoring Configuration
-          </CardTitle>
-          <CardDescription>
-            Set thresholds and weights for lead scoring
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <Collapsible open={openCards.scoring} onOpenChange={() => toggleCard('scoring')}>
+        <Card>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Scoring Configuration
+                </div>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openCards.scoring ? '' : 'rotate-180'}`} />
+              </CardTitle>
+              <CardDescription>
+                Set thresholds and weights for lead scoring
+              </CardDescription>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="space-y-6">
           {/* Hot Threshold */}
           <div className="space-y-3">
             <Label htmlFor="hotThreshold">
@@ -448,21 +464,30 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
               />
             </div>
           </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Card 3: Analysis Triggers */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5" />
-            Analysis Triggers
-          </CardTitle>
-          <CardDescription>
-            Configure when Grok performs lead analysis
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <Collapsible open={openCards.triggers} onOpenChange={() => toggleCard('triggers')}>
+        <Card>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5" />
+                  Analysis Triggers
+                </div>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openCards.triggers ? '' : 'rotate-180'}`} />
+              </CardTitle>
+              <CardDescription>
+                Configure when Grok performs lead analysis
+              </CardDescription>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="space-y-6">
           {/* Trigger on Handoff */}
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -568,8 +593,10 @@ export function BrainSettings({ workspaceSlug }: BrainSettingsProps) {
               Deeper analysis takes longer but provides more insights
             </p>
           </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Validation Warning */}
       {!isWeightValid && (
