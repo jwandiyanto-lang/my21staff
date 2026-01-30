@@ -48,13 +48,13 @@ Requirements for v2.0 milestone. Hybrid AI + Rules architecture using Kapso work
 
 ### Lead Database (Convex - Synced from Kapso)
 
-- [ ] **LEAD-01**: Contact sync from Kapso to Convex (phone, name, profile)
-- [ ] **LEAD-02**: Message sync from Kapso to Convex (all messages, bidirectional)
-- [ ] **LEAD-03**: Custom fields storage (service needed, budget, timeline, qualification status)
-- [ ] **LEAD-04**: Lead status tracking (new, qualified, contacted, converted, archived)
-- [ ] **LEAD-05**: Timestamp tracking (created, last message, last contact, last activity)
-- [ ] **LEAD-06**: Background sync service (Kapso → Convex, near real-time)
-- [ ] **LEAD-07**: Conflict resolution (Kapso source of truth, Convex read replica)
+- [x] **LEAD-01**: Contact sync from Kapso to Convex (phone, name, profile)
+- [x] **LEAD-02**: Message sync from Kapso to Convex (all messages, bidirectional)
+- [x] **LEAD-03**: Custom fields storage (service needed, budget, timeline, qualification status)
+- [x] **LEAD-04**: Lead status tracking (new, qualified, contacted, converted, archived)
+- [x] **LEAD-05**: Timestamp tracking (created, last message, last contact, last activity)
+- [x] **LEAD-06**: Background sync service (Kapso → Convex, near real-time)
+- [x] **LEAD-07**: Conflict resolution (Kapso source of truth, Convex read replica)
 
 ### Grok Manager Bot
 
@@ -189,13 +189,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SARA-05 | Phase 3 | Pending |
 | SARA-06 | Phase 3 | Pending |
 | SARA-07 | Phase 3 | Pending |
-| LEAD-01 | Phase 4 | Pending |
-| LEAD-02 | Phase 4 | Pending |
-| LEAD-03 | Phase 4 | Pending |
-| LEAD-04 | Phase 4 | Pending |
-| LEAD-05 | Phase 4 | Pending |
-| LEAD-06 | Phase 4 | Pending |
-| LEAD-07 | Phase 4 | Pending |
+| LEAD-01 | Phase 4 | Complete |
+| LEAD-02 | Phase 4 | Complete |
+| LEAD-03 | Phase 4 | Complete |
+| LEAD-04 | Phase 4 | Complete |
+| LEAD-05 | Phase 4 | Complete |
+| LEAD-06 | Phase 4 | Complete |
+| LEAD-07 | Phase 4 | Complete |
 | MGR-01 | Phase 5 | Pending |
 | MGR-02 | Phase 5 | Pending |
 | MGR-03 | Phase 5 | Pending |

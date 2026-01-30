@@ -226,13 +226,17 @@ Convex (state storage for dashboard)
 - Lead status state machine with validation
 - Dashboard query functions (by status, needing follow-up, stats)
 
-**Plans:** 4 plans
-- [ ] 04-01-PLAN.md — Extend contacts schema + lead status mutations
-- [ ] 04-02-PLAN.md — Webhook timestamp enhancements
-- [ ] 04-03-PLAN.md — Sarah state sync to contacts
-- [ ] 04-04-PLAN.md — Dashboard queries + end-to-end verification
+**Plans:** 6 plans
+- [x] 04-01-PLAN.md — Extend contacts schema with Sarah fields and lead workflow
+- [x] 04-02-PLAN.md — Webhook timestamp enhancements (lastActivityAt, lastContactAt)
+- [x] 04-03-PLAN.md — Sarah state sync to contacts with failure monitoring
+- [x] 04-04-PLAN.md — Dashboard queries + end-to-end verification (deferred to Phase 6)
+- [x] 04-05-PLAN.md — Lead management mutations (status, notes, sync)
+- [x] 04-06-PLAN.md — Background sync service with hourly cron
 
-**Status:** Planning complete — ready for execution
+**Status:** COMPLETE (2026-01-30)
+
+**Note:** End-to-end verification deferred to Phase 6 (Database UI not built yet). All backend infrastructure verified and operational.
 
 ---
 
