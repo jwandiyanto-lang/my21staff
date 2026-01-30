@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { useEnsureUser } from '@/hooks/use-ensure-user'
@@ -19,6 +19,113 @@ import { cn } from '@/lib/utils'
 import type { Id } from 'convex/_generated/dataModel'
 import type { Contact } from '@/types/database'
 import { isDevMode, MOCK_CONVERSATIONS, MOCK_TEAM_MEMBERS, MOCK_CONTACTS, getNotesForContact } from '@/lib/mock-data'
+
+// =============================================================================
+// KAPSO API INTEGRATION
+// =============================================================================
+
+/**
+ * Hook to fetch conversations from Kapso API with polling
+ *
+ * In production mode, fetches from /api/kapso/conversations every 5 seconds
+ * In dev mode, returns mock data immediately
+ */
+function useKapsoConversations(workspaceId: Id<'workspaces'>) {
+  const [conversations, setConversations] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  useEffect(() => {
+    // In dev mode, use mock data
+    if (isDevMode()) {
+      const mockConversations = MOCK_CONVERSATIONS.map((conv) => ({
+        _id: conv.id as Id<'conversations'>,
+        contact_id: conv.contact_id as Id<'contacts'>,
+        status: conv.status,
+        unread_count: conv.unread_count,
+        last_message_at: new Date(conv.last_message_at!).getTime(),
+        last_message_preview: conv.last_message_preview,
+        assigned_to: conv.assigned_to,
+        contact: conv.contact ? {
+          _id: conv.contact.id as Id<'contacts'>,
+          name: conv.contact.name,
+          kapso_name: conv.contact.kapso_name,
+          phone: conv.contact.phone,
+          email: conv.contact.email,
+          lead_status: conv.contact.lead_status,
+          lead_score: conv.contact.lead_score,
+          tags: conv.contact.tags,
+          assigned_to: conv.contact.assigned_to,
+          metadata: conv.contact.metadata as Record<string, unknown> | undefined,
+          created_at: new Date(conv.contact.created_at!).getTime(),
+        } : null,
+      }))
+      setConversations(mockConversations)
+      setLoading(false)
+      return
+    }
+
+    // Production mode: fetch from Kapso API
+    let isMounted = true
+
+    async function fetchConversations() {
+      try {
+        const res = await fetch(`/api/kapso/conversations?workspace=${workspaceId}`)
+        if (!res.ok) {
+          throw new Error(`Failed to fetch: ${res.statusText}`)
+        }
+        const data = await res.json()
+
+        if (isMounted) {
+          setConversations(data.conversations || [])
+          setError(null)
+        }
+      } catch (err) {
+        console.error('Error fetching Kapso conversations:', err)
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error('Unknown error'))
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchConversations()
+
+    // Poll for updates every 5 seconds
+    const interval = setInterval(fetchConversations, 5000)
+
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+    }
+  }, [workspaceId])
+
+  // Get members from Convex (workspace members don't change frequently)
+  const members = useQuery(
+    api.workspaceMembers.listByWorkspaceWithUsers,
+    isDevMode() ? 'skip' : { workspace_id: String(workspaceId) }
+  )
+
+  const mockMembers = MOCK_TEAM_MEMBERS.map((m) => ({
+    user_id: m.user_id,
+    role: m.role,
+    created_at: Date.now(),
+    profile: m.profile ? {
+      full_name: m.profile.full_name,
+      email: m.profile.email,
+    } : null,
+  }))
+
+  return {
+    conversations,
+    members: isDevMode() ? mockMembers : members,
+    loading,
+    error,
+  }
+}
 
 // Mock data formatted for inbox in dev mode
 const MOCK_INBOX_DATA = {
@@ -148,11 +255,19 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
   // Mutation to mark conversation as read
   const markAsRead = useMutation(api.conversations.markAsRead)
 
-  // Skip Convex query in dev mode - use mock data
-  // Also skip until user is initialized to prevent race conditions
+  // Use Kapso API for conversations in production, mock data in dev mode
+  const { conversations: kapsoConversations, members: kapsoMembers, loading: kapsoLoading } = useKapsoConversations(workspaceId)
+
+  // Skip Kapso until user is initialized
+  const kapsoData = !userInitialized ? null : {
+    conversations: kapsoConversations,
+    members: kapsoMembers,
+  }
+
+  // Fall back to Convex for now if Kapso fails or for compatibility
   const convexData = useQuery(
     api.conversations.listWithFilters,
-    isDevMode() || !userInitialized ? 'skip' : {
+    isDevMode() || kapsoData ? 'skip' : {
       workspace_id: workspaceId as any,
       active: false,
       statusFilters: statusFilter.length > 0 ? statusFilter : undefined,
@@ -160,7 +275,11 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     }
   )
 
-  const data = isDevMode() ? MOCK_INBOX_DATA : convexData
+  // Use Kapso data if available, otherwise fall back to Convex or mock
+  const data = isDevMode() ? MOCK_INBOX_DATA : (kapsoData || convexData)
+
+  // Track loading state
+  const isLoading = kapsoLoading || (!userInitialized && !isDevMode())
 
   // Extract data from query response
   // Note: activeCount removed - no longer needed without Active/All toggle
@@ -370,7 +489,7 @@ export function InboxClient({ workspaceId }: InboxClientProps) {
     return []
   }, [contactForSidebar])
 
-  if (data === undefined) {
+  if (data === undefined || isLoading) {
     return <InboxSkeleton />
   }
 
