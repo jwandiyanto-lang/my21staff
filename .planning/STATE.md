@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 Milestone: v2.0
 Phase: Phase 4 - Lead Database — IN PROGRESS
 Status: 1 of 7 plans complete
-Last activity: 2026-01-30 — Plan 04-05 complete: Lead management mutations
+Last activity: 2026-01-30 — Plan 04-01 complete: Extended contacts schema with Sarah fields
 
 Progress: █████████████████████████████░░░ 87% (13 of 15 total plans across completed phases)
 
@@ -48,7 +48,7 @@ Progress: ███████████████████████�
 
 | Plan | Status | Summary |
 |------|--------|---------|
-| 04-05 | ✅ Complete (executed 19:46-19:48 UTC) | Lead management mutations: status, notes, Sarah sync |
+| 04-01 | ✅ Complete (executed 19:44-19:48 UTC) | Extended contacts schema with Sarah fields, lead workflow, notes timeline |
 
 ## V1.0.0 Archive Summary
 
@@ -205,3 +205,12 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 ---
 
 *Last updated: 2026-01-30 — Phase 4 IN PROGRESS, 13/15 total plans (87%)*
+
+**Phase 4 Progress:**
+- 04-01: Extended Contacts Schema (4 min 21 sec)
+  - Added 16 Sarah extraction fields to contacts table
+  - Added lead workflow status (new → qualified → contacted → converted → archived)
+  - Added notes timeline array with bot/human attribution
+  - Added activity timestamps (lastContactAt, lastActivityAt)
+  - Fixed blocking Convex validator errors in brainConfig.ts and internConfig.ts
+  - Schema validation passed, deployed to Convex cloud
