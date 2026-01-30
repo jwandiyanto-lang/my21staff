@@ -4,19 +4,35 @@
 
 See: .planning/PROJECT.md (updated 2026-01-30)
 
-**Core value:** The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
+**Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Planning v2.0 (fresh feature approach)
+**Current focus:** Phase 1 - Foundation (Kapso workspace setup)
 
 ## Current Position
 
 Milestone: v2.0
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-01-30 — Milestone v2.0 started
+Phase: Phase 1 - Foundation
+Plan: 7 phases planned
+Status: Ready to start execution
+Last activity: 2026-01-30 — Roadmap created, requirements defined
 
-Progress: Gathering requirements
+Progress: Requirements defined (52), Roadmap complete (7 phases)
+
+## V2.0 Milestone
+
+**Started:** 2026-01-30
+**Goal:** Build WhatsApp CRM with dual-agent AI (Sarah chat + Grok manager) using Kapso workflows + Convex database
+
+**Phases Planned:**
+1. Foundation (Kapso workspace + webhook)
+2. Workflow Rules Engine (Kapso triggers + routing)
+3. Sarah Chat Bot (Gemini 2.5 + persona)
+4. Lead Database (Kapso → Convex sync)
+5. Grok Manager Bot (Analysis + insights)
+6. Dashboard (Lead list + analytics)
+7. Handoff Workflow (End-to-end flow)
+
+**Total Requirements:** 52
 
 ## V1.0.0 Archive Summary
 
@@ -33,6 +49,7 @@ Progress: Gathering requirements
 - All features (rebuilding from scratch)
 - Milestone history (archived)
 - Phase execution logs (archived)
+- Eagle workspace (archived, new my21staff workspace for v2.0)
 
 ## Accumulated Context
 
@@ -40,23 +57,25 @@ Progress: Gathering requirements
 
 All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
-- V1.0.0 → V2.0 reset (fresh feature approach, keep infrastructure)
-- Archive Eagle workspace (deactivate first client)
-- Keep Convex + Clerk + Vercel (infrastructure proven)
-- Preserve codebase map (document current state)
+**v2.0 decisions:**
+- Hybrid AI + Rules architecture (Kapso workflows + Gemini/Grok)
+- New my21staff workspace (Eagle archived)
+- Kapso + Convex hybrid data layer (Kapso source of truth, Convex for dashboard performance)
+- Rule-first, AI-fallback approach (keyword triggers checked first)
+- Background sync for buttery smooth dashboard (no loading delays)
 
 ### Pending Todos
 
-None - ready for v2.0 planning.
+**Phase 1 execution:**
+- Create new my21staff workspace in Kapso
+- Provision Indonesian WhatsApp number
+- Configure webhook endpoint
+- Test message reception
 
 ### Blockers/Concerns
 
-**For v2.0 planning:**
-- Define fresh feature requirements
-- Deactivate/archive Eagle workspace
-- Plan new workspace approach
-- Create v2.0 roadmap
+None — ready to start Phase 1.
 
 ---
 
-*Last updated: 2026-01-30 — V2.0 milestone started*
+*Last updated: 2026-01-30 — Roadmap created, ready for Phase 1 execution*

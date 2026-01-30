@@ -136,67 +136,67 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| KAPS-01 | TBD | Pending |
-| KAPS-02 | TBD | Pending |
-| KAPS-03 | TBD | Pending |
-| KAPS-04 | TBD | Pending |
-| KAPS-05 | TBD | Pending |
-| RULE-01 | TBD | Pending |
-| RULE-02 | TBD | Pending |
-| RULE-03 | TBD | Pending |
-| RULE-04 | TBD | Pending |
-| RULE-05 | TBD | Pending |
-| SARA-01 | TBD | Pending |
-| SARA-02 | TBD | Pending |
-| SARA-03 | TBD | Pending |
-| SARA-04 | TBD | Pending |
-| SARA-05 | TBD | Pending |
-| SARA-06 | TBD | Pending |
-| SARA-07 | TBD | Pending |
-| LEAD-01 | TBD | Pending |
-| LEAD-02 | TBD | Pending |
-| LEAD-03 | TBD | Pending |
-| LEAD-04 | TBD | Pending |
-| LEAD-05 | TBD | Pending |
-| LEAD-06 | TBD | Pending |
-| LEAD-07 | TBD | Pending |
-| MGR-01 | TBD | Pending |
-| MGR-02 | TBD | Pending |
-| MGR-03 | TBD | Pending |
-| MGR-04 | TBD | Pending |
-| MGR-05 | TBD | Pending |
-| MGR-06 | TBD | Pending |
-| MGR-07 | TBD | Pending |
-| DBLD-01 | TBD | Pending |
-| DBLD-02 | TBD | Pending |
-| DBLD-03 | TBD | Pending |
-| DBLD-04 | TBD | Pending |
-| DBLD-05 | TBD | Pending |
-| DBLD-06 | TBD | Pending |
-| DBLD-07 | TBD | Pending |
-| DBLI-01 | TBD | Pending |
-| DBLI-02 | TBD | Pending |
-| DBLI-03 | TBD | Pending |
-| DBLI-04 | TBD | Pending |
-| DBLI-05 | TBD | Pending |
-| DBLI-06 | TBD | Pending |
-| DBLA-01 | TBD | Pending |
-| DBLA-02 | TBD | Pending |
-| DBLA-03 | TBD | Pending |
-| DBLA-04 | TBD | Pending |
-| DBLA-05 | TBD | Pending |
-| DBLA-06 | TBD | Pending |
-| HAND-01 | TBD | Pending |
-| HAND-02 | TBD | Pending |
-| HAND-03 | TBD | Pending |
-| HAND-04 | TBD | Pending |
-| HAND-05 | TBD | Pending |
-| HAND-06 | TBD | Pending |
+| KAPS-01 | Phase 1 | Pending |
+| KAPS-02 | Phase 1 | Pending |
+| KAPS-03 | Phase 1 | Pending |
+| KAPS-04 | Phase 1 | Pending |
+| KAPS-05 | Phase 1 | Pending |
+| RULE-01 | Phase 2 | Pending |
+| RULE-02 | Phase 2 | Pending |
+| RULE-03 | Phase 2 | Pending |
+| RULE-04 | Phase 2 | Pending |
+| RULE-05 | Phase 2 | Pending |
+| SARA-01 | Phase 3 | Pending |
+| SARA-02 | Phase 3 | Pending |
+| SARA-03 | Phase 3 | Pending |
+| SARA-04 | Phase 3 | Pending |
+| SARA-05 | Phase 3 | Pending |
+| SARA-06 | Phase 3 | Pending |
+| SARA-07 | Phase 3 | Pending |
+| LEAD-01 | Phase 4 | Pending |
+| LEAD-02 | Phase 4 | Pending |
+| LEAD-03 | Phase 4 | Pending |
+| LEAD-04 | Phase 4 | Pending |
+| LEAD-05 | Phase 4 | Pending |
+| LEAD-06 | Phase 4 | Pending |
+| LEAD-07 | Phase 4 | Pending |
+| MGR-01 | Phase 5 | Pending |
+| MGR-02 | Phase 5 | Pending |
+| MGR-03 | Phase 5 | Pending |
+| MGR-04 | Phase 5 | Pending |
+| MGR-05 | Phase 5 | Pending |
+| MGR-06 | Phase 5 | Pending |
+| MGR-07 | Phase 5 | Pending |
+| DBLD-01 | Phase 6 | Pending |
+| DBLD-02 | Phase 6 | Pending |
+| DBLD-03 | Phase 6 | Pending |
+| DBLD-04 | Phase 6 | Pending |
+| DBLD-05 | Phase 6 | Pending |
+| DBLD-06 | Phase 6 | Pending |
+| DBLD-07 | Phase 6 | Pending |
+| DBLI-01 | Phase 6 | Pending |
+| DBLI-02 | Phase 6 | Pending |
+| DBLI-03 | Phase 6 | Pending |
+| DBLI-04 | Phase 6 | Pending |
+| DBLI-05 | Phase 6 | Pending |
+| DBLI-06 | Phase 6 | Pending |
+| DBLA-01 | Phase 6 | Pending |
+| DBLA-02 | Phase 6 | Pending |
+| DBLA-03 | Phase 6 | Pending |
+| DBLA-04 | Phase 6 | Pending |
+| DBLA-05 | Phase 6 | Pending |
+| DBLA-06 | Phase 6 | Pending |
+| HAND-01 | Phase 7 | Pending |
+| HAND-02 | Phase 7 | Pending |
+| HAND-03 | Phase 7 | Pending |
+| HAND-04 | Phase 7 | Pending |
+| HAND-05 | Phase 7 | Pending |
+| HAND-06 | Phase 7 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 52 total
-- Mapped to phases: 0
-- Unmapped: 52
+- Mapped to phases: 52
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-01-30*
