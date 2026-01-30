@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { MessageCircle, Check, AlertCircle, Trash2, Settings, Zap, Plus, Pencil, Tag, Download, FileSpreadsheet, Upload, Loader2, X, Users, Bot, Palette, ChevronUp, ChevronDown } from 'lucide-react'
+import { SyncStatusIndicator } from '@/components/settings/sync-status-indicator'
 import { Switch } from '@/components/ui/switch'
 import { useRef } from 'react'
 import { Textarea } from '@/components/ui/textarea'
@@ -993,12 +994,15 @@ export function SettingsClient({ workspace }: SettingsClientProps) {
             Manage your workspace settings and team
           </p>
         </div>
-        <Link href={`/${workspace.slug}/team`}>
-          <Button variant="outline">
-            <Users className="h-4 w-4 mr-2" />
-            Manage Team
-          </Button>
-        </Link>
+        <div className="flex items-center gap-4">
+          <SyncStatusIndicator workspaceId={workspace.id} />
+          <Link href={`/${workspace.slug}/team`}>
+            <Button variant="outline">
+              <Users className="h-4 w-4 mr-2" />
+              Manage Team
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Tabs defaultValue="integrations" className="space-y-6">
