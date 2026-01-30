@@ -42,7 +42,7 @@
 - Workflow trigger configured in Kapso
 - Test message verified in logs
 
-**Plans:**
+**Plans:** 3 plans
 - [ ] 01-01-PLAN.md — Kapso workspace & Indonesian number provisioning
 - [ ] 01-02-PLAN.md — Webhook endpoint development
 - [ ] 01-03-PLAN.md — Workflow trigger & verification
@@ -53,26 +53,34 @@
 
 ## Phase 2: Workflow Rules Engine
 
-**Goal:** Kapso's native workflow engine handles keyword triggers and conditional routing before AI.
+**Goal:** Build a rules engine that handles keyword triggers and conditional routing before AI processes messages.
 
-**Note:** This phase uses **Kapso's built-in workflow system** — no custom code. We configure workflows in Kapso dashboard to handle rule-based automation before AI processes unmatched messages.
+**Note:** This phase builds a **code-based workflow rules engine** that runs BEFORE the AI processor. Rules are stored in Convex and configurable via Settings UI (Phase 2.5).
 
 **Requirements:**
 - RULE-01, RULE-02, RULE-03, RULE-04, RULE-05
 
 **Success Criteria:**
-1. Keyword "human"/"agent" triggers handoff flow via Kapso workflow
-2. "!summary" command triggers Grok manager bot via Kapso workflow
-3. New leads vs returning leads are detected and routed differently via Kapso
-4. FAQ responses (pricing, services, hours) work via Kapso template responses
-5. Rules are checked first in Kapso workflow, unmatched messages pass to AI
+1. Keyword "human"/"agent" triggers handoff action
+2. "!summary" command triggers manager_bot action
+3. New leads vs returning leads are detected correctly
+4. FAQ responses (pricing, services, hours) work via template matching
+5. Rules are checked first, unmatched messages pass to AI
 
 **Deliverables:**
-- Kapso workflow configured with keyword triggers (via Settings UI)
-- Lead routing logic in Kapso workflow (new vs returning detection)
-- FAQ template responses in Kapso workflow
-- Conditional routing in Kapso workflow: rules → AI webhook fallback
-- Workflow testing verified via Settings UI test panel
+- Workflow rules engine (src/lib/workflow/)
+- Keyword trigger matching logic
+- Lead routing logic (new vs returning detection)
+- FAQ template response system
+- Convex schema for workflow configuration
+- Webhook integration (rules before AI)
+
+**Plans:** 3 plans
+- [ ] 02-01-PLAN.md — Workflow rules engine core (types, triggers, engine)
+- [ ] 02-02-PLAN.md — Webhook integration + Convex schema
+- [ ] 02-03-PLAN.md — End-to-end testing + verification
+
+**Status:** Planning complete — ready for execution
 
 ---
 
@@ -113,48 +121,48 @@
 
 **Key Features:**
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  Settings                                          Synced ✓ │
-├─────────────────────────────────────────────────────────────┤
-│                                                                │
-│  Workflows                                                     │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │ 🔄 Keyword Triggers                    Edit │ Delete  │   │
-│  │ • "human" → Handoff to human                            │   │
-│  │ • "!summary" → Generate daily summary                   │   │
-│  │ • [Add New Trigger]                                     │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                                │
-│  FAQ Templates                                                │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │ 💬 Pricing Response                     Edit │ Delete  │   │
-│  │ "Our services start from $500/month..."                │   │
-│  │ • [Add New Template]                                   │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                                │
-│  Bot Personas                                                 │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │ 🤖 Sarah (Chat Bot)                                  │   │
-│  │ Prompt: [You are Sarah, warm and efficient...]        │   │
-│  │                                                        │   │
-│  │ 🧠 Grok (Manager Bot)                                │   │
-│  │ Prompt: [Analyze leads and generate insights...]      │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                                │
-│  Lead Routing Rules                                           │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │ If new phone number → [Start fresh conversation]      │   │
-│  │ If returning → [Resume with context]                  │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                                │
-│  Test Panel                                                   │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │ Send test message to: [+62xxx...]                    │   │
-│  │ [Send Test]                                          │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                                │
-│                                        [Apply Changes]        │
-└─────────────────────────────────────────────────────────────┘
++-------------------------------------------------------------+
+|  Settings                                          Synced v |
++-------------------------------------------------------------+
+|                                                              |
+|  Workflows                                                   |
+|  +------------------------------------------------------+   |
+|  | Keyword Triggers                     Edit | Delete    |   |
+|  | - "human" -> Handoff to human                         |   |
+|  | - "!summary" -> Generate daily summary                |   |
+|  | - [Add New Trigger]                                   |   |
+|  +------------------------------------------------------+   |
+|                                                              |
+|  FAQ Templates                                               |
+|  +------------------------------------------------------+   |
+|  | Pricing Response                      Edit | Delete   |   |
+|  | "Our services start from $500/month..."               |   |
+|  | - [Add New Template]                                  |   |
+|  +------------------------------------------------------+   |
+|                                                              |
+|  Bot Personas                                                |
+|  +------------------------------------------------------+   |
+|  | Sarah (Chat Bot)                                      |   |
+|  | Prompt: [You are Sarah, warm and efficient...]        |   |
+|  |                                                       |   |
+|  | Grok (Manager Bot)                                    |   |
+|  | Prompt: [Analyze leads and generate insights...]      |   |
+|  +------------------------------------------------------+   |
+|                                                              |
+|  Lead Routing Rules                                          |
+|  +------------------------------------------------------+   |
+|  | If new phone number -> [Start fresh conversation]     |   |
+|  | If returning -> [Resume with context]                 |   |
+|  +------------------------------------------------------+   |
+|                                                              |
+|  Test Panel                                                  |
+|  +------------------------------------------------------+   |
+|  | Send test message to: [+62xxx...]                     |   |
+|  | [Send Test]                                           |   |
+|  +------------------------------------------------------+   |
+|                                                              |
+|                                        [Apply Changes]       |
++-------------------------------------------------------------+
 ```
 
 **API Endpoints Used:**
@@ -210,16 +218,16 @@ GET    /workflow_executions/{id}     # Get execution result
 
 **Success Criteria:**
 1. Kapso contacts auto-sync to Convex on creation/update
-2. All messages sync bidirectionally (Kapso ↔ Convex)
+2. All messages sync bidirectionally (Kapso <-> Convex)
 3. Custom fields store: service, budget, timeline, qualification status
-4. Lead status workflow: new → qualified → contacted → converted → archived
+4. Lead status workflow: new -> qualified -> contacted -> converted -> archived
 5. Timestamps track: created, last message, last contact, last activity
 6. Background sync service runs near real-time
 7. Kapso remains source of truth, Convex is read replica for dashboard
 
 **Deliverables:**
 - Convex schema: contacts, messages, leads tables
-- Kapso → Convex sync service (background job)
+- Kapso -> Convex sync service (background job)
 - Custom fields in Convex schema
 - Lead status state machine
 - Timestamp tracking implementation
@@ -272,7 +280,7 @@ GET    /workflow_executions/{id}     # Get execution result
 3. Filter by status works (new/qualified/contacted/converted/archived)
 4. Filter by date range (today/week/month)
 5. Search by name/phone is instant
-6. Click lead card → full conversation history loads instantly
+6. Click lead card -> full conversation history loads instantly
 7. Lead cards show metrics (message count, last activity, qualification)
 
 **AI Insights:**
@@ -339,33 +347,33 @@ GET    /workflow_executions/{id}     # Get execution result
 
 ```
 Phase 1 (Foundation)
-    │
-    ▼
+    |
+    v
 Phase 2 (Workflow Rules)
-    │
-    ▼
+    |
+    v
 Phase 2.5 (Settings & Configuration)
-    │
-    ├─────────────┐
-    ▼             ▼
+    |
+    +-------------+
+    v             v
 Phase 3      Phase 4
 (Sarah Bot)  (Database)
-    │             │
-    └──────┬──────┘
-           ▼
+    |             |
+    +------+------+
+           v
     Phase 5 (Grok Manager)
-           │
-           ▼
+           |
+           v
     Phase 6 (Dashboard + Inbox)
-           │
-           ▼
+           |
+           v
     Phase 7 (Handoff)
-           │
-           ▼
+           |
+           v
     Phase 8 (Testing & Polish)
 ```
 
-**Critical Path:** Phase 1 → 2 → 2.5 → 3 → 6 → 7 → 8 (Foundation → Settings → Sarah → Dashboard → Handoff → Test)
+**Critical Path:** Phase 1 -> 2 -> 2.5 -> 3 -> 6 -> 7 -> 8 (Foundation -> Settings -> Sarah -> Dashboard -> Handoff -> Test)
 
 **Can Parallelize:**
 - Phase 3 (Sarah) + Phase 4 (Database) — independent after Phase 2.5
@@ -383,7 +391,7 @@ Phase 3      Phase 4
 **Goal:** End-to-end testing of all features, bug fixes, performance optimization, production readiness.
 
 **Requirements:**
-- TEST-01: End-to-end flow testing (new lead → Sarah → handoff → notification)
+- TEST-01: End-to-end flow testing (new lead -> Sarah -> handoff -> notification)
 - TEST-02: Performance optimization (dashboard load time, sync latency)
 
 **Success Criteria:**
@@ -418,7 +426,7 @@ Phase 3      Phase 4
 
 **Definition of Done:**
 - All 69 requirements marked complete
-- End-to-end flow tested: Lead messages → Sarah qualifies → Handoff → Notification
+- End-to-end flow tested: Lead messages -> Sarah qualifies -> Handoff -> Notification
 - Dashboard accessible with real-time data
 - Settings UI applies changes to Kapso immediately
 - WhatsApp inbox sends/receives with templates and media
