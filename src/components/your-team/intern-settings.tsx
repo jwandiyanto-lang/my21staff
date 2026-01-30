@@ -85,6 +85,16 @@ export function InternSettings({ workspaceId, workspaceSlug }: InternSettingsPro
       }
     }
     loadBotName()
+
+    // Listen for settings changes in dev mode
+    const handleSettingsUpdate = () => {
+      loadBotName()
+    }
+    window.addEventListener('mockWorkspaceSettingsUpdated', handleSettingsUpdate)
+
+    return () => {
+      window.removeEventListener('mockWorkspaceSettingsUpdated', handleSettingsUpdate)
+    }
   }, [workspaceId])
 
   const toggleCard = (card: keyof typeof openCards) => {
