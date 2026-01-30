@@ -75,7 +75,7 @@ export function YourTeamClient({ workspace, teamMembers, activeTab: initialTab }
 
             {/* Intern Settings Component */}
             <TabErrorBoundary tabName="Intern Settings">
-              <InternSettings workspaceSlug={workspace.slug} />
+              <InternSettings workspaceId={workspace.id} workspaceSlug={workspace.slug} />
             </TabErrorBoundary>
           </div>
         </TabsContent>
@@ -95,7 +95,7 @@ export function YourTeamClient({ workspace, teamMembers, activeTab: initialTab }
 
             {/* Brain Settings Component */}
             <TabErrorBoundary tabName="Brain Settings">
-              <BrainSettings workspaceSlug={workspace.slug} />
+              <BrainSettings workspaceId={workspace.id} workspaceSlug={workspace.slug} />
             </TabErrorBoundary>
           </div>
         </TabsContent>

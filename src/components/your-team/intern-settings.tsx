@@ -54,20 +54,38 @@ const DEFAULT_INTERN_CONFIG = {
 export type InternConfig = typeof DEFAULT_INTERN_CONFIG
 
 interface InternSettingsProps {
+  workspaceId: string
   workspaceSlug: string
 }
 
-export function InternSettings({ workspaceSlug }: InternSettingsProps) {
+export function InternSettings({ workspaceId, workspaceSlug }: InternSettingsProps) {
   const [config, setConfig] = useState<InternConfig>(DEFAULT_INTERN_CONFIG)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [newCustomSlot, setNewCustomSlot] = useState("")
+  const [botName, setBotName] = useState("Sarah") // Dynamic bot name
   const [openCards, setOpenCards] = useState({
     persona: true,
     behavior: false,
     response: false,
     slots: false,
   })
+
+  // Load bot name
+  useEffect(() => {
+    async function loadBotName() {
+      try {
+        const res = await fetch(`/api/workspaces/${workspaceId}/bot-config`)
+        if (res.ok) {
+          const data = await res.json()
+          setBotName(data.intern_name || "Sarah")
+        }
+      } catch (error) {
+        console.error("Failed to load bot name:", error)
+      }
+    }
+    loadBotName()
+  }, [workspaceId])
 
   const toggleCard = (card: keyof typeof openCards) => {
     setOpenCards(prev => ({ ...prev, [card]: !prev[card] }))
@@ -228,7 +246,7 @@ export function InternSettings({ workspaceSlug }: InternSettingsProps) {
                 <ChevronDown className={`w-5 h-5 transition-transform ${openCards.persona ? '' : 'rotate-180'}`} />
               </CardTitle>
               <CardDescription>
-                Configure how the Intern (Sarah) presents herself to leads
+                Configure how the Intern ({botName}) presents herself to leads
               </CardDescription>
             </CardHeader>
           </CollapsibleTrigger>
@@ -242,7 +260,7 @@ export function InternSettings({ workspaceSlug }: InternSettingsProps) {
               </div>
               <div>
                 <p className="font-medium">Bot Name</p>
-                <p className="text-sm text-muted-foreground">Sarah (Intern)</p>
+                <p className="text-sm text-muted-foreground">{botName} (Intern)</p>
               </div>
             </div>
             <Button variant="outline" size="sm" asChild>
@@ -312,13 +330,13 @@ export function InternSettings({ workspaceSlug }: InternSettingsProps) {
             <Label htmlFor="customPrompt">Custom System Prompt</Label>
             <Textarea
               id="customPrompt"
-              placeholder="You are Sarah, an educational consultant..."
+              placeholder={`You are ${botName}, an educational consultant...`}
               value={config.persona.customPrompt}
               onChange={(e) => updatePersona("customPrompt", e.target.value)}
               rows={4}
             />
             <p className="text-xs text-muted-foreground">
-              Add specific instructions for Sarah&apos;s behavior and knowledge base
+              Add specific instructions for {botName}&apos;s behavior and knowledge base
             </p>
           </div>
             </CardContent>
