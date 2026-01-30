@@ -11,11 +11,11 @@
   },
   "research_rules": {
     "primary_sources": [
-      "Kapso documentation (docs.kapso.ai)",
-      "Kapso GitHub repo (github.com/gokapso)",
-      "Kapso MCP agent skills (available in CLI)"
+      "Kapso documentation: https://docs.kapso.ai",
+      "Kapso GitHub: https://github.com/gokapso",
+      "Kapso MCP skills: Available in CLI (mcp__kapso_* tools)"
     ],
-    "approach": "recommend_first",
-    "description": "Always research Kapso's native capabilities first. Recommend what already exists in Kapso before building custom solutions. Claude should tell the user what will work best based on Kapso's features, not the other way around."
+    "approach": "kapso_first_for_speed",
+    "description": "ALWAYS check if Kapso already has the solution FIRST. Claude should recommend what will work the FASTEST using Kapso's native features. Only build custom if Kapso doesn't have it. Goal: Speed + leverage existing Kapso capabilities."
   }
 }
