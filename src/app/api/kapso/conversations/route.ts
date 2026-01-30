@@ -12,20 +12,20 @@ export async function GET(request: NextRequest) {
   try {
     // In dev mode, return mock conversations
     if (isDevMode()) {
-      const { MOCK_CONVERSATIONS_RAW } = await import('@/lib/mock-data')
+      const { MOCK_CONVERSATIONS } = await import('@/lib/mock-data')
 
-      const conversations = MOCK_CONVERSATIONS_RAW.map((conv) => ({
+      const conversations = MOCK_CONVERSATIONS.map((conv) => ({
         id: conv.id,
-        phone: conv.phone || '+62 xxx xxxx xxxx',
-        contactName: conv.contact_name,
-        kapso_name: conv.contact_name,
+        phone: conv.contact?.phone || '+62 xxx xxxx xxxx',
+        contactName: conv.contact?.name,
+        kapso_name: conv.contact?.kapso_name,
         lastMessageAt: conv.last_message_at || new Date().toISOString(),
         lastMessagePreview: conv.last_message_preview,
         status: conv.status as 'active' | 'ended' | 'open' | 'handover' | 'closed',
         unreadCount: conv.unread_count || 0,
         assignedTo: conv.assigned_to,
-        tags: [],
-        leadStatus: 'prospect',
+        tags: conv.contact?.tags || [],
+        leadStatus: conv.contact?.lead_status || 'prospect',
       }))
 
       return NextResponse.json({ conversations })
