@@ -1,0 +1,239 @@
+---
+wave: 2
+depends_on: []
+files_modified:
+  - src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx
+  - src/components/inbox/kapso-inbox-embed.tsx
+  - src/lib/kapso-client.ts
+  - src/app/api/kapso/conversations/route.ts
+  - src/app/api/kapso/messages/route.ts
+  - src/app/api/kapso/send/route.ts
+autonomous: true
+---
+
+# 02_5-04-PLAN.md: Kapso Inbox Integration
+
+<objective>
+Enhance the Inbox tab with direct Kapso API integration for real-time WhatsApp messaging. The existing inbox UI stays, but backend switches from Convex-mirrored data to live Kapso API calls for conversations and messages.
+</objective>
+
+<must_haves>
+- Inbox fetches conversations directly from Kapso API
+- Messages load from Kapso API (not Convex mirror)
+- Send messages via Kapso API
+- Preserve existing UI/UX (ConversationList, MessageThread, InfoSidebar)
+- Apply my21staff black/white + Geist Mono styling
+- Real-time message updates (polling or WebSocket)
+- Dev mode continues to work with mock data
+- Production uses Kapso MCP tools for data
+</must_haves>
+
+<tasks>
+
+## Task 1: Create Kapso client library
+
+Build a client library for interacting with Kapso API via MCP tools or direct fetch.
+
+Files modified:
+- CREATE: src/lib/kapso-client.ts
+
+```typescript
+// Kapso API client for WhatsApp operations
+
+interface KapsoConversation {
+  id: string
+  phone: string
+  contactName?: string
+  lastMessageAt: string
+  lastMessagePreview?: string
+  status: 'active' | 'ended'
+  unreadCount: number
+}
+
+interface KapsoMessage {
+  id: string
+  content: string
+  direction: 'inbound' | 'outbound'
+  timestamp: string
+  messageType: 'text' | 'image' | 'video' | 'document' | 'audio'
+  mediaUrl?: string
+}
+
+export class KapsoClient {
+  private apiKey: string
+  private projectId: string
+
+  constructor(config: { apiKey: string; projectId: string })
+
+  // Conversations
+  async listConversations(options?: { status?: 'active' | 'ended'; limit?: number }): Promise<KapsoConversation[]>
+  async getConversation(conversationId: string): Promise<KapsoConversation>
+
+  // Messages
+  async getMessages(conversationId: string, options?: { limit?: number }): Promise<KapsoMessage[]>
+
+  // Send
+  async sendTextMessage(conversationId: string, content: string): Promise<KapsoMessage>
+  async sendTemplate(conversationId: string, templateName: string, params?: Record<string, string>): Promise<KapsoMessage>
+
+  // Contacts
+  async searchContacts(query: string): Promise<KapsoContact[]>
+  async getContactContext(identifier: string): Promise<KapsoContactContext>
+}
+```
+
+Verification:
+- [ ] Types are defined correctly
+- [ ] Client can be instantiated
+- [ ] Methods are implemented
+
+## Task 2: Create API routes for Kapso operations
+
+Create Next.js API routes that proxy Kapso operations (for CORS and auth).
+
+Files modified:
+- CREATE: src/app/api/kapso/conversations/route.ts
+  - GET: List conversations with filters
+  - Uses workspace's Kapso credentials from Convex
+
+- CREATE: src/app/api/kapso/conversations/[id]/route.ts
+  - GET: Get conversation details and messages
+
+- CREATE: src/app/api/kapso/send/route.ts
+  - POST: Send text message
+  - POST with template: Send template message
+
+- CREATE: src/app/api/kapso/contacts/route.ts
+  - GET: Search contacts
+  - GET with identifier: Get contact context
+
+Each route:
+1. Verifies auth (Clerk)
+2. Gets workspace Kapso config
+3. Calls Kapso API (via fetch or MCP)
+4. Returns formatted response
+
+Verification:
+- [ ] Routes return proper responses
+- [ ] Auth is checked
+- [ ] Errors are handled gracefully
+
+## Task 3: Update InboxClient to use Kapso data
+
+Modify the inbox client to fetch from Kapso API instead of Convex.
+
+Files modified:
+- MODIFY: src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx
+  - Add useKapsoConversations hook (fetches from /api/kapso/conversations)
+  - Keep existing filtering/search logic client-side
+  - Add polling for new messages (every 5 seconds) or use WebSocket
+  - Handle loading and error states
+
+```typescript
+// New hook for Kapso conversations
+function useKapsoConversations(workspaceSlug: string) {
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  useEffect(() => {
+    async function fetchConversations() {
+      const res = await fetch(`/api/kapso/conversations?workspace=${workspaceSlug}`)
+      const data = await res.json()
+      setConversations(data.conversations)
+      setLoading(false)
+    }
+    fetchConversations()
+
+    // Poll for updates
+    const interval = setInterval(fetchConversations, 5000)
+    return () => clearInterval(interval)
+  }, [workspaceSlug])
+
+  return { conversations, loading, error }
+}
+```
+
+Integration points:
+- Replace convexData with kapsoData in production mode
+- Keep MOCK_INBOX_DATA for dev mode
+- Adapt data shape to match existing UI expectations
+
+Verification:
+- [ ] Conversations load from Kapso API
+- [ ] List updates in real-time (polling)
+- [ ] Search/filter works
+- [ ] Dev mode still works with mock data
+
+## Task 4: Update MessageThread to use Kapso data
+
+Modify message thread to fetch/send via Kapso.
+
+Files modified:
+- MODIFY: src/components/inbox/message-thread.tsx
+  - Add useKapsoMessages hook (fetches from /api/kapso/conversations/[id])
+  - Send messages via /api/kapso/send
+  - Poll for new messages in active conversation
+
+Key changes:
+- Replace Convex message query with Kapso fetch
+- Replace Convex send mutation with Kapso API call
+- Add optimistic updates for sent messages
+- Handle message status (sent, delivered, read)
+
+Verification:
+- [ ] Messages load from Kapso
+- [ ] Can send text messages
+- [ ] New messages appear in real-time
+- [ ] Message status shows correctly
+
+## Task 5: Ensure styling matches my21staff brand
+
+Verify and fix any styling issues to ensure black/white + Geist Mono consistency.
+
+Files modified:
+- MODIFY: src/components/inbox/conversation-list.tsx (if needed)
+- MODIFY: src/components/inbox/message-bubble.tsx (if needed)
+- MODIFY: src/app/globals.css (if needed)
+
+Style requirements:
+- Background: Dark (#000000 or sidebar color)
+- Text: White/gray scale
+- Accent: Orange (#F7931A) for highlights
+- Font: Geist Mono for data, Geist Sans for text
+- Cards: Subtle borders, rounded corners
+
+Verification:
+- [ ] Inbox matches my21staff brand
+- [ ] No unstyled elements
+- [ ] Consistent with rest of dashboard
+
+## Task 6: Add dev mode fallback
+
+Ensure inbox works in dev mode without Kapso API.
+
+Files modified:
+- MODIFY: src/app/(dashboard)/[workspace]/inbox/inbox-client.tsx
+  - Check isDevMode() flag
+  - If dev mode, use MOCK_INBOX_DATA
+  - If production, use Kapso API
+
+Verification:
+- [ ] /demo/inbox works offline
+- [ ] Uses mock conversations and messages
+- [ ] Can "send" messages (stored in state)
+
+</tasks>
+
+<verification>
+- [ ] Inbox loads conversations from Kapso API
+- [ ] Messages display correctly from Kapso
+- [ ] Can send text messages via Kapso
+- [ ] Real-time updates work (new messages appear)
+- [ ] Search and filter work on Kapso data
+- [ ] Styling matches my21staff brand (black/white, Geist Mono)
+- [ ] Dev mode works offline with mock data
+- [ ] No type errors (npm run type-check)
+- [ ] No console errors in browser
+- [ ] Message status indicators work
+</verification>

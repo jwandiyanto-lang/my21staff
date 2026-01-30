@@ -6,17 +6,17 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 2.5 - Settings & Configuration (Kapso workflow management UI)
+**Current focus:** Phase 2.5 - Settings & Configuration (redoing Plan 04 - Inbox redesign with whatsapp-cloud-inbox)
 
 ## Current Position
 
 Milestone: v2.0
 Phase: Phase 2.5 - Settings & Configuration
-Plan: 5 of 5 plans complete
-Status: Phase 2.5 COMPLETE ✅
-Last activity: 2026-01-30 — Completed Plan 05: Settings Backup & Sync Status
+Plan: 3 of 5 plans complete (Plan 04 needs redo)
+Status: Phase 2.5 IN PROGRESS 🔄
+Last activity: 2026-01-30 — Plan 04 marked for redo (fork whatsapp-cloud-inbox instead of enhancing Eagle inbox)
 
-Progress: ███████████████░░░░░░░░░░░░░░░ 59% (7 of 12 total plans across all phases)
+Progress: ██████████████░░░░░░░░░░░░░░░░ 50% (6 of 12 total plans across all phases)
 
 ## V2.0 Milestone
 
@@ -26,7 +26,7 @@ Progress: ███████████████░░░░░░░░�
 **Phases Planned:**
 1. Foundation (Kapso workspace + webhook) - COMPLETED (1 plan)
 2. Workflow Rules Engine (Kapso native workflows + Grok) - ✅ COMPLETED (3 plans)
-2.5. Settings & Configuration (Kapso workflow management UI) - ✅ COMPLETED (5 plans)
+2.5. Settings & Configuration (Kapso workflow management UI) - 🔄 IN PROGRESS (3 of 5 plans, Plan 04 needs redo)
 3. Sarah Chat Bot (Gemini 2.5 + persona) - PLANNING
 4. Lead Database (Kapso → Convex sync)
 5. Grok Manager Bot (Analysis + insights)
@@ -105,26 +105,26 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Pending Todos
 
-**Phase 2.5: ✅ COMPLETE**
-All 5 plans completed:
-- Your Team Navigation & Layout
-- Bot Name Configuration
-- Bot Configuration Components (Intern & Brain)
-- Kapso Inbox Integration
-- Settings Backup & Sync Status
+**Phase 2.5: 🔄 IN PROGRESS**
+Plans completed (3 of 5):
+- ✅ Your Team Navigation & Layout
+- ✅ Bot Name Configuration
+- ✅ Bot Configuration Components (Intern & Brain)
+- ❌ Kapso Inbox Integration (NEEDS REDO - fork whatsapp-cloud-inbox, not enhance Eagle inbox)
+- ✅ Settings Backup & Sync Status
 
-**Next Phase: Phase 3 - Sarah Chat Bot**
+**Current focus:** Redoing Plan 04 - Fork whatsapp-cloud-inbox and apply my21staff branding
 
 ### Blockers/Concerns
 
-None — ready for Phase 3 (Sarah Chat Bot).
+**Plan 04 incorrectly executed:** Plan enhanced old Eagle inbox instead of forking whatsapp-cloud-inbox repo. Old Eagle inbox removed, Plan 04 needs complete rewrite and re-execution.
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 18:15 UTC
-**Stopped at:** Completed Phase 2.5 Plan 05 (Settings Backup & Sync Status)
+**Last session:** 2026-01-30 19:15 UTC
+**Stopped at:** Phase 2.5 Plan 04 marked for redo - Old Eagle inbox removed, preparing to fork whatsapp-cloud-inbox
 **Resume file:** None
 
 ---
 
-*Last updated: 2026-01-30 — Phase 2.5 COMPLETE ✅ (5/5 plans), 7/12 total plans (59%)*
+*Last updated: 2026-01-30 — Phase 2.5 IN PROGRESS 🔄 (3/5 plans, Plan 04 needs redo), 6/12 total plans (50%)*
