@@ -1,0 +1,203 @@
+# Requirements: my21staff v2.0
+
+**Defined:** 2026-01-30
+**Core Value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
+
+## v2.0 Requirements
+
+Requirements for v2.0 milestone. Hybrid AI + Rules architecture using Kapso workflows.
+
+### Kapso Workspace Setup
+
+- [ ] **KAPS-01**: Create new my21staff workspace in Kapso (separate from archived Eagle)
+- [ ] **KAPS-02**: Provision Indonesian WhatsApp number via Kapso
+- [ ] **KAPS-03**: Configure webhook endpoint for message triggers
+- [ ] **KAPS-04**: Create workflow trigger for new inbound messages
+- [ ] **KAPS-05**: Verify webhook delivery and message reception
+
+### Workflow Rules Engine (Kapso)
+
+- [ ] **RULE-01**: Keyword trigger for handoff ("human", "agent", "speak to person")
+- [ ] **RULE-02**: Keyword trigger for AI manager bot ("!summary", "!report")
+- [ ] **RULE-03**: Lead routing rules (new lead vs returning lead detection)
+- [ ] **RULE-04**: Fixed response templates for FAQs (pricing, services, hours)
+- [ ] **RULE-05**: Conditional routing: rules checked first, AI handles unmatched
+
+### Sarah Chat Bot (Gemini 2.5)
+
+- [ ] **SARA-01**: Gemini 2.5 Flash integration for chat responses
+- [ ] **SARA-02**: Sarah persona implementation (warm, efficient, under 140 chars, max 1 emoji)
+- [ ] **SARA-03**: 4-slot data collection from conversation (Name, Service, Budget, Timeline)
+- [ ] **SARA-04**: Photo/image handling capability (analyze, respond, extract info)
+- [ ] **SARA-05**: Context-aware conversation (remembers chat history)
+- [ ] **SARA-06**: Price range responses (never specific prices, ranges only)
+- [ ] **SARA-07**: Handoff detection (4 slots filled OR user asks for human)
+
+### Lead Database (Convex - Synced from Kapso)
+
+- [ ] **LEAD-01**: Contact sync from Kapso to Convex (phone, name, profile)
+- [ ] **LEAD-02**: Message sync from Kapso to Convex (all messages, bidirectional)
+- [ ] **LEAD-03**: Custom fields storage (service needed, budget, timeline, qualification status)
+- [ ] **LEAD-04**: Lead status tracking (new, qualified, contacted, converted, archived)
+- [ ] **LEAD-05**: Timestamp tracking (created, last message, last contact, last activity)
+- [ ] **LEAD-06**: Background sync service (Kapso → Convex, near real-time)
+- [ ] **LEAD-07**: Conflict resolution (Kapso source of truth, Convex read replica)
+
+### Grok Manager Bot
+
+- [ ] **MGR-01**: Grok 2 integration for deep analysis
+- [ ] **MGR-02**: !Summary command handler (triggered via Kapso workflow)
+- [ ] **MGR-03**: Daily lead summary generation (all leads, activity digest)
+- [ ] **MGR-04**: Lead quality scoring (hot/warm/cold based on engagement + data completeness)
+- [ ] **MGR-05**: Action items generation (who needs follow-up, prioritized)
+- [ ] **MGR-06**: Content recommendations (common questions, suggest FAQ additions)
+- [ ] **MGR-07**: Conversation insights (patterns, objections, interests)
+
+### Dashboard - Lead List
+
+- [ ] **DBLD-01**: Display all leads from Convex (instant load, real-time)
+- [ ] **DBLD-02**: Show contact info (name, phone, avatar) and status badge
+- [ ] **DBLD-03**: Filter by status (new/qualified/contacted/converted/archived)
+- [ ] **DBLD-04**: Filter by date range (created today/week/month)
+- [ ] **DBLD-05**: Search by name or phone number (instant, no latency)
+- [ ] **DBLD-06**: Click to view full conversation history (from Convex, instant)
+- [ ] **DBLD-07**: Lead cards with key metrics (message count, last activity, qualification status)
+
+### Dashboard - AI Insights
+
+- [ ] **DBLI-01**: Display Grok's daily summaries (generated automatically)
+- [ ] **DBLI-02**: Show lead quality scores (hot/warm/cold with visual indicators)
+- [ ] **DBLI-03**: Display action items (prioritized follow-up list)
+- [ ] **DBLI-04**: Show content recommendations (FAQ suggestions from real conversations)
+- [ ] **DBLI-05**: Refresh insights on demand (trigger Grok analysis)
+- [ ] **DBLI-06**: Insight cards with trends (new leads, response rate, qualification rate)
+
+### Dashboard - Analytics
+
+- [ ] **DBLA-01**: Total leads counter (all-time)
+- [ ] **DBLA-02**: New leads today/week/month (with trend indicators)
+- [ ] **DBLA-03**: Response rate metrics (avg response time, response percentage)
+- [ ] **DBLA-04**: Lead stage distribution chart (funnel visualization)
+- [ ] **DBLA-05**: Common questions/topics trending (from Grok analysis)
+- [ ] **DBLA-06**: Conversation volume over time (chart)
+
+### Handoff Workflow (Combo Approach)
+
+- [ ] **HAND-01**: Trigger detection via Kapso workflow (4 slots filled OR user keywords)
+- [ ] **HAND-02**: Dashboard alert/notification for new qualified leads
+- [ ] **HAND-03**: WhatsApp notification to business owner with lead summary
+- [ ] **HAND-04**: Auto-reply to lead: "Thanks! Jonathan will reach out soon" (via Kapso)
+- [ ] **HAND-05**: Mark lead as "pending human contact" in Convex
+- [ ] **HAND-06**: Handoff queue in dashboard (leads awaiting human response)
+
+## v2.1+ Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Advanced Features
+
+- **ADV-01**: Visual workflow builder for custom rules
+- **ADV-02**: WhatsApp template messages (requires Meta approval)
+- **ADV-03**: Self-service onboarding flow
+- **ADV-04**: Billing/subscriptions management
+- **ADV-05**: Multi-user chat assignment (round-robin)
+
+### Integrations
+
+- **INT-01**: Google Calendar integration (appointment booking)
+- **INT-02**: Voice note transcription
+- **INT-03**: Document upload handling (PDF, images)
+- **INT-04**: Video call support (WhatsApp video)
+- **INT-05**: WhatsApp Flows (requires Meta approval)
+- **INT-06**: Voice agent integration (Kapso voice agents)
+
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Visual workflow builder | Use Kapso workflow UI, build custom later |
+| WhatsApp template messages | Requires Meta approval process, use API for now |
+| Self-service onboarding | Manual onboarding sufficient for v2.0 |
+| Billing/subscriptions | Not needed yet — focus on core CRM |
+| Multi-user chat assignment | Single user focus for v2.0 |
+| Google Calendar integration | Defer to v2.1+ |
+| Voice note transcription | Edge case, not core to CRM v2.0 |
+| Document upload handling | Requires storage strategy, defer |
+| Video call support | Outside CRM scope |
+| WhatsApp Flows | Meta approval required, use workflows instead |
+| Voice agent integration | Future consideration |
+| Eagle workspace operations | Eagle is archived, new workspace only |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| KAPS-01 | TBD | Pending |
+| KAPS-02 | TBD | Pending |
+| KAPS-03 | TBD | Pending |
+| KAPS-04 | TBD | Pending |
+| KAPS-05 | TBD | Pending |
+| RULE-01 | TBD | Pending |
+| RULE-02 | TBD | Pending |
+| RULE-03 | TBD | Pending |
+| RULE-04 | TBD | Pending |
+| RULE-05 | TBD | Pending |
+| SARA-01 | TBD | Pending |
+| SARA-02 | TBD | Pending |
+| SARA-03 | TBD | Pending |
+| SARA-04 | TBD | Pending |
+| SARA-05 | TBD | Pending |
+| SARA-06 | TBD | Pending |
+| SARA-07 | TBD | Pending |
+| LEAD-01 | TBD | Pending |
+| LEAD-02 | TBD | Pending |
+| LEAD-03 | TBD | Pending |
+| LEAD-04 | TBD | Pending |
+| LEAD-05 | TBD | Pending |
+| LEAD-06 | TBD | Pending |
+| LEAD-07 | TBD | Pending |
+| MGR-01 | TBD | Pending |
+| MGR-02 | TBD | Pending |
+| MGR-03 | TBD | Pending |
+| MGR-04 | TBD | Pending |
+| MGR-05 | TBD | Pending |
+| MGR-06 | TBD | Pending |
+| MGR-07 | TBD | Pending |
+| DBLD-01 | TBD | Pending |
+| DBLD-02 | TBD | Pending |
+| DBLD-03 | TBD | Pending |
+| DBLD-04 | TBD | Pending |
+| DBLD-05 | TBD | Pending |
+| DBLD-06 | TBD | Pending |
+| DBLD-07 | TBD | Pending |
+| DBLI-01 | TBD | Pending |
+| DBLI-02 | TBD | Pending |
+| DBLI-03 | TBD | Pending |
+| DBLI-04 | TBD | Pending |
+| DBLI-05 | TBD | Pending |
+| DBLI-06 | TBD | Pending |
+| DBLA-01 | TBD | Pending |
+| DBLA-02 | TBD | Pending |
+| DBLA-03 | TBD | Pending |
+| DBLA-04 | TBD | Pending |
+| DBLA-05 | TBD | Pending |
+| DBLA-06 | TBD | Pending |
+| HAND-01 | TBD | Pending |
+| HAND-02 | TBD | Pending |
+| HAND-03 | TBD | Pending |
+| HAND-04 | TBD | Pending |
+| HAND-05 | TBD | Pending |
+| HAND-06 | TBD | Pending |
+
+**Coverage:**
+- v2.0 requirements: 52 total
+- Mapped to phases: 0
+- Unmapped: 52
+
+---
+*Requirements defined: 2026-01-30*
+*Last updated: 2026-01-30 after research-based requirements gathering*
