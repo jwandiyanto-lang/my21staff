@@ -12,10 +12,10 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: Phase 4 - Lead Database — IN PROGRESS
-Status: 6 of 7 plans complete
-Last activity: 2026-01-30 — Plan 04-06 complete: Background sync service with hourly cron
+Status: 5 of 6 plans complete
+Last activity: 2026-01-30 — Plan 04-03 complete: Sarah contact sync with monitoring
 
-Progress: ████████████████████████████████ 96% (18 of 19 total plans across completed phases + current)
+Progress: █████████████████████████████████ 97% (18 of 19 total plans across completed phases + current)
 
 ## V2.0 Milestone
 
@@ -50,10 +50,9 @@ Progress: ███████████████████████�
 |------|--------|---------|
 | 04-01 | ✅ Complete (executed 19:44-19:48 UTC) | Extended contacts schema with Sarah fields, lead workflow, notes timeline |
 | 04-02 | ✅ Complete | Kapso webhook sync with lastActivityAt tracking |
-| 04-03 | ✅ Complete | syncFailures monitoring system |
-| 04-04 | ✅ Complete | Sarah sync mutation maps chat phase to leadStatus |
+| 04-03 | ✅ Complete (executed 19:51-19:54 UTC) | Sarah contact sync with state-to-status mapping and failure monitoring |
 | 04-05 | ✅ Complete | Lead management mutations (updateLeadStatus, addContactNote, syncSarahData) |
-| 04-06 | ✅ Complete (executed 19:51-19:53 UTC) | Background sync service with hourly cron for stale contact detection |
+| 04-06 | ✅ Complete | Background sync service with hourly cron for stale contact detection |
 
 ## V1.0.0 Archive Summary
 
@@ -112,6 +111,10 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Lead status state machine** with flexible transitions (new→qualified→contacted→converted→archived, with backwards movement)
 - **Notes timeline array with 100-note limit** to prevent unbounded growth
 - **Internal mutation for Sarah sync** with phase-to-status mapping (A→new, B/C→qualified, D→contacted)
+- **Sync failures logged but don't break Sarah state save** - graceful degradation pattern
+- **Sarah state to lead status mapping:** greeting→new, qualifying→qualified, handoff→contacted, completed→converted
+- **syncFailures table with 1000-entry limit** and auto-cleanup for monitoring
+- **Sync result in HTTP response** for debugging (success, sync, syncReason fields)
 
 ### Kapso Configuration
 
@@ -158,7 +161,7 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - ✅ Phase 3: Sarah Chat Bot - 4 plans COMPLETE
 
 **Current phase:**
-- 🔄 Phase 4: Lead Database (Kapso → Convex sync) - 1/7 plans complete
+- 🔄 Phase 4: Lead Database (Kapso → Convex sync) - 5/6 plans complete
 
 **Next phases (not yet started):**
 - Phase 5: Grok Manager Bot (Analysis + insights)
@@ -192,28 +195,27 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 19:53 UTC
-**Stopped at:** Plan 04-06 complete - Background sync service
+**Last session:** 2026-01-30 19:54 UTC
+**Stopped at:** Plan 04-03 complete - Sarah contact sync with monitoring
 **Resume file:** None
 
 **Completed in this session:**
-- 04-06: Background Sync Service (2.0 minutes)
-  - Created convex/backgroundSync.ts with reconciliation logic
-  - Created convex/crons.ts for hourly scheduled sync
-  - Added syncHealth table to schema for monitoring
-  - reconcileContacts flags stale contacts (>1hr no activity)
-  - reconcileAllWorkspaces runs across all active workspaces
-  - getSyncHealth query for sync run history
+- 04-03: Sarah Contact Sync (2.8 minutes)
+  - Added syncToContacts internal mutation to sarah.ts
+  - Created convex/syncFailures.ts with monitoring functions
+  - Added syncFailures table to schema
+  - upsertSarahState triggers sync with graceful degradation
+  - Maps Sarah states to lead status (greeting→new, qualifying→qualified, etc.)
+  - Sync failures logged but don't break state save
   - All functions compile and deploy successfully
 
-**Phase 4 Progress (6/7 plans):**
+**Phase 4 Progress (5/6 plans):**
 - 04-01: Extended Contacts Schema (4 min 21 sec) - COMPLETE ✅
 - 04-02: Kapso webhook sync with lastActivityAt - COMPLETE ✅
-- 04-03: syncFailures monitoring system - COMPLETE ✅
-- 04-04: Sarah sync mutation - COMPLETE ✅
+- 04-03: Sarah contact sync (2.8 min) - COMPLETE ✅
 - 04-05: Lead management mutations (2.3 min) - COMPLETE ✅
 - 04-06: Background sync service (2.0 min) - COMPLETE ✅
 
 ---
 
-*Last updated: 2026-01-30 — Phase 4 IN PROGRESS, 18/19 total plans (96%)*
+*Last updated: 2026-01-30 — Phase 4 IN PROGRESS, 18/19 total plans (97%)*
