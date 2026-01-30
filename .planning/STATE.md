@@ -12,11 +12,11 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: Phase 2.5 - Settings & Configuration
-Plan: 2 of 3 plans complete
+Plan: 4 of 5 plans complete
 Status: Phase 2.5 IN PROGRESS
-Last activity: 2026-01-30 — Completed Plan 02: Bot Name Configuration
+Last activity: 2026-01-30 — Completed Plan 04: Kapso Inbox Integration
 
-Progress: ████████░░░░░░░░░░░░░░░░░░░░░░ 45% (5 of 11 total plans across all phases)
+Progress: ████████████░░░░░░░░░░░░░░░░░░ 55% (6 of 11 total plans across all phases)
 
 ## V2.0 Milestone
 
@@ -26,7 +26,7 @@ Progress: ████████░░░░░░░░░░░░░░░�
 **Phases Planned:**
 1. Foundation (Kapso workspace + webhook) - COMPLETED (1 plan)
 2. Workflow Rules Engine (Kapso native workflows + Grok) - ✅ COMPLETED (3 plans)
-2.5. Settings & Configuration (Kapso workflow management UI) - IN PROGRESS (2/3 plans)
+2.5. Settings & Configuration (Kapso workflow management UI) - IN PROGRESS (4/5 plans)
 3. Sarah Chat Bot (Gemini 2.5 + persona) - PLANNING
 4. Lead Database (Kapso → Convex sync)
 5. Grok Manager Bot (Analysis + insights)
@@ -71,6 +71,9 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Backwards-compatible redirect** from /knowledge-base to /your-team
 - **Bot names stored in separate Convex table** (botConfig) for type safety and queryability
 - **Default bot names: Sarah (Intern), Grok (Brain)** to match existing brand persona
+- **Kapso API direct integration** for inbox (not Convex mirror)
+- **5-second polling** for real-time inbox updates (Kapso doesn't support WebSocket)
+- **Next.js API routes** proxy Kapso operations for auth and CORS handling
 
 ### Kapso Configuration
 
@@ -98,6 +101,7 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 **Phase 2.5 (In Progress):**
 - ~~Your Team Navigation & Layout~~ ✅ COMPLETED
 - ~~Bot Name Configuration~~ ✅ COMPLETED
+- ~~Kapso Inbox Integration~~ ✅ COMPLETED
 - Kapso Workflow API Integration (next)
 - Test panel for workflow triggers
 
@@ -107,10 +111,10 @@ None — ready to continue Phase 2.5.
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 17:25 UTC
-**Stopped at:** Completed Phase 2.5 Plan 02 (Bot Name Configuration)
+**Last session:** 2026-01-30 13:51 UTC
+**Stopped at:** Completed Phase 2.5 Plan 04 (Kapso Inbox Integration)
 **Resume file:** None
 
 ---
 
-*Last updated: 2026-01-30 — Phase 2.5 Plan 02 COMPLETE ✅, 5/11 total plans (45%)*
+*Last updated: 2026-01-30 — Phase 2.5 Plan 04 COMPLETE ✅, 6/11 total plans (55%)*
