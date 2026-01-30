@@ -350,6 +350,37 @@ export const getByContactId = query({
 })
 
 /**
+ * Internal query to get conversation by workspace + contact.
+ *
+ * Used by rules engine for lead type detection.
+ * No auth check - internal use only (webhook/API routes handle auth).
+ *
+ * @param workspace_id - The workspace ID
+ * @param contact_id - The contact ID
+ * @returns The conversation with last_message_at, or null if not found
+ */
+export const getByContactInternal = query({
+  args: {
+    workspace_id: v.string(),
+    contact_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Query by contact_id using the existing index
+    const conversation = await ctx.db
+      .query('conversations')
+      .withIndex('by_contact', (q) => q.eq('contact_id', args.contact_id as any))
+      .first();
+
+    // Verify workspace matches (security check)
+    if (conversation && (conversation as any).workspace_id !== args.workspace_id) {
+      return null;
+    }
+
+    return conversation;
+  },
+})
+
+/**
  * Get a single conversation by ID.
  *
  * Returns conversation with associated contact information.
