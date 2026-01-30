@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import { getSarahState, upsertSarahState } from "./sarah";
 
 const http = httpRouter();
 
@@ -133,6 +134,30 @@ http.route({
       });
     }
   }),
+});
+
+// ============================================
+// Sarah Bot: Conversation state management (for Kapso Function nodes)
+// ============================================
+
+/**
+ * GET /sarah/state - Retrieve Sarah conversation state
+ * Called by Kapso before processing a message to get current conversation state
+ */
+http.route({
+  path: "/sarah/state",
+  method: "GET",
+  handler: getSarahState,
+});
+
+/**
+ * POST /sarah/state - Upsert Sarah conversation state
+ * Called by Kapso after each message to save/update conversation state
+ */
+http.route({
+  path: "/sarah/state",
+  method: "POST",
+  handler: upsertSarahState,
 });
 
 // ============================================

@@ -31,6 +31,7 @@ import type * as mutations from "../mutations.js";
 import type * as n8n from "../n8n.js";
 import type * as organizations from "../organizations.js";
 import type * as quickReplies from "../quickReplies.js";
+import type * as sarah from "../sarah.js";
 import type * as settingsBackup from "../settingsBackup.js";
 import type * as storage from "../storage.js";
 import type * as testAuth from "../testAuth.js";
@@ -70,6 +71,7 @@ declare const fullApi: ApiFromModules<{
   n8n: typeof n8n;
   organizations: typeof organizations;
   quickReplies: typeof quickReplies;
+  sarah: typeof sarah;
   settingsBackup: typeof settingsBackup;
   storage: typeof storage;
   testAuth: typeof testAuth;

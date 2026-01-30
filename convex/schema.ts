@@ -621,6 +621,42 @@ export default defineSchema({
     .index("by_workspace", ["workspace_id"]),
 
   // ============================================
+  // SARAH CONVERSATIONS (Sarah bot state per contact)
+  // ============================================
+  sarahConversations: defineTable({
+    contact_phone: v.string(), // Primary identifier (normalized phone number)
+    workspace_id: v.optional(v.string()), // Optional since phone is primary
+
+    // State machine
+    state: v.string(), // 'greeting' | 'qualifying' | 'scoring' | 'handoff' | 'completed'
+
+    // Scoring
+    lead_score: v.number(), // 0-100
+    lead_temperature: v.string(), // 'hot' | 'warm' | 'cold'
+
+    // Extracted data (4-slot extraction for SME qualification)
+    extracted_data: v.object({
+      name: v.optional(v.string()),
+      business_type: v.optional(v.string()),
+      team_size: v.optional(v.number()),
+      pain_points: v.optional(v.array(v.string())),
+      goals: v.optional(v.string()),
+    }),
+
+    // Metadata
+    language: v.string(), // 'id' | 'en'
+    message_count: v.number(),
+
+    // Timestamps
+    created_at: v.number(),
+    updated_at: v.number(),
+    last_message_at: v.number(),
+  })
+    .index("by_phone", ["contact_phone"])
+    .index("by_temperature", ["lead_temperature"])
+    .index("by_score", ["lead_score"]),
+
+  // ============================================
   // SETTINGS BACKUP (Configuration snapshots)
   // ============================================
   settingsBackup: defineTable({
