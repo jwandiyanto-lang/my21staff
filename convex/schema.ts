@@ -523,6 +523,75 @@ export default defineSchema({
     .index("by_workspace", ["workspace_id"]),
 
   // ============================================
+  // WORKFLOW CONFIG (Rules engine configuration per workspace)
+  // ============================================
+  workflow_configs: defineTable({
+    workspace_id: v.id("workspaces"),
+    keyword_triggers: v.array(
+      v.object({
+        id: v.string(),
+        keywords: v.array(v.string()),
+        action: v.union(
+          v.literal("handoff"),
+          v.literal("manager_bot"),
+          v.literal("faq_response"),
+          v.literal("pass_through")
+        ),
+        response_template: v.optional(v.string()),
+        case_sensitive: v.boolean(),
+        match_mode: v.union(
+          v.literal("exact"),
+          v.literal("contains"),
+          v.literal("starts_with")
+        ),
+        enabled: v.boolean(),
+      })
+    ),
+    faq_templates: v.array(
+      v.object({
+        id: v.string(),
+        trigger_keywords: v.array(v.string()),
+        response: v.string(),
+        enabled: v.boolean(),
+      })
+    ),
+    lead_routing: v.object({
+      new_lead_greeting: v.string(),
+      returning_lead_greeting: v.string(),
+      detection_window_hours: v.number(),
+    }),
+    ai_fallback_enabled: v.boolean(),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // WORKFLOW EXECUTIONS (Execution logs for analytics and debugging)
+  // ============================================
+  workflow_executions: defineTable({
+    workspace_id: v.id("workspaces"),
+    contact_id: v.id("contacts"),
+    conversation_id: v.optional(v.id("conversations")),
+    message_content: v.string(),
+    rule_matched: v.optional(v.string()),
+    action_taken: v.union(
+      v.literal("handoff"),
+      v.literal("manager_bot"),
+      v.literal("faq_response"),
+      v.literal("pass_through"),
+      v.literal("ai_fallback")
+    ),
+    lead_type: v.union(v.literal("new"), v.literal("returning")),
+    response_sent: v.optional(v.string()),
+    processing_time_ms: v.number(),
+    created_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_contact", ["contact_id"])
+    .index("by_created", ["created_at"]),
+
+  // ============================================
   // QUICK REPLIES (Message templates)
   // ============================================
   quickReplies: defineTable({
