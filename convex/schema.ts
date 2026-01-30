@@ -721,6 +721,20 @@ export default defineSchema({
     .index("by_workspace_type", ["workspace_id", "backup_type"]),
 
   // ============================================
+  // SYNC FAILURES (Monitoring contact sync failures)
+  // ============================================
+  syncFailures: defineTable({
+    source: v.string(), // 'sarah' | 'kapso' | 'background'
+    contact_phone: v.optional(v.string()),
+    error: v.string(),
+    payload: v.optional(v.string()), // JSON stringified for flexibility
+    created_at: v.number(),
+    resolved: v.boolean(),
+  })
+    .index("by_created", ["created_at"])
+    .index("by_source", ["source"]),
+
+  // ============================================
   // INTERN CONFIG (Sarah Chat Bot settings)
   // ============================================
   internConfig: defineTable({
