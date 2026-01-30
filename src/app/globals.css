@@ -356,15 +356,38 @@ html {
     @apply bg-background text-foreground;
   }
 
-  /* Better input/textarea borders */
+  /* Better input/textarea/select borders - thicker and more visible */
   input[type="text"],
   input[type="email"],
   input[type="password"],
   input[type="number"],
-  textarea,
-  select {
-    @apply border-2 border-border/40 focus:border-ring transition-colors;
+  textarea {
+    @apply border-2 focus:border-ring transition-colors;
+    border-color: oklch(0.35 0.08 145 / 0.3) !important; /* Darker green border */
   }
+
+  /* Make select dropdowns even more distinct with thicker border */
+  select,
+  [role="combobox"],
+  button[role="combobox"] {
+    @apply border-[3px] focus:border-ring transition-colors;
+    border-color: oklch(0.35 0.08 145 / 0.4) !important; /* Even darker for dropdowns */
+  }
+
+  /* Focus states - orange ring for visibility */
+  input:focus,
+  textarea:focus,
+  select:focus,
+  [role="combobox"]:focus {
+    @apply ring-2 ring-crm-orange/30;
+    border-color: oklch(0.35 0.08 145) !important;
+  }
+}
+
+/* Hide Clerk keyless mode indicator */
+[data-clerk-keyless-mode-indicator],
+.cl-internal-keyless-indicator {
+  display: none !important;
 }
 
 /* Hide scrollbar for horizontal scroll */
