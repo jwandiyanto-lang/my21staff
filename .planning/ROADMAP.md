@@ -13,7 +13,7 @@
 | 1 | Foundation | Kapso workspace setup + webhook infrastructure | 5 |
 | 2 | Workflow Rules Engine | Kapso workflow triggers + conditional routing | 5 |
 | 2.5 | Settings & Configuration | CRM settings UI with Kapso API integration | 10 |
-| 3 | Sarah Chat Bot | Gemini 2.5 integration + persona + 4-slot extraction | 7 |
+| 3 | Sarah Chat Bot | Gemini 2.5 integration + persona + 5-slot extraction | 7 |
 | 4 | Lead Database | Kapso → Convex sync + custom fields | 7 |
 | 5 | Grok Manager Bot | Analysis + scoring + insights | 7 |
 | 6 | Dashboard | Lead list + AI insights + analytics + WhatsApp inbox | 24 |
@@ -148,27 +148,39 @@ Sidebar:
 
 ## Phase 3: Sarah Chat Bot
 
-**Goal:** Sarah (Gemini 2.5) handles natural conversation with 4-slot data extraction.
+**Goal:** Sarah (Gemini 2.5 Flash) handles natural WhatsApp conversation with 5-slot data extraction and lead scoring.
+
+**Architecture:** Sarah runs in **Kapso workflow** (Agent/Function nodes calling Gemini API), with Convex storing conversation state for dashboard display.
 
 **Requirements:**
 - SARA-01, SARA-02, SARA-03, SARA-04, SARA-05, SARA-06, SARA-07
 
 **Success Criteria:**
-1. Sarah responds to WhatsApp messages via Kapso API
-2. Sarah persona: warm, under 140 chars, max 1 emoji per message
-3. Extracts Name, Service, Budget, Timeline from conversation
-4. Handles photo/image messages (analyze + respond)
-5. Remembers conversation context across messages
-6. Never gives specific prices, only ranges
-7. Detects when 4 slots are filled for handoff
+1. Sarah responds to WhatsApp messages via Kapso workflow
+2. Sarah persona: warm, Indonesian-first, under 140 chars, max 1-2 emoji
+3. Extracts 5 fields: Name, Business Type, Team Size, Pain Points, Goals
+4. Language detection: auto-switch between Indonesian and English
+5. Remembers conversation context across messages (Convex state)
+6. Lead scoring: 0-100 with hot/warm/cold classification
+7. Detects handoff triggers (score >= 70 or keywords)
 
 **Deliverables:**
-- Gemini 2.5 Flash integration
-- Sarah persona prompt + response formatting
-- 4-slot extraction logic (structured output)
-- Image handling pipeline
-- Conversation memory (Convex storage)
-- Handoff detection logic
+- Gemini 2.5 Flash API integration
+- Sarah persona prompt + structured output schema
+- State machine: greeting → qualifying → scoring → handoff/completed
+- 5-field extraction logic with merge (never overwrites with null)
+- Lead scoring algorithm (0-100 points)
+- Language detection (Indonesian/English)
+- Conversation memory in Convex ariConversations table
+- API endpoint for Kapso workflow integration
+
+**Plans:** 4 plans
+- [ ] 03-01-PLAN.md — Gemini integration + Sarah prompts
+- [ ] 03-02-PLAN.md — State machine + scoring + extraction
+- [ ] 03-03-PLAN.md — Kapso workflow integration + Convex state
+- [ ] 03-04-PLAN.md — End-to-end verification (checkpoint)
+
+**Status:** Planning complete — ready for execution
 
 ---
 
@@ -380,7 +392,7 @@ Phase 3      Phase 4
 1. New my21staff workspace is live with Indonesian number
 2. Settings UI allows viewing and editing all configurations
 3. Sarah responds to leads 24/7 with warm, contextual messages
-4. Leads are captured in database with extracted info (4 slots)
+4. Leads are captured in database with extracted info (5 slots)
 5. Grok generates daily summaries and scores leads
 6. Dashboard shows all leads with instant load
 7. WhatsApp inbox (whatsapp-cloud-inbox) integrated with custom branding
