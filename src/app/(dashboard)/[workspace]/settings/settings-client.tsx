@@ -55,17 +55,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
   const handleSave = async () => {
     setSaving(true)
     try {
-      if (isDevMode()) {
-        updateMockWorkspaceSettings({
-          intern_name: internName,
-          brain_name: brainName,
-        })
-        toast.success('Bot names saved')
-        setSaving(false)
-        return
-      }
-
-      // Production: save via API
+      // Always call API (even in dev mode) to keep server and client in sync
       const res = await fetch(`/api/workspaces/${workspaceId}/bot-config`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -79,11 +69,13 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         throw new Error('Failed to save')
       }
 
-      // Backup settings (non-blocking)
-      backupSettings(workspaceSlug, 'bot_names', {
-        intern_name: internName,
-        brain_name: brainName,
-      })
+      // Backup settings (non-blocking, production only)
+      if (!isDevMode()) {
+        backupSettings(workspaceSlug, 'bot_names', {
+          intern_name: internName,
+          brain_name: brainName,
+        })
+      }
 
       toast.success('Bot names saved')
     } catch (error) {
