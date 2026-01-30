@@ -6,16 +6,16 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 3 planning - Sarah Chat Bot (Gemini 2.5 integration)
+**Current focus:** Phase 3 - Sarah Chat Bot workflow execution
 
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 2.5 - Settings & Configuration — ✅ COMPLETE
-Status: READY FOR PHASE 3
-Last activity: 2026-01-30 — Phase 2.5 verified: 10/10 must-haves passed
+Phase: Phase 3 - Sarah Chat Bot — IN PROGRESS
+Status: 3 of 4 plans complete
+Last activity: 2026-01-30 — Plan 03-03 complete: Sarah workflow created in Kapso
 
-Progress: ████████████████░░░░░░░░░░░░░ 83% (10 of 12 total plans across all phases)
+Progress: ███████████████████░░░░░░░░░░ 92% (11 of 12 total plans across all phases)
 
 ## V2.0 Milestone
 
@@ -26,7 +26,7 @@ Progress: ████████████████░░░░░░░�
 1. Foundation (Kapso workspace + webhook) - ✅ COMPLETED (1 plan)
 2. Workflow Rules Engine (Kapso native workflows + Grok) - ✅ COMPLETED (3 plans)
 2.5. Settings & Configuration (Kapso workflow management UI) - ✅ COMPLETED (5 plans)
-3. Sarah Chat Bot - ✅ PLAN 01 COMPLETE, ✅ PLAN 02 COMPLETE
+3. Sarah Chat Bot - ✅ PLAN 01 COMPLETE, ✅ PLAN 02 COMPLETE, ✅ PLAN 03 COMPLETE
 4. Lead Database (Kapso → Convex sync)
 5. Grok Manager Bot (Analysis + insights)
 6. Dashboard (Lead list + analytics)
@@ -41,6 +41,7 @@ Progress: ████████████████░░░░░░░�
 |------|--------|---------|
 | 03-01 | ✅ Complete (executed 17:15-17:18 UTC) | Sarah persona prompts, 5-field extraction schema, Gemini API setup |
 | 03-02 | ✅ Complete | Convex schema and HTTP endpoints for Sarah state storage |
+| 03-03 | ✅ Complete (executed 17:54-18:12 UTC) | Kapso workflow with Gemini Agent + 7 Function nodes + state management |
 
 ## V1.0.0 Archive Summary
 
@@ -97,12 +98,19 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 **Project:** my21staff
 - Project ID: `1fda0f3d-a913-4a82-bc1f-a07e1cb5213c`
-- API Key: `da99e74e320048a32cc3ff818615bed93a53f39bb62ce073ef8cffa85e778cc6`
+- API Key: `5dbba793f934cde00609e28ad4b1214a8c17bebac3053ad42191759a8e700ec5` (updated 2026-01-30)
+- **API Access:** Use `.claude/skills/kapso-automation/scripts/` with `X-API-Key` header (NOT `Authorization: Bearer`)
 
-**Workflow:** Rules Engine - Keyword Triggers
+**Workflow: Rules Engine - Keyword Triggers**
 - Workflow ID: `6cae069e-7d5c-4fbb-834d-79e1f66e4672`
 - Model: x-ai/grok-4.1-fast
 - Status: Active
+
+**Workflow: Sarah Chat Bot**
+- Workflow ID: `048c075f-bab4-4ccd-920c-fe5e9a3435b5`
+- Model: Gemini 2.5 Flash (gemini-2.5-flash-preview-05-20)
+- Status: Draft (requires activation + env vars)
+- Functions: 7 deployed (get-state, check-keywords, mark-handoff, mark-completed, extract-and-score, determine-state, save-state)
 
 **Phone:**
 - Phone Number ID: `957104384162113`
@@ -121,10 +129,10 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 Completed:
 - ✅ 03-01: Sarah persona definition and Kapso workflow architecture
 - ✅ 03-02: Convex schema and HTTP endpoints for state storage
+- ✅ 03-03: Kapso workflow with Gemini Agent + 7 Function nodes
 
 Next:
-- 03-03: Sarah Kapso workflow integration (HTTP endpoints → Function nodes)
-- 03-04: Sarah lead scoring algorithm
+- 03-04: Sarah lead scoring algorithm refinement (already implemented in extract-and-score function)
 
 **Completed phases:**
 - ✅ Phase 1: Foundation (Kapso workspace + webhook)
@@ -141,21 +149,32 @@ Next:
 
 ### Blockers/Concerns
 
+**Kapso API Authentication - RESOLVED (2026-01-30):**
+- ✅ Correct API key: `5dbba793f934cde00609e28ad4b1214a8c17bebac3053ad42191759a8e700ec5`
+- ✅ Correct header format: `X-API-Key` (NOT `Authorization: Bearer`)
+- ✅ Automation scripts work perfectly with proper env vars
+- All workflows and functions created successfully
+
 **Known technical debt:**
 - Production WhatsApp sending requires workspace settings table to store Kapso API credentials
 - Template sending endpoint (`/api/whatsapp/send`) referenced in MessageView but not yet created
 - Intern/Brain config Convex storage has TODO comments (acceptable per phase scope)
+- Sarah workflow requires manual activation + env vars (Kapso API limitation for variable CRUD)
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 17:18 UTC
-**Stopped at:** Phase 3 Plan 1 complete - Sarah Kapso prompt documentation created
+**Last session:** 2026-01-30 18:12 UTC
+**Stopped at:** Phase 3 Plan 3 complete - Sarah workflow created in Kapso
 **Resume file:** None
 
 **Completed in this session:**
-- 03-01: Sarah Kapso prompt documentation (528 lines, 9 sections)
-- Gemini API key setup documentation (manual steps for Kapso Dashboard)
+- 03-03: Sarah Chat Bot workflow in Kapso (18 minutes)
+  - Created workflow with 12 nodes (1 start, 7 function, 1 agent, 1 decide, 2 send_text)
+  - Deployed 7 functions to Cloudflare Workers
+  - Configured Gemini 2.5 Flash Agent with 800+ word system prompt
+  - Implemented 0-100 lead scoring algorithm
+  - Connected state management to Convex HTTP endpoints
 
 ---
 
-*Last updated: 2026-01-30 — Phase 3 Plan 1 COMPLETE ✅, 10/12 total plans (83%)*
+*Last updated: 2026-01-30 — Phase 3 Plan 3 COMPLETE ✅, 11/12 total plans (92%)*
