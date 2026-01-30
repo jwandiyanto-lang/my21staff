@@ -1,210 +1,252 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Search, MessageSquare, Clock, User } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Avatar } from '@/components/ui/avatar'
-import { isDevMode, MOCK_WHATSAPP_CONVERSATIONS } from '@/lib/mock-whatsapp-data'
-import type { Id } from 'convex/_generated/dataModel'
+import { useEffect, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
+import { format, isValid, isToday, isYesterday } from 'date-fns';
+import { RefreshCw, Search } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useAutoPolling } from '@/hooks/use-auto-polling';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
-interface Conversation {
-  id: string
-  phoneNumber: string
-  contactName?: string
-  status: string
-  lastActiveAt: string
-  messagesCount: number
-  lastMessage: {
-    content: string
-    direction: 'inbound' | 'outbound'
-    type: string
+type Conversation = {
+  id: string;
+  phoneNumber: string;
+  status: string;
+  lastActiveAt: string;
+  phoneNumberId: string;
+  metadata?: Record<string, unknown>;
+  contactName?: string;
+  messagesCount?: number;
+  lastMessage?: {
+    content: string;
+    direction: string;
+    type?: string;
+  };
+};
+
+function formatConversationDate(timestamp: string): string {
+  try {
+    const date = new Date(timestamp);
+    if (!isValid(date)) return '';
+
+    if (isToday(date)) return format(date, 'HH:mm');
+    if (isYesterday(date)) return 'Yesterday';
+    return format(date, 'MMM d');
+  } catch {
+    return '';
   }
 }
 
-interface ConversationListProps {
-  workspaceId: Id<'workspaces'>
-  selectedConversationId?: string
-  onSelectConversation: (conversationId: string) => void
-}
-
-export function ConversationList({ workspaceId, selectedConversationId, onSelectConversation }: ConversationListProps) {
-  const [conversations, setConversations] = useState<Conversation[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchConversations = async () => {
-    try {
-      setError(null)
-
-      // Dev mode: use mock data
-      if (isDevMode()) {
-        setConversations(MOCK_WHATSAPP_CONVERSATIONS)
-        setLoading(false)
-        return
-      }
-
-      // Production: fetch from API
-      const response = await fetch(`/api/whatsapp/conversations?workspace=${workspaceId}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch conversations')
-      }
-      const data = await response.json()
-      setConversations(data.conversations || [])
-    } catch (err) {
-      console.error('Failed to fetch conversations:', err)
-      setError(err instanceof Error ? err.message : 'Unknown error')
-      // Fall back to mock data on error
-      setConversations(MOCK_WHATSAPP_CONVERSATIONS)
-    } finally {
-      setLoading(false)
+function getAvatarInitials(contactName?: string, phoneNumber?: string): string {
+  if (contactName) {
+    const words = contactName.trim().split(/\s+/);
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
     }
+    return contactName.slice(0, 2).toUpperCase();
   }
+
+  if (phoneNumber) {
+    const digits = phoneNumber.replace(/\D/g, '');
+    return digits.slice(-2);
+  }
+
+  return '??';
+}
+
+type Props = {
+  onSelectConversation: (conversation: Conversation) => void;
+  selectedConversationId?: string;
+  isHidden?: boolean;
+};
+
+export type ConversationListRef = {
+  refresh: () => Promise<Conversation[]>;
+  selectByPhoneNumber: (phoneNumber: string) => void;
+};
+
+export const ConversationList = forwardRef<ConversationListRef, Props>(
+  ({ onSelectConversation, selectedConversationId, isHidden = false }, ref) => {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const fetchConversations = useCallback(async () => {
+    try {
+      const response = await fetch('/api/conversations');
+      const data = await response.json();
+      setConversations(data.data || []);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetchConversations()
+    fetchConversations();
+  }, [fetchConversations]);
 
-    // Auto-poll every 10 seconds in production
-    if (!isDevMode()) {
-      const interval = setInterval(fetchConversations, 10000)
-      return () => clearInterval(interval)
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchConversations();
+  };
+
+  // Auto-polling for conversations (every 10 seconds)
+  const { isPolling } = useAutoPolling({
+    interval: 10000,
+    enabled: true,
+    onPoll: fetchConversations
+  });
+
+  const selectByPhoneNumber = (phoneNumber: string) => {
+    const conversation = conversations.find(conv => conv.phoneNumber === phoneNumber);
+    if (conversation) {
+      onSelectConversation(conversation);
     }
-  }, [workspaceId])
+  };
 
-  // Filter conversations by search query
+  useImperativeHandle(ref, () => ({
+    refresh: async () => {
+      setRefreshing(true);
+      const response = await fetch('/api/conversations');
+      const data = await response.json();
+      const newConversations = data.data || [];
+      setConversations(newConversations);
+      setRefreshing(false);
+      return newConversations;
+    },
+    selectByPhoneNumber
+  }));
+
   const filteredConversations = conversations.filter((conv) => {
-    const searchLower = searchQuery.toLowerCase()
+    const query = searchQuery.toLowerCase();
     return (
-      conv.phoneNumber.toLowerCase().includes(searchLower) ||
-      (conv.contactName?.toLowerCase().includes(searchLower) ?? false) ||
-      conv.lastMessage.content.toLowerCase().includes(searchLower)
-    )
-  })
+      conv.phoneNumber.toLowerCase().includes(query) ||
+      conv.contactName?.toLowerCase().includes(query)
+    );
+  });
 
-  // Format relative time
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-
-    if (diffMins < 1) return 'now'
-    if (diffMins < 60) return `${diffMins}m`
-    if (diffHours < 24) return `${diffHours}h`
-    return `${diffDays}d`
+  if (loading) {
+    return (
+      <div className={cn(
+        "w-full md:w-96 border-r border-[#d1d7db] bg-white flex flex-col",
+        isHidden && "hidden md:flex"
+      )}>
+        <div className="p-4 border-b border-[#d1d7db] bg-[#f0f2f5]">
+          <div className="flex items-center justify-between mb-3">
+            <Skeleton className="h-7 w-20" />
+            <Skeleton className="h-9 w-24" />
+          </div>
+          <Skeleton className="h-10 w-full rounded-lg" />
+        </div>
+        <div className="flex-1 p-3 space-y-3">
+          {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+            <div key={i} className="flex gap-3 p-3">
+              <Skeleton className="h-12 w-12 rounded-full flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-48" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col h-full border-r border-border bg-card">
-      {/* Header with search */}
-      <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold mb-3">Messages</h2>
+    <div className={cn(
+      "w-full md:w-96 border-r border-[#d1d7db] bg-white flex flex-col",
+      isHidden && "hidden md:flex"
+    )}>
+      <div className="p-4 border-b border-[#d1d7db] bg-[#f0f2f5]">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold text-[#111b21]">Chats</h1>
+            {isPolling && (
+              <div
+                className="h-2 w-2 rounded-full bg-green-500 animate-pulse"
+                title="Auto-updating"
+              />
+            )}
+          </div>
+          <Button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            variant="ghost"
+            size="icon"
+            className="text-[#667781] hover:bg-[#d1d7db]/30"
+          >
+            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+          </Button>
+        </div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#667781]" />
           <Input
-            placeholder="Search conversations..."
+            type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-10"
+            placeholder="Search or start new chat"
+            className="pl-9 bg-white border-[#d1d7db] focus-visible:ring-[#00a884] rounded-lg"
           />
         </div>
       </div>
 
-      {/* Dev mode indicator */}
-      {isDevMode() && (
-        <div className="px-4 py-2 bg-accent/10 border-b border-border">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            <span className="font-mono">Offline Mode</span>
-          </div>
-        </div>
-      )}
-
-      {/* Error state */}
-      {error && (
-        <div className="p-4 bg-destructive/10 border-b border-border">
-          <p className="text-sm text-destructive">{error}</p>
-        </div>
-      )}
-
-      {/* Conversation list */}
-      <ScrollArea className="flex-1">
-        {loading ? (
-          <div className="p-4 space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <Skeleton className="h-12 w-12 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : filteredConversations.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p className="font-medium">No conversations found</p>
-            <p className="text-sm mt-1">
-              {searchQuery ? 'Try a different search term' : 'Start a conversation to see it here'}
-            </p>
+      <ScrollArea className="flex-1 h-0 overflow-hidden">
+        {filteredConversations.length === 0 ? (
+          <div className="p-4 text-center text-[#667781]">
+            {searchQuery ? 'No conversations found' : 'No conversations yet'}
           </div>
         ) : (
-          <div className="divide-y divide-border">
-            {filteredConversations.map((conv) => (
-              <button
-                key={conv.id}
-                onClick={() => onSelectConversation(conv.id)}
-                className={`w-full p-4 flex items-start gap-3 transition-colors hover:bg-muted/50 ${
-                  selectedConversationId === conv.id ? 'bg-muted' : ''
-                }`}
-              >
-                {/* Avatar */}
-                <div className="relative">
-                  {conv.contactName ? (
-                    <Avatar className="h-12 w-12 bg-primary text-primary-foreground flex items-center justify-center font-semibold">
-                      {conv.contactName.charAt(0).toUpperCase()}
-                    </Avatar>
-                  ) : (
-                    <Avatar className="h-12 w-12 bg-muted text-muted-foreground flex items-center justify-center">
-                      <User className="h-6 w-6" />
-                    </Avatar>
-                  )}
-                  {conv.status === 'active' && (
-                    <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-accent border-2 border-card" />
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <h3 className="font-semibold truncate">
-                      {conv.contactName || conv.phoneNumber}
-                    </h3>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1 whitespace-nowrap">
-                      <Clock className="h-3 w-3" />
-                      {formatTime(conv.lastActiveAt)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {conv.lastMessage.direction === 'inbound' && (
-                      <span className="mr-1">You:</span>
+          <div className="w-full overflow-hidden">
+          {filteredConversations.map((conversation) => (
+            <button
+              key={conversation.id}
+              onClick={() => onSelectConversation(conversation)}
+              className={cn(
+                'w-full p-3 pr-4 border-b border-[#e9edef] hover:bg-[#f0f2f5] text-left transition-colors relative overflow-hidden',
+                selectedConversationId === conversation.id && 'bg-[#f0f2f5]'
+              )}
+            >
+              <div className="flex gap-3 items-start overflow-hidden">
+                <Avatar className="h-12 w-12 flex-shrink-0">
+                  <AvatarFallback className="bg-[#d1d7db] text-[#111b21] text-sm font-medium">
+                    {getAvatarInitials(conversation.contactName, conversation.phoneNumber)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0 flex justify-between items-start gap-4 overflow-hidden">
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <p className="font-medium text-[#111b21] truncate">
+                      {conversation.contactName || conversation.phoneNumber}
+                    </p>
+                    {conversation.lastMessage && (
+                      <p className="text-sm text-[#667781] truncate mt-0.5">
+                        {conversation.lastMessage.direction === 'outbound' && (
+                          <span className="text-[#53bdeb]">✓ </span>
+                        )}
+                        {conversation.lastMessage.content}
+                      </p>
                     )}
-                    {conv.lastMessage.content}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1 font-mono">
-                    {conv.phoneNumber}
-                  </p>
+                  </div>
+                  <span className="text-xs text-[#667781] flex-shrink-0 mt-0.5 ml-4">
+                    {formatConversationDate(conversation.lastActiveAt)}
+                  </span>
                 </div>
-              </button>
-            ))}
+              </div>
+            </button>
+          ))
+          }
           </div>
         )}
       </ScrollArea>
     </div>
-  )
-}
+  );
+});
+
+ConversationList.displayName = 'ConversationList';

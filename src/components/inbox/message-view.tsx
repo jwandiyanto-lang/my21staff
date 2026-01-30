@@ -1,339 +1,655 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useRef } from 'react'
-import { Send, Paperclip, Smile, MoreVertical, Phone, Video, Info } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar } from '@/components/ui/avatar'
-import { Skeleton } from '@/components/ui/skeleton'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { isDevMode, getMockMessages } from '@/lib/mock-whatsapp-data'
-import type { Id } from 'convex/_generated/dataModel'
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { format, isValid, isToday, isYesterday, differenceInHours } from 'date-fns';
+import { RefreshCw, Paperclip, Send, X, AlertCircle, MessageSquare, XCircle, ListTree, ArrowLeft } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { MediaMessage } from '@/components/inbox/media-message';
+import { TemplateSelectorDialog } from '@/components/inbox/template-selector-dialog';
+import { InteractiveMessageDialog } from '@/components/inbox/interactive-message-dialog';
+import { useAutoPolling } from '@/hooks/use-auto-polling';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import type { MediaData } from '@kapso/whatsapp-cloud-api';
 
-interface Message {
-  id: string
-  conversationId: string
-  direction: 'inbound' | 'outbound'
-  content: string
-  timestamp: string
-  type: string
-  status?: 'sent' | 'delivered' | 'read' | 'failed'
-  mediaUrl?: string | null
-}
+type Message = {
+  id: string;
+  direction: 'inbound' | 'outbound';
+  content: string;
+  createdAt: string;
+  status?: string;
+  phoneNumber: string;
+  hasMedia: boolean;
+  mediaData?: {
+    url: string;
+    contentType?: string;
+    filename?: string;
+  } | (MediaData & { url: string });
+  reactionEmoji?: string | null;
+  reactedToMessageId?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  messageType?: string;
+  caption?: string | null;
+  metadata?: {
+    mediaId?: string;
+    caption?: string;
+  };
+};
 
-interface MessageViewProps {
-  workspaceId: Id<'workspaces'>
-  conversationId?: string
-}
-
-export function MessageView({ workspaceId, conversationId }: MessageViewProps) {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [loading, setLoading] = useState(false)
-  const [sending, setSending] = useState(false)
-  const [messageText, setMessageText] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
-
-  const fetchMessages = async () => {
-    if (!conversationId) return
-
-    try {
-      setError(null)
-      setLoading(true)
-
-      // Dev mode: use mock data
-      if (isDevMode()) {
-        setMessages(getMockMessages(conversationId) as Message[])
-        setLoading(false)
-        return
-      }
-
-      // Production: fetch from API
-      const response = await fetch(`/api/whatsapp/messages/${conversationId}?workspace=${workspaceId}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch messages')
-      }
-      const data = await response.json()
-      setMessages(data.messages || [])
-    } catch (err) {
-      console.error('Failed to fetch messages:', err)
-      setError(err instanceof Error ? err.message : 'Unknown error')
-      // Fall back to mock data on error
-      setMessages(getMockMessages(conversationId) as Message[])
-    } finally {
-      setLoading(false)
+function formatMessageTime(timestamp: string): string {
+  try {
+    const date = new Date(timestamp);
+    if (isValid(date)) {
+      return format(date, 'HH:mm');
     }
+    return '';
+  } catch {
+    return '';
+  }
+}
+
+function formatDateDivider(timestamp: string): string {
+  try {
+    const date = new Date(timestamp);
+    if (!isValid(date)) return '';
+
+    if (isToday(date)) return 'Today';
+    if (isYesterday(date)) return 'Yesterday';
+    return format(date, 'MMMM d, yyyy');
+  } catch {
+    return '';
+  }
+}
+
+function shouldShowDateDivider(currentMsg: Message, prevMsg: Message | null): boolean {
+  if (!prevMsg) return true;
+
+  try {
+    const currentDate = new Date(currentMsg.createdAt);
+    const prevDate = new Date(prevMsg.createdAt);
+
+    if (!isValid(currentDate) || !isValid(prevDate)) return false;
+
+    return format(currentDate, 'yyyy-MM-dd') !== format(prevDate, 'yyyy-MM-dd');
+  } catch {
+    return false;
+  }
+}
+
+function isWithin24HourWindow(messages: Message[]): boolean {
+  // Find the last inbound message
+  const inboundMessages = messages.filter(msg => msg.direction === 'inbound');
+
+  if (inboundMessages.length === 0) {
+    // No inbound messages yet - only templates allowed
+    return false;
   }
 
-  useEffect(() => {
-    fetchMessages()
+  const lastInboundMessage = inboundMessages[inboundMessages.length - 1];
 
-    // Auto-poll every 5 seconds in production
-    if (!isDevMode() && conversationId) {
-      const interval = setInterval(fetchMessages, 5000)
-      return () => clearInterval(interval)
-    }
-  }, [conversationId, workspaceId])
+  try {
+    const lastMessageDate = new Date(lastInboundMessage.createdAt);
+    if (!isValid(lastMessageDate)) return false;
 
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages])
+    const hoursSinceLastMessage = differenceInHours(new Date(), lastMessageDate);
+    return hoursSinceLastMessage < 24;
+  } catch {
+    return false; // In case of error, only allow templates
+  }
+}
 
-  const handleSendMessage = async () => {
-    if (!messageText.trim() || !conversationId || sending) return
+function getDisabledInputMessage(messages: Message[]): string {
+  const inboundMessages = messages.filter(msg => msg.direction === 'inbound');
 
-    setSending(true)
-    const tempMessage: Message = {
-      id: `temp-${Date.now()}`,
-      conversationId,
-      direction: 'outbound',
-      content: messageText,
-      timestamp: new Date().toISOString(),
-      type: 'text',
-      status: 'sent',
-    }
+  if (inboundMessages.length === 0) {
+    return "User hasn't messaged yet. Send a template message or wait for them to reply.";
+  }
 
-    // Optimistic update
-    setMessages((prev) => [...prev, tempMessage])
-    setMessageText('')
+  return "Last message was over 24 hours ago. Send a template message or wait for the user to message you.";
+}
+
+type Props = {
+  conversationId?: string;
+  phoneNumber?: string;
+  contactName?: string;
+  onTemplateSent?: (phoneNumber: string) => Promise<void>;
+  onBack?: () => void;
+  isVisible?: boolean;
+};
+
+export function MessageView({ conversationId, phoneNumber, contactName, onTemplateSent, onBack, isVisible = false }: Props) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [messageInput, setMessageInput] = useState('');
+  const [sending, setSending] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [canSendRegularMessage, setCanSendRegularMessage] = useState(true);
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [showInteractiveDialog, setShowInteractiveDialog] = useState(false);
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previousMessageCountRef = useRef(0);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const fetchMessages = useCallback(async () => {
+    if (!conversationId) return;
 
     try {
-      if (!isDevMode()) {
-        // Production: send via Kapso API
-        const response = await fetch('/api/whatsapp/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            workspaceId,
-            conversationId,
-            message: messageText,
-            type: 'text',
-          }),
-        })
+      const response = await fetch(`/api/messages/${conversationId}`);
+      const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error('Failed to send message')
+      // Separate reactions from regular messages
+      const reactions = (data.data || []).filter((msg: Message) => msg.messageType === 'reaction');
+      const regularMessages = (data.data || []).filter((msg: Message) => msg.messageType !== 'reaction');
+
+      // Create a map of message ID to reaction emoji
+      const reactionMap = new Map<string, string>();
+      reactions.forEach((reaction: Message) => {
+        if (reaction.reactedToMessageId && reaction.reactionEmoji) {
+          reactionMap.set(reaction.reactedToMessageId, reaction.reactionEmoji);
         }
+      });
 
-        const data = await response.json()
-        // Update with real message data
-        setMessages((prev) =>
-          prev.map((m) => (m.id === tempMessage.id ? { ...tempMessage, ...data.message } : m))
-        )
-      } else {
-        // Dev mode: keep optimistic update
-        await new Promise((resolve) => setTimeout(resolve, 500))
-      }
-    } catch (err) {
-      console.error('Failed to send message:', err)
-      // Remove temporary message on error
-      setMessages((prev) => prev.filter((m) => m.id !== tempMessage.id))
-      setError('Failed to send message')
+      // Attach reactions to their corresponding messages
+      const messagesWithReactions = regularMessages.map((msg: Message) => {
+        const reaction = reactionMap.get(msg.id);
+        return reaction ? { ...msg, reactionEmoji: reaction } : msg;
+      });
+
+      const sortedMessages = messagesWithReactions.sort((a: Message, b: Message) => {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
+
+      setMessages(sortedMessages);
+      previousMessageCountRef.current = sortedMessages.length;
+    } catch (error) {
+      console.error('Error fetching messages:', error);
     } finally {
-      setSending(false)
-      // Focus back on input
-      inputRef.current?.focus()
+      setLoading(false);
+      setRefreshing(false);
     }
-  }
+  }, [conversationId]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
+  useEffect(() => {
+    if (conversationId) {
+      setLoading(true);
+      fetchMessages();
     }
-  }
+  }, [conversationId, fetchMessages]);
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
-  }
+  useEffect(() => {
+    // Only auto-scroll if user is near bottom
+    if (isNearBottom) {
+      scrollToBottom();
+    }
+  }, [messages, isNearBottom]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
+  useEffect(() => {
+    setCanSendRegularMessage(isWithin24HourWindow(messages));
+  }, [messages]);
 
-    if (date.toDateString() === today.toDateString()) {
-      return formatTime(dateString)
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return `Yesterday, ${formatTime(dateString)}`
+  // Track if user is near bottom of scroll
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const viewport = container.querySelector('[data-radix-scroll-area-viewport]');
+      if (!viewport) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = viewport;
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+      setIsNearBottom(distanceFromBottom < 100);
+    };
+
+    const viewport = container.querySelector('[data-radix-scroll-area-viewport]');
+    if (viewport) {
+      viewport.addEventListener('scroll', handleScroll);
+      return () => viewport.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchMessages();
+  };
+
+  // Auto-polling for messages (every 5 seconds)
+  useAutoPolling({
+    interval: 5000,
+    enabled: !!conversationId,
+    onPoll: fetchMessages
+  });
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     } else {
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      })
+      setFilePreview(null);
     }
-  }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if ((!messageInput.trim() && !selectedFile) || !phoneNumber || sending) return;
+
+    setSending(true);
+    try {
+      const formData = new FormData();
+      formData.append('to', phoneNumber);
+      if (messageInput.trim()) {
+        formData.append('body', messageInput);
+      }
+      if (selectedFile) {
+        formData.append('file', selectedFile);
+      }
+
+      await fetch('/api/messages/send', {
+        method: 'POST',
+        body: formData
+      });
+
+      setMessageInput('');
+      handleRemoveFile();
+      await fetchMessages();
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleTemplateSent = async () => {
+    await fetchMessages();
+
+    // Notify parent to refresh conversation list and select this conversation
+    if (phoneNumber && onTemplateSent) {
+      await onTemplateSent(phoneNumber);
+    }
+  };
 
   if (!conversationId) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-muted/20">
-        <div className="text-center text-muted-foreground">
-          <Info className="h-16 w-16 mx-auto mb-4 opacity-50" />
-          <p className="text-lg font-medium">Select a conversation</p>
-          <p className="text-sm mt-1">Choose a conversation from the list to start messaging</p>
-        </div>
+      <div className={cn(
+        "flex-1 flex items-center justify-center bg-muted/50",
+        !isVisible && "hidden md:flex"
+      )}>
+        <p className="text-muted-foreground">Select a conversation to view messages</p>
       </div>
-    )
+    );
   }
 
-  return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border bg-card">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 bg-primary text-primary-foreground flex items-center justify-center font-semibold">
-            C
-          </Avatar>
-          <div>
-            <h3 className="font-semibold">Conversation</h3>
-            <p className="text-xs text-muted-foreground font-mono">{conversationId}</p>
+  if (loading) {
+    return (
+      <div className={cn(
+        "flex-1 flex flex-col bg-[#efeae2]",
+        !isVisible && "hidden md:flex"
+      )}>
+        <div className="p-3 border-b border-[#d1d7db] bg-[#f0f2f5]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 flex-1">
+              {onBack && (
+                <Button
+                  onClick={onBack}
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden text-[#667781] hover:bg-[#f0f2f5]"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              )}
+              <div className="flex-1">
+                <Skeleton className="h-5 w-40 mb-1" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            </div>
+            <Skeleton className="h-9 w-24 rounded-lg" />
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Phone className="h-4 w-4 mr-2" />
-              Call
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Video className="h-4 w-4 mr-2" />
-              Video Call
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Info className="h-4 w-4 mr-2" />
-              Contact Info
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      {/* Dev mode indicator */}
-      {isDevMode() && (
-        <div className="px-4 py-2 bg-accent/10 border-b border-border">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            <span className="font-mono">Offline Mode</span>
-          </div>
-        </div>
-      )}
-
-      {/* Error state */}
-      {error && (
-        <div className="p-4 bg-destructive/10 border-b border-border">
-          <p className="text-sm text-destructive">{error}</p>
-        </div>
-      )}
-
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-        {loading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
-                <div className={`max-w-[70%] ${i % 2 === 0 ? 'bg-muted' : 'bg-primary text-primary-foreground'} rounded-lg p-3`}>
-                  <Skeleton className="h-4 w-48 mb-2" />
-                  <Skeleton className="h-3 w-24" />
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="max-w-[900px] mx-auto space-y-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className={cn('flex mb-2', i % 2 === 0 ? 'justify-end' : 'justify-start')}>
+                <div className={cn(
+                  'max-w-[70%] rounded-lg px-3 py-2 shadow-sm',
+                  i % 2 === 0 ? 'rounded-br-none' : 'rounded-bl-none'
+                )}>
+                  <Skeleton className="h-4 mb-2" style={{ width: `${Math.random() * 150 + 150}px` }} />
+                  <Skeleton className="h-3 w-16" />
                 </div>
               </div>
             ))}
           </div>
-        ) : (
-          <div className="space-y-4">
-            {messages.map((message, index) => {
-              const isFirstInGroup = index === 0 || messages[index - 1].direction !== message.direction
-              return (
-                <div
-                  key={message.id}
-                  className={`flex ${message.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`max-w-[70%] ${isFirstInGroup ? 'mt-4' : 'mt-1'}`}>
-                    {/* Message bubble */}
-                    <div
-                      className={`rounded-2xl px-4 py-2 ${
-                        message.direction === 'outbound'
-                          ? 'bg-primary text-primary-foreground rounded-br-sm'
-                          : 'bg-muted text-foreground rounded-bl-sm'
-                      }`}
-                    >
-                      <p className="text-sm whitespace-pre-wrap break-words font-mono">{message.content}</p>
-                    </div>
+        </div>
+      </div>
+    );
+  }
 
-                    {/* Timestamp and status */}
-                    <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
-                      message.direction === 'outbound' ? 'justify-end' : 'justify-start'
-                    }`}>
-                      <span className="font-mono">{formatDate(message.timestamp)}</span>
-                      {message.direction === 'outbound' && message.status && (
-                        <span className="font-mono">
-                          {message.status === 'sent' && '✓'}
-                          {message.status === 'delivered' && '✓✓'}
-                          {message.status === 'read' && '✓✓'}
-                          {message.status === 'failed' && '✗'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </ScrollArea>
-
-      {/* Message input */}
-      <div className="p-4 border-t border-border bg-card">
-        <div className="flex items-end gap-2">
-          <Button variant="ghost" size="icon" className="shrink-0">
-            <Paperclip className="h-5 w-5" />
-          </Button>
-          <div className="flex-1 relative">
-            <textarea
-              ref={inputRef}
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
-              className="w-full min-h-[44px] max-h-32 px-4 py-3 pr-12 rounded-lg border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-              rows={1}
-              disabled={sending}
-            />
-            <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2">
-              <Smile className="h-5 w-5" />
-            </Button>
+  return (
+    <div className={cn(
+      "flex-1 flex flex-col bg-[#efeae2]",
+      !isVisible && "hidden md:flex"
+    )}>
+      <div className="p-3 border-b border-[#d1d7db] bg-[#f0f2f5]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {onBack && (
+              <Button
+                onClick={onBack}
+                variant="ghost"
+                size="icon"
+                className="md:hidden text-[#667781] hover:bg-[#f0f2f5] flex-shrink-0"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            )}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-medium text-[#111b21] truncate">{contactName || phoneNumber || 'Conversation'}</h2>
+              {contactName && phoneNumber && (
+                <p className="text-xs text-[#667781] truncate">{phoneNumber}</p>
+              )}
+            </div>
           </div>
           <Button
-            onClick={handleSendMessage}
-            disabled={!messageText.trim() || sending}
-            className="shrink-0"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            variant="ghost"
+            size="icon"
+            className="text-[#667781] hover:bg-[#f0f2f5]"
           >
-            {sending ? (
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
+            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
           </Button>
         </div>
       </div>
+
+      <ScrollArea ref={messagesContainerRef} className="flex-1 h-0 p-4">
+        <div className="max-w-[900px] mx-auto">
+        {messages.length === 0 ? (
+          <p className="text-center text-muted-foreground">No messages yet</p>
+        ) : (
+          messages.map((message, index) => {
+            const prevMessage = index > 0 ? messages[index - 1] : null;
+            const showDateDivider = shouldShowDateDivider(message, prevMessage);
+
+            return (
+              <div key={message.id}>
+                {showDateDivider && (
+                  <div className="flex justify-center my-4">
+                    <Badge variant="secondary" className="shadow-sm">
+                      {formatDateDivider(message.createdAt)}
+                    </Badge>
+                  </div>
+                )}
+
+                <div
+                  className={cn(
+                    'flex mb-2',
+                    message.direction === 'outbound' ? 'justify-end' : 'justify-start'
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'max-w-[70%] rounded-lg px-3 py-2 relative shadow-sm',
+                      message.direction === 'outbound'
+                        ? 'bg-[#d9fdd3] text-[#111b21] rounded-br-none'
+                        : 'bg-white text-[#111b21] rounded-bl-none'
+                    )}
+                  >
+                    {message.hasMedia && message.mediaData?.url ? (
+                      <div className="mb-2">
+                        {message.messageType === 'sticker' ? (
+                          <img
+                            src={message.mediaData.url}
+                            alt="Sticker"
+                            className="max-w-[150px] max-h-[150px] h-auto"
+                          />
+                        ) : message.mediaData.contentType?.startsWith('image/') || message.messageType === 'image' ? (
+                          <img
+                            src={message.mediaData.url}
+                            alt="Media"
+                            className="rounded max-w-full h-auto max-h-96"
+                          />
+                        ) : message.mediaData.contentType?.startsWith('video/') || message.messageType === 'video' ? (
+                          <video
+                            src={message.mediaData.url}
+                            controls
+                            className="rounded max-w-full h-auto max-h-96"
+                          />
+                        ) : message.mediaData.contentType?.startsWith('audio/') || message.messageType === 'audio' ? (
+                          <audio src={message.mediaData.url} controls className="w-full" />
+                        ) : (
+                          <a
+                            href={message.mediaData.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={cn(
+                              'flex items-center gap-2 text-sm underline cursor-pointer hover:opacity-80',
+                              message.direction === 'outbound' ? 'text-[#00a884]' : 'text-[#00a884]'
+                            )}
+                          >
+                            📎 {message.mediaData.filename || message.filename || 'Download file'}
+                          </a>
+                        )}
+                      </div>
+                    ) : message.metadata?.mediaId && message.messageType ? (
+                      <div className="mb-2">
+                        <MediaMessage
+                          mediaId={message.metadata.mediaId}
+                          messageType={message.messageType}
+                          caption={message.caption}
+                          filename={message.filename}
+                          isOutbound={message.direction === 'outbound'}
+                        />
+                      </div>
+                    ) : null}
+
+                    {message.caption && (
+                      <p className="text-sm break-words whitespace-pre-wrap mb-1">
+                        {message.caption}
+                      </p>
+                    )}
+
+                    {message.content && message.content !== '[Image attached]' && (
+                      <p className="text-sm break-words whitespace-pre-wrap">
+                        {message.content}
+                      </p>
+                    )}
+
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[11px] text-[#667781]">
+                        {formatMessageTime(message.createdAt)}
+                      </span>
+
+                      {message.messageType && (
+                        <span className="text-[11px] text-[#667781] opacity-60">
+                          · {message.messageType}
+                        </span>
+                      )}
+
+                      {message.direction === 'outbound' && message.status && (
+                        <>
+                          {message.status === 'failed' ? (
+                            <XCircle className="h-3.5 w-3.5 text-red-500" />
+                          ) : (
+                            <span className="text-xs text-[#53bdeb]">
+                              {message.status === 'read' ? '✓✓' :
+                               message.status === 'delivered' ? '✓✓' :
+                               message.status === 'sent' ? '✓' : ''}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    {message.direction === 'outbound' && message.status === 'failed' && (
+                      <div className="mt-1">
+                        <span className="text-[11px] text-red-500 flex items-center gap-1">
+                          Not delivered
+                        </span>
+                      </div>
+                    )}
+
+                    {message.reactionEmoji && (
+                      <div className="absolute -bottom-2 -right-2 bg-background rounded-full px-1.5 py-0.5 text-sm shadow-sm border">
+                        {message.reactionEmoji}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+        <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
+
+      <div className="border-t border-[#d1d7db] bg-[#f0f2f5]">
+        {canSendRegularMessage ? (
+          <>
+            {selectedFile && (
+              <div className="p-3 border-b border-[#d1d7db] bg-white">
+                <div className="flex items-start gap-3">
+                  {filePreview ? (
+                    <img src={filePreview} alt="Preview" className="w-16 h-16 object-cover rounded" />
+                  ) : (
+                    <div className="w-16 h-16 bg-[#f0f2f5] rounded flex items-center justify-center">
+                      <Paperclip className="h-6 w-6 text-[#667781]" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#111b21] truncate">{selectedFile.name}</p>
+                    <p className="text-xs text-[#667781]">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                  <Button
+                    onClick={handleRemoveFile}
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-[#667781]"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSendMessage} className="p-3 max-w-[900px] mx-auto w-full flex gap-2 items-center">
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileSelect}
+                accept="image/*,video/*,audio/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                className="hidden"
+              />
+              <Button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending}
+                variant="ghost"
+                size="icon"
+                className="text-[#667781] hover:bg-[#d1d7db]/30"
+                title="Upload file"
+              >
+                <Paperclip className="h-5 w-5" />
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setShowInteractiveDialog(true)}
+                disabled={sending}
+                size="icon"
+                variant="ghost"
+                className="text-[#667781] hover:text-[#00a884] hover:bg-[#f0f2f5]"
+                title="Send interactive message"
+              >
+                <ListTree className="h-5 w-5" />
+              </Button>
+              <Input
+                type="text"
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                placeholder="Type a message"
+                disabled={sending}
+                className="flex-1 bg-white border-[#d1d7db] focus-visible:ring-[#00a884] rounded-lg"
+              />
+              <Button
+                type="submit"
+                disabled={sending || (!messageInput.trim() && !selectedFile)}
+                size="icon"
+                className="bg-[#00a884] hover:bg-[#008f6f] rounded-full"
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            </form>
+          </>
+        ) : (
+          <div className="p-3 max-w-[900px] mx-auto w-full">
+            <div className="bg-[#fff4cc] border border-[#e9c46a] rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-[#8b7000] flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-[#111b21] mb-3">
+                    {getDisabledInputMessage(messages)}
+                  </p>
+                  <Button
+                    onClick={() => setShowTemplateDialog(true)}
+                    className="bg-[#00a884] hover:bg-[#008f6f]"
+                    size="sm"
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Send template
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <TemplateSelectorDialog
+        open={showTemplateDialog}
+        onOpenChange={setShowTemplateDialog}
+        phoneNumber={phoneNumber || ''}
+        onTemplateSent={handleTemplateSent}
+      />
+
+      <InteractiveMessageDialog
+        open={showInteractiveDialog}
+        onOpenChange={setShowInteractiveDialog}
+        conversationId={conversationId}
+        phoneNumber={phoneNumber}
+        onMessageSent={fetchMessages}
+      />
     </div>
-  )
+  );
 }
