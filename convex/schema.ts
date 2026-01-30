@@ -805,4 +805,17 @@ export default defineSchema({
     updated_at: v.number(),
   })
     .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // SYNC HEALTH (Background sync monitoring)
+  // ============================================
+  syncHealth: defineTable({
+    workspace_id: v.id("workspaces"),
+    run_at: v.number(),
+    contacts_checked: v.number(),
+    stale_found: v.number(),
+    flagged: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_run_at", ["run_at"]),
 });
