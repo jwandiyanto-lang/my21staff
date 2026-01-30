@@ -6,17 +6,16 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 2.5 - Settings & Configuration (Plan 04 - WhatsApp Inbox - just completed)
+**Current focus:** Phase 3 planning - Sarah Chat Bot (Gemini 2.5 integration)
 
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 2.5 - Settings & Configuration
-Plan: 4 of 5 plans complete
-Status: Phase 2.5 IN PROGRESS 🔄
-Last activity: 2026-01-30 — Plan 04 completed: WhatsApp Inbox with Kapso API integration
+Phase: Phase 2.5 - Settings & Configuration — ✅ COMPLETE
+Status: READY FOR PHASE 3
+Last activity: 2026-01-30 — Phase 2.5 verified: 10/10 must-haves passed
 
-Progress: ███████████████░░░░░░░░░░░░░░ 58% (7 of 12 total plans across all phases)
+Progress: ████████████████░░░░░░░░░░░░░ 67% (8 of 12 total plans across all phases)
 
 ## V2.0 Milestone
 
@@ -24,14 +23,15 @@ Progress: ███████████████░░░░░░░░�
 **Goal:** Build WhatsApp CRM with dual-agent AI (Sarah chat + Grok manager) using Kapso workflows + Convex database
 
 **Phases Planned:**
-1. Foundation (Kapso workspace + webhook) - COMPLETED (1 plan)
+1. Foundation (Kapso workspace + webhook) - ✅ COMPLETED (1 plan)
 2. Workflow Rules Engine (Kapso native workflows + Grok) - ✅ COMPLETED (3 plans)
-2.5. Settings & Configuration (Kapso workflow management UI) - 🔄 IN PROGRESS (4 of 5 plans complete)
-3. Sarah Chat Bot (Gemini 2.5 + persona) - PLANNING
+2.5. Settings & Configuration (Kapso workflow management UI) - ✅ COMPLETED (5 plans)
+3. Sarah Chat Bot (Gemini 2.5 + persona) - READY FOR PLANNING
 4. Lead Database (Kapso → Convex sync)
 5. Grok Manager Bot (Analysis + insights)
 6. Dashboard (Lead list + analytics)
 7. Handoff Workflow (End-to-end flow)
+8. Testing & Polish
 
 **Total Requirements:** 52+
 
@@ -109,26 +109,35 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Pending Todos
 
-**Phase 2.5: 🔄 IN PROGRESS**
-Plans completed (4 of 5):
-- ✅ Your Team Navigation & Layout
-- ✅ Bot Name Configuration
-- ✅ Bot Configuration Components (Intern & Brain)
-- ✅ WhatsApp Inbox (Kapso API integration, template/interactive messages)
-- ✅ Settings Backup & Sync Status
+**Phase 3: READY TO PLAN**
+- Sarah Chat Bot (Gemini 2.5 Flash integration + persona + 4-slot extraction)
 
-**Next:** Plan 05 - Final Phase 2.5 plan (TBD)
+**Completed phases:**
+- ✅ Phase 1: Foundation (Kapso workspace + webhook)
+- ✅ Phase 2: Workflow Rules Engine (Kapso native workflows)
+- ✅ Phase 2.5: Settings & Configuration (5/5 plans complete)
+
+**Phase 2.5 deliverables:**
+- Your Team page with Intern/Brain tabs
+- Bot name configuration in Settings
+- InternSettings & BrainSettings components with auto-save
+- Kapso WhatsApp inbox (conversation list + message view)
+- Settings backup & sync status indicator
+- Dev mode offline support with mock data
 
 ### Blockers/Concerns
 
-**Production WhatsApp sending not yet functional:** Requires workspace settings table to store Kapso API credentials. Template sending endpoint (`/api/whatsapp/send`) referenced in MessageView but not yet created.
+**Known technical debt:**
+- Production WhatsApp sending requires workspace settings table to store Kapso API credentials
+- Template sending endpoint (`/api/whatsapp/send`) referenced in MessageView but not yet created
+- Intern/Brain config Convex storage has TODO comments (acceptable per phase scope)
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 15:27 UTC
-**Stopped at:** Phase 2.5 Plan 04 completed - WhatsApp Inbox fully functional with dev mode support
+**Last session:** 2026-01-30 19:30 UTC
+**Stopped at:** Phase 2.5 complete - Verified 10/10 must-haves, ready to start Phase 3
 **Resume file:** None
 
 ---
 
-*Last updated: 2026-01-30 — Phase 2.5 IN PROGRESS 🔄 (4/5 plans), 7/12 total plans (58%)*
+*Last updated: 2026-01-30 — Phase 2.5 COMPLETE ✅ (5/5 plans), 8/12 total plans (67%)*
