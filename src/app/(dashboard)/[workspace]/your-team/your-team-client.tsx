@@ -10,6 +10,8 @@ import { FlowTab } from '@/components/knowledge-base/flow-tab'
 import { DatabaseTab } from '@/components/knowledge-base/database-tab'
 import { TabErrorBoundary } from '@/components/error-boundaries/tab-error-boundary'
 import { AIToggle } from '@/components/knowledge-base/ai-toggle'
+import { InternSettings } from '@/components/your-team/intern-settings'
+import { BrainSettings } from '@/components/your-team/brain-settings'
 
 interface TeamMember {
   id: string
@@ -102,9 +104,9 @@ export function YourTeamClient({ workspace, teamMembers, activeTab: initialTab }
           </div>
         </TabsContent>
 
-        {/* Brain Tab - Grok Manager Bot placeholder */}
+        {/* Brain Tab - Grok Manager Bot configuration */}
         <TabsContent value="brain" className="space-y-6">
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div>
               <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
                 <Brain className="w-5 h-5" />
@@ -115,33 +117,10 @@ export function YourTeamClient({ workspace, teamMembers, activeTab: initialTab }
               </p>
             </div>
 
-            {/* Placeholder for Grok Manager Bot configuration */}
-            <div className="border border-dashed border-white/20 rounded-xl p-12 text-center space-y-4">
-              <Brain className="w-12 h-12 mx-auto text-white/30" />
-              <div>
-                <h3 className="text-lg font-medium text-foreground">Grok Manager Bot</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Coming Soon
-                </p>
-              </div>
-              <div className="text-sm text-muted-foreground max-w-md mx-auto space-y-2">
-                <p>Configure your AI manager for:</p>
-                <ul className="text-left space-y-1 text-xs">
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#F7931A]" />
-                    Summary generation settings
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#F7931A]" />
-                    Lead scoring configuration
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#F7931A]" />
-                    Analysis triggers
-                  </li>
-                </ul>
-              </div>
-            </div>
+            {/* Brain Settings Component */}
+            <TabErrorBoundary tabName="Brain Settings">
+              <BrainSettings workspaceSlug={workspace.slug} />
+            </TabErrorBoundary>
           </div>
         </TabsContent>
       </Tabs>
@@ -154,11 +133,15 @@ function InternTabs({ workspace, teamMembers }: {
   workspace: { id: string; name: string; slug: string }
   teamMembers: TeamMember[]
 }) {
-  const [activeSubTab, setActiveSubTab] = useState('persona')
+  const [activeSubTab, setActiveSubTab] = useState('settings')
 
   return (
     <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4 max-w-2xl h-auto">
+      <TabsList className="grid w-full grid-cols-5 max-w-2xl h-auto">
+        <TabsTrigger value="settings" className="flex items-center gap-2 py-2">
+          <Bot className="w-4 h-4 shrink-0" />
+          <span className="hidden sm:inline">Settings</span>
+        </TabsTrigger>
         <TabsTrigger value="persona" className="flex items-center gap-2 py-2">
           <Bot className="w-4 h-4 shrink-0" />
           <span className="hidden sm:inline">Persona</span>
@@ -176,6 +159,13 @@ function InternTabs({ workspace, teamMembers }: {
           <span className="hidden sm:inline">Slots</span>
         </TabsTrigger>
       </TabsList>
+
+      {/* Quick Settings Tab - NEW */}
+      <TabsContent value="settings" className="space-y-6">
+        <TabErrorBoundary tabName="Settings">
+          <InternSettings workspaceSlug={workspace.slug} />
+        </TabErrorBoundary>
+      </TabsContent>
 
       <TabsContent value="persona" className="space-y-6">
         <TabErrorBoundary tabName="Persona">

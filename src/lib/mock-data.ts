@@ -2261,3 +2261,205 @@ export const resetMockWorkspaceSettings = () => {
     }
   }
 }
+
+// =============================================================================
+// MOCK BOT CONFIGURATIONS
+// For Intern and Brain settings components (Phase 2.5)
+// =============================================================================
+
+const MOCK_INTERN_CONFIG_STORAGE_KEY = 'my21staff-mock-intern-config'
+const MOCK_BRAIN_CONFIG_STORAGE_KEY = 'my21staff-mock-brain-config'
+
+// Default Intern configuration
+const DEFAULT_INTERN_CONFIG = {
+  persona: {
+    greetingStyle: 'friendly',
+    language: 'indonesian',
+    tone: ['supportive', 'clear'],
+    customPrompt: '',
+  },
+  behavior: {
+    autoRespondNewLeads: true,
+    handoffKeywords: ['human', 'operator', 'manager', 'cs', 'customer service'],
+    quietHoursEnabled: false,
+    quietHoursStart: '22:00',
+    quietHoursEnd: '08:00',
+    maxMessagesBeforeHuman: 10,
+  },
+  response: {
+    maxMessageLength: 280,
+    emojiUsage: 'moderate',
+    priceMentions: 'ranges',
+    responseDelay: 'instant',
+  },
+  slotExtraction: {
+    enabled: true,
+    slots: {
+      name: { enabled: true, required: true },
+      serviceInterest: { enabled: true, required: false },
+      budgetRange: { enabled: true, required: false },
+      timeline: { enabled: true, required: false },
+    },
+    customSlots: [],
+  },
+}
+
+// Default Brain configuration
+const DEFAULT_BRAIN_CONFIG = {
+  summary: {
+    enabled: true,
+    time: '09:00',
+    format: 'bullet',
+    includeMetrics: {
+      newLeads: true,
+      conversions: true,
+      responseTimes: true,
+      topSources: false,
+    },
+  },
+  scoring: {
+    hotThreshold: 70,
+    warmThreshold: 40,
+    weights: {
+      basicInfo: 20,
+      qualification: 30,
+      document: 25,
+      engagement: 25,
+    },
+  },
+  triggers: {
+    onHandoff: true,
+    onKeyword: true,
+    keyword: '!summary',
+    onSchedule: false,
+    schedule: '0 9 * * *',
+    analysisDepth: 'standard',
+  },
+}
+
+// Runtime storage for bot configs
+let runtimeMockInternConfig = initializeMockInternConfig()
+let runtimeMockBrainConfig = initializeMockBrainConfig()
+
+function initializeMockInternConfig() {
+  if (typeof window === 'undefined') {
+    return { ...DEFAULT_INTERN_CONFIG }
+  }
+
+  try {
+    const stored = localStorage.getItem(MOCK_INTERN_CONFIG_STORAGE_KEY)
+    if (stored) {
+      return { ...DEFAULT_INTERN_CONFIG, ...JSON.parse(stored) }
+    }
+  } catch (error) {
+    console.error('Failed to load mock intern config from localStorage:', error)
+  }
+
+  return { ...DEFAULT_INTERN_CONFIG }
+}
+
+function initializeMockBrainConfig() {
+  if (typeof window === 'undefined') {
+    return { ...DEFAULT_BRAIN_CONFIG }
+  }
+
+  try {
+    const stored = localStorage.getItem(MOCK_BRAIN_CONFIG_STORAGE_KEY)
+    if (stored) {
+      return { ...DEFAULT_BRAIN_CONFIG, ...JSON.parse(stored) }
+    }
+  } catch (error) {
+    console.error('Failed to load mock brain config from localStorage:', error)
+  }
+
+  return { ...DEFAULT_BRAIN_CONFIG }
+}
+
+// Intern config getters/setters
+export const getMockInternConfig = () => {
+  return runtimeMockInternConfig
+}
+
+export const updateMockInternConfig = (updates: Partial<typeof DEFAULT_INTERN_CONFIG>) => {
+  runtimeMockInternConfig = deepMerge(runtimeMockInternConfig, updates)
+
+  // Persist to localStorage
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(MOCK_INTERN_CONFIG_STORAGE_KEY, JSON.stringify(runtimeMockInternConfig))
+    } catch (error) {
+      console.error('Failed to save mock intern config to localStorage:', error)
+    }
+  }
+
+  return runtimeMockInternConfig
+}
+
+export const resetMockInternConfig = () => {
+  runtimeMockInternConfig = { ...DEFAULT_INTERN_CONFIG }
+
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(MOCK_INTERN_CONFIG_STORAGE_KEY)
+    } catch (error) {
+      console.error('Failed to clear mock intern config from localStorage:', error)
+    }
+  }
+}
+
+// Brain config getters/setters
+export const getMockBrainConfig = () => {
+  return runtimeMockBrainConfig
+}
+
+export const updateMockBrainConfig = (updates: Partial<typeof DEFAULT_BRAIN_CONFIG>) => {
+  runtimeMockBrainConfig = deepMerge(runtimeMockBrainConfig, updates)
+
+  // Persist to localStorage
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(MOCK_BRAIN_CONFIG_STORAGE_KEY, JSON.stringify(runtimeMockBrainConfig))
+    } catch (error) {
+      console.error('Failed to save mock brain config to localStorage:', error)
+    }
+  }
+
+  return runtimeMockBrainConfig
+}
+
+export const resetMockBrainConfig = () => {
+  runtimeMockBrainConfig = { ...DEFAULT_BRAIN_CONFIG }
+
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(MOCK_BRAIN_CONFIG_STORAGE_KEY)
+    } catch (error) {
+      console.error('Failed to clear mock brain config from localStorage:', error)
+    }
+  }
+}
+
+// Deep merge helper for nested config updates
+function deepMerge<T>(target: T, source: Partial<T>): T {
+  const output = { ...target }
+
+  for (const key in source) {
+    const sourceValue = source[key]
+    const targetValue = output[key]
+
+    if (
+      sourceValue &&
+      typeof sourceValue === 'object' &&
+      !Array.isArray(sourceValue) &&
+      targetValue &&
+      typeof targetValue === 'object' &&
+      !Array.isArray(targetValue)
+    ) {
+      output[key] = deepMerge(targetValue, sourceValue)
+    } else {
+      output[key] = sourceValue as T[Extract<keyof T, string>]
+    }
+  }
+
+  return output
+}
