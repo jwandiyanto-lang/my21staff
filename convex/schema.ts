@@ -12,6 +12,9 @@ export default defineSchema({
     kapso_phone_id: v.optional(v.string()), // The phone_number_id from Kapso
     meta_access_token: v.optional(v.string()), // Encrypted Meta/Kapso API access token
     settings: v.optional(v.any()),
+    last_settings_sync: v.optional(v.number()), // Timestamp of last settings backup
+    settings_sync_status: v.optional(v.string()), // 'synced' | 'pending' | 'error'
+    settings_sync_error: v.optional(v.string()), // Error message if sync failed
     created_at: v.number(),
     updated_at: v.number(),
   })
@@ -616,4 +619,18 @@ export default defineSchema({
     updated_at: v.number(),
   })
     .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
+  // SETTINGS BACKUP (Configuration snapshots)
+  // ============================================
+  settingsBackup: defineTable({
+    workspace_id: v.id("workspaces"),
+    backup_type: v.string(), // 'intern_config', 'brain_config', 'bot_names', 'full'
+    config_data: v.any(), // JSON of configuration
+    source: v.string(), // 'user_save', 'auto_backup', 'import'
+    created_at: v.number(),
+    created_by: v.optional(v.string()), // Clerk user ID
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_type", ["workspace_id", "backup_type"]),
 });
