@@ -14,7 +14,7 @@ Milestone: v2.0
 Phase: Phase 2.5 - Settings & Configuration
 Plan: 4 of 5 plans complete
 Status: Phase 2.5 IN PROGRESS
-Last activity: 2026-01-30 — Completed Plan 04: Kapso Inbox Integration
+Last activity: 2026-01-30 — Completed Plan 03: Bot Configuration Components (Intern & Brain)
 
 Progress: ████████████░░░░░░░░░░░░░░░░░░ 55% (6 of 11 total plans across all phases)
 
@@ -74,6 +74,10 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Kapso API direct integration** for inbox (not Convex mirror)
 - **5-second polling** for real-time inbox updates (Kapso doesn't support WebSocket)
 - **Next.js API routes** proxy Kapso operations for auth and CORS handling
+- **Bot settings auto-save on change** (no submit button) for better UX
+- **localStorage persistence for dev mode** bot configurations
+- **Deep merge utility** preserves nested config structure during updates
+- **Brain scoring weights must total 100%** with validation warning
 
 ### Kapso Configuration
 
@@ -101,6 +105,7 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 **Phase 2.5 (In Progress):**
 - ~~Your Team Navigation & Layout~~ ✅ COMPLETED
 - ~~Bot Name Configuration~~ ✅ COMPLETED
+- ~~Bot Configuration Components (Intern & Brain)~~ ✅ COMPLETED
 - ~~Kapso Inbox Integration~~ ✅ COMPLETED
 - Kapso Workflow API Integration (next)
 - Test panel for workflow triggers
@@ -111,10 +116,10 @@ None — ready to continue Phase 2.5.
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 13:51 UTC
-**Stopped at:** Completed Phase 2.5 Plan 04 (Kapso Inbox Integration)
+**Last session:** 2026-01-30 13:53 UTC
+**Stopped at:** Completed Phase 2.5 Plan 03 (Bot Configuration Components)
 **Resume file:** None
 
 ---
 
-*Last updated: 2026-01-30 — Phase 2.5 Plan 04 COMPLETE ✅, 6/11 total plans (55%)*
+*Last updated: 2026-01-30 — Phase 2.5 Plan 03 COMPLETE ✅, 6/11 total plans (55%)*
