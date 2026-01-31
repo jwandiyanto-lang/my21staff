@@ -12,10 +12,10 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: Phase 6 - Dashboard — IN PROGRESS
-Status: 4 of 6+ plans complete
-Last activity: 2026-01-31 — Completed 06-03-PLAN.md: Lead Detail Panel
+Status: 5 of 6+ plans complete
+Last activity: 2026-01-31 — Completed 06-05-PLAN.md: Lead Stats with Trends
 
-Progress: ████████████████████████████████████████░ 116% (29 of 25 base plans, Phase 6 in progress)
+Progress: ████████████████████████████████████████░ 120% (30 of 25 base plans, Phase 6 in progress)
 
 ## V2.0 Milestone
 
@@ -74,6 +74,7 @@ Progress: ███████████████████████�
 | 06-02 | ✅ Complete (executed 2026-01-31, 7 min) | Real-time lead filtering with multi-select stage filter, debounced search, and date presets |
 | 06-03 | ✅ Complete (executed 2026-01-31, 5.6 min) | Slide-out detail panel with AI insights, notes timeline, and temperature-based guidance |
 | 06-04 | ✅ Complete (executed 2026-01-31, 5 min) | Dedicated Insights page with Grok summaries, action items, patterns, and lead quality visualization |
+| 06-05 | ✅ Complete (executed 2026-01-31, 3.9 min) | Lead statistics with trend indicators, time period toggle, and conversational highlights |
 
 ## V1.0.0 Archive Summary
 
@@ -172,6 +173,12 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Expandable pattern cards** - Reduce visual clutter, user controls detail level (DSH-10)
 - **CSS-based horizontal bar chart** - No charting library needed, lightweight, matches minimalist brand (DSH-11)
 - **Action items placeholder buttons** - Phase 6 focused on read-only display, mutations deferred to Phase 7 (DSH-12)
+- **Time period toggle (Today/Week/Month)** - Dashboard stats with flexible time ranges for lead performance analysis (DSH-13)
+- **Default to Week period** - Best balance for actionable timeframe (not too granular, not too broad) (DSH-14)
+- **Dynamic primary stat card** - Shows most relevant "new leads" metric based on selected time period (DSH-15)
+- **Conversational highlights tailored to period** - Context-aware messaging improves readability and engagement (DSH-16)
+- **Responsive stats grid (1/2/4 columns)** - Mobile: stack, Tablet: 2-col, Desktop: 4-col for optimal layout at all breakpoints (DSH-17)
+- **Previous period trends with mocks** - Production will need `getLeadStatsPrevious` Convex query for real trend calculations (DSH-18)
 
 ### Kapso Configuration
 
@@ -252,14 +259,26 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - Intern/Brain config Convex storage has TODO comments (acceptable per phase scope)
 - Sarah advanced workflow (048c075f-bab4-4ccd-920c-fe5e9a3435b5) created but not used - integrated into Rules Engine instead
 - End-to-end verification deferred to Phase 6 - backend ready, UI testing when database page built
+- Previous period trend calculations use mocks - need `getLeadStatsPrevious` Convex query for production
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 03:37 UTC
-**Stopped at:** Completed 06-04: AI Insights Page - SUMMARY.md created
+**Last session:** 2026-01-31 03:45 UTC
+**Stopped at:** Completed 06-05: Lead Stats with Trends - SUMMARY.md created
 **Resume file:** None
 
 **Completed in this session:**
+- 06-05: Lead Stats with Trends (3.9 minutes)
+  - Created TrendIndicator component (reusable arrow with percentage display)
+  - Created LeadStats component (4 stat cards + conversational highlight)
+  - Time period toggle: Today/Week/Month with dynamic primary stat
+  - Period-aware conversational highlights
+  - Responsive grid: 1 col mobile / 2 col tablet / 4 col desktop
+  - Updated dashboard page to render stats at hero position
+  - 3 atomic commits (c61cad4, aed1538, c9a5b49)
+  - Files: trend-indicator.tsx, lead-stats.tsx, page.tsx, dashboard-client.tsx
+
+**Previous session (2026-01-31 03:37 UTC):**
 - 06-04: AI Insights Page (5 minutes)
   - Created /[workspace]/insights page with server + client components
   - Built 4 insight components: DailySummaryCard, ActionItemsList, PatternInsights, LeadQualityOverview
@@ -324,21 +343,23 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - 05-05: !summary command integration (2.5 min) - COMPLETE ✅
 - 05-06: Kapso workflow documentation (3 min) - COMPLETE ✅
 
-**Phase 6 Progress (3/6+ plans):**
+**Phase 6 Progress (5/6+ plans):**
 - 06-01: Lead List UI (3 min) - COMPLETE ✅
 - 06-02: Lead Filtering & Search (7 min) - COMPLETE ✅
+- 06-03: Lead Detail Panel (5.6 min) - COMPLETE ✅
 - 06-04: AI Insights Page (5 min) - COMPLETE ✅
+- 06-05: Lead Stats with Trends (3.9 min) - COMPLETE ✅
 
-**Phase 6-04 Deliverables:**
-- Dedicated /[workspace]/insights page with 4 components
-- DailySummaryCard: Grok's conversational summary + 3 metrics (new/hot/avg score)
-- ActionItemsList: Prioritized actions with urgency badges and suggested messages
-- PatternInsights: Expandable cards for topics/objections/signals with FAQ suggestions
-- LeadQualityOverview: CSS bar chart for temperature distribution + total/avg display
-- Insights navigation link added to sidebar (Sparkles icon)
-- Two-column responsive layout: (summary+actions) | (quality+patterns)
-- Full dev mode support with comprehensive mock data
+**Phase 6-05 Deliverables:**
+- TrendIndicator component: Reusable arrow with percentage display (green/red/gray)
+- LeadStats component: 4 stat cards (Total, New period-based, Hot, Avg Score)
+- Time period toggle: Today/Week/Month tabs with default to Week
+- Dynamic primary stat card: Shows relevant "new leads" metric based on period
+- Conversational highlights: Period-aware natural language summaries
+- Responsive grid: 1 col mobile / 2 col tablet / 4 col desktop
+- Dashboard page updated to render stats at hero position (removed /your-team redirect)
+- Full dev mode support with comprehensive mock trends
 
 ---
 
-*Last updated: 2026-01-31 — Phase 6 in progress, 27/25+ total plans*
+*Last updated: 2026-01-31 — Phase 6 in progress, 30/25+ total plans*
