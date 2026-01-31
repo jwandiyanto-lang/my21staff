@@ -11,4 +11,19 @@ crons.interval(
   internal.backgroundSync.reconcileAllWorkspaces
 );
 
+// Run Brain daily summary at 09:00 WIB (01:00 UTC)
+// Configured time can override this in brainConfig.summary.time
+crons.daily(
+  "brain-daily-summary",
+  { hourUTC: 1, minuteUTC: 0 }, // 09:00 WIB (Indonesia Western Time)
+  internal.brainAnalysis.generateDailySummary
+);
+
+// Clean up expired action recommendations every 6 hours
+crons.interval(
+  "brain-action-cleanup",
+  { hours: 6 },
+  internal.brainActions.cleanupExpiredActions
+);
+
 export default crons;
