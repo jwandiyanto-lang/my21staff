@@ -19,19 +19,14 @@ export function CTASection() {
           className="text-center"
         >
           {/* Main headline with orange accent */}
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#2D2A26] tracking-[-0.02em] leading-[1.1] mb-6">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#2D2A26] tracking-[-0.02em] leading-[1.1] mb-10">
             Ready to automate your{' '}
             <span className="text-[#F7931A] italic">next million?</span>
           </h2>
 
-          {/* Subtitle */}
-          <p className="text-lg sm:text-xl text-[#2D2A26]/70 max-w-3xl mx-auto mb-10 tracking-[-0.02em]">
-            Deploy the minimal OS for the world&apos;s most ambitious WhatsApp storefronts.
-          </p>
-
           {/* CTA Button - Large and prominent */}
           <Link
-            href="https://wa.me/971585938811?text=Hi%2C%20I'm%20interested%20in%20my21staff!"
+            href="https://wa.me/message/WMW65Q7UGTDNE1"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-10 py-5 bg-[#F7931A] text-white text-lg font-bold rounded-2xl hover:bg-[#e8850f] hover:scale-105 transition-all duration-150 shadow-lg hover:shadow-xl"
