@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from "next/font/google";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, MessageCircle, BarChart3, ArrowRight, Building2 } from "lucide-react";
+import { Check, X, ArrowRight, Zap, Activity } from "lucide-react";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -17,17 +17,14 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.15 } },
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  weight: ["400", "500", "600", "700"],
+});
 
 export default function PricingPage() {
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("");
 
@@ -52,7 +49,6 @@ export default function PricingPage() {
     { code: "+1", flag: "US", country: "USA" },
   ];
 
-  // Toggle lead source checkbox
   const toggleLeadSource = (source: string) => {
     setLeadSources(prev =>
       prev.includes(source)
@@ -79,7 +75,6 @@ export default function PricingPage() {
     setTeamSize("");
   };
 
-  // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
@@ -112,11 +107,9 @@ export default function PricingPage() {
         throw new Error(data.error || "Failed to submit form");
       }
 
-      // Success
       setSubmitSuccess(true);
       resetForm();
 
-      // Close modal after brief success state
       setTimeout(() => {
         setModalOpen(false);
         setSubmitSuccess(false);
@@ -129,13 +122,44 @@ export default function PricingPage() {
     }
   };
 
+  // Activity feed mock data
+  const activities = [
+    {
+      type: "lead",
+      icon: "psychology",
+      title: "Lead Qualified",
+      contact: "Sarah Chen",
+      detail: "Hot lead • Education",
+      time: "2m ago",
+      color: "#F7931A",
+    },
+    {
+      type: "message",
+      icon: "smart_toy",
+      title: "Auto-replied",
+      contact: "Ahmad Rizki",
+      detail: "FAQ: Pricing",
+      time: "5m ago",
+      color: "#1B4332",
+    },
+    {
+      type: "update",
+      icon: "sync",
+      title: "CRM Updated",
+      contact: "Maria Santos",
+      detail: "Stage: Follow-up",
+      time: "12m ago",
+      color: "#6B7280",
+    },
+  ];
+
   return (
     <div
-      className={`${plusJakartaSans.variable} ${inter.variable} antialiased bg-[#f1f5f0]`}
+      className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable} antialiased min-h-screen`}
       style={{ fontFamily: "var(--font-inter)" }}
     >
       {/* Navigation */}
-      <nav className="bg-[#284b31]">
+      <nav className="bg-[#1B4332] border-b border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <span className="text-xl font-extrabold tracking-[-0.02em]">
@@ -144,417 +168,428 @@ export default function PricingPage() {
               <span className="text-white/80">staff</span>
             </span>
           </Link>
-          <a
-            href="#comparison"
+          <Link
+            href="/"
             className="text-sm text-white/80 hover:text-[#F7931A] transition-colors duration-150 font-medium tracking-[-0.02em]"
           >
-            Get Started
-          </a>
+            Back to Home
+          </Link>
         </div>
       </nav>
 
-      <main>
-        {/* SECTION 1: Differentiation — Two Bots */}
-        <section className="bg-white px-6 py-16 md:py-20">
-          <div className="mx-auto max-w-6xl">
+      {/* Grid Background */}
+      <div className="relative bg-[#FCFCFB] notion-grid">
+        {/* Hero Section */}
+        <section className="relative px-6 py-20 md:py-28">
+          <div className="mx-auto max-w-5xl text-center">
+            {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.15 }}
-              className="text-center mb-12"
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#37352F14] bg-white/80 backdrop-blur-sm mb-6"
             >
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#284b31] mb-4 tracking-[-0.02em]">
-                YOU GET A TEAM, NOT JUST A CHATBOT
-              </h1>
-              <p className="text-lg md:text-xl text-[#2D2A26]/70 tracking-[-0.02em]">
-                One handles chat. The other makes sense of it.
+              <span className="material-symbols-outlined text-[#1B4332] text-[20px]">
+                verified
+              </span>
+              <span className="text-sm font-medium text-[#37352F]" style={{ fontFamily: "var(--font-jetbrains)" }}>
+                Pricing Engine V3
+              </span>
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#1B4332] mb-6 tracking-tight"
+              style={{ fontFamily: "var(--font-jakarta)" }}
+            >
+              Simple, sovereign pricing.
+            </motion.h1>
+
+            {/* Description + Toggle */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mb-8"
+            >
+              <p className="text-lg text-[#37352F]/60 mb-6 max-w-2xl mx-auto">
+                Transparent pricing for Indonesian SMEs. Pay monthly or save 20% with yearly billing.
               </p>
-            </motion.div>
 
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-              {/* Bot A */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.15 }}
-                className="bg-[#f1f5f0] rounded-2xl p-8 border-2 border-[#284b31]/10"
-              >
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 bg-[#284b31] rounded-xl flex items-center justify-center">
-                    <MessageCircle className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-[#284b31] tracking-[-0.02em]">
-                      BOT A — THE MOUTH
-                    </h2>
-                  </div>
-                </div>
-                <ul className="space-y-3">
-                  {[
-                    "Replies 24/7, never sleeps",
-                    "Handles FAQs automatically",
-                    "Captures leads instantly",
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-[#2D2A26] tracking-[-0.02em]">
-                      <span className="text-[#284b31]">→</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-
-              {/* Bot B */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.15, delay: 0.1 }}
-                className="bg-[#f1f5f0] rounded-2xl p-8 border-2 border-[#284b31]/10"
-              >
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 bg-[#F7931A] rounded-xl flex items-center justify-center">
-                    <BarChart3 className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-[#284b31] tracking-[-0.02em]">
-                      BOT B — THE BRAIN
-                    </h2>
-                  </div>
-                </div>
-                <ul className="space-y-3">
-                  {[
-                    "Analyzes every conversation",
-                    "Scores leads Hot/Cold",
-                    "Updates CRM automatically",
-                    "Flags urgent conversations",
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-[#2D2A26] tracking-[-0.02em]">
-                      <span className="text-[#F7931A]">→</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </div>
-
-            {/* The Kicker */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.15, delay: 0.2 }}
-              className="mt-12 text-center"
-            >
-              <div className="inline-block bg-[#F7931A]/10 border-2 border-[#F7931A] rounded-2xl px-8 py-6">
-                <p className="text-sm font-semibold text-[#F7931A] uppercase tracking-wider mb-2">
-                  THE KICKER?
-                </p>
-                <p className="text-2xl md:text-3xl font-extrabold text-[#284b31] tracking-[-0.02em] mb-4">
-                  It's always developing for you.
-                </p>
-                <a
-                  href="#comparison"
-                  className="inline-flex items-center gap-2 text-[#284b31] font-semibold hover:text-[#F7931A] transition-colors duration-150 tracking-[-0.02em]"
+              {/* Billing Toggle */}
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => setBillingCycle("monthly")}
+                  className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${
+                    billingCycle === "monthly"
+                      ? "bg-[#1B4332] text-white"
+                      : "bg-transparent text-[#37352F] hover:bg-[#37352F0A]"
+                  }`}
                 >
-                  Don't believe it? Chat with us! <ArrowRight className="w-5 h-5" />
-                </a>
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setBillingCycle("yearly")}
+                  className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${
+                    billingCycle === "yearly"
+                      ? "bg-[#1B4332] text-white"
+                      : "bg-transparent text-[#37352F] hover:bg-[#37352F0A]"
+                  }`}
+                >
+                  Yearly
+                </button>
               </div>
-            </motion.div>
-          </div>
-        </section>
 
-        {/* SECTION 2: 3-Step Process + Free Month */}
-        <section className="bg-[#284b31] text-white px-6 py-16 md:py-20">
-          <div className="mx-auto max-w-6xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.15 }}
-              className="text-center mb-12"
-            >
-              <h2 className="text-3xl md:text-4xl font-extrabold tracking-[-0.02em] mb-4">
-                YOUR DIGITAL STAFF, IN 3 STEPS
-              </h2>
-            </motion.div>
-
-            <div className="grid md:grid-cols-3 gap-4 mb-10">
-              {[
-                { step: "STEP 1", title: "Discover", desc: "We discuss your business", icon: "1" },
-                { step: "STEP 2", title: "Setup", desc: "We build your system", icon: "2" },
-                { step: "STEP 3", title: "Go Live", desc: "They work 24/7", icon: "3" },
-              ].map((item, index) => (
+              {billingCycle === "yearly" && (
                 <motion.div
-                  key={item.step}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.15, delay: 0.05 * index }}
-                  className="relative bg-[#f1f5f0] rounded-xl p-5 border-2 border-[#284b31]/10 hover:border-[#284b31]/30 transition-colors duration-150"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="inline-flex items-center gap-2 mt-4 px-3 py-1.5 rounded-full bg-[#F7931A]/10 border border-[#F7931A]/20"
                 >
-                  {/* Step label and number */}
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs font-bold text-[#284b31] uppercase tracking-wider">
-                      {item.step}
-                    </span>
-                    <span className="w-12 h-12 bg-[#284b31] rounded-xl flex items-center justify-center text-white font-extrabold text-xl">
-                      {item.icon}
-                    </span>
-                  </div>
-
-                  {/* Content */}
-                  <div>
-                    <p className="text-xl font-bold text-[#284b31] mb-1">
-                      {item.title}
-                    </p>
-                    <p className="text-sm text-[#2D2A26]/70">
-                      {item.desc}
-                    </p>
-                  </div>
+                  <Zap className="w-4 h-4 text-[#F7931A]" />
+                  <span className="text-sm font-medium text-[#F7931A]">Save 20% with yearly</span>
                 </motion.div>
-              ))}
-            </div>
+              )}
+            </motion.div>
+          </div>
+        </section>
 
+        {/* Comparison Table */}
+        <section className="relative px-6 pb-20">
+          <div className="mx-auto max-w-7xl">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.15, delay: 0.2 }}
-              className="max-w-2xl mx-auto text-center"
+              transition={{ duration: 0.6 }}
+              className="bg-white rounded-3xl border border-[#37352F14] overflow-hidden shadow-lg"
             >
-              <p className="text-base md:text-lg mb-3 tracking-[-0.02em] text-white/90">
-                30 days setup → You test & adjust → Go live
-              </p>
-              <div className="inline-block bg-[#F7931A] rounded-xl px-6 py-4">
-                <p className="text-xl md:text-2xl font-extrabold tracking-[-0.02em] mb-1">
-                  🎁 FREE 1ST MONTH ON US!
-                </p>
-                <p className="text-sm tracking-[-0.02em]">
-                  Pay setup fee. First month free. You're in control.
-                </p>
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#37352F14]">
+                      <th className="text-left p-6 font-semibold text-[#37352F] w-1/4">
+                        Features & Specs
+                      </th>
+                      <th className="p-6 text-center w-1/4">
+                        <div className="space-y-4">
+                          <div>
+                            <h3 className="text-2xl font-bold text-[#1B4332] mb-1" style={{ fontFamily: "var(--font-jakarta)" }}>
+                              Solo
+                            </h3>
+                            <p className="text-3xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
+                              Rp3.9M
+                              <span className="text-base text-[#6B7280] font-normal">/mo</span>
+                            </p>
+                            <p className="text-sm text-[#F7931A] font-medium mt-1">1st month FREE</p>
+                          </div>
+                          <button
+                            onClick={() => openModal("Solo")}
+                            className="w-full px-6 py-3 bg-[#1B4332] text-white font-semibold rounded-xl hover:bg-[#14261a] transition-all duration-200"
+                          >
+                            Get Started
+                          </button>
+                        </div>
+                      </th>
+                      <th className="p-6 text-center bg-[#1B4332]/5 w-1/4 relative">
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#F7931A] text-white text-xs font-bold rounded-full">
+                          MOST POPULAR
+                        </div>
+                        <div className="space-y-4 pt-2">
+                          <div>
+                            <h3 className="text-2xl font-bold text-[#1B4332] mb-1" style={{ fontFamily: "var(--font-jakarta)" }}>
+                              Team
+                            </h3>
+                            <p className="text-3xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
+                              Rp7.9M
+                              <span className="text-base text-[#6B7280] font-normal">/mo</span>
+                            </p>
+                            <p className="text-sm text-[#F7931A] font-medium mt-1">1st month FREE</p>
+                          </div>
+                          <button
+                            onClick={() => openModal("Team")}
+                            className="w-full px-6 py-3 bg-[#F7931A] text-white font-semibold rounded-xl hover:bg-[#e8850f] transition-all duration-200"
+                          >
+                            Get Started
+                          </button>
+                        </div>
+                      </th>
+                      <th className="p-6 text-center w-1/4">
+                        <div className="space-y-4">
+                          <div>
+                            <h3 className="text-2xl font-bold text-[#1B4332] mb-1" style={{ fontFamily: "var(--font-jakarta)" }}>
+                              Enterprise
+                            </h3>
+                            <p className="text-3xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
+                              Custom
+                            </p>
+                            <p className="text-sm text-[#6B7280] mt-1">Tailored to your needs</p>
+                          </div>
+                          <button
+                            onClick={() => openModal("Enterprise")}
+                            className="w-full px-6 py-3 bg-white text-[#1B4332] font-semibold rounded-xl border-2 border-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-all duration-200"
+                          >
+                            Contact Sales
+                          </button>
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Bot A - The Mouth */}
+                    <tr className="border-b border-[#37352F14] hover:bg-[#FCFCFB] transition-colors duration-150">
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <span className="material-symbols-outlined text-[#1B4332] text-[24px]">
+                            smart_toy
+                          </span>
+                          <div>
+                            <p className="font-semibold text-[#37352F]">Bot A - The Mouth</p>
+                            <p className="text-sm text-[#6B7280]">24/7 auto-reply & FAQ handling</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-6 text-center">
+                        <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
+                      </td>
+                      <td className="p-6 text-center bg-[#1B4332]/5">
+                        <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
+                      </td>
+                      <td className="p-6 text-center">
+                        <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
+                      </td>
+                    </tr>
+
+                    {/* Bot B - The Brain */}
+                    <tr className="border-b border-[#37352F14] hover:bg-[#FCFCFB] transition-colors duration-150">
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <span className="material-symbols-outlined text-[#F7931A] text-[24px]">
+                            psychology
+                          </span>
+                          <div>
+                            <p className="font-semibold text-[#37352F]">Bot B - The Brain</p>
+                            <p className="text-sm text-[#6B7280]">Lead scoring & CRM automation</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-6 text-center">
+                        <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
+                      </td>
+                      <td className="p-6 text-center bg-[#1B4332]/5">
+                        <div className="space-y-1">
+                          <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
+                          <p className="text-xs text-[#F7931A] font-medium">+ Priority support</p>
+                        </div>
+                      </td>
+                      <td className="p-6 text-center">
+                        <div className="space-y-1">
+                          <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
+                          <p className="text-xs text-[#F7931A] font-medium">+ Custom AI training</p>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* WhatsApp Numbers */}
+                    <tr className="border-b border-[#37352F14] hover:bg-[#FCFCFB] transition-colors duration-150">
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <span className="material-symbols-outlined text-[#1B4332] text-[24px]">
+                            phone_android
+                          </span>
+                          <p className="font-semibold text-[#37352F]">WhatsApp Numbers</p>
+                        </div>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className="font-mono font-semibold text-[#1B4332]">1</span>
+                      </td>
+                      <td className="p-6 text-center bg-[#1B4332]/5">
+                        <span className="font-mono font-semibold text-[#1B4332]">3</span>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className="font-mono font-semibold text-[#1B4332]">Unlimited</span>
+                      </td>
+                    </tr>
+
+                    {/* AI Chats/Month */}
+                    <tr className="border-b border-[#37352F14] hover:bg-[#FCFCFB] transition-colors duration-150">
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <span className="material-symbols-outlined text-[#1B4332] text-[24px]">
+                            forum
+                          </span>
+                          <p className="font-semibold text-[#37352F]">AI Chats per Month</p>
+                        </div>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className="font-mono font-semibold text-[#1B4332]">30,000</span>
+                      </td>
+                      <td className="p-6 text-center bg-[#1B4332]/5">
+                        <span className="font-mono font-semibold text-[#1B4332]">60,000</span>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className="font-mono font-semibold text-[#1B4332]">Custom</span>
+                      </td>
+                    </tr>
+
+                    {/* Feature Unlock Frequency */}
+                    <tr className="border-b border-[#37352F14] hover:bg-[#FCFCFB] transition-colors duration-150">
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <span className="material-symbols-outlined text-[#F7931A] text-[24px]">
+                            rocket_launch
+                          </span>
+                          <p className="font-semibold text-[#37352F]">New Features</p>
+                        </div>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className="font-mono text-sm text-[#6B7280]">Every 3 months</span>
+                      </td>
+                      <td className="p-6 text-center bg-[#1B4332]/5">
+                        <span className="font-mono text-sm text-[#F7931A] font-semibold">Monthly updates</span>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className="font-mono text-sm text-[#F7931A] font-semibold">Instant access</span>
+                      </td>
+                    </tr>
+
+                    {/* Setup Fee */}
+                    <tr className="hover:bg-[#FCFCFB] transition-colors duration-150">
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <span className="material-symbols-outlined text-[#1B4332] text-[24px]">
+                            settings
+                          </span>
+                          <p className="font-semibold text-[#37352F]">Setup Fee (one-time)</p>
+                        </div>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className="font-mono font-semibold text-[#1B4332]">Rp7.5M</span>
+                      </td>
+                      <td className="p-6 text-center bg-[#1B4332]/5">
+                        <span className="font-mono font-semibold text-[#1B4332]">Rp7.5M</span>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className="font-mono font-semibold text-[#1B4332]">Custom</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* SECTION 3: Solo vs Team Comparison */}
-        <section id="comparison" className="bg-white px-6 py-16 md:py-20">
-          <div className="mx-auto max-w-6xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.15 }}
-              className="grid md:grid-cols-2 gap-8 lg:gap-12"
-            >
-              {/* Solo */}
+        {/* Infrastructure Health Section */}
+        <section className="relative px-6 pb-28">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
+              {/* Left: Sticky Text */}
               <motion.div
-                className="bg-[#f1f5f0] rounded-2xl p-8 border-2 border-[#284b31]/10"
-                variants={fadeInUp}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="lg:sticky lg:top-24 space-y-6"
               >
-                <div className="mb-6 pb-6 border-b-2 border-[#284b31]/10">
-                  <h2 className="text-2xl font-extrabold text-[#284b31] tracking-[-0.02em]">
-                    SOLO
-                  </h2>
-                  <p className="text-3xl font-extrabold text-[#284b31] mt-2 tracking-[-0.02em]">
-                    Rp3,900,000
-                    <span className="text-lg text-[#2D2A26]/60 font-normal">/mo</span>
-                  </p>
-                  <p className="text-sm text-[#F7931A] font-semibold mt-1 tracking-[-0.02em]">
-                    1st month: FREE
-                  </p>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#37352F14] bg-white/80 backdrop-blur-sm">
+                  <Activity className="w-4 h-4 text-[#1B4332]" />
+                  <span className="text-sm font-medium text-[#37352F]" style={{ fontFamily: "var(--font-jetbrains)" }}>
+                    Real-time monitoring
+                  </span>
                 </div>
 
-                <div className="space-y-6">
-                  <div>
-                    <p className="text-xs font-semibold text-[#2D2A26]/60 uppercase tracking-wider mb-3">
-                      📦 WHAT YOU GET:
-                    </p>
-
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold text-[#284b31] mb-2">🤖 Bot A (The Mouth)</p>
-                      <ul className="space-y-1 text-sm text-[#2D2A26]/80">
-                        {["24/7 auto-reply", "FAQ handling", "Lead capture"].map((item) => (
-                          <li key={item} className="flex items-center gap-2">
-                            <Check className="w-3.5 h-3.5 text-[#284b31]" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold text-[#284b31] mb-2">🧠 Bot B (The Brain)</p>
-                      <ul className="space-y-1 text-sm text-[#2D2A26]/80">
-                        {["Lead scoring", "CRM updates", "Weekly reports"].map((item) => (
-                          <li key={item} className="flex items-center gap-2">
-                            <Check className="w-3.5 h-3.5 text-[#284b31]" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold text-[#284b31] mb-2">📊 QUOTA:</p>
-                      <ul className="space-y-1 text-sm text-[#2D2A26]/80">
-                        {["1 WhatsApp number", "30,000 AI chats/mo", "200 marketing msgs", "100 utility msgs"].map((item) => (
-                          <li key={item} className="flex items-center gap-2">
-                            <Check className="w-3.5 h-3.5 text-[#284b31]" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold text-[#284b31] mb-2">🚀 FEATURE UNLOCK:</p>
-                      <p className="text-sm text-[#2D2A26]/80">
-                        Every <strong>3 months</strong>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t-2 border-[#284b31]/10">
-                    <p className="text-sm text-[#2D2A26]/80 mb-4">
-                      💰 SETUP: <span className="font-semibold text-[#284b31]">Rp7,500,000</span>
-                      <span className="text-xs text-[#2D2A26]/60 ml-1">(one-time)</span>
-                    </p>
-                    <button
-                      onClick={() => openModal("Solo")}
-                      className="block w-full text-center py-4 rounded-xl bg-[#284b31] text-white font-bold text-sm hover:bg-[#1e3a23] transition-all duration-150"
-                    >
-                      CHOOSE SOLO
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Team */}
-              <motion.div
-                className="bg-[#F7931A] text-white rounded-2xl p-8 relative md:-translate-y-2 border-2 border-[#284b31]"
-                variants={fadeInUp}
-              >
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#284b31] text-white text-xs font-bold px-4 py-1.5 rounded-full tracking-[-0.02em]">
-                  POPULAR
-                </span>
-
-                <div className="mb-6 pb-6 border-b-2 border-white/20">
-                  <h2 className="text-2xl font-extrabold tracking-[-0.02em]">
-                    TEAM
-                  </h2>
-                  <p className="text-3xl font-extrabold mt-2 tracking-[-0.02em]">
-                    Rp7,900,000
-                    <span className="text-lg text-white/80 font-normal">/mo</span>
-                  </p>
-                  <p className="text-sm font-semibold mt-1 tracking-[-0.02em]">
-                    1st month: FREE
-                  </p>
-                </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <p className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-3">
-                      📦 WHAT YOU GET:
-                    </p>
-
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold mb-2">🤖 Bot A (The Mouth)</p>
-                      <ul className="space-y-1 text-sm text-white/90">
-                        {["24/7 auto-reply", "FAQ handling", "Lead capture"].map((item) => (
-                          <li key={item} className="flex items-center gap-2">
-                            <Check className="w-3.5 h-3.5" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold mb-2">🧠 Bot B (The Brain)</p>
-                      <ul className="space-y-1 text-sm text-white/90">
-                        {["Lead scoring", "CRM updates", "Weekly reports", "Priority support", "Multi-agent sync"].map((item) => (
-                          <li key={item} className="flex items-center gap-2">
-                            <Check className="w-3.5 h-3.5" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold mb-2">📊 QUOTA:</p>
-                      <ul className="space-y-1 text-sm text-white/90">
-                        {["3 WhatsApp numbers", "60,000 AI chats/mo", "500 marketing msgs", "300 utility msgs"].map((item) => (
-                          <li key={item} className="flex items-center gap-2">
-                            <Check className="w-3.5 h-3.5" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold mb-2">🚀 FEATURE UNLOCK:</p>
-                      <p className="text-sm text-white/90">
-                        Every <strong>1 month</strong>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t-2 border-white/20">
-                    <p className="text-sm text-white/80 mb-4">
-                      💰 SETUP: <span className="font-semibold">Rp7,500,000</span>
-                      <span className="text-xs text-white/70 ml-1">(one-time)</span>
-                    </p>
-                    <button
-                      onClick={() => openModal("Team")}
-                      className="block w-full text-center py-4 rounded-xl bg-white text-[#F7931A] font-bold text-sm hover:bg-white/90 transition-all duration-150"
-                    >
-                      CHOOSE TEAM
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* SECTION 4: Enterprise Small Box */}
-        <section className="bg-[#f1f5f0] px-6 py-12">
-          <div className="mx-auto max-w-4xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.15 }}
-              className="bg-white rounded-2xl p-8 text-center border-2 border-[#284b31]/10"
-            >
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <Building2 className="w-8 h-8 text-[#284b31]" />
-                <h2 className="text-xl font-bold text-[#284b31] tracking-[-0.02em]">
-                  NEED MORE THAN TEAM?
+                <h2 className="text-4xl sm:text-5xl font-bold text-[#1B4332] tracking-tight" style={{ fontFamily: "var(--font-jakarta)" }}>
+                  Infrastructure Health
                 </h2>
-              </div>
-              <p className="text-[#2D2A26]/70 mb-6 tracking-[-0.02em]">
-                Enterprise and custom plans available.<br />
-                High-volume, multi-location, or custom workflows.
-              </p>
-              <button
-                onClick={() => openModal("Enterprise")}
-                className="inline-flex items-center gap-2 px-8 py-3 bg-[#284b31] text-white font-bold text-sm rounded-xl hover:bg-[#1e3a23] transition-all duration-150"
+
+                <p className="text-lg text-[#37352F]/60 leading-relaxed">
+                  Your AI team works around the clock. Monitor every conversation, lead score, and automation in real-time.
+                </p>
+
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  <div className="p-4 rounded-xl border border-[#37352F14] bg-white/50">
+                    <p className="text-3xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>99.8%</p>
+                    <p className="text-sm text-[#6B7280] font-mono mt-1">Live Load</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-[#37352F14] bg-white/50">
+                    <p className="text-3xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>0.02s</p>
+                    <p className="text-sm text-[#6B7280] font-mono mt-1">Queue Sync</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Right: Live Activity Feed Browser Mockup */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="relative"
               >
-                CONTACT US FOR ENTERPRISE <ArrowRight className="w-4 h-4" />
-              </button>
-            </motion.div>
+                {/* Browser Chrome */}
+                <div className="bg-white rounded-2xl border border-[#37352F14] shadow-2xl overflow-hidden">
+                  {/* Browser Header */}
+                  <div className="flex items-center gap-2 px-4 py-3 border-b border-[#37352F14] bg-[#F5F5F4]">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
+                      <div className="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
+                      <div className="w-3 h-3 rounded-full bg-[#27C93F]"></div>
+                    </div>
+                    <div className="flex-1 mx-4 px-3 py-1 bg-white rounded-md border border-[#37352F14]">
+                      <p className="text-xs text-[#6B7280] font-mono">my21staff.com/activity</p>
+                    </div>
+                  </div>
+
+                  {/* Activity Feed */}
+                  <div className="p-6 space-y-3 bg-gradient-to-b from-white to-[#FCFCFB]">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-[#1B4332]">Live Activity</h3>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-[#27C93F] animate-pulse"></div>
+                        <span className="text-xs text-[#6B7280] font-mono">Live</span>
+                      </div>
+                    </div>
+
+                    {activities.map((activity, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        className="flex items-start gap-3 p-4 rounded-xl border border-[#37352F14] bg-white hover:border-[#37352F29] transition-all duration-200"
+                      >
+                        <div
+                          className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                          style={{ backgroundColor: `${activity.color}15` }}
+                        >
+                          <span className="material-symbols-outlined text-[20px]" style={{ color: activity.color }}>
+                            {activity.icon}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-[#37352F]">{activity.title}</p>
+                          <p className="text-sm text-[#1B4332] font-medium">{activity.contact}</p>
+                          <p className="text-xs text-[#6B7280]">{activity.detail}</p>
+                        </div>
+                        <span className="text-xs text-[#6B7280] font-mono flex-shrink-0">{activity.time}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
           </div>
         </section>
-      </main>
+      </div>
 
       {/* Footer */}
-      <footer className="bg-[#284b31] border-t border-white/10 py-6">
+      <footer className="bg-[#1B4332] border-t border-white/10 py-8">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex items-center justify-center gap-4 text-sm text-white/60 tracking-[-0.02em]">
             <span className="font-extrabold">
@@ -579,7 +614,6 @@ export default function PricingPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {/* Backdrop */}
             <motion.div
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               onClick={() => {
@@ -588,14 +622,12 @@ export default function PricingPage() {
               }}
             />
 
-            {/* Modal Content */}
             <motion.div
               className="relative bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
             >
-              {/* Close Button */}
               <button
                 onClick={() => {
                   setModalOpen(false);
@@ -606,7 +638,6 @@ export default function PricingPage() {
                 <X className="w-6 h-6" />
               </button>
 
-              {/* Form Header */}
               <h3 className="text-2xl font-extrabold text-[#2D2A26] mb-2 tracking-[-0.02em]">
                 Interested in {selectedPlan}?
               </h3>
@@ -614,11 +645,9 @@ export default function PricingPage() {
                 Fill this form and we'll contact you shortly.
               </p>
 
-              {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <input type="hidden" name="paket" value={selectedPlan} />
 
-                {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
                     Name
@@ -633,7 +662,6 @@ export default function PricingPage() {
                   />
                 </div>
 
-                {/* WhatsApp */}
                 <div>
                   <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
                     WhatsApp
@@ -661,7 +689,6 @@ export default function PricingPage() {
                   </div>
                 </div>
 
-                {/* Business Type */}
                 <div>
                   <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
                     Business Type
@@ -676,7 +703,6 @@ export default function PricingPage() {
                   />
                 </div>
 
-                {/* How did you hear about us */}
                 <div>
                   <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
                     How did you hear about us?
@@ -698,7 +724,6 @@ export default function PricingPage() {
                   </select>
                 </div>
 
-                {/* Lead Sources */}
                 <div>
                   <label className="block text-sm font-medium text-[#2D2A26] mb-2 tracking-[-0.02em]">
                     Where do your leads come from?
@@ -743,7 +768,6 @@ export default function PricingPage() {
                   </div>
                 </div>
 
-                {/* Current Tracking */}
                 <div>
                   <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
                     How do you track leads now?
@@ -762,7 +786,6 @@ export default function PricingPage() {
                   </select>
                 </div>
 
-                {/* Leads per month */}
                 <div>
                   <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
                     How many leads per month?
@@ -781,7 +804,6 @@ export default function PricingPage() {
                   </select>
                 </div>
 
-                {/* Biggest Problem */}
                 <div>
                   <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
                     Biggest business problem?
@@ -802,7 +824,6 @@ export default function PricingPage() {
                   </select>
                 </div>
 
-                {/* Team Size */}
                 <div>
                   <label className="block text-sm font-medium text-[#2D2A26] mb-1 tracking-[-0.02em]">
                     How many people will use this?
