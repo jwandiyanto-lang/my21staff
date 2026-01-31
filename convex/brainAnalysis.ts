@@ -514,3 +514,139 @@ export const generateActionRecommendations = internalAction({
     return deduped;
   },
 });
+
+// ============================================
+// CONVERSATION PATTERN ANALYSIS
+// ============================================
+
+/**
+ * System prompt for pattern analysis with FAQ suggestions (MGR-06)
+ */
+const PATTERN_ANALYSIS_SYSTEM_PROMPT = `You are Brain, analyzing conversation patterns for an Indonesian SME CRM.
+
+Your job is to identify:
+1. TRENDING TOPICS - What do leads ask about most?
+2. OBJECTION PATTERNS - Common concerns (pricing, timing, technical)
+3. INTEREST SIGNALS - Buying intent indicators
+4. REJECTION REASONS - Why leads went cold
+
+For TRENDING TOPICS and OBJECTION PATTERNS, also generate FAQ SUGGESTIONS.
+
+OUTPUT FORMAT (JSON only, no markdown):
+{
+  "trending_topics": [
+    {
+      "topic": "...",
+      "frequency": N,
+      "examples": ["...", "..."],
+      "suggested_faqs": [
+        { "question": "...", "suggested_answer": "..." }
+      ]
+    }
+  ],
+  "objections": [
+    {
+      "objection": "...",
+      "frequency": N,
+      "examples": ["...", "..."],
+      "suggested_faqs": [
+        { "question": "...", "suggested_answer": "..." }
+      ]
+    }
+  ],
+  "interest_signals": [
+    { "signal": "...", "frequency": N, "examples": ["...", "..."] }
+  ],
+  "rejection_reasons": [
+    { "reason": "...", "frequency": N, "examples": ["...", "..."] }
+  ]
+}
+
+RULES:
+- Only report patterns if you see 3+ examples
+- Include actual quotes as examples (max 3 per pattern)
+- frequency is the count of occurrences
+- For trending_topics and objections, ALWAYS include suggested_faqs with 1-2 draft FAQ entries
+- FAQ answers should be helpful, concise, and in Indonesian or English based on the examples
+- If not enough data, return empty arrays with a "data_insufficient" flag`;
+
+/**
+ * Pattern analysis result type with FAQ suggestions (MGR-06)
+ */
+interface PatternAnalysisResult {
+  trending_topics: Array<{
+    topic: string;
+    frequency: number;
+    examples: string[];
+    suggested_faqs?: Array<{
+      question: string;
+      suggested_answer: string;
+    }>;
+  }>;
+  objections: Array<{
+    objection: string;
+    frequency: number;
+    examples: string[];
+    suggested_faqs?: Array<{
+      question: string;
+      suggested_answer: string;
+    }>;
+  }>;
+  interest_signals: Array<{
+    signal: string;
+    frequency: number;
+    examples: string[];
+  }>;
+  rejection_reasons: Array<{
+    reason: string;
+    frequency: number;
+    examples: string[];
+  }>;
+  data_insufficient?: boolean;
+}
+
+/**
+ * Calculate time range cutoff for pattern analysis
+ */
+function getTimeRangeCutoff(timeRange: 'today' | 'week' | 'month'): number {
+  const now = Date.now();
+  switch (timeRange) {
+    case 'today':
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return today.getTime();
+    case 'week':
+      return now - 7 * 24 * 60 * 60 * 1000;
+    case 'month':
+      return now - 30 * 24 * 60 * 60 * 1000;
+    default:
+      return now - 7 * 24 * 60 * 60 * 1000;
+  }
+}
+
+/**
+ * internalQuery: getContactsWithNotes
+ * Helper query to fetch contacts with recent activity (MUST be defined before analyzeConversationPatterns)
+ */
+export const getContactsWithNotes = internalQuery({
+  args: {
+    workspaceId: v.id("workspaces"),
+    since: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const contacts = await ctx.db
+      .query("contacts")
+      .withIndex("by_workspace", (q) => q.eq("workspace_id", args.workspaceId))
+      .filter((q) => q.gte(q.field("lastActivityAt"), args.since))
+      .collect();
+
+    return contacts.map(c => ({
+      _id: c._id,
+      name: c.name,
+      notes: c.notes,
+      painPoints: c.painPoints,
+      leadStatus: c.leadStatus,
+      leadTemperature: c.leadTemperature,
+    }));
+  },
+});
