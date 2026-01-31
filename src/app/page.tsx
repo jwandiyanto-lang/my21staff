@@ -34,14 +34,14 @@ export default function Home() {
         {/* 1. Hero Section (Off White) */}
         <HeroSection />
 
-        {/* 2. Digital Workforce Section (White) */}
+        {/* 2. Growth Engine Section (White) */}
+        <FeaturesSection />
+
+        {/* 3. Digital Workforce Section (White) */}
         <WorkforceSection />
 
-        {/* 3. Central Console Section (Sage Green) */}
+        {/* 4. Central Console Section (Sage Green) */}
         <ConsoleSection />
-
-        {/* 4. Growth Engine Section (White) */}
-        <FeaturesSection />
 
         {/* 5. Final CTA Section (Light Sage) */}
         <CTASection />

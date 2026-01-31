@@ -54,10 +54,10 @@ export function HeroSection() {
                   </div>
                 </div>
 
-                {/* Console Stream header */}
+                {/* Your Daily Report header */}
                 <div className="bg-white px-5 py-3 border-b border-[rgba(55,53,47,0.08)]">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider">Console Stream</h3>
+                    <h3 className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider">Your Daily Report</h3>
                     <div className="flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 bg-[#F7931A] rounded-full"></div>
                       <span className="text-[9px] text-[#F7931A] font-bold uppercase tracking-wide">Live</span>
@@ -70,8 +70,8 @@ export function HeroSection() {
                   {/* Item 1 - AI Staff #21 */}
                   <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <Bot className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <Bot className="w-5 h-5 text-gray-600" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-[#1B4332] mb-0.5">AI Staff #21</h4>
@@ -85,8 +85,8 @@ export function HeroSection() {
                   {/* Item 2 - System Automations */}
                   <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <Zap className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <Zap className="w-5 h-5 text-gray-600" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-[#1B4332] mb-0.5">System Automations</h4>
@@ -100,8 +100,8 @@ export function HeroSection() {
                   {/* Item 3 - New Lead Captured */}
                   <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <User className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <User className="w-5 h-5 text-gray-600" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-[#1B4332] mb-0.5">New Lead Captured</h4>
