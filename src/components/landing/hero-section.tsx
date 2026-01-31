@@ -6,14 +6,14 @@ import { Check, Circle, Bot, Zap, User } from 'lucide-react'
 
 export function HeroSection() {
   return (
-    <section className="relative bg-[#FCFCFB] pt-12 pb-12 lg:pt-16 lg:pb-16 px-4 sm:px-6 lg:px-8">
+    <section className="relative bg-[#FCFCFB] pt-20 pb-20 lg:pt-24 lg:pb-24 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        {/* Main hero content */}
+        {/* Main hero content - White bubble box wrapper */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="relative"
+          className="relative bg-white rounded-[48px] border border-[rgba(55,53,47,0.12)] shadow-sm p-8 md:p-12 lg:p-16"
         >
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
             {/* Left column - Content */}
