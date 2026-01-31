@@ -6,16 +6,16 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 5 - Grok Manager Bot (Analysis + insights)
+**Current focus:** Phase 6 - Dashboard (Lead list + AI insights + analytics)
 
 ## Current Position
 
 Milestone: v2.0
 Phase: Phase 5 - Grok Manager Bot — COMPLETE ✅
-Status: 5 of 5 plans complete
-Last activity: 2026-01-31 — Plan 05-05 complete: !summary command integration with Kapso HTTP endpoints
+Status: 6 of 6 plans complete
+Last activity: 2026-01-31 — Phase 5 complete: Brain analytics backend ready for dashboard
 
-Progress: ████████████████████████████████████████ 100% (23 of 23 total plans across phases 1-5)
+Progress: ███████████████████████████████████████ 100% (25 of 25 total plans across phases 1-5)
 
 ## V2.0 Milestone
 
@@ -28,7 +28,7 @@ Progress: ███████████████████████�
 2.5. Settings & Configuration (Kapso workflow management UI) - ✅ COMPLETED (5 plans)
 3. Sarah Chat Bot - ✅ COMPLETED (4 plans)
 4. Lead Database (Kapso → Convex sync) - ✅ COMPLETED (6 plans)
-5. Grok Manager Bot (Analysis + insights)
+5. Grok Manager Bot (Analysis + insights) - ✅ COMPLETED (6 plans)
 6. Dashboard (Lead list + analytics)
 7. Handoff Workflow (End-to-end flow)
 8. Testing & Polish
@@ -64,6 +64,7 @@ Progress: ███████████████████████�
 | 05-03 | ✅ Complete (executed 2026-01-31, 2 min) | Weighted priority scoring with Grok-powered personalized WhatsApp templates |
 | 05-04 | ✅ Complete (executed 2026-01-31, 2.8 min) | Conversation pattern analysis detecting topics, objections, rejections with FAQ suggestions |
 | 05-05 | ✅ Complete (executed 2026-01-31, 2.5 min) | !summary command integration with Kapso HTTP endpoints |
+| 05-06 | ✅ Complete (executed 2026-01-31, 3 min) | Kapso workflow documentation (integration deferred to go-live) |
 
 ## V1.0.0 Archive Summary
 

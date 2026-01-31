@@ -270,14 +270,14 @@ Convex (state storage for dashboard)
 - Kapso workflow update for !summary command
 
 **Plans:** 6 plans
-- [ ] 05-01-PLAN.md — Brain analytics schema (summaries, insights, actions tables)
-- [ ] 05-02-PLAN.md — Summary generation with Grok API and daily cron
-- [ ] 05-03-PLAN.md — Action recommendations with priority scoring
-- [ ] 05-04-PLAN.md — Conversation pattern analysis
-- [ ] 05-05-PLAN.md — HTTP endpoint for !summary command
-- [ ] 05-06-PLAN.md — Kapso workflow integration and verification (checkpoint)
+- [x] 05-01-PLAN.md — Brain analytics schema (summaries, insights, actions tables)
+- [x] 05-02-PLAN.md — Summary generation with Grok API and daily cron
+- [x] 05-03-PLAN.md — Action recommendations with priority scoring
+- [x] 05-04-PLAN.md — Conversation pattern analysis
+- [x] 05-05-PLAN.md — HTTP endpoint for !summary command
+- [x] 05-06-PLAN.md — Kapso workflow integration and verification (checkpoint) — *Kapso integration deferred to go-live*
 
-**Status:** Planning complete — ready for execution
+**Status:** COMPLETE (2026-01-31) — Kapso workflow integration deferred, dashboard ready for Phase 6
 
 **Architecture Flow:**
 ```

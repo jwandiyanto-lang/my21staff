@@ -58,13 +58,13 @@ Requirements for v2.0 milestone. Hybrid AI + Rules architecture using Kapso work
 
 ### Grok Manager Bot
 
-- [ ] **MGR-01**: Grok 2 integration for deep analysis
-- [ ] **MGR-02**: !Summary command handler (triggered via Kapso workflow)
-- [ ] **MGR-03**: Daily lead summary generation (all leads, activity digest)
-- [ ] **MGR-04**: Lead quality scoring (hot/warm/cold based on engagement + data completeness)
-- [ ] **MGR-05**: Action items generation (who needs follow-up, prioritized)
-- [ ] **MGR-06**: Content recommendations (common questions, suggest FAQ additions)
-- [ ] **MGR-07**: Conversation insights (patterns, objections, interests)
+- [x] **MGR-01**: Grok 4.1-fast integration for deep analysis (updated from Grok 2)
+- [x] **MGR-02**: !Summary command handler (triggered via Kapso workflow)
+- [x] **MGR-03**: Daily lead summary generation (all leads, activity digest)
+- [x] **MGR-04**: Lead quality scoring (hot/warm/cold based on engagement + data completeness)
+- [x] **MGR-05**: Action items generation (who needs follow-up, prioritized)
+- [x] **MGR-06**: Content recommendations (common questions, suggest FAQ additions)
+- [x] **MGR-07**: Conversation insights (patterns, objections, interests)
 
 ### Dashboard - Lead List
 
@@ -196,13 +196,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LEAD-05 | Phase 4 | Complete |
 | LEAD-06 | Phase 4 | Complete |
 | LEAD-07 | Phase 4 | Complete |
-| MGR-01 | Phase 5 | Pending |
-| MGR-02 | Phase 5 | Pending |
-| MGR-03 | Phase 5 | Pending |
-| MGR-04 | Phase 5 | Pending |
-| MGR-05 | Phase 5 | Pending |
-| MGR-06 | Phase 5 | Pending |
-| MGR-07 | Phase 5 | Pending |
+| MGR-01 | Phase 5 | Complete |
+| MGR-02 | Phase 5 | Complete |
+| MGR-03 | Phase 5 | Complete |
+| MGR-04 | Phase 5 | Complete |
+| MGR-05 | Phase 5 | Complete |
+| MGR-06 | Phase 5 | Complete |
+| MGR-07 | Phase 5 | Complete |
 | DBLD-01 | Phase 6 | Pending |
 | DBLD-02 | Phase 6 | Pending |
 | DBLD-03 | Phase 6 | Pending |
