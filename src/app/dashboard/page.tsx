@@ -43,7 +43,7 @@ export default function DashboardRedirect() {
       }
 
       // Wait for organization list to load
-      if (!userMemberships.isLoaded) {
+      if (!userMemberships) {
         return
       }
 
