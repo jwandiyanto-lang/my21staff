@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 06-dashboard
 source: 06-01-SUMMARY.md, 06-02-SUMMARY.md, 06-03-SUMMARY.md, 06-04-SUMMARY.md, 06-05-SUMMARY.md, 06-06-SUMMARY.md
 started: 2026-01-31T04:00:00Z
-updated: 2026-01-31T04:25:00Z
+updated: 2026-01-31T04:26:00Z
 ---
 
 ## Current Test
@@ -123,21 +123,29 @@ skipped: 0
 ## Gaps
 
 - truth: "Click Name, Stage, Score, Business Type, or Last Active column headers and see table resort accordingly. Arrow indicators show sort direction."
-  status: failed
+  status: fixed
   reason: "User reported: business type is not able to be filter, only name stage and score"
   severity: major
   test: 2
-  root_cause: ""
-  artifacts: []
+  root_cause: "Business Type column definition (line 96 of lead-columns.tsx) uses plain string header instead of sortable Button component with column.toggleSorting handler"
+  artifacts:
+    - path: "src/components/leads/lead-columns.tsx"
+      issue: "Business Type column header missing sortable Button component (line 96)"
   missing: []
-  debug_session: ""
+  debug_session: ".planning/debug/business-type-not-sortable.md"
+  fixed_in_commit: "90e22d1"
 
 - truth: "Navigate to /demo and see LeadStats component at top with 4 stat cards: Total Leads, New (period-based), Hot Leads, Avg Score. Default period is 'Week'."
-  status: failed
+  status: fixed
   reason: "User reported: oh you need to add this inside operations and name it Dashboard, also get rid of eagle influence dashboard!"
   severity: major
   test: 16
-  root_cause: ""
-  artifacts: []
+  root_cause: "Dashboard link was never added to operationsNav array in sidebar.tsx, and Eagle Overseas Education branding remained from template fork"
+  artifacts:
+    - path: "src/components/workspace/sidebar.tsx"
+      issue: "Added Dashboard to Operations nav (commit 30c7af0)"
+    - path: "src/lib/mock-data.ts"
+      issue: "Removed Eagle branding (commit 30c7af0)"
   missing: []
-  debug_session: ""
+  debug_session: ".planning/debug/resolved/sidebar-dashboard-link.md"
+  fixed_in_commit: "30c7af0"
