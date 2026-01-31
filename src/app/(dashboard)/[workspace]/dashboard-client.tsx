@@ -6,8 +6,6 @@ import { api } from 'convex/_generated/api'
 import { useEnsureUser } from '@/hooks/use-ensure-user'
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton'
 import { LeadStats } from '@/components/dashboard/lead-stats'
-import { StatsCards } from '@/components/dashboard/stats-cards'
-import { QuickActions } from '@/components/dashboard/quick-actions'
 import { ActivityFeed } from '@/components/dashboard/activity-feed'
 import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist'
 import { BotAnalyticsDashboard } from '@/components/analytics/bot-analytics-dashboard'
@@ -76,13 +74,6 @@ export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientP
 
       {/* Lead Stats - Hero position */}
       <LeadStats workspaceId={workspaceId} />
-
-      {/* Legacy Stats Cards - Keep for now */}
-      <StatsCards
-        stats={stats}
-        timeFilter={timeFilter}
-        onTimeFilterChange={setTimeFilter}
-      />
 
       {/* ARI Analytics (Collapsible) */}
       {aiEnabled && (

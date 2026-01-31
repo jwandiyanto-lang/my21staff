@@ -93,7 +93,18 @@ export const columns: ColumnDef<Lead>[] = [
   },
   {
     accessorKey: 'businessType',
-    header: 'Business Type',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="hover:bg-transparent p-0 font-bold"
+        >
+          Business Type
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({ row }) => {
       const businessType = row.getValue('businessType') as string | undefined
       return (
