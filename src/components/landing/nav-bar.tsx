@@ -24,7 +24,7 @@ export function NavBar() {
             Sign In
           </Link>
           <Link
-            href="/sign-up"
+            href="/pricing"
             className="text-sm text-white bg-[#284b31] hover:bg-[#284b31]/90 transition-all duration-150 font-semibold tracking-[-0.02em] px-4 py-2 rounded-lg"
           >
             Get Started
