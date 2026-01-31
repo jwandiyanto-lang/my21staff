@@ -35,13 +35,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "my21staff | The CRM that grows with you",
     description: "Scale your business with an adaptive digital workforce. AI-powered WhatsApp automation and database management in one system.",
+    url: "https://www.my21staff.com",
     siteName: "my21staff",
+    images: [
+      {
+        url: "https://www.my21staff.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "my21staff - The CRM that grows with you",
+      },
+    ],
+    locale: "en_US",
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "my21staff | The CRM that grows with you",
     description: "Scale your business with an adaptive digital workforce. AI-powered WhatsApp automation and database management in one system.",
+    images: ["https://www.my21staff.com/og-image.png"],
   },
 };
 
