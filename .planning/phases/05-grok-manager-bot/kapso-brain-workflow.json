@@ -1,0 +1,214 @@
+{
+  "workflow_update": {
+    "name": "Rules Engine - Keyword Triggers (with Sarah and Brain)",
+    "workflow_id": "6cae069e-7d5c-4fbb-834d-79e1f66e4672",
+    "description": "Updates to existing Rules Engine workflow to add Brain !summary handler"
+  },
+
+  "changes": [
+    {
+      "type": "update_ai_decide",
+      "node": "AI Decide (decide_keyword_1738250000000)",
+      "change": "Add 'brain_summary' as new classification option",
+      "keywords": ["!summary", "!Summary", "SUMMARY", "ringkasan", "report"],
+      "note": "AI should route messages starting with '!' to brain_summary path for manager commands",
+      "new_condition": {
+        "id": "brain-summary-condition-001",
+        "label": "brain_summary",
+        "description": "Manager bot command. Message starts with !summary or !Summary"
+      }
+    },
+    {
+      "type": "add_branch",
+      "name": "brain_summary",
+      "description": "Path for !summary command handling - generates conversational summary via Grok"
+    },
+    {
+      "type": "add_function_node",
+      "name": "Generate Brain Summary",
+      "node_id": "function_brain_summary_1738368000000",
+      "path": "brain_summary",
+      "position": { "x": 660, "y": 520 },
+      "config": {
+        "function_type": "http_request",
+        "url": "https://fluent-panda-464.convex.cloud/brain/summary",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "workspace_id": "1fda0f3d-a913-4a82-bc1f-a07e1cb5213c",
+          "triggered_by": "{{trigger.from}}"
+        },
+        "timeout_seconds": 30,
+        "note": "Calls Convex HTTP endpoint to generate summary. Long timeout for Grok API processing."
+      },
+      "output_variable": "brain_response"
+    },
+    {
+      "type": "add_send_message",
+      "name": "Send Brain Summary",
+      "node_id": "send_brain_summary_1738368001000",
+      "path": "brain_summary",
+      "after": "Generate Brain Summary",
+      "position": { "x": 660, "y": 620 },
+      "config": {
+        "whatsapp_config_id": null,
+        "message_template": "{{vars.function_brain_summary_1738368000000.summary_text}}",
+        "fallback": "Maaf, saya tidak bisa membuat ringkasan saat ini. Silakan coba lagi nanti. 🙏",
+        "delay_seconds": 0,
+        "to_phone_number": null
+      }
+    },
+    {
+      "type": "add_edge",
+      "id": "edge_brain_summary_1",
+      "source": "decide_keyword_1738250000000",
+      "target": "function_brain_summary_1738368000000",
+      "label": "brain_summary",
+      "flow_condition_id": "brain-summary-condition-001"
+    },
+    {
+      "type": "add_edge",
+      "id": "edge_brain_summary_2",
+      "source": "function_brain_summary_1738368000000",
+      "target": "send_brain_summary_1738368001000",
+      "label": "next"
+    },
+    {
+      "type": "update_existing_node",
+      "node_id": "send_manager_1738250002000",
+      "action": "remove",
+      "note": "Placeholder node no longer needed - Brain summary now functional"
+    }
+  ],
+
+  "environment_variables": {
+    "CONVEX_DEPLOYMENT_URL": "https://fluent-panda-464.convex.cloud",
+    "WORKSPACE_ID": "1fda0f3d-a913-4a82-bc1f-a07e1cb5213c",
+    "note": "These are already in use for fetch-intern-settings function"
+  },
+
+  "testing": {
+    "test_message": "!summary",
+    "expected_flow": [
+      "1. User sends '!summary' to WhatsApp (+62 813-1859-025)",
+      "2. AI Decide node classifies as 'brain_summary'",
+      "3. Function node calls POST /brain/summary with workspace_id and triggered_by",
+      "4. Convex endpoint triggers brainAnalysis.generateCommandSummary",
+      "5. Grok 4.1-fast generates conversational summary (<800 chars)",
+      "6. Summary stored in brainSummaries table",
+      "7. Send Message node sends summary_text to user",
+      "8. User receives friendly WhatsApp message within 10 seconds"
+    ],
+    "expected_response": "Conversational summary under 800 characters in Indonesian",
+    "test_scenarios": [
+      {
+        "scenario": "First summary with data",
+        "input": "!summary",
+        "expected": "Summary with lead stats, engagement insights, action recommendations"
+      },
+      {
+        "scenario": "Summary with no leads",
+        "input": "!summary",
+        "expected": "Friendly message: 'Belum ada data untuk diringkas saat ini'"
+      },
+      {
+        "scenario": "API failure",
+        "input": "!summary",
+        "expected": "Fallback message: 'Maaf, saya tidak bisa membuat ringkasan...'"
+      }
+    ]
+  },
+
+  "implementation_guide": {
+    "step_1": {
+      "title": "Update AI Decide Node",
+      "actions": [
+        "Open Kapso workflow editor for workflow 6cae069e-7d5c-4fbb-834d-79e1f66e4672",
+        "Click on 'Decision: AI-powered' node (decide_keyword_1738250000000)",
+        "Add new condition to conditions array:",
+        "  - Label: brain_summary",
+        "  - Description: Manager bot command. Message starts with !summary or !Summary",
+        "Save node configuration"
+      ]
+    },
+    "step_2": {
+      "title": "Add Function Node",
+      "actions": [
+        "Add new Function node to canvas",
+        "Configure HTTP request:",
+        "  - URL: https://fluent-panda-464.convex.cloud/brain/summary",
+        "  - Method: POST",
+        "  - Headers: Content-Type: application/json",
+        "  - Body: {workspace_id, triggered_by} using template syntax",
+        "  - Timeout: 30 seconds",
+        "Position at x:660, y:520",
+        "Connect from AI Decide node with 'brain_summary' condition"
+      ]
+    },
+    "step_3": {
+      "title": "Add Send Message Node",
+      "actions": [
+        "Add new Send Text Message node to canvas",
+        "Configure message template:",
+        "  - Message: {{vars.function_brain_summary_1738368000000.summary_text}}",
+        "  - Fallback: Indonesian error message",
+        "Position at x:660, y:620",
+        "Connect from Function node with 'next' edge"
+      ]
+    },
+    "step_4": {
+      "title": "Remove Placeholder",
+      "actions": [
+        "Delete 'send_manager_1738250002000' node (old placeholder)",
+        "Remove edge 'manager' → send_manager_1738250002000",
+        "The 'manager' condition in AI Decide is now replaced by 'brain_summary'"
+      ]
+    },
+    "step_5": {
+      "title": "Test End-to-End",
+      "actions": [
+        "Save and activate workflow",
+        "Send '!summary' to WhatsApp number +62 813-1859-025",
+        "Verify response arrives within 10 seconds",
+        "Check Convex brainSummaries table for stored summary",
+        "Verify trigger='command' and triggered_by shows phone number"
+      ]
+    }
+  },
+
+  "notes": [
+    "The existing Rules Engine workflow already handles keyword triggers via AI Decide node",
+    "Adding brain_summary as a new classification alongside: handoff, faq_pricing, faq_services, ai_fallback",
+    "Function node uses same Convex deployment URL as fetch-intern-settings",
+    "Workspace ID is hardcoded (1fda0f3d-a913-4a82-bc1f-a07e1cb5213c) until multi-tenant support added",
+    "30-second timeout accounts for Grok API processing time + summary generation",
+    "Fallback message in Indonesian for consistency with Sarah persona",
+    "Old 'manager' placeholder node can be removed after brain_summary is working"
+  ],
+
+  "convex_endpoint": {
+    "url": "/brain/summary",
+    "method": "POST",
+    "request": {
+      "workspace_id": "string (required)",
+      "triggered_by": "string (phone number, required)"
+    },
+    "response": {
+      "success": "boolean",
+      "summary_text": "string (<800 chars)",
+      "summary_id": "string (Convex ID)",
+      "error": "string (only if success=false)"
+    },
+    "internal_flow": [
+      "1. HTTP route validates workspace_id",
+      "2. Calls brainAnalysis.generateCommandSummary internalAction",
+      "3. Fetches workspace leads, notes, Sarah states from Convex",
+      "4. Calls Grok 4.1-fast with conversational summary prompt",
+      "5. Truncates to 800 chars",
+      "6. Stores in brainSummaries table (trigger='command')",
+      "7. Returns summary_text in response"
+    ]
+  }
+}
