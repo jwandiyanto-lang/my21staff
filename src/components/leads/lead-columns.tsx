@@ -62,6 +62,10 @@ export const columns: ColumnDef<Lead>[] = [
       const temperature = row.getValue('leadTemperature') as Lead['leadTemperature']
       return <StageBadge temperature={temperature} />
     },
+    filterFn: (row, id, value: string[]) => {
+      if (!value || value.length === 0) return true
+      return value.includes(row.getValue(id))
+    },
   },
   {
     accessorKey: 'leadScore',
