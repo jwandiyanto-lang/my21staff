@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from "next/font/google";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, ArrowRight, Zap, Activity } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -24,7 +24,6 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export default function PricingPage() {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("");
 
@@ -122,36 +121,6 @@ export default function PricingPage() {
     }
   };
 
-  // Activity feed mock data
-  const activities = [
-    {
-      type: "lead",
-      icon: "psychology",
-      title: "Lead Qualified",
-      contact: "Sarah Chen",
-      detail: "Hot lead • Education",
-      time: "2m ago",
-      color: "#F7931A",
-    },
-    {
-      type: "message",
-      icon: "smart_toy",
-      title: "Auto-replied",
-      contact: "Ahmad Rizki",
-      detail: "FAQ: Pricing",
-      time: "5m ago",
-      color: "#1B4332",
-    },
-    {
-      type: "update",
-      icon: "sync",
-      title: "CRM Updated",
-      contact: "Maria Santos",
-      detail: "Stage: Follow-up",
-      time: "12m ago",
-      color: "#6B7280",
-    },
-  ];
 
   return (
     <div
@@ -205,145 +174,143 @@ export default function PricingPage() {
               className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#1B4332] mb-6 tracking-tight"
               style={{ fontFamily: "var(--font-jakarta)" }}
             >
-              Simple, sovereign pricing.
+              Simple, Sovereign Pricing
             </motion.h1>
 
-            {/* Description + Toggle */}
+            {/* Description */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="mb-8"
             >
-              <p className="text-lg text-[#37352F]/60 mb-6 max-w-2xl mx-auto">
-                Transparent pricing for Indonesian SMEs. Pay monthly or save 20% with yearly billing.
+              <p className="text-lg text-[#37352F]/60 max-w-2xl mx-auto">
+                Transparent pricing to get you started on your AI Team.
               </p>
-
-              {/* Billing Toggle */}
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  onClick={() => setBillingCycle("monthly")}
-                  className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${
-                    billingCycle === "monthly"
-                      ? "bg-[#1B4332] text-white"
-                      : "bg-transparent text-[#37352F] hover:bg-[#37352F0A]"
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setBillingCycle("yearly")}
-                  className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${
-                    billingCycle === "yearly"
-                      ? "bg-[#1B4332] text-white"
-                      : "bg-transparent text-[#37352F] hover:bg-[#37352F0A]"
-                  }`}
-                >
-                  Yearly
-                </button>
-              </div>
-
-              {billingCycle === "yearly" && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="inline-flex items-center gap-2 mt-4 px-3 py-1.5 rounded-full bg-[#F7931A]/10 border border-[#F7931A]/20"
-                >
-                  <Zap className="w-4 h-4 text-[#F7931A]" />
-                  <span className="text-sm font-medium text-[#F7931A]">Save 20% with yearly</span>
-                </motion.div>
-              )}
             </motion.div>
           </div>
         </section>
 
-        {/* Comparison Table */}
+        {/* Pricing Cards */}
         <section className="relative px-6 pb-20">
           <div className="mx-auto max-w-7xl">
+            {/* Three Pricing Cards */}
+            <div className="grid lg:grid-cols-3 gap-8 mb-16">
+              {/* Solo Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0 }}
+                className="bg-white rounded-2xl border-2 border-[#37352F14] p-8 hover:border-[#1B4332]/20 transition-all duration-200"
+              >
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-[#1B4332] mb-2" style={{ fontFamily: "var(--font-jakarta)" }}>
+                    Solo
+                  </h3>
+                  <div className="mb-4">
+                    <p className="text-5xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
+                      Rp3.9M
+                    </p>
+                    <p className="text-sm text-[#6B7280] mt-1">/month</p>
+                  </div>
+                  <div className="inline-block px-3 py-1 bg-[#F7931A]/10 border border-[#F7931A]/20 rounded-full mb-4">
+                    <p className="text-sm text-[#F7931A] font-semibold">1st month FREE</p>
+                  </div>
+                  <button
+                    onClick={() => openModal("Solo")}
+                    className="w-full px-6 py-3 bg-[#1B4332] text-white font-semibold rounded-xl hover:bg-[#14261a] transition-all duration-200"
+                  >
+                    Get Started
+                  </button>
+                </div>
+              </motion.div>
+
+              {/* Team Card - Most Popular */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="bg-[#1B4332]/5 rounded-2xl border-2 border-[#F7931A] p-8 relative hover:shadow-xl transition-all duration-200"
+              >
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#F7931A] text-white text-xs font-bold rounded-full">
+                  MOST POPULAR
+                </div>
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-[#1B4332] mb-2" style={{ fontFamily: "var(--font-jakarta)" }}>
+                    Team
+                  </h3>
+                  <div className="mb-4">
+                    <p className="text-5xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
+                      Rp7.9M
+                    </p>
+                    <p className="text-sm text-[#6B7280] mt-1">/month</p>
+                  </div>
+                  <div className="inline-block px-3 py-1 bg-[#F7931A]/10 border border-[#F7931A]/20 rounded-full mb-4">
+                    <p className="text-sm text-[#F7931A] font-semibold">1st month FREE</p>
+                  </div>
+                  <button
+                    onClick={() => openModal("Team")}
+                    className="w-full px-6 py-3 bg-[#F7931A] text-white font-semibold rounded-xl hover:bg-[#e8850f] transition-all duration-200"
+                  >
+                    Get Started
+                  </button>
+                </div>
+              </motion.div>
+
+              {/* Enterprise Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="bg-white rounded-2xl border-2 border-[#37352F14] p-8 hover:border-[#1B4332]/20 transition-all duration-200"
+              >
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-[#1B4332] mb-2" style={{ fontFamily: "var(--font-jakarta)" }}>
+                    Enterprise
+                  </h3>
+                  <div className="mb-4">
+                    <p className="text-5xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
+                      Custom
+                    </p>
+                    <p className="text-sm text-[#6B7280] mt-1">Tailored to your needs</p>
+                  </div>
+                  <div className="h-8 mb-4"></div>
+                  <button
+                    onClick={() => openModal("Enterprise")}
+                    className="w-full px-6 py-3 bg-white text-[#1B4332] font-semibold rounded-xl border-2 border-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-all duration-200"
+                  >
+                    Contact Sales
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Feature Comparison Table */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="bg-white rounded-3xl border border-[#37352F14] overflow-hidden shadow-lg"
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="bg-white rounded-2xl border border-[#37352F14] overflow-hidden"
             >
-              {/* Table */}
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-[#37352F14]">
-                      <th className="text-left p-6 font-semibold text-[#37352F] w-1/4">
-                        Features & Specs
-                      </th>
-                      <th className="p-6 text-center w-1/4">
-                        <div className="space-y-4">
-                          <div>
-                            <h3 className="text-2xl font-bold text-[#1B4332] mb-1" style={{ fontFamily: "var(--font-jakarta)" }}>
-                              Solo
-                            </h3>
-                            <p className="text-3xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
-                              Rp3.9M
-                              <span className="text-base text-[#6B7280] font-normal">/mo</span>
-                            </p>
-                            <p className="text-sm text-[#F7931A] font-medium mt-1">1st month FREE</p>
-                          </div>
-                          <button
-                            onClick={() => openModal("Solo")}
-                            className="w-full px-6 py-3 bg-[#1B4332] text-white font-semibold rounded-xl hover:bg-[#14261a] transition-all duration-200"
-                          >
-                            Get Started
-                          </button>
-                        </div>
-                      </th>
-                      <th className="p-6 text-center bg-[#1B4332]/5 w-1/4 relative">
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#F7931A] text-white text-xs font-bold rounded-full">
-                          MOST POPULAR
-                        </div>
-                        <div className="space-y-4 pt-2">
-                          <div>
-                            <h3 className="text-2xl font-bold text-[#1B4332] mb-1" style={{ fontFamily: "var(--font-jakarta)" }}>
-                              Team
-                            </h3>
-                            <p className="text-3xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
-                              Rp7.9M
-                              <span className="text-base text-[#6B7280] font-normal">/mo</span>
-                            </p>
-                            <p className="text-sm text-[#F7931A] font-medium mt-1">1st month FREE</p>
-                          </div>
-                          <button
-                            onClick={() => openModal("Team")}
-                            className="w-full px-6 py-3 bg-[#F7931A] text-white font-semibold rounded-xl hover:bg-[#e8850f] transition-all duration-200"
-                          >
-                            Get Started
-                          </button>
-                        </div>
-                      </th>
-                      <th className="p-6 text-center w-1/4">
-                        <div className="space-y-4">
-                          <div>
-                            <h3 className="text-2xl font-bold text-[#1B4332] mb-1" style={{ fontFamily: "var(--font-jakarta)" }}>
-                              Enterprise
-                            </h3>
-                            <p className="text-3xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
-                              Custom
-                            </p>
-                            <p className="text-sm text-[#6B7280] mt-1">Tailored to your needs</p>
-                          </div>
-                          <button
-                            onClick={() => openModal("Enterprise")}
-                            className="w-full px-6 py-3 bg-white text-[#1B4332] font-semibold rounded-xl border-2 border-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-all duration-200"
-                          >
-                            Contact Sales
-                          </button>
-                        </div>
-                      </th>
+                    <tr className="border-b border-[#37352F14] bg-[#FCFCFB]">
+                      <th className="text-left p-6 font-semibold text-[#37352F]">Features</th>
+                      <th className="text-center p-6 font-semibold text-[#37352F]">Solo</th>
+                      <th className="text-center p-6 font-semibold text-[#37352F] bg-[#1B4332]/5">Team</th>
+                      <th className="text-center p-6 font-semibold text-[#37352F]">Enterprise</th>
                     </tr>
                   </thead>
                   <tbody>
                     {/* Bot A - The Mouth */}
-                    <tr className="border-b border-[#37352F14] hover:bg-[#FCFCFB] transition-colors duration-150">
+                    <tr className="border-b border-[#37352F14]">
                       <td className="p-6">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-start gap-3">
                           <span className="material-symbols-outlined text-[#1B4332] text-[24px]">
                             smart_toy
                           </span>
@@ -365,9 +332,9 @@ export default function PricingPage() {
                     </tr>
 
                     {/* Bot B - The Brain */}
-                    <tr className="border-b border-[#37352F14] hover:bg-[#FCFCFB] transition-colors duration-150">
+                    <tr className="border-b border-[#37352F14]">
                       <td className="p-6">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-start gap-3">
                           <span className="material-symbols-outlined text-[#F7931A] text-[24px]">
                             psychology
                           </span>
@@ -395,14 +362,9 @@ export default function PricingPage() {
                     </tr>
 
                     {/* WhatsApp Numbers */}
-                    <tr className="border-b border-[#37352F14] hover:bg-[#FCFCFB] transition-colors duration-150">
+                    <tr className="border-b border-[#37352F14]">
                       <td className="p-6">
-                        <div className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-[#1B4332] text-[24px]">
-                            phone_android
-                          </span>
-                          <p className="font-semibold text-[#37352F]">WhatsApp Numbers</p>
-                        </div>
+                        <p className="font-semibold text-[#37352F]">WhatsApp Numbers</p>
                       </td>
                       <td className="p-6 text-center">
                         <span className="font-mono font-semibold text-[#1B4332]">1</span>
@@ -416,14 +378,9 @@ export default function PricingPage() {
                     </tr>
 
                     {/* AI Chats/Month */}
-                    <tr className="border-b border-[#37352F14] hover:bg-[#FCFCFB] transition-colors duration-150">
+                    <tr className="border-b border-[#37352F14]">
                       <td className="p-6">
-                        <div className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-[#1B4332] text-[24px]">
-                            forum
-                          </span>
-                          <p className="font-semibold text-[#37352F]">AI Chats per Month</p>
-                        </div>
+                        <p className="font-semibold text-[#37352F]">AI Chats per Month</p>
                       </td>
                       <td className="p-6 text-center">
                         <span className="font-mono font-semibold text-[#1B4332]">30,000</span>
@@ -436,45 +393,19 @@ export default function PricingPage() {
                       </td>
                     </tr>
 
-                    {/* Feature Unlock Frequency */}
-                    <tr className="border-b border-[#37352F14] hover:bg-[#FCFCFB] transition-colors duration-150">
+                    {/* New Features */}
+                    <tr>
                       <td className="p-6">
-                        <div className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-[#F7931A] text-[24px]">
-                            rocket_launch
-                          </span>
-                          <p className="font-semibold text-[#37352F]">New Features</p>
-                        </div>
+                        <p className="font-semibold text-[#37352F]">New Features</p>
                       </td>
                       <td className="p-6 text-center">
-                        <span className="font-mono text-sm text-[#6B7280]">Every 3 months</span>
+                        <span className="text-sm text-[#6B7280]">Every 3 months</span>
                       </td>
                       <td className="p-6 text-center bg-[#1B4332]/5">
-                        <span className="font-mono text-sm text-[#F7931A] font-semibold">Monthly updates</span>
+                        <span className="text-sm text-[#F7931A] font-semibold">Monthly updates</span>
                       </td>
                       <td className="p-6 text-center">
-                        <span className="font-mono text-sm text-[#F7931A] font-semibold">Instant access</span>
-                      </td>
-                    </tr>
-
-                    {/* Setup Fee */}
-                    <tr className="hover:bg-[#FCFCFB] transition-colors duration-150">
-                      <td className="p-6">
-                        <div className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-[#1B4332] text-[24px]">
-                            settings
-                          </span>
-                          <p className="font-semibold text-[#37352F]">Setup Fee (one-time)</p>
-                        </div>
-                      </td>
-                      <td className="p-6 text-center">
-                        <span className="font-mono font-semibold text-[#1B4332]">Rp7.5M</span>
-                      </td>
-                      <td className="p-6 text-center bg-[#1B4332]/5">
-                        <span className="font-mono font-semibold text-[#1B4332]">Rp7.5M</span>
-                      </td>
-                      <td className="p-6 text-center">
-                        <span className="font-mono font-semibold text-[#1B4332]">Custom</span>
+                        <span className="text-sm text-[#F7931A] font-semibold">Instant access</span>
                       </td>
                     </tr>
                   </tbody>
@@ -484,108 +415,6 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Infrastructure Health Section */}
-        <section className="relative px-6 pb-28">
-          <div className="mx-auto max-w-7xl">
-            <div className="grid lg:grid-cols-2 gap-12 items-start">
-              {/* Left: Sticky Text */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="lg:sticky lg:top-24 space-y-6"
-              >
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#37352F14] bg-white/80 backdrop-blur-sm">
-                  <Activity className="w-4 h-4 text-[#1B4332]" />
-                  <span className="text-sm font-medium text-[#37352F]" style={{ fontFamily: "var(--font-jetbrains)" }}>
-                    Real-time monitoring
-                  </span>
-                </div>
-
-                <h2 className="text-4xl sm:text-5xl font-bold text-[#1B4332] tracking-tight" style={{ fontFamily: "var(--font-jakarta)" }}>
-                  Infrastructure Health
-                </h2>
-
-                <p className="text-lg text-[#37352F]/60 leading-relaxed">
-                  Your AI team works around the clock. Monitor every conversation, lead score, and automation in real-time.
-                </p>
-
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div className="p-4 rounded-xl border border-[#37352F14] bg-white/50">
-                    <p className="text-3xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>99.8%</p>
-                    <p className="text-sm text-[#6B7280] font-mono mt-1">Live Load</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-[#37352F14] bg-white/50">
-                    <p className="text-3xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>0.02s</p>
-                    <p className="text-sm text-[#6B7280] font-mono mt-1">Queue Sync</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Right: Live Activity Feed Browser Mockup */}
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="relative"
-              >
-                {/* Browser Chrome */}
-                <div className="bg-white rounded-2xl border border-[#37352F14] shadow-2xl overflow-hidden">
-                  {/* Browser Header */}
-                  <div className="flex items-center gap-2 px-4 py-3 border-b border-[#37352F14] bg-[#F5F5F4]">
-                    <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
-                      <div className="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
-                      <div className="w-3 h-3 rounded-full bg-[#27C93F]"></div>
-                    </div>
-                    <div className="flex-1 mx-4 px-3 py-1 bg-white rounded-md border border-[#37352F14]">
-                      <p className="text-xs text-[#6B7280] font-mono">my21staff.com/activity</p>
-                    </div>
-                  </div>
-
-                  {/* Activity Feed */}
-                  <div className="p-6 space-y-3 bg-gradient-to-b from-white to-[#FCFCFB]">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-bold text-[#1B4332]">Live Activity</h3>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#27C93F] animate-pulse"></div>
-                        <span className="text-xs text-[#6B7280] font-mono">Live</span>
-                      </div>
-                    </div>
-
-                    {activities.map((activity, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="flex items-start gap-3 p-4 rounded-xl border border-[#37352F14] bg-white hover:border-[#37352F29] transition-all duration-200"
-                      >
-                        <div
-                          className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                          style={{ backgroundColor: `${activity.color}15` }}
-                        >
-                          <span className="material-symbols-outlined text-[20px]" style={{ color: activity.color }}>
-                            {activity.icon}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-[#37352F]">{activity.title}</p>
-                          <p className="text-sm text-[#1B4332] font-medium">{activity.contact}</p>
-                          <p className="text-xs text-[#6B7280]">{activity.detail}</p>
-                        </div>
-                        <span className="text-xs text-[#6B7280] font-mono flex-shrink-0">{activity.time}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
       </div>
 
       {/* Footer */}
