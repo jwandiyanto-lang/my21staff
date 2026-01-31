@@ -167,6 +167,11 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Default sort by lastActivityAt descending** - Most recent lead activity shown first for better UX
 - **Icon + text labels in badges** - Accessibility requirement per 06-RESEARCH.md findings
 - **MOCK_LEADS for offline dev** - 15 Indonesian business leads with variety of stages, scores, and business types
+- **Insights page separate from main dashboard** - Dedicated focus view for AI analytics without cluttering dashboard (DSH-08)
+- **Two-column insights layout** - (summary+actions) left, (quality+patterns) right for logical grouping (DSH-09)
+- **Expandable pattern cards** - Reduce visual clutter, user controls detail level (DSH-10)
+- **CSS-based horizontal bar chart** - No charting library needed, lightweight, matches minimalist brand (DSH-11)
+- **Action items placeholder buttons** - Phase 6 focused on read-only display, mutations deferred to Phase 7 (DSH-12)
 
 ### Kapso Configuration
 
@@ -250,19 +255,20 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 07:30 UTC
-**Stopped at:** Completed 06-01: Lead List UI - SUMMARY.md created
+**Last session:** 2026-01-31 03:37 UTC
+**Stopped at:** Completed 06-04: AI Insights Page - SUMMARY.md created
 **Resume file:** None
 
 **Completed in this session:**
-- 06-01: Lead List UI (3 minutes)
-  - Created /[workspace]/leads page with server + client components
-  - Built TanStack Table with 6 sortable columns
-  - Implemented temperature-based stage badges with accessibility icons
-  - Added 15 MOCK_LEADS for offline testing
-  - Integrated Leads navigation into sidebar
-  - 3 atomic commits (997341b, 1b9e1ff, bb1575d partial)
-  - Files: page.tsx, leads-client.tsx, lead-table.tsx, lead-columns.tsx, stage-badge.tsx
+- 06-04: AI Insights Page (5 minutes)
+  - Created /[workspace]/insights page with server + client components
+  - Built 4 insight components: DailySummaryCard, ActionItemsList, PatternInsights, LeadQualityOverview
+  - Two-column responsive layout for insights display
+  - Expandable pattern cards with examples and FAQ suggestions
+  - CSS-based horizontal bar chart for lead temperature distribution
+  - Added Insights navigation to sidebar with Sparkles icon
+  - 3 atomic commits (7e407ea, c5ea026, d880dae)
+  - Files: page.tsx, insights-client.tsx, daily-summary-card.tsx, action-items-list.tsx, pattern-insights.tsx, lead-quality-overview.tsx, sidebar.tsx
 
 **Previous session (2026-01-31 01:45 UTC):**
 - 05-01: Brain Analytics Data Layer (2.5 minutes)
@@ -318,18 +324,20 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - 05-05: !summary command integration (2.5 min) - COMPLETE ✅
 - 05-06: Kapso workflow documentation (3 min) - COMPLETE ✅
 
-**Phase 6 Progress (2/6+ plans):**
+**Phase 6 Progress (3/6+ plans):**
 - 06-01: Lead List UI (3 min) - COMPLETE ✅
 - 06-02: Lead Filtering & Search (7 min) - COMPLETE ✅
+- 06-04: AI Insights Page (5 min) - COMPLETE ✅
 
-**Phase 6-02 Deliverables:**
-- Multi-select stage filter with Popover + Checkbox pattern
-- Debounced search input (300ms) for name/phone filtering
-- Date range presets (Today/Week/Month/All Time) with button group
-- Real-time filtering without submit button using TanStack Table
-- Combined filter state with "Clear all" functionality
-- Custom filterFn for multi-value stage filtering
-- Custom filterFn for date range filtering by created_at
+**Phase 6-04 Deliverables:**
+- Dedicated /[workspace]/insights page with 4 components
+- DailySummaryCard: Grok's conversational summary + 3 metrics (new/hot/avg score)
+- ActionItemsList: Prioritized actions with urgency badges and suggested messages
+- PatternInsights: Expandable cards for topics/objections/signals with FAQ suggestions
+- LeadQualityOverview: CSS bar chart for temperature distribution + total/avg display
+- Insights navigation link added to sidebar (Sparkles icon)
+- Two-column responsive layout: (summary+actions) | (quality+patterns)
+- Full dev mode support with comprehensive mock data
 
 ---
 
