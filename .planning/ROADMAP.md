@@ -353,20 +353,22 @@ Daily Summary:
 - Convex real-time queries for instant load
 - Dev mode support with mock data
 
-**Plans:** 6 plans
+**Plans:** 7 plans
 - [x] 06-01-PLAN.md — Lead list core (TanStack Table, columns, stage badges)
 - [x] 06-02-PLAN.md — Lead filters (stage multi-select, search, date range)
 - [x] 06-03-PLAN.md — Lead detail sheet (slide-out panel, notes, AI summary)
 - [x] 06-04-PLAN.md — AI Insights page (summary, actions, patterns, quality)
 - [x] 06-05-PLAN.md — Enhanced analytics (stat cards, trends, highlights)
 - [x] 06-06-PLAN.md — Dev mode polish (mock data, navigation, error handling)
+- [ ] 06-07-PLAN.md — Gap closure: Business Type column sorting (UAT fix)
 
-**Status:** COMPLETE (2026-01-31)
+**Status:** UAT in progress — 1 gap remaining
 
 **Wave Structure:**
 - Wave 1: 06-01, 06-02 (parallel - Lead list foundation)
 - Wave 2: 06-03, 06-04 (parallel - Detail panel and Insights page)
 - Wave 3: 06-05, 06-06 (parallel - Analytics and polish)
+- Wave 4: 06-07 (gap closure from UAT)
 
 ---
 
