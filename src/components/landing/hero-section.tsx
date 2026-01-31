@@ -24,10 +24,16 @@ export function HeroSection() {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link
-                href={CTA_TEXT.pricing}
+                href="/sign-up"
                 className="inline-flex items-center justify-center px-6 py-3 bg-[#284b31] text-white font-semibold rounded-xl hover:bg-[#284b31]/90 transition-all duration-150"
               >
                 {CTA_TEXT.primary}
+              </Link>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#284b31] font-semibold rounded-xl border-2 border-[#284b31] hover:bg-gray-50 transition-all duration-150"
+              >
+                {CTA_TEXT.secondary}
               </Link>
             </div>
           </motion.div>
