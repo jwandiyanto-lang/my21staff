@@ -18,31 +18,15 @@ export function HeroSection() {
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 p-8 lg:p-12">
             {/* Left column - Content */}
             <div className="lg:col-span-7 flex flex-col justify-center">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-[#E8F5E9] text-[#1B4332] px-3 py-1.5 rounded-full text-sm font-medium mb-6 w-fit">
-                <Check className="w-4 h-4" />
-                <span className="font-mono">Trusted by 50+ Indonesian SMEs</span>
-              </div>
-
               {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight mb-4">
-                <span className="text-[#1B4332]">Kejar Chat WhatsApp, </span>
-                <span className="text-[#F7931A]">Atau Kejar Closing?</span>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight mb-6">
+                <span className="text-[#1B4332]">Stop Drowning in WhatsApp. </span>
+                <span className="text-[#F7931A]">Start Closing Deals.</span>
               </h1>
 
-              {/* English subtitle */}
-              <p className="text-base sm:text-lg text-[#6B7280] italic mb-6">
-                Chase WhatsApp Messages, Or Chase Deals?
-              </p>
-
               {/* Subheadline */}
-              <p className="text-lg sm:text-xl text-[#37352F] leading-relaxed mb-2 max-w-2xl font-medium">
-                AI Sales Team yang kelola chat 24/7. Kamu fokus closing, Sarah & The Brain yang handle sisanya.
-              </p>
-
-              {/* English subtitle for subheadline */}
-              <p className="text-sm sm:text-base text-[#6B7280] italic mb-8 max-w-2xl">
-                AI Sales Team managing chats 24/7. You focus on closing, Sarah & The Brain handle the rest.
+              <p className="text-lg sm:text-xl text-[#37352F] leading-relaxed mb-8 max-w-2xl">
+                Your AI Sales Team in a Box. <span className="font-semibold">AI handles the routine. You handle the complex.</span>
               </p>
 
               {/* Buttons */}
@@ -51,7 +35,7 @@ export function HeroSection() {
                   href="/sign-up"
                   className="inline-flex items-center justify-center px-8 py-4 bg-[#F7931A] text-white font-semibold rounded-full hover:bg-[#e08515] transition-all duration-200 shadow-md hover:shadow-lg text-base"
                 >
-                  Deploy Console
+                  Chat With Us Now!
                 </Link>
                 <Link
                   href="/demo"
@@ -64,7 +48,7 @@ export function HeroSection() {
 
             {/* Right column - Activity Feed Mockup */}
             <div className="lg:col-span-5 flex items-center">
-              <div className="w-full bg-white rounded-2xl border border-[rgba(55,53,47,0.08)] shadow-lg overflow-hidden">
+              <div className="w-full bg-white rounded-2xl border border-[rgba(55,53,47,0.12)] shadow-2xl overflow-hidden ring-1 ring-black/5">
                 {/* Browser-style header - very subtle */}
                 <div className="bg-[#F8F8F8] px-4 py-2.5 flex items-center gap-2 border-b border-[rgba(55,53,47,0.06)]">
                   <div className="flex gap-1.5">
@@ -86,12 +70,12 @@ export function HeroSection() {
                 </div>
 
                 {/* Activity items */}
-                <div className="p-4 space-y-3 bg-[#FCFCFB]">
+                <div className="p-4 space-y-3 bg-gradient-to-b from-gray-50 to-gray-100">
                   {/* Item 1 - AI Staff #21 */}
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
+                  <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                        <Bot className="w-5 h-5 text-green-600" />
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <Bot className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-[#1B4332] mb-0.5">AI Staff #21</h4>
@@ -103,10 +87,10 @@ export function HeroSection() {
                   </div>
 
                   {/* Item 2 - System Automations */}
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
+                  <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                        <Zap className="w-5 h-5 text-orange-500" />
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <Zap className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-[#1B4332] mb-0.5">System Automations</h4>
@@ -118,10 +102,10 @@ export function HeroSection() {
                   </div>
 
                   {/* Item 3 - New Lead Captured */}
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
+                  <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                        <User className="w-5 h-5 text-gray-600" />
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <User className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-[#1B4332] mb-0.5">New Lead Captured</h4>
