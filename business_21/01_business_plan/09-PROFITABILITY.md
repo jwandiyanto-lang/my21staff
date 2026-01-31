@@ -64,17 +64,6 @@ The $750 (Rp 12M) Setup Fee saves your life. It pays for your time and marketing
 
 ---
 
-## Scaling the Infrastructure
-
-To keep that 82% margin, you cannot afford to waste time on manual debugging. You need hardware that allows you to manage 50 "Digital Employees" (Bots) simultaneously.
-
-| Milestone | Investment | Why |
-|-----------|------------|-----|
-| **Q3 (MRR > Rp 100M)** | Apple MacBook Pro (M4 Chip) | Ensures Convex backend stays responsive while running thousands of Grok and Claude API calls. At scale, a single "crash" could affect 50 businesses at once. |
-| **Q4** | Dell UltraSharp 27" 4K Monitor | Build your "Master Dashboard" to monitor health of all 50 clients. See the "Leaky Buckets" before your clients do. |
-
----
-
 ## Worst Case Safety Net
 
 If you hit **50% of targets (25 clients)**, you still have:

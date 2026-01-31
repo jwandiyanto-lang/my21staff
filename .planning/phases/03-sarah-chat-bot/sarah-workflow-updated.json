@@ -1,0 +1,231 @@
+{
+  "nodes": [
+    {
+      "id": "start",
+      "type": "flow-node",
+      "position": { "x": 120, "y": 120 },
+      "data": {
+        "node_type": "start",
+        "config": {},
+        "display_name": "Start"
+      }
+    },
+    {
+      "id": "function_fetch_settings_1738250006000",
+      "type": "flow-node",
+      "position": { "x": 120, "y": 220 },
+      "data": {
+        "node_type": "function",
+        "config": {
+          "code": "async function fetch_settings({ trigger, vars, env }) {\n  // Get deployment URL from environment or use default\n  const deploymentUrl = env.CONVEX_DEPLOYMENT_URL || 'https://fluent-panda-464.convex.cloud';\n  const workspaceId = env.WORKSPACE_ID || '1fda0f3d-a913-4a82-bc1f-a07e1cb5213c';\n  \n  try {\n    const response = await fetch(`${deploymentUrl}/api/workspaces/${workspaceId}/intern-config`);\n    \n    if (response.ok) {\n      const settings = await response.json();\n      return {\n        success: true,\n        settings: settings\n      };\n    } else {\n      // Return default settings on error\n      return {\n        success: false,\n        settings: {\n          persona: {\n            greetingStyle: 'friendly',\n            language: 'indonesian',\n            tone: ['supportive', 'clear'],\n            customPrompt: ''\n          },\n          behavior: {\n            autoRespondNewLeads: true,\n            handoffKeywords: ['human', 'operator', 'manager', 'cs', 'customer service'],\n            quietHoursEnabled: false,\n            quietHoursStart: '22:00',\n            quietHoursEnd: '08:00',\n            maxMessagesBeforeHuman: 10\n          },\n          response: {\n            maxMessageLength: 280,\n            emojiUsage: 'moderate',\n            priceMentions: 'ranges',\n            responseDelay: 'instant'\n          }\n        }\n      };\n    }\n  } catch (error) {\n    console.error('Failed to fetch settings:', error);\n    // Return default settings on error\n    return {\n      success: false,\n      settings: {\n        persona: {\n          greetingStyle: 'friendly',\n          language: 'indonesian',\n          tone: ['supportive', 'clear'],\n          customPrompt: ''\n        },\n        behavior: {\n          autoRespondNewLeads: true,\n          handoffKeywords: ['human', 'operator', 'manager'],\n          quietHoursEnabled: false,\n          quietHoursStart: '22:00',\n          quietHoursEnd: '08:00',\n          maxMessagesBeforeHuman: 10\n        },\n        response: {\n          maxMessageLength: 280,\n          emojiUsage: 'moderate',\n          priceMentions: 'ranges',\n          responseDelay: 'instant'\n        }\n      }\n    };\n  }\n}",
+          "runtime_environment": "nodejs20.x",
+          "timeout_seconds": 10
+        },
+        "display_name": "Fetch Intern Settings"
+      }
+    },
+    {
+      "id": "decide_keyword_1738250000000",
+      "type": "flow-node",
+      "position": { "x": 120, "y": 320 },
+      "data": {
+        "node_type": "decide",
+        "config": {
+          "decision_type": "ai",
+          "conditions": [
+            {
+              "id": "1a2b28a6-ea3e-430b-832c-8b8448ce003d",
+              "label": "handoff",
+              "description": "User wants to speak to a human agent. Keywords: human, speak to agent, operator"
+            },
+            {
+              "id": "7dc63c44-994a-4881-805f-14bbc23fa396",
+              "label": "manager",
+              "description": "Manager bot command. Message starts with !summary"
+            },
+            {
+              "id": "38d53a89-b99c-4a7e-b832-13a72023b639",
+              "label": "faq_pricing",
+              "description": "User asking about pricing. Keywords: harga, price, biaya, berapa"
+            },
+            {
+              "id": "430c9ca7-e96f-4cf0-b5d9-dafcd3d6d567",
+              "label": "faq_services",
+              "description": "User asking about services. Keywords: layanan, services, apa saja"
+            },
+            {
+              "id": "3ecf05fe-6a13-4084-9127-034b965dacb4",
+              "label": "ai_fallback",
+              "description": "General conversation with no keyword match"
+            }
+          ],
+          "llm_configuration": {},
+          "provider_model_id": "882b9077-896e-473c-9fc0-d7af9ae0b093",
+          "provider_model_name": "x-ai/grok-4.1-fast",
+          "llm_temperature": "0.7",
+          "llm_max_tokens": null
+        },
+        "display_name": "Decision: AI-powered"
+      }
+    },
+    {
+      "id": "send_handoff_1738250001000",
+      "type": "flow-node",
+      "position": { "x": 60, "y": 520 },
+      "data": {
+        "node_type": "send_text",
+        "config": {
+          "whatsapp_config_id": null,
+          "message": "Maaf, saya tidak bisa membantu dengan permintaan ini. Tim manusia kami akan segera menghubungi Anda.",
+          "delay_seconds": 0,
+          "provider_model_id": null,
+          "provider_model_name": null,
+          "ai_field_config": {},
+          "to_phone_number": null
+        },
+        "display_name": "Send Text Message"
+      }
+    },
+    {
+      "id": "send_manager_1738250002000",
+      "type": "flow-node",
+      "position": { "x": 180, "y": 520 },
+      "data": {
+        "node_type": "send_text",
+        "config": {
+          "whatsapp_config_id": null,
+          "message": "[Manager Bot] Summary feature coming in Phase 5! Your request has been logged.",
+          "delay_seconds": 0,
+          "provider_model_id": null,
+          "provider_model_name": null,
+          "ai_field_config": {},
+          "to_phone_number": null
+        },
+        "display_name": "Send Text Message"
+      }
+    },
+    {
+      "id": "send_faq_pricing_1738250003000",
+      "type": "flow-node",
+      "position": { "x": 300, "y": 520 },
+      "data": {
+        "node_type": "send_text",
+        "config": {
+          "whatsapp_config_id": null,
+          "message": "Untuk informasi harga, layanan kami dimulai dari Rp 5.000.000 per bulan. Apakah Anda ingin detail lengkap?",
+          "delay_seconds": 0,
+          "provider_model_id": null,
+          "provider_model_name": null,
+          "ai_field_config": {},
+          "to_phone_number": null
+        },
+        "display_name": "Send Text Message"
+      }
+    },
+    {
+      "id": "send_faq_services_1738250004000",
+      "type": "flow-node",
+      "position": { "x": 420, "y": 520 },
+      "data": {
+        "node_type": "send_text",
+        "config": {
+          "whatsapp_config_id": null,
+          "message": "Kami menyediakan layanan: \n• Staffing Solutions\n• Payroll Management\n• HR Consulting\n\nMana yang ingin Anda tahu lebih lanjut?",
+          "delay_seconds": 0,
+          "provider_model_id": null,
+          "provider_model_name": null,
+          "ai_field_config": {},
+          "to_phone_number": null
+        },
+        "display_name": "Send Text Message"
+      }
+    },
+    {
+      "id": "agent_ai_1738250005000",
+      "type": "flow-node",
+      "position": { "x": 540, "y": 520 },
+      "data": {
+        "node_type": "agent",
+        "config": {
+          "system_prompt": "You are {{vars.intern_settings.persona.greetingStyle}} assistant for my21staff. Keep responses under {{vars.intern_settings.response.maxMessageLength}} characters. Use {{vars.intern_settings.response.emojiUsage}} emoji usage. Language: {{vars.intern_settings.persona.language}}. Tone: {{vars.intern_settings.persona.tone}}.\n\nHANDOFF KEYWORDS: {{vars.intern_settings.behavior.handoffKeywords}}\n\nIf asked about prices: Respond with ranges only (never exact figures).\n\n{{#if vars.intern_settings.persona.customPrompt}}\nAdditional instructions: {{vars.intern_settings.persona.customPrompt}}\n{{/if}}",
+          "provider_model_id": "882b9077-896e-473c-9fc0-d7af9ae0b093",
+          "provider_model_name": "x-ai/grok-4.1-fast",
+          "temperature": "0.0",
+          "max_iterations": 80,
+          "max_tokens": 8192,
+          "enabled_default_tools": [
+            "send_notification_to_user",
+            "send_media",
+            "get_execution_metadata",
+            "get_whatsapp_context",
+            "get_current_datetime",
+            "save_variable",
+            "get_variable"
+          ],
+          "flow_agent_function_tools": [],
+          "flow_agent_app_integration_tools": [],
+          "flow_agent_webhooks": [],
+          "flow_agent_knowledge_bases": [],
+          "flow_agent_mcp_servers": []
+        },
+        "display_name": "AI Agent (Sarah with Dynamic Settings)"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_1",
+      "source": "start",
+      "target": "function_fetch_settings_1738250006000",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "edge_2",
+      "source": "function_fetch_settings_1738250006000",
+      "target": "decide_keyword_1738250000000",
+      "label": "next",
+      "type": "default"
+    },
+    {
+      "id": "a04aecea-9895-41a0-8af4-2d15c575eedc",
+      "source": "decide_keyword_1738250000000",
+      "target": "send_handoff_1738250001000",
+      "label": "handoff",
+      "type": "default",
+      "flow_condition_id": "1a2b28a6-ea3e-430b-832c-8b8448ce003d"
+    },
+    {
+      "id": "50c439bc-e6c9-429f-992d-c7cd509719f7",
+      "source": "decide_keyword_1738250000000",
+      "target": "send_manager_1738250002000",
+      "label": "manager",
+      "type": "default",
+      "flow_condition_id": "7dc63c44-994a-4881-805f-14bbc23fa396"
+    },
+    {
+      "id": "352727be-3d15-43cb-bb1e-0548fb476937",
+      "source": "decide_keyword_1738250000000",
+      "target": "send_faq_pricing_1738250003000",
+      "label": "faq_pricing",
+      "type": "default",
+      "flow_condition_id": "38d53a89-b99c-4a7e-b832-13a72023b639"
+    },
+    {
+      "id": "a9516d9e-59a5-4df0-af5b-cf90f10f6a8c",
+      "source": "decide_keyword_1738250000000",
+      "target": "send_faq_services_1738250004000",
+      "label": "faq_services",
+      "type": "default",
+      "flow_condition_id": "430c9ca7-e96f-4cf0-b5d9-dafcd3d6d567"
+    },
+    {
+      "id": "4ff52517-0890-40be-b802-929f29a7628a",
+      "source": "decide_keyword_1738250000000",
+      "target": "agent_ai_1738250005000",
+      "label": "ai_fallback",
+      "type": "default",
+      "flow_condition_id": "3ecf05fe-6a13-4084-9127-034b965dacb4"
+    }
+  ]
+}

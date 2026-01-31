@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { api } from 'convex/_generated/api'
+import { Id } from 'convex/_generated/dataModel'
 import { isDevMode, getMockBrainConfig, updateMockBrainConfig } from '@/lib/mock-data'
 
 // GET - Load brain configuration
@@ -16,8 +19,46 @@ export async function GET(
     }
 
     // Production: query Convex
-    // TODO: Implement Convex query when brain-config table is created
-    return NextResponse.json({ error: 'Not implemented' }, { status: 501 })
+    const config = await fetchQuery(api.brainConfig.getByWorkspaceId, {
+      workspaceId: id as Id<'workspaces'>,
+    })
+
+    if (!config) {
+      // Return default config if none exists
+      return NextResponse.json({
+        summary: {
+          enabled: true,
+          time: '09:00',
+          format: 'bullet',
+          includeMetrics: {
+            newLeads: true,
+            conversions: true,
+            responseTimes: true,
+            topSources: false,
+          },
+        },
+        scoring: {
+          hotThreshold: 70,
+          warmThreshold: 40,
+          weights: {
+            basicInfo: 20,
+            qualification: 30,
+            document: 25,
+            engagement: 25,
+          },
+        },
+        triggers: {
+          onHandoff: true,
+          onKeyword: true,
+          keyword: '!summary',
+          onSchedule: false,
+          schedule: '0 9 * * *',
+          analysisDepth: 'standard',
+        },
+      })
+    }
+
+    return NextResponse.json(config)
   } catch (error) {
     console.error('Failed to load brain config:', error)
     return NextResponse.json(
@@ -42,9 +83,13 @@ export async function PATCH(
       return NextResponse.json(updated)
     }
 
-    // Production: update in Convex
-    // TODO: Implement Convex mutation when brain-config table is created
-    return NextResponse.json({ error: 'Not implemented' }, { status: 501 })
+    // Production: upsert to Convex
+    const result = await fetchMutation(api.brainConfig.upsert, {
+      workspaceId: id as Id<'workspaces'>,
+      updates,
+    })
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Failed to save brain config:', error)
     return NextResponse.json(
