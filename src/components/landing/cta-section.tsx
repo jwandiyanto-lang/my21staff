@@ -31,7 +31,7 @@ export function CTASection() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-10 py-5 bg-[#F7931A] text-white text-lg font-bold rounded-2xl hover:bg-[#e8850f] hover:scale-105 transition-all duration-150 shadow-lg hover:shadow-xl"
           >
-            Deploy Now
+            Chat Now
             <ArrowRight className="w-5 h-5" />
           </Link>
         </motion.div>

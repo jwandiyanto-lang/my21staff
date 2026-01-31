@@ -35,16 +35,16 @@ export default function Home() {
         {/* 1. Hero Section (Off White) */}
         <HeroSection />
 
-        {/* 2. Growth Engine Section (White) */}
+        {/* 2. What you will love about us (Features) */}
         <FeaturesSection />
 
-        {/* 3. Digital Workforce Section (White) */}
-        <WorkforceSection />
-
-        {/* 4. How to Get Started Section (White) */}
+        {/* 3. How to Get Started Section (White) */}
         <HowToStartSection />
 
-        {/* 5. Final CTA Section (White with Orange Accents) */}
+        {/* 4. Imagine your team is always working (Workforce) */}
+        <WorkforceSection />
+
+        {/* 5. Ready to Automate your next million (CTA) */}
         <CTASection />
       </main>
 
