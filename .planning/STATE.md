@@ -6,16 +6,16 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 4 - Lead Database (Kapso → Convex sync)
+**Current focus:** Phase 5 - Grok Manager Bot (Analysis + insights)
 
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 4 - Lead Database — COMPLETE ✅
-Status: 6 of 6 plans complete
-Last activity: 2026-01-30 — Plan 04-04 complete: Dashboard query functions ready
+Phase: Phase 5 - Grok Manager Bot — IN PROGRESS
+Status: 1 of 3 plans complete
+Last activity: 2026-01-31 — Plan 05-01 complete: Brain analytics data layer
 
-Progress: ████████████████████████████████████ 100% (19 of 19 total plans across completed phases)
+Progress: ████████████████████████████████████░░ 95% (20 of 21 total plans across phases 1-5)
 
 ## V2.0 Milestone
 
@@ -54,6 +54,14 @@ Progress: ███████████████████████�
 | 04-04 | ✅ Complete (executed 19:57-20:05 UTC) | Dashboard query functions ready for Phase 6 UI (verification deferred) |
 | 04-05 | ✅ Complete | Lead management mutations (updateLeadStatus, addContactNote, syncSarahData) |
 | 04-06 | ✅ Complete | Background sync service with hourly cron for stale contact detection |
+
+### Phase 5 Progress: Grok Manager Bot — IN PROGRESS
+
+| Plan | Status | Summary |
+|------|--------|---------|
+| 05-01 | ✅ Complete (executed 2026-01-31, 2.5 min) | Brain analytics data layer (brainSummaries, brainInsights, brainActions) |
+| 05-02 | Pending | Grok integration for pattern analysis |
+| 05-03 | Pending | Daily summary generation |
 
 ## V1.0.0 Archive Summary
 
@@ -118,6 +126,10 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Sync result in HTTP response** for debugging (success, sync, syncReason fields)
 - **Dashboard query functions:** In-memory filtering for status (Convex compound index limitation), prioritized follow-up list by score
 - **End-to-end verification deferred to Phase 6** - backend ready, UI testing when database page built
+- **Three-table Brain analytics architecture** - Separate tables for summaries (text), insights (patterns), actions (recommendations) for clarity and better indexing
+- **Brain operations use internal mutations** - createSummary, createInsight, createActionRecommendation are internalMutations (triggered by cron/workflow, not user actions)
+- **Actions expire after 24h** - Default expiration prevents stale recommendations; cleanup via cleanupExpiredActions cron job
+- **suggested_faqs field in brainInsights** - Optional array for MGR-06 requirement (FAQ suggestions from detected patterns)
 
 ### Kapso Configuration
 
@@ -199,27 +211,24 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-30 20:05 UTC
-**Stopped at:** Plan 04-04 complete - Phase 4 COMPLETE ✅
+**Last session:** 2026-01-31 01:25 UTC
+**Stopped at:** Plan 05-01 complete - Brain analytics data layer
 **Resume file:** None
 
 **Completed in this session:**
-- 04-04: Dashboard Query Functions (7 minutes)
-  - Added getLeadsByStatus query for filtering leads
-  - Added getLeadsNeedingFollowUp query for prioritized follow-up
-  - Added getLeadStats query for dashboard statistics
-  - Backend infrastructure verified via Convex deployment
-  - End-to-end verification deferred to Phase 6 (when database UI built)
-  - All queries compile and deploy successfully
+- 05-01: Brain Analytics Data Layer (2.5 minutes)
+  - Added three Brain analytics tables to schema (brainSummaries, brainInsights, brainActions)
+  - Created brainSummaries.ts with 4 CRUD operations
+  - Created brainInsights.ts with 3 CRUD operations (includes suggested_faqs for MGR-06)
+  - Created brainActions.ts with 6 operations (includes cleanup for expired actions)
+  - All functions compiled and deployed successfully
+  - 3 atomic commits, 444 LOC added
 
-**Phase 4 Progress (6/6 plans) - COMPLETE ✅:**
-- 04-01: Extended Contacts Schema (4 min 21 sec) - COMPLETE ✅
-- 04-02: Kapso webhook sync with lastActivityAt - COMPLETE ✅
-- 04-03: Sarah contact sync (2.8 min) - COMPLETE ✅
-- 04-04: Dashboard query functions (7 min) - COMPLETE ✅
-- 04-05: Lead management mutations (2.3 min) - COMPLETE ✅
-- 04-06: Background sync service (2.0 min) - COMPLETE ✅
+**Phase 5 Progress (1/3 plans) - IN PROGRESS:**
+- 05-01: Brain Analytics Data Layer (2.5 min) - COMPLETE ✅
+- 05-02: Grok integration for pattern analysis - PENDING
+- 05-03: Daily summary generation - PENDING
 
 ---
 
-*Last updated: 2026-01-30 — Phase 4 IN PROGRESS, 18/19 total plans (97%)*
+*Last updated: 2026-01-31 — Phase 5 IN PROGRESS, 20/21 total plans (95%)*
