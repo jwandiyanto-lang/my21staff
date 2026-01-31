@@ -45,7 +45,7 @@ export default function OnboardingPage() {
 
       try {
         // Wait for organization list to load
-        if (!userMemberships.isLoaded) {
+        if (!userMemberships) {
           return
         }
 
