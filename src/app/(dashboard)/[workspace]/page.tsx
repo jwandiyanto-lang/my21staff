@@ -1,4 +1,6 @@
-import { redirect } from 'next/navigation'
+import { DashboardClient } from './dashboard-client'
+
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 interface DashboardPageProps {
   params: Promise<{ workspace: string }>
@@ -7,7 +9,8 @@ interface DashboardPageProps {
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { workspace: workspaceSlug } = await params
 
-  // Phase 2.5: Redirect to Your Team as the main page
-  // Dashboard will be built in Phase 6
-  redirect(`/${workspaceSlug}/your-team`)
+  // In dev mode, use demo workspace
+  const workspaceId = isDevMode ? ('demo' as any) : workspaceSlug
+
+  return <DashboardClient workspaceId={workspaceId} workspaceSlug={workspaceSlug} />
 }

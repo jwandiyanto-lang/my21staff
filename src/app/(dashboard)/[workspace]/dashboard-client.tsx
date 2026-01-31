@@ -5,6 +5,7 @@ import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { useEnsureUser } from '@/hooks/use-ensure-user'
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton'
+import { LeadStats } from '@/components/dashboard/lead-stats'
 import { StatsCards } from '@/components/dashboard/stats-cards'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { ActivityFeed } from '@/components/dashboard/activity-feed'
@@ -73,7 +74,10 @@ export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientP
         <h1 className="text-2xl font-semibold">Dashboard</h1>
       </div>
 
-      {/* Stats Cards */}
+      {/* Lead Stats - Hero position */}
+      <LeadStats workspaceId={workspaceId} />
+
+      {/* Legacy Stats Cards - Keep for now */}
       <StatsCards
         stats={stats}
         timeFilter={timeFilter}
