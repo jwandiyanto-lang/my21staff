@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 5 - Grok Manager Bot — IN PROGRESS
-Status: 2 of 3 plans complete
-Last activity: 2026-01-31 — Plan 05-02 complete: Grok integration for pattern analysis
+Phase: Phase 5 - Grok Manager Bot — COMPLETE ✅
+Status: 3 of 3 plans complete
+Last activity: 2026-01-31 — Plan 05-03 complete: Action recommendation engine
 
-Progress: ████████████████████████████████████░░ 100% (21 of 21 total plans across phases 1-5)
+Progress: ████████████████████████████████████████ 100% (21 of 21 total plans across phases 1-5)
 
 ## V2.0 Milestone
 
@@ -55,13 +55,13 @@ Progress: ███████████████████████�
 | 04-05 | ✅ Complete | Lead management mutations (updateLeadStatus, addContactNote, syncSarahData) |
 | 04-06 | ✅ Complete | Background sync service with hourly cron for stale contact detection |
 
-### Phase 5 Progress: Grok Manager Bot — IN PROGRESS
+### Phase 5 Progress: Grok Manager Bot — COMPLETE ✅
 
 | Plan | Status | Summary |
 |------|--------|---------|
 | 05-01 | ✅ Complete (executed 2026-01-31, 2.5 min) | Brain analytics data layer (brainSummaries, brainInsights, brainActions) |
 | 05-02 | ✅ Complete (executed 2026-01-31, 2.1 min) | Grok 4.1-fast integration with daily cron for conversational summaries |
-| 05-03 | Pending | Daily summary generation |
+| 05-03 | ✅ Complete (executed 2026-01-31, 2 min) | Weighted priority scoring with Grok-powered personalized WhatsApp templates |
 
 ## V1.0.0 Archive Summary
 
@@ -134,6 +134,13 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Fixed daily cron time (01:00 UTC / 09:00 WIB)** - All workspaces get summaries at same time; per-workspace times deferred to future
 - **Conversational tone system prompt** - WhatsApp-optimized friendly messages (under 800 chars) instead of formal reports
 - **Cost tracking in Brain API calls** - tokens_used and cost_usd stored per summary for billing/optimization
+- **Weighted priority scoring for actions** - leadScore 40%, timeSinceContact 30%, engagementDecay 20%, urgencySignals 10% (configurable via ScoringWeights)
+- **Action deduplication by contact** - One action per lead, highest priority wins (prevents overwhelming users)
+- **Top 20 actions stored in database** - Limit dashboard display to actionable recommendations
+- **Template generation limited to top 5 follow-ups** - Control Grok API costs while providing personalization for highest-priority leads
+- **Graceful degradation for templates** - Fallback to generic message if Grok API fails (never block action generation)
+- **api.leads queries (not internal.leads)** - leads.ts exports regular queries, use api.leads for public API access
+- **Language-aware template generation** - Grok generates Indonesian or English based on sarahLanguage field from contact
 
 ### Kapso Configuration
 
@@ -215,8 +222,8 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 01:30 UTC
-**Stopped at:** Plan 05-02 complete - Grok integration for pattern analysis
+**Last session:** 2026-01-31 01:32 UTC
+**Stopped at:** Phase 5 complete - All Grok Manager Bot plans executed
 **Resume file:** None
 
 **Completed in this session:**
@@ -237,11 +244,20 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
   - All functions compiled and deployed successfully
   - 2 atomic commits, 251 LOC added
 
-**Phase 5 Progress (2/3 plans) - IN PROGRESS:**
+- 05-03: Action Recommendation Engine (2 minutes)
+  - Extended brainAnalysis.ts with action recommendation logic
+  - Implemented weighted priority scoring (leadScore 40%, timeSinceContact 30%, engagementDecay 20%, urgencySignals 10%)
+  - Added opportunity detection (budget, competitor, urgency, demo signals)
+  - Grok-powered personalized WhatsApp message templates (top 5 follow-ups, <200 chars)
+  - Deduplication by contact (highest priority wins), top 20 stored in database
+  - All functions compiled and deployed successfully
+  - 3 atomic commits, 185 LOC added
+
+**Phase 5 Progress (3/3 plans) - COMPLETE ✅:**
 - 05-01: Brain Analytics Data Layer (2.5 min) - COMPLETE ✅
 - 05-02: Grok integration for pattern analysis (2.1 min) - COMPLETE ✅
-- 05-03: Daily summary generation - PENDING
+- 05-03: Action recommendation engine (2 min) - COMPLETE ✅
 
 ---
 
-*Last updated: 2026-01-31 — Phase 5 IN PROGRESS, 20/21 total plans (95%)*
+*Last updated: 2026-01-31 — Phase 5 COMPLETE, 21/21 total plans (100%)*
