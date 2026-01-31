@@ -6,7 +6,7 @@
 
 ## Overview
 
-**8 phases** | **69 requirements** | **Hybrid AI + Rules architecture**
+**9 phases** | **69 requirements** | **Hybrid AI + Rules architecture**
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
@@ -17,8 +17,9 @@
 | 4 | Lead Database | Kapso -> Convex sync + custom fields | 7 |
 | 5 | Grok Manager Bot | Analysis + scoring + insights | 7 |
 | 6 | Dashboard | Lead list + AI insights + analytics + WhatsApp inbox | 24 |
-| 7 | Handoff Workflow | End-to-end handoff flow + notifications | 6 |
-| 8 | Testing & Polish | End-to-end testing, bug fixes, performance | 2 |
+| 7 | Production Launch | Deploy to production + landing page + authentication | 7 |
+| 8 | Handoff Workflow | End-to-end handoff flow + notifications | 6 |
+| 9 | Testing & Polish | End-to-end testing, bug fixes, performance | 2 |
 
 ---
 
@@ -372,7 +373,52 @@ Daily Summary:
 
 ---
 
-## Phase 7: Handoff Workflow
+## Phase 7: Production Launch
+
+**Goal:** Deploy to production with working authentication and polished landing page to see the real CRM in action.
+
+**Requirements:**
+- PROD-01: Production deployment to Vercel
+- PROD-02: Environment variables configured (DEV_MODE=false)
+- PROD-03: Clerk authentication working in production
+- PROD-04: Landing page polished with clear CTAs
+- PROD-05: Navigation has sign-in/sign-up links
+- PROD-06: Sign-up flow tested end-to-end
+- PROD-07: Dashboard accessible after authentication
+
+**Success Criteria:**
+1. Application deployed to Vercel production
+2. Clerk authentication configured and working in production
+3. Landing page polished and ready for first impressions
+4. Users can sign in and access the CRM
+5. All core features work in production environment
+6. Environment variables configured for production
+7. Production URL accessible and working
+
+**Deliverables:**
+- Production deployment on Vercel
+- Clerk production environment setup
+- Landing page improvements (interactive session)
+- Sign-in flow tested end-to-end
+- Production environment verification
+
+**Plans:** 3 plans
+- [ ] 07-01-PLAN.md — Deploy and verify production infrastructure
+- [ ] 07-02-PLAN.md — Landing page polish (interactive checkpoint)
+- [ ] 07-03-PLAN.md — End-to-end authentication verification
+
+**Status:** Planning complete — ready for execution
+
+**Wave Structure:**
+- Wave 1: 07-01 (deployment verification)
+- Wave 2: 07-02 (landing page with user feedback)
+- Wave 3: 07-03 (auth flow verification)
+
+**Note:** Focus on speed for deployment, interactive iteration for landing page polish.
+
+---
+
+## Phase 8: Handoff Workflow
 
 **Goal:** When lead qualifies, handoff triggers dashboard alert + WhatsApp notification + auto-reply.
 
@@ -421,13 +467,16 @@ Phase 3      Phase 4
     Phase 6 (Dashboard + Inbox)
            |
            v
-    Phase 7 (Handoff)
+    Phase 7 (Production Launch)
            |
            v
-    Phase 8 (Testing & Polish)
+    Phase 8 (Handoff)
+           |
+           v
+    Phase 9 (Testing & Polish)
 ```
 
-**Critical Path:** Phase 1 -> 2 -> 2.5 -> 3 -> 6 -> 7 -> 8 (Foundation -> Settings -> Sarah -> Dashboard -> Handoff -> Test)
+**Critical Path:** Phase 1 -> 2 -> 2.5 -> 3 -> 6 -> 7 -> 8 -> 9 (Foundation -> Settings -> Sarah -> Dashboard -> Production -> Handoff -> Test)
 
 **Can Parallelize:**
 - Phase 3 (Sarah) + Phase 4 (Database) — independent after Phase 2.5
@@ -440,7 +489,7 @@ Phase 3      Phase 4
 
 ---
 
-## Phase 8: Testing & Polish
+## Phase 9: Testing & Polish
 
 **Goal:** End-to-end testing of all features, bug fixes, performance optimization, production readiness.
 
@@ -474,12 +523,14 @@ Phase 3      Phase 4
 4. Leads are captured in database with extracted info (5 slots)
 5. Grok generates daily summaries and scores leads
 6. Dashboard shows all leads with instant load
-7. WhatsApp inbox (whatsapp-cloud-inbox) integrated with custom branding
-8. Handoff workflow triggers for qualified leads
-9. Business owner receives notifications for handoffs
+7. Production deployment is live with working authentication
+8. WhatsApp inbox (whatsapp-cloud-inbox) integrated with custom branding
+9. Handoff workflow triggers for qualified leads
+10. Business owner receives notifications for handoffs
 
 **Definition of Done:**
-- All 69 requirements marked complete
+- All requirements marked complete
+- Production application deployed and accessible
 - End-to-end flow tested: Lead messages -> Sarah qualifies -> Handoff -> Notification
 - Dashboard accessible with real-time data
 - Settings UI applies changes to Kapso immediately
