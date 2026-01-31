@@ -66,6 +66,35 @@ export const getBySlug = query({
 });
 
 /**
+ * Get a workspace by Clerk organization ID.
+ *
+ * Used during onboarding to find workspace for a user's organization.
+ *
+ * @param clerk_org_id - The Clerk organization ID to look up
+ * @returns Workspace document or null if not found
+ */
+export const getByOrgId = query({
+  args: {
+    clerk_org_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Find organization first
+    const org = await ctx.db
+      .query("organizations")
+      .withIndex("by_clerk_org_id", (q) => q.eq("clerk_org_id", args.clerk_org_id))
+      .first();
+
+    if (!org || !org.workspace_id) {
+      return null;
+    }
+
+    // Get workspace
+    const workspace = await ctx.db.get(org.workspace_id);
+    return workspace;
+  },
+});
+
+/**
  * Get a workspace by Kapso phone ID (internal version).
  *
  * Used by Kapso webhook handler to identify the workspace
@@ -179,8 +208,8 @@ export const getMembership = query({
   handler: async (ctx, { workspace_id, user_id }) => {
     return await ctx.db
       .query("workspaceMembers")
-      .withIndex("by_workspace_user", q =>
-        q.eq("workspace_id", workspace_id).eq("user_id", user_id)
+      .withIndex("by_user_workspace", q =>
+        q.eq("user_id", user_id).eq("workspace_id", workspace_id)
       )
       .first();
   },

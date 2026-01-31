@@ -6,7 +6,7 @@
  */
 
 // @ts-nocheck - Schema types mismatch with generated Convex types
-import { query, internalQuery } from "./_generated/server";
+import { query, internalQuery, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 /**
@@ -177,5 +177,50 @@ export const getByUserAndWorkspace = query({
       )
       .first();
     return membership;
+  },
+});
+
+/**
+ * Create a new workspace member.
+ *
+ * Used by organization onboarding to add the creator as owner,
+ * and by team management to add new members.
+ *
+ * @param workspace_id - The workspace ID to add member to
+ * @param user_id - The user ID (Clerk ID) to add
+ * @param role - The role to assign ('owner', 'admin', 'member')
+ * @returns The created member ID
+ */
+export const create = mutation({
+  args: {
+    workspace_id: v.string(),
+    user_id: v.string(),
+    role: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Check if member already exists (idempotent)
+    const existing = await ctx.db
+      .query("workspaceMembers")
+      .withIndex("by_user_workspace", (q) =>
+        q.eq("user_id", args.user_id).eq("workspace_id", args.workspace_id)
+      )
+      .first();
+
+    if (existing) {
+      console.log(`[WorkspaceMembers] Member ${args.user_id} already in workspace ${args.workspace_id}`);
+      return existing._id;
+    }
+
+    const memberId = await ctx.db.insert("workspaceMembers", {
+      workspace_id: args.workspace_id as any,
+      user_id: args.user_id,
+      role: args.role,
+      created_at: now,
+    });
+
+    console.log(`[WorkspaceMembers] Added ${args.user_id} to workspace ${args.workspace_id} as ${args.role}`);
+    return memberId;
   },
 });
