@@ -505,3 +505,17 @@ export const getForKapso = query({
     return workspace;
   },
 });
+
+/**
+ * Delete a workspace by ID.
+ * Used for cleanup of duplicate workspaces.
+ */
+export const deleteWorkspace = mutation({
+  args: {
+    workspaceId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.workspaceId as any);
+    return { success: true };
+  },
+});
