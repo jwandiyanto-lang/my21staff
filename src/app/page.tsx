@@ -43,18 +43,22 @@ export default function Home() {
         <CTASection />
       </main>
 
-      {/* Footer - Compact */}
-      <footer className="bg-white border-t border-gray-100 py-4">
+      {/* Footer - Minimal */}
+      <footer className="bg-white border-t border-gray-100 py-8">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="flex items-center justify-center gap-4 text-xs text-[#2D2A26]/50">
-            <span className="font-extrabold">
-              <span className="text-[#2D2A26]/50">my</span>
+          <div className="flex items-center justify-between">
+            <span className="text-2xl font-extrabold">
+              <span className="text-[#2D2A26]">my</span>
               <span className="text-[#F7931A]">21</span>
-              <span className="text-[#2D2A26]/50">staff</span>
+              <span className="text-[#2D2A26]">staff</span>
             </span>
-            <span>&copy; 2026</span>
-            <Link href="/security" className="hover:text-[#2D2A26] transition-colors">
-              Security
+            <Link
+              href="https://wa.me/message/WMW65Q7UGTDNE1"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 bg-[#F7931A] text-white font-semibold rounded-full hover:bg-[#e08315] transition-all duration-150"
+            >
+              Chat Now
             </Link>
           </div>
         </div>

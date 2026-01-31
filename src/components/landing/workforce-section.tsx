@@ -170,14 +170,11 @@ export function WorkforceSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.15 }}
-          className="text-center mb-12"
+          className="text-center mb-6"
         >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#284b31] tracking-[-0.02em]">
             Imagine Your Team is Working 24/7
           </h2>
-          <p className="mt-4 text-lg text-[#2D2A26]/70 max-w-2xl mx-auto tracking-[-0.02em]">
-            Watch how our chatbots capture leads, reply instantly, and organize your database automatically.
-          </p>
         </motion.div>
 
         {/* Live Activity Feed + Staff Card */}
