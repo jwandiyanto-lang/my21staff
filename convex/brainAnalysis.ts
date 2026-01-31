@@ -650,3 +650,93 @@ export const getContactsWithNotes = internalQuery({
     }));
   },
 });
+
+/**
+ * internalAction: analyzeConversationPatterns
+ * Main pattern analysis function - extracts notes, calls Grok, returns structured patterns
+ */
+export const analyzeConversationPatterns = internalAction({
+  args: {
+    workspaceId: v.id("workspaces"),
+    timeRange: v.union(v.literal("today"), v.literal("week"), v.literal("month")),
+  },
+  handler: async (ctx, args): Promise<PatternAnalysisResult | null> => {
+    console.log(`[Brain] Analyzing conversation patterns for ${args.timeRange}`);
+
+    const cutoff = getTimeRangeCutoff(args.timeRange);
+
+    // 1. Get contacts with recent activity
+    // Note: getContactsWithNotes is defined above this action
+    const contacts = await ctx.runQuery(internal.brainAnalysis.getContactsWithNotes, {
+      workspaceId: args.workspaceId,
+      since: cutoff,
+    });
+
+    if (contacts.length === 0) {
+      console.log("[Brain] No contacts with notes in time range");
+      return { trending_topics: [], objections: [], interest_signals: [], rejection_reasons: [], data_insufficient: true };
+    }
+
+    // 2. Extract all notes/conversation snippets
+    const allNotes: string[] = [];
+    for (const contact of contacts) {
+      if (contact.notes && contact.notes.length > 0) {
+        for (const note of contact.notes) {
+          // Only include notes from the time range
+          if (note.addedAt >= cutoff) {
+            allNotes.push(note.content);
+          }
+        }
+      }
+      // Also include pain points if extracted
+      if (contact.painPoints) {
+        allNotes.push(...contact.painPoints);
+      }
+    }
+
+    if (allNotes.length < 10) {
+      console.log(`[Brain] Only ${allNotes.length} notes found - insufficient data`);
+      return { trending_topics: [], objections: [], interest_signals: [], rejection_reasons: [], data_insufficient: true };
+    }
+
+    // 3. Limit notes to first 100 to control token usage
+    const limitedNotes = allNotes.slice(0, 100);
+
+    // 4. Build analysis prompt
+    const prompt = `Analyze these ${limitedNotes.length} conversation excerpts from the last ${args.timeRange}:
+
+${limitedNotes.map((n, i) => `${i + 1}. "${n}"`).join('\n')}
+
+Identify patterns following the output format in your instructions.
+IMPORTANT: For trending_topics and objections, include suggested_faqs with draft FAQ content.`;
+
+    // 5. Call Grok for analysis
+    try {
+      const result = await callGrokAPI(PATTERN_ANALYSIS_SYSTEM_PROMPT, prompt);
+
+      // Parse JSON response
+      let analysis: PatternAnalysisResult;
+      try {
+        const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          analysis = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error("No JSON found in response");
+        }
+      } catch (parseError) {
+        console.error("[Brain] Failed to parse pattern analysis:", result.content);
+        return { trending_topics: [], objections: [], interest_signals: [], rejection_reasons: [], data_insufficient: true };
+      }
+
+      // 6. Store insights in database
+      await storePatternInsights(ctx, args.workspaceId, analysis, args.timeRange);
+
+      console.log(`[Brain] Pattern analysis complete: ${analysis.trending_topics.length} topics, ${analysis.objections.length} objections`);
+      return analysis;
+
+    } catch (error) {
+      console.error("[Brain] Pattern analysis failed:", error);
+      return null;
+    }
+  },
+});
