@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Check, Circle } from 'lucide-react'
+import { Check, Circle, Bot, Zap, User } from 'lucide-react'
 
 export function HeroSection() {
   return (
@@ -62,81 +62,90 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* Right column - WhatsApp Chat in Browser Card */}
+            {/* Right column - Activity Feed Mockup */}
             <div className="lg:col-span-5 flex items-center">
               <div className="w-full bg-white rounded-2xl border border-[rgba(55,53,47,0.08)] shadow-lg overflow-hidden">
-                {/* Browser-style header */}
-                <div className="bg-[#F5F5F5] px-4 py-3 flex items-center gap-2 border-b border-[rgba(55,53,47,0.08)]">
+                {/* Browser-style header - very subtle */}
+                <div className="bg-[#F8F8F8] px-4 py-2.5 flex items-center gap-2 border-b border-[rgba(55,53,47,0.06)]">
                   <div className="flex gap-1.5">
-                    <Circle className="w-3 h-3 fill-red-400 text-red-400" />
-                    <Circle className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                    <Circle className="w-3 h-3 fill-green-400 text-green-400" />
+                    <Circle className="w-2.5 h-2.5 fill-gray-300 text-gray-300" />
+                    <Circle className="w-2.5 h-2.5 fill-gray-300 text-gray-300" />
+                    <Circle className="w-2.5 h-2.5 fill-gray-300 text-gray-300" />
                   </div>
                 </div>
 
-                {/* Console header */}
-                <div className="bg-white px-5 py-4 border-b border-[rgba(55,53,47,0.08)]">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-[#1B4332] font-mono">Your Daily Report</h3>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <div className="w-2 h-2 bg-[#F7931A] rounded-full animate-pulse"></div>
-                        <div className="absolute inset-0 w-2 h-2 bg-[#F7931A] rounded-full animate-ping opacity-75"></div>
+                {/* Console Stream header */}
+                <div className="bg-white px-5 py-3 border-b border-[rgba(55,53,47,0.08)]">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider">Console Stream</h3>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 bg-[#F7931A] rounded-full"></div>
+                      <span className="text-[9px] text-[#F7931A] font-bold uppercase tracking-wide">Live</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Activity items */}
+                <div className="p-4 space-y-3 bg-[#FCFCFB]">
+                  {/* Item 1 - AI Staff #21 */}
+                  <div className="bg-white rounded-xl p-4 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <Bot className="w-5 h-5 text-green-600" />
                       </div>
-                      <span className="text-xs text-[#6B7280] font-mono">Live</span>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-[#1B4332] mb-0.5">AI Staff #21</h4>
+                        <p className="text-xs text-[#6B7280] leading-relaxed">
+                          Processed order #8842 from WhatsApp
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Item 2 - System Automations */}
+                  <div className="bg-white rounded-xl p-4 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                        <Zap className="w-5 h-5 text-orange-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-[#1B4332] mb-0.5">System Automations</h4>
+                        <p className="text-xs text-[#6B7280] leading-relaxed">
+                          Inventory sync completed with Shopify
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Item 3 - New Lead Captured */}
+                  <div className="bg-white rounded-xl p-4 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 text-gray-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-[#1B4332] mb-0.5">New Lead Captured</h4>
+                        <p className="text-xs text-[#6B7280] leading-relaxed">
+                          Sarah J. initiated a product inquiry via QR code
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* WhatsApp Chat messages - with blur effect */}
-                <div className="p-4 space-y-3 bg-[#FCFCFB] backdrop-blur-sm relative">
-                  {/* Blur overlay - extremely strong blur to make content completely invisible */}
-                  <div className="absolute inset-0 bg-white/70 backdrop-blur-[20px] pointer-events-none z-20"></div>
-
-                  {/* Message 1 - Customer (text completely hidden) */}
-                  <div className="relative z-10 flex items-start gap-3 justify-end">
-                    <div className="bg-white rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%] h-12">
-                      {/* No text - just empty bubble shape */}
-                    </div>
-                    <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0 opacity-0">
-                      C
-                    </div>
+                {/* Stats grid - 2 columns */}
+                <div className="grid grid-cols-2 gap-0 border-t border-[rgba(55,53,47,0.08)]">
+                  {/* Revenue box - dark green */}
+                  <div className="bg-[#1B4332] px-5 py-4">
+                    <p className="text-[9px] text-white/60 font-bold uppercase tracking-wider mb-1">Revenue</p>
+                    <p className="text-2xl font-bold text-white">$12.4k</p>
                   </div>
 
-                  {/* Message 2 - Sarah (text completely hidden) */}
-                  <div className="relative z-10 flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-full bg-[#25D366] flex items-center justify-center text-xs font-bold text-white flex-shrink-0 opacity-0">
-                      S
-                    </div>
-                    <div className="bg-[#DCF8C6] rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%] h-16">
-                      {/* No text - just empty bubble shape */}
-                    </div>
+                  {/* Avg Response box - light orange */}
+                  <div className="bg-[#FFF4E6] px-5 py-4">
+                    <p className="text-[9px] text-[#F7931A] font-bold uppercase tracking-wider mb-1">Avg. Res.</p>
+                    <p className="text-2xl font-bold text-[#1B4332]">0.8s</p>
                   </div>
-
-                  {/* Message 3 - Customer (text completely hidden) */}
-                  <div className="relative z-10 flex items-start gap-3 justify-end">
-                    <div className="bg-white rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%] h-10">
-                      {/* No text - just empty bubble shape */}
-                    </div>
-                    <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0 opacity-0">
-                      C
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stats footer */}
-                <div className="bg-[#1B4332] px-5 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <p className="text-[10px] text-white/60 font-mono uppercase tracking-wide">Revenue</p>
-                      <p className="text-sm font-bold text-white font-mono">$12.4k</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/60 font-mono uppercase tracking-wide">Avg Res.</p>
-                      <p className="text-sm font-bold text-white font-mono">0.8s</p>
-                    </div>
-                  </div>
-                  <div className="text-[10px] text-white/40 font-mono">Today</div>
                 </div>
               </div>
             </div>
