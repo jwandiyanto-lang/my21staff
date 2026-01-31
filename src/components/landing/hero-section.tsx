@@ -31,12 +31,14 @@ export function HeroSection() {
 
               {/* Button */}
               <div>
-                <Link
-                  href="/sign-up"
+                <a
+                  href="https://wa.me/message/WMW65Q7UGTDNE1"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center justify-center px-12 py-4 bg-[#F7931A] text-white font-semibold rounded-full hover:bg-[#e08515] transition-all duration-200 shadow-md hover:shadow-lg text-base"
                 >
                   Chat With Us Now!
-                </Link>
+                </a>
               </div>
             </div>
 
