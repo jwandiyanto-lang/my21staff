@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import type { Id } from 'convex/_generated/dataModel'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendIndicator } from './trend-indicator'
-import { Users, UserPlus, CalendarDays, Flame } from 'lucide-react'
+import { Users, UserPlus, CalendarDays, Flame, Calendar } from 'lucide-react'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
@@ -24,6 +26,7 @@ const MOCK_STATS = {
 const MOCK_PREVIOUS = {
   newYesterday: 3,
   newLastWeek: 18,
+  newLastMonth: 62,
 }
 
 interface LeadStatsProps {
@@ -31,6 +34,8 @@ interface LeadStatsProps {
 }
 
 export function LeadStats({ workspaceId }: LeadStatsProps) {
+  const [period, setPeriod] = useState<'today' | 'week' | 'month'>('week')
+
   const stats = useQuery(
     api.leads.getLeadStats,
     isDevMode ? 'skip' : { workspaceId }
@@ -43,45 +48,90 @@ export function LeadStats({ workspaceId }: LeadStatsProps) {
     return <LeadStatsSkeleton />
   }
 
-  // Calculate trends (simplified - in production, compare to previous period data)
+  // Calculate trends based on selected period
   const todayTrend = previous.newYesterday > 0
     ? Math.round(((data.newToday - previous.newYesterday) / previous.newYesterday) * 100)
     : 0
   const weekTrend = previous.newLastWeek > 0
     ? Math.round(((data.newThisWeek - previous.newLastWeek) / previous.newLastWeek) * 100)
     : 0
+  const monthTrend = previous.newLastMonth > 0
+    ? Math.round(((data.newThisMonth - previous.newLastMonth) / previous.newLastMonth) * 100)
+    : 0
 
-  // Generate conversational highlight
-  const highlight = generateHighlight(data, todayTrend, weekTrend)
+  // Get primary stats based on period
+  const getPrimaryStats = () => {
+    switch (period) {
+      case 'today':
+        return {
+          title: 'New Today',
+          value: data.newToday,
+          trend: todayTrend,
+          trendPeriod: 'vs yesterday',
+          icon: <UserPlus className="h-4 w-4 text-blue-500" />,
+        }
+      case 'week':
+        return {
+          title: 'New This Week',
+          value: data.newThisWeek,
+          trend: weekTrend,
+          trendPeriod: 'vs last week',
+          icon: <CalendarDays className="h-4 w-4 text-green-500" />,
+        }
+      case 'month':
+        return {
+          title: 'New This Month',
+          value: data.newThisMonth,
+          trend: monthTrend,
+          trendPeriod: 'vs last month',
+          icon: <Calendar className="h-4 w-4 text-purple-500" />,
+        }
+    }
+  }
+
+  const primaryStat = getPrimaryStats()
+
+  // Generate conversational highlight based on period
+  const highlight = generateHighlight(data, period, todayTrend, weekTrend, monthTrend)
 
   return (
     <div className="space-y-4">
-      {/* Stats grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Header with time period toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h2 className="text-lg font-medium">Lead Overview</h2>
+        <Tabs value={period} onValueChange={(v) => setPeriod(v as any)}>
+          <TabsList>
+            <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="week">Week</TabsTrigger>
+            <TabsTrigger value="month">Month</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      {/* Stats grid - responsive: 1 col mobile, 2 col tablet, 4 col desktop */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Leads"
           value={data.total}
           icon={<Users className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
-          title="New Today"
-          value={data.newToday}
-          icon={<UserPlus className="h-4 w-4 text-blue-500" />}
-          trend={todayTrend}
-          trendPeriod="vs yesterday"
-        />
-        <StatCard
-          title="New This Week"
-          value={data.newThisWeek}
-          icon={<CalendarDays className="h-4 w-4 text-green-500" />}
-          trend={weekTrend}
-          trendPeriod="vs last week"
+          title={primaryStat.title}
+          value={primaryStat.value}
+          icon={primaryStat.icon}
+          trend={primaryStat.trend}
+          trendPeriod={primaryStat.trendPeriod}
         />
         <StatCard
           title="Hot Leads"
           value={data.byTemperature?.hot || 0}
           icon={<Flame className="h-4 w-4 text-red-500" />}
           valueClassName="text-red-600"
+        />
+        <StatCard
+          title="Avg Score"
+          value={data.avgScore}
+          icon={<Users className="h-4 w-4 text-blue-500" />}
         />
       </div>
 
@@ -123,25 +173,64 @@ function StatCard({ title, value, icon, trend, trendPeriod, valueClassName }: St
   )
 }
 
-function generateHighlight(data: typeof MOCK_STATS, todayTrend: number, weekTrend: number): string {
+function generateHighlight(
+  data: typeof MOCK_STATS,
+  period: 'today' | 'week' | 'month',
+  todayTrend: number,
+  weekTrend: number,
+  monthTrend: number
+): string {
   const parts: string[] = []
 
-  if (data.newToday > 0) {
-    parts.push(`${data.newToday} new lead${data.newToday > 1 ? 's' : ''} today`)
+  // Period-specific messages
+  switch (period) {
+    case 'today':
+      if (data.newToday > 0) {
+        parts.push(`${data.newToday} new lead${data.newToday > 1 ? 's' : ''} today`)
+        if (todayTrend > 0) {
+          parts.push(`up ${todayTrend}% from yesterday`)
+        } else if (todayTrend < 0) {
+          parts.push(`down ${Math.abs(todayTrend)}% from yesterday`)
+        }
+      } else {
+        parts.push('No new leads today yet')
+      }
+      break
+
+    case 'week':
+      if (data.newThisWeek > 0) {
+        parts.push(`${data.newThisWeek} new lead${data.newThisWeek > 1 ? 's' : ''} this week`)
+        if (weekTrend > 0) {
+          parts.push(`up ${weekTrend}% from last week`)
+        } else if (weekTrend < 0) {
+          parts.push(`down ${Math.abs(weekTrend)}% from last week`)
+        }
+      } else {
+        parts.push('No new leads this week yet')
+      }
+      break
+
+    case 'month':
+      if (data.newThisMonth > 0) {
+        parts.push(`${data.newThisMonth} new lead${data.newThisMonth > 1 ? 's' : ''} this month`)
+        if (monthTrend > 0) {
+          parts.push(`up ${monthTrend}% from last month`)
+        } else if (monthTrend < 0) {
+          parts.push(`down ${Math.abs(monthTrend)}% from last month`)
+        }
+      } else {
+        parts.push('No new leads this month yet')
+      }
+      break
   }
 
-  if (weekTrend > 0) {
-    parts.push(`up ${weekTrend}% from last week`)
-  } else if (weekTrend < 0) {
-    parts.push(`down ${Math.abs(weekTrend)}% from last week`)
-  }
-
+  // Always include hot leads count if any
   if (data.byTemperature?.hot > 0) {
     parts.push(`${data.byTemperature.hot} hot lead${data.byTemperature.hot > 1 ? 's' : ''} ready for follow-up`)
   }
 
   if (parts.length === 0) {
-    return "No new activity today. Check back later!"
+    return "No new activity. Check back later!"
   }
 
   return parts.join(' - ') + '.'
