@@ -124,7 +124,7 @@ export const MOCK_TEAM_MEMBERS: MockTeamMember[] = [
     created_at: '2024-01-01T00:00:00Z',
     profile: {
       id: 'dev-user-001',
-      email: 'jonathan@eagle.edu',
+      email: 'jonathan@my21staff.com',
       full_name: 'Jonathan Wandiyanto',
       avatar_url: null,
       is_admin: false,
@@ -142,7 +142,7 @@ export const MOCK_TEAM_MEMBERS: MockTeamMember[] = [
     created_at: '2024-01-01T00:00:00Z',
     profile: {
       id: 'dev-user-002',
-      email: 'sarah@eagle.edu',
+      email: 'sarah@my21staff.com',
       full_name: 'Sarah Chen',
       avatar_url: null,
       is_admin: false,
@@ -160,7 +160,7 @@ export const MOCK_TEAM_MEMBERS: MockTeamMember[] = [
     created_at: '2024-01-01T00:00:00Z',
     profile: {
       id: 'dev-user-003',
-      email: 'budi@eagle.edu',
+      email: 'budi@my21staff.com',
       full_name: 'Budi Santoso',
       avatar_url: null,
       is_admin: false,
@@ -172,7 +172,7 @@ export const MOCK_TEAM_MEMBERS: MockTeamMember[] = [
 
 export const MOCK_WORKSPACE: Workspace = {
   id: 'dev-workspace-001',
-  name: 'Eagle Overseas Education',
+  name: 'Demo Company',
   slug: 'demo',
   owner_id: 'dev-user-001',
   kapso_phone_id: '647015955153740',
@@ -2078,7 +2078,7 @@ export const MOCK_MESSAGES: Message[] = [
     direction: 'outbound',
     sender_type: 'bot',
     sender_id: 'bot',
-    content: 'Halo Budi! Terima kasih sudah menghubungi Eagle Overseas Education. Tentu, kami bisa bantu. Apakah sudah ada jurusan yang diminati?',
+    content: 'Halo Budi! Terima kasih sudah menghubungi Demo Company. Tentu, kami bisa bantu. Apakah sudah ada jurusan yang diminati?',
     message_type: 'text',
     media_url: null,
     kapso_message_id: 'mock-002',
@@ -2314,7 +2314,7 @@ export const MOCK_ARI_CONVERSATIONS: MockARIConversation[] = [
     messages: [
       {
         role: 'assistant',
-        content: 'Selamat siang! Saya Ari dari Eagle Overseas Education. Mau kuliah di luar negeri ya? Boleh tau namanya siapa?',
+        content: 'Selamat siang! Saya Ari dari Demo Company. Mau kuliah di luar negeri ya? Boleh tau namanya siapa?',
         timestamp: Date.now() - 300000, // 5 minutes ago
       },
       {
@@ -2352,7 +2352,7 @@ export const MOCK_ARI_CONVERSATIONS: MockARIConversation[] = [
     messages: [
       {
         role: 'assistant',
-        content: 'Selamat siang! Saya Ari dari Eagle Overseas Education. Ada yang bisa saya bantu?',
+        content: 'Selamat siang! Saya Ari dari Demo Company. Ada yang bisa saya bantu?',
         timestamp: Date.now() - 600000, // 10 minutes ago
       },
       {

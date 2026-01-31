@@ -49,6 +49,11 @@ interface WorkspaceSidebarProps {
 
 const operationsNav = [
   {
+    title: 'Dashboard',
+    icon: LayoutDashboard,
+    href: '',
+  },
+  {
     title: 'Inbox',
     icon: MessageSquare,
     href: '/inbox',

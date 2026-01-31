@@ -204,7 +204,7 @@ export function InfoSidebar({
               },
               author: {
                 full_name: 'Budi Santoso',
-                email: 'budi@eagle.edu',
+                email: 'budi@my21staff.com',
               },
               created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
             },
@@ -215,7 +215,7 @@ export function InfoSidebar({
               metadata: {},
               author: {
                 full_name: 'Budi Santoso',
-                email: 'budi@eagle.edu',
+                email: 'budi@my21staff.com',
               },
               created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
             },
@@ -226,7 +226,7 @@ export function InfoSidebar({
               metadata: {},
               author: {
                 full_name: 'Budi Santoso',
-                email: 'budi@eagle.edu',
+                email: 'budi@my21staff.com',
               },
               created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
             }

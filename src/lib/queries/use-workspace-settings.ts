@@ -34,7 +34,7 @@ const MOCK_TEAM_MEMBERS: TeamMember[] = [
     created_at: '2024-01-01T00:00:00Z',
     profile: {
       id: 'dev-user-001',
-      email: 'jonathan@eagle.edu',
+      email: 'jonathan@my21staff.com',
       full_name: 'Jonathan Wandiyanto',
       avatar_url: null,
       is_admin: false,
