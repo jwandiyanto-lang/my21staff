@@ -161,6 +161,119 @@ http.route({
 });
 
 // ============================================
+// Brain Summary: !summary command handler
+// ============================================
+
+/**
+ * POST /brain/summary - Generate summary for !summary command
+ *
+ * Called by Kapso when user sends "!summary" command.
+ * Returns WhatsApp-ready summary text (<800 chars).
+ *
+ * Body:
+ *   - workspace_id: The workspace ID (required)
+ *   - triggered_by: Phone number of requester (required)
+ */
+http.route({
+  path: "/brain/summary",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const startTime = Date.now();
+
+    try {
+      const body = await request.json();
+      const { workspace_id, triggered_by } = body;
+
+      // Validate required fields
+      if (!workspace_id) {
+        return new Response(
+          JSON.stringify({ error: "workspace_id is required" }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      if (!triggered_by) {
+        return new Response(
+          JSON.stringify({ error: "triggered_by is required" }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      console.log(`[Brain HTTP] !summary request from ${triggered_by}`);
+
+      // Generate summary via internal action
+      const result = await ctx.runAction(internal.brainAnalysis.generateCommandSummary, {
+        workspaceId: workspace_id,
+        triggeredBy: triggered_by,
+      });
+
+      const duration = Date.now() - startTime;
+      console.log(`[Brain HTTP] Summary generated in ${duration}ms`);
+
+      return new Response(
+        JSON.stringify({
+          success: result.success,
+          summary_text: result.summaryText,
+          error: result.error,
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.error(`[Brain HTTP] Error after ${duration}ms:`, error);
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          summary_text: "Sorry, I couldn't generate the summary. Please try again.",
+          error: String(error),
+        }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  }),
+});
+
+/**
+ * GET /brain/summary - Get latest summary for workspace
+ *
+ * Query params:
+ *   - workspace_id: The workspace ID (required)
+ */
+http.route({
+  path: "/brain/summary",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const workspace_id = url.searchParams.get("workspace_id");
+
+    if (!workspace_id) {
+      return new Response(
+        JSON.stringify({ error: "workspace_id is required" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const summary = await ctx.runQuery(internal.brainSummaries.getLatestSummary, {
+      workspaceId: workspace_id as any, // Cast for ID type
+    });
+
+    if (!summary) {
+      return new Response(
+        JSON.stringify({ summary: null, message: "No summary available" }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ summary }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  }),
+});
+
+// ============================================
 // Clerk Webhook: User sync events
 // ============================================
 
