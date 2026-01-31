@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Check, Zap, Clock } from 'lucide-react'
+import { Check, Circle } from 'lucide-react'
 
 export function HeroSection() {
   return (
@@ -62,87 +62,85 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* Right column - WhatsApp Phone Mockup */}
-            <div className="lg:col-span-5 flex items-center justify-center">
-              <div className="relative w-full max-w-[320px]">
-                {/* Phone frame */}
-                <div className="relative bg-[#1F1F1F] rounded-[3rem] p-3 shadow-2xl">
-                  {/* Notch */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-[#1F1F1F] rounded-b-3xl z-10"></div>
+            {/* Right column - WhatsApp Chat in Browser Card */}
+            <div className="lg:col-span-5 flex items-center">
+              <div className="w-full bg-white rounded-2xl border border-[rgba(55,53,47,0.08)] shadow-lg overflow-hidden">
+                {/* Browser-style header */}
+                <div className="bg-[#F5F5F5] px-4 py-3 flex items-center gap-2 border-b border-[rgba(55,53,47,0.08)]">
+                  <div className="flex gap-1.5">
+                    <Circle className="w-3 h-3 fill-red-400 text-red-400" />
+                    <Circle className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    <Circle className="w-3 h-3 fill-green-400 text-green-400" />
+                  </div>
+                  <span className="text-xs text-[#6B7280] font-mono ml-2">WHATSAPP_CHAT</span>
+                </div>
 
-                  {/* Screen */}
-                  <div className="relative bg-[#E5DDD5] rounded-[2.5rem] overflow-hidden">
-                    {/* WhatsApp Header */}
-                    <div className="bg-[#25D366] px-4 py-3 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#25D366] font-bold text-lg">
-                        S
+                {/* Console header */}
+                <div className="bg-white px-5 py-4 border-b border-[rgba(55,53,47,0.08)]">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-[#1B4332] font-mono">Console Stream</h3>
+                    <div className="flex items-center gap-2">
+                      <div className="relative">
+                        <div className="w-2 h-2 bg-[#F7931A] rounded-full animate-pulse"></div>
+                        <div className="absolute inset-0 w-2 h-2 bg-[#F7931A] rounded-full animate-ping opacity-75"></div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-white font-semibold text-sm">Sarah - Staff Digital</h3>
-                        <p className="text-white/80 text-xs">online</p>
-                      </div>
-                    </div>
-
-                    {/* Chat area */}
-                    <div className="p-4 space-y-3 min-h-[500px] bg-[url('/whatsapp-bg.png')] bg-[#E5DDD5]">
-                      {/* Customer message 1 */}
-                      <div className="flex justify-end">
-                        <div className="bg-white rounded-lg rounded-tr-sm px-3 py-2 max-w-[75%] shadow-sm">
-                          <p className="text-sm text-[#1F1F1F]">Berapa harganya untuk paket basic?</p>
-                          <span className="text-[10px] text-[#667781] float-right mt-1">10:23</span>
-                        </div>
-                      </div>
-
-                      {/* Sarah message 1 */}
-                      <div className="flex justify-start">
-                        <div className="bg-[#DCF8C6] rounded-lg rounded-tl-sm px-3 py-2 max-w-[75%] shadow-sm">
-                          <p className="text-sm text-[#1F1F1F]">Halo! Saya Sarah dari tim di sini. Boleh tau nama kamu dulu?</p>
-                          <span className="text-[10px] text-[#667781] float-right mt-1">10:23</span>
-                        </div>
-                      </div>
-
-                      {/* Customer message 2 */}
-                      <div className="flex justify-end">
-                        <div className="bg-white rounded-lg rounded-tr-sm px-3 py-2 max-w-[75%] shadow-sm">
-                          <p className="text-sm text-[#1F1F1F]">Budi</p>
-                          <span className="text-[10px] text-[#667781] float-right mt-1">10:24</span>
-                        </div>
-                      </div>
-
-                      {/* Sarah message 2 */}
-                      <div className="flex justify-start">
-                        <div className="bg-[#DCF8C6] rounded-lg rounded-tl-sm px-3 py-2 max-w-[75%] shadow-sm">
-                          <p className="text-sm text-[#1F1F1F]">Salam kenal Budi. Bisnisnya di bidang apa?</p>
-                          <span className="text-[10px] text-[#667781] float-right mt-1">10:24</span>
-                        </div>
-                      </div>
-
-                      {/* Typing indicator */}
-                      <div className="flex justify-start">
-                        <div className="bg-[#DCF8C6] rounded-lg rounded-tl-sm px-4 py-3 shadow-sm">
-                          <div className="flex gap-1">
-                            <div className="w-2 h-2 bg-[#667781] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                            <div className="w-2 h-2 bg-[#667781] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                            <div className="w-2 h-2 bg-[#667781] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bottom metrics overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#1B4332] to-transparent p-4 pt-8">
-                      <div className="flex items-center justify-center gap-6 text-white">
-                        <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                          <Zap className="w-3 h-3" />
-                          <span className="text-xs font-mono font-semibold">0.8s avg response</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                          <Clock className="w-3 h-3" />
-                          <span className="text-xs font-mono font-semibold">24/7 Available</span>
-                        </div>
-                      </div>
+                      <span className="text-xs text-[#6B7280] font-mono">Live</span>
                     </div>
                   </div>
+                </div>
+
+                {/* WhatsApp Chat messages - with blur effect */}
+                <div className="p-4 space-y-3 bg-[#FCFCFB] backdrop-blur-sm relative">
+                  {/* Blur overlay */}
+                  <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] pointer-events-none"></div>
+
+                  {/* Message 1 - Customer */}
+                  <div className="relative z-10 flex items-start gap-3 justify-end">
+                    <div className="bg-white rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%]">
+                      <p className="text-sm font-mono text-[#37352F]">Berapa harganya?</p>
+                      <span className="text-[10px] text-[#6B7280] font-mono mt-1 block">Customer</span>
+                    </div>
+                    <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
+                      C
+                    </div>
+                  </div>
+
+                  {/* Message 2 - Sarah */}
+                  <div className="relative z-10 flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-full bg-[#25D366] flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                      S
+                    </div>
+                    <div className="bg-[#DCF8C6] rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%]">
+                      <p className="text-sm font-mono text-[#37352F]">Halo! Boleh tau nama kamu?</p>
+                      <span className="text-[10px] text-[#6B7280] font-mono mt-1 block">Sarah AI</span>
+                    </div>
+                  </div>
+
+                  {/* Message 3 - Customer */}
+                  <div className="relative z-10 flex items-start gap-3 justify-end">
+                    <div className="bg-white rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%]">
+                      <p className="text-sm font-mono text-[#37352F]">Budi</p>
+                      <span className="text-[10px] text-[#6B7280] font-mono mt-1 block">Customer</span>
+                    </div>
+                    <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
+                      C
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stats footer */}
+                <div className="bg-[#1B4332] px-5 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <p className="text-[10px] text-white/60 font-mono uppercase tracking-wide">Revenue</p>
+                      <p className="text-sm font-bold text-white font-mono">$12.4k</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/60 font-mono uppercase tracking-wide">Avg Res.</p>
+                      <p className="text-sm font-bold text-white font-mono">0.8s</p>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-white/40 font-mono">Today</div>
                 </div>
               </div>
             </div>
