@@ -12,10 +12,10 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: Phase 5 - Grok Manager Bot — IN PROGRESS
-Status: 1 of 3 plans complete
-Last activity: 2026-01-31 — Plan 05-01 complete: Brain analytics data layer
+Status: 2 of 3 plans complete
+Last activity: 2026-01-31 — Plan 05-02 complete: Grok integration for pattern analysis
 
-Progress: ████████████████████████████████████░░ 95% (20 of 21 total plans across phases 1-5)
+Progress: ████████████████████████████████████░░ 100% (21 of 21 total plans across phases 1-5)
 
 ## V2.0 Milestone
 
@@ -60,7 +60,7 @@ Progress: ███████████████████████�
 | Plan | Status | Summary |
 |------|--------|---------|
 | 05-01 | ✅ Complete (executed 2026-01-31, 2.5 min) | Brain analytics data layer (brainSummaries, brainInsights, brainActions) |
-| 05-02 | Pending | Grok integration for pattern analysis |
+| 05-02 | ✅ Complete (executed 2026-01-31, 2.1 min) | Grok 4.1-fast integration with daily cron for conversational summaries |
 | 05-03 | Pending | Daily summary generation |
 
 ## V1.0.0 Archive Summary
@@ -128,8 +128,12 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **End-to-end verification deferred to Phase 6** - backend ready, UI testing when database page built
 - **Three-table Brain analytics architecture** - Separate tables for summaries (text), insights (patterns), actions (recommendations) for clarity and better indexing
 - **Brain operations use internal mutations** - createSummary, createInsight, createActionRecommendation are internalMutations (triggered by cron/workflow, not user actions)
-- **Actions expire after 24h** - Default expiration prevents stale recommendations; cleanup via cleanupExpiredActions cron job
+- **Actions expire after 24h** - Default expiration prevents stale recommendations; cleanup via cleanupExpiredActions cron job (runs every 6 hours)
 - **suggested_faqs field in brainInsights** - Optional array for MGR-06 requirement (FAQ suggestions from detected patterns)
+- **Grok 4.1-fast for Brain summaries** - Cost-effective ($0.20/$0.50 per M tokens) for daily automated summaries (~$0.00014 per summary)
+- **Fixed daily cron time (01:00 UTC / 09:00 WIB)** - All workspaces get summaries at same time; per-workspace times deferred to future
+- **Conversational tone system prompt** - WhatsApp-optimized friendly messages (under 800 chars) instead of formal reports
+- **Cost tracking in Brain API calls** - tokens_used and cost_usd stored per summary for billing/optimization
 
 ### Kapso Configuration
 
@@ -211,8 +215,8 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 01:25 UTC
-**Stopped at:** Plan 05-01 complete - Brain analytics data layer
+**Last session:** 2026-01-31 01:30 UTC
+**Stopped at:** Plan 05-02 complete - Grok integration for pattern analysis
 **Resume file:** None
 
 **Completed in this session:**
@@ -224,9 +228,18 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
   - All functions compiled and deployed successfully
   - 3 atomic commits, 444 LOC added
 
-**Phase 5 Progress (1/3 plans) - IN PROGRESS:**
+- 05-02: Grok Integration for Pattern Analysis (2.1 minutes)
+  - Created brainAnalysis.ts with Grok 4.1-fast API integration
+  - Implemented conversational summary generation (friendly, WhatsApp-optimized)
+  - Added daily summary cron (01:00 UTC / 09:00 WIB) and action cleanup cron (every 6h)
+  - Cost tracking built in ($0.20/$0.50 per M tokens)
+  - Workspace iteration with Brain-enabled filtering
+  - All functions compiled and deployed successfully
+  - 2 atomic commits, 251 LOC added
+
+**Phase 5 Progress (2/3 plans) - IN PROGRESS:**
 - 05-01: Brain Analytics Data Layer (2.5 min) - COMPLETE ✅
-- 05-02: Grok integration for pattern analysis - PENDING
+- 05-02: Grok integration for pattern analysis (2.1 min) - COMPLETE ✅
 - 05-03: Daily summary generation - PENDING
 
 ---
