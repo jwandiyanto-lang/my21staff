@@ -12,7 +12,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Bot,
-  UserCircle,
   Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -56,7 +55,7 @@ const operationsNav = [
   },
   {
     title: 'Leads',
-    icon: UserCircle,
+    icon: Users,
     href: '/leads',
   },
   {
@@ -66,7 +65,7 @@ const operationsNav = [
   },
   {
     title: 'Your Team',
-    icon: Users,
+    icon: Bot,
     href: '/your-team',
   },
 ]
