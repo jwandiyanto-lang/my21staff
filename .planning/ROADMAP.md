@@ -491,7 +491,7 @@ Phase 3      Phase 4
 
 ## Phase 9: Testing & Polish
 
-**Goal:** End-to-end testing of all features, bug fixes, performance optimization, production readiness.
+**Goal:** End-to-end verification that all systems connect and work together in production.
 
 **Requirements:**
 - TEST-01: End-to-end flow testing (new lead -> Sarah -> handoff -> notification)
@@ -506,11 +506,17 @@ Phase 3      Phase 4
 6. WhatsApp inbox sends/receives reliably
 7. Handoff notifications fire consistently
 
-**Deliverables:**
-- Test plan documentation
-- Bug fixes applied
-- Performance benchmarks met
-- Production deployment verified
+**Plans:** 3 plans
+- [ ] 09-01-PLAN.md — Kapso + Sarah v2 verification (WhatsApp -> Sarah flow)
+- [ ] 09-02-PLAN.md — Inbox bidirectional flow (CRM send/receive)
+- [ ] 09-03-PLAN.md — Brain notes integration (Grok summaries in lead panel)
+
+**Wave Structure:**
+- Wave 1: 09-01 (Kapso/Sarah verification)
+- Wave 2: 09-02 (depends on 09-01)
+- Wave 3: 09-03 (depends on 09-02)
+
+**Status:** Planning complete — ready for execution
 
 ---
 
