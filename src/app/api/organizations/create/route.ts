@@ -5,8 +5,8 @@ import { api } from '@/../convex/_generated/api'
 
 async function getAuthenticatedConvexClient() {
   const { getToken } = await auth()
-  // Get default Clerk JWT token (no template needed)
-  const token = await getToken()
+  // Get token from "convex" JWT template (required by Convex auth config)
+  const token = await getToken({ template: "convex" })
 
   const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
   if (token) {
