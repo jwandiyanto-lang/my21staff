@@ -821,6 +821,89 @@ export default defineSchema({
     .index("by_workspace", ["workspace_id"]),
 
   // ============================================
+  // BRAIN SUMMARIES (Daily/on-demand summaries)
+  // ============================================
+  brainSummaries: defineTable({
+    workspace_id: v.id("workspaces"),
+    summary_text: v.string(),          // Conversational summary text
+    summary_type: v.string(),          // 'daily' | 'manual' | 'scheduled'
+    trigger: v.string(),               // 'cron' | 'command' | 'api'
+    triggered_by: v.optional(v.string()), // Phone number if !summary command
+
+    // Metrics snapshot (configurable from brainConfig)
+    metrics: v.object({
+      newLeadsCount: v.number(),
+      hotLeadsCount: v.number(),
+      warmLeadsCount: v.number(),
+      coldLeadsCount: v.number(),
+      responseRate: v.optional(v.number()),
+      avgScore: v.optional(v.number()),
+      topQuestions: v.optional(v.array(v.string())),
+      rejectionReasons: v.optional(v.array(v.string())),
+    }),
+
+    // Token usage tracking
+    tokens_used: v.optional(v.number()),
+    cost_usd: v.optional(v.number()),
+
+    created_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_type", ["workspace_id", "summary_type"])
+    .index("by_created", ["created_at"]),
+
+  // ============================================
+  // BRAIN INSIGHTS (Pattern detection results)
+  // ============================================
+  brainInsights: defineTable({
+    workspace_id: v.id("workspaces"),
+    insight_type: v.string(),          // 'trending_topic' | 'objection_pattern' | 'interest_signal' | 'rejection_analysis'
+    pattern: v.string(),               // The detected pattern
+    frequency: v.number(),             // How often it appeared
+    examples: v.array(v.string()),     // Sample quotes/instances
+    recommendation: v.optional(v.string()), // AI recommendation
+    suggested_faqs: v.optional(v.array(v.object({
+      question: v.string(),
+      suggested_answer: v.string(),
+    }))),                              // MGR-06: FAQ suggestions for trending topics/objections
+    confidence: v.string(),            // 'high' | 'medium' | 'low'
+    time_range: v.string(),            // 'today' | 'week' | 'month'
+    created_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_type", ["workspace_id", "insight_type"])
+    .index("by_created", ["created_at"]),
+
+  // ============================================
+  // BRAIN ACTIONS (Action recommendations)
+  // ============================================
+  brainActions: defineTable({
+    workspace_id: v.id("workspaces"),
+    contact_id: v.id("contacts"),
+
+    // Action details
+    action_type: v.string(),           // 'follow_up' | 'response_template' | 'handoff_ready' | 'opportunity_alert'
+    priority: v.number(),              // 0-100 weighted score
+    urgency: v.string(),               // 'immediate' | 'today' | 'this_week'
+    reason: v.string(),                // Why this action is recommended
+
+    // Optional template for response_template type
+    suggested_message: v.optional(v.string()),
+
+    // Status tracking
+    status: v.string(),                // 'pending' | 'actioned' | 'dismissed'
+    actioned_at: v.optional(v.number()),
+    actioned_by: v.optional(v.string()),
+
+    created_at: v.number(),
+    expires_at: v.optional(v.number()), // Actions expire after 24h by default
+  })
+    .index("by_workspace", ["workspace_id"])
+    .index("by_workspace_status", ["workspace_id", "status"])
+    .index("by_contact", ["contact_id"])
+    .index("by_priority", ["workspace_id", "priority"]),
+
+  // ============================================
   // SYNC HEALTH (Background sync monitoring)
   // ============================================
   syncHealth: defineTable({
