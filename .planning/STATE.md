@@ -12,10 +12,10 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: Phase 6 - Dashboard — IN PROGRESS
-Status: 1 of 6+ plans complete
-Last activity: 2026-01-31 — Completed 06-01-PLAN.md: Lead List UI with TanStack Table
+Status: 2 of 6+ plans complete
+Last activity: 2026-01-31 — Completed 06-02-PLAN.md: Lead Filtering & Search
 
-Progress: ████████████████████████████████████████░ 104% (26 of 25 base plans, Phase 6 started)
+Progress: ████████████████████████████████████████░ 108% (27 of 25 base plans, Phase 6 in progress)
 
 ## V2.0 Milestone
 
@@ -71,6 +71,7 @@ Progress: ███████████████████████�
 | Plan | Status | Summary |
 |------|--------|---------|
 | 06-01 | ✅ Complete (executed 2026-01-31, 3 min) | TanStack Table with temperature-based stage badges and sortable columns |
+| 06-02 | ✅ Complete (executed 2026-01-31, 7 min) | Real-time lead filtering with multi-select stage filter, debounced search, and date presets |
 
 ## V1.0.0 Archive Summary
 
@@ -315,9 +316,19 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - 05-05: !summary command integration (2.5 min) - COMPLETE ✅
 - 05-06: Kapso workflow documentation (3 min) - COMPLETE ✅
 
-**Phase 6 Progress (1/6+ plans):**
+**Phase 6 Progress (2/6+ plans):**
 - 06-01: Lead List UI (3 min) - COMPLETE ✅
+- 06-02: Lead Filtering & Search (7 min) - COMPLETE ✅
+
+**Phase 6-02 Deliverables:**
+- Multi-select stage filter with Popover + Checkbox pattern
+- Debounced search input (300ms) for name/phone filtering
+- Date range presets (Today/Week/Month/All Time) with button group
+- Real-time filtering without submit button using TanStack Table
+- Combined filter state with "Clear all" functionality
+- Custom filterFn for multi-value stage filtering
+- Custom filterFn for date range filtering by created_at
 
 ---
 
-*Last updated: 2026-01-31 — Phase 6 started, 26/25+ total plans*
+*Last updated: 2026-01-31 — Phase 6 in progress, 27/25+ total plans*
