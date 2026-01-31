@@ -1,15 +1,20 @@
 'use client';
 
-import { useEffect, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
+import { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { format, isValid, isToday, isYesterday } from 'date-fns';
 import { RefreshCw, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAutoPolling } from '@/hooks/use-auto-polling';
+import { useQuery } from 'convex/react';
+import { api } from 'convex/_generated/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { MOCK_CONVERSATIONS } from '@/lib/mock-data';
+import type { Id } from 'convex/_generated/dataModel';
+
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true';
 
 type Conversation = {
   id: string;
@@ -27,9 +32,9 @@ type Conversation = {
   };
 };
 
-function formatConversationDate(timestamp: string): string {
+function formatConversationDate(timestamp: string | number): string {
   try {
-    const date = new Date(timestamp);
+    const date = typeof timestamp === 'number' ? new Date(timestamp) : new Date(timestamp);
     if (!isValid(date)) return '';
 
     if (isToday(date)) return format(date, 'HH:mm');
@@ -58,6 +63,7 @@ function getAvatarInitials(contactName?: string, phoneNumber?: string): string {
 }
 
 type Props = {
+  workspaceId: Id<'workspaces'>;
   onSelectConversation: (conversation: Conversation) => void;
   selectedConversationId?: string;
   isHidden?: boolean;
@@ -69,40 +75,59 @@ export type ConversationListRef = {
 };
 
 export const ConversationList = forwardRef<ConversationListRef, Props>(
-  ({ onSelectConversation, selectedConversationId, isHidden = false }, ref) => {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  ({ workspaceId, onSelectConversation, selectedConversationId, isHidden = false }, ref) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchConversations = useCallback(async () => {
-    try {
-      const response = await fetch('/api/conversations');
-      const data = await response.json();
-      setConversations(data.data || []);
-    } catch (error) {
-      console.error('Error fetching conversations:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+  // Use Convex query for conversations
+  const convexConversations = useQuery(
+    api.conversations.listByWorkspace,
+    !isDevMode
+      ? { workspace_id: workspaceId }
+      : 'skip'
+  );
+
+  // Transform Convex data to match UI format
+  const conversations = useMemo<Conversation[]>(() => {
+    // Dev mode: use mock data
+    if (isDevMode) {
+      return MOCK_CONVERSATIONS.map(conv => ({
+        id: conv.id,
+        phoneNumber: conv.contact.phone,
+        contactName: conv.contact.name,
+        status: conv.status,
+        lastActiveAt: conv.last_message_at,
+        phoneNumberId: 'mock-phone-id',
+        metadata: {},
+        messagesCount: 5,
+        lastMessage: {
+          content: conv.last_message_preview,
+          direction: 'inbound' as const,
+          type: 'text' as const,
+        },
+      }));
     }
-  }, []);
 
-  useEffect(() => {
-    fetchConversations();
-  }, [fetchConversations]);
+    // Production: transform Convex data
+    if (!convexConversations) return [];
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    fetchConversations();
-  };
+    return convexConversations.map(conv => ({
+      id: conv._id,
+      phoneNumber: conv.contact?.phone || 'Unknown',
+      contactName: conv.contact?.name || conv.contact?.kapso_name || undefined,
+      status: conv.status,
+      lastActiveAt: conv.last_message_at ? String(conv.last_message_at) : conv.updated_at ? String(conv.updated_at) : '',
+      phoneNumberId: '',
+      metadata: {},
+      messagesCount: 0,
+      lastMessage: conv.last_message_preview ? {
+        content: conv.last_message_preview,
+        direction: 'inbound' as const,
+        type: 'text' as const,
+      } : undefined,
+    }));
+  }, [convexConversations]);
 
-  // Auto-polling for conversations (every 10 seconds)
-  const { isPolling } = useAutoPolling({
-    interval: 10000,
-    enabled: true,
-    onPoll: fetchConversations
-  });
+  const loading = !isDevMode && convexConversations === undefined;
 
   const selectByPhoneNumber = (phoneNumber: string) => {
     const conversation = conversations.find(conv => conv.phoneNumber === phoneNumber);
@@ -113,13 +138,8 @@ export const ConversationList = forwardRef<ConversationListRef, Props>(
 
   useImperativeHandle(ref, () => ({
     refresh: async () => {
-      setRefreshing(true);
-      const response = await fetch('/api/conversations');
-      const data = await response.json();
-      const newConversations = data.data || [];
-      setConversations(newConversations);
-      setRefreshing(false);
-      return newConversations;
+      // Convex handles reactivity - no manual refresh needed
+      return conversations;
     },
     selectByPhoneNumber
   }));
@@ -169,21 +189,19 @@ export const ConversationList = forwardRef<ConversationListRef, Props>(
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-semibold text-[#111b21]">Chats</h1>
-            {isPolling && (
-              <div
-                className="h-2 w-2 rounded-full bg-green-500 animate-pulse"
-                title="Auto-updating"
-              />
-            )}
+            {/* Green indicator for real-time Convex connection */}
+            <div
+              className="h-2 w-2 rounded-full bg-green-500"
+              title="Real-time sync"
+            />
           </div>
           <Button
-            onClick={handleRefresh}
-            disabled={refreshing}
+            onClick={() => {}} // No-op - Convex handles reactivity
             variant="ghost"
             size="icon"
             className="text-[#667781] hover:bg-[#d1d7db]/30"
           >
-            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+            <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
         <div className="relative">

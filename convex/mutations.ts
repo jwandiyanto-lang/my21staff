@@ -1775,11 +1775,12 @@ export const findOrCreateContactWebhook = mutation({
     kapso_name: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Try to find existing contact by normalized phone
+    // Try to find existing contact by phone
+    // Index is on ["workspace_id", "phone"] so use phone field
     const existing = await ctx.db
       .query("contacts")
       .withIndex("by_workspace_phone", (q) =>
-        q.eq("workspace_id", args.workspace_id as any).eq("phone_normalized", args.phone_normalized)
+        q.eq("workspace_id", args.workspace_id as any).eq("phone", args.phone)
       )
       .first();
 
@@ -1800,17 +1801,16 @@ export const findOrCreateContactWebhook = mutation({
     }
 
     // Create new contact
+    // For optional fields, omit rather than setting to null
     const contactId = await ctx.db.insert("contacts", {
       workspace_id: args.workspace_id as any,
       phone: args.phone,
       phone_normalized: args.phone_normalized,
-      name: args.kapso_name || null,
-      kapso_name: args.kapso_name || null,
-      email: null,
+      name: args.kapso_name,
+      kapso_name: args.kapso_name,
       lead_score: 0,
       lead_status: "new",
       tags: [],
-      assigned_to: null,
       source: "whatsapp",
       metadata: {},
       cache_updated_at: now,
@@ -1850,17 +1850,16 @@ export const findOrCreateConversationWebhook = mutation({
     }
 
     // Create new conversation
+    // For optional fields, omit rather than setting to null
     const now = Date.now();
     const conversationId = await ctx.db.insert("conversations", {
       workspace_id: args.workspace_id as any,
       contact_id: args.contact_id as any,
       status: "open",
-      assigned_to: null,
       unread_count: 0,
-      last_message_at: null,
-      last_message_preview: null,
       created_at: now,
       updated_at: now,
+      supabaseId: "",
     });
 
     return await ctx.db.get(conversationId);
@@ -1922,13 +1921,54 @@ export const createInboundMessageWebhook = mutation({
       content: args.content,
       direction: "inbound",
       sender_type: "contact",
-      sender_id: null,
       message_type: args.message_type,
-      media_url: null,
       kapso_message_id: args.kapso_message_id,
       metadata: args.metadata || {},
       created_at: now,
-      updated_at: now,
+      supabaseId: "",
+    });
+
+    return await ctx.db.get(messageId);
+  },
+});
+
+/**
+ * Create an outbound message (webhook/sync version).
+ *
+ * Used for syncing outbound messages from Kapso.
+ * No auth check - used for historical sync.
+ *
+ * @param workspace_id - The workspace
+ * @param conversation_id - The conversation
+ * @param content - Message content
+ * @param message_type - Message type (text, image, video, etc.)
+ * @param kapso_message_id - Kapso message ID for deduplication
+ * @param metadata - Optional metadata
+ * @returns The created message document
+ */
+export const createOutboundMessageWebhook = mutation({
+  args: {
+    workspace_id: v.string(),
+    conversation_id: v.string(),
+    content: v.string(),
+    message_type: v.string(),
+    kapso_message_id: v.string(),
+    metadata: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    const messageId = await ctx.db.insert("messages", {
+      workspace_id: args.workspace_id as any,
+      conversation_id: args.conversation_id as any,
+      content: args.content,
+      direction: "outbound",
+      sender_type: "user",
+      message_type: args.message_type,
+      kapso_message_id: args.kapso_message_id,
+      metadata: args.metadata || {},
+      created_at: now,
+      supabaseId: "",
     });
 
     return await ctx.db.get(messageId);

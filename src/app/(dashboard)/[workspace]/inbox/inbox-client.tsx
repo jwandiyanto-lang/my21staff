@@ -40,6 +40,7 @@ export function InboxContent({ workspaceId }: InboxContentProps) {
     <div className="h-screen flex">
       <ConversationList
         ref={conversationListRef}
+        workspaceId={workspaceId}
         onSelectConversation={setSelectedConversation}
         selectedConversationId={selectedConversation?.id}
         isHidden={!!selectedConversation}
