@@ -6,7 +6,7 @@ import { Check, Circle, Bot, Zap, User } from 'lucide-react'
 
 export function HeroSection() {
   return (
-    <section className="relative bg-[#FCFCFB] pt-12 pb-24 lg:pt-16 lg:pb-32 px-4 sm:px-6 lg:px-8">
+    <section className="relative bg-[#FCFCFB] pt-12 pb-12 lg:pt-16 lg:pb-16 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Main hero card */}
         <motion.div
