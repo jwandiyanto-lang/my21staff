@@ -1,6 +1,7 @@
 import { internalAction, internalQuery } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { internal, api } from "./_generated/api";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 // System prompt for Brain summaries
 const BRAIN_SUMMARY_SYSTEM_PROMPT = `You are Brain - the analytical AI assistant for my21staff. Your job is to summarize lead activity in a conversational, friendly tone.
@@ -234,3 +235,108 @@ export const generateDailySummary = internalAction({
     return { processed: results.length, results };
   },
 });
+
+// ============================================
+// ACTION RECOMMENDATION ENGINE
+// ============================================
+
+// ContactLead type - matches the return shape from leads.ts queries
+interface ContactLead {
+  _id: Id<"contacts">;
+  phone: string;
+  name: string;
+  leadScore: number;
+  leadTemperature: string;
+  businessType?: string;
+  painPoints?: string[];
+  lastActivityAt?: number;
+  lastContactAt?: number;
+  daysSinceContact?: number | null;
+  sarahLanguage?: string;
+  notes?: Array<{ content: string; addedBy: string; addedAt: number }>;
+}
+
+interface ActionRecommendation {
+  contactId: string;
+  contactName: string;
+  contactPhone: string;
+  actionType: 'follow_up' | 'response_template' | 'handoff_ready' | 'opportunity_alert';
+  priority: number;  // 0-100
+  urgency: 'immediate' | 'today' | 'this_week';
+  reason: string;
+  suggestedMessage?: string;
+}
+
+interface ScoringWeights {
+  leadScore: number;      // Weight for lead temperature (default: 0.40)
+  timeSinceContact: number; // Weight for days since last contact (default: 0.30)
+  engagementDecay: number;  // Weight for score trending down (default: 0.20)
+  urgencySignals: number;   // Weight for explicit urgency (default: 0.10)
+}
+
+/**
+ * Calculate action priority using weighted scoring algorithm
+ */
+function calculateActionPriority(lead: ContactLead, weights: ScoringWeights = {
+  leadScore: 0.40,
+  timeSinceContact: 0.30,
+  engagementDecay: 0.20,
+  urgencySignals: 0.10,
+}): number {
+  const daysSinceContact = lead.lastContactAt
+    ? Math.floor((Date.now() - lead.lastContactAt) / (24 * 60 * 60 * 1000))
+    : 14; // Default to 14 days if never contacted
+
+  const normalized = {
+    leadScore: (lead.leadScore || 0) / 100,
+    timeSinceContact: Math.min(daysSinceContact / 14, 1), // Cap at 14 days
+    engagementDecay: 0, // TODO: Track previous scores for trending
+    urgencySignals: hasUrgencySignal(lead) ? 1 : 0,
+  };
+
+  return Math.round(
+    normalized.leadScore * weights.leadScore * 100 +
+    normalized.timeSinceContact * weights.timeSinceContact * 100 +
+    normalized.engagementDecay * weights.engagementDecay * 100 +
+    normalized.urgencySignals * weights.urgencySignals * 100
+  );
+}
+
+/**
+ * Detect urgency signals in lead notes
+ */
+function hasUrgencySignal(lead: ContactLead): boolean {
+  // Check notes for urgency keywords
+  const notes = lead.notes?.map(n => n.content).join(' ') || '';
+  const signals = [
+    /budget|anggaran|biaya/i,
+    /urgent|segera|cepat|asap/i,
+    /competitor|saingan|bandingkan/i,
+    /ready|siap|mau/i,
+  ];
+  return signals.some(pattern => pattern.test(notes));
+}
+
+/**
+ * Detect opportunity type from conversation patterns
+ */
+function detectOpportunityType(lead: ContactLead): string | null {
+  const notes = lead.notes?.map(n => n.content).join(' ') || '';
+
+  if (/budget|anggaran|biaya/i.test(notes)) return 'Budget discussion detected';
+  if (/competitor|saingan|bandingkan/i.test(notes)) return 'Competitor comparison mentioned';
+  if (/urgent|segera|cepat/i.test(notes)) return 'Urgency signal detected';
+  if (/demo|coba|trial/i.test(notes)) return 'Demo request detected';
+
+  return null;
+}
+
+/**
+ * Determine urgency level based on priority score and lead temperature
+ */
+function determineUrgency(priority: number, lead: ContactLead): 'immediate' | 'today' | 'this_week' {
+  if (priority >= 80) return 'immediate';
+  if (priority >= 60) return 'today';
+  if (lead.leadTemperature === 'hot') return 'today';
+  return 'this_week';
+}
