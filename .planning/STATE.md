@@ -12,10 +12,10 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: Phase 7 - Production Launch — IN PROGRESS
-Status: 1 of 3+ plans complete
-Last activity: 2026-01-31 — Completed 07-01-PLAN.md: Production Deployment
+Status: 2 of 3+ plans complete
+Last activity: 2026-01-31 — Completed 07-02-PLAN.md: Landing Page Polish
 
-Progress: ████████████████████████████████████████░ 128% (32 of 25 base plans, Phase 7 started)
+Progress: ████████████████████████████████████████░ 132% (33 of 25 base plans, Phase 7 in progress)
 
 ## V2.0 Milestone
 
@@ -82,6 +82,7 @@ Progress: ███████████████████████�
 | Plan | Status | Summary |
 |------|--------|---------|
 | 07-01 | ✅ Complete (executed 2026-01-31, 15 min) | Application deployed to www.my21staff.com with Clerk auth active, middleware protecting routes, dev mode disabled |
+| 07-02 | ✅ Complete (executed 2026-01-31, 73 min) | Landing page redesigned with minimalist console theme, dual navigation CTAs, activity feed mockup deployed to production |
 
 ## V1.0.0 Archive Summary
 
@@ -195,6 +196,11 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Type guard pattern for workspace documents** - `if (!('name' in workspace) || !('slug' in workspace))` to narrow Convex db.get() union types
 - **Next.js 15 async params pattern** - Dynamic route params now `Promise<{ id: string }>` requiring await before access
 - **Conditional query pattern for Convex withIndex** - Use ternary instead of variable reassignment to avoid TypeScript errors
+- **Navigation dual CTAs** - Sign In (subtle text link) + Get Started (prominent green button) for different user intents
+- **Hero CTA optimization** - Primary button links to /sign-up (not /pricing) for direct conversion path
+- **Minimalist console theme for landing** - Activity feed mockup, browser-style headers, pulsing live indicators showcase AI automation
+- **JetBrains Mono for console elements** - Reinforces tech-forward brand, readable for data/code snippets in activity feeds
+- **Forest green + orange accent palette** - #1B4332 for text, #F7931A for primary CTAs, maintains brand consistency
 
 ### Kapso Configuration
 
@@ -280,6 +286,11 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - Environment variables configured (DEV_MODE=false) (COMPLETE)
 - Production build passing all TypeScript checks (COMPLETE)
 - Sign-in page rendering Clerk UI successfully (COMPLETE)
+- Landing page with dual navigation CTAs (Sign In + Get Started) (COMPLETE)
+- Hero section redesigned with minimalist console theme (COMPLETE)
+- Activity feed mockup showcasing AI automation (COMPLETE)
+- JetBrains Mono font integrated for console elements (COMPLETE)
+- New color palette (forest-green, orange accent, off-white) (COMPLETE)
 
 ### Blockers/Concerns
 
@@ -299,11 +310,23 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 05:47 UTC
-**Stopped at:** Completed 07-01: Production Deployment - SUMMARY.md created, Phase 7 started
+**Last session:** 2026-01-31 07:04 UTC
+**Stopped at:** Completed 07-02: Landing Page Polish - SUMMARY.md created, Phase 7 in progress (2/3+ plans)
 **Resume file:** None
 
 **Completed in this session:**
+- 07-02: Landing Page Polish (73 minutes)
+  - Added JetBrains Mono font to layout.tsx and globals.css
+  - Added new color palette (forest-green, sage-green-soft, off-white, etc.)
+  - Updated navigation with Sign In link + Get Started button
+  - Redesigned hero section with console theme (per user feedback at checkpoint)
+  - Created activity feed mockup with browser-style header and live indicator
+  - New headline: "Your Business, Fully Automated." (orange accent)
+  - New CTAs: "Deploy Console" (orange) + "View Demo" (outlined)
+  - Deployed to www.my21staff.com successfully
+  - 3 atomic commits (42fedc3, 36664fc, e5df9a7)
+  - Files: 4 modified (nav-bar, hero-section, layout, globals.css)
+
 - 07-01: Production Deployment (15 minutes)
   - Removed localhost bypass from middleware for production auth
   - Fixed Next.js 15 async params in settings-backup route
