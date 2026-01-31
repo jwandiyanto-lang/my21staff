@@ -340,3 +340,115 @@ function determineUrgency(priority: number, lead: ContactLead): 'immediate' | 't
   if (lead.leadTemperature === 'hot') return 'today';
   return 'this_week';
 }
+
+/**
+ * Generate action recommendations for a workspace
+ *
+ * Process:
+ * 1. Get qualified leads needing follow-up
+ * 2. Get all qualified/hot leads for other actions
+ * 3. Generate follow-up recommendations with priority scoring
+ * 4. Generate handoff-ready alerts for hot leads
+ * 5. Generate opportunity alerts from conversation patterns
+ * 6. Deduplicate by contact (highest priority wins)
+ * 7. Store top 20 recommendations in database
+ */
+export const generateActionRecommendations = internalAction({
+  args: {
+    workspaceId: v.id("workspaces"),
+  },
+  handler: async (ctx, args): Promise<ActionRecommendation[]> => {
+    console.log(`[Brain] Generating action recommendations for workspace ${args.workspaceId}`);
+
+    // 1. Get qualified leads needing follow-up
+    // Note: leads.ts exports regular queries, so use api.leads (not internal.leads)
+    const leadsNeedingFollowUp = await ctx.runQuery(api.leads.getLeadsNeedingFollowUp, {
+      workspaceId: args.workspaceId,
+      daysSinceContact: 7,
+    });
+
+    // 2. Get all qualified and hot leads for other action types
+    const qualifiedLeads = await ctx.runQuery(api.leads.getLeadsByStatus, {
+      workspaceId: args.workspaceId,
+      status: 'qualified',
+      limit: 50,
+    });
+
+    const recommendations: ActionRecommendation[] = [];
+
+    // 3. Generate follow-up recommendations
+    for (const lead of leadsNeedingFollowUp) {
+      // Cast to ContactLead type for type safety
+      const typedLead = lead as ContactLead;
+      const priority = calculateActionPriority(typedLead);
+      recommendations.push({
+        contactId: lead._id,
+        contactName: lead.name,
+        contactPhone: lead.phone,
+        actionType: 'follow_up',
+        priority,
+        urgency: determineUrgency(priority, typedLead),
+        reason: `Qualified lead, ${lead.daysSinceContact || '7+'} days since last contact`,
+      });
+    }
+
+    // 4. Generate handoff-ready recommendations for hot leads
+    for (const lead of qualifiedLeads) {
+      const typedLead = lead as ContactLead;
+      if (lead.leadTemperature === 'hot' && (lead.leadScore || 0) >= 70) {
+        recommendations.push({
+          contactId: lead._id,
+          contactName: lead.name,
+          contactPhone: lead.phone,
+          actionType: 'handoff_ready',
+          priority: 95,
+          urgency: 'immediate',
+          reason: `Hot lead (score: ${lead.leadScore}), ready for human contact`,
+        });
+      }
+    }
+
+    // 5. Generate opportunity alerts
+    for (const lead of qualifiedLeads) {
+      const typedLead = lead as ContactLead;
+      const opportunity = detectOpportunityType(typedLead);
+      if (opportunity) {
+        recommendations.push({
+          contactId: lead._id,
+          contactName: lead.name,
+          contactPhone: lead.phone,
+          actionType: 'opportunity_alert',
+          priority: 90,
+          urgency: 'immediate',
+          reason: opportunity,
+        });
+      }
+    }
+
+    // 6. Sort by priority (highest first) and deduplicate by contact
+    const seen = new Set<string>();
+    const deduped = recommendations
+      .sort((a, b) => b.priority - a.priority)
+      .filter(r => {
+        if (seen.has(r.contactId)) return false;
+        seen.add(r.contactId);
+        return true;
+      });
+
+    // 7. Store recommendations in database
+    for (const rec of deduped.slice(0, 20)) { // Limit to top 20
+      await ctx.runMutation(internal.brainActions.createActionRecommendation, {
+        workspace_id: args.workspaceId,
+        contact_id: rec.contactId as Id<"contacts">,
+        action_type: rec.actionType,
+        priority: rec.priority,
+        urgency: rec.urgency,
+        reason: rec.reason,
+        suggested_message: rec.suggestedMessage,
+      });
+    }
+
+    console.log(`[Brain] Generated ${deduped.length} action recommendations`);
+    return deduped;
+  },
+});
