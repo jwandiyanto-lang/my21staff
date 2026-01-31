@@ -6,12 +6,28 @@ import { api } from 'convex/_generated/api'
 import type { Id } from 'convex/_generated/dataModel'
 import { LeadTable } from '@/components/leads/lead-table'
 import { LeadFilters } from '@/components/leads/lead-filters'
+import { LeadDetailSheet } from '@/components/leads/lead-detail-sheet'
 import { columns } from '@/components/leads/lead-columns'
 import { Badge } from '@/components/ui/badge'
 import { MOCK_LEADS } from '@/lib/mock-data'
 import { ColumnFiltersState } from '@tanstack/react-table'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+
+// Lead type matching schema
+type Lead = {
+  _id: string
+  phone: string
+  name: string
+  leadStatus?: string
+  leadScore?: number
+  leadTemperature?: 'hot' | 'warm' | 'lukewarm' | 'cold' | 'new' | 'converted'
+  businessType?: string
+  painPoints?: string[]
+  notes?: Array<{ content: string; addedBy: string; addedAt: number }>
+  lastActivityAt?: number
+  created_at: number
+}
 
 interface LeadsContentProps {
   workspaceId: Id<'workspaces'>
@@ -21,6 +37,9 @@ export function LeadsContent({ workspaceId }: LeadsContentProps) {
   // Filter state
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
+
+  // Selected lead state for detail sheet
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
 
   // Query leads from Convex
   const leads = useQuery(
@@ -82,8 +101,16 @@ export function LeadsContent({ workspaceId }: LeadsContentProps) {
           setColumnFilters={setColumnFilters}
           globalFilter={globalFilter}
           setGlobalFilter={setGlobalFilter}
+          onRowClick={setSelectedLead}
         />
       </div>
+
+      {/* Lead Detail Sheet */}
+      <LeadDetailSheet
+        lead={selectedLead}
+        open={!!selectedLead}
+        onOpenChange={(open) => !open && setSelectedLead(null)}
+      />
     </div>
   )
 }

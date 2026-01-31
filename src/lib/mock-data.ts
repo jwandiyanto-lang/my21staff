@@ -1809,6 +1809,12 @@ export const MOCK_LEADS = [
     leadScore: 75,
     leadTemperature: 'hot' as const,
     businessType: 'Restaurant',
+    painPoints: ['Staff management', 'Customer tracking', 'Inventory control'],
+    notes: [
+      { content: "Interested in employee management features for 15-person team", addedBy: "sarah-bot", addedAt: Date.now() - 3 * 60 * 60 * 1000 },
+      { content: "Followed up via WhatsApp, awaiting pricing confirmation", addedBy: "jonathan@my21staff.com", addedAt: Date.now() - 5 * 60 * 60 * 1000 },
+      { content: "Budget range: 2-5 juta/month, ready to start next week", addedBy: "sarah-bot", addedAt: Date.now() - 24 * 60 * 60 * 1000 },
+    ],
     lastActivityAt: Date.now() - 2 * 60 * 60 * 1000, // 2 hours ago
     created_at: Date.now() - 7 * 24 * 60 * 60 * 1000, // 7 days ago
   },
@@ -1820,6 +1826,11 @@ export const MOCK_LEADS = [
     leadScore: 58,
     leadTemperature: 'warm' as const,
     businessType: 'Salon & Spa',
+    painPoints: ['Appointment scheduling', 'Customer retention'],
+    notes: [
+      { content: "Wants booking system integrated with WhatsApp", addedBy: "sarah-bot", addedAt: Date.now() - 6 * 60 * 60 * 1000 },
+      { content: "Comparing with other providers, price-sensitive", addedBy: "grok-bot", addedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 },
+    ],
     lastActivityAt: Date.now() - 5 * 60 * 60 * 1000, // 5 hours ago
     created_at: Date.now() - 10 * 24 * 60 * 60 * 1000, // 10 days ago
   },
@@ -1831,6 +1842,10 @@ export const MOCK_LEADS = [
     leadScore: 42,
     leadTemperature: 'lukewarm' as const,
     businessType: 'Retail Shop',
+    painPoints: ['Inventory tracking'],
+    notes: [
+      { content: "Initial contact made, still exploring options", addedBy: "sarah-bot", addedAt: Date.now() - 12 * 60 * 60 * 1000 },
+    ],
     lastActivityAt: Date.now() - 12 * 60 * 60 * 1000, // 12 hours ago
     created_at: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2 days ago
   },

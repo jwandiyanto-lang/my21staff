@@ -27,6 +27,7 @@ interface LeadTableProps<TData, TValue> {
   setColumnFilters: (filters: ColumnFiltersState) => void
   globalFilter: string
   setGlobalFilter: (value: string) => void
+  onRowClick?: (row: TData) => void
 }
 
 export function LeadTable<TData, TValue>({
@@ -36,6 +37,7 @@ export function LeadTable<TData, TValue>({
   setColumnFilters,
   globalFilter,
   setGlobalFilter,
+  onRowClick,
 }: LeadTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'lastActivityAt', desc: true }, // Sort by most recent activity first
@@ -92,7 +94,11 @@ export function LeadTable<TData, TValue>({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow
+              key={row.id}
+              className={onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''}
+              onClick={() => onRowClick?.(row.original)}
+            >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
