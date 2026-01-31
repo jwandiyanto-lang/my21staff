@@ -72,7 +72,6 @@ export function HeroSection() {
                     <Circle className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                     <Circle className="w-3 h-3 fill-green-400 text-green-400" />
                   </div>
-                  <span className="text-xs text-[#6B7280] font-mono ml-2">WHATSAPP_CHAT</span>
                 </div>
 
                 {/* Console header */}
@@ -91,8 +90,8 @@ export function HeroSection() {
 
                 {/* WhatsApp Chat messages - with blur effect */}
                 <div className="p-4 space-y-3 bg-[#FCFCFB] backdrop-blur-sm relative">
-                  {/* Blur overlay */}
-                  <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] pointer-events-none"></div>
+                  {/* Blur overlay - strong blur to make content barely visible */}
+                  <div className="absolute inset-0 bg-white/60 backdrop-blur-[12px] pointer-events-none"></div>
 
                   {/* Message 1 - Customer */}
                   <div className="relative z-10 flex items-start gap-3 justify-end">
