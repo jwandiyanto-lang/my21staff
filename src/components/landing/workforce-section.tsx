@@ -173,7 +173,7 @@ export function WorkforceSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#284b31] tracking-[-0.02em]">
-            Your AI Team, Working 24/7
+            Imagine Your Team is Working 24/7
           </h2>
           <p className="mt-4 text-lg text-[#2D2A26]/70 max-w-2xl mx-auto tracking-[-0.02em]">
             Watch how our chatbots capture leads, reply instantly, and organize your database automatically.
