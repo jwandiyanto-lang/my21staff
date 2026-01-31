@@ -35,7 +35,7 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="relative bg-white pt-12 pb-20 lg:pt-16 lg:pb-28 px-4 sm:px-6 lg:px-8">
+    <section className="relative bg-[#FCFCFB] pt-12 pb-20 lg:pt-16 lg:pb-28 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="text-center mb-16">
@@ -63,7 +63,7 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group relative bg-[#FCFCFB] rounded-lg border border-[#37352F14] p-8 hover:border-[#37352F29] transition-all duration-300"
+              className="group relative bg-transparent rounded-lg border border-[#37352F14] p-8 hover:border-[#37352F29] transition-all duration-300"
             >
               {/* Left accent border */}
               <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#1B4332] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -71,7 +71,7 @@ export function FeaturesSection() {
               {/* Icon and Stat */}
               <div className="mb-6 flex items-start justify-between">
                 {/* Material Symbol Icon */}
-                <div className="w-12 h-12 rounded-lg bg-white border border-[#37352F14] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-lg bg-transparent border border-[#37352F14] flex items-center justify-center">
                   <span className="material-symbols-outlined text-[#1B4332] text-[28px]">
                     {feature.icon}
                   </span>

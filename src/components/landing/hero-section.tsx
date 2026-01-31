@@ -8,14 +8,14 @@ export function HeroSection() {
   return (
     <section className="relative bg-[#FCFCFB] pt-12 pb-12 lg:pt-16 lg:pb-16 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        {/* Main hero card */}
+        {/* Main hero content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="relative bg-white rounded-3xl border border-[rgba(55,53,47,0.08)] shadow-lg overflow-hidden"
+          className="relative"
         >
-          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 p-8 lg:p-12">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
             {/* Left column - Content */}
             <div className="lg:col-span-7 flex flex-col justify-center">
               {/* Headline */}
