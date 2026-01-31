@@ -12,10 +12,10 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: Phase 5 - Grok Manager Bot — COMPLETE ✅
-Status: 4 of 4 plans complete
-Last activity: 2026-01-31 — Plan 05-04 complete: Conversation pattern analysis with FAQ suggestions
+Status: 5 of 5 plans complete
+Last activity: 2026-01-31 — Plan 05-05 complete: !summary command integration with Kapso HTTP endpoints
 
-Progress: ████████████████████████████████████████ 100% (22 of 22 total plans across phases 1-5)
+Progress: ████████████████████████████████████████ 100% (23 of 23 total plans across phases 1-5)
 
 ## V2.0 Milestone
 
@@ -63,6 +63,7 @@ Progress: ███████████████████████�
 | 05-02 | ✅ Complete (executed 2026-01-31, 2.1 min) | Grok 4.1-fast integration with daily cron for conversational summaries |
 | 05-03 | ✅ Complete (executed 2026-01-31, 2 min) | Weighted priority scoring with Grok-powered personalized WhatsApp templates |
 | 05-04 | ✅ Complete (executed 2026-01-31, 2.8 min) | Conversation pattern analysis detecting topics, objections, rejections with FAQ suggestions |
+| 05-05 | ✅ Complete (executed 2026-01-31, 2.5 min) | !summary command integration with Kapso HTTP endpoints |
 
 ## V1.0.0 Archive Summary
 
@@ -147,6 +148,10 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Token cost control for pattern analysis: 100 notes max** - Balance comprehensive analysis vs API costs (~2 weeks of activity)
 - **Confidence levels for insights** - 3-4 = medium, 5+ = high based on frequency of pattern occurrence
 - **Helper query must be defined before action** - Convex requirement: getContactsWithNotes query before analyzeConversationPatterns action
+- **!summary command via HTTP endpoint** - POST /brain/summary generates on-demand summaries triggered by WhatsApp command
+- **800-character WhatsApp limit** - All command summaries truncated to 800 chars for readability
+- **Graceful fallback for !summary** - Returns friendly error message if Grok API fails (never leaves user without response)
+- **Command tracking in summaries** - Stored with trigger='command' and triggered_by for usage analytics
 
 ### Kapso Configuration
 
@@ -228,8 +233,8 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 01:39 UTC
-**Stopped at:** Phase 5 complete - All Grok Manager Bot plans executed
+**Last session:** 2026-01-31 01:45 UTC
+**Stopped at:** Phase 5 complete - All Grok Manager Bot plans executed (5/5)
 **Resume file:** None
 
 **Completed in this session:**
@@ -269,12 +274,22 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
   - All functions compiled and deployed successfully
   - 3 atomic commits, 328 LOC added
 
-**Phase 5 Progress (4/4 plans) - COMPLETE ✅:**
+- 05-05: !summary Command Integration (2.5 minutes)
+  - Added generateCommandSummary internalAction for on-demand summaries
+  - Created POST /brain/summary HTTP endpoint for Kapso workflow integration
+  - Created GET /brain/summary endpoint for latest summary retrieval
+  - 800-character WhatsApp limit enforcement with graceful fallback
+  - Comprehensive Kapso workflow integration documentation
+  - All functions compiled and deployed successfully
+  - 3 atomic commits, 236 LOC added
+
+**Phase 5 Progress (5/5 plans) - COMPLETE ✅:**
 - 05-01: Brain Analytics Data Layer (2.5 min) - COMPLETE ✅
 - 05-02: Grok integration for pattern analysis (2.1 min) - COMPLETE ✅
 - 05-03: Action recommendation engine (2 min) - COMPLETE ✅
 - 05-04: Conversation pattern analysis (2.8 min) - COMPLETE ✅
+- 05-05: !summary command integration (2.5 min) - COMPLETE ✅
 
 ---
 
-*Last updated: 2026-01-31 — Phase 5 COMPLETE, 22/22 total plans (100%)*
+*Last updated: 2026-01-31 — Phase 5 COMPLETE, 23/23 total plans (100%)*
