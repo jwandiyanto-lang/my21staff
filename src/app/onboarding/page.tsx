@@ -3,10 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth, useOrganizationList, useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { ConvexHttpClient } from 'convex/browser'
-import { api } from '@/../convex/_generated/api'
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 /**
@@ -58,14 +55,14 @@ export default function OnboardingPage() {
             await setActive({ organization: firstOrg.id })
           }
 
-          // Find workspace for this org
-          let workspace = await convex.query(api.workspaces.getByOrgId, {
-            clerk_org_id: firstOrg.id,
-          })
-
-          if (workspace) {
-            router.push(`/${workspace.slug}`)
-            return
+          // Check if workspace exists for this org via API
+          const checkResponse = await fetch(`/api/workspaces/by-org/${firstOrg.id}`)
+          if (checkResponse.ok) {
+            const { workspace } = await checkResponse.json()
+            if (workspace) {
+              router.push(`/${workspace.slug}`)
+              return
+            }
           }
 
           // Organization exists but no workspace - create one

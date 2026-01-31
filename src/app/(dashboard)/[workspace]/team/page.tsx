@@ -89,6 +89,12 @@ export default function TeamPage() {
                 pageScrollBox: 'p-6',
                 headerTitle: 'hidden',
                 headerSubtitle: 'hidden',
+                profileSection: {
+                  '& .cl-avatarBox': {
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                  },
+                },
               },
             }}
             routing="hash"

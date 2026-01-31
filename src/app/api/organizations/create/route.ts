@@ -1,9 +1,7 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { ConvexHttpClient } from 'convex/browser'
+import { fetchMutation } from 'convex/nextjs'
 import { api } from '@/../convex/_generated/api'
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 /**
  * POST /api/organizations/create
@@ -56,14 +54,14 @@ export async function POST(request: Request) {
     }
 
     // Create workspace in Convex
-    const workspaceId = await convex.mutation(api.workspaces.create, {
+    const workspaceId = await fetchMutation(api.workspaces.create, {
       name,
       slug,
       owner_id: userId,
     })
 
     // Create organization record in Convex (links Clerk org to workspace)
-    const orgId = await convex.mutation(api.organizations.create, {
+    const orgId = await fetchMutation(api.organizations.create, {
       clerk_org_id: organization.id,
       workspace_id: workspaceId,
       name: organization.name,
@@ -71,7 +69,7 @@ export async function POST(request: Request) {
     })
 
     // Create organization member record
-    await convex.mutation(api.organizations.createMember, {
+    await fetchMutation(api.organizations.createMember, {
       organization_id: orgId,
       clerk_user_id: userId,
       role: 'org:admin',
@@ -86,7 +84,7 @@ export async function POST(request: Request) {
     })
 
     // Add user as workspace member
-    await convex.mutation(api.workspaceMembers.create, {
+    await fetchMutation(api.workspaceMembers.create, {
       workspace_id: workspaceId,
       user_id: userId,
       role: 'owner',
