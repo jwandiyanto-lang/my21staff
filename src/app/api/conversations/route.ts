@@ -7,6 +7,11 @@ import {
   logQuery,
   logQuerySummary,
 } from '@/lib/instrumentation/with-timing'
+import { MOCK_CONVERSATIONS } from '@/lib/mock-data'
+
+function isDevMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+}
 
 /**
  * GET /api/conversations?workspace_id=xxx&status=open&assigned_to=user_id
@@ -14,11 +19,48 @@ import {
  * Inbox conversations API using Convex.
  *
  * Returns conversations list with contacts, pagination, and metadata.
- * Authentication: X-API-Key header with CRM_API_KEY secret
+ * Authentication: X-API-Key header with CRM_API_KEY secret (bypassed in dev mode)
  */
 async function getHandler(request: NextRequest) {
   try {
-    // Verify API key
+    // Get query parameters
+    const { searchParams } = new URL(request.url)
+    const workspaceId = searchParams.get('workspace_id')
+
+    if (!workspaceId) {
+      return NextResponse.json(
+        { error: 'Missing workspace_id parameter' },
+        { status: 400 }
+      )
+    }
+
+    // Dev mode: return mock conversations for offline development
+    if (isDevMode() && workspaceId === 'demo') {
+      // Transform MOCK_CONVERSATIONS to match API response format
+      const mockResponse = {
+        conversations: MOCK_CONVERSATIONS.map(conv => ({
+          id: conv.id,
+          phoneNumber: conv.contact.phone,
+          contactName: conv.contact.name,
+          status: conv.conversation.status,
+          lastActiveAt: conv.conversation.last_message_at,
+          phoneNumberId: 'mock-phone-id',
+          metadata: {},
+          messagesCount: 5,
+          lastMessage: {
+            content: conv.conversation.last_message_preview,
+            direction: 'inbound',
+            type: 'text',
+          },
+        })),
+        total: MOCK_CONVERSATIONS.length,
+        page: 0,
+        hasMore: false,
+      }
+      return NextResponse.json(mockResponse)
+    }
+
+    // Production mode: verify API key
     const apiKey = request.headers.get('x-api-key')
     const expectedKey = process.env.CRM_API_KEY
 
@@ -34,17 +76,6 @@ async function getHandler(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
-      )
-    }
-
-    // Get query parameters
-    const { searchParams } = new URL(request.url)
-    const workspaceId = searchParams.get('workspace_id')
-
-    if (!workspaceId) {
-      return NextResponse.json(
-        { error: 'Missing workspace_id parameter' },
-        { status: 400 }
       )
     }
 

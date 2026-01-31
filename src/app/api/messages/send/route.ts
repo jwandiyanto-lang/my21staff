@@ -10,16 +10,36 @@ import {
   logQuery,
 } from '@/lib/instrumentation/with-timing'
 
+function isDevMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+}
+
 /**
  * POST /api/messages/send
  *
  * Send message via Kapso API, store in Convex.
  *
- * Authentication: Clerk auth
+ * Authentication: Clerk auth (bypassed in dev mode)
  */
 async function postHandler(request: NextRequest) {
   try {
     console.log('[MessagesSend] Step 1: Starting send request')
+
+    // Dev mode: just return success without sending
+    if (isDevMode()) {
+      const body = await request.json()
+      console.log('[MessagesSend] Dev mode: Mock send', { content: body.content })
+      return NextResponse.json({
+        success: true,
+        message: {
+          _id: `mock-msg-${Date.now()}`,
+          content: body.content,
+          direction: 'outbound',
+          created_at: Date.now(),
+        },
+        kapso_message_id: `mock-kapso-${Date.now()}`,
+      })
+    }
 
     // 1. Authenticate via Clerk and get token
     const { userId, getToken } = await auth()
