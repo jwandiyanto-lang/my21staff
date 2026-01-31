@@ -69,9 +69,14 @@ export async function GET(
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
+    // Type guard: ensure this is a workspace document
+    if (!('name' in workspace) || !('slug' in workspace)) {
+      return NextResponse.json({ error: 'Invalid workspace' }, { status: 500 })
+    }
+
     // Get Kapso client from workspace settings
     const kapsoClient = createKapsoClient({
-      kapso_api_key: workspace.settings?.kapso_api_key,
+      kapso_api_key: (workspace as any).settings?.kapso_api_key,
       projectId: workspaceId,
     })
 

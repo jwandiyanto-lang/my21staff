@@ -33,7 +33,13 @@ export const create = internalMutation({
     state: v.string(),
     lead_score: v.number(),
     lead_temperature: v.string(),
-    extracted_data: v.optional(v.any()),
+    extracted_data: v.object({
+      name: v.optional(v.string()),
+      business_type: v.optional(v.string()),
+      team_size: v.optional(v.number()),
+      pain_points: v.optional(v.array(v.string())),
+      goals: v.optional(v.string()),
+    }),
     language: v.string(),
     message_count: v.number(),
     created_at: v.number(),
@@ -56,7 +62,13 @@ export const update = internalMutation({
     state: v.optional(v.string()),
     lead_score: v.optional(v.number()),
     lead_temperature: v.optional(v.string()),
-    extracted_data: v.optional(v.any()),
+    extracted_data: v.optional(v.object({
+      name: v.optional(v.string()),
+      business_type: v.optional(v.string()),
+      team_size: v.optional(v.number()),
+      pain_points: v.optional(v.array(v.string())),
+      goals: v.optional(v.string()),
+    })),
     language: v.optional(v.string()),
     message_count: v.optional(v.number()),
     updated_at: v.optional(v.number()),
@@ -349,15 +361,19 @@ export const getSarahLeads = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    let q = ctx.db.query("sarahConversations");
-
-    if (args.temperature) {
-      q = q.withIndex("by_temperature", (q) =>
-        q.eq("lead_temperature", args.temperature)
-      );
-    }
-
-    const results = await q.order("desc").take(args.limit || 50);
+    // Filter by temperature if provided
+    const results = args.temperature
+      ? await ctx.db
+          .query("sarahConversations")
+          .withIndex("by_temperature", (q) =>
+            q.eq("lead_temperature", args.temperature)
+          )
+          .order("desc")
+          .take(args.limit || 50)
+      : await ctx.db
+          .query("sarahConversations")
+          .order("desc")
+          .take(args.limit || 50);
 
     return results;
   },
