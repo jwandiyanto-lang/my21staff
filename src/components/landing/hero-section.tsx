@@ -77,7 +77,7 @@ export function HeroSection() {
                 {/* Console header */}
                 <div className="bg-white px-5 py-4 border-b border-[rgba(55,53,47,0.08)]">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-[#1B4332] font-mono">Console Stream</h3>
+                    <h3 className="text-sm font-semibold text-[#1B4332] font-mono">Your Daily Report</h3>
                     <div className="flex items-center gap-2">
                       <div className="relative">
                         <div className="w-2 h-2 bg-[#F7931A] rounded-full animate-pulse"></div>
@@ -90,38 +90,35 @@ export function HeroSection() {
 
                 {/* WhatsApp Chat messages - with blur effect */}
                 <div className="p-4 space-y-3 bg-[#FCFCFB] backdrop-blur-sm relative">
-                  {/* Blur overlay - strong blur to make content barely visible */}
-                  <div className="absolute inset-0 bg-white/60 backdrop-blur-[12px] pointer-events-none"></div>
+                  {/* Blur overlay - extremely strong blur to make content completely invisible */}
+                  <div className="absolute inset-0 bg-white/70 backdrop-blur-[20px] pointer-events-none z-20"></div>
 
-                  {/* Message 1 - Customer */}
+                  {/* Message 1 - Customer (text completely hidden) */}
                   <div className="relative z-10 flex items-start gap-3 justify-end">
-                    <div className="bg-white rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%]">
-                      <p className="text-sm font-mono text-[#37352F]">Berapa harganya?</p>
-                      <span className="text-[10px] text-[#6B7280] font-mono mt-1 block">Customer</span>
+                    <div className="bg-white rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%] h-12">
+                      {/* No text - just empty bubble shape */}
                     </div>
-                    <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0 opacity-0">
                       C
                     </div>
                   </div>
 
-                  {/* Message 2 - Sarah */}
+                  {/* Message 2 - Sarah (text completely hidden) */}
                   <div className="relative z-10 flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-full bg-[#25D366] flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-[#25D366] flex items-center justify-center text-xs font-bold text-white flex-shrink-0 opacity-0">
                       S
                     </div>
-                    <div className="bg-[#DCF8C6] rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%]">
-                      <p className="text-sm font-mono text-[#37352F]">Halo! Boleh tau nama kamu?</p>
-                      <span className="text-[10px] text-[#6B7280] font-mono mt-1 block">Sarah AI</span>
+                    <div className="bg-[#DCF8C6] rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%] h-16">
+                      {/* No text - just empty bubble shape */}
                     </div>
                   </div>
 
-                  {/* Message 3 - Customer */}
+                  {/* Message 3 - Customer (text completely hidden) */}
                   <div className="relative z-10 flex items-start gap-3 justify-end">
-                    <div className="bg-white rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%]">
-                      <p className="text-sm font-mono text-[#37352F]">Budi</p>
-                      <span className="text-[10px] text-[#6B7280] font-mono mt-1 block">Customer</span>
+                    <div className="bg-white rounded-lg px-4 py-3 border border-[rgba(55,53,47,0.08)] shadow-sm max-w-[80%] h-10">
+                      {/* No text - just empty bubble shape */}
                     </div>
-                    <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0 opacity-0">
                       C
                     </div>
                   </div>
