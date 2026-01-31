@@ -217,12 +217,14 @@ export default function PricingPage() {
                   <div className="inline-block px-3 py-1 bg-[#F7931A]/10 border border-[#F7931A]/20 rounded-full mb-4">
                     <p className="text-sm text-[#F7931A] font-semibold">1st month FREE</p>
                   </div>
-                  <button
-                    onClick={() => openModal("Solo")}
-                    className="w-full px-6 py-3 bg-[#1B4332] text-white font-semibold rounded-xl hover:bg-[#14261a] transition-all duration-200"
+                  <Link
+                    href="https://wa.me/message/WOCD27QOT3UZL1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full px-6 py-3 bg-[#1B4332] text-white font-semibold rounded-xl hover:bg-[#14261a] transition-all duration-200 text-center"
                   >
                     Get Started
-                  </button>
+                  </Link>
                 </div>
               </motion.div>
 
@@ -250,12 +252,14 @@ export default function PricingPage() {
                   <div className="inline-block px-3 py-1 bg-[#F7931A]/10 border border-[#F7931A]/20 rounded-full mb-4">
                     <p className="text-sm text-[#F7931A] font-semibold">1st month FREE</p>
                   </div>
-                  <button
-                    onClick={() => openModal("Team")}
-                    className="w-full px-6 py-3 bg-[#F7931A] text-white font-semibold rounded-xl hover:bg-[#e8850f] transition-all duration-200"
+                  <Link
+                    href="https://wa.me/message/R6EI5U5KSZ3PF1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full px-6 py-3 bg-[#F7931A] text-white font-semibold rounded-xl hover:bg-[#e8850f] transition-all duration-200 text-center"
                   >
                     Get Started
-                  </button>
+                  </Link>
                 </div>
               </motion.div>
 
@@ -278,12 +282,14 @@ export default function PricingPage() {
                     <p className="text-sm text-[#6B7280] mt-1">Tailored to your needs</p>
                   </div>
                   <div className="h-8 mb-4"></div>
-                  <button
-                    onClick={() => openModal("Enterprise")}
-                    className="w-full px-6 py-3 bg-white text-[#1B4332] font-semibold rounded-xl border-2 border-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-all duration-200"
+                  <Link
+                    href="https://wa.me/message/TDIYV4T3PY44G1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full px-6 py-3 bg-white text-[#1B4332] font-semibold rounded-xl border-2 border-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-all duration-200 text-center"
                   >
                     Contact Sales
-                  </button>
+                  </Link>
                 </div>
               </motion.div>
             </div>
