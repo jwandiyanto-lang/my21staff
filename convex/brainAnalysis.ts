@@ -652,6 +652,108 @@ export const getContactsWithNotes = internalQuery({
 });
 
 /**
+ * Store pattern insights in database with FAQ suggestions (MGR-06)
+ */
+async function storePatternInsights(
+  ctx: any, // ActionCtx
+  workspaceId: Id<"workspaces">,
+  analysis: PatternAnalysisResult,
+  timeRange: string
+): Promise<void> {
+  const insights: Array<{
+    workspace_id: Id<"workspaces">;
+    insight_type: string;
+    pattern: string;
+    frequency: number;
+    examples: string[];
+    recommendation?: string;
+    suggested_faqs?: Array<{ question: string; suggested_answer: string }>;
+    confidence: string;
+    time_range: string;
+  }> = [];
+
+  // Map trending topics to insights (with FAQ suggestions - MGR-06)
+  for (const topic of analysis.trending_topics) {
+    insights.push({
+      workspace_id: workspaceId,
+      insight_type: 'trending_topic',
+      pattern: topic.topic,
+      frequency: topic.frequency,
+      examples: topic.examples.slice(0, 3),
+      recommendation: `Consider adding FAQ about "${topic.topic}"`,
+      suggested_faqs: topic.suggested_faqs || [], // MGR-06: Include FAQ suggestions
+      confidence: topic.frequency >= 5 ? 'high' : topic.frequency >= 3 ? 'medium' : 'low',
+      time_range: timeRange,
+    });
+  }
+
+  // Map objections to insights (with FAQ suggestions - MGR-06)
+  for (const objection of analysis.objections) {
+    insights.push({
+      workspace_id: workspaceId,
+      insight_type: 'objection_pattern',
+      pattern: objection.objection,
+      frequency: objection.frequency,
+      examples: objection.examples.slice(0, 3),
+      recommendation: `Prepare response for "${objection.objection}" objection`,
+      suggested_faqs: objection.suggested_faqs || [], // MGR-06: Include FAQ suggestions
+      confidence: objection.frequency >= 5 ? 'high' : objection.frequency >= 3 ? 'medium' : 'low',
+      time_range: timeRange,
+    });
+  }
+
+  // Map interest signals to insights
+  for (const signal of analysis.interest_signals) {
+    insights.push({
+      workspace_id: workspaceId,
+      insight_type: 'interest_signal',
+      pattern: signal.signal,
+      frequency: signal.frequency,
+      examples: signal.examples.slice(0, 3),
+      confidence: signal.frequency >= 5 ? 'high' : 'medium',
+      time_range: timeRange,
+    });
+  }
+
+  // Map rejection reasons to insights
+  for (const rejection of analysis.rejection_reasons) {
+    insights.push({
+      workspace_id: workspaceId,
+      insight_type: 'rejection_analysis',
+      pattern: rejection.reason,
+      frequency: rejection.frequency,
+      examples: rejection.examples.slice(0, 3),
+      recommendation: `Address "${rejection.reason}" in onboarding or Sarah responses`,
+      confidence: rejection.frequency >= 3 ? 'high' : 'medium',
+      time_range: timeRange,
+    });
+  }
+
+  // Bulk create insights if any found
+  if (insights.length > 0) {
+    await ctx.runMutation(internal.brainInsights.bulkCreateInsights, { insights });
+    console.log(`[Brain] Stored ${insights.length} insights (with FAQ suggestions for topics/objections)`);
+  }
+}
+
+/**
+ * Generate contextual recommendation text for topics
+ */
+function generateTopicRecommendation(topic: string): string {
+  const keywords = topic.toLowerCase();
+  if (keywords.includes('price') || keywords.includes('harga') || keywords.includes('biaya')) {
+    return 'Consider adding a pricing FAQ or update Sarah to handle pricing questions better';
+  }
+  if (keywords.includes('demo') || keywords.includes('trial') || keywords.includes('coba')) {
+    return 'Many leads want demos - consider automated demo scheduling';
+  }
+  if (keywords.includes('competitor') || keywords.includes('vs') || keywords.includes('bandingkan')) {
+    return 'Prepare competitive comparison content';
+  }
+  return `Add FAQ or Sarah response for "${topic}"`;
+}
+
+/**
  * internalAction: analyzeConversationPatterns
  * Main pattern analysis function - extracts notes, calls Grok, returns structured patterns
  */
