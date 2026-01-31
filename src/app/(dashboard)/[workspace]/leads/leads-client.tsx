@@ -6,11 +6,9 @@ import type { Id } from 'convex/_generated/dataModel'
 import { LeadTable } from '@/components/leads/lead-table'
 import { columns } from '@/components/leads/lead-columns'
 import { Badge } from '@/components/ui/badge'
+import { MOCK_LEADS } from '@/lib/mock-data'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
-
-// Mock leads will be added in Task 3
-const MOCK_LEADS: any[] = []
 
 interface LeadsContentProps {
   workspaceId: Id<'workspaces'>

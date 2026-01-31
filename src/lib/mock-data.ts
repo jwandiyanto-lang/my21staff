@@ -104,6 +104,9 @@ export const MOCK_CONVEX_WORKSPACE: MockConvexWorkspace = {
   updated_at: Date.now(),
 }
 
+// Dev mode helper - must be defined before shouldUseMockData
+export const isDevMode = () => process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+
 // Helper to check if we should use mock data (dev mode + demo slug)
 export const shouldUseMockData = (slug: string) => {
   return isDevMode() && slug === 'demo'
@@ -1796,7 +1799,174 @@ export const MOCK_CONTACTS: Contact[] = [
   },
 ]
 
-export const isDevMode = () => process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+// Mock leads for Lead List UI (Phase 6)
+export const MOCK_LEADS = [
+  {
+    _id: 'lead-001',
+    phone: '+62 812-3456-7890',
+    name: 'Budi Santoso',
+    leadStatus: 'qualified',
+    leadScore: 75,
+    leadTemperature: 'hot' as const,
+    businessType: 'Restaurant',
+    lastActivityAt: Date.now() - 2 * 60 * 60 * 1000, // 2 hours ago
+    created_at: Date.now() - 7 * 24 * 60 * 60 * 1000, // 7 days ago
+  },
+  {
+    _id: 'lead-002',
+    phone: '+62 813-4567-8901',
+    name: 'Siti Rahayu',
+    leadStatus: 'qualified',
+    leadScore: 58,
+    leadTemperature: 'warm' as const,
+    businessType: 'Salon & Spa',
+    lastActivityAt: Date.now() - 5 * 60 * 60 * 1000, // 5 hours ago
+    created_at: Date.now() - 10 * 24 * 60 * 60 * 1000, // 10 days ago
+  },
+  {
+    _id: 'lead-003',
+    phone: '+62 814-5678-9012',
+    name: 'Ahmad Hidayat',
+    leadStatus: 'new',
+    leadScore: 42,
+    leadTemperature: 'lukewarm' as const,
+    businessType: 'Retail Shop',
+    lastActivityAt: Date.now() - 12 * 60 * 60 * 1000, // 12 hours ago
+    created_at: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2 days ago
+  },
+  {
+    _id: 'lead-004',
+    phone: '+62 815-6789-0123',
+    name: 'Dewi Lestari',
+    leadStatus: 'converted',
+    leadScore: 92,
+    leadTemperature: 'hot' as const,
+    businessType: 'Cafe',
+    lastActivityAt: Date.now() - 24 * 60 * 60 * 1000, // 1 day ago
+    created_at: Date.now() - 30 * 24 * 60 * 60 * 1000, // 30 days ago
+  },
+  {
+    _id: 'lead-005',
+    phone: '+62 816-7890-1234',
+    name: 'Eko Prasetyo',
+    leadStatus: 'new',
+    leadScore: 25,
+    leadTemperature: 'cold' as const,
+    businessType: 'Barbershop',
+    lastActivityAt: Date.now() - 3 * 24 * 60 * 60 * 1000, // 3 days ago
+    created_at: Date.now() - 5 * 24 * 60 * 60 * 1000, // 5 days ago
+  },
+  {
+    _id: 'lead-006',
+    phone: '+62 817-8901-2345',
+    name: 'Rina Wijaya',
+    leadStatus: 'contacted',
+    leadScore: 68,
+    leadTemperature: 'warm' as const,
+    businessType: 'Gym & Fitness',
+    lastActivityAt: Date.now() - 6 * 60 * 60 * 1000, // 6 hours ago
+    created_at: Date.now() - 14 * 24 * 60 * 60 * 1000, // 14 days ago
+  },
+  {
+    _id: 'lead-007',
+    phone: '+62 818-9012-3456',
+    name: 'Bambang Sugiarto',
+    leadStatus: 'qualified',
+    leadScore: 81,
+    leadTemperature: 'hot' as const,
+    businessType: 'Auto Repair',
+    lastActivityAt: Date.now() - 1 * 60 * 60 * 1000, // 1 hour ago
+    created_at: Date.now() - 12 * 24 * 60 * 60 * 1000, // 12 days ago
+  },
+  {
+    _id: 'lead-008',
+    phone: '+62 819-0123-4567',
+    name: 'Indah Permatasari',
+    leadStatus: 'new',
+    leadScore: 35,
+    leadTemperature: 'lukewarm' as const,
+    businessType: 'Laundry Service',
+    lastActivityAt: Date.now() - 18 * 60 * 60 * 1000, // 18 hours ago
+    created_at: Date.now() - 1 * 24 * 60 * 60 * 1000, // 1 day ago
+  },
+  {
+    _id: 'lead-009',
+    phone: '+62 821-1234-5678',
+    name: 'Joko Widodo',
+    leadStatus: 'contacted',
+    leadScore: 72,
+    leadTemperature: 'warm' as const,
+    businessType: 'Furniture Store',
+    lastActivityAt: Date.now() - 8 * 60 * 60 * 1000, // 8 hours ago
+    created_at: Date.now() - 20 * 24 * 60 * 60 * 1000, // 20 days ago
+  },
+  {
+    _id: 'lead-010',
+    phone: '+62 822-2345-6789',
+    name: 'Mega Kusuma',
+    leadStatus: 'new',
+    leadScore: 18,
+    leadTemperature: 'cold' as const,
+    businessType: 'Grocery Store',
+    lastActivityAt: Date.now() - 4 * 24 * 60 * 60 * 1000, // 4 days ago
+    created_at: Date.now() - 6 * 24 * 60 * 60 * 1000, // 6 days ago
+  },
+  {
+    _id: 'lead-011',
+    phone: '+62 823-3456-7890',
+    name: 'Nurul Hidayah',
+    leadStatus: 'qualified',
+    leadScore: 64,
+    leadTemperature: 'warm' as const,
+    businessType: 'Bakery',
+    lastActivityAt: Date.now() - 10 * 60 * 60 * 1000, // 10 hours ago
+    created_at: Date.now() - 9 * 24 * 60 * 60 * 1000, // 9 days ago
+  },
+  {
+    _id: 'lead-012',
+    phone: '+62 824-4567-8901',
+    name: 'Oka Saputra',
+    leadStatus: 'converted',
+    leadScore: 88,
+    leadTemperature: 'hot' as const,
+    businessType: 'Digital Marketing Agency',
+    lastActivityAt: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2 days ago
+    created_at: Date.now() - 45 * 24 * 60 * 60 * 1000, // 45 days ago
+  },
+  {
+    _id: 'lead-013',
+    phone: '+62 825-5678-9012',
+    name: 'Putri Andini',
+    leadStatus: 'qualified',
+    leadScore: 77,
+    leadTemperature: 'hot' as const,
+    businessType: 'Clothing Store',
+    lastActivityAt: Date.now() - 3 * 60 * 60 * 1000, // 3 hours ago
+    created_at: Date.now() - 8 * 24 * 60 * 60 * 1000, // 8 days ago
+  },
+  {
+    _id: 'lead-014',
+    phone: '+62 826-6789-0123',
+    name: 'Rudi Hartono',
+    leadStatus: 'new',
+    leadScore: 30,
+    leadTemperature: 'lukewarm' as const,
+    businessType: 'Construction',
+    lastActivityAt: Date.now() - 36 * 60 * 60 * 1000, // 36 hours ago
+    created_at: Date.now() - 3 * 24 * 60 * 60 * 1000, // 3 days ago
+  },
+  {
+    _id: 'lead-015',
+    phone: '+62 827-7890-1234',
+    name: 'Sri Mulyani',
+    leadStatus: 'contacted',
+    leadScore: 70,
+    leadTemperature: 'warm' as const,
+    businessType: 'Pharmacy',
+    lastActivityAt: Date.now() - 7 * 60 * 60 * 1000, // 7 hours ago
+    created_at: Date.now() - 15 * 24 * 60 * 60 * 1000, // 15 days ago
+  },
+]
 
 // Mock conversations - synced with MOCK_CONTACTS
 // status: 'open' = AI active, 'handover' = Manual mode, 'closed' = Archived

@@ -12,7 +12,7 @@ export type Lead = {
   name: string
   leadStatus: string
   leadScore: number
-  leadTemperature: 'hot' | 'warm' | 'lukewarm' | 'cold'
+  leadTemperature: 'hot' | 'warm' | 'lukewarm' | 'cold' | 'new' | 'converted'
   businessType?: string
   lastActivityAt?: number
   created_at: number
@@ -101,6 +101,16 @@ export const columns: ColumnDef<Lead>[] = [
           {businessType || <span className="text-muted-foreground">—</span>}
         </span>
       )
+    },
+  },
+  {
+    accessorKey: 'created_at',
+    // Hidden column used only for date range filtering
+    enableHiding: true,
+    filterFn: (row, id, value: number | null) => {
+      if (!value) return true
+      const cellValue = row.getValue(id) as number
+      return cellValue >= value
     },
   },
   {
