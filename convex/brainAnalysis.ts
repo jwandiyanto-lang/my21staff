@@ -236,6 +236,86 @@ export const generateDailySummary = internalAction({
   },
 });
 
+/**
+ * internalAction: generateCommandSummary
+ * Generate summary for !summary command (called from Kapso workflow via HTTP endpoint)
+ */
+export const generateCommandSummary = internalAction({
+  args: {
+    workspaceId: v.id("workspaces"),
+    triggeredBy: v.string(), // Phone number of who sent !summary
+  },
+  handler: async (ctx, args): Promise<{ success: boolean; summaryText: string; error?: string }> => {
+    console.log(`[Brain] !summary command from ${args.triggeredBy}`);
+
+    try {
+      // 1. Get lead stats
+      const stats = await ctx.runQuery(internal.leads.getLeadStats, {
+        workspaceId: args.workspaceId,
+      });
+
+      // 2. Get hot leads for highlighting
+      const hotLeads = await ctx.runQuery(internal.leads.getLeadsByStatus, {
+        workspaceId: args.workspaceId,
+        status: 'qualified',
+        limit: 5,
+      });
+
+      // Filter to only hot temperature leads
+      const hotOnes = hotLeads.filter((l: any) => l.leadTemperature === 'hot');
+
+      // 3. Build concise prompt for WhatsApp
+      const prompt = `Generate a SHORT WhatsApp summary (under 800 characters).
+
+Today's data:
+- New leads today: ${stats.newToday}
+- Total leads: ${stats.total}
+- Hot: ${stats.byTemperature.hot}, Warm: ${stats.byTemperature.warm}, Cold: ${stats.byTemperature.cold}
+${hotOnes.length > 0 ? `- Hot leads: ${hotOnes.map((l: any) => l.name || 'Unknown').join(', ')}` : '- No hot leads today'}
+- Avg score: ${stats.avgScore}
+
+Respond conversationally, like: "Here's what happened today - you've got X hot ones!"
+Keep it under 800 characters for WhatsApp.`;
+
+      // 4. Call Grok for summary
+      const result = await callGrokAPI(BRAIN_SUMMARY_SYSTEM_PROMPT, prompt);
+
+      // 5. Ensure it's under 800 chars
+      let summaryText = result.content.trim();
+      if (summaryText.length > 800) {
+        summaryText = summaryText.substring(0, 797) + '...';
+      }
+
+      // 6. Store the summary
+      await ctx.runMutation(internal.brainSummaries.createSummary, {
+        workspace_id: args.workspaceId,
+        summary_text: summaryText,
+        summary_type: 'manual',
+        trigger: 'command',
+        triggered_by: args.triggeredBy,
+        metrics: {
+          newLeadsCount: stats.newToday,
+          hotLeadsCount: stats.byTemperature.hot,
+          warmLeadsCount: stats.byTemperature.warm,
+          coldLeadsCount: stats.byTemperature.cold,
+          avgScore: stats.avgScore,
+        },
+        tokens_used: result.tokens,
+        cost_usd: result.cost,
+      });
+
+      return { success: true, summaryText };
+
+    } catch (error) {
+      console.error("[Brain] !summary failed:", error);
+
+      // Return fallback summary on error
+      const fallback = "Sorry, I couldn't generate the summary right now. Please try again in a moment.";
+      return { success: false, summaryText: fallback, error: String(error) };
+    }
+  },
+});
+
 // ============================================
 // ACTION RECOMMENDATION ENGINE
 // ============================================
