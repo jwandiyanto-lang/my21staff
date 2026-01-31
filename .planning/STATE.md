@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 6 - Dashboard — IN PROGRESS
-Status: 5 of 6+ plans complete
-Last activity: 2026-01-31 — Completed 06-05-PLAN.md: Lead Stats with Trends
+Phase: Phase 6 - Dashboard — COMPLETE ✅
+Status: 6 of 6 plans complete
+Last activity: 2026-01-31 — Completed 06-06-PLAN.md: Dashboard Polish & Dev Mode
 
-Progress: ████████████████████████████████████████░ 120% (30 of 25 base plans, Phase 6 in progress)
+Progress: ████████████████████████████████████████░ 124% (31 of 25 base plans, Phase 6 complete)
 
 ## V2.0 Milestone
 
@@ -66,7 +66,7 @@ Progress: ███████████████████████�
 | 05-05 | ✅ Complete (executed 2026-01-31, 2.5 min) | !summary command integration with Kapso HTTP endpoints |
 | 05-06 | ✅ Complete (executed 2026-01-31, 3 min) | Kapso workflow documentation (integration deferred to go-live) |
 
-### Phase 6 Progress: Dashboard — IN PROGRESS
+### Phase 6 Progress: Dashboard — COMPLETE ✅
 
 | Plan | Status | Summary |
 |------|--------|---------|
@@ -75,6 +75,7 @@ Progress: ███████████████████████�
 | 06-03 | ✅ Complete (executed 2026-01-31, 5.6 min) | Slide-out detail panel with AI insights, notes timeline, and temperature-based guidance |
 | 06-04 | ✅ Complete (executed 2026-01-31, 5 min) | Dedicated Insights page with Grok summaries, action items, patterns, and lead quality visualization |
 | 06-05 | ✅ Complete (executed 2026-01-31, 3.9 min) | Lead statistics with trend indicators, time period toggle, and conversational highlights |
+| 06-06 | ✅ Complete (executed 2026-01-31, 10 min) | Complete Brain analytics mock data, centralized mock architecture, full offline dev mode for dashboard and inbox |
 
 ## V1.0.0 Archive Summary
 
@@ -176,6 +177,11 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Time period toggle (Today/Week/Month)** - Dashboard stats with flexible time ranges for lead performance analysis (DSH-13)
 - **Default to Week period** - Best balance for actionable timeframe (not too granular, not too broad) (DSH-14)
 - **Dynamic primary stat card** - Shows most relevant "new leads" metric based on selected time period (DSH-15)
+- **Centralized mock data in mock-data.ts** - Single source of truth for all dev mode mocks (no duplication across components)
+- **API route dev mode pattern: isDevMode() early return** - Check dev mode at route start, return mocks before auth/external services
+- **Brain analytics complete mock data** - MOCK_BRAIN_SUMMARY, MOCK_BRAIN_ACTIONS, MOCK_BRAIN_INSIGHTS, MOCK_LEAD_STATS with Indonesian content
+- **Inbox API dev mode support** - /api/conversations and /api/messages endpoints return mocks when NEXT_PUBLIC_DEV_MODE=true
+- **Missing /api/messages/[conversationId] endpoint created** - Phase 2.5 gap filled for inbox message display
 - **Conversational highlights tailored to period** - Context-aware messaging improves readability and engagement (DSH-16)
 - **Responsive stats grid (1/2/4 columns)** - Mobile: stack, Tablet: 2-col, Desktop: 4-col for optimal layout at all breakpoints (DSH-17)
 - **Previous period trends with mocks** - Production will need `getLeadStatsPrevious` Convex query for real trend calculations (DSH-18)
@@ -225,9 +231,7 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - ✅ Phase 3: Sarah Chat Bot - 4 plans COMPLETE
 - ✅ Phase 4: Lead Database (Kapso → Convex sync) - 6/6 plans COMPLETE
 - ✅ Phase 5: Grok Manager Bot (Analysis + insights) - 6/6 plans COMPLETE
-
-**Current phase:**
-- 🔄 Phase 6: Dashboard (Lead list + analytics) - 1/6+ plans complete
+- ✅ Phase 6: Dashboard (Lead list + analytics) - 6/6 plans COMPLETE
 
 **Next phases (not yet started):**
 - Phase 7: Handoff Workflow (End-to-end flow)
@@ -244,6 +248,18 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - Background sync service with hourly cron for stale detection
 - Dashboard query functions (getLeadsByStatus, getLeadsNeedingFollowUp, getLeadStats)
 - Complete lead database sync pipeline ready for Phase 6 UI
+
+**Phase 6 deliverables:**
+- Lead List UI with TanStack Table (sortable columns, temperature badges)
+- Real-time lead filtering (status, search, date ranges)
+- Lead detail panel (slide-out sheet with AI insights, notes timeline)
+- AI Insights page (daily summaries, action items, patterns, lead quality overview)
+- Lead statistics dashboard (time period toggle, trend indicators, conversational highlights)
+- Complete Brain analytics mock data (Indonesian sample content)
+- Centralized mock data architecture (single source of truth)
+- Full offline dev mode support (dashboard + inbox)
+- Dev mode API routes (/api/conversations, /api/messages/send, /api/messages/[conversationId])
+- Dashboard ready for Phase 7 handoff workflow integration
 
 ### Blockers/Concerns
 
@@ -263,19 +279,21 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 03:45 UTC
-**Stopped at:** Completed 06-05: Lead Stats with Trends - SUMMARY.md created
+**Last session:** 2026-01-31 03:51 UTC
+**Stopped at:** Completed 06-06: Dashboard Polish & Dev Mode - SUMMARY.md created, Phase 6 COMPLETE ✅
 **Resume file:** None
 
 **Completed in this session:**
-- 06-05: Lead Stats with Trends (3.9 minutes)
-  - Created TrendIndicator component (reusable arrow with percentage display)
-  - Created LeadStats component (4 stat cards + conversational highlight)
-  - Time period toggle: Today/Week/Month with dynamic primary stat
-  - Period-aware conversational highlights
-  - Responsive grid: 1 col mobile / 2 col tablet / 4 col desktop
-  - Updated dashboard page to render stats at hero position
-  - 3 atomic commits (c61cad4, aed1538, c9a5b49)
+- 06-06: Dashboard Polish & Dev Mode (10 minutes)
+  - Added complete Brain analytics mock data (summaries, actions, insights, stats)
+  - Centralized all mocks in mock-data.ts (single source of truth)
+  - Updated sidebar icons: Users for Leads, Bot for Your Team
+  - Refactored insights-client to use centralized mocks
+  - Added dev mode support to inbox API routes (conversations, messages)
+  - Created missing /api/messages/[conversationId] endpoint
+  - Verified INBX-01 to INBX-05 requirements functional
+  - 4 atomic commits (ccc524f, 2bc275f, b6b1694, 73a900c)
+  - Files: mock-data.ts +213 LOC, 5 modified, 1 created
   - Files: trend-indicator.tsx, lead-stats.tsx, page.tsx, dashboard-client.tsx
 
 **Previous session (2026-01-31 03:37 UTC):**
