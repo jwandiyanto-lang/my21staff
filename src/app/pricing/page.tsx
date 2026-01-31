@@ -210,12 +210,12 @@ export default function PricingPage() {
                   </h3>
                   <div className="mb-4">
                     <p className="text-5xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
-                      Rp3.9M
+                      Rp2.9M
                     </p>
                     <p className="text-sm text-[#6B7280] mt-1">/month</p>
                   </div>
-                  <div className="inline-block px-3 py-1 bg-[#F7931A]/10 border border-[#F7931A]/20 rounded-full mb-4">
-                    <p className="text-sm text-[#F7931A] font-semibold">1st month FREE</p>
+                  <div className="inline-block px-3 py-1 bg-gray-100 border border-gray-200 rounded-full mb-4">
+                    <p className="text-xs text-[#6B7280] font-medium">+ $750 setup fee</p>
                   </div>
                   <Link
                     href="https://wa.me/message/WOCD27QOT3UZL1"
@@ -237,7 +237,7 @@ export default function PricingPage() {
                 className="bg-[#1B4332]/5 rounded-2xl border-2 border-[#F7931A] p-8 relative hover:shadow-xl transition-all duration-200"
               >
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#F7931A] text-white text-xs font-bold rounded-full">
-                  MOST POPULAR
+                  RECOMMENDED
                 </div>
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-[#1B4332] mb-2" style={{ fontFamily: "var(--font-jakarta)" }}>
@@ -245,12 +245,12 @@ export default function PricingPage() {
                   </h3>
                   <div className="mb-4">
                     <p className="text-5xl font-bold text-[#1B4332]" style={{ fontFamily: "var(--font-jetbrains)" }}>
-                      Rp7.9M
+                      Rp4.5M
                     </p>
                     <p className="text-sm text-[#6B7280] mt-1">/month</p>
                   </div>
-                  <div className="inline-block px-3 py-1 bg-[#F7931A]/10 border border-[#F7931A]/20 rounded-full mb-4">
-                    <p className="text-sm text-[#F7931A] font-semibold">1st month FREE</p>
+                  <div className="inline-block px-3 py-1 bg-gray-100 border border-gray-200 rounded-full mb-4">
+                    <p className="text-xs text-[#6B7280] font-medium">+ $750 setup fee</p>
                   </div>
                   <Link
                     href="https://wa.me/message/R6EI5U5KSZ3PF1"
@@ -313,7 +313,7 @@ export default function PricingPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Bot A - The Mouth */}
+                    {/* The Intern */}
                     <tr className="border-b border-[#37352F14]">
                       <td className="p-6">
                         <div className="flex items-start gap-3">
@@ -321,8 +321,8 @@ export default function PricingPage() {
                             smart_toy
                           </span>
                           <div>
-                            <p className="font-semibold text-[#37352F]">Bot A - The Mouth</p>
-                            <p className="text-sm text-[#6B7280]">24/7 auto-reply & FAQ handling</p>
+                            <p className="font-semibold text-[#37352F]">The Intern</p>
+                            <p className="text-sm text-[#6B7280]">Instant lead qualification & basic FAQ handling</p>
                           </div>
                         </div>
                       </td>
@@ -337,7 +337,7 @@ export default function PricingPage() {
                       </td>
                     </tr>
 
-                    {/* Bot B - The Brain */}
+                    {/* The Brain */}
                     <tr className="border-b border-[#37352F14]">
                       <td className="p-6">
                         <div className="flex items-start gap-3">
@@ -345,73 +345,70 @@ export default function PricingPage() {
                             psychology
                           </span>
                           <div>
-                            <p className="font-semibold text-[#37352F]">Bot B - The Brain</p>
-                            <p className="text-sm text-[#6B7280]">Lead scoring & CRM automation</p>
+                            <p className="font-semibold text-[#37352F]">The Brain</p>
+                            <p className="text-sm text-[#6B7280]">Claude 3.5 - Long-term memory & lead scoring</p>
                           </div>
                         </div>
+                      </td>
+                      <td className="p-6 text-center">
+                        <X className="w-5 h-5 text-[#6B7280]/40 mx-auto" />
+                      </td>
+                      <td className="p-6 text-center bg-[#1B4332]/5">
+                        <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
+                      </td>
+                      <td className="p-6 text-center">
+                        <div className="space-y-1">
+                          <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
+                          <p className="text-xs text-[#F7931A] font-medium">+ Custom training</p>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Memory Type */}
+                    <tr className="border-b border-[#37352F14]">
+                      <td className="p-6">
+                        <p className="font-semibold text-[#37352F]">Memory</p>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className="text-sm text-[#6B7280]">Transactional</span>
+                      </td>
+                      <td className="p-6 text-center bg-[#1B4332]/5">
+                        <span className="text-sm text-[#F7931A] font-semibold">Long-term</span>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className="text-sm text-[#F7931A] font-semibold">Long-term</span>
+                      </td>
+                    </tr>
+
+                    {/* WhatsApp Integration */}
+                    <tr className="border-b border-[#37352F14]">
+                      <td className="p-6">
+                        <p className="font-semibold text-[#37352F]">WhatsApp Integration</p>
                       </td>
                       <td className="p-6 text-center">
                         <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
                       </td>
                       <td className="p-6 text-center bg-[#1B4332]/5">
-                        <div className="space-y-1">
-                          <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
-                          <p className="text-xs text-[#F7931A] font-medium">+ Priority support</p>
-                        </div>
+                        <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
                       </td>
                       <td className="p-6 text-center">
-                        <div className="space-y-1">
-                          <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
-                          <p className="text-xs text-[#F7931A] font-medium">+ Custom AI training</p>
-                        </div>
+                        <Check className="w-5 h-5 text-[#1B4332] mx-auto" />
                       </td>
                     </tr>
 
-                    {/* WhatsApp Numbers */}
-                    <tr className="border-b border-[#37352F14]">
-                      <td className="p-6">
-                        <p className="font-semibold text-[#37352F]">WhatsApp Numbers</p>
-                      </td>
-                      <td className="p-6 text-center">
-                        <span className="font-mono font-semibold text-[#1B4332]">1</span>
-                      </td>
-                      <td className="p-6 text-center bg-[#1B4332]/5">
-                        <span className="font-mono font-semibold text-[#1B4332]">3</span>
-                      </td>
-                      <td className="p-6 text-center">
-                        <span className="font-mono font-semibold text-[#1B4332]">Unlimited</span>
-                      </td>
-                    </tr>
-
-                    {/* AI Chats/Month */}
-                    <tr className="border-b border-[#37352F14]">
-                      <td className="p-6">
-                        <p className="font-semibold text-[#37352F]">AI Chats per Month</p>
-                      </td>
-                      <td className="p-6 text-center">
-                        <span className="font-mono font-semibold text-[#1B4332]">30,000</span>
-                      </td>
-                      <td className="p-6 text-center bg-[#1B4332]/5">
-                        <span className="font-mono font-semibold text-[#1B4332]">60,000</span>
-                      </td>
-                      <td className="p-6 text-center">
-                        <span className="font-mono font-semibold text-[#1B4332]">Custom</span>
-                      </td>
-                    </tr>
-
-                    {/* New Features */}
+                    {/* Automated Promotions */}
                     <tr>
                       <td className="p-6">
-                        <p className="font-semibold text-[#37352F]">New Features</p>
+                        <p className="font-semibold text-[#37352F]">Automated Promotions</p>
                       </td>
                       <td className="p-6 text-center">
                         <span className="text-sm text-[#6B7280]">Every 3 months</span>
                       </td>
                       <td className="p-6 text-center bg-[#1B4332]/5">
-                        <span className="text-sm text-[#F7931A] font-semibold">Monthly updates</span>
+                        <span className="text-sm text-[#F7931A] font-semibold">Every month</span>
                       </td>
                       <td className="p-6 text-center">
-                        <span className="text-sm text-[#F7931A] font-semibold">Instant access</span>
+                        <span className="text-sm text-[#F7931A] font-semibold">Custom schedule</span>
                       </td>
                     </tr>
                   </tbody>
@@ -424,16 +421,21 @@ export default function PricingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#1B4332] border-t border-white/10 py-8">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex items-center justify-center gap-4 text-sm text-white/60 tracking-[-0.02em]">
-            <span className="font-extrabold">
-              <span className="text-white/60">my</span>
+      <footer className="bg-[#1B4332] border-t border-white/10">
+        <div className="mx-auto max-w-7xl px-6 py-6">
+          <div className="flex items-center justify-center gap-4 text-sm text-white/60">
+            <span className="text-base font-extrabold">
+              <span className="text-white/80">my</span>
               <span className="text-[#F7931A]">21</span>
-              <span className="text-white/60">staff</span>
+              <span className="text-white/80">staff</span>
             </span>
+            <span className="text-white/30">|</span>
             <span>&copy; 2026</span>
-            <Link href="/security" className="hover:text-white transition-colors duration-150">
+            <span className="text-white/30">|</span>
+            <Link
+              href="/security"
+              className="hover:text-[#F7931A] transition-colors duration-150"
+            >
               Security
             </Link>
           </div>
