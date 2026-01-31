@@ -8,6 +8,7 @@ import {
   WorkforceSection,
   ConsoleSection,
   FeaturesSection,
+  HowToStartSection,
   CTASection,
 } from "@/components/landing";
 
@@ -37,13 +38,16 @@ export default function Home() {
         {/* 2. Growth Engine Section (White) */}
         <FeaturesSection />
 
-        {/* 3. Digital Workforce Section (White) */}
+        {/* 3. How to Get Started Section (White) */}
+        <HowToStartSection />
+
+        {/* 4. Digital Workforce Section (White) */}
         <WorkforceSection />
 
-        {/* 4. Central Console Section (Sage Green) */}
+        {/* 5. Central Console Section (Sage Green) */}
         <ConsoleSection />
 
-        {/* 5. Final CTA Section (Light Sage) */}
+        {/* 6. Final CTA Section (Light Sage) */}
         <CTASection />
       </main>
 
