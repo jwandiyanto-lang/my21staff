@@ -341,6 +341,55 @@ function determineUrgency(priority: number, lead: ContactLead): 'immediate' | 't
   return 'this_week';
 }
 
+// ============================================
+// TEMPLATE GENERATION
+// ============================================
+
+/**
+ * System prompt for Grok template generation
+ */
+const TEMPLATE_SYSTEM_PROMPT = `You are Brain, writing personalized WhatsApp follow-up messages for Indonesian SME leads.
+
+RULES:
+- Keep it under 200 characters (WhatsApp friendly)
+- Use the lead's name
+- Reference their specific pain point or business type
+- Be warm and conversational, not salesy
+- Write in the same language as the conversation (ID or EN)
+
+Example outputs:
+- "Halo Ahmad! Masih ingat pembicaraan kita soal otomasi WhatsApp? Ada waktu diskusi lebih lanjut?"
+- "Hi Sarah! Just following up on our chat about CRM automation. Ready to see a demo?"`;
+
+/**
+ * Generate personalized follow-up message using Grok API
+ *
+ * Fallback to generic template if Grok API fails
+ */
+async function generatePersonalizedTemplate(
+  lead: ContactLead,
+  language: 'id' | 'en'
+): Promise<string> {
+  const prompt = `Generate a follow-up message for:
+Name: ${lead.name || 'there'}
+Business: ${lead.businessType || 'unknown'}
+Pain points: ${lead.painPoints?.join(', ') || 'general automation needs'}
+Last contact: ${lead.daysSinceContact || 7} days ago
+Language: ${language === 'id' ? 'Indonesian (Bahasa Indonesia)' : 'English'}
+
+Write ONE short, personalized follow-up message.`;
+
+  try {
+    const result = await callGrokAPI(TEMPLATE_SYSTEM_PROMPT, prompt);
+    return result.content.trim();
+  } catch (error) {
+    // Fallback to generic template
+    return language === 'id'
+      ? `Halo ${lead.name || 'there'}! Ada waktu untuk lanjut diskusi soal kebutuhan bisnis Anda?`
+      : `Hi ${lead.name || 'there'}! Do you have time to continue our discussion about your business needs?`;
+  }
+}
+
 /**
  * Generate action recommendations for a workspace
  *
@@ -350,8 +399,9 @@ function determineUrgency(priority: number, lead: ContactLead): 'immediate' | 't
  * 3. Generate follow-up recommendations with priority scoring
  * 4. Generate handoff-ready alerts for hot leads
  * 5. Generate opportunity alerts from conversation patterns
- * 6. Deduplicate by contact (highest priority wins)
- * 7. Store top 20 recommendations in database
+ * 6. Generate personalized templates for top 5 follow-ups (using Grok)
+ * 7. Deduplicate by contact (highest priority wins)
+ * 8. Store top 20 recommendations in database
  */
 export const generateActionRecommendations = internalAction({
   args: {
@@ -425,7 +475,19 @@ export const generateActionRecommendations = internalAction({
       }
     }
 
-    // 6. Sort by priority (highest first) and deduplicate by contact
+    // 6. Generate personalized templates for top follow-ups (limit to 5 to control API costs)
+    const followUps = recommendations.filter(r => r.actionType === 'follow_up').slice(0, 5);
+    for (const rec of followUps) {
+      const lead = leadsNeedingFollowUp.find(l => l._id === rec.contactId) as ContactLead | undefined;
+      if (lead) {
+        rec.suggestedMessage = await generatePersonalizedTemplate(
+          lead,
+          (lead.sarahLanguage as 'id' | 'en') || 'id'
+        );
+      }
+    }
+
+    // 7. Sort by priority (highest first) and deduplicate by contact
     const seen = new Set<string>();
     const deduped = recommendations
       .sort((a, b) => b.priority - a.priority)
@@ -435,7 +497,7 @@ export const generateActionRecommendations = internalAction({
         return true;
       });
 
-    // 7. Store recommendations in database
+    // 8. Store recommendations in database
     for (const rec of deduped.slice(0, 20)) { // Limit to top 20
       await ctx.runMutation(internal.brainActions.createActionRecommendation, {
         workspace_id: args.workspaceId,
