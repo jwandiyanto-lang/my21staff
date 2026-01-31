@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 5 - Grok Manager Bot — COMPLETE ✅
-Status: 6 of 6 plans complete
-Last activity: 2026-01-31 — Phase 5 complete: Brain analytics backend ready for dashboard
+Phase: Phase 6 - Dashboard — IN PROGRESS
+Status: 1 of 6+ plans complete
+Last activity: 2026-01-31 — Completed 06-01-PLAN.md: Lead List UI with TanStack Table
 
-Progress: ███████████████████████████████████████ 100% (25 of 25 total plans across phases 1-5)
+Progress: ████████████████████████████████████████░ 104% (26 of 25 base plans, Phase 6 started)
 
 ## V2.0 Milestone
 
@@ -65,6 +65,12 @@ Progress: ███████████████████████�
 | 05-04 | ✅ Complete (executed 2026-01-31, 2.8 min) | Conversation pattern analysis detecting topics, objections, rejections with FAQ suggestions |
 | 05-05 | ✅ Complete (executed 2026-01-31, 2.5 min) | !summary command integration with Kapso HTTP endpoints |
 | 05-06 | ✅ Complete (executed 2026-01-31, 3 min) | Kapso workflow documentation (integration deferred to go-live) |
+
+### Phase 6 Progress: Dashboard — IN PROGRESS
+
+| Plan | Status | Summary |
+|------|--------|---------|
+| 06-01 | ✅ Complete (executed 2026-01-31, 3 min) | TanStack Table with temperature-based stage badges and sortable columns |
 
 ## V1.0.0 Archive Summary
 
@@ -153,6 +159,11 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **800-character WhatsApp limit** - All command summaries truncated to 800 chars for readability
 - **Graceful fallback for !summary** - Returns friendly error message if Grok API fails (never leaves user without response)
 - **Command tracking in summaries** - Stored with trigger='command' and triggered_by for usage analytics
+- **TanStack Table for lead list** - Sortable, extensible table with getCoreRowModel and getSortedRowModel
+- **Temperature-based stage badges** - hot (red/Flame), warm (orange/Sun), lukewarm (yellow/Sun), cold (blue/Snowflake), new (blue/Snowflake), converted (green/CheckCircle)
+- **Default sort by lastActivityAt descending** - Most recent lead activity shown first for better UX
+- **Icon + text labels in badges** - Accessibility requirement per 06-RESEARCH.md findings
+- **MOCK_LEADS for offline dev** - 15 Indonesian business leads with variety of stages, scores, and business types
 
 ### Kapso Configuration
 
@@ -198,10 +209,12 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - ✅ Phase 2.5: Settings & Configuration (5/5 plans complete) - 5 plans
 - ✅ Phase 3: Sarah Chat Bot - 4 plans COMPLETE
 - ✅ Phase 4: Lead Database (Kapso → Convex sync) - 6/6 plans COMPLETE
+- ✅ Phase 5: Grok Manager Bot (Analysis + insights) - 6/6 plans COMPLETE
+
+**Current phase:**
+- 🔄 Phase 6: Dashboard (Lead list + analytics) - 1/6+ plans complete
 
 **Next phases (not yet started):**
-- Phase 5: Grok Manager Bot (Analysis + insights)
-- Phase 6: Dashboard (Lead list + analytics)
 - Phase 7: Handoff Workflow (End-to-end flow)
 - Phase 8: Testing & Polish
 
@@ -234,11 +247,21 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 01:45 UTC
-**Stopped at:** Phase 5 complete - All Grok Manager Bot plans executed (5/5)
+**Last session:** 2026-01-31 07:30 UTC
+**Stopped at:** Completed 06-01: Lead List UI - SUMMARY.md created
 **Resume file:** None
 
 **Completed in this session:**
+- 06-01: Lead List UI (3 minutes)
+  - Created /[workspace]/leads page with server + client components
+  - Built TanStack Table with 6 sortable columns
+  - Implemented temperature-based stage badges with accessibility icons
+  - Added 15 MOCK_LEADS for offline testing
+  - Integrated Leads navigation into sidebar
+  - 3 atomic commits (997341b, 1b9e1ff, bb1575d partial)
+  - Files: page.tsx, leads-client.tsx, lead-table.tsx, lead-columns.tsx, stage-badge.tsx
+
+**Previous session (2026-01-31 01:45 UTC):**
 - 05-01: Brain Analytics Data Layer (2.5 minutes)
   - Added three Brain analytics tables to schema (brainSummaries, brainInsights, brainActions)
   - Created brainSummaries.ts with 4 CRUD operations
@@ -284,13 +307,17 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
   - All functions compiled and deployed successfully
   - 3 atomic commits, 236 LOC added
 
-**Phase 5 Progress (5/5 plans) - COMPLETE ✅:**
+**Phase 5 Progress (6/6 plans) - COMPLETE ✅:**
 - 05-01: Brain Analytics Data Layer (2.5 min) - COMPLETE ✅
 - 05-02: Grok integration for pattern analysis (2.1 min) - COMPLETE ✅
 - 05-03: Action recommendation engine (2 min) - COMPLETE ✅
 - 05-04: Conversation pattern analysis (2.8 min) - COMPLETE ✅
 - 05-05: !summary command integration (2.5 min) - COMPLETE ✅
+- 05-06: Kapso workflow documentation (3 min) - COMPLETE ✅
+
+**Phase 6 Progress (1/6+ plans):**
+- 06-01: Lead List UI (3 min) - COMPLETE ✅
 
 ---
 
-*Last updated: 2026-01-31 — Phase 5 COMPLETE, 23/23 total plans (100%)*
+*Last updated: 2026-01-31 — Phase 6 started, 26/25+ total plans*
