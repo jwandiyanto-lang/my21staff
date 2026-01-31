@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Bot,
   UserCircle,
+  Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WorkspaceSwitcher } from './workspace-switcher'
@@ -57,6 +58,11 @@ const operationsNav = [
     title: 'Leads',
     icon: UserCircle,
     href: '/leads',
+  },
+  {
+    title: 'Insights',
+    icon: Sparkles,
+    href: '/insights',
   },
   {
     title: 'Your Team',
