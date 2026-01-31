@@ -1,17 +1,18 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Bot, Brain, UserCheck } from 'lucide-react'
+import { CheckCircle, Brain, Users, Quote } from 'lucide-react'
+import Image from 'next/image'
 
 export function FeaturesSection() {
   return (
-    <section className="relative bg-white py-24 lg:py-32 px-4 sm:px-6 lg:px-8">
+    <section className="relative bg-white py-24 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="mx-auto max-w-7xl">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
           {/* Left column - Features */}
-          <div className="space-y-8">
+          <div className="space-y-12 relative z-10">
             {/* Heading */}
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1B4332] leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black leading-tight">
               Here's what you'll love about my21staff
             </h2>
 
@@ -21,18 +22,16 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="flex gap-4"
+              className="flex gap-5"
             >
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg">
-                  <Bot className="w-6 h-6 text-white" />
-                </div>
+              <div className="flex-shrink-0 pt-1">
+                <CheckCircle className="w-7 h-7 text-black" strokeWidth={1.5} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-[#1B4332] mb-3">
+                <h3 className="text-2xl font-semibold text-black mb-4">
                   24/7 AI Sales Team That Never Sleeps
                 </h3>
-                <p className="text-base text-[#6B7280] leading-relaxed">
+                <p className="text-lg text-gray-600 leading-relaxed">
                   Sarah, your AI staff, engages every lead instantly—even at 3 AM. She qualifies prospects, answers FAQs, and captures critical info (name, business type, pain points) without you lifting a finger. No more "Berapa harganya?" messages drowning your phone. Sarah handles the routine, you handle the closing.
                 </p>
               </div>
@@ -44,18 +43,16 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="flex gap-4"
+              className="flex gap-5"
             >
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg">
-                  <Brain className="w-6 h-6 text-white" />
-                </div>
+              <div className="flex-shrink-0 pt-1">
+                <Brain className="w-7 h-7 text-black" strokeWidth={1.5} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-[#1B4332] mb-2">
+                <h3 className="text-xl font-semibold text-black mb-2">
                   Long-Term Memory, Not Just Transactional Responses
                 </h3>
-                <p className="text-base text-[#6B7280] leading-relaxed">
+                <p className="text-base text-gray-600 leading-relaxed">
                   The Brain (Claude 3.5) remembers every conversation from 6 months ago. No more "siapa ya?" moments.
                 </p>
               </div>
@@ -67,91 +64,50 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex gap-4"
+              className="flex gap-5"
             >
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
-                  <UserCheck className="w-6 h-6 text-white" />
-                </div>
+              <div className="flex-shrink-0 pt-1">
+                <Users className="w-7 h-7 text-black" strokeWidth={1.5} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-[#1B4332] mb-2">
+                <h3 className="text-xl font-semibold text-black mb-2">
                   Human Handoff When It Matters
                 </h3>
-                <p className="text-base text-[#6B7280] leading-relaxed">
+                <p className="text-base text-gray-600 leading-relaxed">
                   Qualified leads get routed to you automatically. Focus your energy on the deals that actually close.
                 </p>
               </div>
             </motion.div>
+
+            {/* Yellow quotation mark - bottom left */}
+            <div className="absolute -bottom-12 -left-8 lg:-left-16 opacity-20">
+              <Quote className="w-32 h-32 lg:w-48 lg:h-48 text-yellow-400 fill-yellow-400" strokeWidth={1} />
+            </div>
           </div>
 
-          {/* Right column - CRM Screenshot (blurred/animated) */}
+          {/* Right column - CRM Screenshot */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative lg:ml-auto"
+            className="relative lg:ml-auto self-end"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-black/5">
-              {/* Blur overlay for mysterious effect */}
-              <div className="absolute inset-0 bg-gradient-to-t from-white/30 to-transparent backdrop-blur-[2px] z-10"></div>
+            <div className="relative rounded-xl overflow-hidden shadow-xl">
+              {/* Actual screenshot */}
+              <div className="relative w-full">
+                <Image
+                  src="/crm-screenshot.png"
+                  alt="my21staff CRM Dashboard"
+                  width={800}
+                  height={600}
+                  className="w-full h-auto"
+                  priority
+                />
 
-              {/* Mock CRM table interface */}
-              <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
-                <div className="absolute inset-0 p-6 space-y-3">
-                  {/* Header */}
-                  <div className="flex items-center justify-between pb-3 border-b border-gray-300">
-                    <div className="text-sm font-bold text-[#1B4332]">Leads Dashboard</div>
-                    <div className="flex gap-2">
-                      <div className="w-16 h-6 bg-gray-300 rounded"></div>
-                      <div className="w-16 h-6 bg-gray-300 rounded"></div>
-                    </div>
-                  </div>
-
-                  {/* Table rows - Indonesian names */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 p-3 bg-white/80 rounded-lg shadow-sm">
-                      <div className="w-8 h-8 rounded-full bg-green-200"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-[#1B4332]">Bambang Supriadi</div>
-                        <div className="text-xs text-gray-600">Toko Elektronik</div>
-                      </div>
-                      <div className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded">Hot</div>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-white/80 rounded-lg shadow-sm">
-                      <div className="w-8 h-8 rounded-full bg-blue-200"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-[#1B4332]">Budi Santoso</div>
-                        <div className="text-xs text-gray-600">Warung Makan</div>
-                      </div>
-                      <div className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded">Warm</div>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-white/80 rounded-lg shadow-sm">
-                      <div className="w-8 h-8 rounded-full bg-purple-200"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-[#1B4332]">Putri Maharani</div>
-                        <div className="text-xs text-gray-600">Salon Kecantikan</div>
-                      </div>
-                      <div className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded">New</div>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-white/80 rounded-lg shadow-sm opacity-60">
-                      <div className="w-8 h-8 rounded-full bg-gray-200"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-[#1B4332]">Ahmad Fauzi</div>
-                        <div className="text-xs text-gray-600">Bengkel Motor</div>
-                      </div>
-                      <div className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded">Cold</div>
-                    </div>
-                  </div>
-                </div>
+                {/* Subtle blur overlay */}
+                <div className="absolute inset-0 bg-white/5 backdrop-blur-[0.5px]"></div>
               </div>
-
-              {/* Glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-green-400/20 to-orange-400/20 blur-xl -z-10"></div>
             </div>
           </motion.div>
         </div>
