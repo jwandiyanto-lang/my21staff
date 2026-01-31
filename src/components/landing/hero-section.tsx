@@ -29,19 +29,13 @@ export function HeroSection() {
                 Your AI Sales Team in a Box. <span className="font-semibold">AI handles the routine. You handle the complex.</span>
               </p>
 
-              {/* Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              {/* Button */}
+              <div>
                 <Link
                   href="/sign-up"
-                  className="inline-flex items-center justify-center px-8 py-4 bg-[#F7931A] text-white font-semibold rounded-full hover:bg-[#e08515] transition-all duration-200 shadow-md hover:shadow-lg text-base"
+                  className="inline-flex items-center justify-center px-12 py-4 bg-[#F7931A] text-white font-semibold rounded-full hover:bg-[#e08515] transition-all duration-200 shadow-md hover:shadow-lg text-base"
                 >
                   Chat With Us Now!
-                </Link>
-                <Link
-                  href="/demo"
-                  className="inline-flex items-center justify-center px-8 py-4 bg-white text-[#1B4332] font-semibold rounded-full border-2 border-[#1B4332] hover:bg-gray-50 transition-all duration-200 text-base"
-                >
-                  View Demo
                 </Link>
               </div>
             </div>
