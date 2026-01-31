@@ -6,16 +6,16 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 6 - Dashboard (Lead list + AI insights + analytics)
+**Current focus:** Phase 7 - Production Launch (Deploy and test infrastructure)
 
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 6 - Dashboard — COMPLETE ✅
-Status: 6 of 6 plans complete
-Last activity: 2026-01-31 — Completed 06-06-PLAN.md: Dashboard Polish & Dev Mode
+Phase: Phase 7 - Production Launch — IN PROGRESS
+Status: 1 of 3+ plans complete
+Last activity: 2026-01-31 — Completed 07-01-PLAN.md: Production Deployment
 
-Progress: ████████████████████████████████████████░ 124% (31 of 25 base plans, Phase 6 complete)
+Progress: ████████████████████████████████████████░ 128% (32 of 25 base plans, Phase 7 started)
 
 ## V2.0 Milestone
 
@@ -29,8 +29,8 @@ Progress: ███████████████████████�
 3. Sarah Chat Bot - ✅ COMPLETED (4 plans)
 4. Lead Database (Kapso → Convex sync) - ✅ COMPLETED (6 plans)
 5. Grok Manager Bot (Analysis + insights) - ✅ COMPLETED (6 plans)
-6. Dashboard (Lead list + analytics)
-7. Handoff Workflow (End-to-end flow)
+6. Dashboard (Lead list + analytics) - ✅ COMPLETED (6 plans)
+7. Production Launch (Deploy + test infrastructure) - IN PROGRESS (1 plan)
 8. Testing & Polish
 
 **Total Requirements:** 52+
@@ -76,6 +76,12 @@ Progress: ███████████████████████�
 | 06-04 | ✅ Complete (executed 2026-01-31, 5 min) | Dedicated Insights page with Grok summaries, action items, patterns, and lead quality visualization |
 | 06-05 | ✅ Complete (executed 2026-01-31, 3.9 min) | Lead statistics with trend indicators, time period toggle, and conversational highlights |
 | 06-06 | ✅ Complete (executed 2026-01-31, 10 min) | Complete Brain analytics mock data, centralized mock architecture, full offline dev mode for dashboard and inbox |
+
+### Phase 7 Progress: Production Launch — IN PROGRESS
+
+| Plan | Status | Summary |
+|------|--------|---------|
+| 07-01 | ✅ Complete (executed 2026-01-31, 15 min) | Application deployed to www.my21staff.com with Clerk auth active, middleware protecting routes, dev mode disabled |
 
 ## V1.0.0 Archive Summary
 
@@ -185,6 +191,10 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Conversational highlights tailored to period** - Context-aware messaging improves readability and engagement (DSH-16)
 - **Responsive stats grid (1/2/4 columns)** - Mobile: stack, Tablet: 2-col, Desktop: 4-col for optimal layout at all breakpoints (DSH-17)
 - **Previous period trends with mocks** - Production will need `getLeadStatsPrevious` Convex query for real trend calculations (DSH-18)
+- **Production middleware auth enforcement** - Removed localhost bypass, all routes protected except public routes (/, /sign-in, /sign-up, /security, /keamanan, /demo, /api/webhook)
+- **Type guard pattern for workspace documents** - `if (!('name' in workspace) || !('slug' in workspace))` to narrow Convex db.get() union types
+- **Next.js 15 async params pattern** - Dynamic route params now `Promise<{ id: string }>` requiring await before access
+- **Conditional query pattern for Convex withIndex** - Use ternary instead of variable reassignment to avoid TypeScript errors
 
 ### Kapso Configuration
 
@@ -233,8 +243,10 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - ✅ Phase 5: Grok Manager Bot (Analysis + insights) - 6/6 plans COMPLETE
 - ✅ Phase 6: Dashboard (Lead list + analytics) - 6/6 plans COMPLETE
 
+**Current phase:**
+- 🚀 Phase 7: Production Launch - 1/3+ plans COMPLETE (07-01: Deployment ✅)
+
 **Next phases (not yet started):**
-- Phase 7: Handoff Workflow (End-to-end flow)
 - Phase 8: Testing & Polish
 
 **Phase 4 deliverables:**
@@ -261,6 +273,14 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - Dev mode API routes (/api/conversations, /api/messages/send, /api/messages/[conversationId])
 - Dashboard ready for Phase 7 handoff workflow integration
 
+**Phase 7 deliverables (in progress):**
+- Production deployment to www.my21staff.com (COMPLETE)
+- Clerk authentication active in production (COMPLETE)
+- Middleware protecting dashboard routes (COMPLETE)
+- Environment variables configured (DEV_MODE=false) (COMPLETE)
+- Production build passing all TypeScript checks (COMPLETE)
+- Sign-in page rendering Clerk UI successfully (COMPLETE)
+
 ### Blockers/Concerns
 
 **Kapso API Authentication - RESOLVED (2026-01-30):**
@@ -279,11 +299,25 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 03:51 UTC
-**Stopped at:** Completed 06-06: Dashboard Polish & Dev Mode - SUMMARY.md created, Phase 6 COMPLETE ✅
+**Last session:** 2026-01-31 05:47 UTC
+**Stopped at:** Completed 07-01: Production Deployment - SUMMARY.md created, Phase 7 started
 **Resume file:** None
 
 **Completed in this session:**
+- 07-01: Production Deployment (15 minutes)
+  - Removed localhost bypass from middleware for production auth
+  - Fixed Next.js 15 async params in settings-backup route
+  - Fixed sarah.ts extracted_data schema type (required object)
+  - Fixed workspace.settings TypeScript errors with type guards
+  - Fixed MOCK_CONVERSATIONS flat structure access
+  - Fixed Convex query withIndex TypeScript reassignment error
+  - Fixed NEXT_PUBLIC_DEV_MODE env var (was "false\n", now "false")
+  - Deployed to www.my21staff.com successfully
+  - Verified Clerk auth initialized in production
+  - 1 atomic commit (c92903f)
+  - Files: 8 modified (middleware, routes, convex)
+
+**Previous session (2026-01-31 03:51 UTC):**
 - 06-06: Dashboard Polish & Dev Mode (10 minutes)
   - Added complete Brain analytics mock data (summaries, actions, insights, stats)
   - Centralized all mocks in mock-data.ts (single source of truth)
