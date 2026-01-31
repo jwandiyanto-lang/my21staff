@@ -1,3 +1,46 @@
+/**
+ * Brain Analysis Module - Grok-powered lead intelligence
+ *
+ * This module provides AI-powered analytics for leads:
+ * - Daily summaries (via cron)
+ * - !summary command (via HTTP endpoint)
+ * - Action recommendations (follow-ups, handoffs, opportunities)
+ * - Pattern analysis (topics, objections, rejections)
+ *
+ * === KAPSO INTEGRATION ===
+ *
+ * The !summary command is triggered via Kapso workflow:
+ *
+ * 1. User sends "!summary" to WhatsApp
+ * 2. Kapso Rules Engine detects keyword
+ * 3. Kapso Function Node calls POST /brain/summary with:
+ *    {
+ *      "workspace_id": "{{workspace.id}}",
+ *      "triggered_by": "{{contact.phone}}"
+ *    }
+ * 4. Convex generates summary using Grok 4.1-fast
+ * 5. Returns { "success": true, "summary_text": "..." }
+ * 6. Kapso Send Message Node sends summary_text to user
+ *
+ * Kapso Workflow Node Configuration:
+ * - Node Type: Function
+ * - URL: https://YOUR_CONVEX_URL/brain/summary
+ * - Method: POST
+ * - Headers: { "Content-Type": "application/json" }
+ * - Body: { "workspace_id": "...", "triggered_by": "{{contact.phone}}" }
+ *
+ * NOTE: In production, workspace_id resolution would come from Kapso config.
+ * The Kapso Function node should be configured with the workspace_id.
+ * Alternative: Look up workspace by phone_config_id from the Kapso context.
+ *
+ * === COST TRACKING ===
+ *
+ * Uses Grok 4.1-fast: $0.20 input / $0.50 output per million tokens
+ * Typical summary: ~500 input tokens, ~200 output tokens = ~$0.0002 per summary
+ *
+ * Token usage is logged to brainSummaries.tokens_used and brainSummaries.cost_usd
+ */
+
 import { internalAction, internalQuery } from "./_generated/server";
 import { internal, api } from "./_generated/api";
 import { v } from "convex/values";
