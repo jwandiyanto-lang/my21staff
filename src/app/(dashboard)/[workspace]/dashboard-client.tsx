@@ -7,7 +7,6 @@ import { useEnsureUser } from '@/hooks/use-ensure-user'
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton'
 import { LeadStats } from '@/components/dashboard/lead-stats'
 import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist'
-import type { Id } from 'convex/_generated/dataModel'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
@@ -30,21 +29,26 @@ const MOCK_STATS = {
 }
 
 interface DashboardClientProps {
-  workspaceId: Id<'workspaces'>
+  workspaceId: string
   workspaceSlug: string
 }
 
-export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientProps) {
+export function DashboardClient({ workspaceSlug }: DashboardClientProps) {
   const [timeFilter, setTimeFilter] = useState<'week' | 'month' | 'all'>('all')
 
   // Ensure current user exists before running queries
   const userInitialized = useEnsureUser()
 
-  // Skip Convex query in dev mode - use mock data
-  // Also skip until user is initialized to prevent race conditions
+  // First, look up workspace by slug to get actual document ID
+  const workspace = useQuery(
+    api.workspaces.getBySlug,
+    isDevMode || !userInitialized ? 'skip' : { slug: workspaceSlug }
+  )
+
+  // Then fetch stats using the actual workspace ID
   const convexStats = useQuery(
     api.dashboard.getStats,
-    isDevMode || !userInitialized ? 'skip' : { workspace_id: workspaceId as any, time_filter: timeFilter }
+    isDevMode || !userInitialized || !workspace?._id ? 'skip' : { workspace_id: workspace._id, time_filter: timeFilter }
   )
 
   const stats = isDevMode ? MOCK_STATS : convexStats
@@ -64,7 +68,7 @@ export function DashboardClient({ workspaceId, workspaceSlug }: DashboardClientP
       </div>
 
       {/* Lead Stats - Hero position */}
-      <LeadStats workspaceId={workspaceId} />
+      {workspace?._id && <LeadStats workspaceId={workspace._id} />}
 
       {/* Onboarding Checklist (for new workspaces) */}
       {!isOnboarded && (
