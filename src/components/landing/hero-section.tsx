@@ -2,11 +2,11 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Check, Circle } from 'lucide-react'
+import { Check, Zap, Clock } from 'lucide-react'
 
 export function HeroSection() {
   return (
-    <section className="relative bg-[#FCFCFB] pt-32 pb-24 lg:pt-40 lg:pb-32 px-4 sm:px-6 lg:px-8">
+    <section className="relative bg-[#FCFCFB] pt-12 pb-24 lg:pt-16 lg:pb-32 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Main hero card */}
         <motion.div
@@ -21,18 +21,28 @@ export function HeroSection() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-[#E8F5E9] text-[#1B4332] px-3 py-1.5 rounded-full text-sm font-medium mb-6 w-fit">
                 <Check className="w-4 h-4" />
-                <span className="font-mono">Unified OS V3</span>
+                <span className="font-mono">Trusted by 50+ Indonesian SMEs</span>
               </div>
 
               {/* Headline */}
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight mb-6">
-                <span className="text-[#1B4332]">Your Business, </span>
-                <span className="text-[#F7931A]">Fully Automated.</span>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight mb-4">
+                <span className="text-[#1B4332]">Kejar Chat WhatsApp, </span>
+                <span className="text-[#F7931A]">Atau Kejar Closing?</span>
               </h1>
 
-              {/* Description */}
-              <p className="text-lg sm:text-xl text-[#6B7280] leading-relaxed mb-8 max-w-2xl">
-                The minimalist workspace for ambitious small businesses. Convert complex workflows into a streamlined console that manages your WhatsApp storefront, AI staff, and CRM in one place.
+              {/* English subtitle */}
+              <p className="text-base sm:text-lg text-[#6B7280] italic mb-6">
+                Chase WhatsApp Messages, Or Chase Deals?
+              </p>
+
+              {/* Subheadline */}
+              <p className="text-lg sm:text-xl text-[#37352F] leading-relaxed mb-2 max-w-2xl font-medium">
+                AI Sales Team yang kelola chat 24/7. Kamu fokus closing, Sarah & The Brain yang handle sisanya.
+              </p>
+
+              {/* English subtitle for subheadline */}
+              <p className="text-sm sm:text-base text-[#6B7280] italic mb-8 max-w-2xl">
+                AI Sales Team managing chats 24/7. You focus on closing, Sarah & The Brain handle the rest.
               </p>
 
               {/* Buttons */}
@@ -52,88 +62,87 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* Right column - Activity Feed Mockup */}
-            <div className="lg:col-span-5 flex items-center">
-              <div className="w-full bg-white rounded-2xl border border-[rgba(55,53,47,0.08)] shadow-lg overflow-hidden">
-                {/* Browser-style header */}
-                <div className="bg-[#F5F5F5] px-4 py-3 flex items-center gap-2 border-b border-[rgba(55,53,47,0.08)]">
-                  <div className="flex gap-1.5">
-                    <Circle className="w-3 h-3 fill-red-400 text-red-400" />
-                    <Circle className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                    <Circle className="w-3 h-3 fill-green-400 text-green-400" />
-                  </div>
-                  <span className="text-xs text-[#6B7280] font-mono ml-2">console.my21staff.com</span>
-                </div>
+            {/* Right column - WhatsApp Phone Mockup */}
+            <div className="lg:col-span-5 flex items-center justify-center">
+              <div className="relative w-full max-w-[320px]">
+                {/* Phone frame */}
+                <div className="relative bg-[#1F1F1F] rounded-[3rem] p-3 shadow-2xl">
+                  {/* Notch */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-[#1F1F1F] rounded-b-3xl z-10"></div>
 
-                {/* Console header */}
-                <div className="bg-white px-5 py-4 border-b border-[rgba(55,53,47,0.08)]">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-[#1B4332] font-mono">Console Stream</h3>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <div className="w-2 h-2 bg-[#F7931A] rounded-full animate-pulse"></div>
-                        <div className="absolute inset-0 w-2 h-2 bg-[#F7931A] rounded-full animate-ping opacity-75"></div>
+                  {/* Screen */}
+                  <div className="relative bg-[#E5DDD5] rounded-[2.5rem] overflow-hidden">
+                    {/* WhatsApp Header */}
+                    <div className="bg-[#25D366] px-4 py-3 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#25D366] font-bold text-lg">
+                        S
                       </div>
-                      <span className="text-xs text-[#6B7280] font-mono">Live</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Activity items */}
-                <div className="p-4 space-y-3 bg-[#FCFCFB]">
-                  {/* Item 1 */}
-                  <div className="bg-white rounded-lg p-4 border border-[rgba(55,53,47,0.08)] hover:border-[#F7931A] transition-colors cursor-pointer">
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-mono text-[#37352F] leading-relaxed">
-                          AI Staff #21 - Processed order #8842 from WhatsApp
-                        </p>
-                        <span className="text-[10px] text-[#6B7280] font-mono mt-1 block">2m ago</span>
+                      <div className="flex-1">
+                        <h3 className="text-white font-semibold text-sm">Sarah - Staff Digital</h3>
+                        <p className="text-white/80 text-xs">online</p>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Item 2 */}
-                  <div className="bg-white rounded-lg p-4 border border-[rgba(55,53,47,0.08)] hover:border-[#F7931A] transition-colors cursor-pointer">
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-mono text-[#37352F] leading-relaxed">
-                          System Automations - Inventory sync completed with Shopify
-                        </p>
-                        <span className="text-[10px] text-[#6B7280] font-mono mt-1 block">5m ago</span>
+                    {/* Chat area */}
+                    <div className="p-4 space-y-3 min-h-[500px] bg-[url('/whatsapp-bg.png')] bg-[#E5DDD5]">
+                      {/* Customer message 1 */}
+                      <div className="flex justify-end">
+                        <div className="bg-white rounded-lg rounded-tr-sm px-3 py-2 max-w-[75%] shadow-sm">
+                          <p className="text-sm text-[#1F1F1F]">Berapa harganya untuk paket basic?</p>
+                          <span className="text-[10px] text-[#667781] float-right mt-1">10:23</span>
+                        </div>
+                      </div>
+
+                      {/* Sarah message 1 */}
+                      <div className="flex justify-start">
+                        <div className="bg-[#DCF8C6] rounded-lg rounded-tl-sm px-3 py-2 max-w-[75%] shadow-sm">
+                          <p className="text-sm text-[#1F1F1F]">Halo! Saya Sarah dari tim di sini. Boleh tau nama kamu dulu?</p>
+                          <span className="text-[10px] text-[#667781] float-right mt-1">10:23</span>
+                        </div>
+                      </div>
+
+                      {/* Customer message 2 */}
+                      <div className="flex justify-end">
+                        <div className="bg-white rounded-lg rounded-tr-sm px-3 py-2 max-w-[75%] shadow-sm">
+                          <p className="text-sm text-[#1F1F1F]">Budi</p>
+                          <span className="text-[10px] text-[#667781] float-right mt-1">10:24</span>
+                        </div>
+                      </div>
+
+                      {/* Sarah message 2 */}
+                      <div className="flex justify-start">
+                        <div className="bg-[#DCF8C6] rounded-lg rounded-tl-sm px-3 py-2 max-w-[75%] shadow-sm">
+                          <p className="text-sm text-[#1F1F1F]">Salam kenal Budi. Bisnisnya di bidang apa?</p>
+                          <span className="text-[10px] text-[#667781] float-right mt-1">10:24</span>
+                        </div>
+                      </div>
+
+                      {/* Typing indicator */}
+                      <div className="flex justify-start">
+                        <div className="bg-[#DCF8C6] rounded-lg rounded-tl-sm px-4 py-3 shadow-sm">
+                          <div className="flex gap-1">
+                            <div className="w-2 h-2 bg-[#667781] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                            <div className="w-2 h-2 bg-[#667781] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                            <div className="w-2 h-2 bg-[#667781] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom metrics overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#1B4332] to-transparent p-4 pt-8">
+                      <div className="flex items-center justify-center gap-6 text-white">
+                        <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                          <Zap className="w-3 h-3" />
+                          <span className="text-xs font-mono font-semibold">0.8s avg response</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                          <Clock className="w-3 h-3" />
+                          <span className="text-xs font-mono font-semibold">24/7 Available</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* Item 3 */}
-                  <div className="bg-white rounded-lg p-4 border border-[rgba(55,53,47,0.08)] hover:border-[#F7931A] transition-colors cursor-pointer">
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-[#F7931A] rounded-full mt-1.5 flex-shrink-0"></div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-mono text-[#37352F] leading-relaxed">
-                          New Lead Captured - Sarah J. initiated inquiry via QR code
-                        </p>
-                        <span className="text-[10px] text-[#6B7280] font-mono mt-1 block">8m ago</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stats footer */}
-                <div className="bg-[#1B4332] px-5 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <p className="text-[10px] text-white/60 font-mono uppercase tracking-wide">Revenue</p>
-                      <p className="text-sm font-bold text-white font-mono">$12.4k</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/60 font-mono uppercase tracking-wide">Avg Res.</p>
-                      <p className="text-sm font-bold text-white font-mono">0.8s</p>
-                    </div>
-                  </div>
-                  <div className="text-[10px] text-white/40 font-mono">Today</div>
                 </div>
               </div>
             </div>
