@@ -12,10 +12,10 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: Phase 5 - Grok Manager Bot — COMPLETE ✅
-Status: 3 of 3 plans complete
-Last activity: 2026-01-31 — Plan 05-03 complete: Action recommendation engine
+Status: 4 of 4 plans complete
+Last activity: 2026-01-31 — Plan 05-04 complete: Conversation pattern analysis with FAQ suggestions
 
-Progress: ████████████████████████████████████████ 100% (21 of 21 total plans across phases 1-5)
+Progress: ████████████████████████████████████████ 100% (22 of 22 total plans across phases 1-5)
 
 ## V2.0 Milestone
 
@@ -62,6 +62,7 @@ Progress: ███████████████████████�
 | 05-01 | ✅ Complete (executed 2026-01-31, 2.5 min) | Brain analytics data layer (brainSummaries, brainInsights, brainActions) |
 | 05-02 | ✅ Complete (executed 2026-01-31, 2.1 min) | Grok 4.1-fast integration with daily cron for conversational summaries |
 | 05-03 | ✅ Complete (executed 2026-01-31, 2 min) | Weighted priority scoring with Grok-powered personalized WhatsApp templates |
+| 05-04 | ✅ Complete (executed 2026-01-31, 2.8 min) | Conversation pattern analysis detecting topics, objections, rejections with FAQ suggestions |
 
 ## V1.0.0 Archive Summary
 
@@ -141,6 +142,11 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Graceful degradation for templates** - Fallback to generic message if Grok API fails (never block action generation)
 - **api.leads queries (not internal.leads)** - leads.ts exports regular queries, use api.leads for public API access
 - **Language-aware template generation** - Grok generates Indonesian or English based on sarahLanguage field from contact
+- **Pattern analysis minimum threshold: 3+ examples** - Grok only reports patterns with 3+ occurrences to avoid false positives
+- **FAQ suggestions integrated into pattern analysis** - Single Grok API call generates both patterns and suggested FAQs (MGR-06)
+- **Token cost control for pattern analysis: 100 notes max** - Balance comprehensive analysis vs API costs (~2 weeks of activity)
+- **Confidence levels for insights** - 3-4 = medium, 5+ = high based on frequency of pattern occurrence
+- **Helper query must be defined before action** - Convex requirement: getContactsWithNotes query before analyzeConversationPatterns action
 
 ### Kapso Configuration
 
@@ -222,7 +228,7 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 01:32 UTC
+**Last session:** 2026-01-31 01:39 UTC
 **Stopped at:** Phase 5 complete - All Grok Manager Bot plans executed
 **Resume file:** None
 
@@ -253,11 +259,22 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
   - All functions compiled and deployed successfully
   - 3 atomic commits, 185 LOC added
 
-**Phase 5 Progress (3/3 plans) - COMPLETE ✅:**
+- 05-04: Conversation Pattern Analysis (2.8 minutes)
+  - Extended brainAnalysis.ts with pattern detection logic
+  - Implemented trending topics, objections, interest signals, rejection reasons analysis
+  - Added FAQ auto-suggestion for topics and objections (MGR-06)
+  - Confidence scoring (3+ = medium, 5+ = high)
+  - Token limit (100 notes max) for cost control
+  - Helper query defined before action (Convex requirement)
+  - All functions compiled and deployed successfully
+  - 3 atomic commits, 328 LOC added
+
+**Phase 5 Progress (4/4 plans) - COMPLETE ✅:**
 - 05-01: Brain Analytics Data Layer (2.5 min) - COMPLETE ✅
 - 05-02: Grok integration for pattern analysis (2.1 min) - COMPLETE ✅
 - 05-03: Action recommendation engine (2 min) - COMPLETE ✅
+- 05-04: Conversation pattern analysis (2.8 min) - COMPLETE ✅
 
 ---
 
-*Last updated: 2026-01-31 — Phase 5 COMPLETE, 21/21 total plans (100%)*
+*Last updated: 2026-01-31 — Phase 5 COMPLETE, 22/22 total plans (100%)*
