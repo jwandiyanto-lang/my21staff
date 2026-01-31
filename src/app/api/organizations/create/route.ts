@@ -1,7 +1,17 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { fetchMutation } from 'convex/nextjs'
+import { ConvexHttpClient } from 'convex/browser'
 import { api } from '@/../convex/_generated/api'
+
+async function getAuthenticatedConvexClient() {
+  const { getToken } = await auth()
+  const token = await getToken({ template: 'convex' })
+
+  const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+  convex.setAuth(token!)
+
+  return convex
+}
 
 /**
  * POST /api/organizations/create
@@ -35,6 +45,9 @@ export async function POST(request: Request) {
       )
     }
 
+    // Get authenticated Convex client
+    const convex = await getAuthenticatedConvexClient()
+
     const client = await clerkClient()
     let organization
 
@@ -54,14 +67,14 @@ export async function POST(request: Request) {
     }
 
     // Create workspace in Convex
-    const workspaceId = await fetchMutation(api.workspaces.create, {
+    const workspaceId = await convex.mutation(api.workspaces.create, {
       name,
       slug,
       owner_id: userId,
     })
 
     // Create organization record in Convex (links Clerk org to workspace)
-    const orgId = await fetchMutation(api.organizations.create, {
+    const orgId = await convex.mutation(api.organizations.create, {
       clerk_org_id: organization.id,
       workspace_id: workspaceId,
       name: organization.name,
@@ -69,7 +82,7 @@ export async function POST(request: Request) {
     })
 
     // Create organization member record
-    await fetchMutation(api.organizations.createMember, {
+    await convex.mutation(api.organizations.createMember, {
       organization_id: orgId,
       clerk_user_id: userId,
       role: 'org:admin',
@@ -84,7 +97,7 @@ export async function POST(request: Request) {
     })
 
     // Add user as workspace member
-    await fetchMutation(api.workspaceMembers.create, {
+    await convex.mutation(api.workspaceMembers.create, {
       workspace_id: workspaceId,
       user_id: userId,
       role: 'owner',

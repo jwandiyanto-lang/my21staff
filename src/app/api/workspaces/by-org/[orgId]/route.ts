@@ -1,7 +1,17 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { fetchQuery } from 'convex/nextjs'
+import { ConvexHttpClient } from 'convex/browser'
 import { api } from '@/../convex/_generated/api'
+
+async function getAuthenticatedConvexClient() {
+  const { getToken } = await auth()
+  const token = await getToken({ template: 'convex' })
+
+  const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+  convex.setAuth(token!)
+
+  return convex
+}
 
 /**
  * GET /api/workspaces/by-org/[orgId]
@@ -22,8 +32,11 @@ export async function GET(
 
     const { orgId } = await params
 
+    // Get authenticated Convex client
+    const convex = await getAuthenticatedConvexClient()
+
     // Query workspace by organization ID
-    const workspace = await fetchQuery(api.workspaces.getByOrgId, {
+    const workspace = await convex.query(api.workspaces.getByOrgId, {
       clerk_org_id: orgId,
     })
 
