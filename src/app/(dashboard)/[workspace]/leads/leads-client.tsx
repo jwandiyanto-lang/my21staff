@@ -1,12 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import type { Id } from 'convex/_generated/dataModel'
 import { LeadTable } from '@/components/leads/lead-table'
+import { LeadFilters } from '@/components/leads/lead-filters'
 import { columns } from '@/components/leads/lead-columns'
 import { Badge } from '@/components/ui/badge'
 import { MOCK_LEADS } from '@/lib/mock-data'
+import { ColumnFiltersState } from '@tanstack/react-table'
 
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
@@ -15,6 +18,10 @@ interface LeadsContentProps {
 }
 
 export function LeadsContent({ workspaceId }: LeadsContentProps) {
+  // Filter state
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
+
   // Query leads from Convex
   const leads = useQuery(
     api.leads.getLeadsByStatus,
@@ -56,16 +63,26 @@ export function LeadsContent({ workspaceId }: LeadsContentProps) {
         </p>
       </div>
 
-      {/* Filter bar - placeholder for Plan 02 */}
+      {/* Filter bar */}
       <div className="px-8 py-4 border-b border-border bg-muted/20">
-        <div className="text-xs text-muted-foreground">
-          Filters coming in next plan...
-        </div>
+        <LeadFilters
+          globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+        />
       </div>
 
       {/* Lead Table */}
       <div className="flex-1 overflow-auto px-8 py-6">
-        <LeadTable data={data} columns={columns} />
+        <LeadTable
+          data={data}
+          columns={columns}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+          globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
+        />
       </div>
     </div>
   )

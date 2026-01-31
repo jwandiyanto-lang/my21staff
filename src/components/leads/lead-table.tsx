@@ -4,9 +4,11 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
   flexRender,
   SortingState,
   ColumnDef,
+  ColumnFiltersState,
 } from '@tanstack/react-table'
 import { useState } from 'react'
 import {
@@ -21,11 +23,19 @@ import {
 interface LeadTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  columnFilters: ColumnFiltersState
+  setColumnFilters: (filters: ColumnFiltersState) => void
+  globalFilter: string
+  setGlobalFilter: (value: string) => void
 }
 
 export function LeadTable<TData, TValue>({
   columns,
   data,
+  columnFilters,
+  setColumnFilters,
+  globalFilter,
+  setGlobalFilter,
 }: LeadTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'lastActivityAt', desc: true }, // Sort by most recent activity first
@@ -36,9 +46,14 @@ export function LeadTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
+      columnFilters,
+      globalFilter,
     },
   })
 

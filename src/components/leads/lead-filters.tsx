@@ -1,19 +1,17 @@
 'use client'
 
-import { Table, ColumnFiltersState } from '@tanstack/react-table'
+import { ColumnFiltersState } from '@tanstack/react-table'
 import { StageFilter } from './stage-filter'
 import { SearchInput } from './search-input'
 import { DateRangeFilter } from './date-range-filter'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
-import type { Lead } from './lead-columns'
 
 interface LeadFiltersProps {
   globalFilter: string
   setGlobalFilter: (value: string) => void
   columnFilters: ColumnFiltersState
   setColumnFilters: (filters: ColumnFiltersState) => void
-  table: Table<Lead>
 }
 
 export function LeadFilters({
