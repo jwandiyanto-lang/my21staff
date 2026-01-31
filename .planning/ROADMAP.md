@@ -308,13 +308,15 @@ Daily Summary:
 
 ## Phase 6: Dashboard
 
-**Goal:** CRM dashboard displays leads, insights, analytics, and WhatsApp inbox with instant load from Convex + Kapso integration.
+**Goal:** CRM dashboard displays leads, insights, analytics with instant load from Convex.
+
+**Note:** WhatsApp Inbox (INBX-01 to INBX-05) already complete from Phase 2.5. This phase focuses on Lead List, AI Insights, and Analytics UI.
 
 **Requirements:**
-- DBLD-01 to DBLD-07 (7)
-- DBLI-01 to DBLI-06 (6)
-- DBLA-01 to DBLA-06 (6)
-- INBX-01 to INBX-05 (5)
+- DBLD-01 to DBLD-07 (7) - Lead List
+- DBLI-01 to DBLI-06 (6) - AI Insights
+- DBLA-01 to DBLA-06 (6) - Analytics
+- INBX-01 to INBX-05 (5) - WhatsApp Inbox (COMPLETE from Phase 2.5)
 
 **Success Criteria:**
 
@@ -343,22 +345,28 @@ Daily Summary:
 18. Common questions/topics trending (from Grok)
 19. Conversation volume chart over time
 
-**WhatsApp Inbox (whatsapp-cloud-inbox):**
-20. whatsapp-cloud-inbox integrated into dashboard
-21. Styled to match my21staff brand (black/white, Geist Mono)
-22. Kapso branding removed (fully custom UI)
-23. Connected to Kapso API with workspace credentials
-24. Send/receive messages, templates, media, and interactive buttons work
-
 **Deliverables:**
-- Dashboard UI (Shadcn/ui components)
-- Lead list page with filters + search
-- Lead detail page with conversation history
-- AI insights page with summaries + scores
-- Analytics page with charts
-- WhatsApp inbox page (whatsapp-cloud-inbox integrated)
+- Lead list page with TanStack Table + filters + search
+- Lead detail slide-out panel with conversation history
+- AI insights page with summaries + scores + actions
+- Analytics stat cards with trends
 - Convex real-time queries for instant load
-- Refresh functionality for insights
+- Dev mode support with mock data
+
+**Plans:** 6 plans
+- [ ] 06-01-PLAN.md — Lead list core (TanStack Table, columns, stage badges)
+- [ ] 06-02-PLAN.md — Lead filters (stage multi-select, search, date range)
+- [ ] 06-03-PLAN.md — Lead detail sheet (slide-out panel, notes, AI summary)
+- [ ] 06-04-PLAN.md — AI Insights page (summary, actions, patterns, quality)
+- [ ] 06-05-PLAN.md — Enhanced analytics (stat cards, trends, highlights)
+- [ ] 06-06-PLAN.md — Dev mode polish (mock data, navigation, error handling)
+
+**Status:** Planning complete — ready for execution
+
+**Wave Structure:**
+- Wave 1: 06-01, 06-02 (parallel - Lead list foundation)
+- Wave 2: 06-03, 06-04 (parallel - Detail panel and Insights page)
+- Wave 3: 06-05, 06-06 (parallel - Analytics and polish)
 
 ---
 
