@@ -9,12 +9,14 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
  * POST /api/organizations/create
  *
  * Create a new Clerk organization and corresponding Convex workspace.
+ * OR create a workspace for an existing organization.
  *
  * Flow:
- * 1. Create organization in Clerk
- * 2. Create workspace in Convex
- * 3. Link org and workspace via workspace_id in org public_metadata
- * 4. Return organization ID and workspace slug for redirect
+ * 1. If existingOrgId provided: Use existing org, skip Clerk creation
+ * 2. Otherwise: Create new organization in Clerk
+ * 3. Create workspace in Convex
+ * 4. Link org and workspace via workspace_id in org public_metadata
+ * 5. Return organization ID and workspace slug for redirect
  *
  * This is called by the onboarding page to auto-create user's workspace.
  */
@@ -26,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { name, slug } = await request.json()
+    const { name, slug, existingOrgId } = await request.json()
 
     if (!name || !slug) {
       return NextResponse.json(
@@ -35,19 +37,44 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create organization in Clerk
     const client = await clerkClient()
-    const organization = await client.organizations.createOrganization({
-      name,
-      slug,
-      createdBy: userId,
-    })
+    let organization
+
+    // Use existing organization or create new one
+    if (existingOrgId) {
+      // Organization already exists in Clerk, just fetch it
+      organization = await client.organizations.getOrganization({
+        organizationId: existingOrgId,
+      })
+    } else {
+      // Create new organization in Clerk
+      organization = await client.organizations.createOrganization({
+        name,
+        slug,
+        createdBy: userId,
+      })
+    }
 
     // Create workspace in Convex
     const workspaceId = await convex.mutation(api.workspaces.create, {
       name,
       slug,
       owner_id: userId,
+    })
+
+    // Create organization record in Convex (links Clerk org to workspace)
+    const orgId = await convex.mutation(api.organizations.create, {
+      clerk_org_id: organization.id,
+      workspace_id: workspaceId,
+      name: organization.name,
+      slug: organization.slug || slug,
+    })
+
+    // Create organization member record
+    await convex.mutation(api.organizations.createMember, {
+      organization_id: orgId,
+      clerk_user_id: userId,
+      role: 'org:admin',
     })
 
     // Update organization metadata with workspace ID

@@ -2,15 +2,15 @@
 
 ## Pricing Tiers
 
-| Feature | Solo | Pro (Recommended) |
-|---------|------|-------------------|
-| **Setup Fee** (one-time) | $750 | $750 |
-| **Monthly Fee** | Rp 2,900,000 | Rp 4,500,000 |
-| **The Intern** | ✅ | ✅ |
-| **The Brain** | ❌ | ✅ Claude 3.5 |
-| **Memory** | Transactional | Long-term |
-| **Channels** | WhatsApp | WhatsApp |
-| **Automated Promotions** | Every 3 months | Every month |
+| Feature                  | Solo           | Team (Recommended) |
+| ------------------------ | -------------- | ------------------ |
+| **Setup Fee** (one-time) | $750           | $750               |
+| **Monthly Fee**          | Rp 2,900,000   | Rp 4,500,000       |
+| **The Intern**           | ✅              | ✅                  |
+| **The Brain**            | ❌              | ✅ Claude 3.5       |
+| **Memory**               | Transactional  | Long-term          |
+| **Channels**             | WhatsApp       | WhatsApp           |
+| **Automated Promotions** | Every 3 months | Every month        |
 
 ---
 

@@ -59,17 +59,44 @@ export default function OnboardingPage() {
           }
 
           // Find workspace for this org
-          const workspace = await convex.query(api.workspaces.getByOrgId, {
+          let workspace = await convex.query(api.workspaces.getByOrgId, {
             clerk_org_id: firstOrg.id,
           })
 
           if (workspace) {
             router.push(`/${workspace.slug}`)
-          } else {
-            // Organization exists but no workspace - shouldn't happen, but handle it
-            setError('Organization exists but workspace not found. Please contact support.')
-            setStatus('error')
+            return
           }
+
+          // Organization exists but no workspace - create one
+          setStatus('creating')
+
+          // Generate workspace slug from organization name
+          const orgSlug = generateSlug(firstOrg.name, firstOrg.id)
+
+          // Create workspace via API
+          const response = await fetch('/api/organizations/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: firstOrg.name,
+              slug: orgSlug,
+              existingOrgId: firstOrg.id, // Pass existing org ID
+            }),
+          })
+
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || 'Failed to create workspace')
+          }
+
+          const { workspaceSlug } = await response.json()
+
+          // Redirect to new workspace
+          setStatus('complete')
+          router.push(`/${workspaceSlug}`)
           return
         }
 

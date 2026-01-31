@@ -1,10 +1,91 @@
-import { internalMutation } from "./_generated/server";
+import { internalMutation, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 /**
  * Organization CRUD mutations for Clerk webhook handling.
  * All mutations are idempotent to handle webhook retries.
  */
+
+// ============================================
+// PUBLIC MUTATIONS (for API routes)
+// ============================================
+
+export const create = mutation({
+  args: {
+    clerk_org_id: v.string(),
+    workspace_id: v.id("workspaces"),
+    name: v.string(),
+    slug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Check if organization already exists (idempotent)
+    const existing = await ctx.db
+      .query("organizations")
+      .withIndex("by_clerk_org_id", (q) => q.eq("clerk_org_id", args.clerk_org_id))
+      .first();
+
+    if (existing) {
+      // Update workspace_id if not set
+      if (!existing.workspace_id && args.workspace_id) {
+        await ctx.db.patch(existing._id, {
+          workspace_id: args.workspace_id,
+          updated_at: now,
+        });
+      }
+      return existing._id;
+    }
+
+    const orgId = await ctx.db.insert("organizations", {
+      clerk_org_id: args.clerk_org_id,
+      workspace_id: args.workspace_id,
+      name: args.name,
+      slug: args.slug,
+      created_at: now,
+      updated_at: now,
+    });
+
+    return orgId;
+  },
+});
+
+export const createMember = mutation({
+  args: {
+    organization_id: v.id("organizations"),
+    clerk_user_id: v.string(),
+    role: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Check if member already exists (idempotent)
+    const existing = await ctx.db
+      .query("organizationMembers")
+      .withIndex("by_org_user", (q) =>
+        q.eq("organization_id", args.organization_id).eq("clerk_user_id", args.clerk_user_id)
+      )
+      .first();
+
+    if (existing) {
+      return existing._id;
+    }
+
+    const memberId = await ctx.db.insert("organizationMembers", {
+      organization_id: args.organization_id,
+      clerk_user_id: args.clerk_user_id,
+      role: args.role,
+      created_at: now,
+      updated_at: now,
+    });
+
+    return memberId;
+  },
+});
+
+// ============================================
+// INTERNAL MUTATIONS (for webhooks)
+// ============================================
 
 // ============================================
 // CREATE ORGANIZATION

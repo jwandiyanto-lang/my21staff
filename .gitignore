@@ -52,3 +52,6 @@ app.log
 # clerk configuration (can include secrets)
 /.clerk/
 .obsidian/
+
+# Business documentation (contains credentials)
+business_21/
