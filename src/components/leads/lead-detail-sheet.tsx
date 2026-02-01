@@ -1,6 +1,9 @@
 'use client'
 
+import { useParams, useRouter } from 'next/navigation'
+import { MessageSquare } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
 import { LeadInfoCard } from './lead-info-card'
 import { LeadNotesTimeline } from './lead-notes-timeline'
 import { LeadAISummary } from './lead-ai-summary'
@@ -27,11 +30,21 @@ interface LeadDetailSheetProps {
 }
 
 export function LeadDetailSheet({ lead, open, onOpenChange }: LeadDetailSheetProps) {
+  const params = useParams()
+  const router = useRouter()
+
   if (!lead) return null
 
   // Default values for optional fields
   const temperature = lead.leadTemperature || 'new'
   const score = lead.leadScore || 0
+
+  const handleViewInInbox = () => {
+    // Navigate to inbox with phone number filter
+    // The Kapso inbox will search/filter by this phone
+    const workspaceSlug = params.workspace as string
+    router.push(`/${workspaceSlug}/inbox?phone=${encodeURIComponent(lead.phone)}`)
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -44,6 +57,19 @@ export function LeadDetailSheet({ lead, open, onOpenChange }: LeadDetailSheetPro
           <SheetDescription className="font-mono text-sm">
             {lead.phone}
           </SheetDescription>
+
+          {/* View in Inbox button */}
+          <div className="pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleViewInInbox}
+              className="w-full"
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              View in WhatsApp Inbox
+            </Button>
+          </div>
         </SheetHeader>
 
         <div className="space-y-6 mt-6">
