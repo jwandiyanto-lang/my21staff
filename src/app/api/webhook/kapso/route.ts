@@ -29,6 +29,7 @@ interface Contact {
   name?: string
   kapso_name?: string | null
   workspace_id: string
+  kapso_conversation_id?: string
 }
 
 interface Conversation {
@@ -240,7 +241,7 @@ async function processWorkspaceMessages(
     contactMap.set(phone, contact)
   }
 
-  // Step 2: Get or create all conversations
+  // Step 2: Get or create all conversations and link to contacts
   const conversationMap = new Map<string, Conversation>()
   for (const [phone, contact] of contactMap) {
     const conversation = await convex.mutation(api.mutations.findOrCreateConversationWebhook, {
@@ -249,6 +250,17 @@ async function processWorkspaceMessages(
     })
 
     conversationMap.set(phone, conversation)
+
+    // Link contact to conversation (if not already linked)
+    // This enables "Open in Inbox" from the Database lead view
+    if (!contact.kapso_conversation_id) {
+      await convex.mutation(api.mutations.findOrCreateContactWebhook, {
+        workspace_id: workspaceId,
+        phone: contact.phone,
+        phone_normalized: contact.phone_normalized || contact.phone,
+        kapso_conversation_id: conversation._id,
+      })
+    }
   }
 
   // Step 3: Filter out duplicate messages and insert new ones
