@@ -4,6 +4,8 @@ import { useEffect, useState, useRef, useMemo } from 'react';
 import { format, isValid, isToday, isYesterday, differenceInHours } from 'date-fns';
 import { RefreshCw, Paperclip, Send, X, AlertCircle, MessageSquare, XCircle, ListTree, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useQuery } from 'convex/react';
+import { api } from 'convex/_generated/api';
 import { MediaMessage } from '@/components/inbox/media-message';
 import { TemplateSelectorDialog } from '@/components/inbox/template-selector-dialog';
 import { InteractiveMessageDialog } from '@/components/inbox/interactive-message-dialog';
@@ -12,8 +14,6 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { useQuery } from 'convex/react';
-import { api } from 'convex/_generated/api';
 import { MOCK_MESSAGES } from '@/lib/mock-data';
 import type { MediaData } from '@kapso/whatsapp-cloud-api';
 import type { Id } from 'convex/_generated/dataModel';
@@ -118,7 +118,7 @@ function getDisabledInputMessage(messages: Message[]): string {
 }
 
 type Props = {
-  workspaceId?: string;
+  workspaceId: Id<'workspaces'>;
   conversationId?: string;
   phoneNumber?: string;
   contactName?: string;
@@ -140,87 +140,63 @@ export function MessageView({ workspaceId, conversationId, phoneNumber, contactN
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previousMessageCountRef = useRef(0);
 
-  // Use Convex query for messages
+  // Fetch messages from Convex with real-time updates
   const convexMessages = useQuery(
-    api.messages.listByConversation,
-    !isDevMode && conversationId
-      ? { conversation_id: conversationId as Id<'conversations'> }
+    api.messages.listByConversationAsc,
+    !isDevMode && conversationId && workspaceId
+      ? {
+          conversation_id: conversationId,
+          workspace_id: workspaceId,
+        }
       : 'skip'
   );
 
-  // Transform Convex messages to match UI format
+  // Transform messages to UI format
   const messages = useMemo<Message[]>(() => {
     // Dev mode: use mock data
     if (isDevMode) {
-      const mockConvMessages = MOCK_MESSAGES.filter(msg => msg.conversation_id === conversationId);
-      return mockConvMessages.map(msg => ({
-        id: msg.id,
-        direction: msg.direction as 'inbound' | 'outbound',
-        content: msg.content,
-        createdAt: msg.created_at,
-        status: 'delivered',
-        phoneNumber: phoneNumber || '',
-        hasMedia: !!msg.media_url,
-        messageType: msg.message_type,
-      }));
+      return MOCK_MESSAGES
+        .filter(msg => msg.conversation_id === conversationId)
+        .map(msg => ({
+          id: msg.id,
+          direction: msg.direction as 'inbound' | 'outbound',
+          content: msg.content,
+          createdAt: msg.created_at,
+          status: 'delivered',
+          phoneNumber: phoneNumber || '',
+          hasMedia: !!msg.media_url,
+          messageType: msg.message_type,
+        }));
     }
 
-    // Production: transform Convex data
+    // Production: transform Convex messages
     if (!convexMessages) return [];
 
-    // Separate reactions from regular messages
-    const reactions = convexMessages.filter(msg => msg.message_type === 'reaction');
-    const regularMessages = convexMessages.filter(msg => msg.message_type !== 'reaction');
-
-    // Create a map of message ID to reaction emoji
-    const reactionMap = new Map<string, string>();
-    reactions.forEach(reaction => {
-      const reactedToId = (reaction.metadata as Record<string, unknown>)?.reacted_to_message_id as string;
-      const emoji = (reaction.metadata as Record<string, unknown>)?.emoji as string;
-      if (reactedToId && emoji) {
-        reactionMap.set(reactedToId, emoji);
-      }
-    });
-
-    // Transform and attach reactions
-    return regularMessages.map(msg => {
-      const metadata = msg.metadata as Record<string, unknown> | undefined;
-      const mediaUrl = msg.media_url || (metadata?.media_url as string | undefined);
-      const mediaId = metadata?.mediaId as string | undefined;
-      // Status may be stored in metadata since schema doesn't have status field
-      const status = metadata?.status as string | undefined;
-
-      return {
-        id: msg._id,
-        direction: msg.direction as 'inbound' | 'outbound',
-        content: msg.content || '',
-        createdAt: new Date(msg.created_at).toISOString(),
-        status: status || (msg.direction === 'outbound' ? 'delivered' : undefined),
-        phoneNumber: phoneNumber || '',
-        hasMedia: !!mediaUrl,
-        mediaData: mediaUrl ? { url: mediaUrl } : undefined,
-        messageType: msg.message_type,
-        caption: metadata?.caption as string | undefined,
-        reactionEmoji: reactionMap.get(msg.kapso_message_id || ''),
-        metadata: {
-          mediaId: mediaId,
-          caption: metadata?.caption as string | undefined,
-        },
-      };
-    });
+    return convexMessages.map((msg: any) => ({
+      id: msg._id,
+      direction: msg.direction as 'inbound' | 'outbound',
+      content: msg.content || '',
+      createdAt: msg.created_at || new Date().toISOString(),
+      status: msg.status,
+      phoneNumber: phoneNumber || '',
+      hasMedia: !!msg.media_url,
+      mediaData: msg.media_url
+        ? {
+            url: msg.media_url,
+            contentType: msg.mime_type,
+            filename: msg.filename,
+          }
+        : undefined,
+      messageType: msg.message_type,
+      caption: msg.caption,
+      filename: msg.filename,
+      mimeType: msg.mime_type,
+      metadata: msg.metadata,
+    }));
   }, [convexMessages, conversationId, phoneNumber]);
 
   const loading = !isDevMode && conversationId && convexMessages === undefined;
 
-  // Debug logging (production)
-  if (typeof window !== 'undefined' && !isDevMode) {
-    console.log('[MessageView] Debug:', {
-      workspaceId,
-      conversationId,
-      convexMessages: convexMessages ? `${convexMessages.length} messages` : 'undefined',
-      loading,
-    });
-  }
   const canSendRegularMessage = isWithin24HourWindow(messages);
 
   const scrollToBottom = () => {
@@ -295,7 +271,7 @@ export function MessageView({ workspaceId, conversationId, phoneNumber, contactN
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            workspace_id: workspaceId,
+            workspace_id: workspaceId as string, // Convex Id is string at runtime
             conversation_id: conversationId,
             content: messageInput.trim(),
             message_type: 'text',
