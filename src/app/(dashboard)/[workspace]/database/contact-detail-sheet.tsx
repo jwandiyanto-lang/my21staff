@@ -68,6 +68,7 @@ import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-s
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { Contact, ContactNote, Profile, WorkspaceMember } from '@/types/database'
+import { LeadPanel } from './lead-panel'
 
 type TeamMember = WorkspaceMember & { profile: Profile | null }
 
@@ -896,121 +897,34 @@ export function ContactDetailSheet({
           <TabsContent value="details" className="flex-1 m-0 overflow-auto">
             <ScrollArea className="h-full">
               <div className="p-6 space-y-6">
-                {/* Contact Info - Editable */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                      Contact Information
-                    </h3>
-                    {isUpdatingInfo && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-                  </div>
-                  <div className="space-y-3">
-                    {/* Name field */}
-                    <div className="flex items-center gap-3 group">
-                      <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      {editingField === 'name' ? (
-                        <div className="flex-1 flex items-center gap-1">
-                          <Input
-                            value={localName}
-                            onChange={(e) => setLocalName(e.target.value)}
-                            className="h-8 text-sm"
-                            placeholder="Name"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSaveField('name')
-                              if (e.key === 'Escape') handleCancelEdit('name')
-                            }}
-                          />
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleSaveField('name')} disabled={isUpdatingInfo}>
-                            <Check className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCancelEdit('name')}>
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex-1 flex items-center justify-between">
-                          <span>{localName || 'No name'}</span>
-                          <button onClick={() => setEditingField('name')} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded">
-                            <Pencil className="h-3 w-3 text-muted-foreground" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Phone field */}
-                    <div className="flex items-center gap-3 group">
-                      <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      {editingField === 'phone' ? (
-                        <div className="flex-1 flex items-center gap-1">
-                          <Input
-                            value={localPhone}
-                            onChange={(e) => setLocalPhone(e.target.value)}
-                            className="h-8 text-sm"
-                            placeholder="Phone"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSaveField('phone')
-                              if (e.key === 'Escape') handleCancelEdit('phone')
-                            }}
-                          />
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleSaveField('phone')} disabled={isUpdatingInfo}>
-                            <Check className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCancelEdit('phone')}>
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex-1 flex items-center justify-between">
-                          <span>{localPhone}</span>
-                          <button onClick={() => setEditingField('phone')} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded">
-                            <Pencil className="h-3 w-3 text-muted-foreground" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Email field */}
-                    <div className="flex items-center gap-3 group">
-                      <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      {editingField === 'email' ? (
-                        <div className="flex-1 flex items-center gap-1">
-                          <Input
-                            value={localEmail}
-                            onChange={(e) => setLocalEmail(e.target.value)}
-                            className="h-8 text-sm"
-                            placeholder="Email"
-                            type="email"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSaveField('email')
-                              if (e.key === 'Escape') handleCancelEdit('email')
-                            }}
-                          />
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleSaveField('email')} disabled={isUpdatingInfo}>
-                            <Check className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCancelEdit('email')}>
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex-1 flex items-center justify-between">
-                          <span>{localEmail || 'No email'}</span>
-                          <button onClick={() => setEditingField('email')} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded">
-                            <Pencil className="h-3 w-3 text-muted-foreground" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Created date - not editable */}
-                    <div className="text-sm text-muted-foreground">
-                      Added {formatWIB(contact.created_at, DATE_FORMATS.DATE_LONG)}
-                    </div>
-                  </div>
-                </div>
+                {/* Lead Panel - Structured Lead Data */}
+                <LeadPanel
+                  contact={{
+                    _id: contact.id as any,
+                    workspace_id: workspace.slug as any,
+                    name: contact.name,
+                    phone: contact.phone,
+                    phone_normalized: contact.phone_normalized,
+                    email: contact.email,
+                    lead_score: contact.lead_score,
+                    lead_status: contact.lead_status,
+                    leadStatus: contact.leadStatus,
+                    leadTemperature: contact.leadTemperature,
+                    tags: contact.tags,
+                    source: contact.source,
+                    metadata: contact.metadata,
+                    lastActivityAt: contact.lastActivityAt,
+                    lastContactAt: contact.lastContactAt,
+                    created_at: contact.created_at,
+                    updated_at: contact.updated_at,
+                    businessType: contact.businessType,
+                    domisili: contact.domisili,
+                    story: contact.story,
+                    painPoints: contact.painPoints,
+                    urgencyLevel: contact.urgencyLevel,
+                  }}
+                  workspaceId={workspace.slug}
+                />
 
                 <Separator />
 
