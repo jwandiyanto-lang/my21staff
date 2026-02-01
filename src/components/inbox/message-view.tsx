@@ -1,19 +1,24 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { format, isValid, isToday, isYesterday, differenceInHours } from 'date-fns';
 import { RefreshCw, Paperclip, Send, X, AlertCircle, MessageSquare, XCircle, ListTree, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MediaMessage } from '@/components/inbox/media-message';
 import { TemplateSelectorDialog } from '@/components/inbox/template-selector-dialog';
 import { InteractiveMessageDialog } from '@/components/inbox/interactive-message-dialog';
-import { useAutoPolling } from '@/hooks/use-auto-polling';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { useQuery } from 'convex/react';
+import { api } from 'convex/_generated/api';
+import { MOCK_MESSAGES } from '@/lib/mock-data';
 import type { MediaData } from '@kapso/whatsapp-cloud-api';
+import type { Id } from 'convex/_generated/dataModel';
+
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true';
 
 type Message = {
   id: string;
@@ -113,6 +118,7 @@ function getDisabledInputMessage(messages: Message[]): string {
 }
 
 type Props = {
+  workspaceId?: string;
   conversationId?: string;
   phoneNumber?: string;
   contactName?: string;
@@ -121,15 +127,11 @@ type Props = {
   isVisible?: boolean;
 };
 
-export function MessageView({ conversationId, phoneNumber, contactName, onTemplateSent, onBack, isVisible = false }: Props) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+export function MessageView({ workspaceId, conversationId, phoneNumber, contactName, onTemplateSent, onBack, isVisible = false }: Props) {
   const [messageInput, setMessageInput] = useState('');
   const [sending, setSending] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [canSendRegularMessage, setCanSendRegularMessage] = useState(true);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [showInteractiveDialog, setShowInteractiveDialog] = useState(false);
   const [isNearBottom, setIsNearBottom] = useState(true);
@@ -138,66 +140,90 @@ export function MessageView({ conversationId, phoneNumber, contactName, onTempla
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previousMessageCountRef = useRef(0);
 
+  // Use Convex query for messages
+  const convexMessages = useQuery(
+    api.messages.listByConversation,
+    !isDevMode && conversationId
+      ? { conversation_id: conversationId as Id<'conversations'> }
+      : 'skip'
+  );
+
+  // Transform Convex messages to match UI format
+  const messages = useMemo<Message[]>(() => {
+    // Dev mode: use mock data
+    if (isDevMode) {
+      const mockConvMessages = MOCK_MESSAGES.filter(msg => msg.conversation_id === conversationId);
+      return mockConvMessages.map(msg => ({
+        id: msg.id,
+        direction: msg.direction as 'inbound' | 'outbound',
+        content: msg.content,
+        createdAt: msg.created_at,
+        status: 'delivered',
+        phoneNumber: phoneNumber || '',
+        hasMedia: !!msg.media_url,
+        messageType: msg.message_type,
+      }));
+    }
+
+    // Production: transform Convex data
+    if (!convexMessages) return [];
+
+    // Separate reactions from regular messages
+    const reactions = convexMessages.filter(msg => msg.message_type === 'reaction');
+    const regularMessages = convexMessages.filter(msg => msg.message_type !== 'reaction');
+
+    // Create a map of message ID to reaction emoji
+    const reactionMap = new Map<string, string>();
+    reactions.forEach(reaction => {
+      const reactedToId = (reaction.metadata as Record<string, unknown>)?.reacted_to_message_id as string;
+      const emoji = (reaction.metadata as Record<string, unknown>)?.emoji as string;
+      if (reactedToId && emoji) {
+        reactionMap.set(reactedToId, emoji);
+      }
+    });
+
+    // Transform and attach reactions
+    return regularMessages.map(msg => {
+      const metadata = msg.metadata as Record<string, unknown> | undefined;
+      const mediaUrl = msg.media_url || (metadata?.media_url as string | undefined);
+      const mediaId = metadata?.mediaId as string | undefined;
+      // Status may be stored in metadata since schema doesn't have status field
+      const status = metadata?.status as string | undefined;
+
+      return {
+        id: msg._id,
+        direction: msg.direction as 'inbound' | 'outbound',
+        content: msg.content || '',
+        createdAt: new Date(msg.created_at).toISOString(),
+        status: status || (msg.direction === 'outbound' ? 'delivered' : undefined),
+        phoneNumber: phoneNumber || '',
+        hasMedia: !!mediaUrl,
+        mediaData: mediaUrl ? { url: mediaUrl } : undefined,
+        messageType: msg.message_type,
+        caption: metadata?.caption as string | undefined,
+        reactionEmoji: reactionMap.get(msg.kapso_message_id || ''),
+        metadata: {
+          mediaId: mediaId,
+          caption: metadata?.caption as string | undefined,
+        },
+      };
+    });
+  }, [convexMessages, conversationId, phoneNumber]);
+
+  const loading = !isDevMode && conversationId && convexMessages === undefined;
+  const canSendRegularMessage = isWithin24HourWindow(messages);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const fetchMessages = useCallback(async () => {
-    if (!conversationId) return;
-
-    try {
-      const response = await fetch(`/api/messages/${conversationId}`);
-      const data = await response.json();
-
-      // Separate reactions from regular messages
-      const reactions = (data.data || []).filter((msg: Message) => msg.messageType === 'reaction');
-      const regularMessages = (data.data || []).filter((msg: Message) => msg.messageType !== 'reaction');
-
-      // Create a map of message ID to reaction emoji
-      const reactionMap = new Map<string, string>();
-      reactions.forEach((reaction: Message) => {
-        if (reaction.reactedToMessageId && reaction.reactionEmoji) {
-          reactionMap.set(reaction.reactedToMessageId, reaction.reactionEmoji);
-        }
-      });
-
-      // Attach reactions to their corresponding messages
-      const messagesWithReactions = regularMessages.map((msg: Message) => {
-        const reaction = reactionMap.get(msg.id);
-        return reaction ? { ...msg, reactionEmoji: reaction } : msg;
-      });
-
-      const sortedMessages = messagesWithReactions.sort((a: Message, b: Message) => {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      });
-
-      setMessages(sortedMessages);
-      previousMessageCountRef.current = sortedMessages.length;
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [conversationId]);
-
   useEffect(() => {
-    if (conversationId) {
-      setLoading(true);
-      fetchMessages();
-    }
-  }, [conversationId, fetchMessages]);
-
-  useEffect(() => {
-    // Only auto-scroll if user is near bottom
-    if (isNearBottom) {
+    // Only auto-scroll if user is near bottom or new messages arrived
+    if (isNearBottom || messages.length > previousMessageCountRef.current) {
       scrollToBottom();
     }
+    previousMessageCountRef.current = messages.length;
   }, [messages, isNearBottom]);
-
-  useEffect(() => {
-    setCanSendRegularMessage(isWithin24HourWindow(messages));
-  }, [messages]);
 
   // Track if user is near bottom of scroll
   useEffect(() => {
@@ -219,18 +245,6 @@ export function MessageView({ conversationId, phoneNumber, contactName, onTempla
       return () => viewport.removeEventListener('scroll', handleScroll);
     }
   }, []);
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    fetchMessages();
-  };
-
-  // Auto-polling for messages (every 5 seconds)
-  useAutoPolling({
-    interval: 5000,
-    enabled: !!conversationId,
-    onPoll: fetchMessages
-  });
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -261,37 +275,48 @@ export function MessageView({ conversationId, phoneNumber, contactName, onTempla
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if ((!messageInput.trim() && !selectedFile) || !phoneNumber || sending) return;
+    if ((!messageInput.trim() && !selectedFile) || !conversationId || !workspaceId || sending) return;
 
     setSending(true);
     try {
-      const formData = new FormData();
-      formData.append('to', phoneNumber);
+      // For text messages (and text with file attachments)
       if (messageInput.trim()) {
-        formData.append('body', messageInput);
-      }
-      if (selectedFile) {
-        formData.append('file', selectedFile);
+        const response = await fetch('/api/messages/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workspace_id: workspaceId,
+            conversation_id: conversationId,
+            content: messageInput.trim(),
+            message_type: 'text',
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to send message');
+        }
       }
 
-      await fetch('/api/messages/send', {
-        method: 'POST',
-        body: formData
-      });
+      // For file uploads, use FormData (separate flow)
+      // TODO: Implement /api/messages/send-media endpoint for file uploads
+      if (selectedFile) {
+        console.warn('File upload not yet implemented - needs /api/messages/send-media endpoint');
+      }
 
       setMessageInput('');
       handleRemoveFile();
-      await fetchMessages();
+      // Convex handles reactivity - new message will appear automatically
     } catch (error) {
       console.error('Error sending message:', error);
+      // TODO: Show error toast to user
     } finally {
       setSending(false);
     }
   };
 
   const handleTemplateSent = async () => {
-    await fetchMessages();
-
+    // Convex handles reactivity - messages update automatically
     // Notify parent to refresh conversation list and select this conversation
     if (phoneNumber && onTemplateSent) {
       await onTemplateSent(phoneNumber);
@@ -381,13 +406,13 @@ export function MessageView({ conversationId, phoneNumber, contactName, onTempla
             </div>
           </div>
           <Button
-            onClick={handleRefresh}
-            disabled={refreshing}
+            onClick={() => {}} // No-op - Convex handles reactivity
             variant="ghost"
             size="icon"
             className="text-[#667781] hover:bg-[#f0f2f5]"
+            title="Real-time sync enabled"
           >
-            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+            <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -648,7 +673,7 @@ export function MessageView({ conversationId, phoneNumber, contactName, onTempla
         onOpenChange={setShowInteractiveDialog}
         conversationId={conversationId}
         phoneNumber={phoneNumber}
-        onMessageSent={fetchMessages}
+        onMessageSent={() => {}} // Convex handles reactivity
       />
     </div>
   );
