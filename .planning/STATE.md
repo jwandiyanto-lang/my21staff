@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 
 Milestone: v2.0.1 Workflow Integration & Lead Automation
 Phase: 12 of 13 (Sarah Template System)
-Plan: 1 of TBD in current phase
+Plan: 2 of TBD in current phase
 Status: In progress
-Last activity: 2026-02-01 - Completed plan 12-01 (Sarah config backend)
+Last activity: 2026-02-01 - Completed plan 12-02 (Sarah configuration UI)
 
-Progress: [██████████████████████░░] 81% (34/42 estimated total plans)
+Progress: [██████████████████████░░] 83% (35/42 estimated total plans)
 
 ## Performance Metrics
 
@@ -43,10 +43,10 @@ Progress: [██████████████████████░
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 10. Sarah Bot Refinement | 1/1 | ~30min | 30min |
-| 12. Sarah Template System | 1/1 | ~3min | 3min |
+| 12. Sarah Template System | 2/? | ~23min | 12min |
 
 **Recent Trend:**
-- Last 5 plans: 60min, 60min, 45min, 60min, 30min
+- Last 5 plans: 60min, 45min, 60min, 30min, 20min
 - Trend: Improving (automation via MCP reducing manual work)
 
 *Updated after each plan completion*
@@ -64,6 +64,9 @@ Recent decisions affecting v2.0.1 work:
 - **Phase 10**: Sarah is PRIMARY lead generation workflow (ID: 65762c7d-8ab0-4122-810e-9a5562a7a9ca)
 - **Phase 12**: Customer editing via configuration layer (all plans, simple UI in "Your team" tab)
 - **Phase 12**: Bot name customizable (default "Your Intern")
+- **Phase 12**: Sarah config placed on your-team page (Intern tab), not Clerk team page
+- **Phase 12**: Dev mode static form pattern for offline development
+- **Phase 12**: Simplified UI - Insights and Brain settings hidden for v2.0.1
 
 ### Pending Todos
 
@@ -92,7 +95,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-01
-Stopped at: Completed plan 12-01 (Sarah config backend), created sarahConfigs table and Convex functions
+Stopped at: Completed plan 12-02 (Sarah configuration UI)
 Resume file: None
 
 ---
