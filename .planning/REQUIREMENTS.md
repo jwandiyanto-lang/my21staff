@@ -69,13 +69,34 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (To be filled by roadmapper) |  |  |
+| SARAH-01 | Phase 10 | Pending |
+| SARAH-02 | Phase 10 | Pending |
+| SARAH-03 | Phase 10 | Pending |
+| SARAH-04 | Phase 12 | Pending |
+| SARAH-05 | Phase 12 | Pending |
+| LEAD-01 | Phase 11 | Pending |
+| LEAD-02 | Phase 11 | Pending |
+| LEAD-03 | Phase 11 | Pending |
+| LEAD-04 | Phase 11 | Pending |
+| LEAD-05 | Phase 11 | Pending |
+| DATA-01 | Phase 11 | Pending |
+| DATA-02 | Phase 11 | Pending |
+| DATA-03 | Phase 11 | Pending |
+| TEST-01 | Phase 10 | Pending |
+| TEST-02 | Phase 13 | Pending |
+| TEST-03 | Phase 13 | Pending |
 
 **Coverage:**
 - v2.0.1 requirements: 16 total
-- Mapped to phases: (pending roadmap)
-- Unmapped: (pending roadmap)
+- Mapped to phases: 16/16 (100%)
+- Unmapped: 0
+
+**Phase distribution:**
+- Phase 10 (Sarah Bot Refinement): 4 requirements
+- Phase 11 (Smart Lead Automation): 8 requirements
+- Phase 12 (Sarah Template System): 2 requirements
+- Phase 13 (Production Validation): 2 requirements
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-01 after initial definition*
+*Last updated: 2026-02-01 after roadmap creation*
