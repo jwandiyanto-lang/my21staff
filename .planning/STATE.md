@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Milestone: v2.0.1 Workflow Integration & Lead Automation
-Phase: 13 of 13 (Production Validation)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-01 - Completed Phase 12 plan 04, Your Team page Brain tab removed
+Phase: 11 of 13 (Smart Lead Automation)
+Plan: 1 of 1 in current phase
+Status: Phase complete
+Last activity: 2026-02-01 - Completed Phase 11 plan 01, phone deduplication and conversation linking
 
-Progress: [█████████████████████████] 87% (37/42 estimated total plans)
+Progress: [█████████████████████████] 88% (38/42 estimated total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 36 (from v2.0 + v2.0.1)
-- Average duration: ~45 min
+- Total plans completed: 37 (from v2.0 + v2.0.1)
+- Average duration: ~42 min
 - Total execution time: ~26.5 hours over 2 days
 
 **By Phase (v2.0):**
@@ -43,11 +43,12 @@ Progress: [███████████████████████
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 10. Sarah Bot Refinement | 1/1 | ~30min | 30min |
+| 11. Smart Lead Automation | 1/1 | ~4min | 4min |
 | 12. Sarah Template System | 4/4 | ~40min | 10min |
 
 **Recent Trend:**
-- Last 5 plans: 10min, 12min, 12min, 12min, 12min
-- Trend: Excellent (documentation and small code tasks)
+- Last 5 plans: 4min, 10min, 12min, 12min, 12min
+- Trend: Excellent (efficient focused changes)
 
 *Updated after each plan completion*
 
@@ -62,6 +63,10 @@ Recent decisions affecting v2.0.1 work:
 - **Phase 7**: Embedded Kapso inbox (vs building custom UI)
 - **Phase 10**: Simplified Sarah workflow (start → agent → send_trial_link)
 - **Phase 10**: Sarah is PRIMARY lead generation workflow (ID: 65762c7d-8ab0-4122-810e-9a5562a7a9ca)
+- **Phase 11**: Query by phone_normalized instead of raw phone to prevent duplicate leads
+- **Phase 11**: Update lastActivityAt on every inbound message for follow-up prioritization
+- **Phase 11**: Link contacts to conversations via kapso_conversation_id for inbox navigation
+- **Phase 11**: Preserve manual CRM name edits (only update if empty)
 - **Phase 12**: Customer editing via configuration layer (all plans, simple UI in "Your team" tab)
 - **Phase 12**: Bot name customizable (default "Your Intern")
 - **Phase 12**: SarahConfigCard integrated into team page with dev mode support
@@ -75,9 +80,9 @@ None yet.
 
 **Known from research:**
 - Kapso workflows cannot be edited via API (manual Dashboard setup required)
-- Phone normalization needed (libphonenumber-js for E.164 format)
-- Webhook idempotency critical to prevent duplicate leads
-- Lead creation partially working (Phase 4 webhook exists, needs hardening)
+- Phone normalization implemented via by_workspace_phone_normalized index ✅
+- Webhook idempotency verified (dual-layer: kapso_message_id + phone_normalized) ✅
+- Lead creation working (Phase 11 fixes complete) ✅
 
 **v2.0 incomplete plans:**
 - Phase 3 plan 03-03: Webhook issues (may need revisit)
@@ -91,13 +96,13 @@ None yet.
 - Data Integrity: 3 requirements
 - Production Testing: 3 requirements
 
-**Phase 11 Skipped:**
-Per user request, Phase 11 (Smart Lead Automation) was skipped to focus on Phase 12 (Sarah Template System). Phase 11 can be planned and executed later if needed.
+**Phase 11 Complete:**
+Phone deduplication and conversation linking implemented. Ready for production testing in Phase 13.
 
 ## Session Continuity
 
 Last session: 2026-02-01
-Stopped at: Completed Phase 12 plan 04 (Your Team page Brain tab removed)
+Stopped at: Completed Phase 11 plan 01 (phone deduplication and conversation linking)
 Resume file: None - ready to plan Phase 13 (final phase of v2.0.1)
 
 ---
