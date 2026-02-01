@@ -113,9 +113,15 @@ See `.planning/archive/v1.0.0/` for previous milestone history.
 | Combo handoff workflow | Dashboard alert + WhatsApp notification + auto-reply vs single channel | — Pending |
 | Keep Convex + Clerk + Vercel | Infrastructure proven and working | ✓ Good |
 
-## Next Milestone
+## Current Milestone: v2.0.1 Workflow Integration & Lead Automation
 
-Ready to plan next iteration. Run `/gsd:new-milestone` to begin.
+**Goal:** Connect Kapso workflow settings to CRM dashboard and automate lead creation from all WhatsApp messages
+
+**Target features:**
+- Workflow management UI integrated with Your Team settings
+- Automatic lead creation/update on every Kapso message
+- Daily activity summaries auto-generated as lead notes
+- Lead deduplication by phone number
 
 ---
-*Last updated: 2026-02-01 after v2.0 milestone completion*
+*Last updated: 2026-02-01 after v2.0.1 milestone started*

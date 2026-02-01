@@ -10,13 +10,13 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 
 ## Current Position
 
-Milestone: v2.0 — COMPLETE ✅ (Shipped 2026-02-01)
-Phase: Between milestones
-Plan: N/A
-Status: Ready for next milestone planning
-Last activity: 2026-02-01 — v2.0 milestone complete
+Milestone: v2.0.1 — STARTED (2026-02-01)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Researching domain capabilities
+Last activity: 2026-02-01 — Milestone v2.0.1 started
 
-Progress: v2.0 shipped (9 phases, 32/35 plans)
+Progress: Researching Kapso API and workflow integration patterns
 
 ## V2.0 Milestone
 
