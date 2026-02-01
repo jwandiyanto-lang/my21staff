@@ -81,8 +81,8 @@ export const ConversationList = forwardRef<ConversationListRef, Props>(
   // Use Convex query for conversations
   const convexConversations = useQuery(
     api.conversations.listByWorkspace,
-    !isDevMode
-      ? { workspace_id: workspaceId }
+    !isDevMode && workspaceId
+      ? { workspace_id: workspaceId as string }
       : 'skip'
   );
 
@@ -128,6 +128,15 @@ export const ConversationList = forwardRef<ConversationListRef, Props>(
   }, [convexConversations]);
 
   const loading = !isDevMode && convexConversations === undefined;
+
+  // Debug logging (production)
+  if (typeof window !== 'undefined' && !isDevMode) {
+    console.log('[ConversationList] Debug:', {
+      workspaceId,
+      convexConversations: convexConversations ? `${convexConversations.length} conversations` : 'undefined',
+      loading,
+    });
+  }
 
   const selectByPhoneNumber = (phoneNumber: string) => {
     const conversation = conversations.find(conv => conv.phoneNumber === phoneNumber);

@@ -211,6 +211,16 @@ export function MessageView({ workspaceId, conversationId, phoneNumber, contactN
   }, [convexMessages, conversationId, phoneNumber]);
 
   const loading = !isDevMode && conversationId && convexMessages === undefined;
+
+  // Debug logging (production)
+  if (typeof window !== 'undefined' && !isDevMode) {
+    console.log('[MessageView] Debug:', {
+      workspaceId,
+      conversationId,
+      convexMessages: convexMessages ? `${convexMessages.length} messages` : 'undefined',
+      loading,
+    });
+  }
   const canSendRegularMessage = isWithin24HourWindow(messages);
 
   const scrollToBottom = () => {
