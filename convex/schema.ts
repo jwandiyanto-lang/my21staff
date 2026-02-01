@@ -673,6 +673,20 @@ export default defineSchema({
     .index("by_workspace", ["workspace_id"]),
 
   // ============================================
+  // SARAH CONFIGS (Customer-editable Sarah bot settings)
+  // ============================================
+  sarahConfigs: defineTable({
+    workspace_id: v.id("workspaces"),
+    bot_name: v.string(),        // Display name, default "Your Intern"
+    language: v.string(),        // "id" | "en"
+    pronoun: v.string(),         // "Kamu" | "Anda" (Indonesian formality)
+    trial_link: v.string(),      // URL to trial signup
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_workspace", ["workspace_id"]),
+
+  // ============================================
   // SARAH CONVERSATIONS (Sarah bot state per contact)
   // ============================================
   sarahConversations: defineTable({
