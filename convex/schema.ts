@@ -104,6 +104,7 @@ export default defineSchema({
     lastActivityAt: v.optional(v.number()), // Any interaction (message, status, note)
   })
     .index("by_workspace_phone", ["workspace_id", "phone"])
+    .index("by_workspace_phone_normalized", ["workspace_id", "phone_normalized"])
     .index("by_workspace", ["workspace_id"])
     .index("by_assigned", ["workspace_id", "assigned_to"])
     .index("by_workspace_status", ["workspace_id", "leadStatus"])
