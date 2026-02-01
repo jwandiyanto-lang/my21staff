@@ -97,14 +97,14 @@ Plans:
 **Depends on**: Phase 9 (production deployment exists)
 **Requirements**: SARAH-01, SARAH-02, SARAH-03, TEST-01
 **Success Criteria** (what must be TRUE):
-  1. Sarah messages match persona guide (conversational tone, under 140 chars, 1 emoji)
+  1. Sarah messages match persona guide (conversational tone, under 140 chars, NO emojis)
   2. Sarah escalates to human when user requests or qualification stalls
-  3. Sarah extracts lead fields accurately (name, service, budget, timeline)
+  3. Sarah extracts lead fields accurately (name, business_type, location, tenure, pain_confirmed)
   4. Developer can test Sarah changes by messaging WhatsApp number immediately
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 10-01: TBD during planning
+- [ ] 10-01-PLAN.md — Refine Sarah persona prompt + document CLI workflow
 
 #### Phase 11: Smart Lead Automation
 **Goal**: First message creates lead, subsequent messages update existing lead
@@ -162,7 +162,7 @@ Phases execute numerically: 10 → 11 → 12 → 13
 | 7. Inbox Integration | v2.0 | 2/2 | Complete | 2026-02-01 |
 | 8. Handoff Workflow | v2.0 | 2/2 | Complete | 2026-02-01 |
 | 9. Production Deployment | v2.0 | 2/3 | Complete | 2026-02-01 |
-| 10. Sarah Bot Refinement | v2.0.1 | 0/TBD | Not started | - |
+| 10. Sarah Bot Refinement | v2.0.1 | 0/1 | Ready | - |
 | 11. Smart Lead Automation | v2.0.1 | 0/TBD | Not started | - |
 | 12. Sarah Template System | v2.0.1 | 0/TBD | Not started | - |
 | 13. Production Validation | v2.0.1 | 0/TBD | Not started | - |
