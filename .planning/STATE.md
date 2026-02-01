@@ -6,16 +6,17 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 8 - Handoff Workflow (Connect Kapso + sync)
+**Current focus:** Phase 9 - Testing & Polish
 
 ## Current Position
 
 Milestone: v2.0
-Phase: Phase 8 - Handoff Workflow — READY TO START
-Status: Phase 7 complete, starting Phase 8
-Last activity: 2026-01-31 — Completed 07-03-PLAN.md: End-to-End Auth Verification
+Phase: 9 of 9 (Testing & Polish)
+Plan: 1 of 4
+Status: In progress - Kapso infrastructure verified
+Last activity: 2026-02-01 — Completed 09-01-PLAN.md (Kapso WhatsApp verification)
 
-Progress: ████████████████████████████████████████░ 140% (35 of 25 base plans, Phase 7 complete)
+Progress: █████████████████████████████████████████ 148% (37 of 25 base plans)
 
 ## V2.0 Milestone
 
@@ -31,8 +32,8 @@ Progress: ███████████████████████�
 5. Grok Manager Bot (Analysis + insights) - ✅ COMPLETED (6 plans)
 6. Dashboard (Lead list + analytics) - ✅ COMPLETED (6 plans)
 7. Production Launch (Deploy + test infrastructure) - ✅ COMPLETED (3 plans)
-8. Handoff Workflow (Kapso connection + sync) - READY TO START
-9. Testing & Polish
+8. Handoff Workflow (Kapso connection + sync) - ✅ COMPLETED (1 plan)
+9. Testing & Polish - IN PROGRESS (1 of 4 plans complete)
 
 **Total Requirements:** 52+
 
@@ -85,6 +86,28 @@ Progress: ███████████████████████�
 | 07-01 | ✅ Complete (executed 2026-01-31, 15 min) | Application deployed to www.my21staff.com with Clerk auth active, middleware protecting routes, dev mode disabled |
 | 07-02 | ✅ Complete (executed 2026-01-31, 73 min) | Landing page redesigned with minimalist console theme, dual navigation CTAs, activity feed mockup deployed to production |
 | 07-03 | ✅ Complete (executed 2026-01-31, 30 min) | JWT template fix, 350+ duplicate workspace cleanup, dashboard slug-to-ID fix, end-to-end auth verified |
+
+### Phase 8 Progress: Handoff Workflow — COMPLETE ✅
+
+| Plan | Status | Summary |
+|------|--------|---------|
+| 08-01 | ✅ Complete (executed 2026-01-31) | Message view updated to use Convex real-time, Sarah v2 3-phase workflow created (17 nodes, Grok 4.1-fast), workflow activated with WhatsApp trigger |
+
+**Phase 8 deliverables:**
+- Message view component refactored to use Convex `useQuery` for real-time updates
+- Removed API polling in favor of Convex reactive subscriptions
+- Sarah v2 workflow: `67cf2cdc-a8fd-43fa-9721-4ea5d82f0190` (Lead Qualification)
+- Complex 3-phase state machine: Greeting/Data Gathering → Summarize/Interest → Sales Closing/Handoff
+- Lead scoring: HOT (immediate handoff), WARM (nurture + close), COLD (polite close)
+- Triple-Threat Mindset closing techniques integrated
+- Grok 4.1-fast model for AI decisions (temperature 0.8, max tokens 150)
+- WhatsApp trigger active on +62 813-1859-025
+
+### Phase 9 Progress: Testing & Polish — IN PROGRESS
+
+| Plan | Status | Summary |
+|------|--------|---------|
+| 09-01 | ✅ Complete (executed 2026-02-01, 5 min) | Kapso infrastructure verified operational, Sarah v2 WhatsApp integration tested end-to-end, response time <30s |
 
 ## V1.0.0 Archive Summary
 
@@ -203,6 +226,9 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - **Minimalist console theme for landing** - Activity feed mockup, browser-style headers, pulsing live indicators showcase AI automation
 - **JetBrains Mono for console elements** - Reinforces tech-forward brand, readable for data/code snippets in activity feeds
 - **Forest green + orange accent palette** - #1B4332 for text, #F7931A for primary CTAs, maintains brand consistency
+- **Manual verification for external services** - When programmatic API access unavailable, manual browser-based verification provides equivalent confidence for configuration checks
+- **Human checkpoint for AI quality** - AI response quality requires human assessment; automated metrics insufficient for conversational appropriateness
+- **Iterative AI refinement approach** - Approve baseline functionality, defer response tailoring to future iterations rather than blocking on perfection
 
 ### Kapso Configuration
 
@@ -223,12 +249,21 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - URL: https://fn.kapso.ai/prj-1fda0f3d-a913-4a82-bc1f-a07e1cb5213c__fetch-intern-settings
 - Purpose: Fetches Sarah configuration from Convex before each message
 
-**Workflow: Sarah Chat Bot (Advanced - DRAFT, NOT USED)**
+**Workflow: Sarah v2 - 3 Phase Sales Bot (ACTIVE)**
+- Workflow ID: `67cf2cdc-a8fd-43fa-9721-4ea5d82f0190`
+- Model: Grok 4.1-fast (x-ai/grok-4.1-fast)
+- Status: Active (created 2026-01-31)
+- Architecture: Start → Sarah Agent (3-phase prompt with lead scoring, closing techniques, handoff triggers)
+- Temperature: 0.8, Max Tokens: 150
+- Tools: send_notification_to_user, get_whatsapp_context, get_current_datetime, save_variable, get_variable, complete_task, handoff_to_human
+- Link: https://app.kapso.ai/projects/1fda0f3d-a913-4a82-bc1f-a07e1cb5213c/workflows/67cf2cdc-a8fd-43fa-9721-4ea5d82f0190
+
+**Workflow: Sarah Chat Bot v1 (DEPRECATED)**
 - Workflow ID: `048c075f-bab4-4ccd-920c-fe5e9a3435b5`
 - Model: Gemini 2.5 Flash (gemini-2.5-flash-preview-05-20)
-- Status: Draft (created in 03-03, not activated - Sarah integrated into Rules Engine instead)
+- Status: Draft (superseded by Sarah v2)
 - Functions: 7 deployed (get-state, check-keywords, mark-handoff, mark-completed, extract-and-score, determine-state, save-state)
-- Note: Available for future use if advanced stateful conversation needed
+- Note: Kept for reference, not in production use
 
 **Phone:**
 - Phone Number ID: `957104384162113`
@@ -250,12 +285,11 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 - ✅ Phase 4: Lead Database (Kapso → Convex sync) - 6/6 plans COMPLETE
 - ✅ Phase 5: Grok Manager Bot (Analysis + insights) - 6/6 plans COMPLETE
 - ✅ Phase 6: Dashboard (Lead list + analytics) - 6/6 plans COMPLETE
+- ✅ Phase 7: Production Launch - 3/3 plans COMPLETE
+- ✅ Phase 8: Handoff Workflow (Kapso + Sarah v2) - 1 plan COMPLETE
 
 **Current phase:**
-- 🚀 Phase 7: Production Launch - 1/3+ plans COMPLETE (07-01: Deployment ✅)
-
-**Next phases (not yet started):**
-- Phase 8: Testing & Polish
+- Phase 9: Testing & Polish - IN PROGRESS (1 of 4 plans complete)
 
 **Phase 4 deliverables:**
 - Extended contacts schema with 16 Sarah extraction fields
@@ -312,8 +346,8 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ### Session Continuity
 
-**Last session:** 2026-01-31 07:04 UTC
-**Stopped at:** Completed 07-02: Landing Page Polish - SUMMARY.md created, Phase 7 in progress (2/3+ plans)
+**Last session:** 2026-02-01
+**Stopped at:** Completed 09-01-PLAN.md (Kapso infrastructure verification)
 **Resume file:** None
 
 **Completed in this session:**
@@ -439,4 +473,4 @@ All current decisions are logged in `.planning/PROJECT.md` Key Decisions table.
 
 ---
 
-*Last updated: 2026-01-31 — Phase 6 in progress, 30/25+ total plans*
+*Last updated: 2026-02-01 — Phase 9 in progress, 37/25+ total plans, Kapso infrastructure verified*
