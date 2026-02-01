@@ -117,10 +117,11 @@ Plans:
   4. Dashboard shows lead activity timestamps for follow-up prioritization
   5. Leads linked to Kapso conversations via conversation_id for inbox sync
   6. Webhook retries don't create duplicate leads (idempotency working)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 11-01: TBD during planning
+- [ ] 11-01-PLAN.md — Fix phone deduplication bug + activity timestamp tracking
+- [ ] 11-02-PLAN.md — Dashboard right panel with structured lead data sections
 
 #### Phase 12: Sarah Template System
 **Goal**: Sarah configuration documented and duplicatable for new workspaces
@@ -165,6 +166,6 @@ Phases execute numerically: 10 → 11 → 12 → 13
 | 8. Handoff Workflow | v2.0 | 2/2 | Complete | 2026-02-01 |
 | 9. Production Deployment | v2.0 | 2/3 | Complete | 2026-02-01 |
 | 10. Sarah Bot Refinement | v2.0.1 | 1/1 | Complete | 2026-02-01 |
-| 11. Smart Lead Automation | v2.0.1 | 0/TBD | Not started | - |
+| 11. Smart Lead Automation | v2.0.1 | 0/2 | Not started | - |
 | 12. Sarah Template System | v2.0.1 | 3/3 | Complete | 2026-02-01 |
 | 13. Production Validation | v2.0.1 | 0/TBD | Not started | - |
