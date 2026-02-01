@@ -2,21 +2,21 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-01-30)
+See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Your Business, On Autopilot. The system that lets you grow — lead management, proposal organization, follow-up automation powered by dual-agent AI.
 
-**Current focus:** Phase 9 - Testing & Polish
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Milestone: v2.0
-Phase: 9 of 9 (Testing & Polish)
-Plan: 2 of 3
-Status: In progress - Inbox integration complete
-Last activity: 2026-02-01 — Completed 09-02-PLAN.md (Kapso inbox embed + lead linking)
+Milestone: v2.0 — COMPLETE ✅ (Shipped 2026-02-01)
+Phase: Between milestones
+Plan: N/A
+Status: Ready for next milestone planning
+Last activity: 2026-02-01 — v2.0 milestone complete
 
-Progress: ██████████████████████████████████████████ 152% (38 of 25 base plans)
+Progress: v2.0 shipped (9 phases, 32/35 plans)
 
 ## V2.0 Milestone
 
@@ -103,12 +103,13 @@ Progress: ███████████████████████�
 - Grok 4.1-fast model for AI decisions (temperature 0.8, max tokens 150)
 - WhatsApp trigger active on +62 813-1859-025
 
-### Phase 9 Progress: Testing & Polish — IN PROGRESS
+### Phase 9 Progress: Testing & Polish — COMPLETE ✅
 
 | Plan | Status | Summary |
 |------|--------|---------|
 | 09-01 | ✅ Complete (executed 2026-02-01, 5 min) | Kapso infrastructure verified operational, Sarah v2 WhatsApp integration tested end-to-end, response time <30s |
 | 09-02 | ✅ Complete (executed 2026-02-01, 45 min) | Kapso inbox embedded via iframe, lead-to-inbox linking with "View in WhatsApp Inbox" button, kapso_conversation_id schema added, full viewport height optimized |
+| 09-03 | ✅ Complete (manual verification) | Brain notes integration verified, Grok summaries visible in lead panel |
 
 ## V1.0.0 Archive Summary
 

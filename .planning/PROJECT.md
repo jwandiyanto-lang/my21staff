@@ -10,26 +10,24 @@ WhatsApp CRM SaaS for Indonesian SMEs. Multi-tenant admin with AI-powered WhatsA
 
 The system that lets you grow. Lead management, proposal organization, follow-up automation — all guided by someone who's been in business, not just developers selling software.
 
-## Current State (v2.0 — Fresh Start)
+## Current State
 
 **Production URL:** https://www.my21staff.com
 
 **Convex Deployment:** https://intent-otter-212.convex.cloud
 
-**v2.0 Status:** Requirements defined. Ready for roadmap creation.
+**Latest Shipped:** v2.0 WhatsApp CRM (2026-02-01)
 
-**What's preserved from v1.0.0:**
-- Production deployment infrastructure (Vercel + Convex)
-- Authentication system (Clerk with organizations)
-- Core integrations (Kapso WhatsApp API)
-- Development patterns (dev mode, testing approach)
+**What's live in production:**
+- WhatsApp integration via Kapso (+62 813-1859-025)
+- Dual-bot AI (Sarah chatbot + Brain analytics with Grok 4.1-fast)
+- Lead database with real-time Convex sync
+- Dashboard with AI insights and embedded Kapso inbox
+- Production deployment with Clerk authentication
 
-**What's new in v2.0:**
-- Dual-bot AI architecture (Gemini + Grok)
-- Kapso inbox integration (direct message sync)
-- Lead database with AI analysis
-- Dashboard with insights and recommendations
-- New my21staff workspace (separate from Eagle)
+**Codebase:**
+- ~62,000 LOC TypeScript (44,337 frontend + 17,751 backend)
+- 9 phases shipped in 2 days (32/35 plans complete)
 
 **Tech Stack:**
 - Next.js 15 + React 19 + TypeScript
@@ -49,67 +47,23 @@ See `.planning/archive/v1.0.0/` for previous milestone history.
 
 ### Validated
 
-(None yet — ship v2.0 to validate)
+**v2.0 (Shipped 2026-02-01):**
+- ✓ Kapso workspace setup with Indonesian WhatsApp number — v2.0
+- ✓ Workflow rules engine with AI-powered routing (Grok 4.1-fast) — v2.0
+- ✓ Settings & configuration management (Intern + Brain tabs) — v2.0
+- ✓ Sarah chatbot integration for lead qualification — v2.0
+- ✓ Lead database with Kapso → Convex sync — v2.0
+- ✓ Grok Manager Bot for AI analytics and insights — v2.0
+- ✓ Dashboard with lead list, filters, and AI insights — v2.0
+- ✓ Embedded Kapso inbox for WhatsApp messaging — v2.0
+- ✓ Handoff workflow with lead scoring — v2.0
+- ✓ Production deployment to www.my21staff.com — v2.0
 
-### Active (v2.0)
+(69 requirements total — see `.planning/milestones/v2.0-REQUIREMENTS.md`)
 
-**Kapso Integration:**
-- [ ] Create new my21staff workspace in Kapso
-- [ ] Provision Indonesian WhatsApp number via Kapso
-- [ ] Sync all Kapso conversations to local database
-- [ ] Sync all Kapso messages to local database
-- [ ] Store contact info (phone, name, last contact date)
+### Active
 
-**Sarah Chat Bot (Gemini 2.5):**
-- [ ] Gemini 2.5 Flash integration for chat responses
-- [ ] Sarah persona implementation (warm, efficient, under 140 chars)
-- [ ] 4-slot data collection (Name, Service, Budget, Timeline)
-- [ ] Photo/image handling capability
-- [ ] Trigger word detection (!Summary, HANDOVER_REQUIRED)
-- [ ] Price range responses (never specific prices)
-
-**Lead Database:**
-- [ ] Contact storage (phone, name, profile)
-- [ ] Message history storage (all Kapso messages)
-- [ ] Custom fields (service needed, budget, timeline)
-- [ ] Lead status tracking (new, qualified, contacted, etc.)
-- [ ] Timestamp tracking (created, last message, last contact)
-
-**Grok Manager Bot:**
-- [ ] Grok 2 integration for analysis
-- [ ] !Summary command handler
-- [ ] Daily lead summary generation
-- [ ] Lead quality scoring (hot/warm/cold)
-- [ ] Action items generation (who needs follow-up)
-- [ ] Content recommendations based on incoming questions
-
-**Dashboard - Lead List:**
-- [ ] Display all leads from database
-- [ ] Show contact info and status
-- [ ] Filter by status/date
-- [ ] Search by name/phone
-- [ ] Click to view full conversation history
-
-**Dashboard - AI Insights:**
-- [ ] Display Grok's daily summaries
-- [ ] Show lead quality scores
-- [ ] Display action items
-- [ ] Show content recommendations
-- [ ] Refresh insights on demand
-
-**Dashboard - Analytics:**
-- [ ] Total leads counter
-- [ ] New leads today/week/month
-- [ ] Response rate metrics
-- [ ] Lead stage distribution chart
-- [ ] Common questions/topics trending
-
-**Handoff Workflow:**
-- [ ] Detect HANDOVER_REQUIRED trigger (4 slots filled OR user asks for human)
-- [ ] Dashboard alert/notification for new qualified leads
-- [ ] WhatsApp notification to business owner with lead summary
-- [ ] Auto-reply to lead: "Jon will reach out soon"
-- [ ] Mark lead as "pending human contact" in database
+(Next milestone requirements will be defined via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -159,16 +113,9 @@ See `.planning/archive/v1.0.0/` for previous milestone history.
 | Combo handoff workflow | Dashboard alert + WhatsApp notification + auto-reply vs single channel | — Pending |
 | Keep Convex + Clerk + Vercel | Infrastructure proven and working | ✓ Good |
 
-## Current Milestone: v2.0
+## Next Milestone
 
-**Goal:** Build WhatsApp CRM with dual-bot AI (Sarah chat + Grok manager) for Indonesian SME lead management.
-
-**Target features:**
-- Kapso workspace + WhatsApp number provisioning
-- Dual-bot AI (Sarah chat + Grok manager)
-- Lead database with message sync
-- Dashboard with insights, analytics, recommendations
-- Handoff workflow (combo approach)
+Ready to plan next iteration. Run `/gsd:new-milestone` to begin.
 
 ---
-*Last updated: 2026-01-30 — V2.0 milestone started*
+*Last updated: 2026-02-01 after v2.0 milestone completion*
