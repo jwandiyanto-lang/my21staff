@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import type { Id } from 'convex/_generated/dataModel';
 
 interface InboxContentProps {
@@ -7,10 +8,20 @@ interface InboxContentProps {
 }
 
 export function InboxContent({ workspaceId }: InboxContentProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
   // Kapso Inbox Embed Token
-  // Get this from: https://app.kapso.ai/projects/1fda0f3d-a913-4a82-bc1f-a07e1cb5213c
-  // Navigate to: Project → Inbox Embeds → Create Access Token
   const KAPSO_EMBED_TOKEN = process.env.NEXT_PUBLIC_KAPSO_INBOX_EMBED_TOKEN || 'YOUR_EMBED_TOKEN_HERE';
+
+  useEffect(() => {
+    // Set a timeout to hide loading after 3 seconds
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   if (KAPSO_EMBED_TOKEN === 'YOUR_EMBED_TOKEN_HERE') {
     return (
@@ -25,11 +36,8 @@ export function InboxContent({ workspaceId }: InboxContentProps) {
               <li>Click <strong>Create Access Token</strong></li>
               <li>Choose scope: <strong>Project</strong> (for all conversations)</li>
               <li>Copy the embed token</li>
-              <li>Add to <code className="bg-background px-1">.env.local</code>:</li>
+              <li>Add to Vercel environment variables</li>
             </ol>
-            <pre className="bg-background p-3 rounded mt-2 overflow-x-auto">
-              NEXT_PUBLIC_KAPSO_INBOX_EMBED_TOKEN=your_token_here
-            </pre>
           </div>
         </div>
       </div>
@@ -37,12 +45,54 @@ export function InboxContent({ workspaceId }: InboxContentProps) {
   }
 
   return (
-    <div className="h-screen w-full">
+    <div className="relative h-screen w-full bg-background">
+      {/* Loading state */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <p className="text-sm text-muted-foreground">Loading inbox...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {hasError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
+          <div className="max-w-md text-center space-y-4">
+            <h3 className="text-lg font-semibold">Unable to load inbox</h3>
+            <p className="text-sm text-muted-foreground">
+              The Kapso inbox failed to load. Please check your connection and try again.
+            </p>
+            <button
+              onClick={() => {
+                setHasError(false);
+                setIsLoading(true);
+                window.location.reload();
+              }}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Kapso Inbox Iframe */}
       <iframe
         src={`https://inbox.kapso.ai/embed/${KAPSO_EMBED_TOKEN}`}
-        style={{ width: '100%', height: '100%', border: 0 }}
-        title="Kapso Inbox"
+        className="w-full h-full border-0"
+        title="WhatsApp Inbox"
         allow="clipboard-write"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+        onLoad={() => {
+          setIsLoading(false);
+          setHasError(false);
+        }}
+        onError={() => {
+          setIsLoading(false);
+          setHasError(true);
+        }}
       />
     </div>
   );
