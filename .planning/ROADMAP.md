@@ -129,10 +129,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Sarah configuration documented as reusable template (prompt, settings, triggers)
   2. Developer can duplicate Sarah setup for new workspace using template
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 12-01: TBD during planning
+- [ ] 12-01-PLAN.md — Convex backend: sarahConfigs schema + API endpoints
+- [ ] 12-02-PLAN.md — UI: SarahConfigCard component on team page
+- [ ] 12-03-PLAN.md — Documentation: SARAH-TEMPLATE.md + Kapso function code
 
 #### Phase 13: Production Validation
 **Goal**: All v2.0.1 features working in production with confidence
@@ -164,5 +166,5 @@ Phases execute numerically: 10 → 11 → 12 → 13
 | 9. Production Deployment | v2.0 | 2/3 | Complete | 2026-02-01 |
 | 10. Sarah Bot Refinement | v2.0.1 | 1/1 | Complete | 2026-02-01 |
 | 11. Smart Lead Automation | v2.0.1 | 0/TBD | Not started | - |
-| 12. Sarah Template System | v2.0.1 | 0/TBD | Not started | - |
+| 12. Sarah Template System | v2.0.1 | 0/3 | Not started | - |
 | 13. Production Validation | v2.0.1 | 0/TBD | Not started | - |
