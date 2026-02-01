@@ -4,6 +4,8 @@
 
 ---
 
+> **Configuration:** See [SARAH-TEMPLATE.md](business/bots/SARAH-TEMPLATE.md) for customer-editable settings and Kapso integration.
+
 ## Who is Sarah?
 
 **Name:** Sarah
