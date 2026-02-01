@@ -58,7 +58,6 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           intern_name: internName,
-          brain_name: 'Grok', // Keep default for Brain
         }),
       })
 
@@ -70,7 +69,6 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
       if (!isDevMode()) {
         backupSettings(workspaceSlug, 'bot_names', {
           intern_name: internName,
-          brain_name: 'Grok',
         })
       }
 

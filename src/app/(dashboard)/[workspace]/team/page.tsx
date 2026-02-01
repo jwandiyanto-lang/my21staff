@@ -5,9 +5,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertCircle, Users } from 'lucide-react'
+import { SarahConfigCard } from '@/components/team/sarah-config-card'
+import { useQuery } from 'convex/react'
+import { api } from 'convex/_generated/api'
 
 export default function TeamPage() {
   const { organization, isLoaded } = useOrganization()
+  const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+
+  // Get workspace ID from organization
+  const workspaceQuery = useQuery(
+    api.workspaces.getByOrgId,
+    isDevMode ? "skip" : organization ? { clerk_org_id: organization.id } : "skip"
+  )
+
+  const workspaceId = isDevMode
+    ? 'demo' as any
+    : workspaceQuery?._id
 
   // Loading state
   if (!isLoaded) {
@@ -61,6 +75,14 @@ export default function TeamPage() {
           </p>
         </div>
       </div>
+
+      {/* Sarah Config Card - above Team Members */}
+      {workspaceId && (
+        <SarahConfigCard
+          workspaceId={workspaceId}
+          isDevMode={isDevMode}
+        />
+      )}
 
       {/* Clerk OrganizationProfile handles:
           - Member list with avatars
