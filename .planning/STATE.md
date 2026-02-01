@@ -11,17 +11,17 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 
 Milestone: v2.0.1 Workflow Integration & Lead Automation
 Phase: 11 of 13 (Smart Lead Automation)
-Plan: 1 of 1 in current phase
+Plan: 2 of 2 in current phase
 Status: Phase complete
-Last activity: 2026-02-01 - Completed Phase 11 plan 01, phone deduplication and conversation linking
+Last activity: 2026-02-01 - Completed Phase 11 plan 02, lead panel with inline editing
 
-Progress: [█████████████████████████] 88% (38/42 estimated total plans)
+Progress: [█████████████████████████] 90% (39/42 estimated total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 37 (from v2.0 + v2.0.1)
-- Average duration: ~42 min
+- Total plans completed: 38 (from v2.0 + v2.0.1)
+- Average duration: ~39 min
 - Total execution time: ~26.5 hours over 2 days
 
 **By Phase (v2.0):**
@@ -43,11 +43,11 @@ Progress: [███████████████████████
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 10. Sarah Bot Refinement | 1/1 | ~30min | 30min |
-| 11. Smart Lead Automation | 1/1 | ~4min | 4min |
+| 11. Smart Lead Automation | 2/2 | ~7min | 3.5min |
 | 12. Sarah Template System | 4/4 | ~40min | 10min |
 
 **Recent Trend:**
-- Last 5 plans: 4min, 10min, 12min, 12min, 12min
+- Last 5 plans: 3min, 4min, 10min, 12min, 12min
 - Trend: Excellent (efficient focused changes)
 
 *Updated after each plan completion*
@@ -67,6 +67,9 @@ Recent decisions affecting v2.0.1 work:
 - **Phase 11**: Update lastActivityAt on every inbound message for follow-up prioritization
 - **Phase 11**: Link contacts to conversations via kapso_conversation_id for inbox navigation
 - **Phase 11**: Preserve manual CRM name edits (only update if empty)
+- **Phase 11**: InlineEditField component for click-to-edit fields with auto-save on blur
+- **Phase 11**: Structured lead panel with 5 sections (Vitals, Source, Engagement, Profile, Business Info)
+- **Phase 11**: Phone field read-only (primary identifier, editing would complicate matching)
 - **Phase 12**: Customer editing via configuration layer (all plans, simple UI in "Your team" tab)
 - **Phase 12**: Bot name customizable (default "Your Intern")
 - **Phase 12**: SarahConfigCard integrated into team page with dev mode support
@@ -97,12 +100,15 @@ None yet.
 - Production Testing: 3 requirements
 
 **Phase 11 Complete:**
-Phone deduplication and conversation linking implemented. Ready for production testing in Phase 13.
+Lead automation foundation complete:
+- Phone deduplication and conversation linking (plan 01) ✅
+- Structured lead panel with inline editing (plan 02) ✅
+Ready for production testing in Phase 13.
 
 ## Session Continuity
 
 Last session: 2026-02-01
-Stopped at: Completed Phase 11 plan 01 (phone deduplication and conversation linking)
+Stopped at: Completed Phase 11 plan 02 (lead panel with inline editing)
 Resume file: None - ready to plan Phase 13 (final phase of v2.0.1)
 
 ---
