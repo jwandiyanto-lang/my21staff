@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { SyncStatusIndicator } from '@/components/settings/sync-status-indicator'
-import { Bot, Brain, Loader2 } from 'lucide-react'
+import { Bot, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { isDevMode, getMockWorkspaceSettings, updateMockWorkspaceSettings } from '@/lib/mock-data'
 import { backupSettings } from '@/lib/settings-backup'
@@ -24,7 +24,6 @@ interface SettingsClientProps {
 
 export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientProps) {
   const [internName, setInternName] = useState('Sarah')
-  const [brainName, setBrainName] = useState('Grok')
   const [saving, setSaving] = useState(false)
 
   // Load bot names
@@ -34,7 +33,6 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         if (isDevMode()) {
           const settings = getMockWorkspaceSettings()
           setInternName(settings.intern_name || 'Sarah')
-          setBrainName(settings.brain_name || 'Grok')
           return
         }
 
@@ -43,7 +41,6 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         if (!res.ok) return
         const data = await res.json()
         setInternName(data.intern_name || 'Sarah')
-        setBrainName(data.brain_name || 'Grok')
       } catch (error) {
         console.error('Failed to load bot names:', error)
       }
@@ -61,7 +58,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           intern_name: internName,
-          brain_name: brainName,
+          brain_name: 'Grok', // Keep default for Brain
         }),
       })
 
@@ -73,7 +70,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
       if (!isDevMode()) {
         backupSettings(workspaceSlug, 'bot_names', {
           intern_name: internName,
-          brain_name: brainName,
+          brain_name: 'Grok',
         })
       }
 
@@ -102,9 +99,9 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
       {/* Bot Names Configuration */}
       <Card>
         <CardHeader>
-          <CardTitle>Bot Names</CardTitle>
+          <CardTitle>Intern Name</CardTitle>
           <CardDescription>
-            Customize the names of your AI team members
+            Customize the name of your AI assistant
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -127,25 +124,6 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
             </p>
           </div>
 
-          {/* Brain Name */}
-          <div className="space-y-2">
-            <Label htmlFor="brain-name" className="flex items-center gap-2">
-              <Brain className="w-4 h-4" />
-              Brain / Manager Bot Name
-            </Label>
-            <Input
-              id="brain-name"
-              value={brainName}
-              onChange={(e) => setBrainName(e.target.value)}
-              onBlur={handleSave}
-              placeholder="Grok"
-              className="max-w-md"
-            />
-            <p className="text-xs text-muted-foreground">
-              The AI manager that analyzes leads and generates insights
-            </p>
-          </div>
-
           {/* Save Button (for manual save if needed) */}
           <div className="pt-4">
             <Button
@@ -159,7 +137,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
                   Saving...
                 </>
               ) : (
-                'Save Bot Names'
+                'Save Bot Name'
               )}
             </Button>
           </div>
