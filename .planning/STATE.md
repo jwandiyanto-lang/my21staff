@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Milestone: v2.0.1 Workflow Integration & Lead Automation
-Phase: 10 of 13 (Sarah Bot Refinement)
+Phase: 12 of 13 (Sarah Template System)
 Plan: 0 of TBD in current phase
 Status: Ready to plan
-Last activity: 2026-02-01 - v2.0.1 roadmap created
+Last activity: 2026-02-01 - Phase 10 complete, customer editing architecture approved
 
-Progress: [████████████████████░░░░] 76% (32/42 estimated total plans)
+Progress: [█████████████████████░░░] 79% (33/42 estimated total plans)
 
 ## Performance Metrics
 
@@ -38,9 +38,15 @@ Progress: [████████████████████░░░
 | 8. Handoff Workflow | 2/2 | ~1.5h | 45min |
 | 9. Production Deployment | 2/3 | ~2h | 60min |
 
+**By Phase (v2.0.1):**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| 10. Sarah Bot Refinement | 1/1 | ~30min | 30min |
+
 **Recent Trend:**
-- Last 5 plans: 60min, 45min, 60min, 60min, 45min
-- Trend: Stable (45-60 min per plan)
+- Last 5 plans: 60min, 60min, 45min, 60min, 30min
+- Trend: Improving (automation via MCP reducing manual work)
 
 *Updated after each plan completion*
 
@@ -51,11 +57,12 @@ Progress: [████████████████████░░░
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting v2.0.1 work:
 
-- **Phase 3**: Manual Kapso workflow setup (API doesn't support editing)
+- **Phase 3**: Manual Kapso workflow setup (UPDATED: API DOES support editing via MCP skills)
 - **Phase 7**: Embedded Kapso inbox (vs building custom UI)
-- **v2.0.1 Strategy**: Focus on Sarah + Leads only (keep it simple)
-- **v2.0.1 Priority**: Must be testable online immediately (production testing first)
-- **v2.0.1 Approach**: Fix Sarah bot first, then create template
+- **Phase 10**: Simplified Sarah workflow (start → agent → send_trial_link)
+- **Phase 10**: Sarah is PRIMARY lead generation workflow (ID: 65762c7d-8ab0-4122-810e-9a5562a7a9ca)
+- **Phase 12**: Customer editing via configuration layer (all plans, simple UI in "Your team" tab)
+- **Phase 12**: Bot name customizable (default "Your Intern")
 
 ### Pending Todos
 
@@ -84,8 +91,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-01
-Stopped at: Roadmap created for v2.0.1 (4 phases, 16 requirements mapped)
-Resume file: None - ready to plan Phase 10
+Stopped at: Phase 10 complete (Sarah bot refined and tested), customer editing architecture approved
+Resume file: None - ready to plan Phase 12 (skipping Phase 11 per user request)
 
 ---
 *STATE.md updated: 2026-02-01*
