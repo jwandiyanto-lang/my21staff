@@ -120,13 +120,15 @@ export default defineSchema({
     unread_count: v.number(),
     last_message_at: v.optional(v.number()),
     last_message_preview: v.optional(v.string()),
+    kapso_conversation_id: v.optional(v.string()), // Links to Kapso inbox conversation
     created_at: v.number(),
     updated_at: v.number(),
     supabaseId: v.string(),
   })
     .index("by_workspace_time", ["workspace_id", "last_message_at"])
     .index("by_contact", ["contact_id"])
-    .index("by_workspace", ["workspace_id"]),
+    .index("by_workspace", ["workspace_id"])
+    .index("by_kapso_conversation", ["kapso_conversation_id"]),
 
   // ============================================
   // MESSAGES

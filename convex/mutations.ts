@@ -1837,6 +1837,7 @@ export const findOrCreateConversationWebhook = mutation({
   args: {
     workspace_id: v.string(),
     contact_id: v.string(),
+    kapso_conversation_id: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Try to find existing conversation
@@ -1846,6 +1847,13 @@ export const findOrCreateConversationWebhook = mutation({
       .first();
 
     if (existing) {
+      // Update Kapso conversation ID if provided and different
+      if (args.kapso_conversation_id && existing.kapso_conversation_id !== args.kapso_conversation_id) {
+        await ctx.db.patch(existing._id, {
+          kapso_conversation_id: args.kapso_conversation_id,
+          updated_at: Date.now(),
+        });
+      }
       return existing;
     }
 
@@ -1857,6 +1865,7 @@ export const findOrCreateConversationWebhook = mutation({
       contact_id: args.contact_id as any,
       status: "open",
       unread_count: 0,
+      kapso_conversation_id: args.kapso_conversation_id || undefined,
       created_at: now,
       updated_at: now,
       supabaseId: "",
