@@ -12,10 +12,12 @@ This document provides a complete reference for modifying Kapso workflows in the
 
 **Workflows:**
 
-| Workflow | ID | Purpose |
-|----------|-----|---------|
-| Rules Engine - Keyword Triggers | `6cae069e-7d5c-4fbb-834d-79e1f66e4672` | Main routing workflow |
-| Sarah Chat Bot | `048c075f-bab4-4ccd-920c-fe5e9a3435b5` | Lead qualification bot |
+| Workflow | ID | Status | Purpose |
+|----------|-----|--------|---------|
+| **Sarah - Sales Qualification Bot** | `65762c7d-8ab0-4122-810e-9a5562a7a9ca` | **✓ ACTIVE** | **PRIMARY: First workflow for lead generation via WhatsApp** |
+| Sarah v2 - 3 Phase Sales Bot | `67cf2cdc-a8fd-43fa-9721-4ea5d82f0190` | Archived | Replaced 2026-02-01 (too complex) |
+
+**Active Trigger:** `51611461-c08e-4f98-a4fc-3d79874f9e28` (inbound_message on +62 813-1859-025)
 
 **Phone Configuration:**
 
