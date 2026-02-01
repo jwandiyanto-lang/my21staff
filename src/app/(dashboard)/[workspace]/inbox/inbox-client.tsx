@@ -25,7 +25,7 @@ export function InboxContent({ workspaceId }: InboxContentProps) {
 
   if (KAPSO_EMBED_TOKEN === 'YOUR_EMBED_TOKEN_HERE') {
     return (
-      <div className="h-screen flex items-center justify-center p-8">
+      <div className="h-full flex items-center justify-center p-8">
         <div className="max-w-2xl space-y-4 text-center">
           <h2 className="text-2xl font-semibold">Kapso Inbox Setup Required</h2>
           <div className="text-left space-y-2 bg-muted/50 p-6 rounded-lg font-mono text-sm">
@@ -45,7 +45,7 @@ export function InboxContent({ workspaceId }: InboxContentProps) {
   }
 
   return (
-    <div className="relative h-screen w-full bg-background">
+    <div className="relative w-full h-full bg-background overflow-hidden">
       {/* Loading state */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
@@ -81,7 +81,8 @@ export function InboxContent({ workspaceId }: InboxContentProps) {
       {/* Kapso Inbox Iframe */}
       <iframe
         src={`https://inbox.kapso.ai/embed/${KAPSO_EMBED_TOKEN}`}
-        className="w-full h-full border-0"
+        className="w-full h-full border-0 block"
+        style={{ minHeight: '100%', minWidth: '100%' }}
         title="WhatsApp Inbox"
         allow="clipboard-write"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"

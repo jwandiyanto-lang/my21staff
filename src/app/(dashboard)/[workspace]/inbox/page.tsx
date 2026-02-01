@@ -16,9 +16,11 @@ export default async function InboxPage({ params }: InboxPageProps) {
   // Dev mode: use mock workspace
   if (shouldUseMockData(workspaceSlug)) {
     return (
-      <Suspense fallback={<InboxSkeleton />}>
-        <InboxContent workspaceId={MOCK_CONVEX_WORKSPACE._id as Id<'workspaces'>} />
-      </Suspense>
+      <div className="h-full w-full">
+        <Suspense fallback={<InboxSkeleton />}>
+          <InboxContent workspaceId={MOCK_CONVEX_WORKSPACE._id as Id<'workspaces'>} />
+        </Suspense>
+      </div>
     )
   }
 
@@ -32,9 +34,11 @@ export default async function InboxPage({ params }: InboxPageProps) {
   }
 
   return (
-    <Suspense fallback={<InboxSkeleton />}>
-      <InboxContent workspaceId={workspace._id} />
-    </Suspense>
+    <div className="h-full w-full">
+      <Suspense fallback={<InboxSkeleton />}>
+        <InboxContent workspaceId={workspace._id} />
+      </Suspense>
+    </div>
   )
 }
 
