@@ -28,24 +28,25 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   )
 
-  // ALWAYS wrap with ClerkProvider (needed for hooks to work)
-  // In dev mode: Clerk reads from env (won't initialize without valid key)
-  // In production: use Clerk + Convex with auth
+  // Dev mode: Skip ClerkProvider entirely (no production keys needed)
+  // Production: use Clerk + Convex with auth
+  if (isDevMode) {
+    return (
+      <ConvexProvider client={convex}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </ConvexProvider>
+    )
+  }
+
   return (
     <ClerkProvider>
-      {isDevMode ? (
-        <ConvexProvider client={convex}>
-          <QueryClientProvider client={queryClient}>
-            {children}
-          </QueryClientProvider>
-        </ConvexProvider>
-      ) : (
-        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-          <QueryClientProvider client={queryClient}>
-            {children}
-          </QueryClientProvider>
-        </ConvexProviderWithClerk>
-      )}
+      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </ConvexProviderWithClerk>
     </ClerkProvider>
   )
 }

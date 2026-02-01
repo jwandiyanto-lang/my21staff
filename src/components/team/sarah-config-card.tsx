@@ -37,7 +37,10 @@ export function SarahConfigCard({ workspaceId, isDevMode }: SarahConfigCardProps
   // Production mode queries - skip in dev mode
   // In dev mode, we use static config. In production, we fetch from Convex.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const config = useQuery(api.sarah.config.getConfig as any, { workspace_id: workspaceId as any })
+  const config = useQuery(
+    api.sarah.config.getConfig as any,
+    isDevMode ? "skip" : { workspace_id: workspaceId as any }
+  )
   const updateConfig = useMutation(api.sarah.config.updateConfig)
 
   // Initialize form from config data (handles both dev and production)
