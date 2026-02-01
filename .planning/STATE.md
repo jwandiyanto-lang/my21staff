@@ -12,11 +12,11 @@ See: .planning/PROJECT.md (updated 2026-01-30)
 
 Milestone: v2.0
 Phase: 9 of 9 (Testing & Polish)
-Plan: 1 of 4
-Status: In progress - Kapso infrastructure verified
-Last activity: 2026-02-01 — Completed 09-01-PLAN.md (Kapso WhatsApp verification)
+Plan: 2 of 3
+Status: In progress - Inbox integration complete
+Last activity: 2026-02-01 — Completed 09-02-PLAN.md (Kapso inbox embed + lead linking)
 
-Progress: █████████████████████████████████████████ 148% (37 of 25 base plans)
+Progress: ██████████████████████████████████████████ 152% (38 of 25 base plans)
 
 ## V2.0 Milestone
 
@@ -108,6 +108,7 @@ Progress: ███████████████████████�
 | Plan | Status | Summary |
 |------|--------|---------|
 | 09-01 | ✅ Complete (executed 2026-02-01, 5 min) | Kapso infrastructure verified operational, Sarah v2 WhatsApp integration tested end-to-end, response time <30s |
+| 09-02 | ✅ Complete (executed 2026-02-01, 45 min) | Kapso inbox embedded via iframe, lead-to-inbox linking with "View in WhatsApp Inbox" button, kapso_conversation_id schema added, full viewport height optimized |
 
 ## V1.0.0 Archive Summary
 
