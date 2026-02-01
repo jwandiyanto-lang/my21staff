@@ -46,6 +46,7 @@ export function InboxContent({ workspaceId }: InboxContentProps) {
         isHidden={!!selectedConversation}
       />
       <MessageView
+        workspaceId={workspaceId}
         conversationId={selectedConversation?.id}
         phoneNumber={selectedConversation?.phoneNumber}
         contactName={selectedConversation?.contactName}
