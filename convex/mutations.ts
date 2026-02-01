@@ -1773,35 +1773,44 @@ export const findOrCreateContactWebhook = mutation({
     phone: v.string(),
     phone_normalized: v.string(),
     kapso_name: v.optional(v.string()),
+    kapso_conversation_id: v.optional(v.string()), // Links lead to Kapso conversation
   },
   handler: async (ctx, args) => {
-    // Try to find existing contact by phone
-    // Index is on ["workspace_id", "phone"] so use phone field
+    // Query by normalized phone to prevent duplicates
     const existing = await ctx.db
       .query("contacts")
-      .withIndex("by_workspace_phone", (q) =>
-        q.eq("workspace_id", args.workspace_id as any).eq("phone", args.phone)
+      .withIndex("by_workspace_phone_normalized", (q) =>
+        q.eq("workspace_id", args.workspace_id as any).eq("phone_normalized", args.phone_normalized)
       )
       .first();
 
     const now = Date.now();
 
     if (existing) {
-      // Update kapso_name if we have new data
-      if (args.kapso_name && args.kapso_name !== existing.kapso_name) {
-        await ctx.db.patch(existing._id, {
-          kapso_name: args.kapso_name,
-          cache_updated_at: now,
-          // Also update name if contact doesn't have one set
-          ...(existing.name ? {} : { name: args.kapso_name }),
-          updated_at: now,
-        });
-      }
+      // Always update activity timestamp + cache
+      // Only update kapso_name if we have new data
+      // Only update name if not manually set (preserve CRM edits)
+      // Link to conversation if not already linked
+      await ctx.db.patch(existing._id, {
+        lastActivityAt: now,
+        cache_updated_at: now,
+        updated_at: now,
+        ...(args.kapso_name && args.kapso_name !== existing.kapso_name
+          ? {
+              kapso_name: args.kapso_name,
+              // Only overwrite name if empty (preserve manual edits)
+              ...(existing.name ? {} : { name: args.kapso_name }),
+            }
+          : {}),
+        // Link to Kapso conversation if provided and not already set
+        ...(args.kapso_conversation_id && !existing.kapso_conversation_id
+          ? { kapso_conversation_id: args.kapso_conversation_id }
+          : {}),
+      });
       return await ctx.db.get(existing._id);
     }
 
-    // Create new contact
-    // For optional fields, omit rather than setting to null
+    // Create new contact with conversation link
     const contactId = await ctx.db.insert("contacts", {
       workspace_id: args.workspace_id as any,
       phone: args.phone,
@@ -1814,9 +1823,12 @@ export const findOrCreateContactWebhook = mutation({
       source: "whatsapp",
       metadata: {},
       cache_updated_at: now,
+      lastActivityAt: now,
       created_at: now,
       updated_at: now,
       supabaseId: "",
+      // Link to Kapso conversation if provided
+      ...(args.kapso_conversation_id ? { kapso_conversation_id: args.kapso_conversation_id } : {}),
     });
 
     return await ctx.db.get(contactId);
