@@ -27,8 +27,8 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 interface Contact {
-  _id: Id<'contacts'>
-  workspace_id: Id<'workspaces'>
+  _id: string | { toString(): string } // Accept both string and Convex Id
+  workspace_id: string | { toString(): string }
   name?: string | null
   phone: string
   phone_normalized?: string | null
@@ -44,7 +44,7 @@ interface Contact {
   lastContactAt?: number | null
   created_at: number
   updated_at: number
-  // Sarah fields
+  // Sarah fields (populated by Sarah AI during conversations)
   businessType?: string | null
   domisili?: string | null
   story?: string | null
@@ -58,12 +58,15 @@ interface LeadPanelProps {
 }
 
 export function LeadPanel({ contact, workspaceId }: LeadPanelProps) {
+  // Workaround for Convex type instantiation issue
+  // The api.mutations.updateContact type is too deep for TypeScript
+  // @ts-ignore - Type instantiation is excessively deep
   const updateContact = useMutation(api.mutations.updateContact)
 
   const handleFieldSave = async (field: string, value: string) => {
     try {
       await updateContact({
-        contact_id: contact._id,
+        contact_id: String(contact._id), // Ensure string
         workspace_id: workspaceId,
         [field]: value || null,
       })
