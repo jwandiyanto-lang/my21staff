@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from '@/../convex/_generated/api'
-import { useAuth, useUser } from '@clerk/nextjs'
+import { useAuth, useUser } from '@/lib/hooks/use-clerk-safe'
 import { MOCK_WORKSPACE, getMockWorkspaceSettings } from '@/lib/mock-data'
 
 // Import the exact types expected by consumer components

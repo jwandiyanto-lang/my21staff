@@ -8,7 +8,7 @@ import { useState } from 'react'
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
-// Dev mode uses plain Convex (no auth), but keeps ClerkProvider for hooks
+// Dev mode uses plain Convex (no auth), hooks use safe wrappers
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -28,7 +28,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   )
 
-  // Dev mode: Skip ClerkProvider entirely (no production keys needed)
+  // Dev mode: Skip ClerkProvider entirely (use safe hook wrappers)
   // Production: use Clerk + Convex with auth
   if (isDevMode) {
     return (

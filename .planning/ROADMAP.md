@@ -2,13 +2,13 @@
 
 ## Milestones
 
-- ✅ **v2.0 WhatsApp CRM** - Phases 1-9 (shipped 2026-02-01)
-- 🚧 **v2.0.1 Workflow Integration & Lead Automation** - Phases 10-13 (in progress)
+- v2.0 WhatsApp CRM - Phases 1-9 (shipped 2026-02-01)
+- v2.0.1 Workflow Integration & Lead Automation - Phases 10-13 (in progress)
 
 ## Phases
 
 <details>
-<summary>✅ v2.0 WhatsApp CRM (Phases 1-9) - SHIPPED 2026-02-01</summary>
+<summary>v2.0 WhatsApp CRM (Phases 1-9) - SHIPPED 2026-02-01</summary>
 
 ### Phase 1: Project Foundation
 **Goal**: Working Next.js application with authentication
@@ -88,7 +88,7 @@ Plans:
 
 </details>
 
-### 🚧 v2.0.1 Workflow Integration & Lead Automation (In Progress)
+### v2.0.1 Workflow Integration & Lead Automation (In Progress)
 
 **Milestone Goal:** Fix Sarah bot, automate lead creation/update, enable production testing
 
@@ -117,11 +117,12 @@ Plans:
   4. Dashboard shows lead activity timestamps for follow-up prioritization
   5. Leads linked to Kapso conversations via conversation_id for inbox sync
   6. Webhook retries don't create duplicate leads (idempotency working)
-**Plans**: 2 plans
+**Plans**: 3 plans (2 original + 1 gap closure)
 
 Plans:
-- [ ] 11-01-PLAN.md — Fix phone deduplication bug + activity timestamp tracking
-- [ ] 11-02-PLAN.md — Dashboard right panel with structured lead data sections
+- [x] 11-01-PLAN.md — Fix phone deduplication bug + activity timestamp tracking
+- [x] 11-02-PLAN.md — Dashboard right panel with structured lead data sections
+- [ ] 11-03-PLAN.md — Gap closure: Fix TypeScript type mismatches for LeadPanel
 
 #### Phase 12: Sarah Template System
 **Goal**: Sarah configuration documented and duplicatable for new workspaces
@@ -156,7 +157,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute numerically: 10 → 11 → 12 → 13
+Phases execute numerically: 10 -> 11 -> 12 -> 13
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -170,6 +171,6 @@ Phases execute numerically: 10 → 11 → 12 → 13
 | 8. Handoff Workflow | v2.0 | 2/2 | Complete | 2026-02-01 |
 | 9. Production Deployment | v2.0 | 2/3 | Complete | 2026-02-01 |
 | 10. Sarah Bot Refinement | v2.0.1 | 1/1 | Complete | 2026-02-01 |
-| 11. Smart Lead Automation | v2.0.1 | 0/2 | Not started | - |
+| 11. Smart Lead Automation | v2.0.1 | 2/3 | Gaps found | - |
 | 12. Sarah Template System | v2.0.1 | 5/5 | Complete | 2026-02-01 |
 | 13. Production Validation | v2.0.1 | 0/TBD | Not started | - |
