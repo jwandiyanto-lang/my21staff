@@ -124,6 +124,17 @@ Plans:
 - [x] 11-02-PLAN.md — Dashboard right panel with structured lead data sections
 - [x] 11-03-PLAN.md — Gap closure: Fix TypeScript type mismatches for LeadPanel
 
+#### Phase 11.1: Lead Redo (INSERTED)
+**Goal**: Quick iterative fixes to lead management system
+**Depends on**: Phase 11
+**Plans**: TBD (interview-style)
+
+Plans:
+- [ ] TBD (gathered via interview)
+
+**Details:**
+Interview-style approach: identify issue → implement fix → test on localhost → iterate
+
 #### Phase 12: Sarah Template System
 **Goal**: Sarah configuration documented and duplicatable for new workspaces
 **Depends on**: Phase 11
@@ -149,10 +160,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Lead creation verifiable in dashboard within 10 seconds of WhatsApp message
   2. All v2.0.1 changes deployed incrementally without downtime
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 13-01: TBD during planning
+- [ ] 13-01-PLAN.md — Pre-validation checks + interactive user testing
 
 ## Progress
 
