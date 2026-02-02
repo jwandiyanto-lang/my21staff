@@ -17,17 +17,17 @@ Requirements for fixing Sarah bot and implementing smart lead automation.
 
 ### Lead Automation
 
-- [ ] **LEAD-01**: Create lead on first message from new contact (webhook-triggered)
-- [ ] **LEAD-02**: Update lead lastActivityAt on subsequent messages (no new lead)
-- [ ] **LEAD-03**: Deduplicate contacts by normalized phone number (E.164 format)
-- [ ] **LEAD-04**: Track lead activity timestamps for follow-up prioritization
-- [ ] **LEAD-05**: Link leads to Kapso conversations via conversation_id
+- [x] **LEAD-01**: Create lead on first message from new contact (webhook-triggered)
+- [x] **LEAD-02**: Update lead lastActivityAt on subsequent messages (no new lead)
+- [x] **LEAD-03**: Deduplicate contacts by normalized phone number (E.164 format)
+- [x] **LEAD-04**: Track lead activity timestamps for follow-up prioritization
+- [x] **LEAD-05**: Link leads to Kapso conversations via conversation_id
 
 ### Data Integrity
 
-- [ ] **DATA-01**: Phone number normalization to E.164 before storage
-- [ ] **DATA-02**: Webhook idempotency tracking to prevent duplicates
-- [ ] **DATA-03**: Prevent orphaned leads (all leads linked to valid workspace)
+- [x] **DATA-01**: Phone number normalization to E.164 before storage
+- [x] **DATA-02**: Webhook idempotency tracking to prevent duplicates
+- [x] **DATA-03**: Prevent orphaned leads (all leads linked to valid workspace)
 
 ### Production Testing
 
@@ -74,14 +74,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SARAH-03 | Phase 10 | Complete |
 | SARAH-04 | Phase 12 | Complete |
 | SARAH-05 | Phase 12 | Complete |
-| LEAD-01 | Phase 11 | Skipped |
-| LEAD-02 | Phase 11 | Skipped |
-| LEAD-03 | Phase 11 | Skipped |
-| LEAD-04 | Phase 11 | Skipped |
-| LEAD-05 | Phase 11 | Skipped |
-| DATA-01 | Phase 11 | Skipped |
-| DATA-02 | Phase 11 | Skipped |
-| DATA-03 | Phase 11 | Skipped |
+| LEAD-01 | Phase 11 | Complete |
+| LEAD-02 | Phase 11 | Complete |
+| LEAD-03 | Phase 11 | Complete |
+| LEAD-04 | Phase 11 | Complete |
+| LEAD-05 | Phase 11 | Complete |
+| DATA-01 | Phase 11 | Complete |
+| DATA-02 | Phase 11 | Complete |
+| DATA-03 | Phase 11 | Complete |
 | TEST-01 | Phase 10 | Complete |
 | TEST-02 | Phase 13 | Pending |
 | TEST-03 | Phase 13 | Pending |
@@ -99,4 +99,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-01 after roadmap creation*
+*Last updated: 2026-02-02 after Phase 11 completion*
