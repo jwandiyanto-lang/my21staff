@@ -12,6 +12,7 @@ export async function completeTask(noteId: string, workspaceSlug: string) {
   if (!userId) throw new Error('Unauthorized')
 
   // Get workspace ID from slug
+  // @ts-ignore - Type instantiation is excessively deep (Convex known issue)
   const workspace = await convex.query(api.workspaces.getBySlug, {
     slug: workspaceSlug,
   })
@@ -35,6 +36,7 @@ export async function completeTaskWithFollowup(
   if (!userId) throw new Error('Unauthorized')
 
   // Get workspace ID from slug
+  // @ts-ignore - Type instantiation is excessively deep (Convex known issue)
   const workspace = await convex.query(api.workspaces.getBySlug, {
     slug: workspaceSlug,
   })
