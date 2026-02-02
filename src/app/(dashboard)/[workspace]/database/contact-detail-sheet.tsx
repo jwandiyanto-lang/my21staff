@@ -67,7 +67,7 @@ import { toast } from 'sonner'
 import { LEAD_STATUS_CONFIG, LEAD_STATUSES, type LeadStatus } from '@/lib/lead-status'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
-import type { Contact, ContactNote, Profile, WorkspaceMember } from '@/types/database'
+import type { Contact, ContactWithSarahFields, ContactNote, Profile, WorkspaceMember } from '@/types/database'
 import { LeadPanel } from './lead-panel'
 
 type TeamMember = WorkspaceMember & { profile: Profile | null }
@@ -802,6 +802,43 @@ export function ContactDetailSheet({
   const calculatedTotalScore = mainFieldsFormScore + chatScore
   const displayScore = localScore === 0 && calculatedTotalScore > 0 ? calculatedTotalScore : localScore
 
+  // Helper to map Convex contact to LeadPanel props with type safety
+  // Convex contacts have Sarah fields - this mapper ensures proper typing
+  const mapContactToLeadPanelProps = (c: typeof contact) => {
+    const metadataValue = c.metadata as Record<string, unknown> | undefined
+    const createdAtValue = typeof c.created_at === 'string'
+      ? new Date(c.created_at).getTime()
+      : (c.created_at ? new Date(c.created_at).getTime() : Date.now())
+    const updatedAtValue = typeof c.updated_at === 'string'
+      ? new Date(c.updated_at).getTime()
+      : (c.updated_at ? new Date(c.updated_at).getTime() : Date.now())
+
+    return {
+      _id: c.id as any,
+      workspace_id: workspace.slug as any,
+      name: c.name ?? undefined,
+      phone: c.phone,
+      phone_normalized: c.phone_normalized ?? undefined,
+      email: c.email ?? undefined,
+      lead_score: c.lead_score ?? 0,
+      lead_status: c.lead_status ?? 'new',
+      leadStatus: (c as any).leadStatus ?? undefined,
+      leadTemperature: (c as any).leadTemperature ?? undefined,
+      tags: c.tags ?? undefined,
+      source: (c as any).source ?? undefined,
+      metadata: metadataValue,
+      lastActivityAt: (c as any).lastActivityAt ?? undefined,
+      lastContactAt: (c as any).lastContactAt ?? undefined,
+      created_at: createdAtValue,
+      updated_at: updatedAtValue,
+      businessType: (c as any).businessType ?? undefined,
+      domisili: (c as any).domisili ?? undefined,
+      story: (c as any).story ?? undefined,
+      painPoints: (c as any).painPoints ?? undefined,
+      urgencyLevel: (c as any).urgencyLevel ?? undefined,
+    }
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md p-0 flex flex-col">
@@ -899,30 +936,7 @@ export function ContactDetailSheet({
               <div className="p-6 space-y-6">
                 {/* Lead Panel - Structured Lead Data */}
                 <LeadPanel
-                  contact={{
-                    _id: contact.id as any,
-                    workspace_id: workspace.slug as any,
-                    name: contact.name,
-                    phone: contact.phone,
-                    phone_normalized: contact.phone_normalized,
-                    email: contact.email,
-                    lead_score: contact.lead_score,
-                    lead_status: contact.lead_status,
-                    leadStatus: contact.leadStatus,
-                    leadTemperature: contact.leadTemperature,
-                    tags: contact.tags,
-                    source: contact.source,
-                    metadata: contact.metadata,
-                    lastActivityAt: contact.lastActivityAt,
-                    lastContactAt: contact.lastContactAt,
-                    created_at: contact.created_at,
-                    updated_at: contact.updated_at,
-                    businessType: contact.businessType,
-                    domisili: contact.domisili,
-                    story: contact.story,
-                    painPoints: contact.painPoints,
-                    urgencyLevel: contact.urgencyLevel,
-                  }}
+                  contact={mapContactToLeadPanelProps(contact)}
                   workspaceId={workspace.slug}
                 />
 
