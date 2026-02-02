@@ -1557,3 +1557,42 @@ export type Webinar = {
 export type ConversationWithContact = Conversation & {
   contact: Contact
 }
+
+// =============================================================================
+// ContactWithSarahFields - Extended Contact type for Convex/LeadPanel usage
+// The Convex contacts table has additional Sarah-specific fields that are
+// not present in the Supabase schema. This type extends the base Contact type
+// to include those fields for proper TypeScript support.
+// =============================================================================
+export type ContactWithSarahFields = Contact & {
+  // Sarah Phase 1 (Gathering) fields
+  businessType?: string | null
+  domisili?: string | null
+  businessDuration?: string | null
+  story?: string | null
+  sarahLanguage?: string | null
+
+  // Sarah Phase 2 (Interest) fields
+  painPoints?: string[] | null
+  interestMotivation?: string | null
+  priority?: string | null
+  urgencyLevel?: string | null
+
+  // Sarah Phase 3 (Closing) fields
+  leadScore?: number | null
+  leadTemperature?: 'hot' | 'warm' | 'lukewarm' | 'cold' | null
+  closingTechnique?: string | null
+  objectionRaised?: string | null
+
+  // Status workflow fields
+  leadStatus?: 'new' | 'qualified' | 'contacted' | 'converted' | 'archived' | null
+  statusChangedAt?: number | null
+  statusChangedBy?: string | null
+
+  // Timestamp fields (numbers for Convex compatibility)
+  lastContactAt?: number | null
+  lastActivityAt?: number | null
+
+  // Source field
+  source?: string | null
+}
