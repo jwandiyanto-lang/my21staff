@@ -60,11 +60,11 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
     assignments: true,
   })
 
-  // Load bot names and status config
+  // Load bot names, status config, and tags
   useEffect(() => {
     async function loadSettings() {
       try {
-        // Load bot names
+        // Load bot names and statuses
         if (isDevMode()) {
           const settings = getMockWorkspaceSettings()
           setInternName(settings.intern_name || 'Sarah')
@@ -74,6 +74,10 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
               ...s,
               enabled: s.enabled !== false, // Default to enabled if not specified
             })))
+          }
+          // Load tags from mock settings
+          if (settings.contact_tags) {
+            setTags(settings.contact_tags)
           }
         } else {
           // Production: fetch bot config
@@ -92,6 +96,15 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
                 ...s,
                 enabled: s.enabled !== false,
               })))
+            }
+          }
+
+          // Production: fetch workspace settings to get tags
+          const settingsRes = await fetch(`/api/workspaces/${workspaceId}/settings`)
+          if (settingsRes.ok) {
+            const settingsData = await settingsRes.json()
+            if (settingsData.contact_tags) {
+              setTags(settingsData.contact_tags)
             }
           }
         }
@@ -157,6 +170,31 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
       toast.error('Failed to save status configuration')
     } finally {
       setSavingStatuses(false)
+    }
+  }
+
+  // Save tags configuration
+  const handleSaveTags = async (updatedTags: string[]) => {
+    try {
+      if (isDevMode()) {
+        // Update mock settings in dev mode
+        updateMockWorkspaceSettings({ contact_tags: updatedTags })
+      } else {
+        // Production: save to API
+        const res = await fetch(`/api/workspaces/${workspaceId}/tags`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tags: updatedTags }),
+        })
+
+        if (!res.ok) {
+          throw new Error('Failed to save tags')
+        }
+      }
+    } catch (error) {
+      console.error('Failed to save tags:', error)
+      toast.error('Failed to save tags')
+      throw error
     }
   }
 
@@ -296,9 +334,16 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
               <Badge key={tag} variant="outline" className="gap-2">
                 {tag}
                 <button
-                  onClick={() => {
-                    setTags(tags.filter((t) => t !== tag))
-                    toast.success('Tag removed')
+                  onClick={async () => {
+                    const updatedTags = tags.filter((t) => t !== tag)
+                    setTags(updatedTags)
+                    try {
+                      await handleSaveTags(updatedTags)
+                      toast.success('Tag removed')
+                    } catch {
+                      // Error already handled in handleSaveTags
+                      setTags(tags) // Rollback on error
+                    }
                   }}
                   className="ml-1 hover:text-destructive"
                 >
@@ -312,22 +357,38 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
               placeholder="Add new tag..."
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
-              onKeyDown={(e) => {
+              onKeyDown={async (e) => {
                 if (e.key === 'Enter' && newTag.trim()) {
-                  setTags([...tags, newTag.trim()])
+                  const updatedTags = [...tags, newTag.trim()]
+                  setTags(updatedTags)
                   setNewTag('')
-                  toast.success('Tag added')
+                  try {
+                    await handleSaveTags(updatedTags)
+                    toast.success('Tag added')
+                  } catch {
+                    // Error already handled in handleSaveTags
+                    setTags(tags) // Rollback on error
+                    setNewTag(newTag) // Restore input
+                  }
                 }
               }}
               className="max-w-xs"
             />
             <Button
               size="sm"
-              onClick={() => {
+              onClick={async () => {
                 if (newTag.trim()) {
-                  setTags([...tags, newTag.trim()])
+                  const updatedTags = [...tags, newTag.trim()]
+                  setTags(updatedTags)
                   setNewTag('')
-                  toast.success('Tag added')
+                  try {
+                    await handleSaveTags(updatedTags)
+                    toast.success('Tag added')
+                  } catch {
+                    // Error already handled in handleSaveTags
+                    setTags(tags) // Rollback on error
+                    setNewTag(newTag) // Restore input
+                  }
                 }
               }}
             >
