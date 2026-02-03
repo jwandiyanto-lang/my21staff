@@ -35,15 +35,16 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
     color: string
     bgColor: string
     enabled: boolean
+    temperature?: 'hot' | 'warm' | 'cold' | null
   }
 
   const [statuses, setStatuses] = useState<StatusConfig[]>([
-    { key: 'new', label: 'New', color: '#6B7280', bgColor: '#F3F4F6', enabled: true },
-    { key: 'cold', label: 'Cold Lead', color: '#3B82F6', bgColor: '#DBEAFE', enabled: true },
-    { key: 'warm', label: 'Warm Lead', color: '#F59E0B', bgColor: '#FEF3C7', enabled: true },
-    { key: 'hot', label: 'Hot Lead', color: '#DC2626', bgColor: '#FEE2E2', enabled: true },
-    { key: 'client', label: 'Client', color: '#10B981', bgColor: '#D1FAE5', enabled: true },
-    { key: 'lost', label: 'Lost', color: '#4B5563', bgColor: '#E5E7EB', enabled: true },
+    { key: 'new', label: 'New', color: '#6B7280', bgColor: '#F3F4F6', enabled: true, temperature: null },
+    { key: 'cold', label: 'Cold Lead', color: '#3B82F6', bgColor: '#DBEAFE', enabled: true, temperature: 'cold' },
+    { key: 'warm', label: 'Warm Lead', color: '#F59E0B', bgColor: '#FEF3C7', enabled: true, temperature: 'warm' },
+    { key: 'hot', label: 'Hot Lead', color: '#DC2626', bgColor: '#FEE2E2', enabled: true, temperature: 'hot' },
+    { key: 'client', label: 'Client', color: '#10B981', bgColor: '#D1FAE5', enabled: true, temperature: null },
+    { key: 'lost', label: 'Lost', color: '#4B5563', bgColor: '#E5E7EB', enabled: true, temperature: null },
   ])
   const [editingStatusId, setEditingStatusId] = useState<string | null>(null)
   const [savingStatuses, setSavingStatuses] = useState(false)
