@@ -29,7 +29,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
   const [saving, setSaving] = useState(false)
 
   // Tags
-  const [tags, setTags] = useState<string[]>(['Student', 'Parent', 'Hot Lead', 'Follow Up'])
+  const [tags, setTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState('')
 
   // Activity tracking
