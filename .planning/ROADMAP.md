@@ -2,8 +2,8 @@
 
 ## Milestones
 
-- v2.0 WhatsApp CRM - Phases 1-9 (shipped 2026-02-01)
-- v2.0.1 Workflow Integration & Lead Automation - Phases 10-13 (in progress)
+- ✅ v2.0 WhatsApp CRM - Phases 1-9 (shipped 2026-02-01)
+- ✅ v2.0.1 Workflow Integration & Lead Automation - Phases 10-13 (shipped 2026-02-03)
 
 ## Phases
 
@@ -88,92 +88,18 @@ Plans:
 
 </details>
 
-### v2.0.1 Workflow Integration & Lead Automation (In Progress)
+<details>
+<summary>✅ v2.0.1 Workflow Integration & Lead Automation (Phases 10-13) — SHIPPED 2026-02-03</summary>
 
-**Milestone Goal:** Fix Sarah bot, automate lead creation/update, enable production testing
+**Full details:** [.planning/milestones/v2.0.1-ROADMAP.md](.planning/milestones/v2.0.1-ROADMAP.md)
 
-#### Phase 10: Sarah Bot Refinement
-**Goal**: Sarah responds correctly with proper persona and handoff logic
-**Depends on**: Phase 9 (production deployment exists)
-**Requirements**: SARAH-01, SARAH-02, SARAH-03, TEST-01
-**Success Criteria** (what must be TRUE):
-  1. Sarah messages match persona guide (conversational tone, under 140 chars, NO emojis)
-  2. Sarah escalates to human when user requests or qualification stalls
-  3. Sarah extracts lead fields accurately (name, business_type, location, tenure, pain_confirmed)
-  4. Developer can test Sarah changes by messaging WhatsApp number immediately
-**Plans**: 1 plan
+- [x] Phase 10: Sarah Bot Refinement (1/1 plans) — completed 2026-02-01
+- [x] Phase 11: Smart Lead Automation (3/3 plans) — completed 2026-02-02
+- [x] Phase 11.1: Lead Redo (4/4 plans, INSERTED) — completed 2026-02-03
+- [x] Phase 12: Sarah Template System (5/5 plans) — completed 2026-02-01
+- [x] Phase 13: Production Validation (1/1 plan) — completed 2026-02-03
 
-Plans:
-- [x] 10-01-PLAN.md — Refine Sarah persona prompt + document CLI workflow
-
-#### Phase 11: Smart Lead Automation
-**Goal**: First message creates lead, subsequent messages update existing lead
-**Depends on**: Phase 10
-**Requirements**: LEAD-01, LEAD-02, LEAD-03, LEAD-04, LEAD-05, DATA-01, DATA-02, DATA-03
-**Success Criteria** (what must be TRUE):
-  1. New WhatsApp contact automatically creates lead in database
-  2. Existing contact messages update lead lastActivityAt (no duplicate leads)
-  3. Phone numbers normalized to E.164 format prevent duplicates (+62813 = 0813)
-  4. Dashboard shows lead activity timestamps for follow-up prioritization
-  5. Leads linked to Kapso conversations via conversation_id for inbox sync
-  6. Webhook retries don't create duplicate leads (idempotency working)
-**Plans**: 3 plans (2 original + 1 gap closure)
-
-Plans:
-- [x] 11-01-PLAN.md — Fix phone deduplication bug + activity timestamp tracking
-- [x] 11-02-PLAN.md — Dashboard right panel with structured lead data sections
-- [x] 11-03-PLAN.md — Gap closure: Fix TypeScript type mismatches for LeadPanel
-
-#### Phase 11.1: Lead Redo (INSERTED)
-**Goal**: Quick iterative fixes to lead management system
-**Depends on**: Phase 11
-**Plans**: Completed (interview-style iterative fixes)
-
-Plans:
-- [x] Settings to Leads integration: Filter disabled statuses from dropdown
-- [x] Activity tab improvements: Note title field with collapsible body
-- [x] Settings UI reorganization: Tabs for Leads and AI Assistant
-
-**Completed:**
-1. Connected Settings status configuration to Leads page (disabled statuses filtered)
-2. Added note title field with collapsible body in activity timeline
-3. Reorganized Settings with tabs for better readability
-4. Status management: toggle on/off and rename (non-deletable)
-5. Fixed Clerk environment variables (removed literal `\n` characters from all keys)
-
-**Known Issues:**
-- Production ClerkProvider error persists despite fixes (requires Clerk dashboard investigation)
-- Settings → Leads integration code is complete and will work once Clerk issue is resolved
-
-#### Phase 12: Sarah Template System
-**Goal**: Sarah configuration documented and duplicatable for new workspaces
-**Depends on**: Phase 11
-**Requirements**: SARAH-04, SARAH-05
-**Success Criteria** (what must be TRUE):
-  1. Sarah configuration documented as reusable template (prompt, settings, triggers)
-  2. Developer can duplicate Sarah setup for new workspace using template
-  3. Your Team page shows simplified Intern settings (Bot Name, Persona, Script)
-  4. Brain configuration section hidden from UI
-**Plans**: 5 plans (3 original + 2 gap closure)
-
-Plans:
-- [x] 12-01-PLAN.md — Convex backend: sarahConfigs schema + API endpoints
-- [x] 12-02-PLAN.md — UI: SarahConfigCard component on team page
-- [x] 12-03-PLAN.md — Documentation: SARAH-TEMPLATE.md + Kapso function code
-- [x] 12-04-PLAN.md — Gap closure: Remove Brain tab from Your Team page
-- [x] 12-05-PLAN.md — Gap closure: Create SimplifiedInternSettings component
-
-#### Phase 13: Production Validation
-**Goal**: All v2.0.1 features working in production with confidence
-**Depends on**: Phase 12
-**Requirements**: TEST-02, TEST-03
-**Success Criteria** (what must be TRUE):
-  1. Lead creation verifiable in dashboard within 10 seconds of WhatsApp message
-  2. All v2.0.1 changes deployed incrementally without downtime
-**Plans**: 1 plan
-
-Plans:
-- [ ] 13-01-PLAN.md — Pre-validation checks + interactive user testing
+</details>
 
 ## Progress
 

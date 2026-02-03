@@ -16,18 +16,19 @@ The system that lets you grow. Lead management, proposal organization, follow-up
 
 **Convex Deployment:** https://intent-otter-212.convex.cloud
 
-**Latest Shipped:** v2.0 WhatsApp CRM (2026-02-01)
+**Latest Shipped:** v2.0.1 Workflow Integration & Lead Automation (2026-02-03)
 
 **What's live in production:**
 - WhatsApp integration via Kapso (+62 813-1859-025)
-- Dual-bot AI (Sarah chatbot + Brain analytics with Grok 4.1-fast)
-- Lead database with real-time Convex sync
-- Dashboard with AI insights and embedded Kapso inbox
+- Refined Sarah chatbot (NO emojis, proper Indonesian tone, handoff logic)
+- Phone normalization prevents duplicate leads (+62813 = 0813)
+- Manual lead entry with inline editing and delete cascade
+- Dashboard with lead activity tracking and Kapso inbox
 - Production deployment with Clerk authentication
 
 **Codebase:**
-- ~62,000 LOC TypeScript (44,337 frontend + 17,751 backend)
-- 9 phases shipped in 2 days (32/35 plans complete)
+- ~43,000 LOC TypeScript frontend
+- 13 phases shipped (v2.0 + v2.0.1)
 
 **Tech Stack:**
 - Next.js 15 + React 19 + TypeScript
@@ -60,6 +61,20 @@ See `.planning/archive/v1.0.0/` for previous milestone history.
 - ✓ Production deployment to www.my21staff.com — v2.0
 
 (69 requirements total — see `.planning/milestones/v2.0-REQUIREMENTS.md`)
+
+**v2.0.1 (Shipped 2026-02-03):**
+- ✓ Sarah persona refined (NO emojis, "kamu" pronoun, 140 char limit, handoff logic) — v2.0.1
+- ✓ Phone normalization prevents duplicate leads (E.164 format) — v2.0.1
+- ✓ Activity timestamp tracking for follow-up prioritization — v2.0.1
+- ✓ Contact-conversation linking for inbox navigation — v2.0.1
+- ✓ Webhook idempotency (dual-layer duplicate protection) — v2.0.1
+- ✓ Sarah configuration template (bot duplication ready) — v2.0.1
+- ✓ Contact delete cascade (conversations, messages, notes) — v2.0.1
+- ✓ Production validation with bug fixes — v2.0.1
+- ✓ Manual lead entry workflow (auto-creation disabled) — v2.0.1
+- ✓ Incremental deployment without downtime — v2.0.1
+
+(13 of 16 requirements validated, 3 intentionally disabled — see `.planning/milestones/v2.0.1-REQUIREMENTS.md`)
 
 ### Active
 
@@ -113,15 +128,9 @@ See `.planning/archive/v1.0.0/` for previous milestone history.
 | Combo handoff workflow | Dashboard alert + WhatsApp notification + auto-reply vs single channel | — Pending |
 | Keep Convex + Clerk + Vercel | Infrastructure proven and working | ✓ Good |
 
-## Current Milestone: v2.0.1 Workflow Integration & Lead Automation
+## Current Milestone
 
-**Goal:** Connect Kapso workflow settings to CRM dashboard and automate lead creation from all WhatsApp messages
-
-**Target features:**
-- Workflow management UI integrated with Your Team settings
-- Automatic lead creation/update on every Kapso message
-- Daily activity summaries auto-generated as lead notes
-- Lead deduplication by phone number
+No active milestone. Ready for `/gsd:new-milestone` to define next version.
 
 ---
-*Last updated: 2026-02-01 after v2.0.1 milestone started*
+*Last updated: 2026-02-03 after v2.0.1 milestone completion*
