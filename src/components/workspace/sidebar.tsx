@@ -201,7 +201,9 @@ export function WorkspaceSidebar({ workspace, isAdmin = false }: WorkspaceSideba
           <div className="flex items-center gap-3 p-3 bg-white/10 rounded-2xl border border-white/10">
             <UserButton />
             <div className="overflow-hidden">
-              <p className="text-sm font-bold text-white truncate">{workspace.name}</p>
+              <p className="text-sm font-bold text-white truncate">
+                {workspace.name.replace(/-[a-z0-9]{6}$/i, '')}
+              </p>
               <p className="text-[10px] text-white/50 font-mono uppercase tracking-tighter">
                 {isAdmin ? 'Admin' : 'Client'} Access
               </p>

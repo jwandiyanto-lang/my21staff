@@ -23,7 +23,7 @@ export function WorkspaceSwitcher({ currentWorkspaceSlug, isAdmin }: WorkspaceSw
         </div>
         <div className="flex-1 text-left overflow-hidden">
           <p className="text-sm font-semibold text-white truncate">
-            {currentWorkspaceSlug}
+            {currentWorkspaceSlug.replace(/-[a-z0-9]{6}$/i, '')}
           </p>
           <p className="text-[10px] text-white/50 uppercase tracking-wider">
             Workspace
