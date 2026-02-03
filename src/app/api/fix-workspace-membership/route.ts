@@ -19,9 +19,8 @@ export async function GET(request: Request) {
 
     const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
-    // Get workspace slug from query params
-    const { searchParams } = new URL(request.url)
-    const workspaceSlug = searchParams.get('workspace') || 'my21staff-vpdfba'
+    // Hardcode workspace slug for now (easier than URL encoding issues)
+    const workspaceSlug = 'my21staff-vpdfba'
 
     // 1. Get workspace by slug
     const workspace = await convex.query(api.workspaces.getBySlug, {
