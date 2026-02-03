@@ -131,7 +131,7 @@ export const listByWorkspaceWithUsers = query({
         // Look up user by Clerk ID (user_id in members is Clerk ID)
         const user = await ctx.db
           .query("users")
-          .withIndex("by_clerk_id", (q) => q.eq("clerkId", m.user_id))
+          .withIndex("by_clerk_id", (q) => q.eq("clerk_id", m.user_id))
           .first();
 
         return {
