@@ -4,18 +4,14 @@ export interface LeadStatusConfig {
   label: string;
   color: string;
   bgColor: string;
-  temperature?: "hot" | "warm" | "cold" | null;
-  enabled?: boolean;
 }
 
-// Default configuration (matches Brain's default)
+// Fixed 4-status configuration (simplified)
 export const DEFAULT_LEAD_STATUSES: LeadStatusConfig[] = [
-  { key: "new", label: "New", color: "#6B7280", bgColor: "#F3F4F6", temperature: null },
-  { key: "cold", label: "Cold Lead", color: "#3B82F6", bgColor: "#DBEAFE", temperature: "cold" },
-  { key: "warm", label: "Warm Lead", color: "#F59E0B", bgColor: "#FEF3C7", temperature: "warm" },
-  { key: "hot", label: "Hot Lead", color: "#DC2626", bgColor: "#FEE2E2", temperature: "hot" },
-  { key: "client", label: "Client", color: "#10B981", bgColor: "#D1FAE5", temperature: null },
-  { key: "lost", label: "Lost", color: "#4B5563", bgColor: "#E5E7EB", temperature: null },
+  { key: "new", label: "New", color: "#6B7280", bgColor: "#F3F4F6" },
+  { key: "cold", label: "Cold Lead", color: "#3B82F6", bgColor: "#DBEAFE" },
+  { key: "hot", label: "Hot Lead", color: "#DC2626", bgColor: "#FEE2E2" },
+  { key: "client", label: "Client", color: "#10B981", bgColor: "#D1FAE5" },
 ];
 
 // Legacy type for backwards compatibility
@@ -37,7 +33,6 @@ export function getStatusConfig(
     label: statusKey.charAt(0).toUpperCase() + statusKey.slice(1).replace(/_/g, ' '),
     color: "#6B7280",
     bgColor: "#F3F4F6",
-    temperature: null,
   };
 }
 

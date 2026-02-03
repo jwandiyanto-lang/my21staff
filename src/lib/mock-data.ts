@@ -92,10 +92,8 @@ export const MOCK_CONVEX_WORKSPACE: MockConvexWorkspace = {
     lead_statuses: [
       { key: 'new', label: 'New', color: '#6B7280', bgColor: '#F3F4F6' },
       { key: 'cold', label: 'Cold Lead', color: '#3B82F6', bgColor: '#DBEAFE' },
-      { key: 'warm', label: 'Warm Lead', color: '#F59E0B', bgColor: '#FEF3C7' },
       { key: 'hot', label: 'Hot Lead', color: '#DC2626', bgColor: '#FEE2E2' },
       { key: 'client', label: 'Client', color: '#10B981', bgColor: '#D1FAE5' },
-      { key: 'lost', label: 'Lost', color: '#4B5563', bgColor: '#E5E7EB' },
     ],
     intern_name: 'Sarah',
     brain_name: 'Grok',
