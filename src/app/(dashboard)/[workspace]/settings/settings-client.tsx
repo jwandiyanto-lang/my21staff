@@ -12,12 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SyncStatusIndicator } from '@/components/settings/sync-status-indicator'
-import { Bot, Loader2, Plus, X, Tag, Activity } from 'lucide-react'
+import { Plus, X, Tag, Activity } from 'lucide-react'
 import { toast } from 'sonner'
 import { isDevMode, getMockWorkspaceSettings, updateMockWorkspaceSettings } from '@/lib/mock-data'
-import { backupSettings } from '@/lib/settings-backup'
 
 interface SettingsClientProps {
   workspaceId: string
@@ -25,9 +23,6 @@ interface SettingsClientProps {
 }
 
 export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientProps) {
-  const [internName, setInternName] = useState('Sarah')
-  const [saving, setSaving] = useState(false)
-
   // Tags
   const [tags, setTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState('')
@@ -40,26 +35,17 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
     assignments: true,
   })
 
-  // Load bot names, status config, and tags
+  // Load tags
   useEffect(() => {
     async function loadSettings() {
       try {
-        // Load bot names and statuses
         if (isDevMode()) {
           const settings = getMockWorkspaceSettings()
-          setInternName(settings.intern_name || 'Sarah')
           // Load tags from mock settings
           if (settings.contact_tags) {
             setTags(settings.contact_tags)
           }
         } else {
-          // Production: fetch bot config
-          const botRes = await fetch(`/api/workspaces/${workspaceSlug}/bot-config`)
-          if (botRes.ok) {
-            const botData = await botRes.json()
-            setInternName(botData.intern_name || 'Sarah')
-          }
-
           // Production: fetch workspace settings to get tags
           const settingsRes = await fetch(`/api/workspaces/${workspaceSlug}/settings`)
           if (settingsRes.ok) {
@@ -74,43 +60,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
       }
     }
     loadSettings()
-  }, [workspaceId])
-
-  // Save bot name
-  const handleSave = async () => {
-    setSaving(true)
-    try {
-      // Always call API (even in dev mode) to keep server and client in sync
-      const res = await fetch(`/api/workspaces/${workspaceSlug}/bot-config`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          intern_name: internName,
-        }),
-      })
-
-      if (!res.ok) {
-        throw new Error('Failed to save')
-      }
-
-      // Backup settings (non-blocking, production only)
-      if (!isDevMode()) {
-        backupSettings(workspaceSlug, 'bot_names', {
-          intern_name: internName,
-        })
-      }
-
-      // Trigger bot name update event for reactive components
-      window.dispatchEvent(new CustomEvent('botNameUpdated'))
-
-      toast.success('Bot names saved')
-    } catch (error) {
-      console.error('Failed to save bot names:', error)
-      toast.error('Failed to save bot names')
-    } finally {
-      setSaving(false)
-    }
-  }
+  }, [workspaceSlug])
 
   // Save tags configuration
   const handleSaveTags = async (updatedTags: string[]) => {
@@ -154,15 +104,8 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         <SyncStatusIndicator workspaceId={workspaceId} />
       </div>
 
-      {/* Settings Tabs */}
-      <Tabs defaultValue="leads" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="leads">Leads</TabsTrigger>
-          <TabsTrigger value="ai">AI Assistant</TabsTrigger>
-        </TabsList>
-
-        {/* Leads Tab */}
-        <TabsContent value="leads" className="space-y-6 mt-6">
+      {/* Settings Content */}
+      <div className="space-y-6">
       {/* Tags Configuration */}
       <Card>
         <CardHeader>
@@ -309,59 +252,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
           </div>
         </CardContent>
       </Card>
-        </TabsContent>
-
-        {/* AI Assistant Tab */}
-        <TabsContent value="ai" className="space-y-6 mt-6">
-          {/* Bot Names Configuration */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Intern Name</CardTitle>
-              <CardDescription>
-                Customize the name of your AI assistant
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Intern Name */}
-              <div className="space-y-2">
-                <Label htmlFor="intern-name" className="flex items-center gap-2">
-                  <Bot className="w-4 h-4" />
-                  Intern / Chat Bot Name
-                </Label>
-                <Input
-                  id="intern-name"
-                  value={internName}
-                  onChange={(e) => setInternName(e.target.value)}
-                  onBlur={handleSave}
-                  placeholder="Sarah"
-                  className="max-w-md"
-                />
-                <p className="text-xs text-muted-foreground">
-                  The AI assistant that handles conversations and qualifies leads
-                </p>
-              </div>
-
-              {/* Save Button (for manual save if needed) */}
-              <div className="pt-4">
-                <Button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="w-full max-w-md"
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Save Bot Name'
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   )
 }

@@ -7,7 +7,7 @@ interface KnowledgeBasePageProps {
 export default async function KnowledgeBasePage({ params }: KnowledgeBasePageProps) {
   const { workspace: workspaceSlug } = await params
 
-  // Redirect old knowledge-base route to new your-team route
+  // Redirect old knowledge-base route to dashboard
   // This maintains backwards compatibility for any existing bookmarks/links
-  redirect(`/${workspaceSlug}/your-team?tab=intern`)
+  redirect(`/${workspaceSlug}`)
 }
