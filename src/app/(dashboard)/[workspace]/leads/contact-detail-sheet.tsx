@@ -139,11 +139,13 @@ export function ContactDetailSheet({
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [isLoadingActivities, setIsLoadingActivities] = useState(false)
   const [activitiesLoaded, setActivitiesLoaded] = useState(false)
+  const [newNoteTitle, setNewNoteTitle] = useState('')
   const [newNoteContent, setNewNoteContent] = useState('')
   const [newNoteDueDate, setNewNoteDueDate] = useState<Date | undefined>(undefined)
   const [isAddingNote, setIsAddingNote] = useState(false)
   const [expandedForms, setExpandedForms] = useState<Set<string>>(new Set())
   const [expandedMessageDays, setExpandedMessageDays] = useState<Set<string>>(new Set())
+  const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set())
 
   // Delete state
   const [isDeleting, setIsDeleting] = useState(false)
@@ -161,9 +163,11 @@ export function ContactDetailSheet({
       // Reset activity state for new contact
       setActivities([])
       setActivitiesLoaded(false)
+      setNewNoteTitle('')
       setNewNoteContent('')
       setExpandedForms(new Set())
       setExpandedMessageDays(new Set())
+      setExpandedNotes(new Set())
       setActiveTab('details')
     }
   }, [contact])
@@ -351,7 +355,7 @@ export function ContactDetailSheet({
       try {
         const response = await fetch(`/api/contacts/${contact.id}/notes`)
         if (response.ok) {
-          const { notes } = await response.json() as { notes: (ContactNoteWithAuthor & { due_date: string | null })[] }
+          const { notes } = await response.json() as { notes: (ContactNoteWithAuthor & { due_date: string | null, title?: string })[] }
           notes.forEach((note) => {
             activityList.push({
               id: note.id,
@@ -360,6 +364,7 @@ export function ContactDetailSheet({
               metadata: {
                 ...(note.metadata as Record<string, unknown>),
                 ...(note.due_date ? { due_date: note.due_date } : {}),
+                ...(note.title ? { title: note.title } : {}),
               },
               author: note.author ? { full_name: note.author.full_name, email: note.author.email } : undefined,
               created_at: note.created_at,
@@ -443,7 +448,7 @@ export function ContactDetailSheet({
 
   // Add a new note
   const handleAddNote = async () => {
-    if (!contact || !newNoteContent.trim()) return
+    if (!contact || !newNoteTitle.trim() || !newNoteContent.trim()) return
 
     setIsAddingNote(true)
     try {
@@ -451,22 +456,27 @@ export function ContactDetailSheet({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          title: newNoteTitle.trim(),
           content: newNoteContent.trim(),
           due_date: newNoteDueDate ? newNoteDueDate.toISOString() : null,
         }),
       })
 
       if (response.ok) {
-        const { note } = await response.json() as { note: ContactNoteWithAuthor & { due_date: string | null } }
+        const { note } = await response.json() as { note: ContactNoteWithAuthor & { due_date: string | null, title?: string } }
         // Add to activities list
         setActivities((prev) => [{
           id: note.id,
           type: 'note',
           content: note.content,
-          metadata: note.due_date ? { due_date: note.due_date } : undefined,
+          metadata: {
+            ...(note.due_date ? { due_date: note.due_date } : {}),
+            ...(note.title ? { title: note.title } : {}),
+          },
           author: note.author ? { full_name: note.author.full_name, email: note.author.email } : undefined,
           created_at: note.created_at,
         }, ...prev])
+        setNewNoteTitle('')
         setNewNoteContent('')
         setNewNoteDueDate(undefined)
         toast.success('Note added')
@@ -899,8 +909,15 @@ export function ContactDetailSheet({
             <div className="p-4 border-b bg-background">
               <div className="flex gap-2">
                 <div className="flex-1 space-y-2">
+                  <Input
+                    placeholder="Note title..."
+                    value={newNoteTitle}
+                    onChange={(e) => setNewNoteTitle(e.target.value)}
+                    className="text-sm font-medium"
+                    disabled={isAddingNote}
+                  />
                   <Textarea
-                    placeholder="Add a note..."
+                    placeholder="Note details..."
                     value={newNoteContent}
                     onChange={(e) => setNewNoteContent(e.target.value)}
                     className="min-h-[60px] text-sm resize-none"
@@ -947,8 +964,8 @@ export function ContactDetailSheet({
                 <Button
                   size="icon"
                   onClick={handleAddNote}
-                  disabled={!newNoteContent.trim() || isAddingNote}
-                  className="h-[88px] w-[60px]"
+                  disabled={!newNoteTitle.trim() || !newNoteContent.trim() || isAddingNote}
+                  className="h-[112px] w-[60px]"
                 >
                   {isAddingNote ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -1105,9 +1122,35 @@ export function ContactDetailSheet({
                           {/* Note content or form answers */}
                           {activity.type === 'note' && (
                             <div className="mt-1">
-                              <p className="text-sm text-foreground whitespace-pre-wrap">
-                                {activity.content}
-                              </p>
+                              {activity.metadata?.title && (
+                                <button
+                                  onClick={() => {
+                                    setExpandedNotes(prev => {
+                                      const newSet = new Set(prev)
+                                      if (newSet.has(activity.id)) {
+                                        newSet.delete(activity.id)
+                                      } else {
+                                        newSet.add(activity.id)
+                                      }
+                                      return newSet
+                                    })
+                                  }}
+                                  className="text-sm font-medium text-left hover:text-primary transition-colors flex items-center gap-1 w-full"
+                                >
+                                  {activity.metadata.title}
+                                  <span className={cn(
+                                    "text-muted-foreground transition-transform text-xs",
+                                    expandedNotes.has(activity.id) && "rotate-180"
+                                  )}>
+                                    ▼
+                                  </span>
+                                </button>
+                              )}
+                              {expandedNotes.has(activity.id) && (
+                                <p className="text-sm text-foreground whitespace-pre-wrap mt-2">
+                                  {activity.content}
+                                </p>
+                              )}
                               {typeof activity.metadata?.due_date === 'string' && (
                                 <div className="mt-2 flex items-center gap-1.5 text-xs text-orange-600">
                                   <Clock className="h-3 w-3" />
