@@ -22,6 +22,7 @@ interface StatusConfig {
   label: string
   color: string
   bgColor: string
+  enabled: boolean
 }
 
 interface ColumnsConfig {
