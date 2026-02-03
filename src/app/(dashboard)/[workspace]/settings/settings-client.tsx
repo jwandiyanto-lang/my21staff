@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SyncStatusIndicator } from '@/components/settings/sync-status-indicator'
 import { Bot, Loader2, Plus, X, Tag, Activity, BarChart3 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -111,56 +112,17 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         <SyncStatusIndicator workspaceId={workspaceId} />
       </div>
 
-      {/* Bot Names Configuration */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Intern Name</CardTitle>
-          <CardDescription>
-            Customize the name of your AI assistant
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Intern Name */}
-          <div className="space-y-2">
-            <Label htmlFor="intern-name" className="flex items-center gap-2">
-              <Bot className="w-4 h-4" />
-              Intern / Chat Bot Name
-            </Label>
-            <Input
-              id="intern-name"
-              value={internName}
-              onChange={(e) => setInternName(e.target.value)}
-              onBlur={handleSave}
-              placeholder="Sarah"
-              className="max-w-md"
-            />
-            <p className="text-xs text-muted-foreground">
-              The AI assistant that handles conversations and qualifies leads
-            </p>
-          </div>
+      {/* Settings Tabs */}
+      <Tabs defaultValue="leads" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="leads">Leads</TabsTrigger>
+          <TabsTrigger value="ai">AI Assistant</TabsTrigger>
+        </TabsList>
 
-          {/* Save Button (for manual save if needed) */}
-          <div className="pt-4">
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full max-w-md"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save Bot Name'
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Lead Status Configuration */}
-      <Card>
+        {/* Leads Tab */}
+        <TabsContent value="leads" className="space-y-6 mt-6">
+          {/* Lead Status Configuration */}
+          <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5" />
@@ -338,6 +300,59 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+
+        {/* AI Assistant Tab */}
+        <TabsContent value="ai" className="space-y-6 mt-6">
+          {/* Bot Names Configuration */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Intern Name</CardTitle>
+              <CardDescription>
+                Customize the name of your AI assistant
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Intern Name */}
+              <div className="space-y-2">
+                <Label htmlFor="intern-name" className="flex items-center gap-2">
+                  <Bot className="w-4 h-4" />
+                  Intern / Chat Bot Name
+                </Label>
+                <Input
+                  id="intern-name"
+                  value={internName}
+                  onChange={(e) => setInternName(e.target.value)}
+                  onBlur={handleSave}
+                  placeholder="Sarah"
+                  className="max-w-md"
+                />
+                <p className="text-xs text-muted-foreground">
+                  The AI assistant that handles conversations and qualifies leads
+                </p>
+              </div>
+
+              {/* Save Button (for manual save if needed) */}
+              <div className="pt-4">
+                <Button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="w-full max-w-md"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Bot Name'
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
