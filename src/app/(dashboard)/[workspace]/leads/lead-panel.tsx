@@ -96,57 +96,49 @@ export function LeadPanel({ contact, workspaceId }: LeadPanelProps) {
   const showSaasSection = contact.businessType === 'SaaS' || contact.businessType === 'CRM' || currentStack
 
   return (
-    <div className="space-y-6">
-      {/* Compact Overview - Contact + Source + Engagement */}
-      <section className="border rounded-lg p-4 bg-muted/30">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-          Lead Overview
+    <div className="space-y-4">
+      {/* Lead Overview - More Readable Layout */}
+      <section className="space-y-3">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          Contact Information
         </h3>
 
-        {/* Contact Info - Compact Grid */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-4 text-sm">
+        {/* Contact Details */}
+        <div className="space-y-2">
           <InlineEditField
             label="Name"
             value={contact.name}
             placeholder="No name"
             onSave={(value) => handleFieldSave('name', value)}
-            compact
           />
-          <div className="flex items-center gap-2">
-            <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
-            <span className="text-sm truncate">{contact.phone}</span>
+          <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded">
+            <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="text-sm">{contact.phone}</span>
           </div>
           <InlineEditField
             label="Email"
             value={contact.email}
             placeholder="No email"
             onSave={(value) => handleFieldSave('email', value)}
-            compact
           />
           <InlineEditField
             label="Location"
             value={contact.domisili}
             placeholder="No location"
             onSave={(value) => handleFieldSave('domisili', value)}
-            compact
           />
         </div>
 
-        <Separator className="my-3" />
-
-        {/* Source & Engagement - Single Line Grid */}
-        <div className="grid grid-cols-3 gap-4 text-xs">
-          {/* Source */}
-          <div className="space-y-1">
-            <div className="text-muted-foreground font-medium">Source</div>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="px-3 py-2 bg-muted/30 rounded">
+            <div className="text-xs text-muted-foreground mb-1">Source</div>
             <Badge variant="secondary" className="text-xs">
               {contact.source || 'Unknown'}
             </Badge>
           </div>
-
-          {/* Status */}
-          <div className="space-y-1">
-            <div className="text-muted-foreground font-medium">Status</div>
+          <div className="px-3 py-2 bg-muted/30 rounded">
+            <div className="text-xs text-muted-foreground mb-1">Status</div>
             <Badge
               variant="outline"
               className={cn(
@@ -160,52 +152,24 @@ export function LeadPanel({ contact, workspaceId }: LeadPanelProps) {
               {contact.leadStatus || contact.lead_status || 'new'}
             </Badge>
           </div>
-
-          {/* Score */}
-          <div className="space-y-1">
-            <div className="text-muted-foreground font-medium">Score</div>
-            <div className="font-semibold">{contact.lead_score}/100</div>
-          </div>
-
-          {/* Temperature (if available) */}
-          {contact.leadTemperature && (
-            <div className="space-y-1">
-              <div className="text-muted-foreground font-medium">Temp</div>
-              <Badge
-                className={cn(
-                  'text-xs',
-                  contact.leadTemperature === 'hot' && 'bg-red-100 text-red-700',
-                  contact.leadTemperature === 'warm' && 'bg-orange-100 text-orange-700',
-                  contact.leadTemperature === 'lukewarm' && 'bg-yellow-100 text-yellow-700',
-                  contact.leadTemperature === 'cold' && 'bg-blue-100 text-blue-700',
-                )}
-              >
-                {contact.leadTemperature}
-              </Badge>
-            </div>
-          )}
-
-          {/* Last Activity */}
           {contact.lastActivityAt && (
-            <div className="space-y-1">
-              <div className="text-muted-foreground font-medium flex items-center gap-1">
+            <div className="px-3 py-2 bg-muted/30 rounded">
+              <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
                 <Zap className="h-3 w-3" />
-                Activity
+                Last Activity
               </div>
-              <div className="truncate" title={formatWIB(contact.lastActivityAt, DATE_FORMATS.DATETIME_LONG)}>
+              <div className="text-sm" title={formatWIB(contact.lastActivityAt, DATE_FORMATS.DATETIME_LONG)}>
                 {formatDistanceWIB(contact.lastActivityAt, { addSuffix: true })}
               </div>
             </div>
           )}
-
-          {/* Messages */}
           {messageCount !== undefined && (
-            <div className="space-y-1">
-              <div className="text-muted-foreground font-medium flex items-center gap-1">
+            <div className="px-3 py-2 bg-muted/30 rounded">
+              <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
                 <MessageCircle className="h-3 w-3" />
                 Messages
               </div>
-              <div>{messageCount}</div>
+              <div className="text-sm font-medium">{messageCount}</div>
             </div>
           )}
         </div>
@@ -213,77 +177,70 @@ export function LeadPanel({ contact, workspaceId }: LeadPanelProps) {
 
       <Separator />
 
-      {/* Last Contact (if different from last activity) */}
-      {contact.lastContactAt && (
-        <div className="flex items-center justify-between px-3 py-1.5 text-sm">
-          <span className="text-muted-foreground flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            Last Contact
-          </span>
-          <span title={formatWIB(contact.lastContactAt, DATE_FORMATS.DATETIME_LONG)}>
-            {formatDistanceWIB(contact.lastContactAt, { addSuffix: true })}
-          </span>
-        </div>
-      )}
-
-      <Separator />
-
-      {/* Lead Profile */}
+      {/* AI Lead Score */}
       <section>
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-          <Target className="h-3.5 w-3.5" />
-          Lead Profile
+          <BarChart3 className="h-3.5 w-3.5" />
+          AI Lead Score
         </h3>
         <div className="space-y-3">
-          {contact.story && (
-            <div className="px-3">
-              <span className="text-xs text-muted-foreground">Story</span>
-              <p className="text-sm mt-1">{contact.story}</p>
-            </div>
-          )}
-          {summary && (
-            <div className="px-3">
-              <span className="text-xs text-muted-foreground">Summary</span>
-              <p className="text-sm mt-1">{summary}</p>
-            </div>
-          )}
-          {contact.painPoints && contact.painPoints.length > 0 && (
-            <div className="px-3">
-              <span className="text-xs text-muted-foreground">Pain Points</span>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {contact.painPoints.map((pain, i) => (
-                  <Badge key={i} variant="outline" className="text-xs">
-                    {pain}
-                  </Badge>
-                ))}
+          {/* Score Display */}
+          <div className="flex items-center justify-between px-4 py-3 bg-muted/30 rounded-lg">
+            <span className="text-sm font-medium">Overall Score</span>
+            <span className="text-2xl font-bold">{contact.lead_score}/100</span>
+          </div>
+
+          {/* Score Breakdown */}
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-muted-foreground mb-2">Score Highlights</div>
+            {contact.leadTemperature && (
+              <div className="flex items-start gap-2 px-3 py-2 bg-muted/20 rounded text-sm">
+                <div className="w-2 h-2 rounded-full bg-orange-500 mt-1 shrink-0" />
+                <div>
+                  <span className="font-medium">Temperature: </span>
+                  <span className={cn(
+                    contact.leadTemperature === 'hot' && 'text-red-600',
+                    contact.leadTemperature === 'warm' && 'text-orange-600',
+                    contact.leadTemperature === 'lukewarm' && 'text-yellow-600',
+                    contact.leadTemperature === 'cold' && 'text-blue-600',
+                  )}>
+                    {contact.leadTemperature}
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
-          {contact.urgencyLevel && (
-            <div className="flex items-center justify-between px-3 py-1.5 text-sm">
-              <span className="text-muted-foreground">Urgency</span>
-              <Badge variant="secondary" className="text-xs">{contact.urgencyLevel}</Badge>
-            </div>
-          )}
-          {mainPainPoint && (
-            <div className="px-3">
-              <span className="text-xs text-muted-foreground">Main Pain Point</span>
-              <p className="text-sm mt-1 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3 text-orange-500" />
-                {mainPainPoint}
-              </p>
-            </div>
-          )}
-          {urgencyTimeline && (
-            <div className="flex items-center justify-between px-3 py-1.5 text-sm">
-              <span className="text-muted-foreground">Timeline</span>
-              <span>{urgencyTimeline}</span>
-            </div>
-          )}
+            )}
+            {temperatureReason && (
+              <div className="flex items-start gap-2 px-3 py-2 bg-muted/20 rounded text-sm">
+                <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 shrink-0" />
+                <div>
+                  <span className="font-medium">Reason: </span>
+                  <span className="text-muted-foreground">{temperatureReason}</span>
+                </div>
+              </div>
+            )}
+            {responseLatency && (
+              <div className="flex items-start gap-2 px-3 py-2 bg-muted/20 rounded text-sm">
+                <div className="w-2 h-2 rounded-full bg-green-500 mt-1 shrink-0" />
+                <div>
+                  <span className="font-medium">Response Time: </span>
+                  <span>{responseLatency}</span>
+                </div>
+              </div>
+            )}
+            {contact.urgencyLevel && (
+              <div className="flex items-start gap-2 px-3 py-2 bg-muted/20 rounded text-sm">
+                <div className="w-2 h-2 rounded-full bg-purple-500 mt-1 shrink-0" />
+                <div>
+                  <span className="font-medium">Urgency: </span>
+                  <span>{contact.urgencyLevel}</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Niche Data - SaaS/CRM */}
+      {/* Business Info */}
       {showSaasSection && (
         <>
           <Separator />
