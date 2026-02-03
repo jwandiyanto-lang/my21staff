@@ -9,8 +9,53 @@ function isDevMode(): boolean {
   return process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 }
 
-// NOTE: No GET handler - settings are loaded via server component, not this API
-// If browser/Next.js tries to GET this route, Clerk middleware will handle it
+// GET /api/workspaces/[id]/settings - Get workspace settings
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Dev mode: return mock settings
+    if (isDevMode()) {
+      return NextResponse.json({
+        contact_tags: ['Student', 'Parent', 'Hot Lead', 'Follow Up'],
+        main_form_fields: [],
+        form_field_scores: {},
+      })
+    }
+
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { id: workspaceId } = await params
+
+    // Verify workspace access
+    const authResult = await requireWorkspaceMembership(workspaceId)
+    if (authResult instanceof NextResponse) return authResult
+
+    // Fetch workspace by slug to get settings
+    const workspace = await fetchQuery(api.workspaces.getBySlug, { slug: workspaceId })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    // Return workspace settings
+    const settings = (workspace.settings as Record<string, unknown>) || {}
+    return NextResponse.json({
+      contact_tags: settings.contact_tags || [],
+      main_form_fields: settings.main_form_fields || [],
+      form_field_scores: settings.form_field_scores || {},
+    })
+  } catch (error) {
+    console.error('Error in workspace settings GET:', error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
 
 export async function PATCH(
   request: Request,

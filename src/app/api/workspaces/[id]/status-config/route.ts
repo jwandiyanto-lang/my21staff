@@ -28,9 +28,19 @@ export async function GET(
   }
 
   try {
-    const { id } = await params;
+    const { id: workspaceSlug } = await params;
+
+    // Fetch workspace by slug to get Convex ID
+    const workspace = await convex.query(api.workspaces.getBySlug, {
+      slug: workspaceSlug
+    });
+
+    if (!workspace) {
+      return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+    }
+
     const statusConfig = await convex.query(api.workspaces.getStatusConfig, {
-      workspaceId: id as Id<"workspaces">,
+      workspaceId: workspace._id,
     });
 
     return NextResponse.json(statusConfig);
@@ -65,7 +75,7 @@ export async function PUT(
   }
 
   try {
-    const { id } = await params;
+    const { id: workspaceSlug } = await params;
     const body = await request.json();
     const { leadStatuses } = body;
 
@@ -76,8 +86,17 @@ export async function PUT(
       );
     }
 
+    // Fetch workspace by slug to get Convex ID
+    const workspace = await convex.query(api.workspaces.getBySlug, {
+      slug: workspaceSlug
+    });
+
+    if (!workspace) {
+      return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+    }
+
     await convex.mutation(api.workspaces.updateStatusConfig, {
-      workspaceId: id as Id<"workspaces">,
+      workspaceId: workspace._id,
       leadStatuses,
     });
 
