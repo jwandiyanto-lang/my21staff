@@ -145,6 +145,12 @@ export async function POST(request: NextRequest) {
 async function processWebhookAsync(payload: MetaWebhookPayload): Promise<void> {
   const startTime = Date.now()
 
+  // Check if automatic lead creation is disabled
+  if (process.env.DISABLE_AUTO_LEAD_CREATION === 'true') {
+    console.log('[Webhook] Auto lead creation disabled - skipping processing')
+    return
+  }
+
   try {
     // Collect all messages grouped by workspace
     const workspaceMessages = new Map<string, MessageData[]>()
