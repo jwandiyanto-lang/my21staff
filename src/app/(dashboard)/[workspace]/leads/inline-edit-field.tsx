@@ -12,6 +12,7 @@ interface InlineEditFieldProps {
   label?: string
   placeholder?: string
   multiline?: boolean
+  compact?: boolean
   className?: string
   valueClassName?: string
 }
@@ -22,6 +23,7 @@ export function InlineEditField({
   label,
   placeholder = 'Click to edit',
   multiline = false,
+  compact = false,
   className,
   valueClassName,
 }: InlineEditFieldProps) {
@@ -85,7 +87,7 @@ export function InlineEditField({
 
   return (
     <div className={cn('group', className)}>
-      {label && (
+      {label && !compact && (
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">
           {label}
         </label>
@@ -101,7 +103,7 @@ export function InlineEditField({
             disabled={isSaving}
             className={cn(
               'text-sm',
-              multiline ? 'min-h-[80px] resize-none' : 'h-8',
+              multiline ? 'min-h-[80px] resize-none' : compact ? 'h-7' : 'h-8',
               valueClassName
             )}
             placeholder={placeholder}
@@ -114,12 +116,16 @@ export function InlineEditField({
         <div
           onClick={() => setIsEditing(true)}
           className={cn(
-            'px-3 py-2 border border-transparent rounded cursor-pointer min-h-[32px] flex items-center justify-between gap-2',
+            'px-3 border border-transparent rounded cursor-pointer flex items-center justify-between gap-2',
             'hover:border-muted-foreground/20 hover:bg-muted/50 transition-colors',
+            compact ? 'py-0.5 min-h-[24px]' : 'py-2 min-h-[32px]',
             valueClassName
           )}
         >
-          <span className={cn('text-sm', !value && 'text-muted-foreground')}>
+          {compact && label && (
+            <span className="text-xs text-muted-foreground shrink-0 w-16">{label}:</span>
+          )}
+          <span className={cn('text-sm truncate', !value && 'text-muted-foreground')}>
             {value || placeholder}
           </span>
           <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />

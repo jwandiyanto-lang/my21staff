@@ -97,95 +97,56 @@ export function LeadPanel({ contact, workspaceId }: LeadPanelProps) {
 
   return (
     <div className="space-y-6">
-      {/* Contact Vitals */}
-      <section>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-          <User className="h-3.5 w-3.5" />
-          Contact Vitals
+      {/* Compact Overview - Contact + Source + Engagement */}
+      <section className="border rounded-lg p-4 bg-muted/30">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          Lead Overview
         </h3>
-        <div className="space-y-2">
+
+        {/* Contact Info - Compact Grid */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-4 text-sm">
           <InlineEditField
             label="Name"
             value={contact.name}
             placeholder="No name"
             onSave={(value) => handleFieldSave('name', value)}
+            compact
           />
-          <div className="flex items-center gap-2 px-3 py-2">
-            <Phone className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{contact.phone}</span>
-            {contact.phone_normalized && contact.phone_normalized !== contact.phone && (
-              <span className="text-xs text-muted-foreground">({contact.phone_normalized})</span>
-            )}
+          <div className="flex items-center gap-2">
+            <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
+            <span className="text-sm truncate">{contact.phone}</span>
           </div>
           <InlineEditField
             label="Email"
             value={contact.email}
             placeholder="No email"
             onSave={(value) => handleFieldSave('email', value)}
+            compact
           />
           <InlineEditField
             label="Location"
             value={contact.domisili}
             placeholder="No location"
             onSave={(value) => handleFieldSave('domisili', value)}
+            compact
           />
         </div>
-      </section>
 
-      <Separator />
+        <Separator className="my-3" />
 
-      {/* Source Intelligence */}
-      <section>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-          <Globe className="h-3.5 w-3.5" />
-          Source Intelligence
-        </h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center justify-between px-3 py-1.5">
-            <span className="text-muted-foreground">Source</span>
+        {/* Source & Engagement - Single Line Grid */}
+        <div className="grid grid-cols-3 gap-4 text-xs">
+          {/* Source */}
+          <div className="space-y-1">
+            <div className="text-muted-foreground font-medium">Source</div>
             <Badge variant="secondary" className="text-xs">
               {contact.source || 'Unknown'}
             </Badge>
           </div>
-          {trafficSource && (
-            <div className="flex items-center justify-between px-3 py-1.5">
-              <span className="text-muted-foreground">Traffic</span>
-              <span>{trafficSource}</span>
-            </div>
-          )}
-          {campaignId && (
-            <div className="flex items-center justify-between px-3 py-1.5">
-              <span className="text-muted-foreground">Campaign</span>
-              <span className="text-xs font-mono">{campaignId}</span>
-            </div>
-          )}
-          {deviceType && (
-            <div className="flex items-center justify-between px-3 py-1.5">
-              <span className="text-muted-foreground">Device</span>
-              <div className="flex items-center gap-1">
-                <Smartphone className="h-3 w-3" />
-                <span>{deviceType}</span>
-              </div>
-            </div>
-          )}
-          <div className="flex items-center justify-between px-3 py-1.5">
-            <span className="text-muted-foreground">Added</span>
-            <span>{formatWIB(contact.created_at, DATE_FORMATS.DATE_SHORT)}</span>
-          </div>
-        </div>
-      </section>
 
-      <Separator />
-
-      {/* Engagement Signals */}
-      <section>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-          <BarChart3 className="h-3.5 w-3.5" />
-          Engagement Signals
-        </h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center justify-between px-3 py-1.5">
-            <span className="text-muted-foreground">Lead Status</span>
+          {/* Status */}
+          <div className="space-y-1">
+            <div className="text-muted-foreground font-medium">Status</div>
             <Badge
               variant="outline"
               className={cn(
@@ -199,9 +160,17 @@ export function LeadPanel({ contact, workspaceId }: LeadPanelProps) {
               {contact.leadStatus || contact.lead_status || 'new'}
             </Badge>
           </div>
+
+          {/* Score */}
+          <div className="space-y-1">
+            <div className="text-muted-foreground font-medium">Score</div>
+            <div className="font-semibold">{contact.lead_score}/100</div>
+          </div>
+
+          {/* Temperature (if available) */}
           {contact.leadTemperature && (
-            <div className="flex items-center justify-between px-3 py-1.5">
-              <span className="text-muted-foreground">Temperature</span>
+            <div className="space-y-1">
+              <div className="text-muted-foreground font-medium">Temp</div>
               <Badge
                 className={cn(
                   'text-xs',
@@ -211,42 +180,49 @@ export function LeadPanel({ contact, workspaceId }: LeadPanelProps) {
                   contact.leadTemperature === 'cold' && 'bg-blue-100 text-blue-700',
                 )}
               >
-                {contact.leadTemperature.toUpperCase()}
+                {contact.leadTemperature}
               </Badge>
             </div>
           )}
-          <div className="flex items-center justify-between px-3 py-1.5">
-            <span className="text-muted-foreground">Lead Score</span>
-            <span className="font-semibold">{contact.lead_score}/100</span>
-          </div>
+
+          {/* Last Activity */}
+          {contact.lastActivityAt && (
+            <div className="space-y-1">
+              <div className="text-muted-foreground font-medium flex items-center gap-1">
+                <Zap className="h-3 w-3" />
+                Activity
+              </div>
+              <div className="truncate" title={formatWIB(contact.lastActivityAt, DATE_FORMATS.DATETIME_LONG)}>
+                {formatDistanceWIB(contact.lastActivityAt, { addSuffix: true })}
+              </div>
+            </div>
+          )}
+
+          {/* Messages */}
           {messageCount !== undefined && (
-            <div className="flex items-center justify-between px-3 py-1.5">
-              <span className="text-muted-foreground flex items-center gap-1">
+            <div className="space-y-1">
+              <div className="text-muted-foreground font-medium flex items-center gap-1">
                 <MessageCircle className="h-3 w-3" />
                 Messages
-              </span>
-              <span>{messageCount}</span>
+              </div>
+              <div>{messageCount}</div>
             </div>
           )}
-          {contact.lastActivityAt && (
-            <div className="flex items-center justify-between px-3 py-1.5">
-              <span className="text-muted-foreground flex items-center gap-1">
-                <Zap className="h-3 w-3" />
-                Last Activity
-              </span>
-              <span title={formatWIB(contact.lastActivityAt, DATE_FORMATS.DATETIME_LONG)}>
-                {formatDistanceWIB(contact.lastActivityAt, { addSuffix: true })}
-              </span>
-            </div>
-          )}
-          {contact.lastContactAt && (
-            <div className="flex items-center justify-between px-3 py-1.5">
-              <span className="text-muted-foreground flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                Last Contact
-              </span>
-              <span title={formatWIB(contact.lastContactAt, DATE_FORMATS.DATETIME_LONG)}>
-                {formatDistanceWIB(contact.lastContactAt, { addSuffix: true })}
+        </div>
+      </section>
+
+      <Separator />
+
+      {/* Keep remaining sections below... */}
+      {contact.lastContactAt && (
+        <section>
+          <div className="flex items-center justify-between px-3 py-1.5 text-sm">
+            <span className="text-muted-foreground flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              Last Contact
+            </span>
+            <span title={formatWIB(contact.lastContactAt, DATE_FORMATS.DATETIME_LONG)}>
+              {formatDistanceWIB(contact.lastContactAt, { addSuffix: true })}
               </span>
             </div>
           )}
