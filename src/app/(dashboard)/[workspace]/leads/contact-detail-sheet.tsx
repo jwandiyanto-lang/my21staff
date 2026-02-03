@@ -1135,24 +1135,24 @@ export function ContactDetailSheet({
                                       return newSet
                                     })
                                   }}
-                                  className="text-sm font-medium text-left hover:text-primary transition-colors flex items-center gap-1 w-full"
+                                  className="text-sm font-medium text-left hover:text-primary transition-colors flex items-center gap-2 w-full"
                                 >
-                                  {activity.metadata.title}
                                   <span className={cn(
-                                    "text-muted-foreground transition-transform text-xs",
-                                    expandedNotes.has(activity.id) && "rotate-180"
+                                    "text-muted-foreground transition-transform text-xs shrink-0",
+                                    expandedNotes.has(activity.id) && "rotate-90"
                                   )}>
-                                    ▼
+                                    ▶
                                   </span>
+                                  {activity.metadata.title}
                                 </button>
                               )}
                               {expandedNotes.has(activity.id) && (
-                                <p className="text-sm text-foreground whitespace-pre-wrap mt-2">
+                                <p className="text-sm text-foreground whitespace-pre-wrap mt-2 ml-5">
                                   {activity.content}
                                 </p>
                               )}
                               {typeof activity.metadata?.due_date === 'string' && (
-                                <div className="mt-2 flex items-center gap-1.5 text-xs text-orange-600">
+                                <div className="mt-2 ml-5 flex items-center gap-1.5 text-xs text-orange-600">
                                   <Clock className="h-3 w-3" />
                                   <span>Due: {formatWIB(activity.metadata.due_date, DATE_FORMATS.DATETIME_LONG)}</span>
                                 </div>
