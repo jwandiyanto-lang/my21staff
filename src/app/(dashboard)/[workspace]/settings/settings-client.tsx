@@ -28,9 +28,16 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
   const [internName, setInternName] = useState('Sarah')
   const [saving, setSaving] = useState(false)
 
-  // Lead statuses
-  const [statuses, setStatuses] = useState<string[]>(['new', 'hot', 'warm', 'cold', 'converted', 'lost'])
-  const [newStatus, setNewStatus] = useState('')
+  // Lead statuses - structured with enabled state
+  const [statuses, setStatuses] = useState<Array<{ id: string; name: string; enabled: boolean }>>([
+    { id: 'new', name: 'New', enabled: true },
+    { id: 'hot', name: 'Hot', enabled: true },
+    { id: 'warm', name: 'Warm', enabled: true },
+    { id: 'cold', name: 'Cold', enabled: true },
+    { id: 'converted', name: 'Converted', enabled: true },
+    { id: 'lost', name: 'Lost', enabled: true },
+  ])
+  const [editingStatusId, setEditingStatusId] = useState<string | null>(null)
 
   // Tags
   const [tags, setTags] = useState<string[]>(['Student', 'Parent', 'Hot Lead', 'Follow Up'])
@@ -129,50 +136,63 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
             Lead Statuses
           </CardTitle>
           <CardDescription>
-            Customize your lead pipeline stages
+            Rename statuses and toggle them on/off
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2">
+        <CardContent>
+          <div className="space-y-3">
             {statuses.map((status) => (
-              <Badge key={status} variant="secondary" className="gap-2">
-                {status}
-                <button
-                  onClick={() => setStatuses(statuses.filter((s) => s !== status))}
-                  className="ml-1 hover:text-destructive"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </Badge>
+              <div key={status.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3 flex-1">
+                  <input
+                    type="checkbox"
+                    checked={status.enabled}
+                    onChange={(e) => {
+                      setStatuses(statuses.map(s =>
+                        s.id === status.id ? { ...s, enabled: e.target.checked } : s
+                      ))
+                      toast.success(e.target.checked ? 'Status enabled' : 'Status disabled')
+                    }}
+                    className="w-4 h-4 cursor-pointer"
+                  />
+                  {editingStatusId === status.id ? (
+                    <Input
+                      value={status.name}
+                      onChange={(e) => {
+                        setStatuses(statuses.map(s =>
+                          s.id === status.id ? { ...s, name: e.target.value } : s
+                        ))
+                      }}
+                      onBlur={() => {
+                        setEditingStatusId(null)
+                        toast.success('Status renamed')
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          setEditingStatusId(null)
+                          toast.success('Status renamed')
+                        }
+                        if (e.key === 'Escape') {
+                          setEditingStatusId(null)
+                        }
+                      }}
+                      className="max-w-xs"
+                      autoFocus
+                    />
+                  ) : (
+                    <button
+                      onClick={() => setEditingStatusId(status.id)}
+                      className="text-sm font-medium hover:text-primary transition-colors text-left"
+                    >
+                      {status.name}
+                    </button>
+                  )}
+                </div>
+                <Badge variant={status.enabled ? 'secondary' : 'outline'} className="text-xs">
+                  {status.enabled ? 'Active' : 'Disabled'}
+                </Badge>
+              </div>
             ))}
-          </div>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add new status..."
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && newStatus.trim()) {
-                  setStatuses([...statuses, newStatus.trim().toLowerCase()])
-                  setNewStatus('')
-                  toast.success('Status added')
-                }
-              }}
-              className="max-w-xs"
-            />
-            <Button
-              size="sm"
-              onClick={() => {
-                if (newStatus.trim()) {
-                  setStatuses([...statuses, newStatus.trim().toLowerCase()])
-                  setNewStatus('')
-                  toast.success('Status added')
-                }
-              }}
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              Add
-            </Button>
           </div>
         </CardContent>
       </Card>
