@@ -13,7 +13,7 @@ Milestone: v2.0.1 Workflow Integration & Lead Automation
 Phase: 12 of 13 (Sarah Template System) — COMPLETE, VERIFIED
 Plan: 5/5 complete
 Status: Phase 12 complete, verified (4/4 must-haves passed)
-Last activity: 2026-02-03 - Quick task 002 complete (Fixed settings tags and lead status persistence)
+Last activity: 2026-02-03 - Quick task 003 complete (Filtered disabled statuses from leads page)
 
 Progress: [█████████████████████████] 95% (43/43 estimated total plans)
 
@@ -47,12 +47,13 @@ Progress: [███████████████████████
 | 12. Sarah Template System | 5/5 | ~43min | 8.6min |
 
 **Recent Trend:**
-- Last 5 plans: 12min, 12min, 2.4min, 2min (quick-001), 10min (quick-002)
+- Last 5 plans: 12min, 2.4min, 2min (quick-001), 10min (quick-002), 6min (quick-003)
 - Trend: Excellent (efficient focused changes and quick fixes)
 
 **Quick Tasks:**
 - 001: Production build fix (2min) - Removed title field from notes API
 - 002: Settings persistence fix (10min) - Schema alignment and reactive UI events
+- 003: Status filter fix (6min) - Filter disabled statuses from leads dropdown
 
 *Updated after each plan completion*
 
@@ -107,6 +108,7 @@ None yet.
 | 008 | Add endpoint to fix workspace membership (403 error) | 2026-02-03 | c4396ea | Manual fix (no plan dir) |
 | 009 | Fix Convex field name mismatch in workspaceMembers | 2026-02-03 | 574fff3 | [Debug session](./debug/leads-page-api-errors.md) |
 | 002 | Fix settings tags and lead status persistence | 2026-02-03 | 6c7b30f | [002-fix-settings-tags-and-lead-status-persis](./quick/002-fix-settings-tags-and-lead-status-persis/) |
+| 003 | Filter disabled statuses from leads page dropdown | 2026-02-03 | d4f7d1b | [003-filter-disabled-statuses-from-leads-page](./quick/003-filter-disabled-statuses-from-leads-page/) |
 
 ### Blockers/Concerns
 
@@ -138,15 +140,14 @@ Ready for production testing in Phase 13.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed quick task 002 - Settings persistence fix
+Stopped at: Completed quick task 003 - Status filter fix
 Resume file: None - Ready for Phase 13 Production Validation
 
-**Quick Task 002 Complete:**
-Settings persistence fixed:
-- Schema alignment for tags and lead statuses ✅
-- Made temperature and enabled fields optional in LeadStatusConfig ✅
-- Added workspaceSettingsUpdated event for reactive UI updates ✅
-- Tags and status changes persist across tab switches ✅
+**Quick Task 003 Complete:**
+Status filter on Leads page now respects enabled/disabled state:
+- Applied `.filter(status => status.enabled !== false)` to status dropdown ✅
+- Matches existing pattern from columns.tsx for consistency ✅
+- Disabled statuses no longer appear in filter UI ✅
 - TypeScript compilation passes ✅
 
 ---
