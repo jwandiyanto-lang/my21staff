@@ -13,7 +13,7 @@ Milestone: v2.0.1 Workflow Integration & Lead Automation
 Phase: 12 of 13 (Sarah Template System) — COMPLETE, VERIFIED
 Plan: 5/5 complete
 Status: Phase 12 complete, verified (4/4 must-haves passed)
-Last activity: 2026-02-03 - Quick task 008 complete (Created fix endpoint for workspace membership)
+Last activity: 2026-02-03 - Quick task 002 complete (Fixed settings tags and lead status persistence)
 
 Progress: [█████████████████████████] 95% (43/43 estimated total plans)
 
@@ -47,11 +47,12 @@ Progress: [███████████████████████
 | 12. Sarah Template System | 5/5 | ~43min | 8.6min |
 
 **Recent Trend:**
-- Last 5 plans: 12min, 12min, 12min, 2.4min, 2min (quick-001)
+- Last 5 plans: 12min, 12min, 2.4min, 2min (quick-001), 10min (quick-002)
 - Trend: Excellent (efficient focused changes and quick fixes)
 
 **Quick Tasks:**
 - 001: Production build fix (2min) - Removed title field from notes API
+- 002: Settings persistence fix (10min) - Schema alignment and reactive UI events
 
 *Updated after each plan completion*
 
@@ -81,6 +82,8 @@ Recent decisions affecting v2.0.1 work:
 - **Phase 12**: SarahConfigCard integrated into team page with dev mode support
 - **Phase 12**: Insights and Brain UI hidden to simplify interface
 - **Phase 12**: Your Team page simplified to 3-field form (Bot Name display, Persona dropdown, Script textarea)
+- **Quick 002**: Custom event system (workspaceSettingsUpdated) for cross-component settings synchronization
+- **Quick 002**: Optional field pattern in Convex validators (v.optional) for flexible data schemas
 
 ### Roadmap Evolution
 
@@ -103,6 +106,7 @@ None yet.
 | 007 | Fix 500 errors - lookup workspace by slug in APIs | 2026-02-03 | 8293e0d | [Debug session](./debug/resolved/api-500-403-errors.md) |
 | 008 | Add endpoint to fix workspace membership (403 error) | 2026-02-03 | c4396ea | Manual fix (no plan dir) |
 | 009 | Fix Convex field name mismatch in workspaceMembers | 2026-02-03 | 574fff3 | [Debug session](./debug/leads-page-api-errors.md) |
+| 002 | Fix settings tags and lead status persistence | 2026-02-03 | 6c7b30f | [002-fix-settings-tags-and-lead-status-persis](./quick/002-fix-settings-tags-and-lead-status-persis/) |
 
 ### Blockers/Concerns
 
@@ -134,16 +138,16 @@ Ready for production testing in Phase 13.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed quick task 001 - Production build fix
+Stopped at: Completed quick task 002 - Settings persistence fix
 Resume file: None - Ready for Phase 13 Production Validation
 
-**Quick Task 001 Complete:**
-Production build error fixed:
-- Removed unsupported title field from notes API ✅
+**Quick Task 002 Complete:**
+Settings persistence fixed:
+- Schema alignment for tags and lead statuses ✅
+- Made temperature and enabled fields optional in LeadStatusConfig ✅
+- Added workspaceSettingsUpdated event for reactive UI updates ✅
+- Tags and status changes persist across tab switches ✅
 - TypeScript compilation passes ✅
-- Production build succeeds ✅
-- Pushed to master, Vercel deployment triggered ✅
-- Live site restored ✅
 
 ---
 *STATE.md updated: 2026-02-03*
