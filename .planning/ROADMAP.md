@@ -127,13 +127,18 @@ Plans:
 #### Phase 11.1: Lead Redo (INSERTED)
 **Goal**: Quick iterative fixes to lead management system
 **Depends on**: Phase 11
-**Plans**: TBD (interview-style)
+**Plans**: Completed (interview-style iterative fixes)
 
 Plans:
-- [ ] TBD (gathered via interview)
+- [x] Settings to Leads integration: Filter disabled statuses from dropdown
+- [x] Activity tab improvements: Note title field with collapsible body
+- [x] Settings UI reorganization: Tabs for Leads and AI Assistant
 
-**Details:**
-Interview-style approach: identify issue → implement fix → test on localhost → iterate
+**Completed:**
+1. Connected Settings status configuration to Leads page (disabled statuses filtered)
+2. Added note title field with collapsible body in activity timeline
+3. Reorganized Settings with tabs for better readability
+4. Status management: toggle on/off and rename (non-deletable)
 
 #### Phase 12: Sarah Template System
 **Goal**: Sarah configuration documented and duplicatable for new workspaces
@@ -183,5 +188,6 @@ Phases execute numerically: 10 -> 11 -> 12 -> 13
 | 9. Production Deployment | v2.0 | 2/3 | Complete | 2026-02-01 |
 | 10. Sarah Bot Refinement | v2.0.1 | 1/1 | Complete | 2026-02-01 |
 | 11. Smart Lead Automation | v2.0.1 | 3/3 | Complete | 2026-02-02 |
+| 11.1. Lead Redo | v2.0.1 | 4/4 | Complete | 2026-02-03 |
 | 12. Sarah Template System | v2.0.1 | 5/5 | Complete | 2026-02-01 |
 | 13. Production Validation | v2.0.1 | 0/TBD | Not started | - |
