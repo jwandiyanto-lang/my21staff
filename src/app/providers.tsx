@@ -1,6 +1,6 @@
 'use client'
 
-import { ClerkProvider, useAuth } from '@clerk/nextjs'
+import { ClerkProvider, useAuth, ClerkLoaded, ClerkLoading } from '@clerk/nextjs'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
 import { ConvexProvider, ConvexReactClient } from 'convex/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -62,11 +62,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <ClerkProvider publishableKey={publishableKey}>
-      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </ConvexProviderWithClerk>
+      <ClerkLoading>
+        <div className="flex h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </ClerkLoading>
+      <ClerkLoaded>
+        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </ConvexProviderWithClerk>
+      </ClerkLoaded>
     </ClerkProvider>
   )
 }
