@@ -372,32 +372,25 @@ export const getWorkspaceKapsoStatus = query({
 /**
  * Get lead status configuration for a workspace.
  *
- * Returns custom lead statuses if configured, otherwise returns
- * default statuses that align with Brain's temperature mapping.
+ * Now returns fixed 4-status configuration (no workspace customization).
+ * Simplified to always return the same 4 statuses.
  *
- * @param workspaceId - The workspace ID
- * @returns Array of status configurations with keys, labels, colors, and temperature mappings
+ * @param workspaceId - The workspace ID (ignored but kept for backward compatibility)
+ * @returns Array of 4 fixed status configurations
  */
 export const getStatusConfig = query({
   args: { workspaceId: v.id("workspaces") },
   handler: async (ctx, args) => {
+    // Verify workspace exists
     const workspace = await ctx.db.get(args.workspaceId);
     if (!workspace) return null;
 
-    // Return custom config or default
-    const customConfig = workspace.settings?.lead_statuses;
-    if (customConfig && Array.isArray(customConfig) && customConfig.length > 0) {
-      return customConfig;
-    }
-
-    // Default status configuration matching Brain's temperature mapping
+    // Always return fixed 4 statuses (New, Cold, Hot, Client)
     return [
-      { key: "new", label: "New", color: "#6B7280", bgColor: "#F3F4F6", temperature: null },
-      { key: "cold", label: "Cold Lead", color: "#3B82F6", bgColor: "#DBEAFE", temperature: "cold" },
-      { key: "warm", label: "Warm Lead", color: "#F59E0B", bgColor: "#FEF3C7", temperature: "warm" },
-      { key: "hot", label: "Hot Lead", color: "#DC2626", bgColor: "#FEE2E2", temperature: "hot" },
-      { key: "client", label: "Client", color: "#10B981", bgColor: "#D1FAE5", temperature: null },
-      { key: "lost", label: "Lost", color: "#4B5563", bgColor: "#E5E7EB", temperature: null },
+      { key: "new", label: "New", color: "#6B7280", bgColor: "#F3F4F6" },
+      { key: "cold", label: "Cold Lead", color: "#3B82F6", bgColor: "#DBEAFE" },
+      { key: "hot", label: "Hot Lead", color: "#DC2626", bgColor: "#FEE2E2" },
+      { key: "client", label: "Client", color: "#10B981", bgColor: "#D1FAE5" },
     ];
   },
 });
@@ -405,10 +398,11 @@ export const getStatusConfig = query({
 /**
  * Update lead status configuration for a workspace.
  *
- * Allows workspaces to customize their lead status stages and labels.
+ * Now a no-op (statuses are fixed and not customizable).
+ * Kept for backward compatibility to avoid breaking API calls.
  *
  * @param workspaceId - The workspace ID
- * @param leadStatuses - Array of status configurations
+ * @param leadStatuses - Array of status configurations (ignored)
  * @returns Success status
  */
 export const updateStatusConfig = mutation({
@@ -427,14 +421,8 @@ export const updateStatusConfig = mutation({
     const workspace = await ctx.db.get(args.workspaceId);
     if (!workspace) throw new Error("Workspace not found");
 
-    await ctx.db.patch(args.workspaceId, {
-      settings: {
-        ...workspace.settings,
-        lead_statuses: args.leadStatuses,
-      },
-      updated_at: Date.now(),
-    });
-
+    // No-op: statuses are now fixed, don't save custom config
+    // Return success for backward compatibility
     return { success: true };
   },
 });

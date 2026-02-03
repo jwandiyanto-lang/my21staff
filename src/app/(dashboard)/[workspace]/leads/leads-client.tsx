@@ -320,7 +320,7 @@ export function LeadsClient({ workspace }: LeadsClientProps) {
               All Status
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
-            {statusConfig.filter(status => status.enabled !== false).map((status) => {
+            {statusConfig.map((status) => {
               return (
                 <DropdownMenuCheckboxItem
                   key={status.key}

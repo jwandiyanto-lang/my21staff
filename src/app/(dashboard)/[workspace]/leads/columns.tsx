@@ -22,7 +22,6 @@ interface StatusConfig {
   label: string
   color: string
   bgColor: string
-  enabled: boolean
 }
 
 interface ColumnsConfig {
@@ -125,7 +124,7 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, contactT
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
-            {statusConfig.filter(s => s.enabled !== false).map((s) => {
+            {statusConfig.map((s) => {
               const isSelected = s.key === status
               return (
                 <DropdownMenuItem
