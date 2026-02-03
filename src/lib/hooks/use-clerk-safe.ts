@@ -7,6 +7,8 @@
  * so we provide mock implementations that return safe defaults.
  */
 
+import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/nextjs'
+
 const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 // Mock return values for dev mode
@@ -48,9 +50,7 @@ export function useAuth() {
     return mockAuth
   }
 
-  // In production, dynamically import and call the real hook
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { useAuth: useClerkAuth } = require('@clerk/nextjs')
+  // In production, use the real Clerk hook
   return useClerkAuth()
 }
 
@@ -63,8 +63,6 @@ export function useUser() {
     return mockUser
   }
 
-  // In production, dynamically import and call the real hook
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { useUser: useClerkUser } = require('@clerk/nextjs')
+  // In production, use the real Clerk hook
   return useClerkUser()
 }
