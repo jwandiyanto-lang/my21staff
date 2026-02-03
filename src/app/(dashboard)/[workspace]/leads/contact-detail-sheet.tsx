@@ -1090,10 +1090,32 @@ export function ContactDetailSheet({
                                     ▼
                                   </span>
                                 </button>
+                              ) : activity.type === 'note' ? (
+                                <button
+                                  onClick={() => {
+                                    setExpandedNotes(prev => {
+                                      const newSet = new Set(prev)
+                                      if (newSet.has(activity.id)) {
+                                        newSet.delete(activity.id)
+                                      } else {
+                                        newSet.add(activity.id)
+                                      }
+                                      return newSet
+                                    })
+                                  }}
+                                  className="text-sm font-medium text-left hover:text-primary transition-colors flex items-center gap-2"
+                                >
+                                  <span className={cn(
+                                    "text-muted-foreground transition-transform text-xs shrink-0",
+                                    expandedNotes.has(activity.id) && "rotate-90"
+                                  )}>
+                                    ▶
+                                  </span>
+                                  {activity.metadata?.title || 'Note'}
+                                </button>
                               ) : (
                                 <p className="text-sm font-medium">
                                   {activity.type === 'form_submission' ? 'Form Submitted' :
-                                   activity.type === 'note' ? 'Note' :
                                    activity.type === 'status_change' ? 'Status Changed' :
                                    activity.type === 'merge' ? 'Contact Merged' :
                                    activity.type === 'message' ? `WhatsApp ${activity.metadata?.label || 'Message'}` :
@@ -1119,40 +1141,14 @@ export function ContactDetailSheet({
                             </div>
                           </div>
 
-                          {/* Note content or form answers */}
-                          {activity.type === 'note' && (
-                            <div className="mt-1">
-                              {activity.metadata?.title && (
-                                <button
-                                  onClick={() => {
-                                    setExpandedNotes(prev => {
-                                      const newSet = new Set(prev)
-                                      if (newSet.has(activity.id)) {
-                                        newSet.delete(activity.id)
-                                      } else {
-                                        newSet.add(activity.id)
-                                      }
-                                      return newSet
-                                    })
-                                  }}
-                                  className="text-sm font-medium text-left hover:text-primary transition-colors flex items-center gap-2 w-full"
-                                >
-                                  <span className={cn(
-                                    "text-muted-foreground transition-transform text-xs shrink-0",
-                                    expandedNotes.has(activity.id) && "rotate-90"
-                                  )}>
-                                    ▶
-                                  </span>
-                                  {activity.metadata.title}
-                                </button>
-                              )}
-                              {expandedNotes.has(activity.id) && (
-                                <p className="text-sm text-foreground whitespace-pre-wrap mt-2 ml-5">
-                                  {activity.content}
-                                </p>
-                              )}
+                          {/* Note content */}
+                          {activity.type === 'note' && expandedNotes.has(activity.id) && (
+                            <div className="mt-2">
+                              <p className="text-sm text-foreground whitespace-pre-wrap">
+                                {activity.content}
+                              </p>
                               {typeof activity.metadata?.due_date === 'string' && (
-                                <div className="mt-2 ml-5 flex items-center gap-1.5 text-xs text-orange-600">
+                                <div className="mt-2 flex items-center gap-1.5 text-xs text-orange-600">
                                   <Clock className="h-3 w-3" />
                                   <span>Due: {formatWIB(activity.metadata.due_date, DATE_FORMATS.DATETIME_LONG)}</span>
                                 </div>
