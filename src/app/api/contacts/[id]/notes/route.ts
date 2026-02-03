@@ -73,13 +73,6 @@ export async function POST(
     const { id } = await params
     const body = await request.json()
 
-    if (!body.title || !body.title.trim()) {
-      return NextResponse.json(
-        { error: 'Note title is required' },
-        { status: 400 }
-      )
-    }
-
     if (!body.content || !body.content.trim()) {
       return NextResponse.json(
         { error: 'Note content is required' },
@@ -90,7 +83,6 @@ export async function POST(
     // Create note in Convex
     const note = await convex.mutation(api.contactNotes.create, {
       contact_id: id as any,
-      title: body.title.trim(),
       content: body.content.trim(),
       user_id: userId,
       due_date: body.due_date ? new Date(body.due_date).getTime() : undefined,
