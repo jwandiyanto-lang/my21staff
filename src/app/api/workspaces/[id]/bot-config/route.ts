@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { ConvexHttpClient } from 'convex/browser'
 import { api } from '@/../convex/_generated/api'
 import { isDevMode, getMockWorkspaceSettings, updateMockWorkspaceSettings } from '@/lib/mock-data'
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 // Default bot names
 const DEFAULT_INTERN_NAME = 'Sarah'
@@ -11,6 +13,7 @@ const DEFAULT_BRAIN_NAME = 'Grok'
 /**
  * GET /api/workspaces/[id]/bot-config
  * Returns bot configuration for the workspace
+ * Note: [id] is the workspace SLUG, not Convex ID
  */
 export async function GET(
   request: Request,
@@ -22,10 +25,10 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id: workspaceId } = await params
+    const { id: workspaceSlug } = await params
 
     // In dev mode, return mock data
-    if (isDevMode() && workspaceId === 'demo') {
+    if (isDevMode() && workspaceSlug === 'demo') {
       const settings = getMockWorkspaceSettings()
       return NextResponse.json({
         intern_name: settings.intern_name || DEFAULT_INTERN_NAME,
@@ -33,9 +36,15 @@ export async function GET(
       })
     }
 
-    // Fetch from Convex
-    const config = await fetchQuery(api.botConfig.getBotConfig, {
-      workspace_id: workspaceId as any,
+    // Fetch workspace by slug to get Convex ID
+    const workspace = await convex.query(api.workspaces.getBySlug, { slug: workspaceSlug })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    // Fetch from Convex using proper workspace ID
+    const config = await convex.query(api.botConfig.getBotConfig, {
+      workspace_id: workspace._id,
     })
 
     return NextResponse.json(config)
@@ -51,6 +60,7 @@ export async function GET(
 /**
  * PATCH /api/workspaces/[id]/bot-config
  * Updates bot configuration for the workspace
+ * Note: [id] is the workspace SLUG, not Convex ID
  */
 export async function PATCH(
   request: Request,
@@ -62,7 +72,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id: workspaceId } = await params
+    const { id: workspaceSlug } = await params
     const body = await request.json()
     const { intern_name, brain_name } = body
 
@@ -75,7 +85,7 @@ export async function PATCH(
     }
 
     // In dev mode, update mock data
-    if (isDevMode() && workspaceId === 'demo') {
+    if (isDevMode() && workspaceSlug === 'demo') {
       const updates: { intern_name?: string; brain_name?: string } = {}
       if (intern_name !== undefined) updates.intern_name = intern_name
       if (brain_name !== undefined) updates.brain_name = brain_name
@@ -89,9 +99,15 @@ export async function PATCH(
       })
     }
 
-    // Update in Convex
-    const config = await fetchMutation(api.botConfig.updateBotConfig, {
-      workspace_id: workspaceId as any,
+    // Fetch workspace by slug to get Convex ID
+    const workspace = await convex.query(api.workspaces.getBySlug, { slug: workspaceSlug })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    // Update in Convex using proper workspace ID
+    const config = await convex.mutation(api.botConfig.updateBotConfig, {
+      workspace_id: workspace._id,
       intern_name,
       brain_name,
     })

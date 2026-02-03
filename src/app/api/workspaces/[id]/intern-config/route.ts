@@ -1,26 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { ConvexHttpClient } from 'convex/browser'
 import { api } from 'convex/_generated/api'
-import { Id } from 'convex/_generated/dataModel'
 import { isDevMode, getMockInternConfig, updateMockInternConfig } from '@/lib/mock-data'
 
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+
 // GET - Load intern configuration
+// Note: [id] is the workspace SLUG, not Convex ID
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
+    const { id: workspaceSlug } = await params
 
     // Dev mode: return mock data
-    if (isDevMode() && id === 'demo') {
+    if (isDevMode() && workspaceSlug === 'demo') {
       const config = getMockInternConfig()
       return NextResponse.json(config)
     }
 
-    // Production: query Convex
-    const config = await fetchQuery(api.internConfig.getByWorkspaceId, {
-      workspaceId: id as Id<'workspaces'>,
+    // Fetch workspace by slug to get Convex ID
+    const workspace = await convex.query(api.workspaces.getBySlug, { slug: workspaceSlug })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    // Production: query Convex with proper workspace ID
+    const config = await convex.query(api.internConfig.getByWorkspaceId, {
+      workspaceId: workspace._id,
     })
 
     if (!config) {
@@ -70,23 +78,30 @@ export async function GET(
 }
 
 // PATCH - Save intern configuration
+// Note: [id] is the workspace SLUG, not Convex ID
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
+    const { id: workspaceSlug } = await params
     const updates = await request.json()
 
     // Dev mode: update mock data
-    if (isDevMode() && id === 'demo') {
+    if (isDevMode() && workspaceSlug === 'demo') {
       const updated = updateMockInternConfig(updates)
       return NextResponse.json(updated)
     }
 
-    // Production: upsert to Convex
-    const result = await fetchMutation(api.internConfig.upsert, {
-      workspaceId: id as Id<'workspaces'>,
+    // Fetch workspace by slug to get Convex ID
+    const workspace = await convex.query(api.workspaces.getBySlug, { slug: workspaceSlug })
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+    }
+
+    // Production: upsert to Convex with proper workspace ID
+    const result = await convex.mutation(api.internConfig.upsert, {
+      workspaceId: workspace._id,
       updates,
     })
 
