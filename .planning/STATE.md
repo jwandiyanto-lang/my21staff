@@ -13,7 +13,7 @@ Milestone: v2.0.1 Workflow Integration & Lead Automation
 Phase: 12 of 13 (Sarah Template System) — COMPLETE, VERIFIED
 Plan: 5/5 complete
 Status: Phase 12 complete, verified (4/4 must-haves passed)
-Last activity: 2026-02-03 - Quick task 004 complete (Connected settings tags and status config to leads)
+Last activity: 2026-02-03 - Quick task 005 complete (Fixed settings and status-config API endpoints)
 
 Progress: [█████████████████████████] 95% (43/43 estimated total plans)
 
@@ -98,6 +98,7 @@ None yet.
 | 002 | Fix Clerk context error on leads page | 2026-02-03 | a83a2f2 | Manual fix (no plan dir) |
 | 003 | Add score and source columns to leads table | 2026-02-03 | 5b8a7c4 | Manual fix (no plan dir) |
 | 004 | Connect settings tags and status config to leads | 2026-02-03 | e2edb29 | Manual fix (no plan dir) |
+| 005 | Fix settings and status-config API endpoints | 2026-02-03 | 2cbdaf2 | Manual fix (no plan dir) |
 
 ### Blockers/Concerns
 
