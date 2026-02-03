@@ -49,24 +49,33 @@ export function useWorkspaceSettings(workspaceId: string | null) {
   const clerkAuth = useAuth()
   const clerkUser = useUser()
   const [mockSettingsVersion, setMockSettingsVersion] = useState(0)
+  const [settingsVersion, setSettingsVersion] = useState(0)
 
   // Use Clerk data in production, mock data in dev mode
   const userId = isDevMode ? 'dev-user-001' : clerkAuth.userId
   const user = isDevMode ? { fullName: 'Dev User', primaryEmailAddress: { emailAddress: 'dev@localhost' }, imageUrl: null } : clerkUser.user
 
-  // Listen for mock settings updates in dev mode
+  // Listen for settings updates (dev and production)
   useEffect(() => {
-    if (!isDevMode) return
-
-    const handleSettingsUpdate = () => {
+    const handleMockSettingsUpdate = () => {
       setMockSettingsVersion(v => v + 1)
     }
 
-    window.addEventListener('mockWorkspaceSettingsUpdated', handleSettingsUpdate)
-    return () => window.removeEventListener('mockWorkspaceSettingsUpdated', handleSettingsUpdate)
+    const handleSettingsUpdate = () => {
+      setSettingsVersion(v => v + 1)
+    }
+
+    if (isDevMode) {
+      window.addEventListener('mockWorkspaceSettingsUpdated', handleMockSettingsUpdate)
+      return () => window.removeEventListener('mockWorkspaceSettingsUpdated', handleMockSettingsUpdate)
+    } else {
+      window.addEventListener('workspaceSettingsUpdated', handleSettingsUpdate)
+      return () => window.removeEventListener('workspaceSettingsUpdated', handleSettingsUpdate)
+    }
   }, [])
 
   // Dev mode: return mock data immediately, skip Convex queries
+  // settingsVersion is used to trigger re-queries when settings change
   const workspace = useQuery(
     api.workspaces.getById,
     isDevMode ? 'skip' : (workspaceId ? { id: workspaceId } : 'skip')
@@ -76,6 +85,11 @@ export function useWorkspaceSettings(workspaceId: string | null) {
     api.workspaceMembers.listByWorkspaceWithUsers,
     isDevMode ? 'skip' : (workspaceId ? { workspace_id: workspaceId } : 'skip')
   )
+
+  // Force re-render when settingsVersion changes (production)
+  // This triggers useQuery to refetch due to component re-render
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _forceUpdate = settingsVersion
 
   // In dev mode, return mock data from MOCK_WORKSPACE
   // mockSettingsVersion is used to trigger re-renders when settings change

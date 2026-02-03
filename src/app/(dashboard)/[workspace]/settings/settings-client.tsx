@@ -165,6 +165,11 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         throw new Error('Failed to save')
       }
 
+      // Trigger settings update event for reactive components
+      if (!isDevMode()) {
+        window.dispatchEvent(new CustomEvent('workspaceSettingsUpdated'))
+      }
+
       toast.success('Status configuration saved')
     } catch (error) {
       console.error('Failed to save status config:', error)
@@ -191,6 +196,10 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         if (!res.ok) {
           throw new Error('Failed to save tags')
         }
+
+        // Trigger settings update event for reactive components
+        // This notifies useWorkspaceSettings to refetch data
+        window.dispatchEvent(new CustomEvent('workspaceSettingsUpdated'))
       }
     } catch (error) {
       console.error('Failed to save tags:', error)
@@ -253,6 +262,10 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ leadStatuses: newStatuses }),
                         })
+                        // Trigger settings update event for reactive components
+                        if (!isDevMode()) {
+                          window.dispatchEvent(new CustomEvent('workspaceSettingsUpdated'))
+                        }
                         toast.success(e.target.checked ? 'Status enabled' : 'Status disabled')
                       } catch (error) {
                         toast.error('Failed to save')
