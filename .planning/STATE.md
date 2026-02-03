@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Milestone: v2.0.1 Workflow Integration & Lead Automation
-Phase: 12 of 13 (Sarah Template System) — COMPLETE, VERIFIED
-Plan: 5/5 complete
-Status: Phase 12 complete, verified (4/4 must-haves passed)
-Last activity: 2026-02-03 - Quick task 004 complete (Simplified lead statuses to 4 fixed options)
+Phase: 13 of 13 (Production Validation) — COMPLETE
+Plan: 1/1 complete
+Status: Phase 13 complete - all v2.0.1 features validated in production
+Last activity: 2026-02-03 - Production validation complete with 3 bug fixes deployed
 
-Progress: [█████████████████████████] 95% (43/43 estimated total plans)
+Progress: [█████████████████████████] 100% (44/44 estimated total plans)
 
 ## Performance Metrics
 
@@ -88,6 +88,10 @@ Recent decisions affecting v2.0.1 work:
 - **Quick 002**: Optional field pattern in Convex validators (v.optional) for flexible data schemas
 - **Quick 004**: Fixed 4-status configuration (New, Cold, Hot, Client) - no workspace customization
 - **Quick 004**: No-op API pattern for backward compatibility (status-config endpoints kept but do nothing)
+- **Phase 13**: Clean workspace name display (strip -suffix from sidebar/switcher)
+- **Phase 13**: Contact delete requires by_conversation index on messages table
+- **Phase 13**: DISABLE_AUTO_LEAD_CREATION environment variable for manual-only entry
+- **Phase 13**: Your Team page removed per user request (not a bug)
 
 ### Roadmap Evolution
 
