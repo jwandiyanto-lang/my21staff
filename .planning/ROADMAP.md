@@ -139,6 +139,11 @@ Plans:
 2. Added note title field with collapsible body in activity timeline
 3. Reorganized Settings with tabs for better readability
 4. Status management: toggle on/off and rename (non-deletable)
+5. Fixed Clerk environment variables (removed literal `\n` characters from all keys)
+
+**Known Issues:**
+- Production ClerkProvider error persists despite fixes (requires Clerk dashboard investigation)
+- Settings → Leads integration code is complete and will work once Clerk issue is resolved
 
 #### Phase 12: Sarah Template System
 **Goal**: Sarah configuration documented and duplicatable for new workspaces
