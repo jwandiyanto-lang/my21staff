@@ -13,7 +13,7 @@ Milestone: v2.0.1 Workflow Integration & Lead Automation
 Phase: 12 of 13 (Sarah Template System) — COMPLETE, VERIFIED
 Plan: 5/5 complete
 Status: Phase 12 complete, verified (4/4 must-haves passed)
-Last activity: 2026-02-03 - Quick task 003 complete (Filtered disabled statuses from leads page)
+Last activity: 2026-02-03 - Quick task 004 complete (Simplified lead statuses to 4 fixed options)
 
 Progress: [█████████████████████████] 95% (43/43 estimated total plans)
 
@@ -47,13 +47,14 @@ Progress: [███████████████████████
 | 12. Sarah Template System | 5/5 | ~43min | 8.6min |
 
 **Recent Trend:**
-- Last 5 plans: 12min, 2.4min, 2min (quick-001), 10min (quick-002), 6min (quick-003)
+- Last 5 plans: 2.4min, 2min (quick-001), 10min (quick-002), 6min (quick-003), 7min (quick-004)
 - Trend: Excellent (efficient focused changes and quick fixes)
 
 **Quick Tasks:**
 - 001: Production build fix (2min) - Removed title field from notes API
 - 002: Settings persistence fix (10min) - Schema alignment and reactive UI events
 - 003: Status filter fix (6min) - Filter disabled statuses from leads dropdown
+- 004: Lead status simplification (7min) - Reduced to 4 fixed statuses, removed Settings UI
 
 *Updated after each plan completion*
 
@@ -85,6 +86,8 @@ Recent decisions affecting v2.0.1 work:
 - **Phase 12**: Your Team page simplified to 3-field form (Bot Name display, Persona dropdown, Script textarea)
 - **Quick 002**: Custom event system (workspaceSettingsUpdated) for cross-component settings synchronization
 - **Quick 002**: Optional field pattern in Convex validators (v.optional) for flexible data schemas
+- **Quick 004**: Fixed 4-status configuration (New, Cold, Hot, Client) - no workspace customization
+- **Quick 004**: No-op API pattern for backward compatibility (status-config endpoints kept but do nothing)
 
 ### Roadmap Evolution
 
@@ -109,6 +112,7 @@ None yet.
 | 009 | Fix Convex field name mismatch in workspaceMembers | 2026-02-03 | 574fff3 | [Debug session](./debug/leads-page-api-errors.md) |
 | 002 | Fix settings tags and lead status persistence | 2026-02-03 | 6c7b30f | [002-fix-settings-tags-and-lead-status-persis](./quick/002-fix-settings-tags-and-lead-status-persis/) |
 | 003 | Filter disabled statuses from leads page dropdown | 2026-02-03 | d4f7d1b | [003-filter-disabled-statuses-from-leads-page](./quick/003-filter-disabled-statuses-from-leads-page/) |
+| 004 | Simplify lead statuses to 4 fixed options | 2026-02-03 | 8cb3f86 | [004-simplify-lead-statuses-to-4-fixed-option](./quick/004-simplify-lead-statuses-to-4-fixed-option/) |
 
 ### Blockers/Concerns
 
@@ -140,15 +144,16 @@ Ready for production testing in Phase 13.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed quick task 003 - Status filter fix
+Stopped at: Completed quick task 004 - Lead status simplification
 Resume file: None - Ready for Phase 13 Production Validation
 
-**Quick Task 003 Complete:**
-Status filter on Leads page now respects enabled/disabled state:
-- Applied `.filter(status => status.enabled !== false)` to status dropdown ✅
-- Matches existing pattern from columns.tsx for consistency ✅
-- Disabled statuses no longer appear in filter UI ✅
-- TypeScript compilation passes ✅
+**Quick Task 004 Complete:**
+Lead statuses simplified to 4 fixed options (New, Cold, Hot, Client):
+- Removed 'Warm' and 'Lost' status options ✅
+- Removed Lead Statuses configuration from Settings UI (-172 lines) ✅
+- Simplified status config infrastructure (hook, Convex, API routes) ✅
+- Removed enabled/disabled filtering logic throughout codebase ✅
+- Production build succeeds ✅
 
 ---
 *STATE.md updated: 2026-02-03*
