@@ -81,14 +81,14 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
           }
         } else {
           // Production: fetch bot config
-          const botRes = await fetch(`/api/workspaces/${workspaceId}/bot-config`)
+          const botRes = await fetch(`/api/workspaces/${workspaceSlug}/bot-config`)
           if (botRes.ok) {
             const botData = await botRes.json()
             setInternName(botData.intern_name || 'Sarah')
           }
 
           // Production: fetch status config
-          const statusRes = await fetch(`/api/workspaces/${workspaceId}/status-config`)
+          const statusRes = await fetch(`/api/workspaces/${workspaceSlug}/status-config`)
           if (statusRes.ok) {
             const statusData = await statusRes.json()
             if (Array.isArray(statusData)) {
@@ -100,7 +100,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
           }
 
           // Production: fetch workspace settings to get tags
-          const settingsRes = await fetch(`/api/workspaces/${workspaceId}/settings`)
+          const settingsRes = await fetch(`/api/workspaces/${workspaceSlug}/settings`)
           if (settingsRes.ok) {
             const settingsData = await settingsRes.json()
             if (settingsData.contact_tags) {
@@ -120,7 +120,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
     setSaving(true)
     try {
       // Always call API (even in dev mode) to keep server and client in sync
-      const res = await fetch(`/api/workspaces/${workspaceId}/bot-config`, {
+      const res = await fetch(`/api/workspaces/${workspaceSlug}/bot-config`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -152,7 +152,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
   const handleSaveStatuses = async () => {
     setSavingStatuses(true)
     try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/status-config`, {
+      const res = await fetch(`/api/workspaces/${workspaceSlug}/status-config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -181,7 +181,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         updateMockWorkspaceSettings({ contact_tags: updatedTags })
       } else {
         // Production: save to API
-        const res = await fetch(`/api/workspaces/${workspaceId}/tags`, {
+        const res = await fetch(`/api/workspaces/${workspaceSlug}/tags`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tags: updatedTags }),
@@ -247,7 +247,7 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
                       // Auto-save on toggle
                       setSavingStatuses(true)
                       try {
-                        await fetch(`/api/workspaces/${workspaceId}/status-config`, {
+                        await fetch(`/api/workspaces/${workspaceSlug}/status-config`, {
                           method: 'PUT',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ leadStatuses: newStatuses }),
