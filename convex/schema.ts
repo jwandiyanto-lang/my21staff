@@ -148,6 +148,7 @@ export default defineSchema({
     created_at: v.number(),
     supabaseId: v.string(),
   })
+    .index("by_conversation", ["conversation_id"])
     .index("by_conversation_time", ["conversation_id", "created_at"])
     .index("by_workspace", ["workspace_id"])
     .index("by_kapso_message_id", ["kapso_message_id"]),
