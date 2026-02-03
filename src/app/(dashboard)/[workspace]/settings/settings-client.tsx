@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SyncStatusIndicator } from '@/components/settings/sync-status-indicator'
-import { Bot, Loader2, Plus, X, Tag, Activity, BarChart3 } from 'lucide-react'
+import { Bot, Loader2, Plus, X, Tag, Activity } from 'lucide-react'
 import { toast } from 'sonner'
 import { isDevMode, getMockWorkspaceSettings, updateMockWorkspaceSettings } from '@/lib/mock-data'
 import { backupSettings } from '@/lib/settings-backup'
@@ -27,27 +27,6 @@ interface SettingsClientProps {
 export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientProps) {
   const [internName, setInternName] = useState('Sarah')
   const [saving, setSaving] = useState(false)
-
-  // Lead statuses - full configuration with colors
-  interface StatusConfig {
-    key: string
-    label: string
-    color: string
-    bgColor: string
-    enabled: boolean
-    temperature?: 'hot' | 'warm' | 'cold' | null
-  }
-
-  const [statuses, setStatuses] = useState<StatusConfig[]>([
-    { key: 'new', label: 'New', color: '#6B7280', bgColor: '#F3F4F6', enabled: true, temperature: null },
-    { key: 'cold', label: 'Cold Lead', color: '#3B82F6', bgColor: '#DBEAFE', enabled: true, temperature: 'cold' },
-    { key: 'warm', label: 'Warm Lead', color: '#F59E0B', bgColor: '#FEF3C7', enabled: true, temperature: 'warm' },
-    { key: 'hot', label: 'Hot Lead', color: '#DC2626', bgColor: '#FEE2E2', enabled: true, temperature: 'hot' },
-    { key: 'client', label: 'Client', color: '#10B981', bgColor: '#D1FAE5', enabled: true, temperature: null },
-    { key: 'lost', label: 'Lost', color: '#4B5563', bgColor: '#E5E7EB', enabled: true, temperature: null },
-  ])
-  const [editingStatusId, setEditingStatusId] = useState<string | null>(null)
-  const [savingStatuses, setSavingStatuses] = useState(false)
 
   // Tags
   const [tags, setTags] = useState<string[]>(['Student', 'Parent', 'Hot Lead', 'Follow Up'])
@@ -69,13 +48,6 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         if (isDevMode()) {
           const settings = getMockWorkspaceSettings()
           setInternName(settings.intern_name || 'Sarah')
-          // Load statuses from mock settings if available
-          if (settings.lead_statuses) {
-            setStatuses(settings.lead_statuses.map((s: any) => ({
-              ...s,
-              enabled: s.enabled !== false, // Default to enabled if not specified
-            })))
-          }
           // Load tags from mock settings
           if (settings.contact_tags) {
             setTags(settings.contact_tags)
@@ -86,18 +58,6 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
           if (botRes.ok) {
             const botData = await botRes.json()
             setInternName(botData.intern_name || 'Sarah')
-          }
-
-          // Production: fetch status config
-          const statusRes = await fetch(`/api/workspaces/${workspaceSlug}/status-config`)
-          if (statusRes.ok) {
-            const statusData = await statusRes.json()
-            if (Array.isArray(statusData)) {
-              setStatuses(statusData.map((s: any) => ({
-                ...s,
-                enabled: s.enabled !== false,
-              })))
-            }
           }
 
           // Production: fetch workspace settings to get tags
@@ -146,36 +106,6 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
       toast.error('Failed to save bot names')
     } finally {
       setSaving(false)
-    }
-  }
-
-  // Save status configuration
-  const handleSaveStatuses = async () => {
-    setSavingStatuses(true)
-    try {
-      const res = await fetch(`/api/workspaces/${workspaceSlug}/status-config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          leadStatuses: statuses,
-        }),
-      })
-
-      if (!res.ok) {
-        throw new Error('Failed to save')
-      }
-
-      // Trigger settings update event for reactive components
-      if (!isDevMode()) {
-        window.dispatchEvent(new CustomEvent('workspaceSettingsUpdated'))
-      }
-
-      toast.success('Status configuration saved')
-    } catch (error) {
-      console.error('Failed to save status config:', error)
-      toast.error('Failed to save status configuration')
-    } finally {
-      setSavingStatuses(false)
     }
   }
 
@@ -230,107 +160,6 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
 
         {/* Leads Tab */}
         <TabsContent value="leads" className="space-y-6 mt-6">
-          {/* Lead Status Configuration */}
-          <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
-            Lead Statuses
-          </CardTitle>
-          <CardDescription>
-            Rename statuses and toggle them on/off
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            {statuses.map((status) => (
-              <div key={status.key} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3 flex-1">
-                  <input
-                    type="checkbox"
-                    checked={status.enabled}
-                    onChange={async (e) => {
-                      const newStatuses = statuses.map(s =>
-                        s.key === status.key ? { ...s, enabled: e.target.checked } : s
-                      )
-                      setStatuses(newStatuses)
-                      // Auto-save on toggle
-                      setSavingStatuses(true)
-                      try {
-                        await fetch(`/api/workspaces/${workspaceSlug}/status-config`, {
-                          method: 'PUT',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ leadStatuses: newStatuses }),
-                        })
-                        // Trigger settings update event for reactive components
-                        if (!isDevMode()) {
-                          window.dispatchEvent(new CustomEvent('workspaceSettingsUpdated'))
-                        }
-                        toast.success(e.target.checked ? 'Status enabled' : 'Status disabled')
-                      } catch (error) {
-                        toast.error('Failed to save')
-                      } finally {
-                        setSavingStatuses(false)
-                      }
-                    }}
-                    className="w-4 h-4 cursor-pointer"
-                    disabled={savingStatuses}
-                  />
-                  {editingStatusId === status.key ? (
-                    <Input
-                      value={status.label}
-                      onChange={(e) => {
-                        setStatuses(statuses.map(s =>
-                          s.key === status.key ? { ...s, label: e.target.value } : s
-                        ))
-                      }}
-                      onBlur={async () => {
-                        setEditingStatusId(null)
-                        // Auto-save on rename
-                        await handleSaveStatuses()
-                      }}
-                      onKeyDown={async (e) => {
-                        if (e.key === 'Enter') {
-                          setEditingStatusId(null)
-                          await handleSaveStatuses()
-                        }
-                        if (e.key === 'Escape') {
-                          setEditingStatusId(null)
-                        }
-                      }}
-                      className="max-w-xs"
-                      autoFocus
-                      disabled={savingStatuses}
-                    />
-                  ) : (
-                    <button
-                      onClick={() => setEditingStatusId(status.key)}
-                      className="text-sm font-medium hover:text-primary transition-colors text-left"
-                      disabled={savingStatuses}
-                    >
-                      {status.label}
-                    </button>
-                  )}
-                </div>
-                <Badge
-                  variant={status.enabled ? 'secondary' : 'outline'}
-                  className="text-xs"
-                  style={status.enabled ? { backgroundColor: status.bgColor, color: status.color } : {}}
-                >
-                  {status.enabled ? 'Active' : 'Disabled'}
-                </Badge>
-              </div>
-            ))}
-          </div>
-          {savingStatuses && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Saving...
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Tags Configuration */}
       <Card>
         <CardHeader>
