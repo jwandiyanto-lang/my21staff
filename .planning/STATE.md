@@ -13,7 +13,7 @@ Milestone: v2.0.1 Workflow Integration & Lead Automation
 Phase: 12 of 13 (Sarah Template System) — COMPLETE, VERIFIED
 Plan: 5/5 complete
 Status: Phase 12 complete, verified (4/4 must-haves passed)
-Last activity: 2026-02-03 - Quick task 006 complete (Fixed settings using workspace slug in API calls)
+Last activity: 2026-02-03 - Quick task 007 complete (Fixed 500 errors by properly looking up workspace by slug)
 
 Progress: [█████████████████████████] 95% (43/43 estimated total plans)
 
@@ -100,6 +100,7 @@ None yet.
 | 004 | Connect settings tags and status config to leads | 2026-02-03 | e2edb29 | Manual fix (no plan dir) |
 | 005 | Fix settings and status-config API endpoints | 2026-02-03 | 2cbdaf2 | Manual fix (no plan dir) |
 | 006 | Fix settings using workspace slug in API calls | 2026-02-03 | 26bba56 | Manual fix (no plan dir) |
+| 007 | Fix 500 errors - lookup workspace by slug in APIs | 2026-02-03 | 8293e0d | [Debug session](./debug/resolved/api-500-403-errors.md) |
 
 ### Blockers/Concerns
 
