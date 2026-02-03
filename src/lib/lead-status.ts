@@ -4,7 +4,8 @@ export interface LeadStatusConfig {
   label: string;
   color: string;
   bgColor: string;
-  temperature: "hot" | "warm" | "cold" | null;
+  temperature?: "hot" | "warm" | "cold" | null;
+  enabled?: boolean;
 }
 
 // Default configuration (matches Brain's default)

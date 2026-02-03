@@ -419,7 +419,8 @@ export const updateStatusConfig = mutation({
       label: v.string(),
       color: v.string(),
       bgColor: v.string(),
-      temperature: v.union(v.literal("hot"), v.literal("warm"), v.literal("cold"), v.null()),
+      temperature: v.optional(v.union(v.literal("hot"), v.literal("warm"), v.literal("cold"), v.null())),
+      enabled: v.optional(v.boolean()),
     }))
   },
   handler: async (ctx, args) => {
