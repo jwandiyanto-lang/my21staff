@@ -102,6 +102,7 @@ None yet.
 | 006 | Fix settings using workspace slug in API calls | 2026-02-03 | 26bba56 | Manual fix (no plan dir) |
 | 007 | Fix 500 errors - lookup workspace by slug in APIs | 2026-02-03 | 8293e0d | [Debug session](./debug/resolved/api-500-403-errors.md) |
 | 008 | Add endpoint to fix workspace membership (403 error) | 2026-02-03 | c4396ea | Manual fix (no plan dir) |
+| 009 | Fix Convex field name mismatch in workspaceMembers | 2026-02-03 | 574fff3 | [Debug session](./debug/leads-page-api-errors.md) |
 
 ### Blockers/Concerns
 
