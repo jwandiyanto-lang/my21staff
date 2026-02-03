@@ -12,6 +12,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/webhook(.*)',
   '/api/webhooks(.*)',
   '/api/public(.*)',
+  '/api/contacts(.*)', // Dev mode demo routes need access
   '/demo(.*)', // Dev mode demo routes
 ])
 

@@ -79,6 +79,10 @@ Recent decisions affecting v2.0.1 work:
 - **Phase 12**: Insights and Brain UI hidden to simplify interface
 - **Phase 12**: Your Team page simplified to 3-field form (Bot Name display, Persona dropdown, Script textarea)
 
+### Roadmap Evolution
+
+- Phase 11.1 inserted after Phase 11: Lead Redo (URGENT) - Interview-style iterative fixes
+
 ### Pending Todos
 
 None yet.

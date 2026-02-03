@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 import {
   Card,
   CardContent,
@@ -12,7 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { SyncStatusIndicator } from '@/components/settings/sync-status-indicator'
-import { Bot, Loader2 } from 'lucide-react'
+import { Bot, Loader2, Plus, X, Tag, Activity, BarChart3 } from 'lucide-react'
 import { toast } from 'sonner'
 import { isDevMode, getMockWorkspaceSettings, updateMockWorkspaceSettings } from '@/lib/mock-data'
 import { backupSettings } from '@/lib/settings-backup'
@@ -25,6 +26,22 @@ interface SettingsClientProps {
 export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientProps) {
   const [internName, setInternName] = useState('Sarah')
   const [saving, setSaving] = useState(false)
+
+  // Lead statuses
+  const [statuses, setStatuses] = useState<string[]>(['new', 'hot', 'warm', 'cold', 'converted', 'lost'])
+  const [newStatus, setNewStatus] = useState('')
+
+  // Tags
+  const [tags, setTags] = useState<string[]>(['Student', 'Parent', 'Hot Lead', 'Follow Up'])
+  const [newTag, setNewTag] = useState('')
+
+  // Activity tracking
+  const [trackActivities, setTrackActivities] = useState({
+    messages: true,
+    statusChanges: true,
+    notes: true,
+    assignments: true,
+  })
 
   // Load bot names
   useEffect(() => {
@@ -138,6 +155,186 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
                 'Save Bot Name'
               )}
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Lead Status Configuration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="w-5 h-5" />
+            Lead Statuses
+          </CardTitle>
+          <CardDescription>
+            Customize your lead pipeline stages
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {statuses.map((status) => (
+              <Badge key={status} variant="secondary" className="gap-2">
+                {status}
+                <button
+                  onClick={() => setStatuses(statuses.filter((s) => s !== status))}
+                  className="ml-1 hover:text-destructive"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add new status..."
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newStatus.trim()) {
+                  setStatuses([...statuses, newStatus.trim().toLowerCase()])
+                  setNewStatus('')
+                  toast.success('Status added')
+                }
+              }}
+              className="max-w-xs"
+            />
+            <Button
+              size="sm"
+              onClick={() => {
+                if (newStatus.trim()) {
+                  setStatuses([...statuses, newStatus.trim().toLowerCase()])
+                  setNewStatus('')
+                  toast.success('Status added')
+                }
+              }}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tags Configuration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Tag className="w-5 h-5" />
+            Tags
+          </CardTitle>
+          <CardDescription>
+            Manage tags for organizing leads
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <Badge key={tag} variant="outline" className="gap-2">
+                {tag}
+                <button
+                  onClick={() => {
+                    setTags(tags.filter((t) => t !== tag))
+                    toast.success('Tag removed')
+                  }}
+                  className="ml-1 hover:text-destructive"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add new tag..."
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newTag.trim()) {
+                  setTags([...tags, newTag.trim()])
+                  setNewTag('')
+                  toast.success('Tag added')
+                }
+              }}
+              className="max-w-xs"
+            />
+            <Button
+              size="sm"
+              onClick={() => {
+                if (newTag.trim()) {
+                  setTags([...tags, newTag.trim()])
+                  setNewTag('')
+                  toast.success('Tag added')
+                }
+              }}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Activity Tracker Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            Activity Tracking
+          </CardTitle>
+          <CardDescription>
+            Choose which activities to track for leads
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={trackActivities.messages}
+                onChange={(e) => setTrackActivities({ ...trackActivities, messages: e.target.checked })}
+                className="w-4 h-4"
+              />
+              <div>
+                <p className="font-medium">Messages</p>
+                <p className="text-sm text-muted-foreground">Track WhatsApp conversations</p>
+              </div>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={trackActivities.statusChanges}
+                onChange={(e) => setTrackActivities({ ...trackActivities, statusChanges: e.target.checked })}
+                className="w-4 h-4"
+              />
+              <div>
+                <p className="font-medium">Status Changes</p>
+                <p className="text-sm text-muted-foreground">Track when lead status is updated</p>
+              </div>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={trackActivities.notes}
+                onChange={(e) => setTrackActivities({ ...trackActivities, notes: e.target.checked })}
+                className="w-4 h-4"
+              />
+              <div>
+                <p className="font-medium">Notes</p>
+                <p className="text-sm text-muted-foreground">Track when notes are added to leads</p>
+              </div>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={trackActivities.assignments}
+                onChange={(e) => setTrackActivities({ ...trackActivities, assignments: e.target.checked })}
+                className="w-4 h-4"
+              />
+              <div>
+                <p className="font-medium">Assignments</p>
+                <p className="text-sm text-muted-foreground">Track when leads are assigned to team members</p>
+              </div>
+            </label>
           </div>
         </CardContent>
       </Card>

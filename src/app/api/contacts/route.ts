@@ -206,8 +206,3 @@ export async function DELETE(request: NextRequest) {
     )
   }
 }
-
-// Export wrapped handlers with timing instrumentation
-export const GET_TIMED = withTiming('/api/contacts', GET)
-export const POST_TIMED = withTiming('/api/contacts', POST)
-export const DELETE_TIMED = withTiming('/api/contacts', DELETE)

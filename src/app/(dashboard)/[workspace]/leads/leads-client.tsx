@@ -1,115 +1,586 @@
 'use client'
 
-import { useState } from 'react'
-import { useQuery } from 'convex/react'
-import { api } from 'convex/_generated/api'
-import type { Id } from 'convex/_generated/dataModel'
-import { LeadTable } from '@/components/leads/lead-table'
-import { LeadFilters } from '@/components/leads/lead-filters'
-import { LeadDetailSheet } from '@/components/leads/lead-detail-sheet'
-import { columns } from '@/components/leads/lead-columns'
-import { Badge } from '@/components/ui/badge'
-import { MOCK_LEADS } from '@/lib/mock-data'
-import { ColumnFiltersState } from '@tanstack/react-table'
+import { useMemo, useState, useCallback, useEffect } from 'react'
+import { DataTable } from '@/components/ui/data-table'
+import { createColumns } from './columns'
+import { ContactDetailSheet } from './contact-detail-sheet'
+import { MergeContactsDialog } from './merge-contacts-dialog'
+import { AddContactDialog } from '@/components/database/add-contact-dialog'
+import { TableSkeleton } from '@/components/skeletons/table-skeleton'
+import { type LeadStatus } from '@/lib/lead-status'
+import { useStatusConfig } from '@/lib/queries/use-status-config'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+} from '@/components/ui/dropdown-menu'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { ChevronDown, ChevronLeft, ChevronRight, Filter, Tag, SlidersHorizontal, X, Loader2, Plus } from 'lucide-react'
+import { toast } from 'sonner'
+import { useContacts, useUpdateContact, useDeleteContact } from '@/lib/queries/use-contacts'
+import { useWorkspaceSettings } from '@/lib/queries/use-workspace-settings'
+import type { Contact, Workspace } from '@/types/database'
 
-const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+const COLUMN_OPTIONS = [
+  { id: 'name', label: 'Name' },
+  { id: 'email', label: 'Email' },
+  { id: 'lead_status', label: 'Status' },
+  { id: 'tags', label: 'Tags' },
+  { id: 'lead_score', label: 'Score' },
+  { id: 'created_at', label: 'Created' },
+] as const
 
-// Lead type matching schema
-type Lead = {
-  _id: string
-  phone: string
-  name: string
-  leadStatus?: string
-  leadScore?: number
-  leadTemperature?: 'hot' | 'warm' | 'lukewarm' | 'cold' | 'new' | 'converted'
-  businessType?: string
-  painPoints?: string[]
-  notes?: Array<{ content: string; addedBy: string; addedAt: number }>
-  lastActivityAt?: number
-  created_at: number
+const STORAGE_KEY = 'my21staff-database-filters'
+const DEFAULT_COLUMNS = COLUMN_OPTIONS.map((col) => col.id)
+
+interface DatabaseFilters {
+  activeStatus: LeadStatus | 'all'
+  selectedTags: string[]
+  visibleColumns: string[]
 }
 
-interface LeadsContentProps {
-  workspaceId: Id<'workspaces'>
+function loadFiltersFromStorage(): DatabaseFilters {
+  if (typeof window === 'undefined') {
+    return { activeStatus: 'all', selectedTags: [], visibleColumns: DEFAULT_COLUMNS }
+  }
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      return {
+        activeStatus: parsed.activeStatus || 'all',
+        selectedTags: parsed.selectedTags || [],
+        visibleColumns: parsed.visibleColumns || DEFAULT_COLUMNS,
+      }
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return { activeStatus: 'all', selectedTags: [], visibleColumns: DEFAULT_COLUMNS }
 }
 
-export function LeadsContent({ workspaceId }: LeadsContentProps) {
-  // Filter state
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
+interface LeadsClientProps {
+  workspace: Pick<Workspace, 'id' | 'name' | 'slug'>
+}
 
-  // Selected lead state for detail sheet
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+const PAGE_SIZE = 25
 
-  // Query leads from Convex
-  const leads = useQuery(
-    api.leads.getLeadsByStatus,
-    isDevMode ? 'skip' : { workspaceId, limit: 100 }
+export function LeadsClient({ workspace }: LeadsClientProps) {
+  // Lazy initialization: only load from localStorage on first render (client-side)
+  const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>(() =>
+    typeof window !== 'undefined' ? loadFiltersFromStorage().activeStatus : 'all'
+  )
+  const [selectedTags, setSelectedTags] = useState<string[]>(() =>
+    typeof window !== 'undefined' ? loadFiltersFromStorage().selectedTags : []
+  )
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
+    typeof window !== 'undefined' ? loadFiltersFromStorage().visibleColumns : DEFAULT_COLUMNS
+  )
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
+  const [contactToDelete, setContactToDelete] = useState<Contact | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [mergeMode, setMergeMode] = useState(false)
+  const [selectedForMerge, setSelectedForMerge] = useState<Contact[]>([])
+  const [showMergeDialog, setShowMergeDialog] = useState(false)
+  const [showAddDialog, setShowAddDialog] = useState(false)
+
+  // TanStack Query for contacts with pagination
+  const { data: contactsData, isLoading: isLoadingContacts, isFetching } = useContacts(workspace.id, currentPage)
+
+  // TanStack Query for workspace settings (team members, tags)
+  const { data: settingsData } = useWorkspaceSettings(workspace.id)
+
+  // Fetch dynamic status config from Settings
+  const { statuses: statusConfig, statusMap } = useStatusConfig(workspace.id)
+
+  // Extract data from queries
+  const contacts = contactsData?.contacts ?? []
+  const totalCount = contactsData?.total ?? 0
+  const teamMembers = settingsData?.teamMembers ?? []
+  const contactTags = settingsData?.contactTags ?? []
+  const mainFormFields = settingsData?.mainFormFields ?? []
+  const fieldScores = settingsData?.fieldScores ?? {}
+
+  // TanStack Query mutations
+  const updateMutation = useUpdateContact(workspace.id)
+  const deleteMutation = useDeleteContact(workspace.id)
+
+  // Persist filters to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const filters: DatabaseFilters = { activeStatus, selectedTags, visibleColumns }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters))
+  }, [activeStatus, selectedTags, visibleColumns])
+
+  // Handle inline status change using mutation
+  const handleStatusChange = useCallback((contactId: string, newStatus: LeadStatus) => {
+    updateMutation.mutate(
+      { contactId, updates: { lead_status: newStatus } },
+      {
+        onError: () => {
+          toast.error('Failed to update status')
+        },
+      }
+    )
+  }, [updateMutation])
+
+  // Handle inline tags change using mutation
+  const handleTagsChange = useCallback((contactId: string, newTags: string[]) => {
+    updateMutation.mutate(
+      { contactId, updates: { tags: newTags } },
+      {
+        onSuccess: () => {
+          toast.success('Tags updated')
+        },
+        onError: () => {
+          toast.error('Failed to update tags')
+        },
+      }
+    )
+  }, [updateMutation])
+
+  // Handle delete contact using mutation
+  const handleDeleteContact = useCallback(() => {
+    if (!contactToDelete) return
+
+    deleteMutation.mutate(contactToDelete.id, {
+      onSuccess: () => {
+        toast.success('Contact deleted successfully')
+        setContactToDelete(null)
+      },
+      onError: (error) => {
+        toast.error(error instanceof Error ? error.message : 'Failed to delete contact')
+      },
+    })
+  }, [contactToDelete, deleteMutation])
+
+  // Handle page navigation - just set the page, TanStack Query handles fetching
+  const goToPage = useCallback((page: number) => {
+    if (page === currentPage) return
+    setCurrentPage(page)
+  }, [currentPage])
+
+  // Loading state for page transitions (not initial load)
+  const isLoadingPage = isFetching
+
+  // Create columns with status change handler, filtered by visibility
+  const allColumns = useMemo(
+    () => createColumns({
+      onStatusChange: handleStatusChange,
+      onTagsChange: handleTagsChange,
+      onDelete: setContactToDelete,
+      contactTags,
+      statusConfig,
+      statusMap,
+    }),
+    [handleStatusChange, handleTagsChange, contactTags, statusConfig, statusMap]
   )
 
-  // Use mock data in dev mode, otherwise use Convex data
-  const data = isDevMode ? MOCK_LEADS : (leads ?? [])
-  const isLoading = !isDevMode && leads === undefined
+  const columns = useMemo(
+    () => allColumns.filter((col) => {
+      const colId = 'accessorKey' in col ? col.accessorKey : col.id
+      if (colId === 'actions') return true // Always show actions
+      return visibleColumns.includes(colId as string)
+    }),
+    [allColumns, visibleColumns]
+  )
 
-  if (isLoading) {
-    return (
-      <div className="h-full p-8">
-        <div className="mb-8 space-y-2">
-          <div className="h-8 w-32 bg-muted animate-pulse rounded" />
-          <div className="h-4 w-48 bg-muted animate-pulse rounded" />
-        </div>
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-20 bg-muted animate-pulse rounded" />
-          ))}
-        </div>
-      </div>
+  // Toggle column visibility
+  const toggleColumn = (columnId: string) => {
+    setVisibleColumns((prev) =>
+      prev.includes(columnId)
+        ? prev.filter((id) => id !== columnId)
+        : [...prev, columnId]
     )
   }
 
+  // Status counts removed - no longer needed for UI
+
+  // Toggle tag selection
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag]
+    )
+  }
+
+  const filteredContacts = useMemo(() => {
+    let filtered = contacts
+
+    // Filter by status
+    if (activeStatus !== 'all') {
+      filtered = filtered.filter((contact) => contact.lead_status === activeStatus)
+    }
+
+    // Filter by tags (contact must have ALL selected tags)
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter((contact) =>
+        selectedTags.every((tag) => contact.tags?.includes(tag))
+      )
+    }
+
+    return filtered
+  }, [contacts, activeStatus, selectedTags])
+
+  // Calculate total pages based on filtered results
+  const totalPages = Math.ceil(filteredContacts.length / PAGE_SIZE)
+
+  // Reset to page 1 when filters change
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeStatus, selectedTags])
+
+  // Paginate filtered contacts
+  const paginatedContacts = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE
+    const endIndex = startIndex + PAGE_SIZE
+    return filteredContacts.slice(startIndex, endIndex)
+  }, [filteredContacts, currentPage])
+
+  const handleRowClick = (contact: Contact) => {
+    if (mergeMode) {
+      setSelectedForMerge(prev => {
+        const isSelected = prev.some(c => c.id === contact.id)
+        if (isSelected) {
+          return prev.filter(c => c.id !== contact.id)
+        } else if (prev.length < 2) {
+          return [...prev, contact]
+        }
+        return prev
+      })
+    } else {
+      // Normal behavior - open detail dialog
+      setSelectedContact(contact)
+      setIsDetailOpen(true)
+    }
+  }
+
+  // Show skeleton only on initial load (not page transitions)
+  if (isLoadingContacts && !contactsData) {
+    return <TableSkeleton columns={7} rows={10} />
+  }
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="px-8 py-6 border-b border-border">
-        <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-2xl font-bold">Leads</h1>
-          <Badge variant="secondary" className="font-mono">
-            {data.length}
-          </Badge>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Leads</h1>
+          <p className="text-muted-foreground">
+            {filteredContacts.length} lead{filteredContacts.length !== 1 ? 's' : ''}
+            {filteredContacts.length !== totalCount && ` (filtered from ${totalCount})`}
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Manage and track all your WhatsApp leads
-        </p>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Contact
+          </Button>
+        </div>
       </div>
 
-      {/* Filter bar */}
-      <div className="px-8 py-4 border-b border-border bg-muted/20">
-        <LeadFilters
-          globalFilter={globalFilter}
-          setGlobalFilter={setGlobalFilter}
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
+      {/* Compact Filter Row */}
+      <div className="flex items-center gap-3 flex-wrap">
+        {/* Status Filter Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="h-9">
+              <Filter className="h-4 w-4 mr-2" />
+              {activeStatus === 'all' ? 'All Status' : (statusMap[activeStatus]?.label || activeStatus)}
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuCheckboxItem
+              checked={activeStatus === 'all'}
+              onCheckedChange={() => setActiveStatus('all')}
+            >
+              All Status
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator />
+            {statusConfig.map((status) => {
+              return (
+                <DropdownMenuCheckboxItem
+                  key={status.key}
+                  checked={activeStatus === status.key}
+                  onCheckedChange={() => setActiveStatus(status.key as LeadStatus)}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full mr-2"
+                    style={{ backgroundColor: status.color }}
+                  />
+                  {status.label}
+                </DropdownMenuCheckboxItem>
+              )
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Tags Filter Dropdown */}
+        {contactTags.length > 0 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9">
+                <Tag className="h-4 w-4 mr-2" />
+                Tags
+                {selectedTags.length > 0 && (
+                  <span className="ml-2 text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                    {selectedTags.length}
+                  </span>
+                )}
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-56 p-2">
+              <div className="space-y-1">
+                {contactTags.map((tag) => {
+                  const isSelected = selectedTags.includes(tag)
+                  return (
+                    <div
+                      key={tag}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
+                      onClick={() => toggleTag(tag)}
+                    >
+                      <Checkbox checked={isSelected} />
+                      <span className="text-sm">{tag}</span>
+                    </div>
+                  )
+                })}
+                {selectedTags.length > 0 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <button
+                      onClick={() => setSelectedTags([])}
+                      className="w-full text-xs text-muted-foreground hover:text-foreground text-left px-2 py-1"
+                    >
+                      Clear all
+                    </button>
+                  </>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+
+        {/* Column Visibility Dropdown */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-9">
+              <SlidersHorizontal className="h-4 w-4 mr-2" />
+              Columns
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-48 p-2">
+            <div className="space-y-1">
+              {COLUMN_OPTIONS.map((col) => {
+                const isVisible = visibleColumns.includes(col.id)
+                return (
+                  <div
+                    key={col.id}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
+                    onClick={() => toggleColumn(col.id)}
+                  >
+                    <Checkbox checked={isVisible} />
+                    <span className="text-sm">{col.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Active filter badges */}
+        {(activeStatus !== 'all' || selectedTags.length > 0) && (
+          <div className="flex items-center gap-2 ml-2">
+            {activeStatus !== 'all' && statusMap[activeStatus] && (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor: statusMap[activeStatus].bgColor,
+                  color: statusMap[activeStatus].color,
+                }}
+              >
+                {statusMap[activeStatus].label}
+                <X
+                  className="h-3 w-3 cursor-pointer hover:opacity-70"
+                  onClick={() => setActiveStatus('all')}
+                />
+              </span>
+            )}
+            {selectedTags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-muted"
+              >
+                {tag}
+                <X
+                  className="h-3 w-3 cursor-pointer hover:opacity-70"
+                  onClick={() => toggleTag(tag)}
+                />
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Merge Mode Instructions - hidden, merge feature disabled */}
+
+      {/* Data Table */}
+      <DataTable
+        columns={columns}
+        data={paginatedContacts}
+        searchPlaceholder="Search contacts..."
+        onRowClick={handleRowClick}
+      />
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1 || isLoadingPage}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          {/* Page numbers */}
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+              // Show first, last, current, and adjacent pages
+              const showPage = page === 1 ||
+                page === totalPages ||
+                Math.abs(page - currentPage) <= 1
+
+              // Show ellipsis
+              const showEllipsisBefore = page === currentPage - 2 && currentPage > 3
+              const showEllipsisAfter = page === currentPage + 2 && currentPage < totalPages - 2
+
+              if (showEllipsisBefore || showEllipsisAfter) {
+                return <span key={page} className="px-2 text-muted-foreground">...</span>
+              }
+
+              if (!showPage) return null
+
+              return (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? "default" : "outline"}
+                  size="sm"
+                  className="w-9"
+                  onClick={() => goToPage(page)}
+                  disabled={isLoadingPage}
+                >
+                  {isLoadingPage && page === currentPage ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    page
+                  )}
+                </Button>
+              )
+            })}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages || isLoadingPage}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+
+          <span className="text-sm text-muted-foreground ml-2">
+            Page {currentPage} of {totalPages}
+          </span>
+        </div>
+      )}
+
+      {/* Contact Detail Sheet */}
+      <ContactDetailSheet
+        contact={selectedContact}
+        workspace={{ slug: workspace.slug }}
+        open={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
+        contactTags={contactTags}
+        teamMembers={teamMembers}
+        mainFormFields={mainFormFields}
+        fieldScores={fieldScores}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!contactToDelete} onOpenChange={(open) => !open && setContactToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contact</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{contactToDelete?.name || contactToDelete?.phone}</strong>?
+              This will also delete all associated conversations and messages. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteContact}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Merge Contacts Dialog */}
+      {showMergeDialog && selectedForMerge.length === 2 && (
+        <MergeContactsDialog
+          contact1={selectedForMerge[0] as Contact}
+          contact2={selectedForMerge[1] as Contact}
+          open={showMergeDialog}
+          onOpenChange={setShowMergeDialog}
+          onMergeComplete={() => {
+            setMergeMode(false)
+            setSelectedForMerge([])
+          }}
         />
-      </div>
+      )}
 
-      {/* Lead Table */}
-      <div className="flex-1 overflow-auto px-8 py-6">
-        <LeadTable
-          data={data}
-          columns={columns}
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
-          globalFilter={globalFilter}
-          setGlobalFilter={setGlobalFilter}
-          onRowClick={setSelectedLead}
-        />
-      </div>
-
-      {/* Lead Detail Sheet */}
-      <LeadDetailSheet
-        lead={selectedLead}
-        open={!!selectedLead}
-        onOpenChange={(open) => !open && setSelectedLead(null)}
+      {/* Add Contact Dialog */}
+      <AddContactDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        workspaceId={workspace.id}
       />
     </div>
   )
