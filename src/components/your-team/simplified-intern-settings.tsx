@@ -70,6 +70,22 @@ export function SimplifiedInternSettings({ workspaceId, workspaceSlug }: Simplif
       }
     }
     loadConfig()
+
+    // Listen for bot name updates from Settings
+    const handleBotNameUpdate = async () => {
+      try {
+        const botRes = await fetch(`/api/workspaces/${workspaceId}/bot-config`)
+        if (botRes.ok) {
+          const data = await botRes.json()
+          setBotName(data.intern_name || "Sarah")
+        }
+      } catch (error) {
+        console.error("Failed to reload bot name:", error)
+      }
+    }
+
+    window.addEventListener('botNameUpdated', handleBotNameUpdate)
+    return () => window.removeEventListener('botNameUpdated', handleBotNameUpdate)
   }, [workspaceId, workspaceSlug])
 
   // Save handler

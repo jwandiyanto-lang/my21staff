@@ -100,6 +100,9 @@ export function SettingsClient({ workspaceId, workspaceSlug }: SettingsClientPro
         })
       }
 
+      // Trigger bot name update event for reactive components
+      window.dispatchEvent(new CustomEvent('botNameUpdated'))
+
       toast.success('Bot names saved')
     } catch (error) {
       console.error('Failed to save bot names:', error)
