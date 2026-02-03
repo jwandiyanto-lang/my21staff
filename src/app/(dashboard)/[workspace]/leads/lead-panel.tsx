@@ -213,21 +213,18 @@ export function LeadPanel({ contact, workspaceId }: LeadPanelProps) {
 
       <Separator />
 
-      {/* Keep remaining sections below... */}
+      {/* Last Contact (if different from last activity) */}
       {contact.lastContactAt && (
-        <section>
-          <div className="flex items-center justify-between px-3 py-1.5 text-sm">
-            <span className="text-muted-foreground flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              Last Contact
-            </span>
-            <span title={formatWIB(contact.lastContactAt, DATE_FORMATS.DATETIME_LONG)}>
-              {formatDistanceWIB(contact.lastContactAt, { addSuffix: true })}
-              </span>
-            </div>
-          )}
+        <div className="flex items-center justify-between px-3 py-1.5 text-sm">
+          <span className="text-muted-foreground flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            Last Contact
+          </span>
+          <span title={formatWIB(contact.lastContactAt, DATE_FORMATS.DATETIME_LONG)}>
+            {formatDistanceWIB(contact.lastContactAt, { addSuffix: true })}
+          </span>
         </div>
-      </section>
+      )}
 
       <Separator />
 
