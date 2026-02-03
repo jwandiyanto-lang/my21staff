@@ -244,45 +244,6 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, contactT
     },
   },
   {
-    accessorKey: 'lead_score',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="-ml-4"
-        >
-          Score
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const score = row.getValue('lead_score') as number
-      let color = '#6B7280' // gray
-      if (score >= 80) color = '#10B981' // green
-      else if (score >= 60) color = '#F59E0B' // yellow
-      else if (score >= 40) color = '#3B82F6' // blue
-
-      return (
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-16 rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: `${Math.min(score, 100)}%`,
-                backgroundColor: color,
-              }}
-            />
-          </div>
-          <span className="text-sm font-medium" style={{ color }}>
-            {score}
-          </span>
-        </div>
-      )
-    },
-  },
-  {
     accessorKey: 'created_at',
     header: ({ column }) => {
       return (

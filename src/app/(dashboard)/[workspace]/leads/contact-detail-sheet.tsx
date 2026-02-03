@@ -844,82 +844,32 @@ export function ContactDetailSheet({
       <SheetContent className="w-full sm:max-w-md p-0 flex flex-col">
         {/* Header */}
         <SheetHeader className="p-6 pb-4 border-b">
-          <div className="flex items-start gap-4">
-            <Avatar className={cn('h-14 w-14', getAvatarColor(contact.phone))}>
-              <AvatarFallback className="text-lg text-white font-medium bg-transparent">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0 space-y-3">
-              {/* Name and Status on same line */}
-              <div className="flex items-center gap-2">
-                <SheetTitle className="text-xl truncate">
-                  {contact.name || contact.phone}
-                </SheetTitle>
-                <Select
-                  value={localStatus}
-                  onValueChange={(value) => handleStatusChange(value as LeadStatus)}
-                  disabled={isUpdatingStatus}
-                >
-                  <SelectTrigger
-                    className="w-auto h-6 text-xs border-none shadow-none px-2"
-                    style={{
-                      backgroundColor: statusConfig.bgColor,
-                      color: statusConfig.color,
-                    }}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LEAD_STATUSES.map((status) => {
-                      const config = LEAD_STATUS_CONFIG[status]
-                      return (
-                        <SelectItem
-                          key={status}
-                          value={status}
-                          className="text-xs"
-                        >
-                          <span
-                            className="inline-block w-2 h-2 rounded-full mr-2"
-                            style={{ backgroundColor: config.color }}
-                          />
-                          {config.label}
-                        </SelectItem>
-                      )
-                    })}
-                  </SelectContent>
-                </Select>
-                {isUpdatingStatus && (
-                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2">
-                <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={openWhatsApp}>
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  WhatsApp
-                </Button>
-                <Button size="sm" variant="outline" asChild>
-                  <a href={`tel:${contact.phone}`}>
-                    <Phone className="mr-2 h-4 w-4" />
-                    Call
-                  </a>
-                </Button>
-              </div>
-
-              {/* Tags Display (Read-only) */}
-              {localTags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {localTags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      <Tag className="mr-1 h-3 w-3" />
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+          <div className="space-y-3">
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={openWhatsApp}>
+                <MessageCircle className="mr-2 h-4 w-4" />
+                WhatsApp
+              </Button>
+              <Button size="sm" variant="outline" asChild>
+                <a href={`tel:${contact.phone}`}>
+                  <Phone className="mr-2 h-4 w-4" />
+                  Call
+                </a>
+              </Button>
             </div>
+
+            {/* Tags Display */}
+            {localTags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {localTags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    <Tag className="mr-1 h-3 w-3" />
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </SheetHeader>
 
