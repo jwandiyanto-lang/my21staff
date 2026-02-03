@@ -4,6 +4,7 @@ import { ConvexHttpClient } from 'convex/browser'
 import { api } from 'convex/_generated/api'
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 /**
  * GET /api/contacts/[id]/messages - Get messages for a contact
@@ -14,6 +15,11 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Dev mode: return empty messages for now
+  if (isDevMode) {
+    return NextResponse.json({ messages: [] })
+  }
+
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

@@ -4,6 +4,7 @@ import { ConvexHttpClient } from 'convex/browser'
 import { api } from 'convex/_generated/api'
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 /**
  * GET /api/contacts/[id]/notes - Get notes for a contact
@@ -12,6 +13,11 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Dev mode: return empty notes for now
+  if (isDevMode) {
+    return NextResponse.json({ notes: [] })
+  }
+
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -42,6 +48,21 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Dev mode: return mock note
+  if (isDevMode) {
+    const { id } = await params
+    const body = await request.json()
+    return NextResponse.json({
+      note: {
+        id: `note-${Date.now()}`,
+        contact_id: id,
+        content: body.content,
+        created_at: new Date().toISOString(),
+        due_date: body.due_date || null,
+      }
+    })
+  }
+
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
