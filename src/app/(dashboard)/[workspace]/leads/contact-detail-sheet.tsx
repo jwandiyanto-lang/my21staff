@@ -1111,7 +1111,7 @@ export function ContactDetailSheet({
                                   )}>
                                     ▶
                                   </span>
-                                  {activity.metadata?.title || 'Note'}
+                                  {(activity.metadata?.title as string) || 'Note'}
                                 </button>
                               ) : (
                                 <p className="text-sm font-medium">
