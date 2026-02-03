@@ -90,6 +90,12 @@ Recent decisions affecting v2.0.1 work:
 
 None yet.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 001 | Fix production build error in contacts notes API | 2026-02-03 | 109456e | [001-fix-production-build-error-in-contacts-n](./quick/001-fix-production-build-error-in-contacts-n/) |
+
 ### Blockers/Concerns
 
 **Known from research:**
