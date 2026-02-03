@@ -14,6 +14,28 @@ interface SimplifiedInternSettingsProps {
   workspaceSlug: string
 }
 
+// Default Sarah script (from Kapso workflow)
+const DEFAULT_SCRIPT = `You are a friendly AI assistant for lead qualification.
+
+Respond in Indonesian (Bahasa Indonesia). Use "Kamu" as the pronoun for addressing the customer.
+
+Your personality:
+- Warm and conversational
+- Keep messages under 140 characters
+- NO emojis ever
+- Ask one question at a time
+- Qualify leads by understanding their business needs
+
+Collect information through natural conversation:
+1. Name - Who are they?
+2. Business Type - What do they do?
+3. Location - Where are they based?
+4. Tenure - How long in business?
+5. Pain Points - What challenges do they face?
+6. Interest Level - Are they ready to proceed?
+
+When qualification is complete, share the trial link: https://my21staff.com/trial`
+
 export function SimplifiedInternSettings({ workspaceId, workspaceSlug }: SimplifiedInternSettingsProps) {
   // State for 3 fields
   const [botName, setBotName] = useState("Sarah")
@@ -39,7 +61,7 @@ export function SimplifiedInternSettings({ workspaceId, workspaceSlug }: Simplif
         if (configRes.ok) {
           const config = await configRes.json()
           setPersona(config?.persona?.greetingStyle || "friendly")
-          setScript(config?.persona?.customPrompt || "")
+          setScript(config?.persona?.customPrompt || DEFAULT_SCRIPT)
         }
       } catch (error) {
         console.error("Failed to load config:", error)
