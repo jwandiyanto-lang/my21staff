@@ -45,6 +45,7 @@ const COLUMN_OPTIONS = [
   { id: 'lead_status', label: 'Status' },
   { id: 'tags', label: 'Tags' },
   { id: 'lead_score', label: 'Score' },
+  { id: 'source', label: 'Source' },
   { id: 'created_at', label: 'Created' },
 ] as const
 

@@ -245,6 +245,54 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, contactT
     },
   },
   {
+    accessorKey: 'lead_score',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="-ml-4"
+        >
+          Score
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const score = row.getValue('lead_score') as number | null
+      if (score === null || score === undefined) {
+        return <span className="text-muted-foreground">-</span>
+      }
+      // Color code based on score ranges
+      const getScoreColor = (s: number) => {
+        if (s >= 80) return 'text-green-600 font-semibold'
+        if (s >= 60) return 'text-blue-600 font-medium'
+        if (s >= 40) return 'text-yellow-600'
+        return 'text-muted-foreground'
+      }
+      return (
+        <span className={`text-sm ${getScoreColor(score)}`}>
+          {score}
+        </span>
+      )
+    },
+  },
+  {
+    accessorKey: 'source',
+    header: 'Source',
+    cell: ({ row }) => {
+      const source = row.getValue('source') as string | null
+      if (!source) {
+        return <span className="text-muted-foreground">-</span>
+      }
+      return (
+        <Badge variant="outline" className="text-xs">
+          {source}
+        </Badge>
+      )
+    },
+  },
+  {
     accessorKey: 'created_at',
     header: ({ column }) => {
       return (
