@@ -124,7 +124,7 @@ export function createColumns({ onStatusChange, onTagsChange, onDelete, contactT
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
-            {statusConfig.map((s) => {
+            {statusConfig.filter(s => s.enabled !== false).map((s) => {
               const isSelected = s.key === status
               return (
                 <DropdownMenuItem
